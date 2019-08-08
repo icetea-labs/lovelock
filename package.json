@@ -1,0 +1,30 @@
+{
+  "name": "nextjs-with-material-ui-styled-components",
+  "version": "1.0.0",
+  "dependencies": {
+    "@material-ui/core": "latest",
+    "@zeit/next-css": "^1.0.1",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "glamor": "^2.20.40",
+    "i": "^0.3.6",
+    "jss": "latest",
+    "next": "latest",
+    "npm": "^6.10.3",
+    "prop-types": "latest",
+    "react": "latest",
+    "react-dnd": "^9.3.4",
+    "react-dnd-html5-backend": "^9.3.4",
+    "react-dom": "latest",
+    "react-jss": "^8.1.0",
+    "react-tag-input": "^6.4.0",
+    "styled-components": "latest"
+  },
+  "devDependencies": {
+    "babel-plugin-styled-components": "^1.8.0"
+  },
+  "scripts": {
+    "dev": "next -p 8080",
+    "build": "next build",
+    "start": "next start"
+  }
+}
