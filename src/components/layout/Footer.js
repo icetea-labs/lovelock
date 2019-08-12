@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 const Footer = styled.div`
   grid-area: footer;
-  background: #555;
+  background: #8250c8;
 `;
 
 const FooterText = styled.p`
