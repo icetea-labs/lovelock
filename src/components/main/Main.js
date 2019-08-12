@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import Icon from "src/components/elements/Icon";
-import { WithContext as ReactTags } from "react-tag-input";
+// import { WithContext as ReactTags } from "react-tag-input";
+import MessageHistory from "./MessageHistory";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -149,9 +150,17 @@ const RightBox = styled.div`
       height: 50px;
       display: flex;
       align-items: center;
-      .contenteditable {
-        max-width: 100%;
-        width: 100%;
+      .contentEditable {
+        width: 200px;
+        height: 19px;
+        font-family: Montserrat;
+        font-size: 16px;
+        font-weight: 500;
+        font-style: normal;
+        font-stretch: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        color: #8f8f8f;
         outline: none;
         font-size: ${rem(16)};
       }
@@ -163,23 +172,44 @@ const RightBox = styled.div`
     margin-top: 10px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     border-top: 1px solid #e1e1e1;
     border-bottom: 1px solid #e1e1e1;
+    i {
+      color: #8250c8;
+    }
     .tags {
+      display: flex;
       width: 70%;
       font-size: 12px;
-      text-transform: uppercase;
+      font-family: Montserrat;
+      font-style: normal;
+      font-stretch: normal;
+      line-height: normal;
+      letter-spacing: normal;
+      color: #545454;
     }
-    .options {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1;
+    .tags_tilte {
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .tagName {
+      width: 132px;
+      height: 15px;
+      margin: 10px;
+      color: #8250c8;
+      :hover {
+        cursor: pointer;
+      }
+    }
+    .avatar_receiver {
+      width: 24px;
+      height: 24px;
     }
   }
   .action {
     width: 100%;
-    margin-top: 16px;
+    margin: 16px 0 16px;
     display: inline-block;
     .privacy {
       display: inline-block;
@@ -196,6 +226,28 @@ const RightBox = styled.div`
       box-shadow: 0 5px 14px 0 rgba(0, 0, 0, 0.06);
       background-image: -webkit-linear-gradient(118deg, #b276ff, #fe8dc3);
       background-image: linear-gradient(332deg, #b276ff, #fe8dc3);
+    }
+    .btn_post_policy {
+      width: 102px;
+      height: 36px;
+      border-radius: 21px;
+      background: #ffffff;
+      border: 1px solid #8250c8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Montserrat;
+      font-size: 12px;
+      font-weight: 500;
+      font-style: normal;
+      font-stretch: normal;
+      line-height: normal;
+      letter-spacing: normal;
+      color: #8f36b3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
     }
   }
 `;
@@ -247,7 +299,8 @@ class Main extends React.Component {
         { name: "Jessie Guzman", nick: "@derickrogers" },
         { name: "Bertie Woods", nick: "@derickrogers" }
       ],
-      tag: ["love", "travel", "honeymoon", "relax", "sweet"]
+      tag: ["love", "travel", "honeymoon", "relax", "sweet"],
+      ownerTag: ["honeymoon", "travel"]
     };
   }
 
@@ -286,8 +339,8 @@ class Main extends React.Component {
     });
   };
 
-  renderTag = () => {
-    const { tag } = this.state;
+  renderTag = tag => {
+    // const { tag } = this.state;
 
     return tag.map((item, index) => {
       return (
@@ -299,6 +352,7 @@ class Main extends React.Component {
   };
 
   render() {
+    const { tag, ownerTag } = this.state;
     return (
       <main>
         <BannerContainer>
@@ -359,89 +413,84 @@ class Main extends React.Component {
                 <div className="title">Pending promise</div>
                 <div>{this.renderPendingPromise()}</div>
                 <div className="title">Popular Tag</div>
-                <TagBox>{this.renderTag()}</TagBox>
+                <TagBox>{this.renderTag(tag)}</TagBox>
               </ShadowBox>
             </LeftBox>
           </FlexWidthBox>
           <FlexWidthBox width="70%">
             <RightBox>
-              <ShadowBox>
-                <div className="memorypost__content">
-                  <div className="post_container clearfix">
-                    <div className="user_avatar">
-                      <img src="/static/img/user-women.jpg" alt="itea" />
-                    </div>
-                    <div className="post_input fl">
-                      <div className="contenteditable" contenteditable="true">
-                        Describe your Memory….
-                      </div>
-                    </div>
+              <div className="memorypost__content">
+                <div className="post_container clearfix">
+                  <div className="user_avatar">
+                    <img src="/static/img/user-men.jpg" alt="itea" />
                   </div>
-                  <div className="custom_post">
-                    <div className="tags">
-                      <div className="tags_input">
-                        <p>Tags: </p>
-                        <ReactTags />
-                      </div>
-                    </div>
-                    <div className="options">
-                      <div className="place-wrapper">
-                        <i class="material-icons">location_on</i>
-                      </div>
-                      <div className="upload_img" />
-                      <i class="material-icons">insert_photo</i>
-                      <input type="file" accept=".png, .jpg, .jpeg" />
-                    </div>
-                    <div className="picktime">
-                      <i class="material-icons">today</i>
-                      <div className="react-datepicker-wrapper">
-                        <div className="react-datepicker__input-container">
-                          <input type="text" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="avatar_receiver">
-                      <img src="/static/img/user-women.jpg" alt="itea" />
+                  <div className="post_input fl">
+                    <div className="contentEditable">
+                      Describe your Memory….
                     </div>
                   </div>
                 </div>
-                <div className="action">
-                  <div className="privacy">
-                    <div className="css-1pcexqc-container privacy_select">
-                      <div className="css-bg1rzq-control">
-                        <div className="css-1hwfws3">
-                          <div className="css-dvua67-singleValue">Public</div>
-                          <input
+                <div className="custom_post">
+                  <div className="tags">
+                    <div className="tags_tilte">
+                      <p>Tags: </p>
+                    </div>
+                    <div className="tagName">
+                      <span>#honeymoon </span>
+                      <span>#travel</span>
+                    </div>
+                  </div>
+                  <div className="place-wrapper">
+                    <i className="material-icons">location_on</i>
+                  </div>
+                  <div className="upload_img">
+                    <i className="material-icons">insert_photo</i>
+                  </div>
+                  <div className="picktime">
+                    <i className="material-icons">today</i>
+                  </div>
+                  <div className="avatar_receiver">
+                    <img src="/static/img/user-women.jpg" alt="itea" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="action">
+                <div className="privacy">
+                  <div className="css-1pcexqc-container privacy_select">
+                    <div className="css-bg1rzq-control">
+                      <div className="css-1hwfws3">
+                        <div>
+                          <button
+                            type="button"
+                            disabled=""
+                            className="btn_post_policy"
+                          >
+                            Public
+                            <div className="css-1wy0on6">
+                              <span className="css-bgvzuu-indicatorSeparator" />
+                              <div
+                                aria-hidden="true"
+                                className="css-16pqwjk-indicatorContainer"
+                              >
+                                <i className="material-icons">arrow_drop_down</i>
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                        {/* <input
                             id="react-select-2-input"
                             className="css-gj7qu5-dummyInput"
-                          />
-                        </div>
-                        <div className="css-1wy0on6">
-                          <span className="css-bgvzuu-indicatorSeparator" />
-                          <div
-                            aria-hidden="true"
-                            className="css-16pqwjk-indicatorContainer"
-                          >
-                            <svg
-                              height="20"
-                              width="20"
-                              viewBox="0 0 20 20"
-                              aria-hidden="true"
-                              focusable="false"
-                              className="css-19bqh2r"
-                            >
-                              <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z" />
-                            </svg>
-                          </div>
-                        </div>
+                          /> */}
                       </div>
                     </div>
                   </div>
-                  <button type="button" disabled="">
-                    Share
-                  </button>
                 </div>
-              </ShadowBox>
+                <button type="button" disabled="">
+                  Share
+                </button>
+              </div>
+              <MessageHistory />
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
