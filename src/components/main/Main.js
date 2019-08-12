@@ -3,6 +3,7 @@ import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import Icon from "src/components/elements/Icon";
 // import { WithContext as ReactTags } from "react-tag-input";
 import MessageHistory from "./MessageHistory";
+import Promise from "./Promise";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -473,7 +474,9 @@ class Main extends React.Component {
                                 aria-hidden="true"
                                 className="css-16pqwjk-indicatorContainer"
                               >
-                                <i className="material-icons">arrow_drop_down</i>
+                                <i className="material-icons">
+                                  arrow_drop_down
+                                </i>
                               </div>
                             </div>
                           </button>
@@ -494,6 +497,7 @@ class Main extends React.Component {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
+        <Promise />
       </main>
     );
   }
