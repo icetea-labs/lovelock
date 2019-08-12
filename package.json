@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@material-ui/core": "latest",
+    "@material/react-text-field": "^0.15.0",
     "@zeit/next-css": "^1.0.1",
     "babel-plugin-module-resolver": "^3.2.0",
     "glamor": "^2.20.40",

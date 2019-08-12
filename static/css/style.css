@@ -369,3 +369,7 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+i, button {
+  cursor: pointer;
+}
