@@ -376,7 +376,7 @@ class Main extends React.Component {
                 <div className="content_detail fl clearfix">
                   <div className="name_time">
                     <span className="user_name color-violet">John Smith</span>
-                    <span className="time fr color-grey">08/06/2019</span>
+                    <span className="time fr color-gray">08/06/2019</span>
                   </div>
                   <p>
                     In ultricies ipsum sem, in ullamcorper velit luctus sed.
@@ -392,7 +392,7 @@ class Main extends React.Component {
                 <div className="content_detail fl clearfix">
                   <div className="name_time">
                     <span className="user_name color-violet">Mary William</span>
-                    <span className="time fr color-grey">08/06/2019</span>
+                    <span className="time fr color-gray">08/06/2019</span>
                   </div>
                   <p>Duis hendrerit, lacus a facilisis congue</p>
                 </div>

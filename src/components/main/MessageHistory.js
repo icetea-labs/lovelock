@@ -1,9 +1,13 @@
 import styled from "styled-components";
-import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
-import Icon from "src/components/elements/Icon";
+import { rem } from "../elements/Common";
 
 const Container = styled.div`
-  /* margin: 16px 0 16px; */
+  width: 100%;
+`;
+
+const TimelineContainer = styled.div`
+  width: 100%;
+  margin: 16px 0 32px;
 `;
 
 const TitleWrapper = styled.div`
@@ -69,6 +73,13 @@ const WarrperChatBox = styled.div`
   .message_container {
     display: flex;
     width: 100%;
+    .color-violet {
+      color: #8250c8;
+    }
+    .color-gray {
+      font-size: 0.75rem;
+      color: #8f8f8f;
+    }
     .user_avatar {
       width: 58px;
       height: 58px;
@@ -84,7 +95,7 @@ const WarrperChatBox = styled.div`
     .content_detail {
       align-items: center;
       width: 100%;
-      height: 81px;
+      height: 100%;
       border-radius: 6px;
       box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.04);
       background-color: #ffffff;
@@ -95,9 +106,9 @@ const WarrperChatBox = styled.div`
       content: "";
     }
     p {
-      width: 100%;
+      width: 93%;
       margin: 5px 25px 7px 14px;
-      height: 44px;
+      height: 100%;
       font-family: Montserrat;
       font-size: 12px;
       font-weight: 500;
@@ -106,6 +117,15 @@ const WarrperChatBox = styled.div`
       line-height: 1.5;
       letter-spacing: normal;
       color: #8f8f8f;
+    }
+    .postImg {
+      width: 93%;
+      margin: 14px 25px 36px 18px;
+    }
+    .collection {
+      display: flex;
+      width: 100%;
+      margin: 14px 22px 33px 21px;
     }
     .name_time {
       margin-top: 10px;
@@ -142,49 +162,139 @@ class MessageHistory extends React.Component {
   render() {
     return (
       <Container>
-        <TitleWrapper>
-          <div className="leftTitle">
-            <img src="/static/img/bed.svg" className="bed" />
-            <div className="titleText">
-              <span>Lorem ipsum dolor sit amet</span>
-            </div>
-          </div>
-          <div className="date">
-            <span>2/4/2004</span>
-          </div>
-        </TitleWrapper>
-        <WarrperChatBox>
-          <div className="message_container clearfix">
-            <div className="user_avatar sender fl ">
-              <img src="/static/img/user-men.jpg" alt="itea" />
-            </div>
-            <div className="content_detail fr clearfix">
-              <div className="name_time">
-                <span className="user_name color-violet">John Smith</span>
-                <span className="time fr color-grey">12:02 3 May 2018</span>
+        <TimelineContainer>
+          <TitleWrapper>
+            <div className="leftTitle">
+              <img src="/static/img/bed.svg" className="bed" />
+              <div className="titleText">
+                <span>Lorem ipsum dolor sit amet</span>
               </div>
-              <p>
-                In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
-                arcu ante, aliquet sit amet ornare quis, euismod ac justo. Duis
-                hendrerit, lacus a facilisis congue,
-              </p>
             </div>
-          </div>
-        </WarrperChatBox>
-        <WarrperChatBox>
-          <div className="message_container clearfix">
-            <div className="content_detail fl clearfix">
-              <div className="name_time">
-                <span className="user_name color-violet">Marry William</span>
-                <span className="time fr color-grey">12:02 3 May 2018</span>
+            <div className="date">
+              <span>2/4/2004</span>
+            </div>
+          </TitleWrapper>
+          <WarrperChatBox>
+            <div className="message_container clearfix">
+              <div className="user_avatar sender fl ">
+                <img src="/static/img/user-men.jpg" alt="itea" />
               </div>
-              <p>Duis hendrerit, lacus a facilisis congue</p>
+              <div className="content_detail fr clearfix">
+                <div className="name_time">
+                  <span className="user_name color-violet">John Smith</span>
+                  <span className="time fr color-gray">12:02 3 May 2018</span>
+                </div>
+                <p>
+                  In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
+                  arcu ante, aliquet sit amet ornare quis, euismod ac justo.
+                  Duis hendrerit, lacus a facilisis congue,
+                </p>
+              </div>
             </div>
-            <div className="user_avatar receiver fr">
-              <img src="/static/img/user-women.jpg" alt="itea" />
+          </WarrperChatBox>
+          <WarrperChatBox>
+            <div className="message_container clearfix">
+              <div className="content_detail fl clearfix rightReci">
+                <div className="name_time">
+                  <span className="user_name color-violet">Marry William</span>
+                  <span className="time fr color-gray">12:02 3 May 2018</span>
+                </div>
+                <p>
+                  Duis hendrerit, lacus a facilisis congue, In ultricies ipsum
+                  sem, in ullamcorper velit luctus sed. Fusce arcu ante, aliquet
+                  sit amet ornare quis, euismod ac justo. Duis hendrerit, lacus
+                  a facilisis congue,In ultricies ipsum sem, in ullamcorper
+                  velit luctus sed. Fusce arcu ante, aliquet sit amet ornare
+                  quis, euismod ac justo. Duis hendrerit, lacus a facilisis
+                  congue,
+                </p>
+              </div>
+              <div className="user_avatar receiver fr">
+                <img src="/static/img/user-women.jpg" alt="itea" />
+              </div>
             </div>
-          </div>
-        </WarrperChatBox>
+          </WarrperChatBox>
+        </TimelineContainer>
+        <TimelineContainer>
+          <TitleWrapper>
+            <div className="leftTitle">
+              <img src="/static/img/bed.svg" className="bed" />
+              <div className="titleText">
+                <span>Lorem ipsum dolor sit amet</span>
+              </div>
+            </div>
+            <div className="date">
+              <span>2/4/2004</span>
+            </div>
+          </TitleWrapper>
+          <WarrperChatBox>
+            <div className="message_container clearfix">
+              <div className="user_avatar sender fl ">
+                <img src="/static/img/user-men.jpg" alt="itea" />
+              </div>
+              <div className="content_detail fr clearfix">
+                <div className="name_time">
+                  <span className="user_name color-violet">John Smith</span>
+                  <span className="time fr color-gray">12:02 3 May 2018</span>
+                </div>
+                <p>
+                  In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
+                  arcu ante, aliquet sit amet ornare quis, euismod ac justo.
+                  Duis hendrerit, lacus a facilisis congue,
+                </p>
+                <img src="/static/img/rectangle.png" className="postImg" />
+              </div>
+            </div>
+          </WarrperChatBox>
+          <WarrperChatBox>
+            <div className="message_container clearfix">
+              <div className="content_detail fl clearfix rightReci">
+                <div className="name_time">
+                  <span className="user_name color-violet">Marry William</span>
+                  <span className="time fr color-gray">12:02 3 May 2018</span>
+                </div>
+                <p>Duis hendrerit, lacus a facilisis congue,</p>
+                <img src="/static/img/rectangle1.png" className="postImg" />
+              </div>
+              <div className="user_avatar receiver fr">
+                <img src="/static/img/user-women.jpg" alt="itea" />
+              </div>
+            </div>
+          </WarrperChatBox>
+        </TimelineContainer>
+        <TimelineContainer>
+          <TitleWrapper>
+            <div className="leftTitle">
+              <img src="/static/img/bed.svg" className="bed" />
+              <div className="titleText">
+                <span>Lorem ipsum dolor sit amet</span>
+              </div>
+            </div>
+            <div className="date">
+              <span>2/4/2004</span>
+            </div>
+          </TitleWrapper>
+          <WarrperChatBox>
+            <div className="message_container clearfix">
+              <div className="user_avatar sender fl ">
+                <img src="/static/img/user-men.jpg" alt="itea" />
+              </div>
+              <div className="content_detail fr clearfix">
+                <div className="name_time">
+                  <span className="user_name color-violet">John Smith </span>
+                  <span className="color-gray">is at </span>
+                  <span className="color-violet">Chaing Mai</span>
+                  <span className="time fr color-gray">12:02 3 May 2018</span>
+                </div>
+                <div className="collection postImg">
+                  <img src="/static/img/chaingMai1.png" />
+                  <img src="/static/img/chaingMai2.png" />
+                  <img src="/static/img/chaingMai3.png" />
+                </div>
+              </div>
+            </div>
+          </WarrperChatBox>
+        </TimelineContainer>
       </Container>
     );
   }
