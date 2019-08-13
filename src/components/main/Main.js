@@ -1,9 +1,11 @@
+import React from "react";
 import styled from "styled-components";
 import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import Icon from "src/components/elements/Icon";
 // import { WithContext as ReactTags } from "react-tag-input";
 import MessageHistory from "./MessageHistory";
 import Promise from "./Promise";
+import CustomPost from "./CustomPost";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -167,47 +169,6 @@ const RightBox = styled.div`
       }
     }
   }
-
-  .custom_post {
-    min-height: 55px;
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid #e1e1e1;
-    border-bottom: 1px solid #e1e1e1;
-    i {
-      color: #8250c8;
-    }
-    .tags {
-      display: flex;
-      width: 70%;
-      font-size: 12px;
-      font-family: Montserrat;
-      font-style: normal;
-      font-stretch: normal;
-      line-height: normal;
-      letter-spacing: normal;
-      color: #545454;
-    }
-    .tags_tilte {
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-    .tagName {
-      width: 132px;
-      height: 15px;
-      margin: 10px;
-      color: #8250c8;
-      :hover {
-        cursor: pointer;
-      }
-    }
-    .avatar_receiver {
-      width: 24px;
-      height: 24px;
-    }
-  }
   .action {
     width: 100%;
     margin: 16px 0 16px;
@@ -273,9 +234,6 @@ const WarrperAcceptedPromise = styled.div`
     color: #8250c8;
     font-size: ${rem(12)};
   }
-  /* .pri_info {
-    width: calc(100% - 141px);
-  } */
 `;
 const TagBox = styled.div`
   width: 100%;
@@ -431,29 +389,7 @@ class Main extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="custom_post">
-                  <div className="tags">
-                    <div className="tags_tilte">
-                      <p>Tags: </p>
-                    </div>
-                    <div className="tagName">
-                      <span>#honeymoon </span>
-                      <span>#travel</span>
-                    </div>
-                  </div>
-                  <div className="place-wrapper">
-                    <i className="material-icons">location_on</i>
-                  </div>
-                  <div className="upload_img">
-                    <i className="material-icons">insert_photo</i>
-                  </div>
-                  <div className="picktime">
-                    <i className="material-icons">today</i>
-                  </div>
-                  <div className="avatar_receiver">
-                    <img src="/static/img/user-women.jpg" alt="itea" />
-                  </div>
-                </div>
+                <CustomPost avatarShow />
               </div>
 
               <div className="action">
@@ -497,7 +433,7 @@ class Main extends React.Component {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-        <Promise />
+        {/* <Promise />  */}
       </main>
     );
   }

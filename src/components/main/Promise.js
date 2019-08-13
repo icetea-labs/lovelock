@@ -1,9 +1,56 @@
 import React from "react";
 import styled from "styled-components";
 import { rem } from "../elements/Common";
-import TextField, { HelperText, Input } from "@material/react-text-field";
-// import "@material/react-text-field/dist/text-field.css";
-// import MaterialIcon from '@material/react-material-icon';
+import { makeStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import CustomPost from "./CustomPost";
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    display: "flex",
+    flexWrap: "wrap"
+  },
+  textField: {
+    marginLeft: theme.spacing(0),
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(4)
+  },
+  textMulti: {
+    marginLeft: theme.spacing(0),
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(1)
+  }
+}));
+
+function TextFieldPlaceholder() {
+  const classes = useStyles();
+  return (
+    <TextField
+      id="outlined-helperText"
+      className={classes.textField}
+      placeholder="@partner"
+      margin="normal"
+      variant="outlined"
+      fullWidth
+    />
+  );
+}
+
+function TextFieldMultiLine() {
+  const classes = useStyles();
+  return (
+    <TextField
+      id="outlined-multiline-static"
+      placeholder="your promise ..."
+      multiline
+      fullWidth
+      rows="5"
+      className={classes.textMulti}
+      margin="normal"
+      variant="outlined"
+    />
+  );
+}
 
 const PuLayout = styled.div`
   position: fixed;
@@ -82,6 +129,25 @@ const TagTitle = styled.div`
   color: #141927;
 `;
 
+const Action = styled.div`
+  .action {
+    width: 100%;
+    margin: 40px 0 16px;
+    justify-content: center;
+    display: flex;
+    button {
+      width: 172px;
+      line-height: 46px;
+      font-size: 16px;
+      color: #ffffff;
+      font-weight: 600;
+      border-radius: 23px;
+      /* box-shadow: 0 5px 14px 0 rgba(0, 0, 0, 0.06); */
+      background-image: linear-gradient(340deg, #b276ff, #fe8dc3);
+    }
+  }
+`;
+
 class Promise extends React.Component {
   constructor(props) {
     super(props);
@@ -100,15 +166,17 @@ class Promise extends React.Component {
           </PuTitle>
           <ContWrap>
             <TagTitle>Tag your partner you promise</TagTitle>
-            <TextField
-              onTrailingIconSelect={() => this.setState({ value: "" })}
-              // trailingIcon={<MaterialIcon role="button" icon="delete" />}
-            >
-              <Input
-                value={this.state.value}
-                onChange={e => this.setState({ value: e.currentTarget.value })}
-              />
-            </TextField>
+            <TextFieldPlaceholder />
+            <TagTitle>Your promise</TagTitle>
+            <TextFieldMultiLine />
+            <CustomPost />
+            <Action>
+              <div className="action">
+                <button type="button" disabled="">
+                  Send
+                </button>
+              </div>
+            </Action>
           </ContWrap>
         </Container>
       </PuLayout>

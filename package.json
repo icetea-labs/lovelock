@@ -1,14 +1,14 @@
 {
-  "name": "nextjs-with-material-ui-styled-components",
+  "name": "icetea-couple-lock",
   "version": "1.0.0",
   "dependencies": {
     "@material-ui/core": "latest",
-    "@material/react-text-field": "^0.15.0",
     "@zeit/next-css": "^1.0.1",
     "babel-plugin-module-resolver": "^3.2.0",
     "glamor": "^2.20.40",
     "i": "^0.3.6",
     "jss": "latest",
+    "material-ui": "^0.20.2",
     "next": "latest",
     "npm": "^6.10.3",
     "prop-types": "latest",
