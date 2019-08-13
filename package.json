@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-with-material-ui-styled-components",
+  "name": "icetea-couple-lock",
   "version": "1.0.0",
   "dependencies": {
     "@iceteachain/web3": "^0.1.8",
@@ -8,10 +8,11 @@
     "babel-plugin-module-resolver": "^3.2.0",
     "ipfs-http-client": "^33.1.1",
     "jss": "latest",
+    "material-ui": "^0.20.2",
     "next": "latest",
     "npm": "^6.10.3",
     "prop-types": "latest",
-    "pull-file-reader": "^1.0.2",
+    "rc-queue-anim": "^1.7.0",
     "react": "latest",
     "react-dnd": "^9.3.4",
     "react-dnd-html5-backend": "^9.3.4",
