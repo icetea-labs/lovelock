@@ -3,6 +3,8 @@ import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import Icon from "src/components/elements/Icon";
 // import { WithContext as ReactTags } from "react-tag-input";
 import MessageHistory from "./MessageHistory";
+import ipfs from "src/service/ipfs";
+import fileReaderPullStream from "pull-file-reader";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -303,6 +305,24 @@ class Main extends React.Component {
       ownerTag: ["honeymoon", "travel"]
     };
   }
+  componentDidMount() {
+    const file = "/static/img/banner.jpg";
+    var fileStream = fileReaderPullStream(file);
+    console.log("fileStream", fileStream);
+    // ipfs
+    //   .add(fileStream, {
+    //     pin: true,
+    //     progress: prog => console.log(`IPFS upload progress: ${prog}`)
+    //   })
+    //   .then(response => {
+    //     // registerUser(account, username, response[0].hash);
+    //     console.log("response", response);
+    //   })
+    //   .catch(err => {
+    //     alert(err);
+    //     console.error(err);
+    //   });
+  }
 
   renderPromise = () => {
     const { promises } = this.state;
@@ -350,12 +370,37 @@ class Main extends React.Component {
       );
     });
   };
-
+  captureFile = event => {
+    event.stopPropagation();
+    event.preventDefault();
+    // if (document.getElementById("keepFilename").checked) {
+    //   this.saveToIpfsWithFilename(event.target.files);
+    // } else {
+    // }
+    console.log("event.target.files", event.target.files);
+    this.saveToIpfs(event.target.files);
+  };
+  saveToIpfs(files) {
+    let ipfsId;
+    ipfs
+      .add([...files], { progress: prog => console.log(`received: ${prog}`) })
+      .then(response => {
+        console.log(response);
+        ipfsId = response[0].hash;
+        console.log(ipfsId);
+        this.setState({ added_file_hash: ipfsId });
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
   render() {
     const { tag, ownerTag } = this.state;
     return (
       <main>
         <BannerContainer>
+          <input type="file" onChange={this.captureFile} />
+          <br />
           <ShadowBox>
             <WarrperImg>
               <img src="/static/img/banner.jpg" alt="itea-scan" />
@@ -473,7 +518,9 @@ class Main extends React.Component {
                                 aria-hidden="true"
                                 className="css-16pqwjk-indicatorContainer"
                               >
-                                <i className="material-icons">arrow_drop_down</i>
+                                <i className="material-icons">
+                                  arrow_drop_down
+                                </i>
                               </div>
                             </div>
                           </button>
