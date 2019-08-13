@@ -8,7 +8,6 @@ import styled from "styled-components";
 import { HomeLayout } from "src/components/layout";
 import Main from "src/components/main/Main";
 import "static/css/style.css";
-import '@material/react-text-field/dist/text-field.css';
 
 export default function Index() {
   return (
