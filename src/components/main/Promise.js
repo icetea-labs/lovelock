@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import QueueAnim from "rc-queue-anim";
 import { rem } from "../elements/Common";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
@@ -22,34 +23,14 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-function TextFieldPlaceholder() {
+function TextFieldPlaceholder(props) {
   const classes = useStyles();
-  return (
-    <TextField
-      id="outlined-helperText"
-      className={classes.textField}
-      placeholder="@partner"
-      margin="normal"
-      variant="outlined"
-      fullWidth
-    />
-  );
+  return <TextField className={classes.textField} {...props} />;
 }
 
-function TextFieldMultiLine() {
+function TextFieldMultiLine(props) {
   const classes = useStyles();
-  return (
-    <TextField
-      id="outlined-multiline-static"
-      placeholder="your promise ..."
-      multiline
-      fullWidth
-      rows="5"
-      className={classes.textMulti}
-      margin="normal"
-      variant="outlined"
-    />
-  );
+  return <TextField className={classes.textMulti} {...props} />;
 }
 
 const PuLayout = styled.div`
@@ -73,7 +54,7 @@ const Container = styled.div`
   background: ${props => props.theme.popupBg};
   box-shadow: ${props => props.theme.boxShadow};
   position: fixed;
-  top: 50%;
+  top: 10%;
   left: 50%;
   transform: translate(-50%, -50%);
   @media (max-width: 768px) {
@@ -152,36 +133,84 @@ class Promise extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      smt: ""
+      partner: "",
+      promiseStm: ""
     };
   }
 
+  partnerChange = e => {
+    const value = e.target.value;
+    this.setState({
+      partner: value
+    });
+    // console.log("view partnerChange", value);
+  };
+
+  promiseStmChange = e => {
+    const value = e.target.value;
+    this.setState({
+      promiseStm: value
+    });
+    // console.log("view promiseStmChange", value);
+  };
+
   render() {
+    const { send, close } = this.props;
+    const { partner, promiseStm } = this.state;
+    // console.log("State CK", this.state);
+
     return (
-      <PuLayout>
-        <Container>
-          <PuTitle>
-            <span className="title">Promise</span>
-            <i class="material-icons">close</i>
-          </PuTitle>
-          <ContWrap>
-            <TagTitle>Tag your partner you promise</TagTitle>
-            <TextFieldPlaceholder />
-            <TagTitle>Your promise</TagTitle>
-            <TextFieldMultiLine />
-            <CustomPost />
-            <Action>
-              <div className="action">
-                <button type="button" disabled="">
-                  Send
-                </button>
-              </div>
-            </Action>
-          </ContWrap>
-        </Container>
-      </PuLayout>
+      <QueueAnim animConfig={{ opacity: [1, 0] }}>
+        <PuLayout key={1}>
+          <QueueAnim leaveReverse delay={100} type={["top", "bottom"]}>
+            <Container key={2}>
+              <PuTitle>
+                <span className="title">Promise</span>
+                <i className="material-icons" onClick={close}>
+                  close
+                </i>
+              </PuTitle>
+              <ContWrap>
+                <TagTitle>Tag your partner you promise</TagTitle>
+                <TextFieldPlaceholder
+                  id="outlined-helperText"
+                  placeholder="@partner"
+                  margin="normal"
+                  variant="outlined"
+                  fullWidth
+                  onChange={this.partnerChange}
+                />
+                <TagTitle>Your promise</TagTitle>
+                <TextFieldMultiLine
+                  id="outlined-multiline-static"
+                  placeholder="your promise ..."
+                  multiline
+                  fullWidth
+                  rows="5"
+                  margin="normal"
+                  variant="outlined"
+                  onChange={this.promiseStmChange}
+                />
+                <CustomPost />
+                <Action>
+                  <div className="action">
+                    <button type="button" disabled="" onClick={send}>
+                      Send
+                    </button>
+                  </div>
+                </Action>
+              </ContWrap>
+            </Container>
+          </QueueAnim>
+        </PuLayout>
+      </QueueAnim>
     );
   }
 }
+
+Promise.defaultProps = {
+  send() {},
+  close() {}
+};
 
 export default Promise;

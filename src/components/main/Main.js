@@ -259,7 +259,8 @@ class Main extends React.Component {
         { name: "Bertie Woods", nick: "@derickrogers" }
       ],
       tag: ["love", "travel", "honeymoon", "relax", "sweet"],
-      ownerTag: ["honeymoon", "travel"]
+      ownerTag: ["honeymoon", "travel"],
+      isPromise: false
     };
   }
 
@@ -310,8 +311,16 @@ class Main extends React.Component {
     });
   };
 
+  addPromise = () => {
+    this.setState({ isPromise: true });
+  };
+
+  closePromise = () => {
+    this.setState({ isPromise: false });
+  };
+
   render() {
-    const { tag, ownerTag } = this.state;
+    const { tag, ownerTag, isPromise } = this.state;
     return (
       <main>
         <BannerContainer>
@@ -363,7 +372,11 @@ class Main extends React.Component {
           <FlexWidthBox width="30%">
             <LeftBox>
               <ShadowBox>
-                <button type="button" className="btn_add_promise">
+                <button
+                  type="button"
+                  className="btn_add_promise"
+                  onClick={this.addPromise}
+                >
                   <Icon type="add" />
                   Add Promise
                 </button>
@@ -433,7 +446,7 @@ class Main extends React.Component {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-        {/* <Promise />  */}
+        {isPromise && <Promise close={this.closePromise} />}
       </main>
     );
   }
