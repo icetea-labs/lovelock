@@ -88,7 +88,7 @@ const WarrperChatBox = styled(FlexBox)`
 
 class TopContrainer extends PureComponent {
   async componentDidMount() {
-    this.loaddata();
+    // this.loaddata();
   }
 
   async loaddata() {

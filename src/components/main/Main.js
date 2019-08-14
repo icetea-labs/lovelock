@@ -8,6 +8,8 @@ import Promise from "./Promise";
 import CustomPost from "./CustomPost";
 import TopContrainer from "./TopContrainer";
 import PromiseAlert from "./PromiseAlert";
+import tweb3 from "../../service/tweb3";
+import PromiseConfirm from "./PromiseConfirm";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -181,8 +183,27 @@ class Main extends React.Component {
       tag: ["love", "travel", "honeymoon", "relax", "sweet"],
       ownerTag: ["honeymoon", "travel"],
       isPromise: false,
-      isPendingPromise: false
+      isPendingPromise: false,
+      isAccept: false,
+      isDeny: false
     };
+  }
+
+  async componentDidMount() {
+    // this.loadPromise();
+  }
+
+  async loadPromise() {
+    const address = process.env.REACT_APP_CONTRACT;
+    // const ct = tweb3.contract(address);
+    console.log("view add", address);
+
+    const params = process.env.address1;
+    console.log("view params", params);
+    const method = "callReadonlyContractMethod";
+    const funcName = "getProposeByAddress";
+    const result = await tweb3[method](address, funcName, params);
+    console.log("view result", result);
   }
 
   renderPromise = () => {
@@ -222,6 +243,15 @@ class Main extends React.Component {
     });
   };
 
+  // async createPropose() {
+  //   console.log("I am here");
+  //   const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
+  //   const { address } = tweb3.wallet.createAccount();
+  //   const receiver = address;
+  //   const name = "createPropose";
+  //   const result = await ct.methods[name](receiver).sendCommit();
+  // }
+
   renderTag = tag => {
     // const { tag } = this.state;
 
@@ -242,6 +272,18 @@ class Main extends React.Component {
     this.setState({ isPendingPromise: true });
   };
 
+  acceptPromise = () => {
+    this.setState({ isAccept: true, isPendingPromise: false });
+  };
+
+  denyPromise = () => {
+    this.setState({ isDeny: true, isPendingPromise: false });
+  };
+
+  closeConfirm = () => {
+    this.setState({ isAccept: false, isDeny: false });
+  };
+
   closePromise = () => {
     this.setState({ isPromise: false });
   };
@@ -251,7 +293,14 @@ class Main extends React.Component {
   };
 
   render() {
-    const { tag, ownerTag, isPromise, isPendingPromise } = this.state;
+    const {
+      tag,
+      ownerTag,
+      isPromise,
+      isPendingPromise,
+      isAccept,
+      isDeny
+    } = this.state;
     return (
       <main>
         <BannerContainer>
@@ -339,7 +388,15 @@ class Main extends React.Component {
           </FlexWidthBox>
         </FlexBox>
         {isPromise && <Promise close={this.closePromise} />}
-        {isPendingPromise && <PromiseAlert close={this.closePendingPromise} />}
+        {isPendingPromise && (
+          <PromiseAlert
+            close={this.closePendingPromise}
+            accept={this.acceptPromise}
+            deny={this.denyPromise}
+          />
+        )}
+        {isAccept && <PromiseConfirm close={this.closeConfirm} />}
+        {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} />}
       </main>
     );
   }

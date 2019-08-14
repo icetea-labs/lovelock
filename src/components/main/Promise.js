@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import CustomPost from "./CustomPost";
 import CommonDialog from "./CommonDialog";
+import tweb3 from "../../service/tweb3";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -69,13 +70,39 @@ class Promise extends React.Component {
     // console.log("view promiseStmChange", value);
   };
 
+  async createPropose(partner, promiseStm) {
+    console.log("partner", partner);
+    console.log("promiseStm", promiseStm);
+    const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    // const { address } = tweb3.wallet.createAccount();
+    const info = process.env.address1;
+    const name = "createPropose";
+    const result = await ct.methods[name](
+      promiseStm,
+      partner,
+      info
+    ).sendCommit();
+    console.log("View result", result);
+    if (result) {
+      window.alert("send success");
+    }
+    this.props.close();
+  }
+
   render() {
     const { send, close } = this.props;
     const { partner, promiseStm } = this.state;
     // console.log("State CK", this.state);
 
     return (
-      <CommonDialog title="Promise" okText="Send" close={close} confirm={send}>
+      <CommonDialog
+        title="Promise"
+        okText="Send"
+        close={close}
+        confirm={() => {
+          this.createPropose(partner, promiseStm);
+        }}
+      >
         <TagTitle>Tag your partner you promise</TagTitle>
         <TextFieldPlaceholder
           id="outlined-helperText"
