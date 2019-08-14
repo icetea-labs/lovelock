@@ -6,6 +6,7 @@ import Icon from "src/components/elements/Icon";
 import MessageHistory from "./MessageHistory";
 import Promise from "./Promise";
 import CustomPost from "./CustomPost";
+import TopContrainer from "./TopContrainer";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -18,88 +19,6 @@ const ShadowBox = styled.div`
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
 `;
 
-const WarrperImg = styled.div`
-  text-align: center;
-  border-radius: 10px;
-  /* padding-bottom: 18px; */
-  border-bottom: 1px dashed #ebebeb;
-  overflow: hidden;
-  .txPromise {
-    display: flex;
-    align-items: center;
-    padding: ${rem(20)} 0;
-    img {
-      padding-right: ${rem(15)};
-    }
-    .text {
-      color: #8250c8;
-      font-weight: 600;
-      width: 100%;
-      text-align: left;
-    }
-    .date {
-      color: #8f8f8f;
-    }
-  }
-`;
-const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(35)};
-  /* & > div:first-child {
-    padding-right: ${rem(15)};
-  } */
-  div:nth-child(even) .content_detail p {
-    background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
-    background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
-  }
-  .user_photo {
-    display: block;
-    width: 58px;
-    height: 58px;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .name_time {
-    .user_name {
-      font-weight: 600;
-      text-transform: capitalize;
-      color: #8250c8;
-      width: 100%;
-    }
-    .time {
-      font-size: ${rem(12)};
-      color: #8f8f8f;
-    }
-  }
-
-  .content_detail {
-    display: block;
-    width: calc(100% - 58px - 15px);
-    padding: 0 ${rem(10)};
-  }
-  .fl {
-    float: left;
-  }
-  .fr {
-    float: right;
-  }
-  .clearfix::after {
-    display: block;
-    clear: both;
-    content: "";
-  }
-  p {
-    display: block;
-    padding: ${rem(11)} ${rem(14)};
-    font-size: ${rem(12)};
-    line-height: ${rem(18)};
-    color: #ffffff;
-    border-radius: 10px;
-    margin-top: 10px;
-    box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
-    background-image: -webkit-linear-gradient(113deg, #76a8ff, #8df6fe);
-    background-image: linear-gradient(337deg, #76a8ff, #8df6fe);
-  }
-`;
 const LeftBox = styled.div`
   width: 100%;
   min-height: ${rem(360)};
@@ -325,49 +244,10 @@ class Main extends React.Component {
       <main>
         <BannerContainer>
           <ShadowBox>
-            <WarrperImg>
-              <img src="/static/img/banner.jpg" alt="itea-scan" />
-              <div className="txPromise">
-                <img src="/static/img/luggage.svg" alt="itea" />
-                <span className="text">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. In
-                  facilisis sollicitudin ultricies.
-                </span>
-                <span className="date">2/4/2004</span>
-              </div>
-            </WarrperImg>
-            <WarrperChatBox>
-              <FlexWidthBox width="50%">
-                <div className="user_photo fl">
-                  <img src="/static/img/user-men.jpg" alt="itea" />
-                </div>
-                <div className="content_detail fl clearfix">
-                  <div className="name_time">
-                    <span className="user_name color-violet">John Smith</span>
-                    <span className="time fr color-gray">08/06/2019</span>
-                  </div>
-                  <p>
-                    In ultricies ipsum sem, in ullamcorper velit luctus sed.
-                    Fusce arcu ante, aliquet sit amet ornare quis, euismod ac
-                    justo. Duis hendrerit, lacus a facilisis congue,
-                  </p>
-                </div>
-              </FlexWidthBox>
-              <FlexWidthBox width="50%">
-                <div className="user_photo fr">
-                  <img src="/static/img/user-women.jpg" alt="itea" />
-                </div>
-                <div className="content_detail fl clearfix">
-                  <div className="name_time">
-                    <span className="user_name color-violet">Mary William</span>
-                    <span className="time fr color-gray">08/06/2019</span>
-                  </div>
-                  <p>Duis hendrerit, lacus a facilisis congue</p>
-                </div>
-              </FlexWidthBox>
-            </WarrperChatBox>
+            <TopContrainer />
           </ShadowBox>
         </BannerContainer>
+
         <FlexBox wrap="wrap">
           <FlexWidthBox width="30%">
             <LeftBox>

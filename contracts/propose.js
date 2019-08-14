@@ -1,8 +1,8 @@
 const { expect } = require(";");
 
 @contract class Propose {
-  @view @state propose = [];
-  @view @state addressToPropose = {};//1:n
+  @state propose = [];
+  @state addressToPropose = {};//1:n
 
   @view @state memories = [];
   @view @state proposeToMemories = {}; //1:n
@@ -34,52 +34,58 @@ const { expect } = require(";");
   }
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
-    this.confirmPropose(proIndex, r_content, 1)
+    this._confirmPropose(proIndex, r_content, 1)
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
-    this.confirmPropose(proIndex, r_content, 2)
+    this._confirmPropose(proIndex, r_content, 2)
   }
 
-  //private function
-  confirmPropose(index: number, r_content: string, status: number) {
-    const pendingPropose = this.propose[index]
-    // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (status === 1) {
-      expect(msg.sender === pendingPropose.receiver, "Can't accept propose. You must be receiver.")
-    } else {
-      expect(msg.sender === pendingPropose.receiver || msg.sender === pendingPropose.sender, "You can't update propose. You must be owner propose.")
-    }
-    const propose = Object.assign({}, pendingPropose, { r_content, status })
-    this.propose[index] = propose
+  @view getProposeByAddress(address: string) {
+    const arrPro = this.addressToPropose[address]
+    let resp = []
+    arrPro.forEach(index => {
+      const pro = this.propose[index]
+      if (pro.isPrivate && (msg.sender === pro.sender || msg.sender === pro.receiver)) {
+        resp.push(pro)
+      } else {
+        resp.push(pro)
+      }
+    });
 
-    //emit Event
-    const log = Object.assign({}, propose, { index })
-    this.emitEvent("confirmPropose", { by: msg.sender, log }, ["by"]);
+    return resp
+  }
+
+  @view getProposeByIndex(proIndex: number) {
+    const pro = this.propose[proIndex]
+    if (pro.isPrivate) {
+      this._isOwnerPropose(pro, "Can't get propose.")
+    }
+    return propose[proIndex]
   }
 
   // Change info { img:Array, location:string, date:string }
-  @transaction changeInfoPromise(index: number, info: string) {
-    const propose = this.propose[index]
-    expect(msg.sender === propose.receiver || msg.sender === propose.sender, "Can't change info promise. You must be owner propose.")
-    this.propose[index] = Object.assign({}, propose, { info })
+  @transaction changeInfoPropose(index: number, info: string) {
+    const pro = this.propose[index]
+    this._isOwnerPropose(pro, "You can't change propose info.")
+    this.propose[index] = Object.assign({}, pro, { info })
 
     //emit Event
-    const log = Object.assign({}, propose, { index, info })
-    this.emitEvent("changeInfoPromise", { by: msg.sender, log }, ["by"]);
+    const log = Object.assign({}, pro, { index, info })
+    this.emitEvent("changeInfoPropose", { by: msg.sender, log }, ["by"]);
   }
   // change privacy propose (public or private)
   @transaction changePrivacy(proIndex: number, isPrivate: bool) {
-    const propose = this.propose[proIndex]
-    this.propose[index] = Object.assign({}, propose, { isPrivate })
+    const pro = this.propose[proIndex]
+    this.propose[index] = Object.assign({}, pro, { isPrivate })
     //emit Event
-    const log = Object.assign({}, propose, { proIndex, isPrivate })
+    const log = Object.assign({}, pro, { proIndex, isPrivate })
     this.emitEvent("changePrivacy", { by: msg.sender, log }, ["by"]);
   }
   // info { img:Array, location:string, date:string }
   @transaction addMemory(proIndex: number, content: string, info: string) {
-    const propose = this.propose[proIndex]
-    expect(msg.sender === propose.receiver || msg.sender === propose.sender, "Can't add memory. You must be owner propose.")
+    const pro = this.propose[proIndex]
+    expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.")
 
     //new memories
     const menory = { proIndex, content, info }
@@ -106,8 +112,8 @@ const { expect } = require(";");
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
     const proIndex = this.memoryToPropose[memoIndex]
-    const propose = this.propose[proIndex]
-    expect(msg.sender === propose.receiver || msg.sender === propose.sender, "Can't add comment. You must be owner propose.")
+    const pro = this.propose[proIndex]
+    expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.")
 
     //new memories
     const comment = { memoIndex, content, info }
@@ -124,5 +130,31 @@ const { expect } = require(";");
     //emit Event
     const log = Object.assign({}, comment, { index })
     this.emitEvent("addComment", { by: msg.sender, log }, ["by"]);
+  }
+
+  //private function
+  _isOwnerPropose(propose, message: string) {
+    const errmsg = message + " You must be owner propose."
+    expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg)
+  }
+
+  //private function
+  _confirmPropose(index: number, r_content: string, status: number) {
+    const pro = this.propose[index]
+    // status: pending: 0, accept_propose: 1, cancel_propose: 2
+    switch (status) {
+      case 1:
+        expect(msg.sender === pro.receiver, "Can't accept propose. You must be receiver.")
+        break;
+      case 2:
+        this._isOwnerPropose(pro, "You can't cancel propose.")
+        break;
+    }
+    const x = Object.assign({}, pro, { r_content, status })
+    this.propose[index] = x
+
+    //emit Event
+    const log = Object.assign({}, propose, { index })
+    this.emitEvent("_confirmPropose", { by: msg.sender, log }, ["by"]);
   }
 }
