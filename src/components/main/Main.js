@@ -8,6 +8,7 @@ import Promise from "./Promise";
 import CustomPost from "./CustomPost";
 import TopContrainer from "./TopContrainer";
 import PromiseAlert from "./PromiseAlert";
+import tweb3 from "../../service/tweb3";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -222,6 +223,15 @@ class Main extends React.Component {
     });
   };
 
+  // async createPropose() {
+  //   console.log("I am here");
+  //   const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
+  //   const { address } = tweb3.wallet.createAccount();
+  //   const receiver = address;
+  //   const name = "createPropose";
+  //   const result = await ct.methods[name](receiver).sendCommit();
+  // }
+
   renderTag = tag => {
     // const { tag } = this.state;
 
@@ -338,7 +348,9 @@ class Main extends React.Component {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-        {isPromise && <Promise close={this.closePromise} />}
+        {isPromise && (
+          <Promise close={this.closePromise}/>
+        )}
         {isPendingPromise && <PromiseAlert close={this.closePendingPromise} />}
       </main>
     );
