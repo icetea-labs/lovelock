@@ -92,7 +92,7 @@ class Promise extends React.Component {
   render() {
     const { send, close } = this.props;
     const { partner, promiseStm } = this.state;
-    console.log("State CK", this.state);
+    // console.log("State CK", this.state);
 
     return (
       <CommonDialog

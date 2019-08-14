@@ -9,6 +9,7 @@ import CustomPost from "./CustomPost";
 import TopContrainer from "./TopContrainer";
 import PromiseAlert from "./PromiseAlert";
 import tweb3 from "../../service/tweb3";
+import PromiseConfirm from "./PromiseConfirm";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -182,8 +183,27 @@ class Main extends React.Component {
       tag: ["love", "travel", "honeymoon", "relax", "sweet"],
       ownerTag: ["honeymoon", "travel"],
       isPromise: false,
-      isPendingPromise: false
+      isPendingPromise: false,
+      isAccept: false,
+      isDeny: false
     };
+  }
+
+  async componentDidMount() {
+    // this.loadPromise();
+  }
+
+  async loadPromise() {
+    const address = process.env.REACT_APP_CONTRACT;
+    // const ct = tweb3.contract(address);
+    console.log("view add", address);
+
+    const params = process.env.address1;
+    console.log("view params", params);
+    const method = "callReadonlyContractMethod";
+    const funcName = "getProposeByAddress";
+    const result = await tweb3[method](address, funcName, params);
+    console.log("view result", result);
   }
 
   renderPromise = () => {
@@ -252,6 +272,18 @@ class Main extends React.Component {
     this.setState({ isPendingPromise: true });
   };
 
+  acceptPromise = () => {
+    this.setState({ isAccept: true, isPendingPromise: false });
+  };
+
+  denyPromise = () => {
+    this.setState({ isDeny: true, isPendingPromise: false });
+  };
+
+  closeConfirm = () => {
+    this.setState({ isAccept: false, isDeny: false });
+  };
+
   closePromise = () => {
     this.setState({ isPromise: false });
   };
@@ -261,7 +293,14 @@ class Main extends React.Component {
   };
 
   render() {
-    const { tag, ownerTag, isPromise, isPendingPromise } = this.state;
+    const {
+      tag,
+      ownerTag,
+      isPromise,
+      isPendingPromise,
+      isAccept,
+      isDeny
+    } = this.state;
     return (
       <main>
         <BannerContainer>
@@ -348,10 +387,16 @@ class Main extends React.Component {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-        {isPromise && (
-          <Promise close={this.closePromise}/>
+        {isPromise && <Promise close={this.closePromise} />}
+        {isPendingPromise && (
+          <PromiseAlert
+            close={this.closePendingPromise}
+            accept={this.acceptPromise}
+            deny={this.denyPromise}
+          />
         )}
-        {isPendingPromise && <PromiseAlert close={this.closePendingPromise} />}
+        {isAccept && <PromiseConfirm close={this.closeConfirm} />}
+        {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} />}
       </main>
     );
   }
