@@ -6,6 +6,7 @@ import Icon from "src/components/elements/Icon";
 import MessageHistory from "./MessageHistory";
 import Promise from "./Promise";
 import CustomPost from "./CustomPost";
+import PromiseAlert from "./PromiseAlert";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -260,7 +261,8 @@ class Main extends React.Component {
       ],
       tag: ["love", "travel", "honeymoon", "relax", "sweet"],
       ownerTag: ["honeymoon", "travel"],
-      isPromise: false
+      isPromise: false,
+      isPendingPromise: false
     };
   }
 
@@ -286,12 +288,14 @@ class Main extends React.Component {
 
     return promises.map((item, index) => {
       return (
-        <WarrperAcceptedPromise key={index}>
+        <WarrperAcceptedPromise key={index} onClick={this.openPendingPromise}>
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
           </div>
           <div className="pri_info">
-            <div className="name">{item.name}</div>
+            <div className="name" id={"pending" + index}>
+              {item.name}
+            </div>
             <div className="nick">{item.nick}</div>
           </div>
         </WarrperAcceptedPromise>
@@ -315,12 +319,20 @@ class Main extends React.Component {
     this.setState({ isPromise: true });
   };
 
+  openPendingPromise = () => {
+    this.setState({ isPendingPromise: true });
+  };
+
   closePromise = () => {
     this.setState({ isPromise: false });
   };
 
+  closePendingPromise = () => {
+    this.setState({ isPendingPromise: false });
+  };
+
   render() {
-    const { tag, ownerTag, isPromise } = this.state;
+    const { tag, ownerTag, isPromise, isPendingPromise } = this.state;
     return (
       <main>
         <BannerContainer>
@@ -447,6 +459,7 @@ class Main extends React.Component {
           </FlexWidthBox>
         </FlexBox>
         {isPromise && <Promise close={this.closePromise} />}
+        {isPendingPromise && <PromiseAlert close={this.closePendingPromise} />}
       </main>
     );
   }
