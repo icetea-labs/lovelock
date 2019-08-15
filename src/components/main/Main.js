@@ -263,8 +263,10 @@ class Main extends React.Component {
     this.setState({ isPromise: true });
   };
 
-  openPendingPromise = () => {
+  openPending = index => {
+    // this.setState(Object.assign({}, { isPendingPromise: true }, e));
     this.setState({ isPendingPromise: true });
+    console.log(index);
   };
 
   acceptPromise = () => {
@@ -303,7 +305,7 @@ class Main extends React.Component {
       proIndex
     } = this.state;
     const { propose } = this.props;
-    // console.log("main render", propose);
+    console.log("main state", this.state);
     return (
       <main>
         <BannerContainer>
@@ -333,7 +335,10 @@ class Main extends React.Component {
                 </div>
                 <div className="title">Pending promise</div>
                 <div>
-                  <PromiseLeftPending propose={propose} />
+                  <PromiseLeftPending
+                    propose={propose}
+                    openPendingPromise={this.openPending}
+                  />
                 </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>

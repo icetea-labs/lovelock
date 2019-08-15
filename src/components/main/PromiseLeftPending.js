@@ -31,7 +31,8 @@ class PromiseLeftPending extends PureComponent {
     super(props);
     this.state = {
       basePropose: [],
-      newPropose: []
+      newPropose: [],
+      index: ""
     };
   }
 
@@ -65,18 +66,38 @@ class PromiseLeftPending extends PureComponent {
         const reps = await getTagsInfo(obj.receiver);
         obj.name = reps["display-name"];
         obj.nick = "@" + reps.username;
+        obj.index = i;
         tmp.push(obj);
       }
     }
     this.setState({ newPropose: tmp });
   }
 
+  openPendingPromise(index) {
+    // console.log("view Index", index);
+    this.setState(
+      {
+        index: index
+      },
+      () => {
+        this.props.openPendingPromise &&
+          this.props.openPendingPromise(this.state);
+      }
+    );
+  }
+
   render() {
     const { newPropose } = this.state;
+    const { openPendingPromise } = this.props;
 
-    return newPropose.map((item, index) => {
+    return newPropose.map(item => {
       return (
-        <WarrperAcceptedPromise key={index}>
+        <WarrperAcceptedPromise
+          key={item.index}
+          onClick={() => {
+            this.props.openPendingPromise(item.index);
+          }}
+        >
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
           </div>
