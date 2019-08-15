@@ -228,7 +228,7 @@ class Main extends React.Component {
 
   openPending = index => {
     this.setState({ isPendingPromise: true, pendingIndex: index });
-    // console.log(index);
+    console.log(index);
   };
 
   acceptPromise = () => {
