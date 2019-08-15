@@ -191,7 +191,8 @@ class Main extends React.Component {
       isPendingPromise: false,
       isAccept: false,
       isDeny: false,
-      reload: true
+      reload: true,
+      proIndex: -1
     };
   }
 
@@ -203,13 +204,11 @@ class Main extends React.Component {
   async loadAllPropose() {
     const { reload } = this.state;
     const { setPropose } = this.props;
-    console.log("process.env.address1", process.env.address1);
     const allPropose = await callView("getProposeByAddress", [
       process.env.address1
     ]);
 
     setPropose(JSON.parse(allPropose));
-    console.log("allPropose", JSON.parse(allPropose));
     this.setState({ reload: false });
   }
 
@@ -290,6 +289,11 @@ class Main extends React.Component {
     this.setState({ isPendingPromise: false });
   };
 
+  handlerSelectPropose = proIndex => {
+    console.log("proIndex", proIndex);
+    this.setState({ proIndex });
+  };
+
   render() {
     const {
       tag,
@@ -297,7 +301,8 @@ class Main extends React.Component {
       isPromise,
       isPendingPromise,
       isAccept,
-      isDeny
+      isDeny,
+      proIndex
     } = this.state;
     const { propose } = this.props;
     console.log("main state", this.state);
@@ -305,7 +310,7 @@ class Main extends React.Component {
       <main>
         <BannerContainer>
           <ShadowBox>
-            <TopContrainer />
+            <TopContrainer proIndex={proIndex} />
           </ShadowBox>
         </BannerContainer>
 
@@ -323,7 +328,10 @@ class Main extends React.Component {
                 </button>
                 <div className="title">Accepted promise</div>
                 <div>
-                  <PromiseLeftAccept propose={propose} />
+                  <PromiseLeftAccept
+                    propose={propose}
+                    handlerSelectPropose={this.handlerSelectPropose}
+                  />
                 </div>
                 <div className="title">Pending promise</div>
                 <div>

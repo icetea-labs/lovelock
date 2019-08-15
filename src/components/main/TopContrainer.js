@@ -93,47 +93,78 @@ class TopContrainer extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      topInfo: {}
+      topInfo: {},
+      proIndex: -1,
+      basePropose: []
     };
   }
 
-  async componentDidMount() {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { propose, proIndex } = nextProps;
+    if (
+      JSON.stringify(propose) !== JSON.stringify(prevState.basePropose) ||
+      proIndex !== prevState.proIndex
+    ) {
+      return { basePropose: propose, proIndex };
+    }
+    return null;
+  }
+
+  componentDidMount() {
     this.loaddata();
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { basePropose, proIndex } = this.state;
+
+    if (
+      JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) ||
+      proIndex !== prevState.proIndex
+    ) {
+      this.loaddata();
+    }
+  }
+
   async loaddata() {
-    // await this.loadAllPropose();
     const { topInfo } = this.state;
+    const { propose, proIndex } = this.props;
     let newTopInfor = {};
-    const senderinfor = await getTagsInfo(process.env.address1);
+
+    if (proIndex >= 0) {
+      const obj = propose[proIndex];
+      newTopInfor.s_content = obj.s_content;
+      newTopInfor.r_content = obj.r_content;
+      const senderinfor = await getTagsInfo(obj.sender);
+      newTopInfor.s_displayname = senderinfor["display-name"];
+      const receiverinfor = await getTagsInfo(obj.receiver);
+      newTopInfor.r_displayname = receiverinfor["display-name"];
+    } else {
+      for (let i = 0; i < propose.length; i++) {
+        const obj = propose[i];
+        if (obj.status === 1) {
+          newTopInfor.s_content = obj.s_content;
+          newTopInfor.r_content = obj.r_content;
+          const senderinfor = await getTagsInfo(obj.sender);
+          newTopInfor.s_displayname = senderinfor["display-name"];
+          const receiverinfor = await getTagsInfo(obj.receiver);
+          newTopInfor.r_displayname = receiverinfor["display-name"];
+          break;
+        }
+        console.log("obj", obj);
+      }
+    }
+
+    // const senderinfor = await getTagsInfo(process.env.address1);
     // console.log("senderinfor", senderinfor);
     newTopInfor.coverimg =
       "https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo";
     newTopInfor.title =
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In facilisis sollicitudin ultricies.";
     newTopInfor.date = "2/4/2004";
-    newTopInfor.s_displayname = senderinfor["display-name"];
     newTopInfor.s_date = "08/06/2019";
-    newTopInfor.s_content = `In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
-    arcu ante, aliquet sit amet ornare quis, euismod ac justo. Duis
-    hendrerit, lacus a facilisis congue`;
-
-    newTopInfor.r_displayname = "Mary William";
     newTopInfor.r_date = "09/06/2019";
-    newTopInfor.r_content = `Duis hendrerit, lacus a facilisis congue`;
 
     this.setState({ topInfo: newTopInfor });
-  }
-
-  async loadAllPropose() {
-    const { setPropose } = this.props;
-    console.log("process.env.address1", process.env.address1);
-    const allPropose = await callView("getProposeByAddress", [
-      process.env.address1
-    ]);
-
-    setPropose(JSON.parse(allPropose));
-    console.log("allPropose", JSON.parse(allPropose));
   }
 
   render() {
@@ -187,11 +218,12 @@ class TopContrainer extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { userInfo } = state;
+  const { userInfo, propose } = state;
   return {
     username: userInfo.username,
     displayname: userInfo.displayname,
-    avata: userInfo.avata
+    avata: userInfo.avata,
+    propose: propose.propose
   };
 };
 
