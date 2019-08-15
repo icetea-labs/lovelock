@@ -192,7 +192,8 @@ class Main extends React.Component {
       isAccept: false,
       isDeny: false,
       reload: true,
-      proIndex: -1
+      proIndex: -1,
+      pendingIndex: -1
     };
   }
 
@@ -264,9 +265,8 @@ class Main extends React.Component {
   };
 
   openPending = index => {
-    // this.setState(Object.assign({}, { isPendingPromise: true }, e));
-    this.setState({ isPendingPromise: true });
-    console.log(index);
+    this.setState({ isPendingPromise: true, pendingIndex: index });
+    // console.log(index);
   };
 
   acceptPromise = () => {
@@ -302,7 +302,8 @@ class Main extends React.Component {
       isPendingPromise,
       isAccept,
       isDeny,
-      proIndex
+      proIndex,
+      pendingIndex
     } = this.state;
     const { propose } = this.props;
     console.log("main state", this.state);
@@ -410,8 +411,16 @@ class Main extends React.Component {
             deny={this.denyPromise}
           />
         )}
-        {isAccept && <PromiseConfirm close={this.closeConfirm} />}
-        {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} />}
+        {isAccept && (
+          <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />
+        )}
+        {isDeny && (
+          <PromiseConfirm
+            isDeny
+            close={this.closeConfirm}
+            index={pendingIndex}
+          />
+        )}
       </main>
     );
   }

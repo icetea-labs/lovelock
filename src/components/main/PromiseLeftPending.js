@@ -73,19 +73,6 @@ class PromiseLeftPending extends PureComponent {
     this.setState({ newPropose: tmp });
   }
 
-  openPendingPromise(index) {
-    // console.log("view Index", index);
-    this.setState(
-      {
-        index: index
-      },
-      () => {
-        this.props.openPendingPromise &&
-          this.props.openPendingPromise(this.state);
-      }
-    );
-  }
-
   render() {
     const { newPropose } = this.state;
     const { openPendingPromise } = this.props;
