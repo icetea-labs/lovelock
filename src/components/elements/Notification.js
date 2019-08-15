@@ -1,8 +1,8 @@
 import React from "react";
 import "rc-notification/assets/index.css";
 import Notification from "rc-notification";
-import iconSuccess from "static/img/success-icon.png";
-import iconWarning from "static/img/warning-icon.png";
+import iconSuccess from "static/img/success.png";
+import iconWarning from "static/img/warning.png";
 
 let notification = null;
 
