@@ -17,6 +17,7 @@ class index extends Component {
     // reduxStore.dispatch(serverRenderClock(isServer));
     return {};
   }
+
   render() {
     const { isLoading } = this.props;
     return (
