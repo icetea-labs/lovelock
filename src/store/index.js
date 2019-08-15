@@ -2,9 +2,7 @@ import { createStore, applyMiddleware } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import rootReducer from "./reducers";
 const exampleInitialState = {
-  lastUpdate: 0,
-  light: false,
-  count: 0
+  lastUpdate: 0
 };
 // const initializeStore = createStore(
 //   rootReducer,
