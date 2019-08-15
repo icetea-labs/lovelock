@@ -40,6 +40,7 @@ class PromiseConfirm extends React.Component {
   };
 
   async messageAccept(message) {
+    const { index } = this.props;
     try {
       // const address = process.env.contract;
       // const params = process.env.address1;
@@ -54,10 +55,11 @@ class PromiseConfirm extends React.Component {
       tweb3.wallet.defaultAccount = process.env.address2;
       const ct = tweb3.contract(process.env.contract);
       const name = "acceptPropose";
-      const result = await ct.methods[name](1, message).sendCommit();
+      const result = await ct.methods[name](index, message).sendCommit();
       console.log("View result", result);
       if (result) {
         window.alert("send success");
+        this.props.close();
       }
     } catch (error) {
       console.log(error);
@@ -103,6 +105,7 @@ class PromiseConfirm extends React.Component {
 
 PromiseConfirm.defaultProps = {
   isDeny: false,
+  index: 0,
   send() {},
   close() {}
 };
