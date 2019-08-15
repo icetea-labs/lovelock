@@ -41,7 +41,8 @@ const { expect } = require(";");
     this._confirmPropose(proIndex, r_content, 2)
   }
 
-  @view getProposeByAddress(address: string) {
+  @view getProposeByAddress(address) {
+    if (!address) address = msg.sender
     const arrPro = this.addressToPropose[address]
     let resp = []
     arrPro.forEach(index => {
@@ -58,10 +59,12 @@ const { expect } = require(";");
 
   @view getProposeByIndex(proIndex: number) {
     const pro = this.propose[proIndex]
+    let resp = []
     if (pro.isPrivate) {
       this._isOwnerPropose(pro, "Can't get propose.")
     }
-    return propose[proIndex]
+    resp.push(pro)
+    return resp
   }
 
   // Change info { img:Array, location:string, date:string }

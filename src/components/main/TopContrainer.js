@@ -1,7 +1,9 @@
 import React, { PureComponent } from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
 import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import tweb3 from "../../service/tweb3";
+import { callView } from "../../helper";
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -92,13 +94,21 @@ class TopContrainer extends PureComponent {
   }
 
   async loaddata() {
-    const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
-    const { address } = tweb3.wallet.createAccount();
-    console.log(address);
-    const result = await ct.methods["propose"]([]).sendCommit({
-      signers: address
-    });
-    console.log(result);
+    // const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    // const { address } = tweb3.wallet.createAccount();
+    // console.log(address);
+    // const result = await ct.methods["propose"]([]).sendCommit({
+    //   signers: address
+    // });
+    // console.log(result);
+    const resp = await callView("getProposeByAddress", [
+      "teat18yj3x5rpujk8dxjvxx7eamwznn9vl7sygph2ta"
+    ]);
+    console.log("TopContrainer", resp);
+    const resp1 = await callView("getProposeByIndex", [0]);
+    console.log("TopContrainer1", resp1);
+    const { username } = this.props;
+    console.log("username", username);
   }
 
   render() {
@@ -155,4 +165,24 @@ class TopContrainer extends PureComponent {
   }
 }
 
-export default TopContrainer;
+const mapStateToProps = state => {
+  const { userInfo } = state;
+  return {
+    username: userInfo.username,
+    displayname: userInfo.displayname,
+    avata: userInfo.avata
+  };
+};
+
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     setLoading: value => {
+//       dispatch(actions.setLoading(value));
+//     }
+//   };
+// };
+
+export default connect(
+  mapStateToProps,
+  null
+)(TopContrainer);

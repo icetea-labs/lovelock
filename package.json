@@ -2,7 +2,7 @@
   "name": "icetea-couple-lock",
   "version": "1.0.0",
   "dependencies": {
-    "@iceteachain/web3": "^0.1.8",
+    "@iceteachain/web3": "0.1.5",
     "@material-ui/core": "latest",
     "@zeit/next-css": "^1.0.1",
     "babel-plugin-module-resolver": "^3.2.0",
@@ -19,6 +19,7 @@
     "react-dnd-html5-backend": "^9.3.4",
     "react-dom": "latest",
     "react-jss": "^8.1.0",
+    "react-redux": "^7.1.0",
     "react-tag-input": "^6.4.0",
     "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",

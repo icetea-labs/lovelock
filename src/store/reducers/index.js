@@ -1,10 +1,12 @@
 import { combineReducers } from "redux";
 import chainInfo from "./chainInfo";
 import globalData from "./globalData";
+import userInfo from "./userInfo";
 
 const myReducer = combineReducers({
   chainInfo,
-  globalData
+  globalData,
+  userInfo
 });
 
 export default myReducer;
