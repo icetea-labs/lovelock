@@ -198,59 +198,21 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
-    // this.loadPromise();
     this.loadAllPropose();
   }
 
   async loadAllPropose() {
     const { reload } = this.state;
-    const { setPropose } = this.props;
-    const allPropose = await callView("getProposeByAddress", [
-      process.env.address1
-    ]);
+    const { setPropose, address } = this.props;
+    console.log("address", address);
+    const allPropose = await callView("getProposeByAddress", [address]);
 
     setPropose(JSON.parse(allPropose));
     this.setState({ reload: false });
   }
 
-  async loadPromise() {
-    const address = process.env.contract;
-    // const ct = tweb3.contract(address);
-    console.log("view add", address);
-
-    const params = process.env.address1;
-    console.log("view params", params);
-    const method = "callReadonlyContractMethod";
-    const funcName = "getProposeByAddress";
-    const result = await tweb3[method](address, funcName, params);
-    // const method = this.id === 'read' ? 'callReadonlyContractMethod' : 'callPureContractMethod'
-    // const result = await tweb3[method](address, name, params)
-    console.log("view result", result);
-  }
-
-  // renderPromise = () => {
-  //   // const { promises } = this.state;
-  //   const { propose } = this.props;
-  //   return <PromiseLeft propose={propose} />;
-  // };
-  // renderPendingPromise = () => {
-  //   // const { promises } = this.state;
-  //   const { propose } = this.props;
-  //   return <PromiseLeftPending propose={propose} />;
-  // };
-
-  // async createPropose() {
-  //   console.log("I am here");
-  //   const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
-  //   const { address } = tweb3.wallet.createAccount();
-  //   const receiver = address;
-  //   const name = "createPropose";
-  //   const result = await ct.methods[name](receiver).sendCommit();
-  // }
-
   renderTag = tag => {
     // const { tag } = this.state;
-
     return tag.map((item, index) => {
       return (
         <span className="tagName" key={index}>
@@ -305,8 +267,8 @@ class Main extends React.Component {
       proIndex,
       pendingIndex
     } = this.state;
-    const { propose } = this.props;
-    console.log("main state", this.state);
+    const { propose, address } = this.props;
+    // console.log("main state", this.state);
     return (
       <main>
         <BannerContainer>
@@ -331,6 +293,7 @@ class Main extends React.Component {
                 <div>
                   <PromiseLeftAccept
                     propose={propose}
+                    address={address}
                     handlerSelectPropose={this.handlerSelectPropose}
                   />
                 </div>
@@ -338,6 +301,7 @@ class Main extends React.Component {
                 <div>
                   <PromiseLeftPending
                     propose={propose}
+                    address={address}
                     openPendingPromise={this.openPending}
                   />
                 </div>
@@ -427,9 +391,10 @@ class Main extends React.Component {
 }
 
 const mapStateToProps = state => {
-  const { propose } = state;
+  const { propose, userInfo } = state;
   return {
-    propose: propose.propose
+    propose: propose.propose,
+    address: userInfo.address
   };
 };
 

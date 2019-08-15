@@ -154,8 +154,6 @@ class TopContrainer extends PureComponent {
       }
     }
 
-    // const senderinfor = await getTagsInfo(process.env.address1);
-    // console.log("senderinfor", senderinfor);
     newTopInfor.coverimg =
       "https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo";
     newTopInfor.title =
@@ -220,6 +218,7 @@ class TopContrainer extends PureComponent {
 const mapStateToProps = state => {
   const { userInfo, propose } = state;
   return {
+    address: userInfo.address,
     username: userInfo.username,
     displayname: userInfo.displayname,
     avata: userInfo.avata,
