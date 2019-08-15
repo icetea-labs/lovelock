@@ -194,7 +194,7 @@ class Main extends React.Component {
   }
 
   async loadPromise() {
-    const address = process.env.REACT_APP_CONTRACT;
+    const address = process.env.contract;
     // const ct = tweb3.contract(address);
     console.log("view add", address);
 
