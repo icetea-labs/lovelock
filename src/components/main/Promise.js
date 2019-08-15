@@ -83,6 +83,7 @@ class Promise extends React.Component {
     // console.log("View result", result);
     if (result) {
       // window.alert("send success");
+      // notifi.info('Success!');
     }
     this.props.close();
   }
