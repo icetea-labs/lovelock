@@ -71,7 +71,7 @@ class PromiseConfirm extends React.Component {
       const result = await ct.methods[name](index, message).sendCommit();
       console.log("View result", result);
       if (result) {
-        // window.alert("send success");
+        window.alert("Success");
         // notifi.info("Success!");
         this.props.close();
       }

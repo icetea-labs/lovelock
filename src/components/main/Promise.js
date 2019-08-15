@@ -82,10 +82,9 @@ class Promise extends React.Component {
     ).sendCommit();
     // console.log("View result", result);
     if (result) {
-      // window.alert("send success");
-      // notifi.info('Success!');
+      window.alert("Success");
+      this.props.close();
     }
-    this.props.close();
   }
 
   render() {
