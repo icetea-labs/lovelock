@@ -15,6 +15,7 @@ import tweb3 from "../../service/tweb3";
 import PromiseConfirm from "./PromiseConfirm";
 import PromiseLeftAccept from "./PromiseLeftAccept";
 import PromiseLeftPending from "./PromiseLeftPending";
+// import notifi from "../elements/Notification";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};

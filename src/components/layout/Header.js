@@ -1,9 +1,11 @@
 import React, { PureComponent } from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { rem, FlexBox } from "../elements/Common";
 import Icon from "src/components/elements/Icon";
 import TextField from "@material-ui/core/TextField";
+import { callView, getAccountInfo, getTagsInfo } from "../../helper";
 
 const Container = styled.header`
   width: 100%;
@@ -103,7 +105,24 @@ const Rectangle = styled.a`
 `;
 
 class Header extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: "anonymous"
+    };
+  }
+
+  componentDidMount() {
+    this.loaddata();
+  }
+  async loaddata() {
+    const { address } = this.props;
+    const reps = await getTagsInfo(address);
+    this.setState({ username: reps["display-name"] });
+  }
+
   render() {
+    const { username } = this.state;
     return (
       <Container>
         <Content>
@@ -120,7 +139,7 @@ class Header extends PureComponent {
           <FlexBox flex={1} justify="flex-end">
             <MenuItem>
               <img src="/static/img/user-men.jpg" alt="" />
-              <a href="/login">John Smith</a>
+              <a href="/login">{username}</a>
             </MenuItem>
             <MenuItem>
               <a href="/login">Explore</a>
@@ -141,6 +160,22 @@ class Header extends PureComponent {
   }
 }
 
-Header.propTypes = {};
+const mapStateToProps = state => {
+  const { propose, userInfo } = state;
+  return {
+    address: userInfo.address
+  };
+};
 
-export default Header;
+const mapDispatchToProps = dispatch => {
+  return {
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    }
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Header);
