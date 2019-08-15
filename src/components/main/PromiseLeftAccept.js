@@ -60,12 +60,14 @@ class PromiseLeft extends PureComponent {
     let { propose } = this.props;
     let tmp = [];
     if (!propose) propose = [];
+
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
       if (obj.status === 1) {
         const reps = await getTagsInfo(obj.receiver);
         obj.name = reps["display-name"];
         obj.nick = "@" + reps.username;
+        obj.index = i;
         tmp.push(obj);
       }
     }
@@ -74,10 +76,14 @@ class PromiseLeft extends PureComponent {
 
   render() {
     const { newPropose } = this.state;
+    const { handlerSelectPropose } = this.props;
 
-    return newPropose.map((item, index) => {
+    return newPropose.map(item => {
       return (
-        <WarrperAcceptedPromise key={index}>
+        <WarrperAcceptedPromise
+          key={item.index}
+          onClick={() => handlerSelectPropose(item.index)}
+        >
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
           </div>
