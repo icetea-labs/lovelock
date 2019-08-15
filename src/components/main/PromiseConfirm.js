@@ -4,6 +4,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import CommonDialog from "./CommonDialog";
 import { TagTitle } from "./Promise";
+import tweb3 from "../../service/tweb3";
+import { callView } from "../../helper";
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -26,11 +28,45 @@ class PromiseConfirm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      smt: ""
+      message: ""
     };
   }
+
+  messageChange = e => {
+    const value = e.target.value;
+    this.setState({
+      message: value
+    });
+  };
+
+  async messageAccept(message) {
+    try {
+      // const address = process.env.contract;
+      // const params = process.env.address1;
+      // const method = "callReadonlyContractMethod";
+      // const funcName = "getProposeByAddress";
+      // const res = await tweb3[method](address, funcName, params);
+
+      // const res = callView(
+      //   "getProposeByAddress",
+      //   "teat18yj3x5rpujk8dxjvxx7eamwznn9vl7sygph2ta"
+      // );
+      tweb3.wallet.defaultAccount = process.env.address2;
+      const ct = tweb3.contract(process.env.contract);
+      const name = "acceptPropose";
+      const result = await ct.methods[name](1, message).sendCommit();
+      console.log("View result", result);
+      if (result) {
+        window.alert("send success");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   render() {
     const { close, send, isDeny } = this.props;
+    const { message } = this.state;
     return (
       <CommonDialog
         title="Promise alert"
@@ -38,7 +74,9 @@ class PromiseConfirm extends React.Component {
         cancelText="Cancel"
         close={close}
         cancel={close}
-        confirm={send}
+        confirm={() => {
+          this.messageAccept(message);
+        }}
         isCancel
       >
         <TagTitle>
@@ -53,7 +91,7 @@ class PromiseConfirm extends React.Component {
           rows="5"
           margin="normal"
           variant="outlined"
-          onChange={this.promiseStmChange}
+          onChange={this.messageChange}
         />
         <IconView>
           <i className="material-icons">insert_photo</i>

@@ -17,7 +17,7 @@ async function callReadOrPure(funcName, params, method) {
   }
 }
 
-export async function sendTransaction(func, index) {
+export async function sendTransaction(func) {
   const { address } = this.props;
   const { answers, loading, params_value, account } = this.state;
   const signers = account.address;
