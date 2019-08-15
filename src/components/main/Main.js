@@ -207,7 +207,7 @@ class Main extends React.Component {
     console.log("address", address);
     const allPropose = await callView("getProposeByAddress", [address]);
 
-    setPropose(JSON.parse(allPropose));
+    setPropose(allPropose);
     this.setState({ reload: false });
   }
 

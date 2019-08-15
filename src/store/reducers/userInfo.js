@@ -1,7 +1,7 @@
 import { actionTypes } from "../actions/userInfo";
 
 const initialState = {
-  address: process.env.address2,
+  address: process.env.address1,
   username: "hoanghuy",
   displayname: "anonymous",
   avata: "",

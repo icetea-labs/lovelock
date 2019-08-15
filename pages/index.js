@@ -9,7 +9,7 @@ import styled from "styled-components";
 import { HomeLayout } from "src/components/layout";
 import Main from "src/components/main/Main";
 import "static/css/style.css";
-
+import { GlobaLoading } from "src/components/elements/GlobaLoading";
 class index extends Component {
   static getInitialProps({ reduxStore, req }) {
     // const isServer = !!req;
@@ -18,14 +18,26 @@ class index extends Component {
     return {};
   }
   render() {
+    const { isLoading } = this.props;
     return (
       <Container maxWidth="xl">
         <HomeLayout title="Couple Lock">
           <Main />
         </HomeLayout>
+        {isLoading && <GlobaLoading />}
       </Container>
     );
   }
 }
 
-export default index;
+const mapStateToProps = state => {
+  const { globalData } = state;
+  return {
+    isLoading: globalData.isLoading
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(index);
