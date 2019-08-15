@@ -7,7 +7,7 @@ export async function callView(funcName, params) {
   return callReadOrPure(funcName, params, "callReadonlyContractMethod");
 }
 async function callReadOrPure(funcName, params, method) {
-  const address = process.env.REACT_APP_CONTRACT;
+  const address = process.env.contract;
 
   try {
     const result = await tweb3[method](address, funcName, params || []);
