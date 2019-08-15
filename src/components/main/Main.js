@@ -370,6 +370,9 @@ class Main extends React.Component {
         {isPromise && <Promise close={this.closePromise} />}
         {isPendingPromise && (
           <PromiseAlert
+            propose={propose}
+            address={address}
+            index={pendingIndex}
             close={this.closePendingPromise}
             accept={this.acceptPromise}
             deny={this.denyPromise}

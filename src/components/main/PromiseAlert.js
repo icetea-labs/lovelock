@@ -3,6 +3,7 @@ import styled from "styled-components";
 import CommonDialog from "./CommonDialog";
 import { TagTitle } from "./Promise";
 // import PromiseConfirm from "./PromiseConfirm";
+import { callView, getAccountInfo, getTagsInfo } from "../../helper";
 
 const ImgView = styled.div`
   margin: 31px 0 31px;
@@ -12,21 +13,37 @@ class PromiseAlert extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isAccept: false
+      sender: "",
+      info: "",
+      content: ""
     };
   }
 
-  // acceptPromise = () => {
-  //   this.setState({ isAccept: true });
-  // };
+  componentDidMount() {
+    this.loaddata();
+  }
 
-  // closeConfirm = () => {
-  //   this.setState({ isAccept: false });
-  // }
+  async loaddata() {
+    let { propose, address } = this.props;
+    const { index } = this.props;
+
+    const obj = propose[index];
+    console.log("view obj", obj);
+    if (obj.status === 0) {
+      const addr = address === obj.sender ? obj.receiver : obj.sender;
+      const reps = await getTagsInfo(addr);
+      obj.name = reps["display-name"];
+      this.setState({
+        sender: obj.name,
+        info: obj.info,
+        content: obj.s_content
+      });
+    }
+  }
 
   render() {
-    const { deny, close, accept } = this.props;
-    const { isAccept } = this.state;
+    const { deny, close, accept, index } = this.props;
+    const { sender, info, content } = this.state;
     return (
       <div>
         <CommonDialog
@@ -38,15 +55,11 @@ class PromiseAlert extends React.Component {
           confirm={accept}
           isCancel
         >
-          <TagTitle>John Smith send you a promise</TagTitle>
+          <TagTitle>{sender} send you a promise</TagTitle>
           <ImgView>
             <img src="/static/img/promiseAlert.jpeg" className="postImg" />
           </ImgView>
-          <p>
-            No one needs to count material wealth when they have a friend like
-            you. You are the most wonderful friend I could ever wish for. I wish
-            you a very happy friendship day.
-          </p>
+          <p>{content}</p>
         </CommonDialog>
         {/* {isAccept && <PromiseConfirm close={this.closeConfirm} />} */}
       </div>
@@ -55,6 +68,7 @@ class PromiseAlert extends React.Component {
 }
 
 PromiseAlert.defaultProps = {
+  index: 0,
   deny() {},
   accept() {},
   close() {}

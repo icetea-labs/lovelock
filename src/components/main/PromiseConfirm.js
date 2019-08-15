@@ -42,23 +42,12 @@ class PromiseConfirm extends React.Component {
   async messageAccept(message) {
     const { index } = this.props;
     try {
-      // const address = process.env.contract;
-      // const params = process.env.address1;
-      // const method = "callReadonlyContractMethod";
-      // const funcName = "getProposeByAddress";
-      // const res = await tweb3[method](address, funcName, params);
-
-      // const res = callView(
-      //   "getProposeByAddress",
-      //   "teat18yj3x5rpujk8dxjvxx7eamwznn9vl7sygph2ta"
-      // );
-      tweb3.wallet.defaultAccount = process.env.address2;
       const ct = tweb3.contract(process.env.contract);
       const name = "acceptPropose";
       const result = await ct.methods[name](index, message).sendCommit();
       console.log("View result", result);
       if (result) {
-        window.alert("send success");
+        // window.alert("send success");
         this.props.close();
       }
     } catch (error) {

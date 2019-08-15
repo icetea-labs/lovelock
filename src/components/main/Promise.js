@@ -34,7 +34,7 @@ function TextFieldMultiLine(props) {
 }
 
 export const TagTitle = styled.div`
-  width: 225px;
+  width: 100%;
   height: 18px;
   font-family: Montserrat;
   font-size: 14px;
@@ -71,8 +71,6 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm) {
-    // console.log("partner", partner);
-    // console.log("promiseStm", promiseStm);
     const ct = tweb3.contract(process.env.contract);
     // const { address } = tweb3.wallet.createAccount();
     const info = "abcxyz";
@@ -84,7 +82,7 @@ class Promise extends React.Component {
     ).sendCommit();
     // console.log("View result", result);
     if (result) {
-      window.alert("send success");
+      // window.alert("send success");
     }
     this.props.close();
   }
