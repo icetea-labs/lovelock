@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { connect } from "react-redux";
 import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import tweb3 from "../../service/tweb3";
-import { callView } from "../../helper";
+import { callView, getAccountInfo, getTagsInfo } from "../../helper";
+import * as actions from "../../store/actions";
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -89,45 +90,63 @@ const WarrperChatBox = styled(FlexBox)`
 `;
 
 class TopContrainer extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      topInfo: {}
+    };
+  }
+
   async componentDidMount() {
     this.loaddata();
   }
 
   async loaddata() {
-    // const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
-    // const { address } = tweb3.wallet.createAccount();
-    // console.log(address);
-    // const result = await ct.methods["propose"]([]).sendCommit({
-    //   signers: address
-    // });
-    // console.log(result);
-    const resp = await callView("getProposeByAddress", [
-      "teat18yj3x5rpujk8dxjvxx7eamwznn9vl7sygph2ta"
+    await this.loadAllPropose();
+    const { topInfo } = this.state;
+    let newTopInfor = {};
+    const senderinfor = await getTagsInfo(process.env.address1);
+    // console.log("senderinfor", senderinfor);
+    newTopInfor.coverimg =
+      "https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo";
+    newTopInfor.title =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In facilisis sollicitudin ultricies.";
+    newTopInfor.date = "2/4/2004";
+    newTopInfor.s_displayname = senderinfor["display-name"];
+    newTopInfor.s_date = "08/06/2019";
+    newTopInfor.s_content = `In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
+    arcu ante, aliquet sit amet ornare quis, euismod ac justo. Duis
+    hendrerit, lacus a facilisis congue`;
+
+    newTopInfor.r_displayname = "Mary William";
+    newTopInfor.r_date = "09/06/2019";
+    newTopInfor.r_content = `Duis hendrerit, lacus a facilisis congue`;
+
+    this.setState({ topInfo: newTopInfor });
+  }
+
+  async loadAllPropose() {
+    const { setPropose } = this.props;
+    const allPropose = await callView("getProposeByAddress", [
+      process.env.address1
     ]);
-    console.log("TopContrainer", resp);
-    const resp1 = await callView("getProposeByIndex", [0]);
-    console.log("TopContrainer1", resp1);
-    const { username } = this.props;
-    console.log("username", username);
+    setPropose(allPropose);
+    // console.log("allPropose", allPropose);
   }
 
   render() {
+    const { topInfo } = this.state;
+    console.log("topInfo", topInfo);
     return (
       <TopContainerBox>
         <div className="top__coverimg">
-          <img
-            src="https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo"
-            alt="itea-scan"
-          />
+          <img src={topInfo.coverimg} alt="itea-scan" />
         </div>
 
         <div className="top__title">
           <img src="/static/img/luggage.svg" alt="itea" />
-          <span className="title__content">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In
-            facilisis sollicitudin ultricies.
-          </span>
-          <span className="title__date">2/4/2004</span>
+          <span className="title__content">{topInfo.title}</span>
+          <span className="title__date">{topInfo.date}</span>
         </div>
 
         <WarrperChatBox>
@@ -137,14 +156,12 @@ class TopContrainer extends PureComponent {
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
-                <span className="user_name color-violet">John Smith</span>
-                <span className="time fr color-gray">08/06/2019</span>
+                <span className="user_name color-violet">
+                  {topInfo.s_displayname}
+                </span>
+                <span className="time fr color-gray">{topInfo.s_date}</span>
               </div>
-              <p>
-                In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
-                arcu ante, aliquet sit amet ornare quis, euismod ac justo. Duis
-                hendrerit, lacus a facilisis congue,
-              </p>
+              <p>{topInfo.s_content}</p>
             </div>
           </FlexWidthBox>
           <FlexWidthBox width="50%">
@@ -153,10 +170,12 @@ class TopContrainer extends PureComponent {
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
-                <span className="user_name color-violet">Mary William</span>
-                <span className="time fr color-gray">08/06/2019</span>
+                <span className="user_name color-violet">
+                  {topInfo.r_displayname}
+                </span>
+                <span className="time fr color-gray">{topInfo.r_date}</span>
               </div>
-              <p>Duis hendrerit, lacus a facilisis congue</p>
+              <p>{topInfo.r_content}</p>
             </div>
           </FlexWidthBox>
         </WarrperChatBox>
@@ -174,15 +193,15 @@ const mapStateToProps = state => {
   };
 };
 
-// const mapDispatchToProps = dispatch => {
-//   return {
-//     setLoading: value => {
-//       dispatch(actions.setLoading(value));
-//     }
-//   };
-// };
+const mapDispatchToProps = dispatch => {
+  return {
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    }
+  };
+};
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(TopContrainer);

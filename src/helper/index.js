@@ -1,10 +1,10 @@
 import tweb3 from "../service/tweb3";
 
 export async function callPure(funcName, params) {
-  callReadOrPure(funcName, params, "callPureContractMethod");
+  return callReadOrPure(funcName, params, "callPureContractMethod");
 }
 export async function callView(funcName, params) {
-  callReadOrPure(funcName, params, "callReadonlyContractMethod");
+  return callReadOrPure(funcName, params, "callReadonlyContractMethod");
 }
 async function callReadOrPure(funcName, params, method) {
   const address = process.env.REACT_APP_CONTRACT;
@@ -44,5 +44,27 @@ export function tryStringifyJson(p, replacer = undefined, space = 2) {
     return "" + JSON.stringify(p, replacer, space);
   } catch (e) {
     return String(p);
+  }
+}
+
+export async function getAccountInfo(address) {
+  try {
+    const info = await tweb3.getAccountInfo(address);
+    return info;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function getTagsInfo(address) {
+  const resp = await tweb3
+    .contract("system.did")
+    .methods.query(address)
+    .call();
+  if (resp) {
+    const { tags } = resp;
+    return tags;
+  } else {
+    return {};
   }
 }
