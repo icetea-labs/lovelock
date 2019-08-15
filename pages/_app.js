@@ -1,5 +1,7 @@
 import React from "react";
 import App, { Container } from "next/app";
+import withReduxStore from "../lib/with-redux-store";
+import { Provider } from "react-redux";
 import Head from "next/head";
 import { ThemeProvider } from "@material-ui/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -15,7 +17,7 @@ class MyApp extends App {
   }
 
   render() {
-    const { Component, pageProps } = this.props;
+    const { Component, pageProps, reduxStore } = this.props;
 
     return (
       <Container>
@@ -25,11 +27,13 @@ class MyApp extends App {
         <ThemeProvider theme={theme}>
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <CssBaseline />
-          <Component {...pageProps} />
+          <Provider store={reduxStore}>
+            <Component {...pageProps} />
+          </Provider>
         </ThemeProvider>
       </Container>
     );
   }
 }
 
-export default MyApp;
+export default withReduxStore(MyApp);
