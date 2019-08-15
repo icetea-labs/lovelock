@@ -1,10 +1,24 @@
 import tweb3 from "../service/tweb3";
 
 export async function callPure(funcName, params) {
-  return callReadOrPure(funcName, params, "callPureContractMethod");
+  const resp = await callReadOrPure(funcName, params, "callPureContractMethod");
+  if (resp) {
+    return JSON.parse(resp);
+  } else {
+    return [];
+  }
 }
 export async function callView(funcName, params) {
-  return callReadOrPure(funcName, params, "callReadonlyContractMethod");
+  const resp = await callReadOrPure(
+    funcName,
+    params,
+    "callReadonlyContractMethod"
+  );
+  if (resp) {
+    return JSON.parse(resp);
+  } else {
+    return [];
+  }
 }
 async function callReadOrPure(funcName, params, method) {
   const address = process.env.contract;
