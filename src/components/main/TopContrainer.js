@@ -102,7 +102,7 @@ class TopContrainer extends PureComponent {
   }
 
   async loaddata() {
-    await this.loadAllPropose();
+    // await this.loadAllPropose();
     const { topInfo } = this.state;
     let newTopInfor = {};
     const senderinfor = await getTagsInfo(process.env.address1);
@@ -127,16 +127,18 @@ class TopContrainer extends PureComponent {
 
   async loadAllPropose() {
     const { setPropose } = this.props;
+    console.log("process.env.address1", process.env.address1);
     const allPropose = await callView("getProposeByAddress", [
       process.env.address1
     ]);
-    setPropose(allPropose);
-    // console.log("allPropose", allPropose);
+
+    setPropose(JSON.parse(allPropose));
+    console.log("allPropose", JSON.parse(allPropose));
   }
 
   render() {
     const { topInfo } = this.state;
-    console.log("topInfo", topInfo);
+    // console.log("topInfo", topInfo);
     return (
       <TopContainerBox>
         <div className="top__coverimg">

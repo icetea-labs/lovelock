@@ -25,7 +25,9 @@ const { expect } = require(";");
     //map address to propose
     const y = this.addressToPropose
     if (!y[sender]) y[sender] = []
+    if (!y[receiver]) y[receiver] = []
     y[sender].push(index)
+    y[receiver].push(index)
     this.addressToPropose = y
 
     //emit Event
@@ -42,7 +44,7 @@ const { expect } = require(";");
   }
 
   @view getProposeByAddress(address) {
-    if (!address) address = msg.sender
+    if (address === 'undefined') address = msg.sender
     const arrPro = this.addressToPropose[address]
     let resp = []
     arrPro.forEach(index => {
@@ -157,7 +159,7 @@ const { expect } = require(";");
     this.propose[index] = x
 
     //emit Event
-    const log = Object.assign({}, propose, { index })
+    const log = Object.assign({}, pro, { index })
     this.emitEvent("_confirmPropose", { by: msg.sender, log }, ["by"]);
   }
 }

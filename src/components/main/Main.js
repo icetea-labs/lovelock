@@ -1,5 +1,8 @@
 import React from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import { callView, getAccountInfo, getTagsInfo } from "../../helper";
+import * as actions from "../../store/actions";
 import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import Icon from "src/components/elements/Icon";
 // import { WithContext as ReactTags } from "react-tag-input";
@@ -10,6 +13,8 @@ import TopContrainer from "./TopContrainer";
 import PromiseAlert from "./PromiseAlert";
 import tweb3 from "../../service/tweb3";
 import PromiseConfirm from "./PromiseConfirm";
+import PromiseLeftAccept from "./PromiseLeftAccept";
+import PromiseLeftPending from "./PromiseLeftPending";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -185,12 +190,27 @@ class Main extends React.Component {
       isPromise: false,
       isPendingPromise: false,
       isAccept: false,
-      isDeny: false
+      isDeny: false,
+      reload: true
     };
   }
 
   componentDidMount() {
     // this.loadPromise();
+    this.loadAllPropose();
+  }
+
+  async loadAllPropose() {
+    const { reload } = this.state;
+    const { setPropose } = this.props;
+    console.log("process.env.address1", process.env.address1);
+    const allPropose = await callView("getProposeByAddress", [
+      process.env.address1
+    ]);
+
+    setPropose(JSON.parse(allPropose));
+    console.log("allPropose", JSON.parse(allPropose));
+    this.setState({ reload: false });
   }
 
   async loadPromise() {
@@ -208,42 +228,16 @@ class Main extends React.Component {
     console.log("view result", result);
   }
 
-  renderPromise = () => {
-    const { promises } = this.state;
-
-    return promises.map((item, index) => {
-      return (
-        <WarrperAcceptedPromise key={index}>
-          <div className="icon">
-            <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
-          </div>
-          <div className="pri_info">
-            <div className="name">{item.name}</div>
-            <div className="nick">{item.nick}</div>
-          </div>
-        </WarrperAcceptedPromise>
-      );
-    });
-  };
-  renderPendingPromise = () => {
-    const { promises } = this.state;
-
-    return promises.map((item, index) => {
-      return (
-        <WarrperAcceptedPromise key={index} onClick={this.openPendingPromise}>
-          <div className="icon">
-            <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
-          </div>
-          <div className="pri_info">
-            <div className="name" id={"pending" + index}>
-              {item.name}
-            </div>
-            <div className="nick">{item.nick}</div>
-          </div>
-        </WarrperAcceptedPromise>
-      );
-    });
-  };
+  // renderPromise = () => {
+  //   // const { promises } = this.state;
+  //   const { propose } = this.props;
+  //   return <PromiseLeft propose={propose} />;
+  // };
+  // renderPendingPromise = () => {
+  //   // const { promises } = this.state;
+  //   const { propose } = this.props;
+  //   return <PromiseLeftPending propose={propose} />;
+  // };
 
   // async createPropose() {
   //   console.log("I am here");
@@ -303,6 +297,8 @@ class Main extends React.Component {
       isAccept,
       isDeny
     } = this.state;
+    const { propose } = this.props;
+    // console.log("main render", propose);
     return (
       <main>
         <BannerContainer>
@@ -324,9 +320,13 @@ class Main extends React.Component {
                   Add Promise
                 </button>
                 <div className="title">Accepted promise</div>
-                <div>{this.renderPromise()}</div>
+                <div>
+                  <PromiseLeftAccept propose={propose} />
+                </div>
                 <div className="title">Pending promise</div>
-                <div>{this.renderPendingPromise()}</div>
+                <div>
+                  <PromiseLeftPending propose={propose} />
+                </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
               </ShadowBox>
@@ -404,4 +404,22 @@ class Main extends React.Component {
   }
 }
 
-export default Main;
+const mapStateToProps = state => {
+  const { propose } = state;
+  return {
+    propose: propose.propose
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    }
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Main);
