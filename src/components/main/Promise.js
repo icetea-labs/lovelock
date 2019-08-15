@@ -71,9 +71,10 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm) {
+    tweb3.wallet.defaultAccount = process.env.address1;
     // console.log("partner", partner);
     // console.log("promiseStm", promiseStm);
-    const ct = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    const ct = tweb3.contract(process.env.contract);
     // const { address } = tweb3.wallet.createAccount();
     const info = "abcxyz";
     const name = "createPropose";

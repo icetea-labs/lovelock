@@ -7,7 +7,7 @@ export async function callView(funcName, params) {
   return callReadOrPure(funcName, params, "callReadonlyContractMethod");
 }
 async function callReadOrPure(funcName, params, method) {
-  const address = process.env.REACT_APP_CONTRACT;
+  const address = process.env.contract;
 
   try {
     const result = await tweb3[method](address, funcName, params || []);
@@ -17,7 +17,7 @@ async function callReadOrPure(funcName, params, method) {
   }
 }
 
-export async function sendTransaction(func, index) {
+export async function sendTransaction(func) {
   const { address } = this.props;
   const { answers, loading, params_value, account } = this.state;
   const signers = account.address;
