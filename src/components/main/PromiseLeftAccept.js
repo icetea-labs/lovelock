@@ -10,6 +10,8 @@ const WarrperAcceptedPromise = styled.div`
   margin-bottom: ${rem(20)};
   :hover {
     cursor: pointer;
+    background: #f5f2f0;
+    border-radius: 5px;
   }
   .icon {
     width: ${rem(36)};
@@ -57,14 +59,15 @@ class PromiseLeft extends PureComponent {
   }
 
   async loaddata() {
-    let { propose } = this.props;
+    let { propose, address } = this.props;
     let tmp = [];
     if (!propose) propose = [];
 
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
       if (obj.status === 1) {
-        const reps = await getTagsInfo(obj.receiver);
+        const addr = address === obj.sender ? obj.receiver : obj.sender;
+        const reps = await getTagsInfo(addr);
         obj.name = reps["display-name"];
         obj.nick = "@" + reps.username;
         obj.index = i;
