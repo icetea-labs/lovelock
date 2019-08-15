@@ -2,7 +2,7 @@
   "name": "icetea-couple-lock",
   "version": "1.0.0",
   "dependencies": {
-    "@iceteachain/web3": "^0.1.8",
+    "@iceteachain/web3": "0.1.5",
     "@material-ui/core": "latest",
     "@zeit/next-css": "^1.0.1",
     "babel-plugin-module-resolver": "^3.2.0",

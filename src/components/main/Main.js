@@ -189,7 +189,7 @@ class Main extends React.Component {
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     // this.loadPromise();
   }
 
@@ -203,6 +203,8 @@ class Main extends React.Component {
     const method = "callReadonlyContractMethod";
     const funcName = "getProposeByAddress";
     const result = await tweb3[method](address, funcName, params);
+    // const method = this.id === 'read' ? 'callReadonlyContractMethod' : 'callPureContractMethod'
+    // const result = await tweb3[method](address, name, params)
     console.log("view result", result);
   }
 
