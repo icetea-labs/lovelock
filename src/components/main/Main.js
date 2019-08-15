@@ -13,7 +13,7 @@ import TopContrainer from "./TopContrainer";
 import PromiseAlert from "./PromiseAlert";
 import tweb3 from "../../service/tweb3";
 import PromiseConfirm from "./PromiseConfirm";
-import PromiseLeft from "./PromiseLeft";
+import PromiseLeftAccept from "./PromiseLeftAccept";
 import PromiseLeftPending from "./PromiseLeftPending";
 
 const BannerContainer = styled.div`
@@ -298,7 +298,7 @@ class Main extends React.Component {
       isDeny
     } = this.state;
     const { propose } = this.props;
-    console.log("main render", propose);
+    // console.log("main render", propose);
     return (
       <main>
         <BannerContainer>
@@ -321,7 +321,7 @@ class Main extends React.Component {
                 </button>
                 <div className="title">Accepted promise</div>
                 <div>
-                  <PromiseLeft propose={propose} />
+                  <PromiseLeftAccept propose={propose} />
                 </div>
                 <div className="title">Pending promise</div>
                 <div>
