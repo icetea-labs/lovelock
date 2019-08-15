@@ -5,7 +5,6 @@ import TextField from "@material-ui/core/TextField";
 import CommonDialog from "./CommonDialog";
 import { TagTitle } from "./Promise";
 import tweb3 from "../../service/tweb3";
-import { callView } from "../../helper";
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -28,14 +27,22 @@ class PromiseConfirm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      message: ""
+      messageAccept: "",
+      messageDeny: ""
     };
   }
 
-  messageChange = e => {
+  messageAcceptChange = e => {
     const value = e.target.value;
     this.setState({
-      message: value
+      messageAccept: value
+    });
+  };
+
+  messageDenyChange = e => {
+    const value = e.target.value;
+    this.setState({
+      messageDeny: value
     });
   };
 
@@ -48,6 +55,24 @@ class PromiseConfirm extends React.Component {
       console.log("View result", result);
       if (result) {
         // window.alert("send success");
+        // notifi.info("Success!");
+        this.props.close();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async messageDeny(message) {
+    const { index } = this.props;
+    try {
+      const ct = tweb3.contract(process.env.contract);
+      const name = "cancelPropose";
+      const result = await ct.methods[name](index, message).sendCommit();
+      console.log("View result", result);
+      if (result) {
+        // window.alert("send success");
+        // notifi.info("Success!");
         this.props.close();
       }
     } catch (error) {
@@ -57,7 +82,7 @@ class PromiseConfirm extends React.Component {
 
   render() {
     const { close, send, isDeny } = this.props;
-    const { message } = this.state;
+    const { messageAccept, messageDeny } = this.state;
     return (
       <CommonDialog
         title="Promise alert"
@@ -66,27 +91,45 @@ class PromiseConfirm extends React.Component {
         close={close}
         cancel={close}
         confirm={() => {
-          this.messageAccept(message);
+          if (!isDeny) {
+            this.messageAccept(messageAccept);
+          } else {
+            this.messageDeny(messageDeny);
+          }
         }}
         isCancel
       >
         <TagTitle>
           {isDeny ? "Your message (optional)" : "Your message"}
         </TagTitle>
-
-        <TextFieldMultiLine
-          id="outlined-multiline-static"
-          placeholder="Like your promise"
-          multiline
-          fullWidth
-          rows="5"
-          margin="normal"
-          variant="outlined"
-          onChange={this.messageChange}
-        />
-        <IconView>
-          <i className="material-icons">insert_photo</i>
-        </IconView>
+        {isDeny ? (
+          <TextFieldMultiLine
+            id="outlined-multiline-static"
+            placeholder="I don’t care"
+            multiline
+            fullWidth
+            rows="5"
+            margin="normal"
+            variant="outlined"
+            onChange={this.messageDenyChange}
+          />
+        ) : (
+          <div>
+            <TextFieldMultiLine
+              id="outlined-multiline-static"
+              placeholder="Like your promise"
+              multiline
+              fullWidth
+              rows="5"
+              margin="normal"
+              variant="outlined"
+              onChange={this.messageAcceptChange}
+            />
+            <IconView>
+              <i className="material-icons">insert_photo</i>
+            </IconView>
+          </div>
+        )}
       </CommonDialog>
     );
   }
