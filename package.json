@@ -13,6 +13,7 @@
     "next": "latest",
     "npm": "^6.10.3",
     "prop-types": "latest",
+    "rc-notification": "^3.3.1",
     "rc-queue-anim": "^1.7.0",
     "react": "latest",
     "react-dnd": "^9.3.4",
