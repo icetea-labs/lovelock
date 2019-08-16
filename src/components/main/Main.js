@@ -15,6 +15,7 @@ import tweb3 from "../../service/tweb3";
 import PromiseConfirm from "./PromiseConfirm";
 import PromiseLeftAccept from "./PromiseLeftAccept";
 import PromiseLeftPending from "./PromiseLeftPending";
+import InputBase from "@material-ui/core/InputBase";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -81,7 +82,7 @@ const RightBox = styled.div`
       display: flex;
       align-items: center;
       .contentEditable {
-        width: 200px;
+        width: 100%;
         height: 19px;
         font-family: Montserrat;
         font-size: 16px;
@@ -319,7 +320,12 @@ class Main extends React.Component {
                   </div>
                   <div className="post_input fl">
                     <div className="contentEditable">
-                      Describe your Memory….
+                      <InputBase
+                        fullWidth
+                        margin="dense"
+                        defaultValue="Describe your Memory…."
+                        inputProps={{ "aria-label": "naked" }}
+                      />
                     </div>
                   </div>
                 </div>
