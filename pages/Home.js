@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 class Home extends PureComponent {
   render() {
-    return <div />;
+    return <div>home</div>;
   }
 }
 

@@ -8,6 +8,9 @@ import Link from "src/Link";
 import styled from "styled-components";
 import { HomeLayout } from "src/components/layout";
 import Main from "src/components/main/Main";
+import Timeline from "src/components/timeline";
+import Authen from "src/components/authen";
+
 import "static/css/style.css";
 import { GlobaLoading } from "src/components/elements/GlobaLoading";
 class index extends Component {
@@ -19,12 +22,16 @@ class index extends Component {
   }
 
   render() {
-    const { isLoading } = this.props;
+    const { isLoading, address } = this.props;
     return (
       <Container maxWidth="xl">
-        <HomeLayout title="Couple Lock">
-          <Main />
-        </HomeLayout>
+        {!address ? (
+          <HomeLayout title="Couple Lock">
+            <Main />
+          </HomeLayout>
+        ) : (
+          <Authen />
+        )}
         {isLoading && <GlobaLoading />}
       </Container>
     );
@@ -32,9 +39,10 @@ class index extends Component {
 }
 
 const mapStateToProps = state => {
-  const { globalData } = state;
+  const { globalData, userInfo } = state;
   return {
-    isLoading: globalData.isLoading
+    isLoading: globalData.isLoading,
+    address: userInfo.address
   };
 };
 
