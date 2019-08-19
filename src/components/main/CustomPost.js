@@ -63,33 +63,21 @@ const Container = styled.div`
     .postAbove {
       display: flex;
       align-items: center;
-      /* justify-content: space-between; */
+      justify-content: space-between;
       float: right;
       margin-top: 5px;
     }
     .picktime {
-      width: 55 %;
+      width: 60%;
     }
   }
 `;
 
-function MaterialUIPickers() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  function handleDateChange(date) {
-    setSelectedDate(date);
-  }
-
+function MaterialUIPickers(props) {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <KeyboardDatePicker
-        disableToolbar
-        variant="inline"
-        format="MM/dd/yyyy"
-        margin="normal"
-        id="date-picker-inline"
-        value={selectedDate}
-        onChange={handleDateChange}
+        {...props}
         KeyboardButtonProps={{
           "aria-label": "change date"
         }}
@@ -102,8 +90,14 @@ class CustomPost extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      smt: ""
+      date: new Date(),
+      file: ""
     };
+  }
+
+  componentDidMount() {
+    const date = new Date();
+    this.setState({ date });
   }
 
   async saveToIpfs(files) {
@@ -127,12 +121,23 @@ class CustomPost extends React.Component {
     event.stopPropagation();
     event.preventDefault();
     const file = event.target.files;
-    console.log("event.target.files", file);
+    // console.log("event.target.files", file);
+    this.setState({ file }, () => this.props.onChange(this.state.date, file));
     // this.saveToIpfs(event.target.files);
+  };
+
+  handleDateChange = date => {
+    const newDate = new Date(date);
+    // console.log("view date", newDate);
+    this.setState({ date: newDate }, () =>
+      this.props.onChange(newDate, this.state.file)
+    );
   };
 
   render() {
     const { avatarShow } = this.props;
+    const { date } = this.state;
+    // console.log("viewState", this.state);
     return (
       <Container>
         <div className="custom_post">
@@ -147,7 +152,15 @@ class CustomPost extends React.Component {
           </div>
           <div className="postAbove">
             <div className="picktime">
-              <MaterialUIPickers />
+              <MaterialUIPickers
+                disableToolbar
+                variant="inline"
+                format="MM/dd/yyyy"
+                margin="normal"
+                id="date-picker-inline"
+                value={date}
+                onChange={this.handleDateChange}
+              />
               {/* <i className="material-icons">today</i> */}
             </div>
             <div className="place-wrapper">
@@ -176,6 +189,7 @@ class CustomPost extends React.Component {
 }
 
 CustomPost.defaultProps = {
+  onChange() {},
   avatarShow: false
 };
 

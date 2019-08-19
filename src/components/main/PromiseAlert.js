@@ -28,7 +28,7 @@ class PromiseAlert extends React.Component {
     const { index } = this.props;
 
     const obj = propose[index];
-    console.log("view obj", obj);
+    // console.log("view obj", obj);
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       const reps = await getTagsInfo(addr);
