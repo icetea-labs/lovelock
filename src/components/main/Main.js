@@ -15,7 +15,11 @@ import tweb3 from "../../service/tweb3";
 import PromiseConfirm from "./PromiseConfirm";
 import PromiseLeftAccept from "./PromiseLeftAccept";
 import PromiseLeftPending from "./PromiseLeftPending";
+<<<<<<< HEAD
 import InputBase from "@material-ui/core/InputBase";
+=======
+// import notifi from "../elements/Notification";
+>>>>>>> 9bcf2744e2c5e0d8e22f49b169a9a5deff8ec6ca
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
