@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import { rem, FlexBox } from "../elements/Common";
+import { rem, FlexBox } from "src/components/elements/Common";
 import Icon from "src/components/elements/Icon";
 import TextField from "@material-ui/core/TextField";
 import { callView, getAccountInfo, getTagsInfo } from "../../helper";
