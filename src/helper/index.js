@@ -1,5 +1,6 @@
 import tweb3 from "../service/tweb3";
 import ipfs from "../service/ipfs";
+import moment from 'moment';
 
 export async function callPure(funcName, params) {
   const resp = await callReadOrPure(funcName, params, "callPureContractMethod");
@@ -99,18 +100,27 @@ export async function saveToIpfs(files) {
   //   .catch(err => {
   //     console.error(err);
   //   });
-  const response = await ipfs.add(fileDetails, options);
-  ipfsId = response[response.length - 1].hash;
-  console.log(ipfsId);
-  // await ipfs
-  //   .add([...files], { progress: prog => console.log(`received: ${prog}`) })
-  //   .then(response => {
-  //     console.log(response);
-  //     ipfsId = response[0].hash;
-  //     console.log(ipfsId);
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //   });
+
+  // upload usung file nam
+  // const response = await ipfs.add(fileDetails, options);
+  // ipfsId = response[response.length - 1].hash;
+  // console.log(ipfsId);
+
+  // simple upload
+  await ipfs
+    .add([...files], { progress: prog => console.log(`received: ${prog}`) })
+    .then(response => {
+      console.log(response);
+      ipfsId = response[0].hash;
+      console.log(ipfsId);
+    })
+    .catch(err => {
+      console.error(err);
+    });
   return ipfsId;
+}
+
+export function TimeWithFormat(props) {
+  const formatValue = props.format ? props.format : "MM/DD/YYYY";
+  return <span>{moment(props.value).format(formatValue)}</span>;
 }

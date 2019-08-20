@@ -4,8 +4,8 @@ const { expect } = require(";");
   @state propose = [];
   @state addressToPropose = {};//1:n
 
-  @view @state memories = [];
-  @view @state proposeToMemories = {}; //1:n
+  @state memories = [];
+  @state proposeToMemories = {}; //1:n
   @view @state memoryToPropose = {}; //1:1
 
   @view @state comments = [];
@@ -69,6 +69,16 @@ const { expect } = require(";");
     return resp
   }
 
+  @view getMemoryByProIndex(proIndex: number) {
+    const memoryPro = this.proposeToMemories[proIndex];
+    let res = []
+    memoryPro.forEach(index => {
+      const mem = this.memories[index]
+      res.push(mem)
+    });
+    return res
+  }
+
   // Change info { img:Array, location:string, date:string }
   @transaction changeInfoPropose(index: number, info: string) {
     const pro = this.propose[index]
@@ -91,9 +101,10 @@ const { expect } = require(";");
   @transaction addMemory(proIndex: number, content: string, info: string) {
     const pro = this.propose[proIndex]
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.")
+    const sender = msg.sender
 
     //new memories
-    const menory = { proIndex, content, info }
+    const menory = { proIndex, content, info, sender }
     const x = this.memories
     const index = x.push(menory) - 1
     this.memories = x

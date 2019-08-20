@@ -208,7 +208,7 @@ class Main extends React.Component {
 
   async loadAllPropose() {
     const { reload } = this.state;
-    const { setPropose, address } = this.props;
+    const { setPropose, address, setCurrentIndex } = this.props;
     // console.log("address", address);
     const allPropose = await callView("getProposeByAddress", [address]);
 
@@ -230,7 +230,10 @@ class Main extends React.Component {
       }
     }
     // console.log("tmp", tmp);
-    this.setState({ proIndex: tmp[0].index });
+    if (tmp.length > 0) {
+      this.setState({ proIndex: tmp[0].index });
+      setCurrentIndex(tmp[0].index);
+    }
   }
 
   renderTag = tag => {
@@ -435,7 +438,7 @@ class Main extends React.Component {
                   Share
                 </button>
               </div>
-              <MessageHistory />
+              <MessageHistory propose={propose} proIndex={proIndex} />
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
@@ -469,6 +472,7 @@ const mapStateToProps = state => {
   const { propose, userInfo } = state;
   return {
     propose: propose.propose,
+    currentIndex: propose.currentProIndex,
     address: userInfo.address
   };
 };
@@ -477,6 +481,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setPropose: value => {
       dispatch(actions.setPropose(value));
+    },
+    setCurrentIndex: value => {
+      dispatch(actions.setCurrentIndex(value));
     }
   };
 };
