@@ -120,8 +120,8 @@ class Promise extends React.Component {
   }
 
   async createPropose(partner, promiseStm, date, file) {
-    // const hash = await this.saveToIpfs(file);
-    const hash = "QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM";
+    const hash = await this.saveToIpfs(file);
+    // const hash = "QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM";
     const ct = tweb3.contract(process.env.contract);
     // const { address } = tweb3.wallet.createAccount();
     let info = {
