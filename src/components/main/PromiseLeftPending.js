@@ -60,6 +60,7 @@ class PromiseLeftPending extends PureComponent {
 
   async loaddata() {
     let { propose, address } = this.props;
+    console.log("check propose", propose);
     let tmp = [];
     if (!propose) propose = [];
     for (let i = 0; i < propose.length; i++) {
@@ -73,6 +74,7 @@ class PromiseLeftPending extends PureComponent {
         tmp.push(obj);
       }
     }
+
     this.setState({ newPropose: tmp });
   }
 

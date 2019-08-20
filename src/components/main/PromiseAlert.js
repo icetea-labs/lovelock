@@ -28,14 +28,14 @@ class PromiseAlert extends React.Component {
     const { index } = this.props;
 
     const obj = propose[index];
-    console.log("view obj", obj);
+    // console.log("view obj", obj);
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       const reps = await getTagsInfo(addr);
       obj.name = reps["display-name"];
       this.setState({
         sender: obj.name,
-        info: obj.info,
+        info: JSON.parse(obj.info),
         content: obj.s_content
       });
     }
@@ -44,6 +44,8 @@ class PromiseAlert extends React.Component {
   render() {
     const { deny, close, accept, index } = this.props;
     const { sender, info, content } = this.state;
+    const hash = info.hash;
+    console.log("view state", this.state);
     return (
       <div>
         <CommonDialog
@@ -57,7 +59,7 @@ class PromiseAlert extends React.Component {
         >
           <TagTitle>{sender} send you a promise</TagTitle>
           <ImgView>
-            <img src="/static/img/promiseAlert.jpeg" className="postImg" />
+            <img src={"https://ipfs.io/ipfs/" + hash} className="postImg" />
           </ImgView>
           <p>{content}</p>
         </CommonDialog>
