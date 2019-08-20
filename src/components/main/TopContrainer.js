@@ -127,9 +127,9 @@ class TopContrainer extends PureComponent {
 
   async loaddata() {
     const { topInfo } = this.state;
-    const { propose, proIndex } = this.props;
+    const { propose, proIndex, setLoading } = this.props;
     let newTopInfor = {};
-
+    setLoading(true);
     if (proIndex >= 0) {
       const obj = propose[proIndex];
       newTopInfor.s_content = obj.s_content;
@@ -162,7 +162,7 @@ class TopContrainer extends PureComponent {
     newTopInfor.s_date = "08/06/2019";
     newTopInfor.r_date = "09/06/2019";
 
-    this.setState({ topInfo: newTopInfor });
+    this.setState({ topInfo: newTopInfor }, setLoading(false));
   }
 
   render() {
@@ -230,6 +230,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setPropose: value => {
       dispatch(actions.setPropose(value));
+    },
+    setLoading: value => {
+      dispatch(actions.setLoading(value));
     }
   };
 };
