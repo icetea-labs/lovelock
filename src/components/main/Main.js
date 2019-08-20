@@ -16,6 +16,7 @@ import PromiseConfirm from "./PromiseConfirm";
 import PromiseLeftAccept from "./PromiseLeftAccept";
 import PromiseLeftPending from "./PromiseLeftPending";
 import InputBase from "@material-ui/core/InputBase";
+import { saveToIpfs, sendTransaction } from "../../helper";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -194,7 +195,10 @@ class Main extends React.Component {
       isDeny: false,
       reload: true,
       proIndex: -1,
-      pendingIndex: -1
+      pendingIndex: -1,
+      date: new Date(),
+      file: "",
+      memoryContent: ""
     };
   }
 
@@ -205,11 +209,28 @@ class Main extends React.Component {
   async loadAllPropose() {
     const { reload } = this.state;
     const { setPropose, address } = this.props;
-    console.log("address", address);
+    // console.log("address", address);
     const allPropose = await callView("getProposeByAddress", [address]);
 
     setPropose(allPropose);
     this.setState({ reload: false });
+
+    let tmp = [];
+    if (!allPropose) allPropose = [];
+
+    for (let i = 0; i < allPropose.length; i++) {
+      const obj = allPropose[i];
+      if (obj.status === 1) {
+        const addr = address === obj.sender ? obj.receiver : obj.sender;
+        const reps = await getTagsInfo(addr);
+        obj.name = reps["display-name"];
+        obj.nick = "@" + reps.username;
+        obj.index = i;
+        tmp.push(obj);
+      }
+    }
+    // console.log("tmp", tmp);
+    this.setState({ proIndex: tmp[0].index });
   }
 
   renderTag = tag => {
@@ -257,6 +278,41 @@ class Main extends React.Component {
     this.setState({ proIndex });
   };
 
+  onChangeCus = (date, file) => {
+    console.log("view Date", date);
+    console.log("view File", file);
+    this.setState({ date, file });
+  };
+
+  statusChange = e => {
+    const value = e.target.value;
+    this.setState({
+      memoryContent: value
+    });
+  };
+
+  async shareMemory(proIndex, memoryContent, date, file) {
+    const hash = await saveToIpfs(file);
+    // const ct = tweb3.contract(process.env.contract);
+    const name = "addMemory";
+    let info = {
+      date: date,
+      hash: hash
+    };
+    info = JSON.stringify(info);
+    // const result = await ct.methods[name](
+    //   proIndex,
+    //   memoryContent,
+    //   info
+    // ).sendCommit();
+    const params = [proIndex, memoryContent, info];
+    const result = await sendTransaction(name, params);
+    console.log("View result", result);
+    if (result) {
+      window.alert("Success");
+    }
+  }
+
   render() {
     const {
       tag,
@@ -266,10 +322,13 @@ class Main extends React.Component {
       isAccept,
       isDeny,
       proIndex,
-      pendingIndex
+      pendingIndex,
+      date,
+      file,
+      memoryContent
     } = this.state;
     const { propose, address } = this.props;
-    // console.log("main state", this.state);
+    console.log("main state", this.state);
     return (
       <main>
         <BannerContainer>
@@ -325,11 +384,12 @@ class Main extends React.Component {
                         margin="dense"
                         defaultValue="Describe your Memory…."
                         inputProps={{ "aria-label": "naked" }}
+                        onChange={this.statusChange}
                       />
                     </div>
                   </div>
                 </div>
-                <CustomPost avatarShow />
+                <CustomPost avatarShow onChange={this.onChangeCus} />
               </div>
 
               <div className="action">
@@ -365,7 +425,13 @@ class Main extends React.Component {
                     </div>
                   </div>
                 </div>
-                <button type="button" disabled="">
+                <button
+                  type="button"
+                  disabled=""
+                  onClick={() => {
+                    this.shareMemory(proIndex, memoryContent, date, file);
+                  }}
+                >
                   Share
                 </button>
               </div>
