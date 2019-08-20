@@ -6,7 +6,6 @@ import { callView, isAliasRegisted, wallet } from 'src/helper';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Icon from '@material-ui/core/Icon';
 import * as acGlobal from 'src/store/actions/globalData';
 import * as actions from 'src/store/actions/create';
 
@@ -30,7 +29,8 @@ class LoginWithMnemonic extends PureComponent {
     super(props);
     this.state = {
       rePassErr: '',
-      username: '',
+      mnemonic: '',
+      password: '',
     };
   }
   componentDidMount() {
@@ -41,52 +41,32 @@ class LoginWithMnemonic extends PureComponent {
   }
   _keydown = e => {
     const { props } = this;
-    e.keyCode === 13 && this.gotoNext();
+    e.keyCode === 13 && this.gotoLogin();
   };
-  gotoNext = async () => {
-    const { username } = this.state;
+  gotoLogin = async () => {
+    const { mnemonic, password } = this.state;
     const { setUsername, setStep, setLoading, setAccount } = this.props;
-
-    if (username) {
-      const resp = await isAliasRegisted(username);
-      if (resp) {
-        this.setState({
-          rePassErr: 'Username already exists! Please choose another',
-        });
-      } else {
-        setLoading(true);
-        setTimeout(async () => {
-          const account = await this._createAccountWithMneomnic();
-          setAccount({
-            privateKey: account.privateKey,
-            mnemonic: account.mnemonic,
-            address: account.address,
-            step: 'inputPassword',
-            username: username,
-          });
-          setLoading(false);
-        }, 500);
-      }
-    } else {
-      this.setState({
-        rePassErr: 'Username is required',
-      });
+    try {
+      console.log('mnemonic', mnemonic);
+      const privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
+      const address = wallet.getAddressFromPrivateKey(privateKey);
+      const account = { address, privateKey, cipher: password };
+      setAccount(account);
+      console.log('account', account);
+    } catch (err) {
+      throw err;
     }
   };
 
-  handleUsername = event => {
-    const username = event.currentTarget.value;
+  handlePassword = event => {
+    const password = event.target.value;
     // console.log(value);
-    this.setState({ username });
+    this.setState({ password });
   };
-  _createAccountWithMneomnic = () => {
-    const resp = wallet.createAccountWithMneomnic();
-    // const keyObject = encode(resp.privateKey, 'a');
-    return {
-      privateKey: resp.privateKey,
-      address: resp.address,
-      mnemonic: resp.mnemonic,
-    };
+  handleMnemonic = () => {
+    const mnemonic = event.target.value;
+    console.log(mnemonic);
+    this.setState({ mnemonic });
   };
   loginWithPrivatekey = () => {
     const { setStep } = this.props;
@@ -105,7 +85,7 @@ class LoginWithMnemonic extends PureComponent {
           multiline
           rows="4"
           className={classes.textField}
-          onChange={this.handleUsername}
+          onChange={this.handleMnemonic}
           margin="normal"
           variant="outlined"
           fullWidth
@@ -120,14 +100,14 @@ class LoginWithMnemonic extends PureComponent {
           error={rePassErr !== ''}
           fullWidth
           margin="normal"
-          onChange={this.handleUsername}
+          onChange={this.handlePassword}
           type="password"
         />
         <DivControlBtnKeystore>
           <Button color="primary" onClick={this.loginWithPrivatekey} className={classes.link}>
             Login with privatekey
           </Button>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoNext}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
             Login
           </Button>
         </DivControlBtnKeystore>

@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import LoginWithMnemonic from './LoginWithMnemonic';
 import LoginWithPrivatekey from './LoginWithPrivatekey';
+import Button from '@material-ui/core/Button';
 
 const DivWallet = styled.div`
   position: relative;
@@ -43,8 +44,8 @@ const RegisterBox = styled.div`
 `;
 const ShadowBox = styled.div`
   width: 100%;
-  /* background: #fff; */
-  background-image: linear-gradient(0deg, #c4dcfc, #c4dcfc);
+  background: #fff;
+  /* background-image: linear-gradient(0deg, #c4dcfc, #c4dcfc); */
   border-radius: 20px;
   box-shadow: 0 0 10px #e4e4e4;
   padding: ${rem(40)} ${rem(54)};
@@ -54,7 +55,7 @@ const ShadowBox = styled.div`
     box-sizing: border-box;
   }
   @media (min-width: 624px) {
-    min-width: ${rem(500)};
+    min-width: ${rem(550)};
   }
 `;
 const WrapperImgPencil = styled.div`

@@ -9,7 +9,7 @@ import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import * as acGlobal from 'src/store/actions/globalData';
 import * as actions from 'src/store/actions/create';
-
+import * as actionsAccount from 'src/store/actions/account';
 import { DivControlBtnKeystore } from 'src/components/elements/Common';
 
 const styles = theme => ({
@@ -30,7 +30,8 @@ class LoginWithPrivatekey extends PureComponent {
     super(props);
     this.state = {
       rePassErr: '',
-      username: '',
+      privateKey: '',
+      password: '',
     };
   }
   componentDidMount() {
@@ -39,54 +40,33 @@ class LoginWithPrivatekey extends PureComponent {
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
+
   _keydown = e => {
     const { props } = this;
-    e.keyCode === 13 && this.gotoNext();
+    e.keyCode === 13 && this.gotoLogin();
   };
-  gotoNext = async () => {
-    const { username } = this.state;
-    const { setUsername, setStep, setLoading, setAccount } = this.props;
 
-    if (username) {
-      const resp = await isAliasRegisted(username);
-      if (resp) {
-        this.setState({
-          rePassErr: 'Username already exists! Please choose another',
-        });
-      } else {
-        setLoading(true);
-        setTimeout(async () => {
-          const account = await this._createAccountWithMneomnic();
-          setAccount({
-            privateKey: account.privateKey,
-            mnemonic: account.mnemonic,
-            address: account.address,
-            step: 'inputPassword',
-            username: username,
-          });
-          setLoading(false);
-        }, 500);
-      }
-    } else {
-      this.setState({
-        rePassErr: 'Username is required',
-      });
+  gotoLogin = async () => {
+    const { privateKey, password } = this.state;
+    const { setUsername, setStep, setLoading, setAccount } = this.props;
+    try {
+      const address = wallet.getAddressFromPrivateKey(privateKey);
+      const account = { address, privateKey, cipher: password };
+      setAccount(account);
+      console.log('account', account);
+    } catch (err) {
+      throw err;
     }
   };
 
-  handleUsername = event => {
-    const username = event.currentTarget.value;
+  handlePassword = event => {
+    const password = event.currentTarget.value;
     // console.log(value);
-    this.setState({ username });
+    this.setState({ password });
   };
-  _createAccountWithMneomnic = () => {
-    const resp = wallet.createAccountWithMneomnic();
-    // const keyObject = encode(resp.privateKey, 'a');
-    return {
-      privateKey: resp.privateKey,
-      address: resp.address,
-      mnemonic: resp.mnemonic,
-    };
+  handlePrivatekey = event => {
+    const privateKey = event.currentTarget.value;
+    this.setState({ privateKey });
   };
   loginWithSeed = () => {
     const { setStep } = this.props;
@@ -106,7 +86,7 @@ class LoginWithPrivatekey extends PureComponent {
           error={rePassErr !== ''}
           fullWidth
           margin="normal"
-          onChange={this.handleUsername}
+          onChange={this.handlePrivatekey}
         />
         <TextField
           id="rePassword"
@@ -116,14 +96,14 @@ class LoginWithPrivatekey extends PureComponent {
           error={rePassErr !== ''}
           fullWidth
           margin="normal"
-          onChange={this.handleUsername}
+          onChange={this.handlePassword}
           type="password"
         />
         <DivControlBtnKeystore>
           <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
             Login with seed
           </Button>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoNext}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
             Login
           </Button>
         </DivControlBtnKeystore>
@@ -148,7 +128,7 @@ const mapDispatchToProps = dispatch => {
     //   dispatch(actions.setPassword(value));
     // },
     setAccount: value => {
-      dispatch(actions.setAccount(value));
+      dispatch(actionsAccount.setAccount(value));
     },
     setStep: value => {
       dispatch(actions.setStep(value));
