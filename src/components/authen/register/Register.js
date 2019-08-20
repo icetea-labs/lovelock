@@ -83,6 +83,9 @@ const StyledLogo = styled.div`
   span {
     margin: 0 ${rem(10)};
   }
+  a {
+    text-decoration: none;
+  }
   cursor: pointer;
 `;
 class Register extends PureComponent {
@@ -104,13 +107,15 @@ class Register extends PureComponent {
               <ShadowBox>
                 <div>
                   <StyledLogo>
-                    <img src="/static/img/logo.svg" alt="itea-scan" />
-                    <span>LoveLock</span>
+                    <a href="/">
+                      <img src="/static/img/logo.svg" alt="itea-scan" />
+                      <span>LoveLock</span>
+                    </a>
                   </StyledLogo>
                   <Title>Register Icetea Account</Title>
                 </div>
-                {step === 'inputUsername' && <RegisterUsername />}
-                {step === 'inputPassword' && <RegisterPassword />}
+                {step === 'one' && <RegisterUsername />}
+                {step === 'two' && <RegisterPassword />}
               </ShadowBox>
             </RegisterBox>
           </DivWallet>

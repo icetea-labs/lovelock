@@ -7,18 +7,18 @@ const initialState = Object.assign(
     cipher: '',
     privateKey: '',
     encryptedData: '',
-  },
-  (function getSessionStorage() {
-    const resp = {};
-    let user = localStorage.getItem('user') || sessionStorage.getItem('user');
+  }
+  // (function getSessionStorage() {
+  //   const resp = {};
+  //   let user = localStorage.getItem('user') || sessionStorage.getItem('user');
 
-    if (user && JSON.parse(user).address) {
-      user = JSON.parse(user);
-      resp.address = user.address;
-      resp.privateKey = user.privateKey;
-    }
-    return resp;
-  })()
+  //   if (user && JSON.parse(user).address) {
+  //     user = JSON.parse(user);
+  //     resp.address = user.address;
+  //     resp.privateKey = user.privateKey;
+  //   }
+  //   return resp;
+  // })()
 );
 
 const account = (state = initialState, action) => {

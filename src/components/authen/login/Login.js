@@ -1,15 +1,10 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'next/router';
 import { rem, FlexBox } from 'src/components/elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import RegisterUsername from './RegisterUsername';
-import RegisterPassword from './RegisterPassword';
-
-// import { Header } from "../../elements/utils";
-// import { PuConfirm, PuShowPrivateKey } from "../../elements";
-// import FooterCus from "../FooterCus";
+import LoginWithMnemonic from './LoginWithMnemonic';
+import LoginWithPrivatekey from './LoginWithPrivatekey';
 
 const DivWallet = styled.div`
   position: relative;
@@ -83,6 +78,9 @@ const StyledLogo = styled.div`
   span {
     margin: 0 ${rem(10)};
   }
+  a {
+    text-decoration: none;
+  }
   cursor: pointer;
 `;
 class Login extends PureComponent {
@@ -96,6 +94,7 @@ class Login extends PureComponent {
 
   render() {
     let { confirmMnemonic, showPrivateKey, privateKey, step } = this.props;
+    console.log('step', step);
     return (
       <div>
         <QueueAnim delay={200} type={['top', 'bottom']}>
@@ -104,13 +103,16 @@ class Login extends PureComponent {
               <ShadowBox>
                 <div>
                   <StyledLogo>
-                    <img src="/static/img/logo.svg" alt="itea-scan" />
-                    <span>LoveLock</span>
+                    <a href="/">
+                      <img src="/static/img/logo.svg" alt="itea-scan" />
+                      <span>LoveLock</span>
+                    </a>
                   </StyledLogo>
-                  <Title>Login Icetea Account</Title>
+
+                  <Title>Sign In</Title>
                 </div>
-                {step === 'inputUsername' && <RegisterUsername />}
-                {step === 'inputPassword' && <RegisterPassword />}
+                {step === 'one' && <LoginWithPrivatekey />}
+                {step === 'two' && <LoginWithMnemonic />}
               </ShadowBox>
             </RegisterBox>
           </DivWallet>

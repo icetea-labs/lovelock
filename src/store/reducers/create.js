@@ -5,7 +5,7 @@ const initialState = {
   address: '',
   privateKey: '',
   keyStore: '',
-  step: 'inputUsername',
+  step: 'one',
   username: '',
   mnemonic: '',
   keyStoreText: '',

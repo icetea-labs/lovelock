@@ -129,7 +129,7 @@ class RegisterPassword extends PureComponent {
 
   gotoBack = () => {
     const { setStep } = this.props;
-    setStep('inputUsername');
+    setStep('one');
   };
   render() {
     const { rePassErr, showPassword, password, selectedDate, sex } = this.state;
@@ -176,7 +176,7 @@ class RegisterPassword extends PureComponent {
           <TextField
             id="rePassword"
             label="Confirm Password"
-            placeholder="Confirm your Password"
+            placeholder="Confirm your password"
             helperText={rePassErr}
             error={rePassErr !== ''}
             fullWidth

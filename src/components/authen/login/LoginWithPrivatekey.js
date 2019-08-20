@@ -25,7 +25,7 @@ const styles = theme => ({
   },
 });
 
-class RegisterUsername extends PureComponent {
+class LoginWithPrivatekey extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -61,7 +61,7 @@ class RegisterUsername extends PureComponent {
             privateKey: account.privateKey,
             mnemonic: account.mnemonic,
             address: account.address,
-            step: 'two',
+            step: 'inputPassword',
             username: username,
           });
           setLoading(false);
@@ -88,6 +88,10 @@ class RegisterUsername extends PureComponent {
       mnemonic: resp.mnemonic,
     };
   };
+  loginWithSeed = () => {
+    const { setStep } = this.props;
+    setStep('two');
+  };
   render() {
     const { rePassErr } = this.state;
     const { classes } = this.props;
@@ -96,21 +100,31 @@ class RegisterUsername extends PureComponent {
       <div>
         <TextField
           id="username"
-          label="Username"
-          placeholder="Enter your username"
+          label="Privatekey"
+          placeholder="Enter your private key"
           helperText={rePassErr}
           error={rePassErr !== ''}
           fullWidth
           margin="normal"
           onChange={this.handleUsername}
         />
+        <TextField
+          id="rePassword"
+          label="Password"
+          placeholder="Enter your password"
+          helperText={rePassErr}
+          error={rePassErr !== ''}
+          fullWidth
+          margin="normal"
+          onChange={this.handleUsername}
+          type="password"
+        />
         <DivControlBtnKeystore>
-          <Button color="primary" href="/login" className={classes.link}>
-            Login
+          <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
+            Login with seed
           </Button>
           <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoNext}>
-            Next
-            <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
+            Login
           </Button>
         </DivControlBtnKeystore>
       </div>
@@ -149,5 +163,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(RegisterUsername)
+  )(LoginWithPrivatekey)
 );
