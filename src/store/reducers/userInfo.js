@@ -1,18 +1,18 @@
-import { actionTypes } from "../actions/userInfo";
+import { actionTypes } from '../actions/userInfo';
 
 const initialState = {
-  address: process.env.address1,
-  username: "hoanghuy",
-  displayname: "anonymous",
-  avata: "",
-  avatarLarge: "",
-  aboutMe: ""
+  address: 'teat18yj3x5rpujk8dxjvxx7eamwznn9vl7sygph2ta',
+  username: 'hoanghuy',
+  displayname: 'anonymous',
+  avata: '',
+  avatarLarge: '',
+  aboutMe: '',
 };
 const userInfo = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_USER_INFO:
       return Object.assign({}, state, {
-        ...action.data
+        ...action.data,
       });
     default:
       return state;
