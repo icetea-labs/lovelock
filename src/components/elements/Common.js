@@ -40,6 +40,7 @@ export const FlexBox = styled.div`
   flex: ${props => props.flex};
   padding: ${props => props.padding};
   height: ${props => props.height};
+  width: ${props => props.width};
   flex-wrap: ${props => props.wrap};
   margin: ${props => props.margin};
   margin-top: ${props => props.marginTop};
@@ -102,3 +103,74 @@ export const LayoutDisplay = styled.div`
   z-index: 1100;
   background: rgba(0, 0, 0, 0.4);
 `;
+
+export const Header2 = styled.div`
+  font-size: 16px;
+  color: #848e9c;
+  margin: 40px 0 20px;
+  font-weight: bold;
+  span {
+    font-size: 16px;
+  }
+  .totalPage {
+    color: #eaecef;
+  }
+  .title {
+    font-size: 18px;
+    color: #48515d;
+    margin-left: 8px;
+  }
+`;
+export const DivControlBtnKeystore = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px 0 0 0;
+  font-size: 14px;
+  width: 100%; /*add*/
+  @media (min-width: 320px) and (max-width: 623px) {
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    height: 70px;
+    .previous-button {
+      order: 1;
+    }
+    .download-keystore {
+      order: 0;
+      margin-top: 20px;
+    }
+  }
+`;
+export const DivUnlockLink = styled.div`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #15b5dd;
+  i {
+    margin-right: 10px;
+  }
+`;
+const IconBase = styled.i`
+  color: ${props => props.color};
+  font-size: ${props => "".concat(props.size, "px")};
+  &:hover {
+    color: ${props => (props.hoverColor ? props.hoverColor : props.color)};
+  }
+`;
+export const Icon = props => {
+  const { size, color, type, hoverColor } = props;
+  return (
+    <IconBase
+      className={"iconfont icon-".concat(type)}
+      size={size || "16px"}
+      color={color}
+      hoverColor={hoverColor}
+    />
+  );
+};
+Icon.defaultProps = {
+  size: 16,
+  color: "",
+  hoverColor: ""
+};

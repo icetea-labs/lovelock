@@ -1,8 +1,11 @@
 import React, { PureComponent } from "react";
 import styled from "styled-components";
 import { withRouter } from "next/router";
+import { rem, FlexBox } from "src/components/elements/Common";
 import { connect } from "react-redux";
 import QueueAnim from "rc-queue-anim";
+import RegisterUsername from "./RegisterUsername";
+import RegisterPassword from "./RegisterPassword";
 // import * as actions from "../../../store/actions/create";
 // import { theme, zIndex } from './../../../constants/Styles';
 // import NewWallet01 from "./NewWallet01";
@@ -14,7 +17,6 @@ import QueueAnim from "rc-queue-anim";
 
 // import { Header } from "../../elements/utils";
 // import { PuConfirm, PuShowPrivateKey } from "../../elements";
-import InputPassword from "../../elements/InputPassword";
 // import FooterCus from "../FooterCus";
 
 const DivWallet = styled.div`
@@ -54,16 +56,18 @@ const RegisterBox = styled.div`
 `;
 const ShadowBox = styled.div`
   width: 100%;
-  background: #fff;
+  /* background: #fff; */
+  background-image: linear-gradient(0deg, #c4dcfc, #c4dcfc);
+  border-radius: 20px;
   box-shadow: 0 0 10px #e4e4e4;
-  padding: 40px 54px;
+  padding: ${rem(40)} ${rem(54)};
   @media (min-width: 320px) and (max-width: 623px) {
     box-shadow: none;
     padding: 5px 20px;
     box-sizing: border-box;
   }
   @media (min-width: 624px) {
-    width: 500px;
+    min-width: ${rem(500)};
   }
 `;
 const WrapperImgPencil = styled.div`
@@ -75,15 +79,20 @@ const WrapperImgPencil = styled.div`
     margin-bottom: 20px;
   }
 `;
-export const Header = styled.div`
-  font-size: 24px;
-  font-weight: bold;
-  margin-top: 10px;
-  padding-bottom: 18px;
-  text-align: center;
-  /* font-family: DIN; */
+const Title = styled.div`
+  font-size: ${rem(20)};
+  /* font-weight: bold; */
+  margin-top: ${rem(10)};
 `;
-
+const StyledLogo = styled.div`
+  font-size: ${rem(20)};
+  display: flex;
+  align-items: center;
+  span {
+    margin: 0 ${rem(10)};
+  }
+  cursor: pointer;
+`;
 class Register extends PureComponent {
   _closeModal = () => {};
 
@@ -102,11 +111,15 @@ class Register extends PureComponent {
             <RegisterBox>
               <ShadowBox>
                 <div>
-                  <Header>Regiter</Header>
+                  <StyledLogo>
+                    <img src="/static/img/logo.svg" alt="itea-scan" />
+                    <span>LoveLock</span>
+                  </StyledLogo>
+                  <Title>Register Icetea Account</Title>
                 </div>
-                {/* {step === "success" && <NewWallet05 />} */}
+                {step === "inputUsername" && <RegisterUsername />}
+                {step === "inputPassword" && <RegisterPassword />}
               </ShadowBox>
-              <InputPassword />
             </RegisterBox>
           </DivWallet>
         </QueueAnim>
@@ -132,7 +145,15 @@ class Register extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  return {};
+  const e = state.create;
+  return {
+    password: e.password,
+    step: e.step,
+    privateKey: e.privateKey,
+    keyStoreText: e.keyStoreText,
+    showPrivateKey: e.showPrivateKey,
+    confirmMnemonic: e.confirmMnemonic
+  };
 };
 
 // const mapDispatchToProps = (dispatch) => {

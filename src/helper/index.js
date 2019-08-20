@@ -82,3 +82,16 @@ export async function getTagsInfo(address) {
     return {};
   }
 }
+export async function isAliasRegisted(username) {
+  try {
+    const alias = "account.".concat(username);
+    const info = await tweb3
+      .contract("system.alias")
+      .methods.resolve(alias)
+      .call();
+    return info;
+  } catch (err) {
+    console.log(tryStringifyJson(err));
+    throw err;
+  }
+}

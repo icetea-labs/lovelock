@@ -6,6 +6,7 @@ const initialState = {
   privateKey: "",
   keyStore: "",
   step: "inputPassword",
+  username: "",
   mnemonic: "",
   keyStoreText: "",
   showPrivateKey: false,
@@ -17,6 +18,10 @@ function create(state = initialState, action) {
     case actionTypes.SET_PASSWORD:
       return Object.assign({}, state, {
         password: action.password
+      });
+    case actionTypes.SET_USERNAME:
+      return Object.assign({}, state, {
+        password: action.username
       });
     case actionTypes.SET_STEP:
       return Object.assign({}, state, {
