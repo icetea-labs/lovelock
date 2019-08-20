@@ -1,7 +1,7 @@
-import React, { PureComponent } from "react";
-import Button from "@material-ui/core/Button";
-import styled from "styled-components";
-import Link from "src/Link";
+import React, { PureComponent } from 'react';
+import Button from '@material-ui/core/Button';
+import styled from 'styled-components';
+import Link from 'src/Link';
 
 const Wrapper = styled.div`
   display: flex;
@@ -17,37 +17,29 @@ class Authen extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      step: "default"
+      step: 'default',
     };
   }
 
   goLogin = () => {
-    this.setState({ step: "login" });
+    this.setState({ step: 'login' });
   };
 
   goRegister = () => {
-    this.setState({ step: "register" });
+    this.setState({ step: 'register' });
   };
 
   renderDefault = () => {
     return (
       <React.Fragment>
-        <Button
-          size="large"
-          color="primary"
-          variant="contained"
-          // onClick={this.goLogin}
-          href="/login"
-        >
+        <Button size="large" color="primary" variant="contained" href="/login">
           Login
         </Button>
-        <Button
-          size="large"
-          color="primary"
-          variant="contained"
-          href="/register"
-        >
+        <Button size="large" color="primary" variant="contained" href="/register">
           Singup
+        </Button>
+        <Button size="large" color="primary" variant="contained" href="/timeline">
+          Timeline
         </Button>
       </React.Fragment>
     );
@@ -56,7 +48,7 @@ class Authen extends PureComponent {
   render() {
     const { step } = this.state;
 
-    return <Wrapper>{step === "default" && this.renderDefault()}</Wrapper>;
+    return <Wrapper>{step === 'default' && this.renderDefault()}</Wrapper>;
   }
 }
 

@@ -5,7 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import CustomPost from "./CustomPost";
 import CommonDialog from "./CommonDialog";
 import tweb3 from "../../service/tweb3";
-import ipfs from "../../service/ipfs";
+import { saveToIpfs } from "../../helper";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -80,47 +80,8 @@ class Promise extends React.Component {
     this.setState({ date, file });
   };
 
-  async saveToIpfs(files) {
-    const file = [...files][0];
-    let ipfsId;
-    const fileDetails = {
-      path: file.name,
-      content: file
-    };
-    const options = {
-      wrapWithDirectory: true,
-      progress: prog => console.log(`received: ${prog}`)
-    };
-    console.log("fileDetails", fileDetails);
-    //ipfs
-    //   .add(fileDetails, options)
-    //   .then(response => {
-    //     console.log(response);
-    //     // CID of wrapping directory is returned last
-    //     ipfsId = response[response.length - 1].hash;
-    //     console.log(ipfsId);
-    //   })
-    //   .catch(err => {
-    //     console.error(err);
-    //   });
-    const response = await ipfs.add(fileDetails, options);
-    ipfsId = response[response.length - 1].hash;
-    console.log(ipfsId);
-    // await ipfs
-    //   .add([...files], { progress: prog => console.log(`received: ${prog}`) })
-    //   .then(response => {
-    //     console.log(response);
-    //     ipfsId = response[0].hash;
-    //     console.log(ipfsId);
-    //   })
-    //   .catch(err => {
-    //     console.error(err);
-    //   });
-    return ipfsId;
-  }
-
   async createPropose(partner, promiseStm, date, file) {
-    const hash = await this.saveToIpfs(file);
+    const hash = await saveToIpfs(file);
     // const hash = "QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM";
     const ct = tweb3.contract(process.env.contract);
     // const { address } = tweb3.wallet.createAccount();

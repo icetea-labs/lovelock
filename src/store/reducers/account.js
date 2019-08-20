@@ -3,9 +3,9 @@ import { actionTypes } from '../actions/account';
 const initialState = Object.assign(
   {
     needAuth: false,
-    address: '',
+    address: 'teat18yj3x5rpujk8dxjvxx7eamwznn9vl7sygph2ta',
     cipher: '',
-    privateKey: '',
+    privateKey: 'Cxz9qGX13Y2qzCKjSbaE8vmJZ5nNDqV5XDTKSfY8K3hC',
     encryptedData: '',
   }
   // (function getSessionStorage() {

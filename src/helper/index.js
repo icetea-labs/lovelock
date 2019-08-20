@@ -1,4 +1,6 @@
-import tweb3 from '../service/tweb3';
+import tweb3 from "../service/tweb3";
+import ipfs from "../service/ipfs";
+import moment from 'moment';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
@@ -32,21 +34,15 @@ async function callReadOrPure(funcName, params, method) {
   }
 }
 
-export async function sendTransaction(func) {
-  const { address } = this.props;
-  const { answers, loading, params_value, account } = this.state;
-  const signers = account.address;
-  // console.log('params_value', params_value);
+export async function sendTransaction(funcName, params) {
+  // const { address } = this.props;
+  console.log("params", params);
   try {
-    const ct = tweb3.contract(address);
-    const result = await ct.methods[func.name](...(params_value[func.name] || [])).sendCommit({ signers });
-    answers[func.name] = formatResult(result);
+    const ct = tweb3.contract(process.env.contract);
+    const result = await ct.methods[funcName](...(params || [])).sendCommit();
+    return result;
   } catch (error) {
     console.log(error);
-    answers[func.name] = formatResult(error, true);
-  } finally {
-    loading[func.name] = false;
-    this.setState({ answers, loading });
   }
 }
 export function tryStringifyJson(p, replacer = undefined, space = 2) {
@@ -80,6 +76,54 @@ export async function getTagsInfo(address) {
   } else {
     return {};
   }
+}
+
+export async function saveToIpfs(files) {
+  const file = [...files][0];
+  let ipfsId;
+  const fileDetails = {
+    path: file.name,
+    content: file
+  };
+  const options = {
+    wrapWithDirectory: true,
+    progress: prog => console.log(`received: ${prog}`)
+  };
+  console.log("fileDetails", fileDetails);
+  //ipfs
+  //   .add(fileDetails, options)
+  //   .then(response => {
+  //     console.log(response);
+  //     // CID of wrapping directory is returned last
+  //     ipfsId = response[response.length - 1].hash;
+  //     console.log(ipfsId);
+  //   })
+  //   .catch(err => {
+  //     console.error(err);
+  //   });
+
+  // upload usung file nam
+  // const response = await ipfs.add(fileDetails, options);
+  // ipfsId = response[response.length - 1].hash;
+  // console.log(ipfsId);
+
+  // simple upload
+  await ipfs
+    .add([...files], { progress: prog => console.log(`received: ${prog}`) })
+    .then(response => {
+      console.log(response);
+      ipfsId = response[0].hash;
+      console.log(ipfsId);
+    })
+    .catch(err => {
+      console.error(err);
+    });
+  return ipfsId;
+}
+
+export function TimeWithFormat(props) {
+  const formatValue = props.format ? props.format : "MM/DD/YYYY";
+  return <span>{moment(props.value).format(formatValue)}</span>;
 }
 export async function isAliasRegisted(username) {
   try {
