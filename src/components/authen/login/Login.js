@@ -46,6 +46,7 @@ const ShadowBox = styled.div`
   width: 100%;
   background: #fff;
   /* background-image: linear-gradient(0deg, #c4dcfc, #c4dcfc); */
+  border: 1px solid #dee2e6 !important;
   border-radius: 20px;
   box-shadow: 0 0 10px #e4e4e4;
   padding: ${rem(40)} ${rem(54)};
