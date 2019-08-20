@@ -1,20 +1,14 @@
-import React, { PureComponent } from "react";
-import styled from "styled-components";
-import { withRouter } from "next/router";
-import { connect } from "react-redux";
-import QueueAnim from "rc-queue-anim";
-// import * as actions from "../../../store/actions/create";
-// import { theme, zIndex } from './../../../constants/Styles';
-// import NewWallet01 from "./NewWallet01";
-// import NewWallet02 from "./NewWallet02";
-// import NewWallet03 from "./NewWallet03";
-// import NewWallet04 from "./NewWallet04";
-// import NewWallet05 from "./NewWallet05";
-// import pencil from "../../../assets/img/pencil.svg";
+import React, { PureComponent } from 'react';
+import styled from 'styled-components';
+import { withRouter } from 'next/router';
+import { rem, FlexBox } from 'src/components/elements/Common';
+import { connect } from 'react-redux';
+import QueueAnim from 'rc-queue-anim';
+import RegisterUsername from './RegisterUsername';
+import RegisterPassword from './RegisterPassword';
 
 // import { Header } from "../../elements/utils";
 // import { PuConfirm, PuShowPrivateKey } from "../../elements";
-import InputPassword from "../../elements/InputPassword";
 // import FooterCus from "../FooterCus";
 
 const DivWallet = styled.div`
@@ -40,7 +34,7 @@ const DivLogo = styled.div`
     width: 80px;
   }
 `;
-const DivBox1 = styled.div`
+const RegisterBox = styled.div`
   position: absolute;
   top: 130px;
   left: 50%;
@@ -52,18 +46,20 @@ const DivBox1 = styled.div`
     width: 100%;
   }
 `;
-const DivBox2 = styled.div`
+const ShadowBox = styled.div`
   width: 100%;
-  background: #fff;
+  /* background: #fff; */
+  background-image: linear-gradient(0deg, #c4dcfc, #c4dcfc);
+  border-radius: 20px;
   box-shadow: 0 0 10px #e4e4e4;
-  padding: 40px 54px;
+  padding: ${rem(40)} ${rem(54)};
   @media (min-width: 320px) and (max-width: 623px) {
     box-shadow: none;
     padding: 5px 20px;
     box-sizing: border-box;
   }
   @media (min-width: 624px) {
-    width: 500px;
+    min-width: ${rem(500)};
   }
 `;
 const WrapperImgPencil = styled.div`
@@ -75,15 +71,20 @@ const WrapperImgPencil = styled.div`
     margin-bottom: 20px;
   }
 `;
-export const Header = styled.div`
-  font-size: 24px;
-  font-weight: bold;
-  margin-top: 10px;
-  padding-bottom: 18px;
-  text-align: center;
-  /* font-family: DIN; */
+const Title = styled.div`
+  font-size: ${rem(20)};
+  /* font-weight: bold; */
+  margin-top: ${rem(10)};
 `;
-
+const StyledLogo = styled.div`
+  font-size: ${rem(20)};
+  display: flex;
+  align-items: center;
+  span {
+    margin: 0 ${rem(10)};
+  }
+  cursor: pointer;
+`;
 class Login extends PureComponent {
   _closeModal = () => {};
 
@@ -95,33 +96,28 @@ class Login extends PureComponent {
 
   render() {
     let { confirmMnemonic, showPrivateKey, privateKey, step } = this.props;
-    // console.log('00-step', showPrivateKey);
     return (
-      // <ThemeProvider theme={ theme }>
       <div>
-        <QueueAnim delay={200} type={["top", "bottom"]}>
+        <QueueAnim delay={200} type={['top', 'bottom']}>
           <DivWallet key={1}>
-            <DivBox1>
-              <DivBox2>
+            <RegisterBox>
+              <ShadowBox>
                 <div>
-                  <Header>Regiter</Header>
+                  <StyledLogo>
+                    <img src="/static/img/logo.svg" alt="itea-scan" />
+                    <span>LoveLock</span>
+                  </StyledLogo>
+                  <Title>Login Icetea Account</Title>
                 </div>
-                {/* {step === "success" && <NewWallet05 />} */}
-              </DivBox2>
-              <InputPassword />
-            </DivBox1>
+                {step === 'inputUsername' && <RegisterUsername />}
+                {step === 'inputPassword' && <RegisterPassword />}
+              </ShadowBox>
+            </RegisterBox>
           </DivWallet>
         </QueueAnim>
-        {showPrivateKey && (
-          <PuShowPrivateKey privateKey={privateKey} close={this._closeModal} />
-        )}
+        {showPrivateKey && <PuShowPrivateKey privateKey={privateKey} close={this._closeModal} />}
         {confirmMnemonic && (
-          <PuConfirm
-            okText="Yes"
-            cancelText="Go Back"
-            confirm={this._continue}
-            cancel={this._hide}
-          >
+          <PuConfirm okText="Yes" cancelText="Go Back" confirm={this._continue} cancel={this._hide}>
             <WrapperImgPencil>
               <img src={pencil} alt="" />
               <p>Are you sure you have noted down your Mnemonic Phrase?</p>
@@ -129,13 +125,20 @@ class Login extends PureComponent {
           </PuConfirm>
         )}
       </div>
-      // </ThemeProvider>
     );
   }
 }
 
 const mapStateToProps = state => {
-  return {};
+  const e = state.create;
+  return {
+    password: e.password,
+    step: e.step,
+    privateKey: e.privateKey,
+    keyStoreText: e.keyStoreText,
+    showPrivateKey: e.showPrivateKey,
+    confirmMnemonic: e.confirmMnemonic,
+  };
 };
 
 // const mapDispatchToProps = (dispatch) => {

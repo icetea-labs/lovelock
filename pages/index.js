@@ -1,18 +1,18 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import Container from "@material-ui/core/Container";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import MuiLink from "@material-ui/core/Link";
-import Link from "src/Link";
-import styled from "styled-components";
-import { HomeLayout } from "src/components/layout";
-import Main from "src/components/main/Main";
-import Timeline from "src/components/timeline";
-import Authen from "src/components/authen";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import Container from '@material-ui/core/Container';
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import MuiLink from '@material-ui/core/Link';
+import Link from 'src/Link';
+import styled from 'styled-components';
+import { HomeLayout } from 'src/components/layout';
+import Main from 'src/components/main/Main';
+import Timeline from 'src/components/timeline';
+import Authen from 'src/components/authen';
 
-import "static/css/style.css";
-import { GlobaLoading } from "src/components/elements/GlobaLoading";
+import 'static/css/style.css';
+import { GlobaLoading } from 'src/components/elements/GlobaLoading';
 class index extends Component {
   static getInitialProps({ reduxStore, req }) {
     // const isServer = !!req;
@@ -42,7 +42,7 @@ const mapStateToProps = state => {
   const { globalData, userInfo } = state;
   return {
     isLoading: globalData.isLoading,
-    address: userInfo.address
+    address: userInfo.address,
   };
 };
 

@@ -2,13 +2,14 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import tweb3 from 'src/service/tweb3';
-import { callView, isAliasRegisted, getTagsInfo } from 'src/helper';
+import { callView, isAliasRegisted, registerAlias } from 'src/helper';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import * as acGlobal from 'src/store/actions/globalData';
 import * as actions from 'src/store/actions/create';
+import * as actionsAccount from 'src/store/actions/account';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import IconButton from '@material-ui/core/IconButton';
@@ -55,6 +56,7 @@ const WrapperLeftBox = styled.div`
   }
   i {
     margin: 0 ${rem(7)};
+    cursor: pointer;
   }
   code {
     word-break: break-word;
@@ -68,7 +70,7 @@ const WrapperLeftBox = styled.div`
     margin: ${rem(20)} 0;
     font-style: italic;
     color: red;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 400;
   }
 `;
@@ -78,7 +80,6 @@ class RegisterPassword extends PureComponent {
     super(props);
     this.state = {
       rePassErr: '',
-      username: '',
       password: '',
       showPassword: false,
       selectedDate: new Date(),
@@ -93,34 +94,22 @@ class RegisterPassword extends PureComponent {
   }
   _keydown = e => {
     const { props } = this;
-    e.keyCode === 13 && this.gotoNext();
+    e.keyCode === 13 && this.gotoRegister();
   };
-  gotoNext = async () => {
-    const { username } = this.state;
-    const { setUsername, setStep } = this.props;
-
-    if (username) {
-      const resp = await isAliasRegisted(username);
-      if (resp) {
-        this.setState({
-          rePassErr: 'Username already exists! Please choose another',
-        });
-      } else {
-        setUsername(username);
-        setStep('inputPassword');
-      }
-    } else {
-      this.setState({
-        rePassErr: 'Username is required',
-      });
+  gotoRegister = async () => {
+    const { password } = this.state;
+    const { setUsername, setStep, username, address, privateKey } = this.props;
+    console.log('username', username, address);
+    const resp = await registerAlias(username, address, privateKey);
+    if (resp) {
+      const account = { address, privateKey, cipher: password };
+      setAccount(account);
+      localStorage.removeItem('user');
+      localStorage.setItem('user', JSON.stringify({ address, privateKey }));
     }
+    console.log('resp', resp);
   };
 
-  handleUsername = event => {
-    const username = event.currentTarget.value;
-    // console.log(value);
-    this.setState({ username });
-  };
   handlePassword = event => {
     const password = event.target.value;
     // console.log(value);
@@ -144,7 +133,7 @@ class RegisterPassword extends PureComponent {
   };
   render() {
     const { rePassErr, showPassword, password, selectedDate, sex } = this.state;
-    const { classes } = this.props;
+    const { classes, address, privateKey, mnemonic, username } = this.props;
 
     return (
       <FlexBox wrap="wrap" width="900px">
@@ -152,17 +141,17 @@ class RegisterPassword extends PureComponent {
           <WrapperLeftBox>
             <p className="titleKey">Address:</p>
             <FlexBox justify="space-between">
-              <code>0xbc9a72ae3a7ecfdb27a419f8269daeff19271366</code>
+              <code>{address}</code>
               <i className="material-icons">file_copy</i>
             </FlexBox>
             <p className="titleKey">Private key:</p>
             <FlexBox justify="space-between">
-              <code>286d9c217c0a9a89c47123b665098f0e47a42b5e06d22f0fa3e30872e87184a7</code>
+              <code>{privateKey}</code>
               <i className="material-icons">file_copy</i>
             </FlexBox>
             <p className="titleKey">Mnemonic phrase:</p>
             <FlexBox justify="space-between">
-              <code>current hurdle siege mango link obey roof voice weasel quality secret dentist</code>
+              <code>{mnemonic}</code>
               <i className="material-icons">file_copy</i>
             </FlexBox>
             <p className="txNote">
@@ -172,7 +161,7 @@ class RegisterPassword extends PureComponent {
           </WrapperLeftBox>
         </FlexWidthBox>
         <FlexWidthBox width="40%">
-          <TextField id="username" label="Username" value="hoanghuy" disabled fullWidth margin="normal" />
+          <TextField id="username" label="Username" value={username} disabled fullWidth margin="normal" />
           <TextField
             id="password"
             label="Password"
@@ -225,7 +214,7 @@ class RegisterPassword extends PureComponent {
           <Button color="primary" className={classes.link} onClick={this.gotoBack}>
             Back
           </Button>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoNext}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoRegister}>
             Register
           </Button>
         </DivControlBtnKeystore>
@@ -235,22 +224,24 @@ class RegisterPassword extends PureComponent {
 }
 
 const mapStateToProps = state => {
+  const e = state.create;
   return {
-    password: state.create.password,
+    username: e.username,
+    password: e.password,
+    privateKey: e.privateKey,
+    address: e.address,
+    mnemonic: e.mnemonic,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    setUsername: value => {
-      dispatch(actions.setUsername(value));
-    },
     // setPassword: value => {
     //   dispatch(actions.setPassword(value));
     // },
-    // setAccount: value => {
-    //   dispatch(actions.setAccount(value));
-    // },
+    setAccount: value => {
+      dispatch(actionsAccount.setAccount(value));
+    },
     setStep: value => {
       dispatch(actions.setStep(value));
     },

@@ -1,19 +1,11 @@
-import React, { PureComponent } from "react";
-import styled from "styled-components";
-import { withRouter } from "next/router";
-import { rem, FlexBox } from "src/components/elements/Common";
-import { connect } from "react-redux";
-import QueueAnim from "rc-queue-anim";
-import RegisterUsername from "./RegisterUsername";
-import RegisterPassword from "./RegisterPassword";
-// import * as actions from "../../../store/actions/create";
-// import { theme, zIndex } from './../../../constants/Styles';
-// import NewWallet01 from "./NewWallet01";
-// import NewWallet02 from "./NewWallet02";
-// import NewWallet03 from "./NewWallet03";
-// import NewWallet04 from "./NewWallet04";
-// import NewWallet05 from "./NewWallet05";
-// import pencil from "../../../assets/img/pencil.svg";
+import React, { PureComponent } from 'react';
+import styled from 'styled-components';
+import { withRouter } from 'next/router';
+import { rem, FlexBox } from 'src/components/elements/Common';
+import { connect } from 'react-redux';
+import QueueAnim from 'rc-queue-anim';
+import RegisterUsername from './RegisterUsername';
+import RegisterPassword from './RegisterPassword';
 
 // import { Header } from "../../elements/utils";
 // import { PuConfirm, PuShowPrivateKey } from "../../elements";
@@ -106,7 +98,7 @@ class Register extends PureComponent {
     let { confirmMnemonic, showPrivateKey, privateKey, step } = this.props;
     return (
       <div>
-        <QueueAnim delay={200} type={["top", "bottom"]}>
+        <QueueAnim delay={200} type={['top', 'bottom']}>
           <DivWallet key={1}>
             <RegisterBox>
               <ShadowBox>
@@ -117,22 +109,15 @@ class Register extends PureComponent {
                   </StyledLogo>
                   <Title>Register Icetea Account</Title>
                 </div>
-                {step === "inputUsername" && <RegisterUsername />}
-                {step === "inputPassword" && <RegisterPassword />}
+                {step === 'inputUsername' && <RegisterUsername />}
+                {step === 'inputPassword' && <RegisterPassword />}
               </ShadowBox>
             </RegisterBox>
           </DivWallet>
         </QueueAnim>
-        {showPrivateKey && (
-          <PuShowPrivateKey privateKey={privateKey} close={this._closeModal} />
-        )}
+        {showPrivateKey && <PuShowPrivateKey privateKey={privateKey} close={this._closeModal} />}
         {confirmMnemonic && (
-          <PuConfirm
-            okText="Yes"
-            cancelText="Go Back"
-            confirm={this._continue}
-            cancel={this._hide}
-          >
+          <PuConfirm okText="Yes" cancelText="Go Back" confirm={this._continue} cancel={this._hide}>
             <WrapperImgPencil>
               <img src={pencil} alt="" />
               <p>Are you sure you have noted down your Mnemonic Phrase?</p>
@@ -152,7 +137,7 @@ const mapStateToProps = state => {
     privateKey: e.privateKey,
     keyStoreText: e.keyStoreText,
     showPrivateKey: e.showPrivateKey,
-    confirmMnemonic: e.confirmMnemonic
+    confirmMnemonic: e.confirmMnemonic,
   };
 };
 
