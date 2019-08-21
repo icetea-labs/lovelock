@@ -297,9 +297,10 @@ class Main extends React.Component {
 
   handlerSelectPropose = proIndex => {
     // console.log('proIndex', proIndex);
-    const { setCurrentIndex } = this.props;
+    const { setCurrentIndex, setMemory } = this.props;
     this.setState({ proIndex });
     setCurrentIndex(proIndex);
+    this.loadMemory(proIndex);
   };
 
   onChangeCus = (date, file) => {
