@@ -52,6 +52,9 @@ class LoginWithMnemonic extends PureComponent {
       const address = wallet.getAddressFromPrivateKey(privateKey);
       const account = { address, privateKey, cipher: password };
       setAccount(account);
+      localStorage.setItem('user', JSON.stringify(account));
+      // Router.push('/timeline');
+      window.location.pathname = '/timeline';
       console.log('account', account);
     } catch (err) {
       throw err;
