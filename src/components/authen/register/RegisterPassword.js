@@ -19,6 +19,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Router from 'next/router';
 
 import { DivControlBtnKeystore, FlexBox, FlexWidthBox, rem } from 'src/components/elements/Common';
 // import "date-fns";
@@ -98,14 +99,16 @@ class RegisterPassword extends PureComponent {
   };
   gotoRegister = async () => {
     const { password } = this.state;
-    const { setUsername, setStep, username, address, privateKey } = this.props;
-    console.log('username', username, address);
+    const { setAccount, setStep, username, address, privateKey } = this.props;
+    // console.log('username', username, address);
     const resp = await registerAlias(username, address, privateKey);
     if (resp) {
       const account = { address, privateKey, cipher: password };
       setAccount(account);
       localStorage.removeItem('user');
       localStorage.setItem('user', JSON.stringify({ address, privateKey }));
+      window.location.pathname = '/timeline';
+      // Router.push('/timeline');
     }
     console.log('resp', resp);
   };

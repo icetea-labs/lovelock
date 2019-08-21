@@ -6,6 +6,7 @@ import QueueAnim from 'rc-queue-anim';
 import LoginWithMnemonic from './LoginWithMnemonic';
 import LoginWithPrivatekey from './LoginWithPrivatekey';
 import Button from '@material-ui/core/Button';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 
 const DivWallet = styled.div`
   position: relative;
@@ -40,6 +41,10 @@ const RegisterBox = styled.div`
   }
   @media (max-width: 768px) {
     width: 100%;
+  }
+  .btRegister {
+    padding-top: 20px;
+    text-align: center;
   }
 `;
 const ShadowBox = styled.div`
@@ -85,6 +90,20 @@ const StyledLogo = styled.div`
   }
   cursor: pointer;
 `;
+
+const styles = theme => ({
+  button: {
+    margin: theme.spacing(1),
+    background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
+  },
+  link: {
+    margin: theme.spacing(1),
+  },
+  rightIcon: {
+    marginLeft: theme.spacing(1),
+  },
+});
+
 class Login extends PureComponent {
   _closeModal = () => {};
 
@@ -95,7 +114,7 @@ class Login extends PureComponent {
   gotoHome = () => {};
 
   render() {
-    let { confirmMnemonic, showPrivateKey, privateKey, step } = this.props;
+    let { confirmMnemonic, showPrivateKey, privateKey, step, classes } = this.props;
     console.log('step', step);
     return (
       <div>
@@ -115,6 +134,11 @@ class Login extends PureComponent {
                 </div>
                 {step === 'one' && <LoginWithPrivatekey />}
                 {step === 'two' && <LoginWithMnemonic />}
+                <div className="btRegister">
+                  <Button color="primary" href="/register" className={classes.link}>
+                    Register
+                  </Button>
+                </div>
               </ShadowBox>
             </RegisterBox>
           </DivWallet>
@@ -149,7 +173,9 @@ const mapStateToProps = state => {
 //   return {
 //   };
 // }
-export default connect(
-  mapStateToProps,
-  null
-)(Login);
+export default withStyles(styles)(
+  connect(
+    mapStateToProps,
+    null
+  )(Login)
+);

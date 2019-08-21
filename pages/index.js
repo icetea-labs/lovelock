@@ -10,11 +10,11 @@ import { HomeLayout } from 'src/components/layout';
 import Main from 'src/components/main/Main';
 import Timeline from 'src/components/timeline';
 import Authen from 'src/components/authen';
+import Router from 'next/router';
 
 import 'static/css/style.css';
-import { GlobaLoading } from 'src/components/elements/GlobaLoading';
 class index extends Component {
-  static getInitialProps({ reduxStore, req }) {
+  static getInitialProps({ reduxStore, req, res }) {
     // const isServer = !!req;
     // // DISPATCH ACTIONS HERE ONLY WITH `reduxStore.dispatch`
     // reduxStore.dispatch(serverRenderClock(isServer));
@@ -25,14 +25,7 @@ class index extends Component {
     const { isLoading, address } = this.props;
     return (
       <Container maxWidth="xl">
-        {!address ? (
-          <HomeLayout title="Couple Lock">
-            <Main />
-          </HomeLayout>
-        ) : (
-          <Authen />
-        )}
-        {isLoading && <GlobaLoading />}
+        <Authen />
       </Container>
     );
   }

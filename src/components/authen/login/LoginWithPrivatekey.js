@@ -11,6 +11,7 @@ import * as acGlobal from 'src/store/actions/globalData';
 import * as actions from 'src/store/actions/create';
 import * as actionsAccount from 'src/store/actions/account';
 import { DivControlBtnKeystore } from 'src/components/elements/Common';
+import Router from 'next/router';
 
 const styles = theme => ({
   button: {
@@ -53,6 +54,9 @@ class LoginWithPrivatekey extends PureComponent {
       const address = wallet.getAddressFromPrivateKey(privateKey);
       const account = { address, privateKey, cipher: password };
       setAccount(account);
+      localStorage.setItem('user', JSON.stringify(account));
+      // Router.push('/timeline');
+      window.location.pathname = '/timeline';
       console.log('account', account);
     } catch (err) {
       throw err;
