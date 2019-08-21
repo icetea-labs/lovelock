@@ -1,8 +1,9 @@
-import React from "react";
-import styled from "styled-components";
-import { connect } from "react-redux";
-import { rem } from "../elements/Common";
-import { callView, TimeWithFormat, getTagsInfo } from "../../helper";
+import React from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { rem } from '../elements/Common';
+import { callView, TimeWithFormat, getTagsInfo } from '../../helper';
+import tweb3 from '../../service/tweb3';
 
 const Container = styled.div`
   width: 100%;
@@ -106,7 +107,7 @@ const WarrperChatBox = styled.div`
     .clearfix::after {
       display: block;
       clear: both;
-      content: "";
+      content: '';
     }
     p {
       width: 93%;
@@ -153,15 +154,21 @@ class MessageHistory extends React.Component {
     super(props);
     this.state = {
       memoryList: [],
-      currentIndex: 0
+      currentIndex: -1,
     };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { currentIndex } = nextProps;
+    const { currentIndex, memory } = nextProps;
+    let value = {};
     if (currentIndex !== prevState.currentIndex) {
-      return { currentIndex };
+      value = Object.assign({}, { currentIndex });
     }
+
+    if (memory.length !== prevState.memoryList.length) {
+      value = Object.assign({}, { memoryList: memory });
+    }
+    if (value) return value;
     return null;
   }
 
@@ -170,77 +177,20 @@ class MessageHistory extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { currentIndex } = this.state;
-
-    if (prevState.currentIndex !== currentIndex) {
+    let { currentIndex, memory } = this.props;
+    if (prevState.currentIndex !== currentIndex || prevState.memoryList.length !== memory.length) {
       this.loadMemory();
     }
   }
 
   async loadMemory() {
-    let newMemoryList = [];
-    const { currentIndex } = this.props;
-    console.log("view currentIndex", currentIndex);
-    const allMemory = await callView("getMemoryByProIndex", [currentIndex]);
-    console.log("view memory", allMemory);
-
-    for (let i = 0; i < allMemory.length; i++) {
-      const obj = allMemory[i];
-      obj.info = JSON.parse(obj.info);
-      const sender = await getTagsInfo(obj.sender);
-      obj.senderName = sender["display-name"];
-      obj.index = [i];
-      newMemoryList.push(obj);
-    }
-    console.log("newMemoryList", newMemoryList);
-    this.setState({ memoryList: newMemoryList, currentIndex: currentIndex });
+    const { currentIndex, memory } = this.props;
+    this.setState({ memoryList: memory, currentIndex: currentIndex });
   }
-
-  renderMemory = memoryList => {
-    memoryList.map(memory => {
-      return (
-        <TimelineContainer key={memory.index}>
-          <TitleWrapper>
-            <div className="leftTitle">
-              <img src="/static/img/bed.svg" className="bed" />
-              <div className="titleText">
-                <span>{memory.senderName} shared a memory</span>
-              </div>
-            </div>
-            <div className="date">
-              <span>{memory.info.date}</span>
-            </div>
-          </TitleWrapper>
-          <WarrperChatBox>
-            <div className="message_container clearfix">
-              <div className="user_avatar sender fl ">
-                <img src="/static/img/user-men.jpg" alt="itea" />
-              </div>
-              <div className="content_detail fr clearfix">
-                <div className="name_time">
-                  <span className="user_name color-violet">
-                    {memory.senderName}
-                  </span>
-                  <span className="time fr color-gray">
-                    {TimeWithFormat(memory.info.date)}
-                  </span>
-                </div>
-                <p>{memory.content}</p>
-                <img
-                  src={"https://ipfs.io/ipfs/" + memory.info.hash}
-                  className="postImg"
-                />
-              </div>
-            </div>
-          </WarrperChatBox>
-        </TimelineContainer>
-      );
-    });
-  };
 
   render() {
     const { memoryList, currentIndex } = this.state;
-    console.log("view state", this.state);
+    // console.log('view state', this.state);
     return memoryList.map(memory => {
       return (
         <Container key={memory.index}>
@@ -253,7 +203,7 @@ class MessageHistory extends React.Component {
                 </div>
               </div>
               <div className="date">
-                <span>{TimeWithFormat(memory.info.date)}</span>
+                <TimeWithFormat value={memory.info.date} />
               </div>
             </TitleWrapper>
             <WarrperChatBox>
@@ -263,18 +213,13 @@ class MessageHistory extends React.Component {
                 </div>
                 <div className="content_detail fr clearfix">
                   <div className="name_time">
-                    <span className="user_name color-violet">
-                      {memory.senderName}
-                    </span>
+                    <span className="user_name color-violet">{memory.senderName}</span>
                     <span className="time fr color-gray">
-                      {TimeWithFormat(memory.info.date)}
+                      <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
                     </span>
                   </div>
                   <p>{memory.content}</p>
-                  <img
-                    src={"https://ipfs.io/ipfs/" + memory.info.hash}
-                    className="postImg"
-                  />
+                  {memory.info.hash && <img src={'https://ipfs.io/ipfs/' + memory.info.hash} className="postImg" />}
                 </div>
               </div>
             </WarrperChatBox>
@@ -286,16 +231,18 @@ class MessageHistory extends React.Component {
 }
 
 MessageHistory.defaultProps = {
-  proIndex: 0,
-  propose: {}
+  currentIndex: 0,
+  memory: [],
 };
 
 const mapStateToProps = state => {
-  const { propose, userInfo } = state;
+  const { propose, account } = state;
   return {
     propose: propose.propose,
     currentIndex: propose.currentProIndex,
-    address: userInfo.address
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
   };
 };
 

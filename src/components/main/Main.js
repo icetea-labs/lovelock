@@ -1,22 +1,22 @@
-import React from "react";
-import styled from "styled-components";
-import { connect } from "react-redux";
-import { callView, getAccountInfo, getTagsInfo } from "../../helper";
-import * as actions from "../../store/actions";
-import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
-import Icon from "src/components/elements/Icon";
+import React from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { callView, getAccountInfo, getTagsInfo } from '../../helper';
+import * as actions from '../../store/actions';
+import { FlexBox, FlexWidthBox, rem } from '../elements/Common';
+import Icon from 'src/components/elements/Icon';
 // import { WithContext as ReactTags } from "react-tag-input";
-import MessageHistory from "./MessageHistory";
-import Promise from "./Promise";
-import CustomPost from "./CustomPost";
-import TopContrainer from "./TopContrainer";
-import PromiseAlert from "./PromiseAlert";
-import tweb3 from "../../service/tweb3";
-import PromiseConfirm from "./PromiseConfirm";
-import PromiseLeftAccept from "./PromiseLeftAccept";
-import PromiseLeftPending from "./PromiseLeftPending";
-import InputBase from "@material-ui/core/InputBase";
-import { saveToIpfs, sendTransaction } from "../../helper";
+import MessageHistory from './MessageHistory';
+import Promise from './Promise';
+import CustomPost from './CustomPost';
+import TopContrainer from './TopContrainer';
+import PromiseAlert from './PromiseAlert';
+import PromiseConfirm from './PromiseConfirm';
+import PromiseLeftAccept from './PromiseLeftAccept';
+import PromiseLeftPending from './PromiseLeftPending';
+import InputBase from '@material-ui/core/InputBase';
+import { saveToIpfs, sendTransaction } from '../../helper';
+import tweb3 from '../../service/tweb3';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -183,12 +183,12 @@ class Main extends React.Component {
     super(props);
     this.state = {
       promises: [
-        { name: "Derrick Rogers", nick: "@derickrogers" },
-        { name: "Jessie Guzman", nick: "@derickrogers" },
-        { name: "Bertie Woods", nick: "@derickrogers" }
+        { name: 'Derrick Rogers', nick: '@derickrogers' },
+        { name: 'Jessie Guzman', nick: '@derickrogers' },
+        { name: 'Bertie Woods', nick: '@derickrogers' },
       ],
-      tag: ["love", "travel", "honeymoon", "relax", "sweet"],
-      ownerTag: ["honeymoon", "travel"],
+      tag: ['love', 'travel', 'honeymoon', 'relax', 'sweet'],
+      ownerTag: ['honeymoon', 'travel'],
       isPromise: false,
       isPendingPromise: false,
       isAccept: false,
@@ -197,8 +197,8 @@ class Main extends React.Component {
       proIndex: -1,
       pendingIndex: -1,
       date: new Date(),
-      file: "",
-      memoryContent: ""
+      file: '',
+      memoryContent: '',
     };
   }
 
@@ -210,7 +210,7 @@ class Main extends React.Component {
     const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
     // console.log("address", address);
-    const allPropose = await callView("getProposeByAddress", [address]);
+    const allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);
     this.setState({ reload: false });
@@ -223,8 +223,8 @@ class Main extends React.Component {
       if (obj.status === 1) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const reps = await getTagsInfo(addr);
-        obj.name = reps["display-name"];
-        obj.nick = "@" + reps.username;
+        obj.name = reps['display-name'];
+        obj.nick = '@' + reps.username;
         obj.index = i;
         tmp.push(obj);
       }
@@ -233,7 +233,26 @@ class Main extends React.Component {
     if (tmp.length > 0) {
       this.setState({ proIndex: tmp[0].index });
       setCurrentIndex(tmp[0].index);
+      this.loadMemory(tmp[0].index);
     }
+  }
+
+  async loadMemory(currentIndex) {
+    const { privateKey, address, setMemory } = this.props;
+    tweb3.wallet.importAccount(privateKey);
+    tweb3.wallet.defaultAccount = address;
+    const allMemory = await callView('getMemoryByProIndex', [currentIndex]);
+    let newMemoryList = [];
+    for (let i = 0; i < allMemory.length; i++) {
+      const obj = allMemory[i];
+      obj.info = JSON.parse(obj.info);
+      const sender = await getTagsInfo(obj.sender);
+      obj.senderName = sender['display-name'];
+      obj.index = [i];
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    setMemory(newMemoryList);
   }
 
   renderTag = tag => {
@@ -253,7 +272,7 @@ class Main extends React.Component {
 
   openPending = index => {
     this.setState({ isPendingPromise: true, pendingIndex: index });
-    console.log(index);
+    // console.log(index);
   };
 
   acceptPromise = () => {
@@ -277,30 +296,34 @@ class Main extends React.Component {
   };
 
   handlerSelectPropose = proIndex => {
-    console.log("proIndex", proIndex);
+    // console.log('proIndex', proIndex);
+    const { setCurrentIndex } = this.props;
     this.setState({ proIndex });
+    setCurrentIndex(proIndex);
   };
 
   onChangeCus = (date, file) => {
-    console.log("view Date", date);
-    console.log("view File", file);
+    console.log('view Date', date);
+    console.log('view File', file);
     this.setState({ date, file });
   };
 
   statusChange = e => {
     const value = e.target.value;
     this.setState({
-      memoryContent: value
+      memoryContent: value,
     });
   };
 
   async shareMemory(proIndex, memoryContent, date, file) {
-    const hash = await saveToIpfs(file);
-    // const ct = tweb3.contract(process.env.contract);
-    const name = "addMemory";
+    let hash;
+    if (file) {
+      hash = await saveToIpfs(file);
+    }
+    const name = 'addMemory';
     let info = {
       date: date,
-      hash: hash
+      hash: hash,
     };
     info = JSON.stringify(info);
     // const result = await ct.methods[name](
@@ -310,9 +333,9 @@ class Main extends React.Component {
     // ).sendCommit();
     const params = [proIndex, memoryContent, info];
     const result = await sendTransaction(name, params);
-    console.log("View result", result);
+    console.log('View result', result);
     if (result) {
-      window.alert("Success");
+      window.alert('Success');
     }
   }
 
@@ -328,10 +351,10 @@ class Main extends React.Component {
       pendingIndex,
       date,
       file,
-      memoryContent
+      memoryContent,
     } = this.state;
-    const { propose, address } = this.props;
-    console.log("main state", this.state);
+    const { propose, address, memory } = this.props;
+    // console.log("main state", this.state);
     return (
       <main>
         <BannerContainer>
@@ -344,11 +367,7 @@ class Main extends React.Component {
           <FlexWidthBox width="30%">
             <LeftBox>
               <ShadowBox>
-                <button
-                  type="button"
-                  className="btn_add_promise"
-                  onClick={this.addPromise}
-                >
+                <button type="button" className="btn_add_promise" onClick={this.addPromise}>
                   <Icon type="add" />
                   Add Promise
                 </button>
@@ -362,11 +381,7 @@ class Main extends React.Component {
                 </div>
                 <div className="title">Pending promise</div>
                 <div>
-                  <PromiseLeftPending
-                    propose={propose}
-                    address={address}
-                    openPendingPromise={this.openPending}
-                  />
+                  <PromiseLeftPending propose={propose} address={address} openPendingPromise={this.openPending} />
                 </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
@@ -386,7 +401,7 @@ class Main extends React.Component {
                         fullWidth
                         margin="dense"
                         defaultValue="Describe your Memory…."
-                        inputProps={{ "aria-label": "naked" }}
+                        inputProps={{ 'aria-label': 'naked' }}
                         onChange={this.statusChange}
                       />
                     </div>
@@ -401,21 +416,12 @@ class Main extends React.Component {
                     <div className="css-bg1rzq-control">
                       <div className="css-1hwfws3">
                         <div>
-                          <button
-                            type="button"
-                            disabled=""
-                            className="btn_post_policy"
-                          >
+                          <button type="button" disabled="" className="btn_post_policy">
                             Public
                             <div className="css-1wy0on6">
                               <span className="css-bgvzuu-indicatorSeparator" />
-                              <div
-                                aria-hidden="true"
-                                className="css-16pqwjk-indicatorContainer"
-                              >
-                                <i className="material-icons">
-                                  arrow_drop_down
-                                </i>
+                              <div aria-hidden="true" className="css-16pqwjk-indicatorContainer">
+                                <i className="material-icons">arrow_drop_down</i>
                               </div>
                             </div>
                           </button>
@@ -438,7 +444,7 @@ class Main extends React.Component {
                   Share
                 </button>
               </div>
-              <MessageHistory propose={propose} proIndex={proIndex} />
+              <MessageHistory />
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
@@ -453,27 +459,21 @@ class Main extends React.Component {
             deny={this.denyPromise}
           />
         )}
-        {isAccept && (
-          <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />
-        )}
-        {isDeny && (
-          <PromiseConfirm
-            isDeny
-            close={this.closeConfirm}
-            index={pendingIndex}
-          />
-        )}
+        {isAccept && <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />}
+        {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} index={pendingIndex} />}
       </main>
     );
   }
 }
 
 const mapStateToProps = state => {
-  const { propose, userInfo } = state;
+  const { propose, account } = state;
   return {
     propose: propose.propose,
     currentIndex: propose.currentProIndex,
-    address: userInfo.address
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
   };
 };
 
@@ -484,7 +484,10 @@ const mapDispatchToProps = dispatch => {
     },
     setCurrentIndex: value => {
       dispatch(actions.setCurrentIndex(value));
-    }
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
   };
 };
 
