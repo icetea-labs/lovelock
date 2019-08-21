@@ -109,15 +109,33 @@ class Header extends PureComponent {
     super(props);
     this.state = {
       username: 'anonymous',
+      address: '',
     };
   }
-
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.address !== prevState.address) {
+      return {
+        address: nextProps.address,
+      };
+    } else {
+      return null;
+    }
+  }
   componentDidMount() {
     this.loaddata();
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { address } = this.state;
+    if (address !== prevState.address) {
+      this.loaddata();
+    }
+  }
   async loaddata() {
     const { address } = this.props;
+    console.log('address', address);
     const reps = await getAlias(address);
+    console.log('reps', reps);
     this.setState({ username: reps });
   }
 
