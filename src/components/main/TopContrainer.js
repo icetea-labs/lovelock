@@ -150,7 +150,7 @@ class TopContrainer extends PureComponent {
           newTopInfor.r_displayname = receiverinfor["display-name"];
           break;
         }
-        console.log("obj", obj);
+        // console.log("obj", obj);
       }
     }
 
