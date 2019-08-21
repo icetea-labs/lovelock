@@ -64,7 +64,7 @@ class RegisterUsername extends PureComponent {
             step: 'two',
             username: username,
           });
-          setLoading(false);
+          // setLoading(false);
         }, 500);
       }
     } else {

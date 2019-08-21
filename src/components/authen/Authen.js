@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react';
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
 import Link from 'src/Link';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { connect } from 'react-redux';
 
 const Wrapper = styled.div`
   display: flex;
@@ -29,6 +31,23 @@ class Authen extends PureComponent {
     this.setState({ step: 'register' });
   };
 
+  componentDidMount() {
+    const { address } = this.props;
+    // console.log('address', address);
+  }
+
+  componentDidUpdate() {
+    const { address } = this.props;
+    if (address) {
+      console.log('timeline', address);
+      window.location.pathname = '/timeline';
+    } else {
+      console.log('login', address);
+      window.location.pathname = '/login';
+    }
+    // console.log('address', address);
+  }
+
   renderDefault = () => {
     return (
       <React.Fragment>
@@ -52,6 +71,14 @@ class Authen extends PureComponent {
   }
 }
 
-Authen.propTypes = {};
+const mapStateToProps = state => {
+  const e = state.account;
+  return {
+    address: e.address,
+  };
+};
 
-export default Authen;
+export default connect(
+  mapStateToProps,
+  null
+)(Authen);
