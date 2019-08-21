@@ -1,5 +1,9 @@
-import styled from "styled-components";
-import { rem } from "../elements/Common";
+import React from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { rem } from '../elements/Common';
+import { callView, TimeWithFormat, getTagsInfo } from '../../helper';
+import tweb3 from '../../service/tweb3';
 
 const Container = styled.div`
   width: 100%;
@@ -34,7 +38,7 @@ const TitleWrapper = styled.div`
     margin: 0px 14px 0 14px;
   }
   .titleText {
-    width: 201px;
+    width: 100%;
     height: 18px;
     font-size: 14px;
     font-weight: 600;
@@ -103,7 +107,7 @@ const WarrperChatBox = styled.div`
     .clearfix::after {
       display: block;
       clear: both;
-      content: "";
+      content: '';
     }
     p {
       width: 93%;
@@ -149,155 +153,100 @@ class MessageHistory extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      promises: [
-        { name: "Derrick Rogers", nick: "@derickrogers" },
-        { name: "Jessie Guzman", nick: "@derickrogers" },
-        { name: "Bertie Woods", nick: "@derickrogers" }
-      ],
-      tag: ["love", "travel", "honeymoon", "relax", "sweet"],
-      ownerTag: ["honeymoon", "travel"]
+      memoryList: [],
+      currentIndex: -1,
     };
   }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { currentIndex, memory } = nextProps;
+    let value = {};
+    if (currentIndex !== prevState.currentIndex) {
+      value = Object.assign({}, { currentIndex });
+    }
+
+    if (memory.length !== prevState.memoryList.length) {
+      value = Object.assign({}, { memoryList: memory });
+    }
+    if (value) return value;
+    return null;
+  }
+
+  componentDidMount() {
+    this.loadMemory();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    let { currentIndex, memory } = this.props;
+    if (prevState.currentIndex !== currentIndex || prevState.memoryList.length !== memory.length) {
+      this.loadMemory();
+    }
+  }
+
+  async loadMemory() {
+    const { currentIndex, memory } = this.props;
+    this.setState({ memoryList: memory, currentIndex: currentIndex });
+  }
+
   render() {
-    return (
-      <Container>
-        <TimelineContainer>
-          <TitleWrapper>
-            <div className="leftTitle">
-              <img src="/static/img/bed.svg" className="bed" />
-              <div className="titleText">
-                <span>Lorem ipsum dolor sit amet</span>
-              </div>
-            </div>
-            <div className="date">
-              <span>2/4/2004</span>
-            </div>
-          </TitleWrapper>
-          <WarrperChatBox>
-            <div className="message_container clearfix">
-              <div className="user_avatar sender fl ">
-                <img src="/static/img/user-men.jpg" alt="itea" />
-              </div>
-              <div className="content_detail fr clearfix">
-                <div className="name_time">
-                  <span className="user_name color-violet">John Smith</span>
-                  <span className="time fr color-gray">12:02 3 May 2018</span>
-                </div>
-                <p>
-                  In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
-                  arcu ante, aliquet sit amet ornare quis, euismod ac justo.
-                  Duis hendrerit, lacus a facilisis congue,
-                </p>
-              </div>
-            </div>
-          </WarrperChatBox>
-          <WarrperChatBox>
-            <div className="message_container clearfix">
-              <div className="content_detail fl clearfix rightReci">
-                <div className="name_time">
-                  <span className="user_name color-violet">Marry William</span>
-                  <span className="time fr color-gray">12:02 3 May 2018</span>
-                </div>
-                <p>
-                  Duis hendrerit, lacus a facilisis congue, In ultricies ipsum
-                  sem, in ullamcorper velit luctus sed. Fusce arcu ante, aliquet
-                  sit amet ornare quis, euismod ac justo. Duis hendrerit, lacus
-                  a facilisis congue,In ultricies ipsum sem, in ullamcorper
-                  velit luctus sed. Fusce arcu ante, aliquet sit amet ornare
-                  quis, euismod ac justo. Duis hendrerit, lacus a facilisis
-                  congue,
-                </p>
-              </div>
-              <div className="user_avatar receiver fr">
-                <img src="/static/img/user-women.jpg" alt="itea" />
-              </div>
-            </div>
-          </WarrperChatBox>
-        </TimelineContainer>
-        <TimelineContainer>
-          <TitleWrapper>
-            <div className="leftTitle">
-              <img src="/static/img/bed.svg" className="bed" />
-              <div className="titleText">
-                <span>Lorem ipsum dolor sit amet</span>
-              </div>
-            </div>
-            <div className="date">
-              <span>2/4/2004</span>
-            </div>
-          </TitleWrapper>
-          <WarrperChatBox>
-            <div className="message_container clearfix">
-              <div className="user_avatar sender fl ">
-                <img src="/static/img/user-men.jpg" alt="itea" />
-              </div>
-              <div className="content_detail fr clearfix">
-                <div className="name_time">
-                  <span className="user_name color-violet">John Smith</span>
-                  <span className="time fr color-gray">12:02 3 May 2018</span>
-                </div>
-                <p>
-                  In ultricies ipsum sem, in ullamcorper velit luctus sed. Fusce
-                  arcu ante, aliquet sit amet ornare quis, euismod ac justo.
-                  Duis hendrerit, lacus a facilisis congue,
-                </p>
-                <img src="/static/img/rectangle.png" className="postImg" />
-              </div>
-            </div>
-          </WarrperChatBox>
-          <WarrperChatBox>
-            <div className="message_container clearfix">
-              <div className="content_detail fl clearfix rightReci">
-                <div className="name_time">
-                  <span className="user_name color-violet">Marry William</span>
-                  <span className="time fr color-gray">12:02 3 May 2018</span>
-                </div>
-                <p>Duis hendrerit, lacus a facilisis congue,</p>
-                <img src="/static/img/rectangle1.png" className="postImg" />
-              </div>
-              <div className="user_avatar receiver fr">
-                <img src="/static/img/user-women.jpg" alt="itea" />
-              </div>
-            </div>
-          </WarrperChatBox>
-        </TimelineContainer>
-        <TimelineContainer>
-          <TitleWrapper>
-            <div className="leftTitle">
-              <img src="/static/img/bed.svg" className="bed" />
-              <div className="titleText">
-                <span>Lorem ipsum dolor sit amet</span>
-              </div>
-            </div>
-            <div className="date">
-              <span>2/4/2004</span>
-            </div>
-          </TitleWrapper>
-          <WarrperChatBox>
-            <div className="message_container clearfix">
-              <div className="user_avatar sender fl ">
-                <img src="/static/img/user-men.jpg" alt="itea" />
-              </div>
-              <div className="content_detail fr clearfix">
-                <div className="name_time">
-                  <span className="user_name color-violet">John Smith </span>
-                  <span className="color-gray">is at </span>
-                  <span className="color-violet">Chaing Mai</span>
-                  <span className="time fr color-gray">12:02 3 May 2018</span>
-                </div>
-                <div className="collection postImg">
-                  <img src="/static/img/chaingMai1.png" />
-                  <img src="/static/img/chaingMai2.png" />
-                  <img src="/static/img/chaingMai3.png" />
+    const { memoryList, currentIndex } = this.state;
+    // console.log('view state', this.state);
+    return memoryList.map(memory => {
+      return (
+        <Container key={memory.index}>
+          <TimelineContainer>
+            <TitleWrapper>
+              <div className="leftTitle">
+                <img src="/static/img/bed.svg" className="bed" />
+                <div className="titleText">
+                  <span>{memory.senderName} shared a memory</span>
                 </div>
               </div>
-            </div>
-          </WarrperChatBox>
-        </TimelineContainer>
-      </Container>
-    );
+              <div className="date">
+                <TimeWithFormat value={memory.info.date} />
+              </div>
+            </TitleWrapper>
+            <WarrperChatBox>
+              <div className="message_container clearfix">
+                <div className="user_avatar sender fl ">
+                  <img src="/static/img/user-men.jpg" alt="itea" />
+                </div>
+                <div className="content_detail fr clearfix">
+                  <div className="name_time">
+                    <span className="user_name color-violet">{memory.senderName}</span>
+                    <span className="time fr color-gray">
+                      <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
+                    </span>
+                  </div>
+                  <p>{memory.content}</p>
+                  {memory.info.hash && <img src={'https://ipfs.io/ipfs/' + memory.info.hash} className="postImg" />}
+                </div>
+              </div>
+            </WarrperChatBox>
+          </TimelineContainer>
+        </Container>
+      );
+    });
   }
 }
 
-export default MessageHistory;
+MessageHistory.defaultProps = {
+  currentIndex: 0,
+  memory: [],
+};
+
+const mapStateToProps = state => {
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(MessageHistory);

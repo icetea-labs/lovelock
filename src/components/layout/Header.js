@@ -1,9 +1,11 @@
-import React, { PureComponent } from "react";
-import styled from "styled-components";
-import PropTypes from "prop-types";
-import { rem, FlexBox } from "../elements/Common";
-import Icon from "src/components/elements/Icon";
-import TextField from "@material-ui/core/TextField";
+import React, { PureComponent } from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { rem, FlexBox } from 'src/components/elements/Common';
+import Icon from 'src/components/elements/Icon';
+import TextField from '@material-ui/core/TextField';
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
 
 const Container = styled.header`
   width: 100%;
@@ -103,7 +105,42 @@ const Rectangle = styled.a`
 `;
 
 class Header extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: 'anonymous',
+      address: '',
+    };
+  }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.address !== prevState.address) {
+      return {
+        address: nextProps.address,
+      };
+    } else {
+      return null;
+    }
+  }
+  componentDidMount() {
+    this.loaddata();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { address } = this.state;
+    if (address !== prevState.address) {
+      this.loaddata();
+    }
+  }
+  async loaddata() {
+    const { address } = this.props;
+    console.log('address', address);
+    const reps = await getAlias(address);
+    console.log('reps', reps);
+    this.setState({ username: reps });
+  }
+
   render() {
+    const { username } = this.state;
     return (
       <Container>
         <Content>
@@ -120,7 +157,7 @@ class Header extends PureComponent {
           <FlexBox flex={1} justify="flex-end">
             <MenuItem>
               <img src="/static/img/user-men.jpg" alt="" />
-              <a href="/login">John Smith</a>
+              <a href="/login">{username}</a>
             </MenuItem>
             <MenuItem>
               <a href="/login">Explore</a>
@@ -141,6 +178,22 @@ class Header extends PureComponent {
   }
 }
 
-Header.propTypes = {};
+const mapStateToProps = state => {
+  const { propose, userInfo, account } = state;
+  return {
+    address: account.address,
+  };
+};
 
-export default Header;
+const mapDispatchToProps = dispatch => {
+  return {
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Header);

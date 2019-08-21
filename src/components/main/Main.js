@@ -1,8 +1,22 @@
-import styled from "styled-components";
-import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
-import Icon from "src/components/elements/Icon";
+import React from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
+import * as actions from '../../store/actions';
+import { FlexBox, FlexWidthBox, rem } from '../elements/Common';
+import Icon from 'src/components/elements/Icon';
 // import { WithContext as ReactTags } from "react-tag-input";
-import MessageHistory from "./MessageHistory";
+import MessageHistory from './MessageHistory';
+import Promise from './Promise';
+import CustomPost from './CustomPost';
+import TopContrainer from './TopContrainer';
+import PromiseAlert from './PromiseAlert';
+import PromiseConfirm from './PromiseConfirm';
+import PromiseLeftAccept from './PromiseLeftAccept';
+import PromiseLeftPending from './PromiseLeftPending';
+import InputBase from '@material-ui/core/InputBase';
+import { saveToIpfs, sendTransaction } from '../../helper';
+import tweb3 from '../../service/tweb3';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -15,88 +29,6 @@ const ShadowBox = styled.div`
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
 `;
 
-const WarrperImg = styled.div`
-  text-align: center;
-  border-radius: 10px;
-  /* padding-bottom: 18px; */
-  border-bottom: 1px dashed #ebebeb;
-  overflow: hidden;
-  .txPromise {
-    display: flex;
-    align-items: center;
-    padding: ${rem(20)} 0;
-    img {
-      padding-right: ${rem(15)};
-    }
-    .text {
-      color: #8250c8;
-      font-weight: 600;
-      width: 100%;
-      text-align: left;
-    }
-    .date {
-      color: #8f8f8f;
-    }
-  }
-`;
-const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(35)};
-  /* & > div:first-child {
-    padding-right: ${rem(15)};
-  } */
-  div:nth-child(even) .content_detail p {
-    background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
-    background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
-  }
-  .user_photo {
-    display: block;
-    width: 58px;
-    height: 58px;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .name_time {
-    .user_name {
-      font-weight: 600;
-      text-transform: capitalize;
-      color: #8250c8;
-      width: 100%;
-    }
-    .time {
-      font-size: ${rem(12)};
-      color: #8f8f8f;
-    }
-  }
-
-  .content_detail {
-    display: block;
-    width: calc(100% - 58px - 15px);
-    padding: 0 ${rem(10)};
-  }
-  .fl {
-    float: left;
-  }
-  .fr {
-    float: right;
-  }
-  .clearfix::after {
-    display: block;
-    clear: both;
-    content: "";
-  }
-  p {
-    display: block;
-    padding: ${rem(11)} ${rem(14)};
-    font-size: ${rem(12)};
-    line-height: ${rem(18)};
-    color: #ffffff;
-    border-radius: 10px;
-    margin-top: 10px;
-    box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
-    background-image: -webkit-linear-gradient(113deg, #76a8ff, #8df6fe);
-    background-image: linear-gradient(337deg, #76a8ff, #8df6fe);
-  }
-`;
 const LeftBox = styled.div`
   width: 100%;
   min-height: ${rem(360)};
@@ -151,7 +83,7 @@ const RightBox = styled.div`
       display: flex;
       align-items: center;
       .contentEditable {
-        width: 200px;
+        width: 100%;
         height: 19px;
         font-family: Montserrat;
         font-size: 16px;
@@ -164,47 +96,6 @@ const RightBox = styled.div`
         outline: none;
         font-size: ${rem(16)};
       }
-    }
-  }
-
-  .custom_post {
-    min-height: 55px;
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid #e1e1e1;
-    border-bottom: 1px solid #e1e1e1;
-    i {
-      color: #8250c8;
-    }
-    .tags {
-      display: flex;
-      width: 70%;
-      font-size: 12px;
-      font-family: Montserrat;
-      font-style: normal;
-      font-stretch: normal;
-      line-height: normal;
-      letter-spacing: normal;
-      color: #545454;
-    }
-    .tags_tilte {
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-    .tagName {
-      width: 132px;
-      height: 15px;
-      margin: 10px;
-      color: #8250c8;
-      :hover {
-        cursor: pointer;
-      }
-    }
-    .avatar_receiver {
-      width: 24px;
-      height: 24px;
     }
   }
   .action {
@@ -272,9 +163,6 @@ const WarrperAcceptedPromise = styled.div`
     color: #8250c8;
     font-size: ${rem(12)};
   }
-  /* .pri_info {
-    width: calc(100% - 141px);
-  } */
 `;
 const TagBox = styled.div`
   width: 100%;
@@ -295,53 +183,105 @@ class Main extends React.Component {
     super(props);
     this.state = {
       promises: [
-        { name: "Derrick Rogers", nick: "@derickrogers" },
-        { name: "Jessie Guzman", nick: "@derickrogers" },
-        { name: "Bertie Woods", nick: "@derickrogers" }
+        { name: 'Derrick Rogers', nick: '@derickrogers' },
+        { name: 'Jessie Guzman', nick: '@derickrogers' },
+        { name: 'Bertie Woods', nick: '@derickrogers' },
       ],
-      tag: ["love", "travel", "honeymoon", "relax", "sweet"],
-      ownerTag: ["honeymoon", "travel"]
+      tag: ['love', 'travel', 'honeymoon', 'relax', 'sweet'],
+      ownerTag: ['honeymoon', 'travel'],
+      isPromise: false,
+      isPendingPromise: false,
+      isAccept: false,
+      isDeny: false,
+      reload: true,
+      proIndex: -1,
+      pendingIndex: -1,
+      date: new Date(),
+      file: '',
+      memoryContent: '',
+      address: '',
+      propose: [],
     };
   }
 
-  renderPromise = () => {
-    const { promises } = this.state;
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { propose, address } = nextProps;
+    let value = {};
+    if (address !== prevState.address) {
+      value = Object.assign({}, { address });
+    }
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
+      value = Object.assign({}, { propose });
+    }
+    if (value) return value;
+    return null;
+  }
 
-    return promises.map((item, index) => {
-      return (
-        <WarrperAcceptedPromise key={index}>
-          <div className="icon">
-            <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
-          </div>
-          <div className="pri_info">
-            <div className="name">{item.name}</div>
-            <div className="nick">{item.nick}</div>
-          </div>
-        </WarrperAcceptedPromise>
-      );
-    });
-  };
-  renderPendingPromise = () => {
-    const { promises } = this.state;
+  componentDidUpdate(prevProps, prevState) {
+    const { address } = this.state;
 
-    return promises.map((item, index) => {
-      return (
-        <WarrperAcceptedPromise key={index}>
-          <div className="icon">
-            <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
-          </div>
-          <div className="pri_info">
-            <div className="name">{item.name}</div>
-            <div className="nick">{item.nick}</div>
-          </div>
-        </WarrperAcceptedPromise>
-      );
-    });
-  };
+    if (prevState.address !== address) {
+      this.loadAllPropose();
+    }
+  }
+
+  componentDidMount() {
+    this.loadAllPropose();
+  }
+
+  async loadAllPropose() {
+    const { reload } = this.state;
+    const { setPropose, address, setCurrentIndex } = this.props;
+    console.log(' loadAllPropose address', address);
+    const allPropose = await callView('getProposeByAddress', [address]);
+
+    setPropose(allPropose);
+    this.setState({ reload: false });
+
+    let tmp = [];
+    if (!allPropose) allPropose = [];
+
+    for (let i = 0; i < allPropose.length; i++) {
+      const obj = allPropose[i];
+      if (obj.status === 1) {
+        const addr = address === obj.sender ? obj.receiver : obj.sender;
+        const reps = await getTagsInfo(addr);
+        const name = await getAlias(addr);
+        obj.name = name;
+        obj.nick = '@' + reps.username;
+        obj.index = i;
+        tmp.push(obj);
+      }
+    }
+    // console.log("tmp", tmp);
+    if (tmp.length > 0) {
+      this.setState({ proIndex: tmp[0].index });
+      setCurrentIndex(tmp[0].index);
+      this.loadMemory(tmp[0].index);
+    }
+  }
+
+  async loadMemory(currentIndex) {
+    const { privateKey, address, setMemory } = this.props;
+    tweb3.wallet.importAccount(privateKey);
+    tweb3.wallet.defaultAccount = address;
+    const allMemory = await callView('getMemoryByProIndex', [currentIndex]);
+    let newMemoryList = [];
+    for (let i = 0; i < allMemory.length; i++) {
+      const obj = allMemory[i];
+      obj.info = JSON.parse(obj.info);
+      const sender = await getTagsInfo(obj.sender);
+      const name = await getAlias(addr);
+      obj.name = name;
+      obj.index = [i];
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    setMemory(newMemoryList);
+  }
 
   renderTag = tag => {
     // const { tag } = this.state;
-
     return tag.map((item, index) => {
       return (
         <span className="tagName" key={index}>
@@ -351,67 +291,124 @@ class Main extends React.Component {
     });
   };
 
+  addPromise = () => {
+    this.setState({ isPromise: true });
+  };
+
+  openPending = index => {
+    this.setState({ isPendingPromise: true, pendingIndex: index });
+    // console.log(index);
+  };
+
+  acceptPromise = () => {
+    this.setState({ isAccept: true, isPendingPromise: false });
+  };
+
+  denyPromise = () => {
+    this.setState({ isDeny: true, isPendingPromise: false });
+  };
+
+  closeConfirm = () => {
+    this.setState({ isAccept: false, isDeny: false });
+  };
+
+  closePromise = () => {
+    this.setState({ isPromise: false });
+  };
+
+  closePendingPromise = () => {
+    this.setState({ isPendingPromise: false });
+  };
+
+  handlerSelectPropose = proIndex => {
+    // console.log('proIndex', proIndex);
+    const { setCurrentIndex, setMemory } = this.props;
+    this.setState({ proIndex });
+    setCurrentIndex(proIndex);
+    this.loadMemory(proIndex);
+  };
+
+  onChangeCus = (date, file) => {
+    console.log('view Date', date);
+    console.log('view File', file);
+    this.setState({ date, file });
+  };
+
+  statusChange = e => {
+    const value = e.target.value;
+    this.setState({
+      memoryContent: value,
+    });
+  };
+
+  async shareMemory(proIndex, memoryContent, date, file) {
+    let hash;
+    if (file) {
+      hash = await saveToIpfs(file);
+    }
+    const name = 'addMemory';
+    let info = {
+      date: date,
+      hash: hash,
+    };
+    info = JSON.stringify(info);
+    // const result = await ct.methods[name](
+    //   proIndex,
+    //   memoryContent,
+    //   info
+    // ).sendCommit();
+    const params = [proIndex, memoryContent, info];
+    const result = await sendTransaction(name, params);
+    console.log('View result', result);
+    if (result) {
+      window.alert('Success');
+    }
+  }
+
   render() {
-    const { tag, ownerTag } = this.state;
+    const {
+      tag,
+      ownerTag,
+      isPromise,
+      isPendingPromise,
+      isAccept,
+      isDeny,
+      proIndex,
+      pendingIndex,
+      date,
+      file,
+      memoryContent,
+    } = this.state;
+    const { propose, address, memory } = this.props;
+    // console.log("main state", this.state);
     return (
       <main>
         <BannerContainer>
           <ShadowBox>
-            <WarrperImg>
-              <img src="/static/img/banner.jpg" alt="itea-scan" />
-              <div className="txPromise">
-                <img src="/static/img/luggage.svg" alt="itea" />
-                <span className="text">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. In
-                  facilisis sollicitudin ultricies.
-                </span>
-                <span className="date">2/4/2004</span>
-              </div>
-            </WarrperImg>
-            <WarrperChatBox>
-              <FlexWidthBox width="50%">
-                <div className="user_photo fl">
-                  <img src="/static/img/user-men.jpg" alt="itea" />
-                </div>
-                <div className="content_detail fl clearfix">
-                  <div className="name_time">
-                    <span className="user_name color-violet">John Smith</span>
-                    <span className="time fr color-gray">08/06/2019</span>
-                  </div>
-                  <p>
-                    In ultricies ipsum sem, in ullamcorper velit luctus sed.
-                    Fusce arcu ante, aliquet sit amet ornare quis, euismod ac
-                    justo. Duis hendrerit, lacus a facilisis congue,
-                  </p>
-                </div>
-              </FlexWidthBox>
-              <FlexWidthBox width="50%">
-                <div className="user_photo fr">
-                  <img src="/static/img/user-women.jpg" alt="itea" />
-                </div>
-                <div className="content_detail fl clearfix">
-                  <div className="name_time">
-                    <span className="user_name color-violet">Mary William</span>
-                    <span className="time fr color-gray">08/06/2019</span>
-                  </div>
-                  <p>Duis hendrerit, lacus a facilisis congue</p>
-                </div>
-              </FlexWidthBox>
-            </WarrperChatBox>
+            <TopContrainer proIndex={proIndex} />
           </ShadowBox>
         </BannerContainer>
+
         <FlexBox wrap="wrap">
           <FlexWidthBox width="30%">
             <LeftBox>
               <ShadowBox>
-                <button type="button" className="btn_add_promise">
+                <button type="button" className="btn_add_promise" onClick={this.addPromise}>
                   <Icon type="add" />
                   Add Promise
                 </button>
                 <div className="title">Accepted promise</div>
-                <div>{this.renderPromise()}</div>
+                <div>
+                  <PromiseLeftAccept
+                    propose={propose}
+                    address={address}
+                    handlerSelectPropose={this.handlerSelectPropose}
+                  />
+                </div>
                 <div className="title">Pending promise</div>
-                <div>{this.renderPendingPromise()}</div>
+                <div>
+                  <PromiseLeftPending address={address} openPendingPromise={this.openPending} />
+                </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
               </ShadowBox>
@@ -426,33 +423,17 @@ class Main extends React.Component {
                   </div>
                   <div className="post_input fl">
                     <div className="contentEditable">
-                      Describe your Memory….
+                      <InputBase
+                        fullWidth
+                        margin="dense"
+                        defaultValue="Describe your Memory…."
+                        inputProps={{ 'aria-label': 'naked' }}
+                        onChange={this.statusChange}
+                      />
                     </div>
                   </div>
                 </div>
-                <div className="custom_post">
-                  <div className="tags">
-                    <div className="tags_tilte">
-                      <p>Tags: </p>
-                    </div>
-                    <div className="tagName">
-                      <span>#honeymoon </span>
-                      <span>#travel</span>
-                    </div>
-                  </div>
-                  <div className="place-wrapper">
-                    <i className="material-icons">location_on</i>
-                  </div>
-                  <div className="upload_img">
-                    <i className="material-icons">insert_photo</i>
-                  </div>
-                  <div className="picktime">
-                    <i className="material-icons">today</i>
-                  </div>
-                  <div className="avatar_receiver">
-                    <img src="/static/img/user-women.jpg" alt="itea" />
-                  </div>
-                </div>
+                <CustomPost avatarShow onChange={this.onChangeCus} />
               </div>
 
               <div className="action">
@@ -461,18 +442,11 @@ class Main extends React.Component {
                     <div className="css-bg1rzq-control">
                       <div className="css-1hwfws3">
                         <div>
-                          <button
-                            type="button"
-                            disabled=""
-                            className="btn_post_policy"
-                          >
+                          <button type="button" disabled="" className="btn_post_policy">
                             Public
                             <div className="css-1wy0on6">
                               <span className="css-bgvzuu-indicatorSeparator" />
-                              <div
-                                aria-hidden="true"
-                                className="css-16pqwjk-indicatorContainer"
-                              >
+                              <div aria-hidden="true" className="css-16pqwjk-indicatorContainer">
                                 <i className="material-icons">arrow_drop_down</i>
                               </div>
                             </div>
@@ -486,7 +460,13 @@ class Main extends React.Component {
                     </div>
                   </div>
                 </div>
-                <button type="button" disabled="">
+                <button
+                  type="button"
+                  disabled=""
+                  onClick={() => {
+                    this.shareMemory(proIndex, memoryContent, date, file);
+                  }}
+                >
                   Share
                 </button>
               </div>
@@ -494,9 +474,50 @@ class Main extends React.Component {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
+        {isPromise && <Promise close={this.closePromise} />}
+        {isPendingPromise && (
+          <PromiseAlert
+            propose={propose}
+            address={address}
+            index={pendingIndex}
+            close={this.closePendingPromise}
+            accept={this.acceptPromise}
+            deny={this.denyPromise}
+          />
+        )}
+        {isAccept && <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />}
+        {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} index={pendingIndex} />}
       </main>
     );
   }
 }
 
-export default Main;
+const mapStateToProps = state => {
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    },
+    setCurrentIndex: value => {
+      dispatch(actions.setCurrentIndex(value));
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Main);
