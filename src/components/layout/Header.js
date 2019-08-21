@@ -1,11 +1,11 @@
-import React, { PureComponent } from "react";
-import styled from "styled-components";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
-import { rem, FlexBox } from "src/components/elements/Common";
-import Icon from "src/components/elements/Icon";
-import TextField from "@material-ui/core/TextField";
-import { callView, getAccountInfo, getTagsInfo } from "../../helper";
+import React, { PureComponent } from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { rem, FlexBox } from 'src/components/elements/Common';
+import Icon from 'src/components/elements/Icon';
+import TextField from '@material-ui/core/TextField';
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
 
 const Container = styled.header`
   width: 100%;
@@ -108,7 +108,7 @@ class Header extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      username: "anonymous"
+      username: 'anonymous',
     };
   }
 
@@ -117,8 +117,8 @@ class Header extends PureComponent {
   }
   async loaddata() {
     const { address } = this.props;
-    const reps = await getTagsInfo(address);
-    this.setState({ username: reps["display-name"] });
+    const reps = await getAlias(address);
+    this.setState({ username: reps });
   }
 
   render() {
@@ -161,9 +161,9 @@ class Header extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, userInfo } = state;
+  const { propose, userInfo, account } = state;
   return {
-    address: userInfo.address
+    address: account.address,
   };
 };
 
@@ -171,7 +171,7 @@ const mapDispatchToProps = dispatch => {
   return {
     setPropose: value => {
       dispatch(actions.setPropose(value));
-    }
+    },
   };
 };
 

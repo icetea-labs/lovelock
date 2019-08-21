@@ -141,6 +141,24 @@ export async function isAliasRegisted(username) {
     throw err;
   }
 }
+export async function getAlias(address) {
+  try {
+    let info = await tweb3
+      .contract('system.alias')
+      .methods.byAddress(address)
+      .call();
+
+    if (info) {
+      info = info.split('.');
+      info = info[1];
+    }
+    // console.log('info', info);
+    return info;
+  } catch (err) {
+    console.log(tryStringifyJson(err));
+    throw err;
+  }
+}
 export async function registerAlias(username, address, privateKey) {
   try {
     tweb3.wallet.importAccount(privateKey);
