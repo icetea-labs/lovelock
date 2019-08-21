@@ -1,7 +1,7 @@
-import React, { PureComponent } from "react";
-import styled from "styled-components";
-import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
-import { callView, getAccountInfo, getTagsInfo } from "../../helper";
+import React, { PureComponent } from 'react';
+import styled from 'styled-components';
+import { FlexBox, FlexWidthBox, rem } from '../elements/Common';
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
 
 const WarrperAcceptedPromise = styled.div`
   display: flex;
@@ -34,7 +34,7 @@ class PromiseLeftPending extends PureComponent {
     this.state = {
       basePropose: [],
       newPropose: [],
-      index: ""
+      index: '',
     };
   }
 
@@ -60,7 +60,7 @@ class PromiseLeftPending extends PureComponent {
 
   async loaddata() {
     let { propose, address } = this.props;
-    console.log("check propose", propose);
+    console.log('check propose', propose);
     let tmp = [];
     if (!propose) propose = [];
     for (let i = 0; i < propose.length; i++) {
@@ -68,8 +68,9 @@ class PromiseLeftPending extends PureComponent {
       if (obj.status === 0) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const reps = await getTagsInfo(addr);
-        obj.name = reps["display-name"];
-        obj.nick = "@" + reps.username;
+        const name = await getAlias(addr);
+        obj.name = name;
+        obj.nick = '@' + reps.username;
         obj.index = i;
         tmp.push(obj);
       }

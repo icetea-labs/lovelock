@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { connect } from "react-redux";
 import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
 import tweb3 from "../../service/tweb3";
-import { callView, getAccountInfo, getTagsInfo } from "../../helper";
+import { callView, getAccountInfo, getTagsInfo, getAlias } from "../../helper";
 import * as actions from "../../store/actions";
 
 const TopContainerBox = styled.div`
