@@ -1,18 +1,23 @@
-import { actionTypes } from "../actions/propose";
+import { actionTypes } from '../actions/propose';
 
 const initialState = {
   propose: [],
-  currentProIndex: 0
+  currentProIndex: 0,
+  memory: [],
 };
 const userInfo = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_PROPOSE:
       return Object.assign({}, state, {
-        propose: action.data
+        propose: action.data,
       });
     case actionTypes.SET_CURRENTIDX:
       return Object.assign({}, state, {
-        currentProIndex: action.data
+        currentProIndex: action.data,
+      });
+    case actionTypes.SET_MEMORY:
+      return Object.assign({}, state, {
+        memory: action.data,
       });
     default:
       return state;
