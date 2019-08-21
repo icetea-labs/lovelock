@@ -199,7 +199,30 @@ class Main extends React.Component {
       date: new Date(),
       file: '',
       memoryContent: '',
+      address: '',
+      propose: [],
     };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { propose, address } = nextProps;
+    let value = {};
+    if (address !== prevState.address) {
+      value = Object.assign({}, { address });
+    }
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
+      value = Object.assign({}, { propose });
+    }
+    if (value) return value;
+    return null;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { address } = this.state;
+
+    if (prevState.address !== address) {
+      this.loadAllPropose();
+    }
   }
 
   componentDidMount() {
@@ -209,7 +232,7 @@ class Main extends React.Component {
   async loadAllPropose() {
     const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
-    // console.log("address", address);
+    console.log(' loadAllPropose address', address);
     const allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);
@@ -384,7 +407,7 @@ class Main extends React.Component {
                 </div>
                 <div className="title">Pending promise</div>
                 <div>
-                  <PromiseLeftPending propose={propose} address={address} openPendingPromise={this.openPending} />
+                  <PromiseLeftPending address={address} openPendingPromise={this.openPending} />
                 </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>

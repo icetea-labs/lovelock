@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { FlexBox, FlexWidthBox, rem } from '../elements/Common';
 import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
+import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.div`
   display: flex;
@@ -35,14 +36,20 @@ class PromiseLeftPending extends PureComponent {
       basePropose: [],
       newPropose: [],
       index: '',
+      address: '',
     };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose } = nextProps;
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
-      return { basePropose: propose };
+    const { propose, address } = nextProps;
+    let value = {};
+    if (address !== prevState.address) {
+      value = Object.assign({}, { address });
     }
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
+      value = Object.assign({}, { basePropose: propose });
+    }
+    if (value) return value;
     return null;
   }
 
@@ -51,9 +58,9 @@ class PromiseLeftPending extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { basePropose } = this.state;
+    const { basePropose, address } = this.state;
 
-    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose)) {
+    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) || prevState.address !== address) {
       this.loaddata();
     }
   }
@@ -104,4 +111,18 @@ class PromiseLeftPending extends PureComponent {
   }
 }
 
-export default PromiseLeftPending;
+const mapStateToProps = state => {
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(PromiseLeftPending);

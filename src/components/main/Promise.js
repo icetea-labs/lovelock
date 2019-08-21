@@ -1,27 +1,28 @@
-import React from "react";
-import styled from "styled-components";
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
-import CustomPost from "./CustomPost";
-import CommonDialog from "./CommonDialog";
-import tweb3 from "../../service/tweb3";
-import { saveToIpfs } from "../../helper";
+import React from 'react';
+import styled from 'styled-components';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import CustomPost from './CustomPost';
+import CommonDialog from './CommonDialog';
+import tweb3 from '../../service/tweb3';
+import { saveToIpfs } from '../../helper';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
   container: {
-    display: "flex",
-    flexWrap: "wrap"
+    display: 'flex',
+    flexWrap: 'wrap',
   },
   textField: {
     marginLeft: theme.spacing(0),
     marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(4)
+    marginBottom: theme.spacing(4),
   },
   textMulti: {
     marginLeft: theme.spacing(0),
     marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(1)
-  }
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 function TextFieldPlaceholder(props) {
@@ -50,18 +51,18 @@ class Promise extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      partner: "",
-      promiseStm: "",
+      partner: '',
+      promiseStm: '',
       date: new Date(),
-      file: "",
-      hash: ""
+      file: '',
+      hash: '',
     };
   }
 
   partnerChange = e => {
     const value = e.target.value;
     this.setState({
-      partner: value
+      partner: value,
     });
     // console.log("view partnerChange", value);
   };
@@ -69,36 +70,35 @@ class Promise extends React.Component {
   promiseStmChange = e => {
     const value = e.target.value;
     this.setState({
-      promiseStm: value
+      promiseStm: value,
     });
     // console.log("view promiseStmChange", value);
   };
 
   onChangeCus = (date, file) => {
-    console.log("view Date", date);
-    console.log("view File", file);
+    console.log('view Date', date);
+    console.log('view File', file);
     this.setState({ date, file });
   };
 
   async createPropose(partner, promiseStm, date, file) {
+    const { privateKey, address } = this.props;
     const hash = await saveToIpfs(file);
     // const hash = "QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM";
+    tweb3.wallet.importAccount(privateKey);
+    tweb3.wallet.defaultAccount = address;
     const ct = tweb3.contract(process.env.contract);
     // const { address } = tweb3.wallet.createAccount();
     let info = {
       date: date,
-      hash: hash
+      hash: hash,
     };
     info = JSON.stringify(info);
-    const name = "createPropose";
-    const result = await ct.methods[name](
-      promiseStm,
-      partner,
-      info
-    ).sendCommit();
+    const name = 'createPropose';
+    const result = await ct.methods[name](promiseStm, partner, info).sendCommit();
     // console.log("View result", result);
     if (result) {
-      window.alert("Success");
+      window.alert('Success');
       this.props.close();
     }
   }
@@ -145,7 +145,21 @@ class Promise extends React.Component {
 
 Promise.defaultProps = {
   send() {},
-  close() {}
+  close() {},
 };
 
-export default Promise;
+const mapStateToProps = state => {
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(Promise);
