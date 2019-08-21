@@ -1,9 +1,9 @@
-import React from "react";
-import styled from "styled-components";
-import CommonDialog from "./CommonDialog";
-import { TagTitle } from "./Promise";
+import React from 'react';
+import styled from 'styled-components';
+import CommonDialog from './CommonDialog';
+import { TagTitle } from './Promise';
 // import PromiseConfirm from "./PromiseConfirm";
-import { callView, getAccountInfo, getTagsInfo } from "../../helper";
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
 
 const ImgView = styled.div`
   margin: 31px 0 31px;
@@ -13,9 +13,9 @@ class PromiseAlert extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      sender: "",
-      info: "",
-      content: ""
+      sender: '',
+      info: '',
+      content: '',
     };
   }
 
@@ -32,11 +32,12 @@ class PromiseAlert extends React.Component {
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       const reps = await getTagsInfo(addr);
-      obj.name = reps["display-name"];
+      const name = await getAlias(addr);
+      obj.name = name;
       this.setState({
         sender: obj.name,
         info: JSON.parse(obj.info),
-        content: obj.s_content
+        content: obj.s_content,
       });
     }
   }
@@ -45,7 +46,7 @@ class PromiseAlert extends React.Component {
     const { deny, close, accept, index } = this.props;
     const { sender, info, content } = this.state;
     const hash = info.hash;
-    console.log("view state", this.state);
+    console.log('view state', this.state);
     return (
       <div>
         <CommonDialog
@@ -59,7 +60,7 @@ class PromiseAlert extends React.Component {
         >
           <TagTitle>{sender} send you a promise</TagTitle>
           <ImgView>
-            <img src={"https://ipfs.io/ipfs/" + hash} className="postImg" />
+            <img src={'https://ipfs.io/ipfs/' + hash} className="postImg" />
           </ImgView>
           <p>{content}</p>
         </CommonDialog>
@@ -73,7 +74,7 @@ PromiseAlert.defaultProps = {
   index: 0,
   deny() {},
   accept() {},
-  close() {}
+  close() {},
 };
 
 export default PromiseAlert;

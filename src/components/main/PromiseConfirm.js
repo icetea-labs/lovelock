@@ -1,17 +1,18 @@
-import React from "react";
-import styled from "styled-components";
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
-import CommonDialog from "./CommonDialog";
-import { TagTitle } from "./Promise";
-import tweb3 from "../../service/tweb3";
+import React from 'react';
+import styled from 'styled-components';
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import CommonDialog from './CommonDialog';
+import { TagTitle } from './Promise';
+import tweb3 from '../../service/tweb3';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
     marginLeft: theme.spacing(0),
     marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(1)
-  }
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 function TextFieldMultiLine(props) {
@@ -27,32 +28,34 @@ class PromiseConfirm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      messageAccept: "",
-      messageDeny: ""
+      messageAccept: '',
+      messageDeny: '',
     };
   }
 
   messageAcceptChange = e => {
     const value = e.target.value;
     this.setState({
-      messageAccept: value
+      messageAccept: value,
     });
   };
 
   messageDenyChange = e => {
     const value = e.target.value;
     this.setState({
-      messageDeny: value
+      messageDeny: value,
     });
   };
 
   async messageAccept(message) {
-    const { index } = this.props;
+    const { index, privateKey, address } = this.props;
     try {
       const ct = tweb3.contract(process.env.contract);
-      const name = "acceptPropose";
+      const name = 'acceptPropose';
+      tweb3.wallet.importAccount(privateKey);
+      tweb3.wallet.defaultAccount = address;
       const result = await ct.methods[name](index, message).sendCommit();
-      console.log("View result", result);
+      console.log('View result', result);
       if (result) {
         // window.alert("send success");
         // notifi.info("Success!");
@@ -67,11 +70,11 @@ class PromiseConfirm extends React.Component {
     const { index } = this.props;
     try {
       const ct = tweb3.contract(process.env.contract);
-      const name = "cancelPropose";
+      const name = 'cancelPropose';
       const result = await ct.methods[name](index, message).sendCommit();
-      console.log("View result", result);
+      console.log('View result', result);
       if (result) {
-        window.alert("Success");
+        window.alert('Success');
         // notifi.info("Success!");
         this.props.close();
       }
@@ -99,9 +102,7 @@ class PromiseConfirm extends React.Component {
         }}
         isCancel
       >
-        <TagTitle>
-          {isDeny ? "Your message (optional)" : "Your message"}
-        </TagTitle>
+        <TagTitle>{isDeny ? 'Your message (optional)' : 'Your message'}</TagTitle>
         {isDeny ? (
           <TextFieldMultiLine
             id="outlined-multiline-static"
@@ -139,7 +140,21 @@ PromiseConfirm.defaultProps = {
   isDeny: false,
   index: 0,
   send() {},
-  close() {}
+  close() {},
 };
 
-export default PromiseConfirm;
+const mapStateToProps = state => {
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(PromiseConfirm);

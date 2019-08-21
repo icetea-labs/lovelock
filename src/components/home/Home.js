@@ -208,7 +208,7 @@ class Home extends React.Component {
   async loadAllPropose() {
     const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
-    // console.log("address", address);
+    console.log('address', address);
     const allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);

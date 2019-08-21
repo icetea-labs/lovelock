@@ -1,8 +1,8 @@
-import React, { PureComponent } from "react";
-import styled from "styled-components";
-import { FlexBox, FlexWidthBox, rem } from "../elements/Common";
-import { callView, getAccountInfo, getTagsInfo } from "../../helper";
-import { stringify } from "querystring";
+import React, { PureComponent } from 'react';
+import styled from 'styled-components';
+import { FlexBox, FlexWidthBox, rem } from '../elements/Common';
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
+import { stringify } from 'querystring';
 
 const WarrperAcceptedPromise = styled.div`
   display: flex;
@@ -34,7 +34,7 @@ class PromiseLeft extends PureComponent {
     super(props);
     this.state = {
       basePropose: [],
-      newPropose: []
+      newPropose: [],
     };
   }
 
@@ -68,8 +68,9 @@ class PromiseLeft extends PureComponent {
       if (obj.status === 1) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const reps = await getTagsInfo(addr);
-        obj.name = reps["display-name"];
-        obj.nick = "@" + reps.username;
+        const name = await getAlias(addr);
+        obj.name = name;
+        obj.nick = '@' + reps.username;
         obj.index = i;
         tmp.push(obj);
       }
@@ -83,10 +84,7 @@ class PromiseLeft extends PureComponent {
 
     return newPropose.map(item => {
       return (
-        <WarrperAcceptedPromise
-          key={item.index}
-          onClick={() => handlerSelectPropose(item.index)}
-        >
+        <WarrperAcceptedPromise key={item.index} onClick={() => handlerSelectPropose(item.index)}>
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="echo_bot" />
           </div>

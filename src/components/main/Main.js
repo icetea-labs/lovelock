@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { callView, getAccountInfo, getTagsInfo } from '../../helper';
+import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
 import * as actions from '../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../elements/Common';
 import Icon from 'src/components/elements/Icon';
@@ -199,7 +199,30 @@ class Main extends React.Component {
       date: new Date(),
       file: '',
       memoryContent: '',
+      address: '',
+      propose: [],
     };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { propose, address } = nextProps;
+    let value = {};
+    if (address !== prevState.address) {
+      value = Object.assign({}, { address });
+    }
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
+      value = Object.assign({}, { propose });
+    }
+    if (value) return value;
+    return null;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { address } = this.state;
+
+    if (prevState.address !== address) {
+      this.loadAllPropose();
+    }
   }
 
   componentDidMount() {
@@ -209,7 +232,7 @@ class Main extends React.Component {
   async loadAllPropose() {
     const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
-    // console.log("address", address);
+    console.log(' loadAllPropose address', address);
     const allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);
@@ -223,7 +246,8 @@ class Main extends React.Component {
       if (obj.status === 1) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const reps = await getTagsInfo(addr);
-        obj.name = reps['display-name'];
+        const name = await getAlias(addr);
+        obj.name = name;
         obj.nick = '@' + reps.username;
         obj.index = i;
         tmp.push(obj);
@@ -247,7 +271,8 @@ class Main extends React.Component {
       const obj = allMemory[i];
       obj.info = JSON.parse(obj.info);
       const sender = await getTagsInfo(obj.sender);
-      obj.senderName = sender['display-name'];
+      const name = await getAlias(addr);
+      obj.name = name;
       obj.index = [i];
       newMemoryList.push(obj);
     }
@@ -382,7 +407,7 @@ class Main extends React.Component {
                 </div>
                 <div className="title">Pending promise</div>
                 <div>
-                  <PromiseLeftPending propose={propose} address={address} openPendingPromise={this.openPending} />
+                  <PromiseLeftPending address={address} openPendingPromise={this.openPending} />
                 </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
