@@ -1,5 +1,4 @@
-import React from 'react';
-import styled from 'styled-components';
+import styled from "styled-components";
 
 const Footer = styled.div`
   grid-area: footer;
@@ -9,7 +8,8 @@ const Footer = styled.div`
 const FooterText = styled.p`
   text-align: center;
   color: #ddd;
-  font-family: 'Avenir Roman', 'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Avenir Roman", "proxima-nova", "Helvetica Neue", Helvetica,
+    Arial, sans-serif;
   font-size: 14px;
   line-height: 18px;
   margin: 8px;

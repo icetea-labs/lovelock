@@ -1,9 +1,14 @@
-import React from 'react';
-
-import styled from 'styled-components';
-import { rem, FlexBox, pc, mobile, media } from '../elements/Common';
-import Header from './Header';
-import Footer from './Footer';
+import styled from "styled-components";
+import {
+  rem,
+  FlexBox,
+  pc,
+  mobile,
+  media
+} from "src/components/elements/Common";
+import Head from "next/head";
+import Header from "src/components/layout/Header";
+import Footer from "src/components/layout/Footer";
 
 const Container = styled.div`
   flex-direction: column;
@@ -28,6 +33,9 @@ const Content = styled.div`
 
 const Layout = ({ children, title }) => (
   <Container>
+    <Head>
+      <title>{title}</title>
+    </Head>
     <Header />
     <Content> {children} </Content>
     <Footer />
@@ -35,6 +43,9 @@ const Layout = ({ children, title }) => (
 );
 const HomeLayout = ({ children, title }) => (
   <Container>
+    <Head>
+      <title>{title}</title>
+    </Head>
     <Header />
     <Content> {children} </Content>
     <Footer />
