@@ -7,6 +7,7 @@ import Login from './components/pages/Authen/Login';
 import Register from './components/pages/Authen/Register';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import GlobaLoading from './components/elements/GlobaLoading';
+import Main from './components/pages/Timeline';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -20,9 +21,10 @@ class App extends Component {
       <div className="App">
         <Router>
           <Switch>
-            <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
+            <RouteWithLayout layout={HomeLayout} exact path="/home" component={Home} />
+            <RouteWithLayout layout={HomeLayout} exact path="/" component={Main} />
             {/* <Route component={NotFound} /> */}
           </Switch>
         </Router>
