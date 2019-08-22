@@ -6,6 +6,15 @@ import InputBase from '@material-ui/core/InputBase';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
 import Icon from '../../elements/Icon';
 
+import TopContrainer from './TopContrainer';
+// import MessageHistory from './MessageHistory';
+// import Promise from './Promise';
+import CustomPost from './CustomPost';
+// import PromiseAlert from './PromiseAlert';
+// import PromiseConfirm from './PromiseConfirm';
+// import PromiseLeftAccept from './PromiseLeftAccept';
+// import PromiseLeftPending from './PromiseLeftPending';
+
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
 `;
@@ -59,8 +68,10 @@ const RightBox = styled.div`
     display: flex;
     width: 100%;
     .user_avatar {
-      width: 58px;
-      height: 58px;
+      img {
+        width: 58px;
+        height: 58px;
+      }
       border-radius: 10px;
       overflow: hidden;
       margin-right: ${rem(10)};
@@ -198,6 +209,12 @@ class Main extends PureComponent {
     });
   };
 
+  onChangeCus = (date, file) => {
+    console.log('view Date', date);
+    console.log('view File', file);
+    this.setState({ date, file });
+  };
+
   render() {
     const {
       tag,
@@ -215,7 +232,9 @@ class Main extends PureComponent {
     return (
       <React.Fragment>
         <BannerContainer>
-          <ShadowBox>{/* <TopContrainer proIndex={proIndex} /> */}</ShadowBox>
+          <ShadowBox>
+            <TopContrainer proIndex={proIndex} />
+          </ShadowBox>
         </BannerContainer>
 
         <FlexBox wrap="wrap">
@@ -260,7 +279,7 @@ class Main extends PureComponent {
                     </div>
                   </div>
                 </div>
-                {/* <CustomPost avatarShow onChange={this.onChangeCus} /> */}
+                <CustomPost avatarShow onChange={this.onChangeCus} />
               </div>
 
               <div className="action">
