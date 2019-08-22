@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { rem, FlexBox } from '../elements/Common';
 import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
+import { getAlias } from '../../helper';
 
 const Container = styled.header`
   width: 100%;
@@ -107,7 +108,7 @@ class Header extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      username: 'anonymous',
+      username: '',
       address: '',
     };
   }
@@ -130,12 +131,13 @@ class Header extends PureComponent {
       this.loaddata();
     }
   }
+
   async loaddata() {
     const { address } = this.props;
     console.log('address', address);
-    // const reps = await getAlias(address);
+    const reps = await getAlias(address);
     // console.log('reps', reps);
-    // this.setState({ username: reps });
+    this.setState({ username: reps });
   }
 
   goRegister = () => {
@@ -162,9 +164,10 @@ class Header extends PureComponent {
             <React.Fragment>
               <SearchBox>
                 <input type="text" name="" placeholder="Search" />
-                <a className="search-bt">
+                {/* <a className="search-bt">
                   <Icon type="search" />
-                </a>
+                </a> */}
+                <Icon type="search" />
               </SearchBox>
               <FlexBox flex={1} justify="flex-end">
                 <MenuItem>

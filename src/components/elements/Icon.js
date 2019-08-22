@@ -22,7 +22,7 @@ import Icon from '@material-ui/core/Icon';
 
 export default function Icons({ type, className, ...rest }) {
   // const classes = useStyles();
-  // return <Icon >{type}</Icon>;className={className ? 'material-icons '.concat(className) : 'material-icons'}
+  return <i className={className ? 'material-icons '.concat(className) : 'material-icons'}>{type}</i>;
 
-  return <Icon>{type}</Icon>;
+  // return <Icon>{type}</Icon>;
 }

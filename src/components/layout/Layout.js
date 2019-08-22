@@ -23,7 +23,7 @@ const Content = styled.div`
   align-items: center;
   width: ${rem(960)};
   margin: 0 auto;
-  margin-top: 114px;
+  margin-top: 95px;
 `;
 
 const Layout = ({ children, title }) => (
