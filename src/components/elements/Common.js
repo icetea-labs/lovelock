@@ -102,3 +102,23 @@ export const LayoutDisplay = styled.div`
   z-index: 1100;
   background: rgba(0, 0, 0, 0.4);
 `;
+export const DivControlBtnKeystore = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px 0 0 0;
+  font-size: 14px;
+  @media (min-width: 320px) and (max-width: 623px) {
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    height: 70px;
+    .previous-button {
+      order: 1;
+    }
+    .download-keystore {
+      order: 0;
+      margin-top: 20px;
+    }
+  }
+`;
