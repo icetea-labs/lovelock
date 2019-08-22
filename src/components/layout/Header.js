@@ -1,11 +1,11 @@
-import React, { PureComponent } from 'react';
-import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { rem, FlexBox } from '../elements/Common';
-import Icon from '../elements/Icon';
-import Button from '@material-ui/core/Button';
-import { getAlias } from '../../helper';
+import React, { PureComponent } from "react";
+import styled from "styled-components";
+import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { rem, FlexBox } from "../elements/Common";
+import Icon from "../elements/Icon";
+import Button from "@material-ui/core/Button";
+import { getAlias } from "../../helper";
 
 const Container = styled.header`
   width: 100%;
@@ -108,14 +108,14 @@ class Header extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
-      address: '',
+      username: "",
+      address: ""
     };
   }
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.address !== prevState.address) {
       return {
-        address: nextProps.address,
+        address: nextProps.address
       };
     } else {
       return null;
@@ -131,10 +131,9 @@ class Header extends PureComponent {
       this.loaddata();
     }
   }
-
   async loaddata() {
     const { address } = this.props;
-    console.log('address', address);
+    console.log("address", address);
     const reps = await getAlias(address);
     // console.log('reps', reps);
     this.setState({ username: reps });
@@ -142,12 +141,12 @@ class Header extends PureComponent {
 
   goRegister = () => {
     const { history } = this.props;
-    history.push('/register');
+    history.push("/register");
   };
 
   goLogin = () => {
     const { history } = this.props;
-    history.push('/login');
+    history.push("/login");
   };
   render() {
     const { username } = this.state;
@@ -191,12 +190,20 @@ class Header extends PureComponent {
           ) : (
             <FlexBox flex={1} justify="flex-end">
               <MenuItem>
-                <Button variant="contained" color="primary" onClick={this.goLogin}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={this.goLogin}
+                >
                   Login
                 </Button>
               </MenuItem>
               <MenuItem>
-                <Button variant="contained" color="primary" onClick={this.goRegister}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={this.goRegister}
+                >
                   Register
                 </Button>
               </MenuItem>
@@ -211,7 +218,7 @@ class Header extends PureComponent {
 const mapStateToProps = state => {
   const { account } = state;
   return {
-    address: account.address,
+    address: account.address
   };
 };
 
@@ -219,7 +226,7 @@ const mapDispatchToProps = dispatch => {
   return {
     setPropose: value => {
       // dispatch(actions.setPropose(value));
-    },
+    }
   };
 };
 

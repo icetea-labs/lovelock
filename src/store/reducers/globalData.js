@@ -1,20 +1,20 @@
-import { actionTypes } from '../actions/globalData';
+import { actionTypes } from "../actions/globalData";
 
 const initialState = {
   isLoading: false,
   showNotLoginNotify: false,
-  triggerElement: null,
+  triggerElement: null
 };
 
 const globalData = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_GLOBAL_LOADING:
       return Object.assign({}, state, {
-        isLoading: action.data,
+        isLoading: action.data
       });
     case actionTypes.SET_CONFIRM_AUTH_ELE:
       return Object.assign({}, state, {
-        triggerElement: action.data,
+        triggerElement: action.data
       });
     // case types.SET_SHOW_PRIVATEKEY:
     //   return {
