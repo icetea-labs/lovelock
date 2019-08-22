@@ -1,7 +1,9 @@
 import { actionTypes } from "../actions/globalData";
 
 const initialState = {
-  isLoading: false
+  isLoading: false,
+  showNotLoginNotify: false,
+  triggerElement: null
 };
 
 const globalData = (state = initialState, action) => {
@@ -10,6 +12,15 @@ const globalData = (state = initialState, action) => {
       return Object.assign({}, state, {
         isLoading: action.data
       });
+    case actionTypes.SET_CONFIRM_AUTH_ELE:
+      return Object.assign({}, state, {
+        triggerElement: action.data
+      });
+    // case types.SET_SHOW_PRIVATEKEY:
+    //   return {
+    //     ...state,
+    //     triggerElement: action.data
+    //   }
     default:
       return state;
   }
