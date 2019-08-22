@@ -2,10 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-// import * as actions from '../../../store/actions/create';
-// import { Button } from '../../elements';
-// import { Icon } from '../../elements/utils';
-// import success from '../../../assets/img/success.svg';
 import * as actionCreate from '../../../../store/actions/create';
 import Button from '@material-ui/core/Button';
 const WrapperImg = styled.div`

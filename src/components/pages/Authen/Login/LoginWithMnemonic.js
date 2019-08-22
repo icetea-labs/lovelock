@@ -1,12 +1,13 @@
 import React, { PureComponent } from 'react';
-import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { callView, isAliasRegisted, wallet } from '../../../../helper';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { wallet } from '../../../../helper';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-// import * as acGlobal from 'src/store/actions/globalData';
-// import * as actions from 'src/store/actions/create';
+import * as actionGlobal from '../../../../store/actions/globalData';
+import * as actionAccount from '../../../../store/actions/account';
+import * as actionCreate from '../../../../store/actions/create';
 
 import { DivControlBtnKeystore } from '../../../elements/Common';
 
@@ -45,22 +46,23 @@ class LoginWithMnemonic extends PureComponent {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
   _keydown = e => {
-    const { props } = this;
     e.keyCode === 13 && this.gotoLogin();
   };
   gotoLogin = async () => {
     const { mnemonic, password } = this.state;
-    const { setUsername, setStep, setLoading, setAccount } = this.props;
+    const { setLoading, setAccount, history } = this.props;
     try {
-      console.log('mnemonic', mnemonic);
-      const privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
-      const address = wallet.getAddressFromPrivateKey(privateKey);
-      const account = { address, privateKey, cipher: password };
-      setAccount(account);
-      localStorage.setItem('user', JSON.stringify(account));
-      // Router.push('/timeline');
-      window.location.pathname = '/timeline';
-      console.log('account', account);
+      setLoading(true);
+      setTimeout(async () => {
+        const privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
+        const address = wallet.getAddressFromPrivateKey(privateKey);
+        const account = { address, privateKey, cipher: password };
+        setAccount(account);
+        localStorage.removeItem('user');
+        localStorage.setItem('user', JSON.stringify(account));
+        history.push('/');
+        setLoading(false);
+      }, 500);
     } catch (err) {
       throw err;
     }
@@ -133,20 +135,17 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setUsername: value => {
-      // dispatch(actions.setUsername(value));
-    },
     // setPassword: value => {
     //   dispatch(actions.setPassword(value));
     // },
     setAccount: value => {
-      // dispatch(actions.setAccount(value));
+      dispatch(actionAccount.setAccount(value));
     },
     setStep: value => {
-      // dispatch(actions.setStep(value));
+      dispatch(actionCreate.setStep(value));
     },
     setLoading: value => {
-      // dispatch(acGlobal.setLoading(value));
+      dispatch(actionGlobal.setLoading(value));
     },
   };
 };
@@ -155,5 +154,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(LoginWithMnemonic)
+  )(withRouter(LoginWithMnemonic))
 );

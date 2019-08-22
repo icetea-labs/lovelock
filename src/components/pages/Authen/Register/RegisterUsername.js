@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { callView, isAliasRegisted, wallet } from '../../../../helper';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { isAliasRegisted, wallet } from '../../../../helper';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
