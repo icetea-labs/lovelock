@@ -71,7 +71,7 @@ const ContWrap = styled.div`
 `;
 
 const Action = styled.div`
-  .action {
+  .actionConfirm {
     width: 100%;
     margin: 40px 0 16px;
     justify-content: center;
@@ -129,7 +129,7 @@ class CommonDialog extends React.Component {
               <ContWrap>
                 {children}
                 <Action>
-                  <div className="action">
+                  <div className="actionConfirm">
                     {isCancel && (
                       <button className="deny" type="button" disabled="" onClick={cancel}>
                         {cancelText}
