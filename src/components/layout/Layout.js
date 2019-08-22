@@ -30,14 +30,14 @@ const Layout = ({ children, title }) => (
   <Container>
     <Header />
     <Content> {children} </Content>
-    <Footer />
+    {/* <Footer /> */}
   </Container>
 );
 const HomeLayout = ({ children, title }) => (
   <Container>
     <Header />
     <Content> {children} </Content>
-    <Footer />
+    {/* <Footer /> */}
   </Container>
 );
 export { HomeLayout, Layout };

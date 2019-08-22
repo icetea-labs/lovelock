@@ -1,13 +1,13 @@
 import React, { PureComponent } from 'react';
-import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { callView, isAliasRegisted, wallet } from '../../../../helper';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
-// import * as acGlobal from 'src/store/actions/globalData';
-// import * as actions from 'src/store/actions/create';
+import * as actionGlobal from '../../../../store/actions/globalData';
+import * as actionAccount from '../../../../store/actions/account';
+import * as actionCreate from '../../../../store/actions/create';
 
 import { DivControlBtnKeystore } from '../../../elements/Common';
 
@@ -39,12 +39,11 @@ class RegisterUsername extends PureComponent {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
   _keydown = e => {
-    const { props } = this;
     e.keyCode === 13 && this.gotoNext();
   };
   gotoNext = async () => {
     const { username } = this.state;
-    const { setUsername, setStep, setLoading, setAccount } = this.props;
+    const { setStep, setLoading, setAccount } = this.props;
 
     if (username) {
       const resp = await isAliasRegisted(username);
@@ -57,13 +56,13 @@ class RegisterUsername extends PureComponent {
         setTimeout(async () => {
           const account = await this._createAccountWithMneomnic();
           setAccount({
+            username: username,
+            address: account.address,
             privateKey: account.privateKey,
             mnemonic: account.mnemonic,
-            address: account.address,
-            step: 'two',
-            username: username,
           });
-          // setLoading(false);
+          setLoading(false);
+          setStep('two');
         }, 500);
       }
     } else {
@@ -126,20 +125,17 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setUsername: value => {
-      // dispatch(actions.setUsername(value));
-    },
     // setPassword: value => {
     //   dispatch(actions.setPassword(value));
     // },
     setAccount: value => {
-      // dispatch(actions.setAccount(value));
+      dispatch(actionAccount.setAccount(value));
     },
     setStep: value => {
-      // dispatch(actions.setStep(value));
+      dispatch(actionCreate.setStep(value));
     },
     setLoading: value => {
-      // dispatch(acGlobal.setLoading(value));
+      dispatch(actionGlobal.setLoading(value));
     },
   };
 };

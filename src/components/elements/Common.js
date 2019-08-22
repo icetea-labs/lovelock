@@ -40,6 +40,7 @@ export const FlexBox = styled.div`
   flex: ${props => props.flex};
   padding: ${props => props.padding};
   height: ${props => props.height};
+  width: ${props => props.width};
   flex-wrap: ${props => props.wrap};
   margin: ${props => props.margin};
   margin-top: ${props => props.marginTop};

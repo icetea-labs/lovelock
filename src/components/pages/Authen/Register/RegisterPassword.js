@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { callView, isAliasRegisted, registerAlias } from '../../../../helper';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -18,8 +19,12 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-
 import { DivControlBtnKeystore, FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
+import * as actionGlobal from '../../../../store/actions/globalData';
+import * as actionAccount from '../../../../store/actions/account';
+import * as actionCreate from '../../../../store/actions/create';
+import notifi from '../../../elements/Notification';
+
 // import "date-fns";
 // import DateFnsUtils from "@date-io/date-fns";
 // import {
@@ -92,21 +97,25 @@ class RegisterPassword extends PureComponent {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
   _keydown = e => {
-    const { props } = this;
     e.keyCode === 13 && this.gotoRegister();
   };
   gotoRegister = async () => {
     const { password } = this.state;
-    const { setAccount, setStep, username, address, privateKey } = this.props;
+    const { history, username, address, privateKey } = this.props;
+    const { setAccount, setLoading, setStep } = this.props;
     // console.log('username', username, address);
     const resp = await registerAlias(username, address, privateKey);
     if (resp) {
-      const account = { address, privateKey, cipher: password };
-      setAccount(account);
-      localStorage.removeItem('user');
-      localStorage.setItem('user', JSON.stringify({ address, privateKey }));
-      window.location.pathname = '/timeline';
-      // Router.push('/timeline');
+      setLoading(true);
+      setTimeout(async () => {
+        const account = { address, privateKey, cipher: password };
+        setAccount(account);
+        localStorage.removeItem('user');
+        localStorage.setItem('user', JSON.stringify({ address, privateKey }));
+        setLoading(false);
+        // history.push('/');
+        setStep('three');
+      }, 500);
     }
     console.log('resp', resp);
   };
@@ -137,65 +146,66 @@ class RegisterPassword extends PureComponent {
     const { classes, address, privateKey, mnemonic, username } = this.props;
 
     return (
-      <FlexBox wrap="wrap" width="900px">
-        <FlexWidthBox width="60%">
-          <WrapperLeftBox>
-            <p className="titleKey">Address:</p>
-            <FlexBox justify="space-between">
-              <code>{address}</code>
-              <i className="material-icons">file_copy</i>
-            </FlexBox>
-            <p className="titleKey">Private key:</p>
-            <FlexBox justify="space-between">
-              <code>{privateKey}</code>
-              <i className="material-icons">file_copy</i>
-            </FlexBox>
-            <p className="titleKey">Mnemonic phrase:</p>
-            <FlexBox justify="space-between">
-              <code>{mnemonic}</code>
-              <i className="material-icons">file_copy</i>
-            </FlexBox>
-            <p className="txNote">
-              * Private key is generated from client side and cannot restore once lost. Please backup private
-              key/mnemonic carefully.
-            </p>
-          </WrapperLeftBox>
-        </FlexWidthBox>
-        <FlexWidthBox width="40%">
-          <TextField id="username" label="Username" value={username} disabled fullWidth margin="normal" />
-          <TextField
-            id="password"
-            label="Password"
-            placeholder="Password"
-            helperText={rePassErr}
-            error={rePassErr !== ''}
-            fullWidth
-            margin="normal"
-            onChange={this.handleUsername}
-            type={showPassword ? 'text' : 'password'}
-          />
-          <TextField
-            id="rePassword"
-            label="Confirm Password"
-            placeholder="Confirm your password"
-            helperText={rePassErr}
-            error={rePassErr !== ''}
-            fullWidth
-            margin="normal"
-            onChange={this.handleUsername}
-            type={showPassword ? 'text' : 'password'}
-          />
-          <RadioGroup
-            aria-label="gender"
-            name="gender1"
-            className={classes.group}
-            value={sex}
-            onChange={this.handleChangeSex}
-          >
-            <FormControlLabel value="female" control={<Radio className={classes.radio} />} label="Female" />
-            <FormControlLabel value="male" control={<Radio className={classes.radio} />} label="Male" />
-          </RadioGroup>
-          {/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <div>
+        <FlexBox wrap="wrap" width="800px">
+          <FlexWidthBox width="60%">
+            <WrapperLeftBox>
+              <p className="titleKey">Address:</p>
+              <FlexBox justify="space-between">
+                <code>{address}</code>
+                <i className="material-icons">file_copy</i>
+              </FlexBox>
+              <p className="titleKey">Private key:</p>
+              <FlexBox justify="space-between">
+                <code>{privateKey}</code>
+                <i className="material-icons">file_copy</i>
+              </FlexBox>
+              <p className="titleKey">Mnemonic phrase:</p>
+              <FlexBox justify="space-between">
+                <code>{mnemonic}</code>
+                <i className="material-icons">file_copy</i>
+              </FlexBox>
+              <p className="txNote">
+                * Private key is generated from client side and cannot restore once lost. Please backup private
+                key/mnemonic carefully.
+              </p>
+            </WrapperLeftBox>
+          </FlexWidthBox>
+          <FlexWidthBox width="40%">
+            <TextField id="username" label="Username" value={username} disabled fullWidth margin="normal" />
+            <TextField
+              id="password"
+              label="Password"
+              placeholder="Password"
+              helperText={rePassErr}
+              error={rePassErr !== ''}
+              fullWidth
+              margin="normal"
+              onChange={this.handleUsername}
+              type={showPassword ? 'text' : 'password'}
+            />
+            <TextField
+              id="rePassword"
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              helperText={rePassErr}
+              error={rePassErr !== ''}
+              fullWidth
+              margin="normal"
+              onChange={this.handleUsername}
+              type={showPassword ? 'text' : 'password'}
+            />
+            <RadioGroup
+              aria-label="gender"
+              name="gender1"
+              className={classes.group}
+              value={sex}
+              onChange={this.handleChangeSex}
+            >
+              <FormControlLabel value="female" control={<Radio className={classes.radio} />} label="Female" />
+              <FormControlLabel value="male" control={<Radio className={classes.radio} />} label="Male" />
+            </RadioGroup>
+            {/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
               disableToolbar
               variant="inline"
@@ -210,7 +220,8 @@ class RegisterPassword extends PureComponent {
               }}
             />
           </MuiPickersUtilsProvider> */}
-        </FlexWidthBox>
+          </FlexWidthBox>
+        </FlexBox>
         <DivControlBtnKeystore>
           <Button color="primary" className={classes.link} onClick={this.gotoBack}>
             Back
@@ -219,13 +230,13 @@ class RegisterPassword extends PureComponent {
             Register
           </Button>
         </DivControlBtnKeystore>
-      </FlexBox>
+      </div>
     );
   }
 }
 
 const mapStateToProps = state => {
-  const e = state.create;
+  const e = state.account;
   return {
     username: e.username,
     password: e.password,
@@ -241,14 +252,14 @@ const mapDispatchToProps = dispatch => {
     //   dispatch(actions.setPassword(value));
     // },
     setAccount: value => {
-      // dispatch(actionsAccount.setAccount(value));
+      dispatch(actionAccount.setAccount(value));
     },
     setStep: value => {
-      // dispatch(actions.setStep(value));
+      dispatch(actionCreate.setStep(value));
     },
-    // setLoading: value => {
-    //   dispatch(acGlobal.setLoading(value));
-    // }
+    setLoading: value => {
+      dispatch(actionGlobal.setLoading(value));
+    },
   };
 };
 
@@ -256,5 +267,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(RegisterPassword)
+  )(withRouter(RegisterPassword))
 );

@@ -1,8 +1,8 @@
-import React from "react";
-import "rc-notification/assets/index.css";
-import Notification from "rc-notification";
-import iconSuccess from "../../assets/img/success-icon.png";
-import iconWarning from "../../assets/img/warning-icon.png";
+import React from 'react';
+import 'rc-notification/assets/index.css';
+import Notification from 'rc-notification';
+// import iconSuccess from '/static/img/success.svg';
+// import iconWarning from '/static/img/warning.svg';
 
 let notification = null;
 
@@ -15,10 +15,10 @@ const notifi = {
     notification.notice({
       content: (
         <span className="notification">
-          <img width='20' height='20' src={iconSuccess} alt="" />
+          <img width="20" height="20" src="/static/img/success.svg" alt="" />
           {e}
         </span>
-      )
+      ),
     });
   },
   warn(e) {
@@ -26,12 +26,12 @@ const notifi = {
       duration: 5,
       content: (
         <span className="notification">
-          <img src={iconWarning} alt="" />
+          <img width="20" height="20" src="/static/img/warning.svg" alt="" />
           {e}
         </span>
-      )
+      ),
     });
-  }
+  },
 };
 
 export default notifi;

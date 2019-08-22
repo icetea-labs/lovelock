@@ -48,7 +48,7 @@ const RegisterBox = styled.div`
   }
 `;
 const ShadowBox = styled.div`
-  width: 100%;
+  /* width: 100%; */
   background: #fff;
   /* background-image: linear-gradient(0deg, #c4dcfc, #c4dcfc); */
   border: 1px solid #dee2e6 !important;
@@ -61,7 +61,7 @@ const ShadowBox = styled.div`
     box-sizing: border-box;
   }
   @media (min-width: 624px) {
-    min-width: ${rem(300)};
+    min-width: ${rem(400)};
   }
 `;
 const WrapperImgPencil = styled.div`
