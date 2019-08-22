@@ -1,15 +1,15 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { callView, isAliasRegisted, wallet } from '../../../helper';
+import { callView, isAliasRegisted, wallet } from '../../../../helper';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 // import * as acGlobal from 'src/store/actions/globalData';
 // import * as actions from 'src/store/actions/create';
-// import * as actionsAccount from 'src/store/actions/account';
-import { DivControlBtnKeystore } from '../../elements/Common';
+
+import { DivControlBtnKeystore } from '../../../elements/Common';
 
 const styles = theme => ({
   button: {
@@ -24,13 +24,12 @@ const styles = theme => ({
   },
 });
 
-class LoginWithPrivatekey extends PureComponent {
+class RegisterUsername extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       rePassErr: '',
-      privateKey: '',
-      password: '',
+      username: '',
     };
   }
   componentDidMount() {
@@ -39,40 +38,54 @@ class LoginWithPrivatekey extends PureComponent {
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
-
   _keydown = e => {
     const { props } = this;
-    e.keyCode === 13 && this.gotoLogin();
+    e.keyCode === 13 && this.gotoNext();
   };
-
-  gotoLogin = async () => {
-    const { privateKey, password } = this.state;
+  gotoNext = async () => {
+    const { username } = this.state;
     const { setUsername, setStep, setLoading, setAccount } = this.props;
-    try {
-      const address = wallet.getAddressFromPrivateKey(privateKey);
-      const account = { address, privateKey, cipher: password };
-      setAccount(account);
-      localStorage.setItem('user', JSON.stringify(account));
-      // Router.push('/timeline');
-      window.location.pathname = '/timeline';
-      console.log('account', account);
-    } catch (err) {
-      throw err;
+
+    if (username) {
+      const resp = await isAliasRegisted(username);
+      if (resp) {
+        this.setState({
+          rePassErr: 'Username already exists! Please choose another',
+        });
+      } else {
+        setLoading(true);
+        setTimeout(async () => {
+          const account = await this._createAccountWithMneomnic();
+          setAccount({
+            privateKey: account.privateKey,
+            mnemonic: account.mnemonic,
+            address: account.address,
+            step: 'two',
+            username: username,
+          });
+          // setLoading(false);
+        }, 500);
+      }
+    } else {
+      this.setState({
+        rePassErr: 'Username is required',
+      });
     }
   };
 
-  handlePassword = event => {
-    const password = event.currentTarget.value;
+  handleUsername = event => {
+    const username = event.currentTarget.value;
     // console.log(value);
-    this.setState({ password });
+    this.setState({ username });
   };
-  handlePrivatekey = event => {
-    const privateKey = event.currentTarget.value;
-    this.setState({ privateKey });
-  };
-  loginWithSeed = () => {
-    const { setStep } = this.props;
-    setStep('two');
+  _createAccountWithMneomnic = () => {
+    const resp = wallet.createAccountWithMneomnic();
+    // const keyObject = encode(resp.privateKey, 'a');
+    return {
+      privateKey: resp.privateKey,
+      address: resp.address,
+      mnemonic: resp.mnemonic,
+    };
   };
   render() {
     const { rePassErr } = this.state;
@@ -82,31 +95,21 @@ class LoginWithPrivatekey extends PureComponent {
       <div>
         <TextField
           id="username"
-          label="Privatekey"
-          placeholder="Enter your private key"
+          label="Username"
+          placeholder="Enter your username"
           helperText={rePassErr}
           error={rePassErr !== ''}
           fullWidth
           margin="normal"
-          onChange={this.handlePrivatekey}
-        />
-        <TextField
-          id="rePassword"
-          label="Password"
-          placeholder="Enter your password"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePassword}
-          type="password"
+          onChange={this.handleUsername}
         />
         <DivControlBtnKeystore>
-          <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
-            Login with seed
-          </Button>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
+          <Button color="primary" href="/login" className={classes.link}>
             Login
+          </Button>
+          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoNext}>
+            Next
+            <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
           </Button>
         </DivControlBtnKeystore>
       </div>
@@ -130,7 +133,7 @@ const mapDispatchToProps = dispatch => {
     //   dispatch(actions.setPassword(value));
     // },
     setAccount: value => {
-      // dispatch(actionsAccount.setAccount(value));
+      // dispatch(actions.setAccount(value));
     },
     setStep: value => {
       // dispatch(actions.setStep(value));
@@ -145,5 +148,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(LoginWithPrivatekey)
+  )(RegisterUsername)
 );

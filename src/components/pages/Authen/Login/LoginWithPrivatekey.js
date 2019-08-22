@@ -1,14 +1,15 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { callView, isAliasRegisted, wallet } from '../../../helper';
+import { callView, isAliasRegisted, wallet } from '../../../../helper';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
 // import * as acGlobal from 'src/store/actions/globalData';
 // import * as actions from 'src/store/actions/create';
-
-import { DivControlBtnKeystore } from '../../elements/Common';
+// import * as actionsAccount from 'src/store/actions/account';
+import { DivControlBtnKeystore } from '../../../elements/Common';
 
 const styles = theme => ({
   button: {
@@ -23,12 +24,12 @@ const styles = theme => ({
   },
 });
 
-class LoginWithMnemonic extends PureComponent {
+class LoginWithPrivatekey extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       rePassErr: '',
-      mnemonic: '',
+      privateKey: '',
       password: '',
     };
   }
@@ -38,16 +39,16 @@ class LoginWithMnemonic extends PureComponent {
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
+
   _keydown = e => {
     const { props } = this;
     e.keyCode === 13 && this.gotoLogin();
   };
+
   gotoLogin = async () => {
-    const { mnemonic, password } = this.state;
+    const { privateKey, password } = this.state;
     const { setUsername, setStep, setLoading, setAccount } = this.props;
     try {
-      console.log('mnemonic', mnemonic);
-      const privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
       const address = wallet.getAddressFromPrivateKey(privateKey);
       const account = { address, privateKey, cipher: password };
       setAccount(account);
@@ -61,18 +62,17 @@ class LoginWithMnemonic extends PureComponent {
   };
 
   handlePassword = event => {
-    const password = event.target.value;
+    const password = event.currentTarget.value;
     // console.log(value);
     this.setState({ password });
   };
-  handleMnemonic = event => {
-    const mnemonic = event.target.value;
-    console.log(mnemonic);
-    this.setState({ mnemonic });
+  handlePrivatekey = event => {
+    const privateKey = event.currentTarget.value;
+    this.setState({ privateKey });
   };
-  loginWithPrivatekey = () => {
+  loginWithSeed = () => {
     const { setStep } = this.props;
-    setStep('one');
+    setStep('two');
   };
   render() {
     const { rePassErr } = this.state;
@@ -81,18 +81,14 @@ class LoginWithMnemonic extends PureComponent {
     return (
       <div>
         <TextField
-          id="outlined-multiline-static"
-          label="Mnemonic phrase"
-          placeholder="Enter your mnemonic phrase"
-          multiline
-          rows="4"
-          className={classes.textField}
-          onChange={this.handleMnemonic}
-          margin="normal"
-          variant="outlined"
-          fullWidth
+          id="username"
+          label="Privatekey"
+          placeholder="Enter your private key"
           helperText={rePassErr}
           error={rePassErr !== ''}
+          fullWidth
+          margin="normal"
+          onChange={this.handlePrivatekey}
         />
         <TextField
           id="rePassword"
@@ -106,8 +102,8 @@ class LoginWithMnemonic extends PureComponent {
           type="password"
         />
         <DivControlBtnKeystore>
-          <Button color="primary" onClick={this.loginWithPrivatekey} className={classes.link}>
-            Login with privatekey
+          <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
+            Login with seed
           </Button>
           <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
             Login
@@ -134,7 +130,7 @@ const mapDispatchToProps = dispatch => {
     //   dispatch(actions.setPassword(value));
     // },
     setAccount: value => {
-      // dispatch(actions.setAccount(value));
+      // dispatch(actionsAccount.setAccount(value));
     },
     setStep: value => {
       // dispatch(actions.setStep(value));
@@ -149,5 +145,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(LoginWithMnemonic)
+  )(LoginWithPrivatekey)
 );

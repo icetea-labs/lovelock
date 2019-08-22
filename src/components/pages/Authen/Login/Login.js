@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem, FlexBox } from '../../elements/Common';
+import { rem, FlexBox } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import LoginWithMnemonic from './LoginWithMnemonic';
@@ -61,7 +61,7 @@ const ShadowBox = styled.div`
     box-sizing: border-box;
   }
   @media (min-width: 624px) {
-    min-width: ${rem(550)};
+    min-width: ${rem(300)};
   }
 `;
 const WrapperImgPencil = styled.div`

@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { HomeLayout, Layout } from './components/layout/Layout';
-import Login from './components/pages/Authen';
+import Home from './components/pages/Home';
+import Login from './components/pages/Authen/Login';
+import Register from './components/pages/Authen/Register';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import GlobaLoading from './components/elements/GlobaLoading';
 
@@ -18,7 +20,9 @@ class App extends Component {
       <div className="App">
         <Router>
           <Switch>
-            <RouteWithLayout layout={HomeLayout} exact path="/" component={Login} />
+            <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
             {/* <Route component={NotFound} /> */}
           </Switch>
         </Router>

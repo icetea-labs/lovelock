@@ -1,7 +1,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { rem, FlexBox, pc, mobile, media } from '../elements/Common';
+import { rem, pc, mobile, media } from '../elements/Common';
 import Header from './Header';
 import Footer from './Footer';
 

@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { rem, FlexBox } from '../elements/Common';
 import Icon from '../elements/Icon';
-import TextField from '@material-ui/core/TextField';
-// import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
+import Button from '@material-ui/core/Button';
 
 const Container = styled.header`
   width: 100%;
@@ -138,8 +138,19 @@ class Header extends PureComponent {
     // this.setState({ username: reps });
   }
 
+  goRegister = () => {
+    const { history } = this.props;
+    history.push('/register');
+  };
+
+  goLogin = () => {
+    const { history } = this.props;
+    history.push('/login');
+  };
   render() {
     const { username } = this.state;
+    const { address } = this.props;
+
     return (
       <Container>
         <Content>
@@ -147,30 +158,47 @@ class Header extends PureComponent {
             <img src="/static/img/logo.svg" alt="itea-scan" />
             <span>LoveLock</span>
           </StyledLogo>
-          <SearchBox>
-            <input type="text" name="" placeholder="Search" />
-            <a className="search-bt">
-              <Icon type="search" />
-            </a>
-          </SearchBox>
-          <FlexBox flex={1} justify="flex-end">
-            <MenuItem>
-              <img src="/static/img/user-men.jpg" alt="" />
-              <a href="/login">{username}</a>
-            </MenuItem>
-            <MenuItem>
-              <a href="/login">Explore</a>
-              <Icon className="expand" type="expand_more" />
-            </MenuItem>
-            <MenuItem>
-              <Icon type="group" />
-              <Rectangle />
-            </MenuItem>
-            <MenuItem>
-              <Icon type="notifications" />
-              <Rectangle />
-            </MenuItem>
-          </FlexBox>
+          {address ? (
+            <React.Fragment>
+              <SearchBox>
+                <input type="text" name="" placeholder="Search" />
+                <a className="search-bt">
+                  <Icon type="search" />
+                </a>
+              </SearchBox>
+              <FlexBox flex={1} justify="flex-end">
+                <MenuItem>
+                  <img src="/static/img/user-men.jpg" alt="" />
+                  <a href="/login">{username}</a>
+                </MenuItem>
+                <MenuItem>
+                  <a href="/login">Explore</a>
+                  <Icon className="expand" type="expand_more" />
+                </MenuItem>
+                <MenuItem>
+                  <Icon type="group" />
+                  <Rectangle />
+                </MenuItem>
+                <MenuItem>
+                  <Icon type="notifications" />
+                  <Rectangle />
+                </MenuItem>
+              </FlexBox>
+            </React.Fragment>
+          ) : (
+            <FlexBox flex={1} justify="flex-end">
+              <MenuItem>
+                <Button variant="contained" color="primary" onClick={this.goLogin}>
+                  Login
+                </Button>
+              </MenuItem>
+              <MenuItem>
+                <Button variant="contained" color="primary" onClick={this.goRegister}>
+                  Register
+                </Button>
+              </MenuItem>
+            </FlexBox>
+          )}
         </Content>
       </Container>
     );
@@ -178,7 +206,7 @@ class Header extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, userInfo, account } = state;
+  const { account } = state;
   return {
     address: account.address,
   };
@@ -195,4 +223,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Header);
+)(withRouter(Header));
