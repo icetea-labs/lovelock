@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { HomeLayout, Layout } from './components/Layout/Layout';
+import { HomeLayout, Layout } from './components/layout/Layout';
 import Login from './components/pages/Authen';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import GlobaLoading from './components/elements/GlobaLoading';
