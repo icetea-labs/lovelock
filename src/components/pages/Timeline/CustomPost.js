@@ -100,7 +100,7 @@ class CustomPost extends React.Component {
 
   async saveToIpfs(files) {
     const file = [...files][0];
-    let ipfsId;
+    // let ipfsId;
     const fileDetails = {
       path: file.name,
       content: file,

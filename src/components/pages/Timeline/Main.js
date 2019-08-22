@@ -8,7 +8,7 @@ import Icon from '../../elements/Icon';
 
 import TopContrainer from './TopContrainer';
 // import MessageHistory from './MessageHistory';
-// import Promise from './Promise';
+import Promise from '../Propose/Promise';
 import CustomPost from './CustomPost';
 // import PromiseAlert from './PromiseAlert';
 // import PromiseConfirm from './PromiseConfirm';
@@ -23,7 +23,7 @@ const ShadowBox = styled.div`
   border-radius: 10px;
   /* margin-bottom: 20px; */
   background: #ffffff;
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 `;
 
 const LeftBox = styled.div`
@@ -215,6 +215,14 @@ class Main extends PureComponent {
     this.setState({ date, file });
   };
 
+  addPromise = () => {
+    this.setState({ isPromise: true });
+  };
+
+  closePromise = () => {
+    this.setState({ isPromise: false });
+  };
+
   render() {
     const {
       tag,
@@ -298,10 +306,6 @@ class Main extends PureComponent {
                             </div>
                           </button>
                         </div>
-                        {/* <input
-                            id="react-select-2-input"
-                            className="css-gj7qu5-dummyInput"
-                          /> */}
                       </div>
                     </div>
                   </div>
@@ -317,10 +321,11 @@ class Main extends PureComponent {
                 </button>
               </div>
               {/* <MessageHistory /> */}
+              {isPromise && <Promise close={this.closePromise} />}
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-        {/* {isPromise && <Promise close={this.closePromise} />}
+        {/* 
         {isPendingPromise && (
           <PromiseAlert
             propose={propose}

@@ -2,10 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import CustomPost from './CustomPost';
+import CustomPost from '../Timeline/CustomPost';
 import CommonDialog from './CommonDialog';
-import tweb3 from '../../service/tweb3';
-// import { saveToIpfs } from '../../helper';
+import tweb3 from '../../../service/tweb3';
+import { saveToIpfs } from '../../../helper/index';
 import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
@@ -149,14 +149,14 @@ Promise.defaultProps = {
 };
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
-  return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
-    address: account.address,
-    privateKey: account.privateKey,
-  };
+  //   const { propose, account } = state;
+  //   return {
+  //     propose: propose.propose,
+  //     currentIndex: propose.currentProIndex,
+  //     memory: propose.memory,
+  //     address: account.address,
+  //     privateKey: account.privateKey,
+  //   };
 };
 
 export default connect(
