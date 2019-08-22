@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import InputBase from '@material-ui/core/InputBase';
 
+import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../helper';
+import * as actions from '../../../store/actions';
+
 import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
 import Icon from '../../elements/Icon';
 
@@ -198,6 +201,63 @@ class Main extends PureComponent {
     };
   }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { propose, address } = nextProps;
+    let value = {};
+    if (address !== prevState.address) {
+      value = Object.assign({}, { address });
+    }
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
+      value = Object.assign({}, { propose });
+    }
+    if (value) return value;
+    return null;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { address } = this.state;
+
+    if (prevState.address !== address) {
+      this.loadAllPropose();
+    }
+  }
+
+  componentDidMount() {
+    this.loadAllPropose();
+  }
+
+  async loadAllPropose() {
+    const { reload } = this.state;
+    const { setPropose, address, setCurrentIndex } = this.props;
+    console.log(' loadAllPropose address', address);
+    const allPropose = await callView('getProposeByAddress', [address]);
+
+    setPropose(allPropose);
+    this.setState({ reload: false });
+
+    let tmp = [];
+    if (!allPropose) allPropose = [];
+
+    for (let i = 0; i < allPropose.length; i++) {
+      const obj = allPropose[i];
+      if (obj.status === 1) {
+        const addr = address === obj.sender ? obj.receiver : obj.sender;
+        const reps = await getTagsInfo(addr);
+        const name = await getAlias(addr);
+        obj.name = name;
+        obj.nick = '@' + reps.username;
+        obj.index = i;
+        tmp.push(obj);
+      }
+    }
+    // console.log("tmp", tmp);
+    if (tmp.length > 0) {
+      this.setState({ proIndex: tmp[0].index });
+      setCurrentIndex(tmp[0].index);
+      this.loadMemory(tmp[0].index);
+    }
+  }
+
   renderTag = tag => {
     // const { tag } = this.state;
     return tag.map((item, index) => {
@@ -209,19 +269,79 @@ class Main extends PureComponent {
     });
   };
 
+  addPromise = () => {
+    this.setState({ isPromise: true });
+  };
+
+  openPending = index => {
+    this.setState({ isPendingPromise: true, pendingIndex: index });
+    // console.log(index);
+  };
+
+  acceptPromise = () => {
+    this.setState({ isAccept: true, isPendingPromise: false });
+  };
+
+  denyPromise = () => {
+    this.setState({ isDeny: true, isPendingPromise: false });
+  };
+
+  closeConfirm = () => {
+    this.setState({ isAccept: false, isDeny: false });
+  };
+
+  closePromise = () => {
+    this.setState({ isPromise: false });
+  };
+
+  closePendingPromise = () => {
+    this.setState({ isPendingPromise: false });
+  };
+
+  handlerSelectPropose = proIndex => {
+    // console.log('proIndex', proIndex);
+    const { setCurrentIndex, setMemory } = this.props;
+    this.setState({ proIndex });
+    setCurrentIndex(proIndex);
+    this.loadMemory(proIndex);
+  };
+
   onChangeCus = (date, file) => {
     console.log('view Date', date);
     console.log('view File', file);
     this.setState({ date, file });
   };
 
-  addPromise = () => {
-    this.setState({ isPromise: true });
+  statusChange = e => {
+    const value = e.target.value;
+    this.setState({
+      memoryContent: value,
+    });
   };
 
-  closePromise = () => {
-    this.setState({ isPromise: false });
-  };
+  async shareMemory(proIndex, memoryContent, date, file) {
+    let hash;
+    if (file) {
+      hash = await saveToIpfs(file);
+    }
+    const name = 'addMemory';
+    let info = {
+      date: date,
+      hash: hash,
+    };
+    info = JSON.stringify(info);
+    // const result = await ct.methods[name](
+    //   proIndex,
+    //   memoryContent,
+    //   info
+    // ).sendCommit();
+    const params = [proIndex, memoryContent, info];
+    const result = await sendTransaction(name, params);
+    console.log('View result', result);
+    if (result) {
+      window.alert('Success');
+    }
+  }
 
   render() {
     const {
@@ -343,4 +463,32 @@ class Main extends PureComponent {
   }
 }
 
-export default Main;
+const mapStateToProps = state => {
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    },
+    setCurrentIndex: value => {
+      dispatch(actions.setCurrentIndex(value));
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Main);

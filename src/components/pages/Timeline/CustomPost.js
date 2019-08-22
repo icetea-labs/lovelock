@@ -68,6 +68,11 @@ const Container = styled.div`
     .picktime {
       width: 60%;
     }
+
+    input,
+    i {
+      cursor: pointer;
+    }
   }
 `;
 
