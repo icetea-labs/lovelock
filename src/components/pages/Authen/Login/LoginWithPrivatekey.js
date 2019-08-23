@@ -9,6 +9,7 @@ import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/Common';
+import tweb3 from '../../../../service/tweb3';
 
 const styles = theme => ({
   button: {
@@ -51,6 +52,8 @@ class LoginWithPrivatekey extends PureComponent {
       setTimeout(async () => {
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const account = { address, privateKey, cipher: password };
+        tweb3.wallet.importAccount(privateKey);
+        tweb3.wallet.defaultAccount = address;
         setAccount(account);
         localStorage.removeItem('user');
         localStorage.setItem('user', JSON.stringify(account));

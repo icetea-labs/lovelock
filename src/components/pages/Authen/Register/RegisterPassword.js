@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { registerAlias } from '../../../../helper';
+import { registerAlias, setTagsInfo } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -78,6 +78,7 @@ class RegisterPassword extends PureComponent {
       showPassword: false,
       selectedDate: new Date(),
       sex: '',
+      displayname: props.username,
     };
   }
   componentDidMount() {
@@ -90,11 +91,13 @@ class RegisterPassword extends PureComponent {
     e.keyCode === 13 && this.gotoRegister();
   };
   gotoRegister = async () => {
-    const { password } = this.state;
+    const { password, displayname } = this.state;
     const { history, username, address, privateKey } = this.props;
     const { setAccount, setLoading, setStep } = this.props;
     // console.log('username', username, address);
     const resp = await registerAlias(username, address, privateKey);
+    const respTags = await setTagsInfo(address, 'display-name', displayname);
+    console.log('respTags', respTags);
     if (resp) {
       setLoading(true);
       setTimeout(async () => {
@@ -131,8 +134,13 @@ class RegisterPassword extends PureComponent {
     const { setStep } = this.props;
     setStep('one');
   };
+  handleDisplayname = event => {
+    const displayname = event.target.value;
+    // console.log(value);
+    this.setState({ displayname });
+  };
   render() {
-    const { rePassErr, showPassword, password, selectedDate, sex } = this.state;
+    const { rePassErr, displayname, showPassword, sex } = this.state;
     const { classes, address, privateKey, mnemonic, username } = this.props;
 
     return (
@@ -163,6 +171,15 @@ class RegisterPassword extends PureComponent {
           </FlexWidthBox>
           <FlexWidthBox width="40%">
             <TextField id="username" label="Username" value={username} disabled fullWidth margin="normal" />
+            <TextField
+              id="displayname"
+              value={displayname}
+              label="Display Name"
+              placeholder="Enter your display name"
+              fullWidth
+              margin="normal"
+              onChange={this.handleDisplayname}
+            />
             <TextField
               id="password"
               label="Password"

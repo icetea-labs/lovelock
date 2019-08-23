@@ -52,8 +52,8 @@ class PromiseConfirm extends React.Component {
     const { index, privateKey, address } = this.props;
     console.log('view confirm props', this.props)
     try {
-      tweb3.wallet.importAccount(privateKey);
-      tweb3.wallet.defaultAccount = address;
+      // tweb3.wallet.importAccount(privateKey);
+      // tweb3.wallet.defaultAccount = address;
       const name = 'acceptPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params);
@@ -71,8 +71,8 @@ class PromiseConfirm extends React.Component {
   async messageDeny(message) {
     const { index, privateKey, address } = this.props;
     try {
-      tweb3.wallet.importAccount(privateKey);
-      tweb3.wallet.defaultAccount = address;
+      // tweb3.wallet.importAccount(privateKey);
+      // tweb3.wallet.defaultAccount = address;
       const name = 'cancelPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params);

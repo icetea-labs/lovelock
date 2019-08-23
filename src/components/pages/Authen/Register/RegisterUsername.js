@@ -8,7 +8,7 @@ import Icon from '@material-ui/core/Icon';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
-
+import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/Common';
 
 const styles = theme => ({
@@ -61,6 +61,8 @@ class RegisterUsername extends PureComponent {
             privateKey: account.privateKey,
             mnemonic: account.mnemonic,
           });
+          tweb3.wallet.importAccount(account.privateKey);
+          tweb3.wallet.defaultAccount = account.address;
           setLoading(false);
           setStep('two');
         }, 500);
