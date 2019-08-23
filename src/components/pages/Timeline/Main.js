@@ -15,7 +15,7 @@ import Promise from '../Propose/Promise';
 import CustomPost from './CustomPost';
 import PromiseAlert from '../Propose/PromiseAlert';
 import PromiseConfirm from '../Propose/PromiseConfirm';
-// import PromiseLeftAccept from './PromiseLeftAccept';
+import PromiseLeftAccept from './PromiseLeftAccept';
 import PromiseLeftPending from './PromiseLeftPending';
 
 const BannerContainer = styled.div`
@@ -306,6 +306,23 @@ class Main extends PureComponent {
     this.loadMemory(proIndex);
   };
 
+  async loadMemory(currentIndex) {
+    const { address, setMemory } = this.props;
+    const allMemory = await callView('getMemoryByProIndex', [currentIndex]);
+    let newMemoryList = [];
+    for (let i = 0; i < allMemory.length; i++) {
+      const obj = allMemory[i];
+      obj.info = JSON.parse(obj.info);
+      // const sender = await getTagsInfo(obj.sender);
+      const name = await getAlias(address);
+      obj.name = name;
+      obj.index = [i];
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    setMemory(newMemoryList);
+  }
+
   onChangeCus = (date, file) => {
     console.log('view Date', date);
     console.log('view File', file);
@@ -377,11 +394,11 @@ class Main extends PureComponent {
                 </button>
                 <div className="title">Accepted promise</div>
                 <div>
-                  {/* <PromiseLeftAccept
+                  <PromiseLeftAccept
                     propose={propose}
                     address={address}
                     handlerSelectPropose={this.handlerSelectPropose}
-                  /> */}
+                  />
                 </div>
                 <div className="title">Pending promise</div>
                 <div>

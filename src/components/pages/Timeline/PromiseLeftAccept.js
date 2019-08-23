@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
-import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../../helper';
+import { rem } from '../../elements/Common';
+import { getTagsInfo, getAlias } from '../../../helper';
 import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.div`
@@ -31,27 +31,20 @@ const WarrperAcceptedPromise = styled.div`
   }
 `;
 
-class PromiseLeftPending extends PureComponent {
+class PromiseLeftAccept extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       basePropose: [],
       newPropose: [],
-      index: '',
-      address: '',
     };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose, address } = nextProps;
-    let value = {};
-    if (address !== prevState.address) {
-      value = Object.assign({}, { address });
-    }
+    const { propose } = nextProps;
     if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
-      value = Object.assign({}, { basePropose: propose });
+      return { basePropose: propose };
     }
-    if (value) return value;
     return null;
   }
 
@@ -60,21 +53,21 @@ class PromiseLeftPending extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { basePropose, address } = this.state;
+    const { basePropose } = this.state;
 
-    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) || prevState.address !== address) {
+    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose)) {
       this.loaddata();
     }
   }
 
   async loaddata() {
     let { propose, address } = this.props;
-    console.log('check propose', propose);
     let tmp = [];
     if (!propose) propose = [];
+
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
-      if (obj.status === 0) {
+      if (obj.status === 1) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const reps = await getTagsInfo(addr);
         const name = await getAlias(addr);
@@ -84,22 +77,16 @@ class PromiseLeftPending extends PureComponent {
         tmp.push(obj);
       }
     }
-
     this.setState({ newPropose: tmp });
   }
 
   render() {
     const { newPropose } = this.state;
-    const { openPendingPromise } = this.props;
+    const { handlerSelectPropose } = this.props;
 
     return newPropose.map(item => {
       return (
-        <WarrperAcceptedPromise
-          key={item.index}
-          onClick={() => {
-            this.props.openPendingPromise(item.index);
-          }}
-        >
+        <WarrperAcceptedPromise key={item.index} onClick={() => handlerSelectPropose(item.index)}>
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="imgTrada" />
           </div>
@@ -127,4 +114,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   null
-)(PromiseLeftPending);
+)(PromiseLeftAccept);
