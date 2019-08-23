@@ -9,13 +9,13 @@ import * as actions from '../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
 import Icon from '../../elements/Icon';
 
-import TopContrainer from './TopContrainer';
-// import MessageHistory from './MessageHistory';
+// import TopContrainer from './TopContrainer';
+import MessageHistory from '../Memory/MessageHistory';
 import Promise from '../Propose/Promise';
 import CustomPost from './CustomPost';
 import PromiseAlert from '../Propose/PromiseAlert';
 import PromiseConfirm from '../Propose/PromiseConfirm';
-// import PromiseLeftAccept from './PromiseLeftAccept';
+import PromiseLeftAccept from './PromiseLeftAccept';
 import PromiseLeftPending from './PromiseLeftPending';
 
 const BannerContainer = styled.div`
@@ -144,28 +144,6 @@ const RightBox = styled.div`
     }
   }
 `;
-const WarrperAcceptedPromise = styled.div`
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: ${rem(20)};
-  :hover {
-    cursor: pointer;
-  }
-  .icon {
-    width: ${rem(36)};
-    height: ${rem(36)};
-    margin-right: ${rem(10)};
-    border-radius: 50%;
-    overflow: hidden;
-  }
-  .name {
-    color: #5a5e67;
-  }
-  .nick {
-    color: #8250c8;
-    font-size: ${rem(12)};
-  }
-`;
 const TagBox = styled.div`
   width: 100%;
   display: flex;
@@ -203,12 +181,17 @@ class Home extends PureComponent {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const { propose, address } = nextProps;
+    const proIndex = parseInt(nextProps.match.params.proposeIndex);
+
     let value = {};
     if (address !== prevState.address) {
       value = Object.assign({}, { address });
     }
     if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
       value = Object.assign({}, { propose });
+    }
+    if (proIndex !== prevState.proIndex) {
+      value = Object.assign({}, { proIndex });
     }
     if (value) return value;
     return null;
@@ -227,10 +210,10 @@ class Home extends PureComponent {
   }
 
   async loadAllPropose() {
-    const { reload } = this.state;
+    // const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
-    console.log(' loadAllPropose address', address);
-    const allPropose = await callView('getProposeByAddress', [address]);
+    // console.log(' loadAllPropose address', address);
+    let allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);
     this.setState({ reload: false });
@@ -240,21 +223,21 @@ class Home extends PureComponent {
 
     for (let i = 0; i < allPropose.length; i++) {
       const obj = allPropose[i];
-      if (obj.status === 1) {
-        const addr = address === obj.sender ? obj.receiver : obj.sender;
-        const reps = await getTagsInfo(addr);
-        const name = await getAlias(addr);
-        obj.name = name;
-        obj.nick = '@' + reps.username;
-        obj.index = i;
-        tmp.push(obj);
-      }
+      // if (obj.status === 1) {
+      const addr = address === obj.sender ? obj.receiver : obj.sender;
+      const reps = await getTagsInfo(addr);
+      const name = await getAlias(addr);
+      obj.name = reps['display-name'];
+      obj.nick = '@' + name;
+      obj.index = i;
+      tmp.push(obj);
+      // }
     }
-    // console.log("tmp", tmp);
+    // console.log('tmp', tmp);
     if (tmp.length > 0) {
       this.setState({ proIndex: tmp[0].index });
       setCurrentIndex(tmp[0].index);
-      this.loadMemory(tmp[0].index);
+      this.loadMemory();
     }
   }
 
@@ -300,11 +283,30 @@ class Home extends PureComponent {
 
   handlerSelectPropose = proIndex => {
     // console.log('proIndex', proIndex);
-    const { setCurrentIndex, setMemory } = this.props;
+    const { setCurrentIndex } = this.props;
     this.setState({ proIndex });
     setCurrentIndex(proIndex);
-    this.loadMemory(proIndex);
+    this.loadMemory();
   };
+
+  async loadMemory() {
+    const { setMemory } = this.props;
+    const { proIndex } = this.state;
+    const allMemory = await callView('getMemoryByProIndex', [proIndex]);
+    let newMemoryList = [];
+
+    for (let i = 0; i < allMemory.length; i++) {
+      const obj = allMemory[i];
+      const sender = obj.sender;
+      obj.info = JSON.parse(obj.info);
+      const reps = await getTagsInfo(sender);
+      obj.name = reps['display-name'];
+      obj.index = [i];
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    setMemory(newMemoryList);
+  }
 
   onChangeCus = (date, file) => {
     console.log('view Date', date);
@@ -320,6 +322,8 @@ class Home extends PureComponent {
   };
 
   async shareMemory(proIndex, memoryContent, date, file) {
+    const { setLoading } = this.props;
+    setLoading(true);
     let hash;
     if (file) {
       hash = await saveToIpfs(file);
@@ -330,23 +334,19 @@ class Home extends PureComponent {
       hash: hash,
     };
     info = JSON.stringify(info);
-    // const result = await ct.methods[name](
-    //   proIndex,
-    //   memoryContent,
-    //   info
-    // ).sendCommit();
     const params = [proIndex, memoryContent, info];
     const result = await sendTransaction(name, params);
     console.log('View result', result);
     if (result) {
+      this.loadMemory();
       window.alert('Success');
     }
+    setLoading(false);
   }
 
   render() {
     const {
       tag,
-      ownerTag,
       isPromise,
       isPendingPromise,
       isAccept,
@@ -360,7 +360,13 @@ class Home extends PureComponent {
       propose,
     } = this.state;
     return (
-      address && (
+      <React.Fragment>
+        {/* <BannerContainer>
+          <ShadowBox>
+            <TopContrainer proIndex={proIndex} />
+          </ShadowBox>
+        </BannerContainer> */}
+
         <FlexBox wrap="wrap">
           <FlexWidthBox width="30%">
             <LeftBox>
@@ -371,11 +377,7 @@ class Home extends PureComponent {
                 </button>
                 <div className="title">Accepted promise</div>
                 <div>
-                  {/* <PromiseLeftAccept
-                    propose={propose}
-                    address={address}
-                    handlerSelectPropose={this.handlerSelectPropose}
-                  /> */}
+                  <PromiseLeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
                 </div>
                 <div className="title">Pending promise</div>
                 <div>
@@ -398,7 +400,7 @@ class Home extends PureComponent {
                       <InputBase
                         fullWidth
                         margin="dense"
-                        defaultValue="Describe your Memory…."
+                        defaultValue="Describe your Propose…."
                         inputProps={{ 'aria-label': 'naked' }}
                         onChange={this.statusChange}
                       />
@@ -435,10 +437,10 @@ class Home extends PureComponent {
                     this.shareMemory(proIndex, memoryContent, date, file);
                   }}
                 >
-                  Share
+                  Add Propose
                 </button>
               </div>
-              {/* <MessageHistory /> */}
+              <MessageHistory />
               {isPromise && <Promise close={this.closePromise} />}
               {isPendingPromise && (
                 <PromiseAlert
@@ -455,7 +457,7 @@ class Home extends PureComponent {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-      )
+      </React.Fragment>
     );
   }
 }
@@ -481,6 +483,9 @@ const mapDispatchToProps = dispatch => {
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));
+    },
+    setLoading: value => {
+      dispatch(actions.setLoading(value));
     },
   };
 };
