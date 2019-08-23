@@ -38,6 +38,9 @@ const WarrperChatBox = styled(FlexBox)`
     background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
     background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
   }
+  .proposeMes {
+    display : flex;
+  }
   .user_photo {
     display: block;
     img {
@@ -179,7 +182,7 @@ class TopContrainer extends PureComponent {
         </div>
 
         <WarrperChatBox>
-          <FlexWidthBox width="50%">
+          <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
               <img src="/static/img/user-men.jpg" alt="itea" />
             </div>
@@ -191,7 +194,7 @@ class TopContrainer extends PureComponent {
               <p>{topInfo.s_content}</p>
             </div>
           </FlexWidthBox>
-          <FlexWidthBox width="50%">
+          <FlexWidthBox width="50%" className="proposeMes">
             <div className="content_detail fl clearfix">
               <div className="name_time">
                 <span className="user_name color-violet">{topInfo.r_displayname}</span>
