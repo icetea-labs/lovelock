@@ -240,15 +240,15 @@ class Main extends PureComponent {
 
     for (let i = 0; i < allPropose.length; i++) {
       const obj = allPropose[i];
-      if (obj.status === 1) {
-        const addr = address === obj.sender ? obj.receiver : obj.sender;
-        const reps = await getTagsInfo(addr);
-        const name = await getAlias(addr);
-        obj.name = name;
-        obj.nick = '@' + reps.username;
-        obj.index = i;
-        tmp.push(obj);
-      }
+      // if (obj.status === 1) {
+      const addr = address === obj.sender ? obj.receiver : obj.sender;
+      const reps = await getTagsInfo(addr);
+      const name = await getAlias(addr);
+      obj.name = reps['display-name'];
+      obj.nick = '@' + name;
+      obj.index = i;
+      tmp.push(obj);
+      // }
     }
     // console.log("tmp", tmp);
     if (tmp.length > 0) {
@@ -394,11 +394,7 @@ class Main extends PureComponent {
                 </button>
                 <div className="title">Accepted promise</div>
                 <div>
-                  <PromiseLeftAccept
-                    propose={propose}
-                    address={address}
-                    handlerSelectPropose={this.handlerSelectPropose}
-                  />
+                  <PromiseLeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
                 </div>
                 <div className="title">Pending promise</div>
                 <div>

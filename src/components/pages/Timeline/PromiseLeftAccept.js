@@ -61,18 +61,13 @@ class PromiseLeftAccept extends PureComponent {
   }
 
   async loaddata() {
-    let { propose, address } = this.props;
+    let { propose } = this.props;
     let tmp = [];
     if (!propose) propose = [];
 
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
       if (obj.status === 1) {
-        const addr = address === obj.sender ? obj.receiver : obj.sender;
-        const reps = await getTagsInfo(addr);
-        const name = await getAlias(addr);
-        obj.name = reps['display-name'];
-        obj.nick = '@' + name;
         obj.index = i;
         tmp.push(obj);
       }
@@ -83,6 +78,7 @@ class PromiseLeftAccept extends PureComponent {
   render() {
     const { newPropose } = this.state;
     const { handlerSelectPropose } = this.props;
+    console.log('view State', this.state);
 
     return newPropose.map(item => {
       return (
