@@ -78,8 +78,8 @@ class PromiseLeftPending extends PureComponent {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const reps = await getTagsInfo(addr);
         const name = await getAlias(addr);
-        obj.name = name;
-        obj.nick = '@' + reps.username;
+        obj.name = reps['display-name'];
+        obj.nick = '@' + name;
         obj.index = i;
         tmp.push(obj);
       }

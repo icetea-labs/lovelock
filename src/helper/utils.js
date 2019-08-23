@@ -41,7 +41,7 @@ export async function sendTransaction(funcName, params) {
   // const { address } = this.props;
   console.log('params', params);
   try {
-    const ct = tweb3.contract('teat1862c92syky6l9jjq9s9tah6zpgsza2shx5fe2t');
+    const ct = tweb3.contract(contract);
     const result = await ct.methods[funcName](...(params || [])).sendCommit();
     return result;
   } catch (error) {
