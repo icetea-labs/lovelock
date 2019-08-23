@@ -10,7 +10,7 @@ import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
 import Icon from '../../elements/Icon';
 
 import TopContrainer from './TopContrainer';
-// import MessageHistory from './MessageHistory';
+import MessageHistory from '../Memory/MessageHistory';
 import Promise from '../Propose/Promise';
 import CustomPost from './CustomPost';
 import PromiseAlert from '../Propose/PromiseAlert';
@@ -144,28 +144,6 @@ const RightBox = styled.div`
     }
   }
 `;
-const WarrperAcceptedPromise = styled.div`
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: ${rem(20)};
-  :hover {
-    cursor: pointer;
-  }
-  .icon {
-    width: ${rem(36)};
-    height: ${rem(36)};
-    margin-right: ${rem(10)};
-    border-radius: 50%;
-    overflow: hidden;
-  }
-  .name {
-    color: #5a5e67;
-  }
-  .nick {
-    color: #8250c8;
-    font-size: ${rem(12)};
-  }
-`;
 const TagBox = styled.div`
   width: 100%;
   display: flex;
@@ -180,7 +158,7 @@ const TagBox = styled.div`
   }
 `;
 
-class Main extends PureComponent {
+class Timeline extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -203,12 +181,17 @@ class Main extends PureComponent {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const { propose, address } = nextProps;
+    const proIndex = parseInt(nextProps.match.params.proposeIndex);
+
     let value = {};
     if (address !== prevState.address) {
       value = Object.assign({}, { address });
     }
     if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
       value = Object.assign({}, { propose });
+    }
+    if (proIndex !== prevState.proIndex) {
+      value = Object.assign({}, { proIndex });
     }
     if (value) return value;
     return null;
@@ -227,10 +210,10 @@ class Main extends PureComponent {
   }
 
   async loadAllPropose() {
-    const { reload } = this.state;
+    // const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
-    console.log(' loadAllPropose address', address);
-    const allPropose = await callView('getProposeByAddress', [address]);
+    // console.log(' loadAllPropose address', address);
+    let allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);
     this.setState({ reload: false });
@@ -250,7 +233,7 @@ class Main extends PureComponent {
       tmp.push(obj);
       // }
     }
-    // console.log("tmp", tmp);
+    // console.log('tmp', tmp);
     if (tmp.length > 0) {
       this.setState({ proIndex: tmp[0].index });
       setCurrentIndex(tmp[0].index);
@@ -300,7 +283,7 @@ class Main extends PureComponent {
 
   handlerSelectPropose = proIndex => {
     // console.log('proIndex', proIndex);
-    const { setCurrentIndex, setMemory } = this.props;
+    const { setCurrentIndex } = this.props;
     this.setState({ proIndex });
     setCurrentIndex(proIndex);
     this.loadMemory(proIndex);
@@ -313,9 +296,8 @@ class Main extends PureComponent {
     for (let i = 0; i < allMemory.length; i++) {
       const obj = allMemory[i];
       obj.info = JSON.parse(obj.info);
-      // const sender = await getTagsInfo(obj.sender);
-      const name = await getAlias(address);
-      obj.name = name;
+      const reps = await getTagsInfo(address);
+      obj.name = reps['display-name'];
       obj.index = [i];
       newMemoryList.push(obj);
     }
@@ -347,11 +329,6 @@ class Main extends PureComponent {
       hash: hash,
     };
     info = JSON.stringify(info);
-    // const result = await ct.methods[name](
-    //   proIndex,
-    //   memoryContent,
-    //   info
-    // ).sendCommit();
     const params = [proIndex, memoryContent, info];
     const result = await sendTransaction(name, params);
     console.log('View result', result);
@@ -363,7 +340,6 @@ class Main extends PureComponent {
   render() {
     const {
       tag,
-      ownerTag,
       isPromise,
       isPendingPromise,
       isAccept,
@@ -457,7 +433,7 @@ class Main extends PureComponent {
                   Share
                 </button>
               </div>
-              {/* <MessageHistory /> */}
+              <MessageHistory />
               {isPromise && <Promise close={this.closePromise} />}
               {isPendingPromise && (
                 <PromiseAlert
@@ -501,10 +477,13 @@ const mapDispatchToProps = dispatch => {
     setMemory: value => {
       dispatch(actions.setMemory(value));
     },
+    setLoading: value => {
+      dispatch(actions.setLoading(value));
+    },
   };
 };
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Main);
+)(Timeline);
