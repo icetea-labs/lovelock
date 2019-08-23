@@ -237,7 +237,7 @@ class Timeline extends PureComponent {
     if (tmp.length > 0) {
       this.setState({ proIndex: tmp[0].index });
       setCurrentIndex(tmp[0].index);
-      this.loadMemory(tmp[0].index);
+      this.loadMemory();
     }
   }
 
@@ -286,17 +286,20 @@ class Timeline extends PureComponent {
     const { setCurrentIndex } = this.props;
     this.setState({ proIndex });
     setCurrentIndex(proIndex);
-    this.loadMemory(proIndex);
+    this.loadMemory();
   };
 
-  async loadMemory(currentIndex) {
-    const { address, setMemory } = this.props;
-    const allMemory = await callView('getMemoryByProIndex', [currentIndex]);
+  async loadMemory() {
+    const { setMemory } = this.props;
+    const { proIndex } = this.state;
+    const allMemory = await callView('getMemoryByProIndex', [proIndex]);
     let newMemoryList = [];
+
     for (let i = 0; i < allMemory.length; i++) {
       const obj = allMemory[i];
+      const sender = obj.sender;
       obj.info = JSON.parse(obj.info);
-      const reps = await getTagsInfo(address);
+      const reps = await getTagsInfo(sender);
       obj.name = reps['display-name'];
       obj.index = [i];
       newMemoryList.push(obj);
@@ -319,6 +322,8 @@ class Timeline extends PureComponent {
   };
 
   async shareMemory(proIndex, memoryContent, date, file) {
+    const { setLoading } = this.props;
+    setLoading(true);
     let hash;
     if (file) {
       hash = await saveToIpfs(file);
@@ -333,8 +338,10 @@ class Timeline extends PureComponent {
     const result = await sendTransaction(name, params);
     console.log('View result', result);
     if (result) {
+      this.loadMemory();
       window.alert('Success');
     }
+    setLoading(false);
   }
 
   render() {
