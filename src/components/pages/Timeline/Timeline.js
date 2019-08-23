@@ -181,7 +181,7 @@ class Timeline extends PureComponent {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const { propose, address } = nextProps;
-    const proIndex = nextProps.match.params.proposeIndex;
+    const proIndex = parseInt(nextProps.match.params.proposeIndex);
 
     let value = {};
     if (address !== prevState.address) {
@@ -210,10 +210,10 @@ class Timeline extends PureComponent {
   }
 
   async loadAllPropose() {
-    const { reload } = this.state;
+    // const { reload } = this.state;
     const { setPropose, address, setCurrentIndex } = this.props;
     // console.log(' loadAllPropose address', address);
-    const allPropose = await callView('getProposeByAddress', [address]);
+    let allPropose = await callView('getProposeByAddress', [address]);
 
     setPropose(allPropose);
     this.setState({ reload: false });
@@ -283,7 +283,7 @@ class Timeline extends PureComponent {
 
   handlerSelectPropose = proIndex => {
     // console.log('proIndex', proIndex);
-    const { setCurrentIndex, setMemory } = this.props;
+    const { setCurrentIndex } = this.props;
     this.setState({ proIndex });
     setCurrentIndex(proIndex);
     this.loadMemory(proIndex);
@@ -296,9 +296,8 @@ class Timeline extends PureComponent {
     for (let i = 0; i < allMemory.length; i++) {
       const obj = allMemory[i];
       obj.info = JSON.parse(obj.info);
-      // const sender = await getTagsInfo(obj.sender);
-      const name = await getAlias(address);
-      obj.name = name;
+      const reps = await getTagsInfo(address);
+      obj.name = reps['display-name'];
       obj.index = [i];
       newMemoryList.push(obj);
     }
@@ -330,11 +329,6 @@ class Timeline extends PureComponent {
       hash: hash,
     };
     info = JSON.stringify(info);
-    // const result = await ct.methods[name](
-    //   proIndex,
-    //   memoryContent,
-    //   info
-    // ).sendCommit();
     const params = [proIndex, memoryContent, info];
     const result = await sendTransaction(name, params);
     console.log('View result', result);
@@ -482,6 +476,9 @@ const mapDispatchToProps = dispatch => {
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));
+    },
+    setLoading: value => {
+      dispatch(actions.setLoading(value));
     },
   };
 };

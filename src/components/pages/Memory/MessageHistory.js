@@ -84,8 +84,10 @@ const WarrperChatBox = styled.div`
       color: #8f8f8f;
     }
     .user_avatar {
-      width: 58px;
-      height: 58px;
+      img {
+        width: 58px;
+        height: 58px;
+      }
       border-radius: 10px;
       overflow: hidden;
     }
@@ -100,7 +102,7 @@ const WarrperChatBox = styled.div`
       width: 100%;
       height: 100%;
       border-radius: 6px;
-      box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.04);
+      box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.14);
       background-color: #ffffff;
     }
     .clearfix::after {
@@ -188,7 +190,7 @@ class MessageHistory extends React.Component {
   }
 
   render() {
-    const { memoryList, currentIndex } = this.state;
+    const { memoryList } = this.state;
     // console.log('view state', this.state);
     return memoryList.map(memory => {
       return (
@@ -198,7 +200,7 @@ class MessageHistory extends React.Component {
               <div className="leftTitle">
                 <img src="/static/img/bed.svg" className="bed" alt="titleImg" />
                 <div className="titleText">
-                  <span>{memory.senderName} shared a memory</span>
+                  <span>{memory.name} shared a memory</span>
                 </div>
               </div>
               <div className="date">
@@ -212,13 +214,15 @@ class MessageHistory extends React.Component {
                 </div>
                 <div className="content_detail fr clearfix">
                   <div className="name_time">
-                    <span className="user_name color-violet">{memory.senderName}</span>
+                    <span className="user_name color-violet">{memory.name}</span>
                     <span className="time fr color-gray">
                       <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
                     </span>
                   </div>
                   <p>{memory.content}</p>
-                  {memory.info.hash && <img src={'https://ipfs.io/ipfs/' + memory.info.hash} className="postImg" />}
+                  {memory.info.hash && (
+                    <img src={'https://ipfs.io/ipfs/' + memory.info.hash} className="postImg" alt="postImg" />
+                  )}
                 </div>
               </div>
             </WarrperChatBox>
