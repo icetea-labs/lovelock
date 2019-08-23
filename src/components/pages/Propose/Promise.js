@@ -4,9 +4,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CustomPost from '../Timeline/CustomPost';
 import CommonDialog from './CommonDialog';
-import tweb3 from '../../../service/tweb3';
 import { saveToIpfs, sendTransaction } from '../../../helper/index';
 import { connect } from 'react-redux';
+import notifi from '../../elements/Notification';
+import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -82,14 +83,13 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { privateKey, address } = this.props;
-    console.log('view address', address);
+    const { setLoading } = this.props;
     let hash;
+    setLoading(true);
+
     if (file) {
       hash = await saveToIpfs(file);
     }
-    // tweb3.wallet.importAccount(privateKey);
-    // tweb3.wallet.defaultAccount = address;
     let info = {
       date: date,
       hash: hash,
@@ -97,11 +97,14 @@ class Promise extends React.Component {
     info = JSON.stringify(info);
     const name = 'createPropose';
     const params = [promiseStm, partner, info];
+
     const result = await sendTransaction(name, params);
     // console.log("View result", result);
     if (result) {
-      window.alert('Success');
+      // window.alert('Success');
+      notifi.info('Success');
       this.props.close();
+      setLoading(false);
     }
   }
 
@@ -161,7 +164,15 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return {
+    setLoading: value => {
+      dispatch(actions.setLoading(value));
+    },
+  };
+};
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Promise);

@@ -2,13 +2,17 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
-import { getTagsInfo } from '../../../helper';
+import { getTagsInfo, TimeWithFormat } from '../../../helper';
 import * as actions from '../../../store/actions';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
     width: ${rem(900)};
     height: ${rem(425)};
+    img {
+      width: 100%;
+      height: 100%;
+    }
   }
   .top__title {
     display: flex;
@@ -130,27 +134,30 @@ class TopContrainer extends PureComponent {
     setLoading(true);
     if (propose.length > 0) {
       const obj = propose[proIndex];
-      // console.log('proIndex', proIndex);
-      // console.log('propose', propose);
+      console.log('proIndex', proIndex);
+      console.log('propose', propose);
       newTopInfor.s_content = obj.s_content;
       newTopInfor.r_content = obj.r_content;
       const senderinfor = await getTagsInfo(obj.sender);
       newTopInfor.s_displayname = senderinfor['display-name'];
       const receiverinfor = await getTagsInfo(obj.receiver);
       newTopInfor.r_displayname = receiverinfor['display-name'];
+      const info = JSON.parse(obj.info);
+      newTopInfor.coverimg = info.hash;
+      newTopInfor.s_date = info.date;
+      newTopInfor.r_date = info.date;
     }
 
     // newTopInfor.s_content = 'I love you so much';
     // newTopInfor.s_displayname = 'LuongHV';
     // newTopInfor.r_content = 'Will you marry me?';
     // newTopInfor.r_displayname = 'Hana';
-    newTopInfor.coverimg = 'https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo';
-    newTopInfor.title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In facilisis sollicitudin ultricies.';
-    newTopInfor.date = '2/4/2004';
-    newTopInfor.s_date = '08/06/2019';
-    newTopInfor.r_date = '09/06/2019';
+    // newTopInfor.coverimg = 'https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo';
+    // newTopInfor.title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In facilisis sollicitudin ultricies.';
+    // newTopInfor.date = '2/4/2004';
+    // newTopInfor.s_date = '08/06/2019';
+    // newTopInfor.r_date = '09/06/2019';
 
-    // this.setState({ topInfo: newTopInfor });
     this.setState({ topInfo: newTopInfor }, setLoading(false));
   }
 
@@ -160,7 +167,7 @@ class TopContrainer extends PureComponent {
     return (
       <TopContainerBox>
         <div className="top__coverimg">
-          <img src={topInfo.coverimg} alt="itea-scan" />
+          <img src={'https://ipfs.io/ipfs/' + topInfo.coverimg} alt="itea-scan" />
         </div>
 
         {/* <div className="top__title">
@@ -177,7 +184,9 @@ class TopContrainer extends PureComponent {
             <div className="content_detail fl clearfix">
               <div className="name_time">
                 <span className="user_name color-violet">{topInfo.s_displayname}</span>
-                <span className="time fr color-gray">{topInfo.s_date}</span>
+                <span className="time fr color-gray">
+                  <TimeWithFormat value={topInfo.s_date} />
+                </span>
               </div>
               <p>{topInfo.s_content}</p>
             </div>
@@ -186,7 +195,9 @@ class TopContrainer extends PureComponent {
             <div className="content_detail fl clearfix">
               <div className="name_time">
                 <span className="user_name color-violet">{topInfo.r_displayname}</span>
-                <span className="time fr color-gray">{topInfo.r_date}</span>
+                <span className="time fr color-gray">
+                  <TimeWithFormat value={topInfo.r_date} />
+                </span>
               </div>
               <p>{topInfo.r_content}</p>
             </div>

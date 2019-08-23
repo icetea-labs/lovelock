@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { rem, FlexBox } from '../elements/Common';
 import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
-import { getAlias } from '../../helper';
+import { getAlias, getTagsInfo } from '../../helper';
 
 const Container = styled.header`
   width: 100%;
@@ -87,6 +87,7 @@ const MenuItem = styled.div`
   }
   a {
     color: inherit;
+    text-decoration: none;
   }
   i {
     font-size: ${rem(22)};
@@ -136,9 +137,9 @@ class Header extends PureComponent {
   async loaddata() {
     const { address } = this.props;
     console.log('address', address);
-    const reps = await getAlias(address);
+    const reps = await getTagsInfo(address);
     // console.log('reps', reps);
-    this.setState({ username: reps });
+    this.setState({ username: reps['display-name'] });
   }
 
   goRegister = () => {
