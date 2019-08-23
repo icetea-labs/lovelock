@@ -8,6 +8,8 @@ import { ecc, codec, AccountType } from '@iceteachain/common';
 import decode from './decode';
 const paths = 'm’/44’/60’/0’/0';
 
+export const contract = 'teat1862c92syky6l9jjq9s9tah6zpgsza2shx5fe2t';
+
 export async function callPure(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callPureContractMethod');
   if (resp) {
@@ -25,7 +27,7 @@ export async function callView(funcName, params) {
   }
 }
 async function callReadOrPure(funcName, params, method) {
-  const address = process.env.contract;
+  const address = contract;
 
   try {
     const result = await tweb3[method](address, funcName, params || []);
@@ -39,7 +41,7 @@ export async function sendTransaction(funcName, params) {
   // const { address } = this.props;
   console.log('params', params);
   try {
-    const ct = tweb3.contract(process.env.contract);
+    const ct = tweb3.contract('teat1862c92syky6l9jjq9s9tah6zpgsza2shx5fe2t');
     const result = await ct.methods[funcName](...(params || [])).sendCommit();
     return result;
   } catch (error) {

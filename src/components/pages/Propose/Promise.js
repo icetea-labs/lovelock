@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import CustomPost from '../Timeline/CustomPost';
 import CommonDialog from './CommonDialog';
 import tweb3 from '../../../service/tweb3';
-import { saveToIpfs } from '../../../helper/index';
+import { saveToIpfs, sendTransaction } from '../../../helper/index';
 import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
@@ -83,19 +83,21 @@ class Promise extends React.Component {
 
   async createPropose(partner, promiseStm, date, file) {
     const { privateKey, address } = this.props;
-    const hash = await saveToIpfs(file);
-    // const hash = "QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM";
+    console.log('view address', address);
+    let hash;
+    if (file) {
+      hash = await saveToIpfs(file);
+    }
     tweb3.wallet.importAccount(privateKey);
     tweb3.wallet.defaultAccount = address;
-    const ct = tweb3.contract(process.env.contract);
-    // const { address } = tweb3.wallet.createAccount();
     let info = {
       date: date,
       hash: hash,
     };
     info = JSON.stringify(info);
     const name = 'createPropose';
-    const result = await ct.methods[name](promiseStm, partner, info).sendCommit();
+    const params = [promiseStm, partner, info];
+    const result = await sendTransaction(name, params);
     // console.log("View result", result);
     if (result) {
       window.alert('Success');
@@ -104,8 +106,8 @@ class Promise extends React.Component {
   }
 
   render() {
-    const { send, close } = this.props;
-    const { partner, promiseStm, date, file, hash } = this.state;
+    const { close } = this.props;
+    const { partner, promiseStm, date, file } = this.state;
     // console.log("State CK", this.state);
 
     return (
@@ -149,14 +151,14 @@ Promise.defaultProps = {
 };
 
 const mapStateToProps = state => {
-  //   const { propose, account } = state;
-  //   return {
-  //     propose: propose.propose,
-  //     currentIndex: propose.currentProIndex,
-  //     memory: propose.memory,
-  //     address: account.address,
-  //     privateKey: account.privateKey,
-  //   };
+  const { propose, account } = state;
+  return {
+    propose: propose.propose,
+    currentIndex: propose.currentProIndex,
+    memory: propose.memory,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
 };
 
 export default connect(
