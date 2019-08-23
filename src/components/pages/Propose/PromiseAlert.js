@@ -31,17 +31,17 @@ class PromiseAlert extends React.Component {
     let { propose, address } = this.props;
     const { index } = this.props;
 
-    const obj = propose[index];
-    console.log('view obj', obj);
+    const obj = propose.filter(item => item.id === index)[0];
+
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
-      const reps = await getTagsInfo(addr);
+      // const reps = await getTagsInfo(addr);
       const name = await getAlias(addr);
       obj.name = name;
       this.setState({
         sender: obj.sender,
         name: obj.name,
-        info: JSON.parse(obj.info),
+        info: obj.info,
         content: obj.s_content,
       });
     }
@@ -50,7 +50,9 @@ class PromiseAlert extends React.Component {
   render() {
     const { deny, close, accept, address } = this.props;
     const { sender, info, content, name } = this.state;
-    const hash = info.hash;
+    const infoParse = info && JSON.parse(info);
+    const hash = (infoParse && infoParse.hash) || '';
+    console.log('infoParse', infoParse);
     // console.log('view state', this.state);
     return (
       <div>
