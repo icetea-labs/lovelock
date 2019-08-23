@@ -49,7 +49,6 @@ export const FlexBox = styled.div`
   margin-right: ${props => props.marginRight};
 `;
 export const FlexWidthBox = styled.div`
-  display: flex;
   width: ${props => props.width};
   ${media.mobile`
     width: 100%;

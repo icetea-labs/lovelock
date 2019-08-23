@@ -210,14 +210,10 @@ class TopContrainer extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  //   const { userInfo, propose } = state;
-  //   return {
-  //     address: userInfo.address,
-  //     username: userInfo.username,
-  //     displayname: userInfo.displayname,
-  //     avata: userInfo.avata,
-  //     propose: propose.propose,
-  //   };
+  const { propose } = state;
+  return {
+    propose: propose.propose,
+  };
 };
 
 const mapDispatchToProps = dispatch => {

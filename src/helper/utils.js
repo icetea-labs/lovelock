@@ -8,7 +8,7 @@ import { ecc, codec, AccountType } from '@iceteachain/common';
 import decode from './decode';
 const paths = 'm’/44’/60’/0’/0';
 
-export const contract = 'teat1862c92syky6l9jjq9s9tah6zpgsza2shx5fe2t';
+export const contract = process.env.REACT_APP_CONTRACT;
 
 export async function callPure(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callPureContractMethod');
@@ -67,7 +67,18 @@ export async function getAccountInfo(address) {
     throw err;
   }
 }
-
+export async function setTagsInfo(address, name, value) {
+  const resp = await tweb3
+    .contract('system.did')
+    .methods.setTag(address, name, value)
+    .sendCommit({ from: address });
+  if (resp) {
+    const { tags } = resp;
+    return tags;
+  } else {
+    return {};
+  }
+}
 export async function getTagsInfo(address) {
   const resp = await tweb3
     .contract('system.did')
@@ -164,7 +175,7 @@ export async function getAlias(address) {
 }
 export async function registerAlias(username, address, privateKey) {
   try {
-    tweb3.wallet.importAccount(privateKey);
+    // tweb3.wallet.importAccount(privateKey);
     const info = await tweb3
       .contract('system.alias')
       .methods.register(username, address)

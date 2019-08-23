@@ -1,6 +1,6 @@
 import { AccountType } from '@iceteachain/common';
 import { actionTypes } from '../actions/account';
-
+import tweb3 from '../../service/tweb3';
 const initialState = Object.assign(
   {
     needAuth: false,
@@ -19,6 +19,8 @@ const initialState = Object.assign(
       resp.address = user.address;
       resp.privateKey = user.privateKey;
       resp.encryptedData = user.mnemonic;
+      tweb3.wallet.importAccount(user.privateKey);
+      tweb3.wallet.defaultAccount = user.address;
     }
     return resp;
   })()

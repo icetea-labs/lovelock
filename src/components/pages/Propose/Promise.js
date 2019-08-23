@@ -88,8 +88,8 @@ class Promise extends React.Component {
     if (file) {
       hash = await saveToIpfs(file);
     }
-    tweb3.wallet.importAccount(privateKey);
-    tweb3.wallet.defaultAccount = address;
+    // tweb3.wallet.importAccount(privateKey);
+    // tweb3.wallet.defaultAccount = address;
     let info = {
       date: date,
       hash: hash,
