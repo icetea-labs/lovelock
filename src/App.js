@@ -7,7 +7,7 @@ import Login from './components/pages/Authen/Login';
 import Register from './components/pages/Authen/Register';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import GlobaLoading from './components/elements/GlobaLoading';
-import Main from './components/pages/Timeline';
+import Timeline from './components/pages/Timeline';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -24,7 +24,7 @@ class App extends Component {
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
-            <RouteWithLayout layout={HomeLayout} exact path="/timeline" component={Main} />
+            <RouteWithLayout layout={HomeLayout} exact path={`/propose/:proposeIndex`} component={Timeline} />;
             {/* <Route component={NotFound} /> */}
           </Switch>
         </Router>
