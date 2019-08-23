@@ -7,6 +7,7 @@ import { TagTitle } from './Promise';
 import tweb3 from '../../../service/tweb3';
 import { connect } from 'react-redux';
 import { saveToIpfs, sendTransaction } from '../../../helper/index';
+import notifi from '../../elements/Notification';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -50,7 +51,7 @@ class PromiseConfirm extends React.Component {
 
   async messageAccept(message) {
     const { index, privateKey, address } = this.props;
-    console.log('view confirm props', this.props)
+    console.log('view confirm props', this.props);
     try {
       // tweb3.wallet.importAccount(privateKey);
       // tweb3.wallet.defaultAccount = address;
@@ -59,8 +60,8 @@ class PromiseConfirm extends React.Component {
       const result = await sendTransaction(name, params);
       // console.log('View result', result);
       if (result) {
-        window.alert('send success');
-        // notifi.info("Success!");
+        // window.alert('send success');
+        notifi.info('Success!');
         this.props.close();
       }
     } catch (error) {
