@@ -13,10 +13,10 @@ import TopContrainer from './TopContrainer';
 // import MessageHistory from './MessageHistory';
 import Promise from '../Propose/Promise';
 import CustomPost from './CustomPost';
-// import PromiseAlert from './PromiseAlert';
-// import PromiseConfirm from './PromiseConfirm';
+import PromiseAlert from '../Propose/PromiseAlert';
+import PromiseConfirm from '../Propose/PromiseConfirm';
 // import PromiseLeftAccept from './PromiseLeftAccept';
-// import PromiseLeftPending from './PromiseLeftPending';
+import PromiseLeftPending from './PromiseLeftPending';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -275,7 +275,7 @@ class Main extends PureComponent {
 
   openPending = index => {
     this.setState({ isPendingPromise: true, pendingIndex: index });
-    // console.log(index);
+    console.log('view pending index', index);
   };
 
   acceptPromise = () => {
@@ -356,6 +356,8 @@ class Main extends PureComponent {
       date,
       file,
       memoryContent,
+      address,
+      propose,
     } = this.state;
     return (
       <React.Fragment>
@@ -382,7 +384,9 @@ class Main extends PureComponent {
                   /> */}
                 </div>
                 <div className="title">Pending promise</div>
-                <div>{/* <PromiseLeftPending address={address} openPendingPromise={this.openPending} /> */}</div>
+                <div>
+                  <PromiseLeftPending address={address} openPendingPromise={this.openPending} />
+                </div>
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
               </ShadowBox>
@@ -442,22 +446,21 @@ class Main extends PureComponent {
               </div>
               {/* <MessageHistory /> */}
               {isPromise && <Promise close={this.closePromise} />}
+              {isPendingPromise && (
+                <PromiseAlert
+                  propose={propose}
+                  address={address}
+                  index={pendingIndex}
+                  close={this.closePendingPromise}
+                  accept={this.acceptPromise}
+                  deny={this.denyPromise}
+                />
+              )}
+              {isAccept && <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />}
+              {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} index={pendingIndex} />}
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-        {/* 
-        {isPendingPromise && (
-          <PromiseAlert
-            propose={propose}
-            address={address}
-            index={pendingIndex}
-            close={this.closePendingPromise}
-            accept={this.acceptPromise}
-            deny={this.denyPromise}
-          />
-        )}
-        {isAccept && <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />}
-        {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} index={pendingIndex} />} */}
       </React.Fragment>
     );
   }
