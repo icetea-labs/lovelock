@@ -360,13 +360,7 @@ class Home extends PureComponent {
       propose,
     } = this.state;
     return (
-      <React.Fragment>
-        {/* <BannerContainer>
-          <ShadowBox>
-            <TopContrainer proIndex={proIndex} />
-          </ShadowBox>
-        </BannerContainer> */}
-
+      address && (
         <FlexBox wrap="wrap">
           <FlexWidthBox width="30%">
             <LeftBox>
@@ -461,7 +455,7 @@ class Home extends PureComponent {
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
-      </React.Fragment>
+      )
     );
   }
 }
