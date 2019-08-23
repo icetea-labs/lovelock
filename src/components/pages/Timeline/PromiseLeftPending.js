@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
-import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../../helper';
+import { rem } from '../../elements/Common';
+import { getTagsInfo, getAlias } from '../../../helper';
 import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.div`
@@ -68,18 +68,13 @@ class PromiseLeftPending extends PureComponent {
   }
 
   async loaddata() {
-    let { propose, address } = this.props;
+    let { propose } = this.props;
     console.log('check propose', propose);
     let tmp = [];
     if (!propose) propose = [];
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
       if (obj.status === 0) {
-        const addr = address === obj.sender ? obj.receiver : obj.sender;
-        const reps = await getTagsInfo(addr);
-        const name = await getAlias(addr);
-        obj.name = reps['display-name'];
-        obj.nick = '@' + name;
         obj.index = i;
         tmp.push(obj);
       }
