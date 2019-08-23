@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { rem } from '../../elements/Common';
-import { getTagsInfo, getAlias } from '../../../helper';
 import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.div`
@@ -69,7 +68,7 @@ class PromiseLeftPending extends PureComponent {
 
   async loaddata() {
     let { propose } = this.props;
-    console.log('check propose', propose);
+    // console.log('check propose', propose);
     let tmp = [];
     if (!propose) propose = [];
     for (let i = 0; i < propose.length; i++) {
@@ -85,7 +84,6 @@ class PromiseLeftPending extends PureComponent {
 
   render() {
     const { newPropose } = this.state;
-    const { openPendingPromise } = this.props;
 
     return newPropose.map(item => {
       return (

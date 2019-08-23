@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { rem } from '../../elements/Common';
-import { getTagsInfo, getAlias } from '../../../helper';
 import { connect } from 'react-redux';
 
-const WarrperAcceptedPromise = styled.div`
+const WarrperAcceptedPromise = styled.a`
+  text-decoration: none;
   display: flex;
   align-items: flex-start;
   margin-bottom: ${rem(20)};
@@ -78,11 +78,15 @@ class PromiseLeftAccept extends PureComponent {
   render() {
     const { newPropose } = this.state;
     const { handlerSelectPropose } = this.props;
-    console.log('view State', this.state);
+    // console.log('view State', this.state);
 
     return newPropose.map(item => {
       return (
-        <WarrperAcceptedPromise key={item.index} onClick={() => handlerSelectPropose(item.index)}>
+        <WarrperAcceptedPromise
+          href={`/propose/${item.index}`}
+          key={item.index}
+          onClick={() => handlerSelectPropose(item.index)}
+        >
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="imgTrada" />
           </div>

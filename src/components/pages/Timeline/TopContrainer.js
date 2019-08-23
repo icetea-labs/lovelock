@@ -2,8 +2,8 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
-// import { callView, getAccountInfo, getTagsInfo, getAlias } from '../../helper';
-// import * as actions from '../../store/actions';
+import { getTagsInfo } from '../../../helper';
+import * as actions from '../../../store/actions';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -127,43 +127,31 @@ class TopContrainer extends PureComponent {
     const { topInfo } = this.state;
     const { propose, proIndex, setLoading } = this.props;
     let newTopInfor = {};
-    // setLoading(true);
-    // if (proIndex >= 0) {
-    //   const obj = propose[proIndex];
-    //   newTopInfor.s_content = obj.s_content;
-    //   newTopInfor.r_content = obj.r_content;
-    //     const senderinfor = await getTagsInfo(obj.sender);
-    //     newTopInfor.s_displayname = senderinfor['display-name'];
-    //     const receiverinfor = await getTagsInfo(obj.receiver);
-    //     newTopInfor.r_displayname = receiverinfor['display-name'];
-    // } else {
-    //   for (let i = 0; i < propose.length; i++) {
-    //     const obj = propose[i];
-    //     if (obj.status === 1) {
-    //       newTopInfor.s_content = obj.s_content;
-    //       newTopInfor.r_content = obj.r_content;
-    //         const senderinfor = await getTagsInfo(obj.sender);
-    //         newTopInfor.s_displayname = senderinfor['display-name'];
-    //         const receiverinfor = await getTagsInfo(obj.receiver);
-    //         newTopInfor.r_displayname = receiverinfor['display-name'];
-    //       break;
-    //     }
-    //     // console.log("obj", obj);
-    //   }
-    // }
+    setLoading(true);
+    if (propose.length > 0) {
+      const obj = propose[proIndex];
+      // console.log('proIndex', proIndex);
+      // console.log('propose', propose);
+      newTopInfor.s_content = obj.s_content;
+      newTopInfor.r_content = obj.r_content;
+      const senderinfor = await getTagsInfo(obj.sender);
+      newTopInfor.s_displayname = senderinfor['display-name'];
+      const receiverinfor = await getTagsInfo(obj.receiver);
+      newTopInfor.r_displayname = receiverinfor['display-name'];
+    }
 
-    newTopInfor.s_content = 'I love you so much';
-    newTopInfor.s_displayname = 'LuongHV';
-    newTopInfor.r_content = 'Will you marry me?';
-    newTopInfor.r_displayname = 'Hana';
+    // newTopInfor.s_content = 'I love you so much';
+    // newTopInfor.s_displayname = 'LuongHV';
+    // newTopInfor.r_content = 'Will you marry me?';
+    // newTopInfor.r_displayname = 'Hana';
     newTopInfor.coverimg = 'https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo';
     newTopInfor.title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In facilisis sollicitudin ultricies.';
     newTopInfor.date = '2/4/2004';
     newTopInfor.s_date = '08/06/2019';
     newTopInfor.r_date = '09/06/2019';
 
-    this.setState({ topInfo: newTopInfor });
-    // this.setState({ topInfo: newTopInfor }, setLoading(false));
+    // this.setState({ topInfo: newTopInfor });
+    this.setState({ topInfo: newTopInfor }, setLoading(false));
   }
 
   render() {
@@ -175,11 +163,11 @@ class TopContrainer extends PureComponent {
           <img src={topInfo.coverimg} alt="itea-scan" />
         </div>
 
-        <div className="top__title">
+        {/* <div className="top__title">
           <img src="/static/img/luggage.svg" alt="itea" />
           <span className="title__content">{topInfo.title}</span>
           <span className="title__date">{topInfo.date}</span>
-        </div>
+        </div> */}
 
         <WarrperChatBox>
           <FlexWidthBox width="50%" className="proposeMes">
@@ -221,12 +209,12 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    // setPropose: value => {
-    //   dispatch(actions.setPropose(value));
-    // },
-    // setLoading: value => {
-    //   dispatch(actions.setLoading(value));
-    // },
+    setPropose: value => {
+      dispatch(actions.setPropose(value));
+    },
+    setLoading: value => {
+      dispatch(actions.setLoading(value));
+    },
   };
 };
 
