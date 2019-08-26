@@ -40,7 +40,7 @@ export const TagTitle = styled.div`
   width: 100%;
   height: 18px;
   font-family: Montserrat;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   font-style: normal;
   font-stretch: normal;
