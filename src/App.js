@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './assets/sass/common.scss';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { HomeLayout, Layout } from './components/layout/Layout';
