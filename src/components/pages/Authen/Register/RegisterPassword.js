@@ -13,6 +13,7 @@ import { DivControlBtnKeystore, FlexBox, FlexWidthBox, rem } from '../../../elem
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
+import { encode } from '../../../../helper';
 // import notifi from '../../../elements/Notification';
 
 // import "date-fns";
@@ -101,10 +102,12 @@ class RegisterPassword extends PureComponent {
     if (resp) {
       setLoading(true);
       setTimeout(async () => {
-        const account = { address, privateKey, cipher: password };
+        const keyObject = encode(privateKey, password);
+        console.log('keyObject', keyObject);
+        const account = { address, privateKey, cipher: keyObject };
         setAccount(account);
         localStorage.removeItem('user');
-        localStorage.setItem('user', JSON.stringify({ address, privateKey }));
+        localStorage.setItem('user', JSON.stringify({ address, keyObject, privateKey }));
         setLoading(false);
         // history.push('/');
         setStep('three');

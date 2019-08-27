@@ -10,6 +10,7 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/Common';
 import tweb3 from '../../../../service/tweb3';
+import { decode } from '../../../../helper';
 
 const styles = theme => ({
   button: {
@@ -45,11 +46,12 @@ class LoginWithPassWord extends PureComponent {
   };
 
   gotoLogin = async () => {
-    const { privateKey, password } = this.state;
-    const { setLoading, setAccount, history } = this.props;
+    const { password } = this.state;
+    const { setLoading, setAccount, history, keyObject } = this.props;
     try {
       setLoading(true);
       setTimeout(async () => {
+        const privateKey = decode(keyObject, password);
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const account = { address, privateKey, cipher: password };
         tweb3.wallet.importAccount(privateKey);
