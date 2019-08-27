@@ -218,7 +218,7 @@ class RegisterUsername extends PureComponent {
             id="firstname"
             label="First Name"
             required
-            placeholder="Enter your username"
+            placeholder="Enter your fistname"
             helperText={firstnameErr}
             error={firstnameErr !== ''}
             fullWidth
@@ -232,7 +232,7 @@ class RegisterUsername extends PureComponent {
             helperText={lastnameErr}
             error={lastnameErr !== ''}
             required
-            placeholder="Enter your username"
+            placeholder="Enter your lastname"
             fullWidth
             margin="normal"
             onChange={this.handleUsername}

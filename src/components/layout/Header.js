@@ -78,6 +78,11 @@ const MenuItem = styled.div`
     margin-left: ${rem(2)};
     font-weight: 600;
   }
+  .username {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   img {
     width: 46px;
     height: 46px;
@@ -175,7 +180,9 @@ class Header extends PureComponent {
               <FlexBox flex={1} justify="flex-end">
                 <MenuItem>
                   <img src="/static/img/user-men.jpg" alt="" />
-                  <a href="/login">{username}</a>
+                  <a className="username" href="/login">
+                    {username}
+                  </a>
                 </MenuItem>
                 <MenuItem>
                   <a href="/login">Explore</a>
