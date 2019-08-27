@@ -10,6 +10,7 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/Common';
+import notifi from '../../../elements/Notification';
 
 const styles = theme => ({
   button: {
@@ -39,8 +40,11 @@ class RegisterUsername extends PureComponent {
       username: '',
       usernameErr: '',
       firstname: '',
+      firstnameErr: '',
       lastname: '',
+      lastnameErr: '',
       password: '',
+      passwordErr: '',
       rePassword: '',
       rePassErr: '',
     };
@@ -56,14 +60,14 @@ class RegisterUsername extends PureComponent {
   };
 
   gotoNext = async () => {
-    const { username, firstname, lastname, password } = this.state;
+    const { username, firstname, lastname, password, rePassword } = this.state;
     const { setStep, setLoading, setAccount } = this.props;
 
-    if (username) {
+    if (!this.isInvalidateData()) {
       const resp = await isAliasRegisted(username);
       if (resp) {
         this.setState({
-          rePassErr: 'Username already exists! Please choose another',
+          usernameErr: 'Username already exists! Please choose another',
         });
       } else {
         setLoading(true);
@@ -82,16 +86,79 @@ class RegisterUsername extends PureComponent {
           const respTags = await setTagsInfo(address, 'display-name', displayname);
           console.log('respTags', respTags);
 
-          setLoading(false);
-          setStep('three');
+          if (resp && respTags) {
+            setLoading(false);
+            setStep('three');
+          } else {
+            notifi.info('Error registerAlias');
+          }
         }, 500);
       }
-    } else {
-      this.setState({
-        rePassErr: 'Username is required',
-      });
     }
   };
+
+  isInvalidateData() {
+    const { username, firstname, lastname, password, rePassword } = this.state;
+
+    if (!username) {
+      this.setState({
+        usernameErr: 'The Username field is required',
+      });
+      return true;
+    } else {
+      const { usernameErr } = this.state;
+      if (usernameErr) this.setState({ usernameErr: '' });
+    }
+
+    if (!firstname) {
+      this.setState({
+        firstnameErr: 'The Firstname field is required',
+      });
+      return true;
+    } else {
+      const { firstnameErr } = this.state;
+      if (firstnameErr) this.setState({ firstnameErr: '' });
+    }
+
+    if (!lastname) {
+      this.setState({
+        lastnameErr: 'The Lastname field is required',
+      });
+      return true;
+    } else {
+      const { lastnameErr } = this.state;
+      if (lastnameErr) this.setState({ lastnameErr: '' });
+    }
+
+    if (!password) {
+      this.setState({
+        passwordErr: 'The password field is required',
+      });
+      return true;
+    } else {
+      const { passwordErr } = this.state;
+      if (passwordErr) this.setState({ passwordErr: '' });
+    }
+
+    if (!rePassword) {
+      this.setState({
+        rePassErr: 'The confirm password field is required',
+      });
+      return true;
+    }
+
+    if (password !== rePassword) {
+      this.setState({
+        rePassErr: 'The confirmation password do not match.',
+      });
+      return true;
+    } else {
+      const { rePassErr } = this.state;
+      if (rePassErr) this.setState({ rePassErr: '' });
+    }
+
+    return false;
+  }
 
   handleUsername = event => {
     const key = event.currentTarget.id;
@@ -109,11 +176,11 @@ class RegisterUsername extends PureComponent {
       const resp = await isAliasRegisted(username);
       if (resp) {
         this.setState({
-          rePassErr: 'Username already exists! Please choose another',
+          usernameErr: 'Username already exists! Please choose another',
         });
       } else {
         this.setState({
-          rePassErr: '',
+          usernameErr: '',
         });
       }
     }, 1500);
@@ -130,7 +197,7 @@ class RegisterUsername extends PureComponent {
   };
 
   render() {
-    const { rePassErr } = this.state;
+    const { usernameErr, rePassErr, lastnameErr, firstnameErr, passwordErr } = this.state;
     const { classes } = this.props;
 
     return (
@@ -138,9 +205,10 @@ class RegisterUsername extends PureComponent {
         <TextField
           id="username"
           label="Username"
+          required
           placeholder="Enter your username"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
+          helperText={usernameErr}
+          error={usernameErr !== ''}
           fullWidth
           margin="normal"
           onChange={this.handleUsername}
@@ -149,9 +217,10 @@ class RegisterUsername extends PureComponent {
           <TextField
             id="firstname"
             label="First Name"
+            required
             placeholder="Enter your username"
-            helperText={rePassErr}
-            error={rePassErr !== ''}
+            helperText={firstnameErr}
+            error={firstnameErr !== ''}
             fullWidth
             className={classes.marginRight}
             margin="normal"
@@ -160,9 +229,10 @@ class RegisterUsername extends PureComponent {
           <TextField
             id="lastname"
             label="Last Name"
+            helperText={lastnameErr}
+            error={lastnameErr !== ''}
+            required
             placeholder="Enter your username"
-            helperText={rePassErr}
-            error={rePassErr !== ''}
             fullWidth
             margin="normal"
             onChange={this.handleUsername}
@@ -171,9 +241,10 @@ class RegisterUsername extends PureComponent {
         <TextField
           id="password"
           label="Password"
+          helperText={passwordErr}
+          error={passwordErr !== ''}
+          required
           placeholder="Password"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
           fullWidth
           margin="normal"
           onChange={this.handleUsername}
@@ -182,9 +253,10 @@ class RegisterUsername extends PureComponent {
         <TextField
           id="rePassword"
           label="Confirm Password"
-          placeholder="Confirm your password"
           helperText={rePassErr}
           error={rePassErr !== ''}
+          required
+          placeholder="Confirm your password"
           fullWidth
           margin="normal"
           onChange={this.handleUsername}
