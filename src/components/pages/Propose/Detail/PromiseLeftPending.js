@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem } from '../../elements/Common';
+import { rem } from '../../../elements/Common';
 import { connect } from 'react-redux';
 
-const WarrperAcceptedPromise = styled.a`
-  text-decoration: none;
+const WarrperAcceptedPromise = styled.div`
   display: flex;
   align-items: flex-start;
   margin-bottom: ${rem(20)};
@@ -31,20 +30,27 @@ const WarrperAcceptedPromise = styled.a`
   }
 `;
 
-class PromiseLeftAccept extends PureComponent {
+class PromiseLeftPending extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       basePropose: [],
       newPropose: [],
+      index: '',
+      address: '',
     };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose } = nextProps;
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
-      return { basePropose: propose };
+    const { propose, address } = nextProps;
+    let value = {};
+    if (address !== prevState.address) {
+      value = Object.assign({}, { address });
     }
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
+      value = Object.assign({}, { basePropose: propose });
+    }
+    if (value) return value;
     return null;
   }
 
@@ -53,39 +59,38 @@ class PromiseLeftAccept extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { basePropose } = this.state;
+    const { basePropose, address } = this.state;
 
-    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose)) {
+    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) || prevState.address !== address) {
       this.loaddata();
     }
   }
 
   async loaddata() {
     let { propose } = this.props;
+    // console.log('check propose', propose);
     let tmp = [];
     if (!propose) propose = [];
-
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
-      if (obj.status === 1) {
-        obj.index = i;
+      if (obj.status === 0) {
         tmp.push(obj);
       }
     }
+
     this.setState({ newPropose: tmp });
   }
 
   render() {
     const { newPropose } = this.state;
-    const { handlerSelectPropose } = this.props;
-    // console.log('view State', this.state);
 
     return newPropose.map(item => {
       return (
         <WarrperAcceptedPromise
-          href={`/propose/${item.index}`}
-          key={item.index}
-          onClick={() => handlerSelectPropose(item.index)}
+          key={item.id}
+          onClick={() => {
+            this.props.openPendingPromise(item.id);
+          }}
         >
           <div className="icon">
             <img src="https://trada.tech/assets/img/logo.svg" alt="imgTrada" />
@@ -114,4 +119,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   null
-)(PromiseLeftAccept);
+)(PromiseLeftPending);

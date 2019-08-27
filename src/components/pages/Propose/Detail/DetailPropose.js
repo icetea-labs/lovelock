@@ -3,18 +3,18 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import InputBase from '@material-ui/core/InputBase';
 
-import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../helper';
-import * as actions from '../../../store/actions';
+import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../../helper';
+import * as actions from '../../../../store/actions';
 
-import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
-import Icon from '../../elements/Icon';
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
+import Icon from '../../../elements/Icon';
 
 import TopContrainer from './TopContrainer';
-import MessageHistory from '../Memory/MessageHistory';
-import Promise from '../Propose/Promise';
+import MessageHistory from '../../Memory/MessageHistory';
+import Promise from '../Promise';
 import CustomPost from './CustomPost';
-import PromiseAlert from '../Propose/PromiseAlert';
-import PromiseConfirm from '../Propose/PromiseConfirm';
+import PromiseAlert from '../PromiseAlert';
+import PromiseConfirm from '../PromiseConfirm';
 import PromiseLeftAccept from './PromiseLeftAccept';
 import PromiseLeftPending from './PromiseLeftPending';
 
@@ -38,9 +38,9 @@ const LeftBox = styled.div`
   .btn_add_promise {
     width: 172px;
     height: 46px;
-    background: #ffffff;
     border-radius: 23px;
     font-weight: 600;
+    font-size: ${rem(14)};
     color: #8250c8;
     border: 1px solid #8250c8;
     display: flex;
@@ -106,7 +106,6 @@ const RightBox = styled.div`
     display: inline-block;
     .privacy {
       display: inline-block;
-      float: left;
     }
     button {
       width: 254px;
@@ -158,7 +157,7 @@ const TagBox = styled.div`
   }
 `;
 
-class Timeline extends PureComponent {
+class DetailPropose extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -493,4 +492,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Timeline);
+)(DetailPropose);

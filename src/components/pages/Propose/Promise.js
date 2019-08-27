@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import CustomPost from '../Timeline/CustomPost';
+import CustomPost from './Detail/CustomPost';
 import CommonDialog from './CommonDialog';
 import { saveToIpfs, sendTransaction } from '../../../helper/index';
 import { connect } from 'react-redux';
