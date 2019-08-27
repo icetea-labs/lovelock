@@ -1,5 +1,5 @@
 // import React from 'react';
-import styled, { css } from "styled-components";
+import styled, { css } from 'styled-components';
 
 export const px2rem = px => `${px / 16}rem`;
 export const rem = px => `${px / 16}rem`;
@@ -15,19 +15,19 @@ export const media = {
       @media (max-width: ${mobile.pagemaxwidth}) {
         ${css(...args)}
       }
-    `
+    `,
 };
 export const pc = {
-  pageminwidth: "960",
-  pagemaxwidth: "100%",
-  contentmaxwidth: "1200"
+  pageminwidth: '960',
+  pagemaxwidth: '100%',
+  contentmaxwidth: '1200',
   // topleft: "25%",
   // topright: "20%",
 };
 export const mobile = {
-  pageminwidth: "320",
-  pagemaxwidth: "960",
-  contentmaxwidth: "750"
+  pageminwidth: '320',
+  pagemaxwidth: '960',
+  contentmaxwidth: '750',
   // topleft: "100%",
   // topright: "100%",
 };
@@ -61,7 +61,7 @@ export const FlexItem = styled.div`
   width: ${props => props.width};
 `;
 export const ShadowBox = styled.div.attrs({
-  className: "shadow_box"
+  className: 'shadow_box',
 })`
   width: ${props => props.width};
   background-color: #fff;
@@ -85,12 +85,12 @@ export const ShadowBox = styled.div.attrs({
     background-color: #fff;
   }
   ${media.mobile`
-    padding: ${props => props.padding && "16px 12px"};
+    padding: ${props => props.padding && '16px 12px'};
     margin: 0px 0px 16px 0px;
   `}
 `;
 export const TextOvewflow = styled.div.attrs({
-  className: "text-overflow"
+  className: 'text-overflow',
 })`
   width: ${props => props.width};
 `;
@@ -122,4 +122,8 @@ export const DivControlBtnKeystore = styled.div`
       margin-top: 20px;
     }
   }
+`;
+
+export const DivPassRecover = styled.div`
+  padding: 10px 0 0 0;
 `;

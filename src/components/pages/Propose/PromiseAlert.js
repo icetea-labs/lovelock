@@ -12,6 +12,10 @@ const ImgView = styled.div`
   }
 `;
 
+const PageView = styled.p`
+  font-family: Montserrat;
+`;
+
 class PromiseAlert extends React.Component {
   constructor(props) {
     super(props);
@@ -69,7 +73,7 @@ class PromiseAlert extends React.Component {
           <ImgView>
             <img src={'https://ipfs.io/ipfs/' + hash} className="postImg" alt="promiseImg" />
           </ImgView>
-          <p>{content}</p>
+          <PageView>{content}</PageView>
         </CommonDialog>
       </div>
     );

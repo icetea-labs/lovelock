@@ -8,8 +8,8 @@ import Button from '@material-ui/core/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
-import { DivControlBtnKeystore } from '../../../elements/Common';
 import tweb3 from '../../../../service/tweb3';
+import { DivControlBtnKeystore } from '../../../elements/Common';
 
 const styles = theme => ({
   button: {
@@ -22,14 +22,20 @@ const styles = theme => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
   },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    borderWidth: '1px',
+    borderColor: 'yellow !important',
+  },
 });
 
-class LoginWithPrivatekey extends PureComponent {
+class LoginRecover extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       rePassErr: '',
-      privateKey: '',
+      mnemonic: '',
       password: '',
     };
   }
@@ -39,17 +45,16 @@ class LoginWithPrivatekey extends PureComponent {
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
-
   _keydown = e => {
     e.keyCode === 13 && this.gotoLogin();
   };
-
   gotoLogin = async () => {
-    const { privateKey, password } = this.state;
+    const { mnemonic, password } = this.state;
     const { setLoading, setAccount, history } = this.props;
     try {
       setLoading(true);
       setTimeout(async () => {
+        const privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const account = { address, privateKey, cipher: password };
         tweb3.wallet.importAccount(privateKey);
@@ -66,17 +71,18 @@ class LoginWithPrivatekey extends PureComponent {
   };
 
   handlePassword = event => {
-    const password = event.currentTarget.value;
+    const password = event.target.value;
     // console.log(value);
     this.setState({ password });
   };
-  handlePrivatekey = event => {
-    const privateKey = event.currentTarget.value;
-    this.setState({ privateKey });
+  handleMnemonic = event => {
+    const mnemonic = event.target.value;
+    console.log(mnemonic);
+    this.setState({ mnemonic });
   };
-  loginWithSeed = () => {
+  loginWithPrivatekey = () => {
     const { setStep } = this.props;
-    setStep('two');
+    setStep('one');
   };
   render() {
     const { rePassErr } = this.state;
@@ -85,18 +91,22 @@ class LoginWithPrivatekey extends PureComponent {
     return (
       <div>
         <TextField
-          id="username"
-          label="Privatekey"
-          placeholder="Enter your private key"
+          id="outlined-multiline-static"
+          label="Recovery phase or key"
+          placeholder="Enter your recovery phase or key"
+          multiline
+          rows="4"
+          className={classes.textField}
+          onChange={this.handleMnemonic}
+          margin="normal"
+          variant="outlined"
+          fullWidth
           helperText={rePassErr}
           error={rePassErr !== ''}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePrivatekey}
         />
         <TextField
           id="rePassword"
-          label="Password"
+          label="New Password"
           placeholder="Enter your password"
           helperText={rePassErr}
           error={rePassErr !== ''}
@@ -106,11 +116,11 @@ class LoginWithPrivatekey extends PureComponent {
           type="password"
         />
         <DivControlBtnKeystore>
-          <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
-            Login with seed
+          <Button color="primary" onClick={this.loginWithPrivatekey} className={classes.link}>
+            Login
           </Button>
           <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
-            Login
+            Recover
           </Button>
         </DivControlBtnKeystore>
       </div>
@@ -146,5 +156,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withRouter(LoginWithPrivatekey))
+  )(withRouter(LoginRecover))
 );

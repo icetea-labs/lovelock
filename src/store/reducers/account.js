@@ -16,6 +16,7 @@ const initialState = Object.assign(
 
     if (user && JSON.parse(user).address) {
       user = JSON.parse(user);
+      console.log('user', user)
       resp.address = user.address;
       // resp.privateKey = user.privateKey;
       resp.encryptedData = user.crypto;

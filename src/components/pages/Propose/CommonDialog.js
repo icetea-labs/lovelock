@@ -14,7 +14,7 @@ const PuLayout = styled.div`
 
 const Container = styled.div`
   width: 600px;
-  min-height: 390px;
+  /* min-height: 390px; */
   max-height: 730px;
   border-radius: 10px;
   box-shadow: 0 14px 52px 0 rgba(0, 0, 0, 0.12);
