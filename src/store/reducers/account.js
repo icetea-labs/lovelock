@@ -17,10 +17,10 @@ const initialState = Object.assign(
     if (user && JSON.parse(user).address) {
       user = JSON.parse(user);
       resp.address = user.address;
-      resp.privateKey = user.privateKey;
-      resp.encryptedData = user.mnemonic;
-      tweb3.wallet.importAccount(user.privateKey);
-      tweb3.wallet.defaultAccount = user.address;
+      // resp.privateKey = user.privateKey;
+      resp.encryptedData = user.crypto;
+      // tweb3.wallet.importAccount(user.privateKey);
+      // tweb3.wallet.defaultAccount = user.address;
     }
     return resp;
   })()

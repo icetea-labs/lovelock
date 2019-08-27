@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './assets/sass/common.scss';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { HomeLayout, Layout } from './components/layout/Layout';
@@ -7,7 +8,7 @@ import Login from './components/pages/Authen/Login';
 import Register from './components/pages/Authen/Register';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import GlobaLoading from './components/elements/GlobaLoading';
-import Timeline from './components/pages/Timeline';
+import DetailPropose from './components/pages/Propose/Detail';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -24,7 +25,7 @@ class App extends Component {
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
-            <RouteWithLayout layout={HomeLayout} exact path={`/propose/:proposeIndex`} component={Timeline} />;
+            <RouteWithLayout layout={HomeLayout} exact path={`/propose/:proposeIndex`} component={DetailPropose} />;
             {/* <Route component={NotFound} /> */}
           </Switch>
         </Router>

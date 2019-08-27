@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import ipfs from '../../../service/ipfs';
+import ipfs from '../../../../service/ipfs';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 

@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
-import { getTagsInfo, TimeWithFormat } from '../../../helper';
-import * as actions from '../../../store/actions';
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
+import { getTagsInfo, TimeWithFormat } from '../../../../helper';
+import * as actions from '../../../../store/actions';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
