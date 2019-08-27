@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { codec } from '@iceteachain/common';
 import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -47,18 +48,23 @@ class LoginWithPassWord extends PureComponent {
 
   gotoLogin = async () => {
     const { password } = this.state;
-    const { setLoading, setAccount, history, keyObject } = this.props;
+    const { setLoading, setAccount, history, encryptedData } = this.props;
+    let privateKey;
+    if (encryptedData) {
+      const readableKey = decode(password, encryptedData).privateKey;
+      privateKey = codec.toString(readableKey);
+    } else return;
+    console.log('privateKey', privateKey);
     try {
       setLoading(true);
       setTimeout(async () => {
-        const privateKey = decode(keyObject, password);
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const account = { address, privateKey, cipher: password };
         tweb3.wallet.importAccount(privateKey);
         tweb3.wallet.defaultAccount = address;
         setAccount(account);
-        localStorage.removeItem('user');
-        localStorage.setItem('user', JSON.stringify(account));
+        // localStorage.removeItem('user');
+        // localStorage.setItem('user', JSON.stringify(account));
         history.push('/');
         setLoading(false);
       }, 500);
@@ -125,8 +131,10 @@ class LoginWithPassWord extends PureComponent {
 
 const mapStateToProps = state => {
   const e = state.create;
+  const account = state.account;
   return {
     password: e.password,
+    encryptedData: account.encryptedData,
   };
 };
 
