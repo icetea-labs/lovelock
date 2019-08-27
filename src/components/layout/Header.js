@@ -137,6 +137,7 @@ class Header extends PureComponent {
   async loaddata() {
     const { address } = this.props;
     console.log('address', address);
+    if (address === '') return;
     const reps = await getTagsInfo(address);
     // console.log('reps', reps);
     this.setState({ username: reps['display-name'] });

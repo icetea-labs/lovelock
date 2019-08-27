@@ -60,15 +60,14 @@ const FoolterBtn = styled.div`
 
 class RegisterSuccess extends React.Component {
   gotoHome = () => {
-    const { privateKey, setLoading, setStep, history, password } = this.props;
+    const { address, privateKey, setLoading, setStep, history, password } = this.props;
     let keyObject = '';
     setLoading(true);
     setTimeout(async () => {
       keyObject = encode(privateKey, password);
       setLoading(false);
       localStorage.removeItem('user');
-      // localStorage.setItem('user', JSON.stringify({ address, privateKey }));
-      localStorage.setItem('user', JSON.stringify(keyObject));
+      localStorage.setItem('user', JSON.stringify({ address, keyObject }));
       setStep('one');
       history.push('/');
     }, 500);
