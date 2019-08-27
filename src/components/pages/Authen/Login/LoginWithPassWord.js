@@ -49,33 +49,44 @@ class LoginWithPassWord extends PureComponent {
   gotoLogin = async () => {
     const { password } = this.state;
     const { setLoading, setAccount, history, encryptedData } = this.props;
-    let privateKey;
+
     if (encryptedData) {
-      const readableKey = decode(password, encryptedData).privateKey;
-      privateKey = codec.toString(readableKey);
-    } else return;
-    console.log('privateKey', privateKey);
-    try {
+      if (!password) {
+        this.setState({ rePassErr: 'Password required.' });
+        return;
+      }
       setLoading(true);
-      setTimeout(async () => {
-        const address = wallet.getAddressFromPrivateKey(privateKey);
-        const account = { address, privateKey, cipher: password };
-        tweb3.wallet.importAccount(privateKey);
-        tweb3.wallet.defaultAccount = address;
-        setAccount(account);
-        // localStorage.removeItem('user');
-        // localStorage.setItem('user', JSON.stringify(account));
-        history.push('/');
-        setLoading(false);
-      }, 500);
-    } catch (err) {
-      throw err;
+
+      this.timeoutHanle1 = setTimeout(() => {
+        try {
+          let privateKey = '';
+          privateKey = codec.toString(decode(password, encryptedData).privateKey);
+          const address = wallet.getAddressFromPrivateKey(privateKey);
+          const account = { address, privateKey, cipher: password };
+          tweb3.wallet.importAccount(privateKey);
+          tweb3.wallet.defaultAccount = address;
+          setAccount(account);
+          // localStorage.removeItem('user');
+          // localStorage.setItem('user', JSON.stringify(account));
+          history.push('/');
+          setLoading(false);
+        } catch (err) {
+          // console.log(err);
+          this.setState({
+            rePassErr: 'Wrong Password!',
+          });
+          setLoading(false);
+        }
+      }, 100);
     }
   };
 
   handlePassword = event => {
     const password = event.currentTarget.value;
-    // console.log(value);
+    if (!password) {
+      this.setState({ rePassErr: 'Password required.' });
+    }
+    // console.log(password);
     this.setState({ password });
   };
   handlePrivatekey = event => {
@@ -103,11 +114,12 @@ class LoginWithPassWord extends PureComponent {
           onChange={this.handlePrivatekey}
         /> */}
         <TextField
+          required
           id="rePassword"
           label="Password"
           placeholder="Enter your password"
           helperText={rePassErr}
-          error={rePassErr !== ''}
+          error={rePassErr.length === 0 ? false : true}
           fullWidth
           margin="normal"
           onChange={this.handlePassword}
