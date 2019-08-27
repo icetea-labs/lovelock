@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { rem, FlexBox } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import LoginWithMnemonic from './LoginWithMnemonic';
-import LoginWithPrivatekey from './LoginWithPrivatekey';
+import LoginRecover from './LoginRecover';
+import LoginWithPassWord from './LoginWithPassWord';
 import Button from '@material-ui/core/Button';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 
@@ -97,7 +97,7 @@ const styles = theme => ({
     background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
   },
   link: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(0),
   },
   rightIcon: {
     marginLeft: theme.spacing(1),
@@ -132,9 +132,10 @@ class Login extends PureComponent {
 
                   <Title>Sign In</Title>
                 </div>
-                {step === 'one' && <LoginWithPrivatekey />}
-                {step === 'two' && <LoginWithMnemonic />}
+                {step === 'one' && <LoginWithPassWord />}
+                {step === 'two' && <LoginRecover />}
                 <div className="btRegister">
+                  <span>Have not account yet?</span>
                   <Button color="primary" href="/register" className={classes.link}>
                     Register
                   </Button>
