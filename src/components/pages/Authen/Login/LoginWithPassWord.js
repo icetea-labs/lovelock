@@ -5,13 +5,13 @@ import { codec } from '@iceteachain/common';
 import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/Common';
 import tweb3 from '../../../../service/tweb3';
 import { decode } from '../../../../helper';
+import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
 
 const styles = theme => ({
   button: {
@@ -127,14 +127,11 @@ class LoginWithPassWord extends PureComponent {
         />
         <DivControlBtnKeystore>
           <DivPassRecover>
-            <span>Forgot password?</span>
-            <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
-              Recover
-            </Button>
+            <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
           </DivPassRecover>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
+          <ButtonPro className={classes.button} onClick={this.gotoLogin}>
             Login
-          </Button>
+          </ButtonPro>
         </DivControlBtnKeystore>
       </div>
     );

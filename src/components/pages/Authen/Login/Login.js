@@ -5,8 +5,9 @@ import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import LoginRecover from './LoginRecover';
 import LoginWithPassWord from './LoginWithPassWord';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
 
 const DivWallet = styled.div`
   position: relative;
@@ -136,9 +137,7 @@ class Login extends PureComponent {
                 {step === 'two' && <LoginRecover />}
                 <div className="btRegister">
                   <span>Have not account yet?</span>
-                  <Button color="primary" href="/register" className={classes.link}>
-                    Register
-                  </Button>
+                  <LinkPro href="/register">Register</LinkPro>
                 </div>
               </ShadowBox>
             </RegisterBox>

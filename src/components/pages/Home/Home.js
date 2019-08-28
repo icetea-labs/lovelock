@@ -225,6 +225,7 @@ class Home extends PureComponent {
       const obj = allPropose[i];
       // if (obj.status === 1) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
+      console.log('addr', addr);
       const reps = await getTagsInfo(addr);
       const name = await getAlias(addr);
       obj.name = reps['display-name'];

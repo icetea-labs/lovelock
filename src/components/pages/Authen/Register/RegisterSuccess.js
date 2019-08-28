@@ -7,6 +7,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import encode from '../../../../helper/encode';
 // import decode from '../../../../helper/decode';
+import { savetoLocalStorage } from '../../../../helper';
 
 const WrapperImg = styled.div`
   margin-top: 20px;
@@ -61,13 +62,14 @@ const FoolterBtn = styled.div`
 class RegisterSuccess extends React.Component {
   gotoHome = () => {
     const { address, privateKey, setLoading, setStep, history, password } = this.props;
-    let keyObject = '';
+    // let keyObject = '';
     setLoading(true);
     setTimeout(async () => {
-      keyObject = encode(privateKey, password);
+      const keyObject = encode(privateKey, password);
       setLoading(false);
-      localStorage.removeItem('user');
-      localStorage.setItem('user', JSON.stringify({ address, keyObject }));
+      savetoLocalStorage(address, keyObject);
+      // localStorage.removeItem('user');
+      // localStorage.setItem('user', JSON.stringify({ address, keyObject }));
       setStep('one');
       history.push('/');
     }, 500);

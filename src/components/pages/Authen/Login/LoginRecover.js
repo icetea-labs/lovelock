@@ -4,12 +4,15 @@ import { connect } from 'react-redux';
 import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
+import { ButtonPro } from '../../../elements/ButtonPro';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/Common';
+import { savetoLocalStorage } from '../../../../helper';
+import encode from '../../../../helper/encode';
 
 const styles = theme => ({
   button: {
@@ -36,6 +39,7 @@ class LoginRecover extends PureComponent {
     this.state = {
       rePassErr: '',
       mnemonic: '',
+      isPrivateKey: false,
       password: '',
     };
   }
@@ -49,19 +53,27 @@ class LoginRecover extends PureComponent {
     e.keyCode === 13 && this.gotoLogin();
   };
   gotoLogin = async () => {
-    const { mnemonic, password } = this.state;
+    const { mnemonic, password, isPrivateKey } = this.state;
     const { setLoading, setAccount, history } = this.props;
     try {
       setLoading(true);
       setTimeout(async () => {
-        const privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
+        let privateKey = '';
+        if (isPrivateKey) {
+          privateKey = mnemonic;
+        } else {
+          privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
+        }
+
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const account = { address, privateKey, cipher: password };
         tweb3.wallet.importAccount(privateKey);
         tweb3.wallet.defaultAccount = address;
         setAccount(account);
-        localStorage.removeItem('user');
-        localStorage.setItem('user', JSON.stringify(account));
+        // localStorage.removeItem('user');
+        // localStorage.setItem('user', JSON.stringify(account));
+        const keyObject = encode(privateKey, password);
+        savetoLocalStorage(address, keyObject);
         history.push('/');
         setLoading(false);
       }, 500);
@@ -76,9 +88,11 @@ class LoginRecover extends PureComponent {
     this.setState({ password });
   };
   handleMnemonic = event => {
-    const mnemonic = event.target.value;
-    console.log(mnemonic);
-    this.setState({ mnemonic });
+    let isPrivateKey = false;
+    const mnemonic = event.target.value.trim();
+    if (mnemonic.length === 44) isPrivateKey = true;
+    // console.log(mnemonic);
+    this.setState({ mnemonic, isPrivateKey });
   };
   loginWithPrivatekey = () => {
     const { setStep } = this.props;
@@ -116,12 +130,12 @@ class LoginRecover extends PureComponent {
           type="password"
         />
         <DivControlBtnKeystore>
-          <Button color="primary" onClick={this.loginWithPrivatekey} className={classes.link}>
-            Login
-          </Button>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
+          <ButtonPro color="primary" onClick={this.loginWithPrivatekey} className={classes.link}>
+            Back
+          </ButtonPro>
+          <ButtonPro variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
             Recover
-          </Button>
+          </ButtonPro>
         </DivControlBtnKeystore>
       </div>
     );

@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import { isAliasRegisted, wallet, registerAlias, setTagsInfo } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
+import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
 import Icon from '@material-ui/core/Icon';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -88,7 +89,7 @@ class RegisterUsername extends PureComponent {
 
           if (resp && respTags) {
             setLoading(false);
-            setStep('three');
+            setStep('two');
           } else {
             notifi.info('Error registerAlias');
           }
@@ -263,13 +264,11 @@ class RegisterUsername extends PureComponent {
           type="password"
         />
         <DivControlBtnKeystore>
-          <Button color="primary" href="/login" className={classes.link}>
-            Login
-          </Button>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoNext}>
+          <LinkPro href="/login">Login</LinkPro>
+          <ButtonPro onClick={this.gotoNext}>
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
-          </Button>
+          </ButtonPro>
         </DivControlBtnKeystore>
       </div>
     );

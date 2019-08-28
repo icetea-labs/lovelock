@@ -1,11 +1,10 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
+// import { withRouter } from 'react-router-dom';
 import { rem } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import RegisterUsername from './RegisterUsername';
-import RegisterPassword from './RegisterPassword';
 import RegisterSuccess from './RegisterSuccess';
 
 // import { Header } from "../../elements/utils";
@@ -93,8 +92,7 @@ class Register extends PureComponent {
                   </div>
                 )}
                 {step === 'one' && <RegisterUsername />}
-                {step === 'two' && <RegisterPassword />}
-                {step === 'three' && <RegisterSuccess />}
+                {step === 'two' && <RegisterSuccess />}
               </ShadowBox>
             </RegisterBox>
           </DivWallet>
