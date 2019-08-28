@@ -4,9 +4,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
-import tweb3 from '../../../service/tweb3';
 import { connect } from 'react-redux';
-import { saveToIpfs, sendTransaction } from '../../../helper/index';
+import { sendTransaction } from '../../../helper/index';
 import notifi from '../../elements/Notification';
 
 const useStyles = makeStyles(theme => ({
@@ -50,11 +49,9 @@ class PromiseConfirm extends React.Component {
   };
 
   async messageAccept(message) {
-    const { index, privateKey, address } = this.props;
+    const { index } = this.props;
     console.log('view confirm props', this.props);
     try {
-      // tweb3.wallet.importAccount(privateKey);
-      // tweb3.wallet.defaultAccount = address;
       const name = 'acceptPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params);
@@ -70,10 +67,8 @@ class PromiseConfirm extends React.Component {
   }
 
   async messageDeny(message) {
-    const { index, privateKey, address } = this.props;
+    const { index } = this.props;
     try {
-      // tweb3.wallet.importAccount(privateKey);
-      // tweb3.wallet.defaultAccount = address;
       const name = 'cancelPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params);
@@ -89,7 +84,7 @@ class PromiseConfirm extends React.Component {
   }
 
   render() {
-    const { close, send, isDeny } = this.props;
+    const { close, isDeny } = this.props;
     const { messageAccept, messageDeny } = this.state;
     return (
       <CommonDialog

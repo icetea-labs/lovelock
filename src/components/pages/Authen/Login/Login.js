@@ -1,13 +1,13 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem, FlexBox } from '../../../elements/Common';
+import { rem } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import LoginRecover from './LoginRecover';
 import LoginWithPassWord from './LoginWithPassWord';
 // import Button from '@material-ui/core/Button';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
+import { withStyles } from '@material-ui/core/styles';
+import { LinkPro } from '../../../elements/ButtonPro';
 
 const DivWallet = styled.div`
   position: relative;
@@ -16,22 +16,22 @@ const DivWallet = styled.div`
   padding-bottom: 50px;
   justify-content: center;
 `;
-const DivLogo = styled.div`
-  color: #15b5dd;
-  height: 80px;
-  cursor: pointer;
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 80px;
-  top: 10px;
-  @media (min-width: 1900px) {
-    top: 80px;
-  }
-  img {
-    width: 80px;
-  }
-`;
+// const DivLogo = styled.div`
+//   color: #15b5dd;
+//   height: 80px;
+//   cursor: pointer;
+//   position: absolute;
+//   left: 50%;
+//   transform: translate(-50%, 0);
+//   width: 80px;
+//   top: 10px;
+//   @media (min-width: 1900px) {
+//     top: 80px;
+//   }
+//   img {
+//     width: 80px;
+//   }
+// `;
 const RegisterBox = styled.div`
   position: absolute;
   top: 130px;
@@ -63,15 +63,6 @@ const ShadowBox = styled.div`
   }
   @media (min-width: 624px) {
     min-width: ${rem(400)};
-  }
-`;
-const WrapperImgPencil = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  img {
-    width: 80px;
-    margin-bottom: 20px;
   }
 `;
 const Title = styled.div`
@@ -115,7 +106,7 @@ class Login extends PureComponent {
   gotoHome = () => {};
 
   render() {
-    let { confirmMnemonic, showPrivateKey, privateKey, step, classes } = this.props;
+    const { step } = this.props;
     console.log('step', step);
     return (
       <div>

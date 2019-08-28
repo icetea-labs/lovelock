@@ -61,7 +61,7 @@ class RegisterUsername extends PureComponent {
   };
 
   gotoNext = async () => {
-    const { username, firstname, lastname, password, rePassword } = this.state;
+    const { username, firstname, lastname, password } = this.state;
     const { setStep, setLoading, setAccount } = this.props;
 
     if (!this.isInvalidateData()) {

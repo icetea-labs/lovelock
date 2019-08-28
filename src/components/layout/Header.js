@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { rem, FlexBox } from '../elements/Common';
 import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
-import { getAlias, getTagsInfo } from '../../helper';
+import { getTagsInfo } from '../../helper';
 
 const Container = styled.header`
   width: 100%;

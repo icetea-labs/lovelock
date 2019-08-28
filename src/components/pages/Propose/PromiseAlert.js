@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
-import { getTagsInfo, getAlias } from '../../../helper/';
+import { getAlias } from '../../../helper/';
 
 const ImgView = styled.div`
   margin: 31px 0 31px;

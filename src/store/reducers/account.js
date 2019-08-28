@@ -1,6 +1,4 @@
-import { AccountType } from '@iceteachain/common';
 import { actionTypes } from '../actions/account';
-import tweb3 from '../../service/tweb3';
 const initialState = Object.assign(
   {
     needAuth: false,

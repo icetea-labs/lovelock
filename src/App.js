@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './assets/sass/common.scss';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { HomeLayout, Layout } from './components/layout/Layout';
+import { HomeLayout } from './components/layout/Layout';
 import Home from './components/pages/Home';
 import Login from './components/pages/Authen/Login';
 import Register from './components/pages/Authen/Register';

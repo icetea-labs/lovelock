@@ -128,7 +128,7 @@ class TopContrainer extends PureComponent {
   }
 
   async loaddata() {
-    const { topInfo } = this.state;
+    // const { topInfo } = this.state;
     const { propose, proIndex, setLoading } = this.props;
     let newTopInfor = {};
     setLoading(true);
