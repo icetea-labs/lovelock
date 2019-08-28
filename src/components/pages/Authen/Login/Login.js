@@ -84,16 +84,16 @@ const StyledLogo = styled.div`
 `;
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing(1),
-    background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  },
-  link: {
-    margin: theme.spacing(0),
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
+  //   button: {
+  //     margin: theme.spacing(1),
+  //     background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
+  //   },
+  //   link: {
+  //     margin: theme.spacing(0),
+  //   },
+  //   rightIcon: {
+  //     marginLeft: theme.spacing(1),
+  //   },
 });
 
 class Login extends PureComponent {

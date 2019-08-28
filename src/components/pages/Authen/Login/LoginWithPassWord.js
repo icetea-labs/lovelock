@@ -14,16 +14,16 @@ import { decode } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing(1),
-    background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  },
-  link: {
-    margin: theme.spacing(0),
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
+  // button: {
+  //   margin: theme.spacing(1),
+  //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
+  // },
+  // link: {
+  //   margin: theme.spacing(0),
+  // },
+  // rightIcon: {
+  //   marginLeft: theme.spacing(1),
+  // },
 });
 
 class LoginWithPassWord extends PureComponent {
@@ -38,6 +38,7 @@ class LoginWithPassWord extends PureComponent {
   componentDidMount() {
     window.document.body.addEventListener('keydown', this._keydown);
   }
+
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
@@ -99,20 +100,10 @@ class LoginWithPassWord extends PureComponent {
   };
   render() {
     const { rePassErr } = this.state;
-    const { classes } = this.props;
+    // const { classes } = this.props;
 
     return (
       <div>
-        {/* <TextField
-          id="username"
-          label="Privatekey"
-          placeholder="Enter your private key"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePrivatekey}
-        /> */}
         <TextField
           required
           id="rePassword"
@@ -129,9 +120,7 @@ class LoginWithPassWord extends PureComponent {
           <DivPassRecover>
             <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
           </DivPassRecover>
-          <ButtonPro className={classes.button} onClick={this.gotoLogin}>
-            Login
-          </ButtonPro>
+          <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro>
         </DivControlBtnKeystore>
       </div>
     );

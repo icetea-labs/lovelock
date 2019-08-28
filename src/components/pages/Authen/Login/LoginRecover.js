@@ -15,16 +15,16 @@ import { savetoLocalStorage } from '../../../../helper';
 import encode from '../../../../helper/encode';
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing(1),
-    background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  },
-  link: {
-    margin: theme.spacing(1),
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
+  // button: {
+  //   margin: theme.spacing(1),
+  //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
+  // },
+  // link: {
+  //   margin: theme.spacing(1),
+  // },
+  // rightIcon: {
+  //   marginLeft: theme.spacing(1),
+  // },
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),

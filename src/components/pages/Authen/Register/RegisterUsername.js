@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { isAliasRegisted, wallet, registerAlias, setTagsInfo } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
 // import Button from '@material-ui/core/Button';
 import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
 import Icon from '@material-ui/core/Icon';
@@ -12,19 +12,10 @@ import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/Common';
 import notifi from '../../../elements/Notification';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing(1),
-    background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  },
-  link: {
-    margin: theme.spacing(1),
-  },
   rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
-  marginLeft: {
     marginLeft: theme.spacing(1),
   },
   marginRight: {
@@ -52,9 +43,25 @@ class RegisterUsername extends PureComponent {
   }
   componentDidMount() {
     window.document.body.addEventListener('keydown', this._keydown);
+    ValidatorForm.addValidationRule('isPasswordMatch', value => {
+      if (value !== this.state.password) {
+        return false;
+      }
+      return true;
+    });
+
+    ValidatorForm.addValidationRule('isAliasRegisted', async username => {
+      // const resp = this.checkAliasRegisted(value);
+      const resp = await isAliasRegisted(username);
+      console.log('isAliasRegisted', !!resp);
+      return !resp;
+    });
   }
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
+    // remove rule when it is not needed
+    ValidatorForm.removeValidationRule('isPasswordMatch');
+    ValidatorForm.removeValidationRule('isAliasRegisted');
   }
   _keydown = e => {
     e.keyCode === 13 && this.gotoNext();
@@ -98,77 +105,78 @@ class RegisterUsername extends PureComponent {
     }
   };
 
-  isInvalidateData() {
-    const { username, firstname, lastname, password, rePassword } = this.state;
+  // isInvalidateData() {
+  //   const { username, firstname, lastname, password, rePassword } = this.state;
 
-    if (!username) {
-      this.setState({
-        usernameErr: 'The Username field is required',
-      });
-      return true;
-    } else {
-      const { usernameErr } = this.state;
-      if (usernameErr) this.setState({ usernameErr: '' });
-    }
+  //   if (!username) {
+  //     this.setState({
+  //       usernameErr: 'The Username field is required',
+  //     });
+  //     return true;
+  //   } else {
+  //     const { usernameErr } = this.state;
+  //     if (usernameErr) this.setState({ usernameErr: '' });
+  //   }
 
-    if (!firstname) {
-      this.setState({
-        firstnameErr: 'The Firstname field is required',
-      });
-      return true;
-    } else {
-      const { firstnameErr } = this.state;
-      if (firstnameErr) this.setState({ firstnameErr: '' });
-    }
+  //   if (!firstname) {
+  //     this.setState({
+  //       firstnameErr: 'The Firstname field is required',
+  //     });
+  //     return true;
+  //   } else {
+  //     const { firstnameErr } = this.state;
+  //     if (firstnameErr) this.setState({ firstnameErr: '' });
+  //   }
 
-    if (!lastname) {
-      this.setState({
-        lastnameErr: 'The Lastname field is required',
-      });
-      return true;
-    } else {
-      const { lastnameErr } = this.state;
-      if (lastnameErr) this.setState({ lastnameErr: '' });
-    }
+  //   if (!lastname) {
+  //     this.setState({
+  //       lastnameErr: 'The Lastname field is required',
+  //     });
+  //     return true;
+  //   } else {
+  //     const { lastnameErr } = this.state;
+  //     if (lastnameErr) this.setState({ lastnameErr: '' });
+  //   }
 
-    if (!password) {
-      this.setState({
-        passwordErr: 'The password field is required',
-      });
-      return true;
-    } else {
-      const { passwordErr } = this.state;
-      if (passwordErr) this.setState({ passwordErr: '' });
-    }
+  //   if (!password) {
+  //     this.setState({
+  //       passwordErr: 'The password field is required',
+  //     });
+  //     return true;
+  //   } else {
+  //     const { passwordErr } = this.state;
+  //     if (passwordErr) this.setState({ passwordErr: '' });
+  //   }
 
-    if (!rePassword) {
-      this.setState({
-        rePassErr: 'The confirm password field is required',
-      });
-      return true;
-    }
+  //   if (!rePassword) {
+  //     this.setState({
+  //       rePassErr: 'The confirm password field is required',
+  //     });
+  //     return true;
+  //   }
 
-    if (password !== rePassword) {
-      this.setState({
-        rePassErr: 'The confirmation password do not match.',
-      });
-      return true;
-    } else {
-      const { rePassErr } = this.state;
-      if (rePassErr) this.setState({ rePassErr: '' });
-    }
+  //   if (password !== rePassword) {
+  //     this.setState({
+  //       rePassErr: 'The confirmation password do not match.',
+  //     });
+  //     return true;
+  //   } else {
+  //     const { rePassErr } = this.state;
+  //     if (rePassErr) this.setState({ rePassErr: '' });
+  //   }
 
-    return false;
-  }
+  //   return false;
+  // }
 
   handleUsername = event => {
-    const key = event.currentTarget.id;
+    const key = event.currentTarget.name;
     const value = event.currentTarget.value;
     console.log(event.currentTarget.id);
+
     this.setState({ [key]: value });
-    if (key === 'username') {
-      this.checkAliasRegisted(value);
-    }
+    // if (key === 'username') {
+    //   this.checkAliasRegisted(value);
+    // }
   };
 
   checkAliasRegisted = username => {
@@ -176,13 +184,15 @@ class RegisterUsername extends PureComponent {
     myTime = setTimeout(async () => {
       const resp = await isAliasRegisted(username);
       if (resp) {
-        this.setState({
-          usernameErr: 'Username already exists! Please choose another',
-        });
+        // this.setState({
+        //   usernameErr: 'Username already exists! Please choose another',
+        // });
+        return true;
       } else {
-        this.setState({
-          usernameErr: '',
-        });
+        // this.setState({
+        //   usernameErr: '',
+        // });
+        return false;
       }
     }, 1500);
   };
@@ -198,12 +208,13 @@ class RegisterUsername extends PureComponent {
   };
 
   render() {
-    const { usernameErr, rePassErr, lastnameErr, firstnameErr, passwordErr } = this.state;
+    // const { usernameErr, rePassErr, lastnameErr, firstnameErr, passwordErr } = this.state;
+    const { username, firstname, lastname, password, rePassword } = this.state;
     const { classes } = this.props;
 
     return (
-      <div>
-        <TextField
+      <ValidatorForm onSubmit={this.gotoNext}>
+        {/* <TextField
           id="username"
           label="Username"
           required
@@ -213,12 +224,21 @@ class RegisterUsername extends PureComponent {
           fullWidth
           margin="normal"
           onChange={this.handleUsername}
+        /> */}
+        <TextValidator
+          label="Username"
+          fullWidth
+          onChange={this.handleUsername}
+          name="username"
+          validators={['required', 'isAliasRegisted']}
+          errorMessages={['This field is required', 'Username already exists! Please choose another']}
+          margin="normal"
+          value={username}
         />
         <FlexBox>
-          <TextField
+          {/* <TextField
             id="firstname"
             label="First Name"
-            required
             placeholder="Enter your fistname"
             helperText={firstnameErr}
             error={firstnameErr !== ''}
@@ -232,14 +252,34 @@ class RegisterUsername extends PureComponent {
             label="Last Name"
             helperText={lastnameErr}
             error={lastnameErr !== ''}
-            required
             placeholder="Enter your lastname"
             fullWidth
             margin="normal"
             onChange={this.handleUsername}
+          /> */}
+          <TextValidator
+            label="First Name"
+            fullWidth
+            onChange={this.handleUsername}
+            name="firstname"
+            validators={['required']}
+            errorMessages={['This field is required']}
+            className={classes.marginRight}
+            margin="normal"
+            value={firstname}
+          />
+          <TextValidator
+            label="Last Name"
+            fullWidth
+            onChange={this.handleUsername}
+            name="lastname"
+            validators={['required']}
+            errorMessages={['This field is required']}
+            margin="normal"
+            value={lastname}
           />
         </FlexBox>
-        <TextField
+        {/* <TextField
           id="password"
           label="Password"
           helperText={passwordErr}
@@ -262,15 +302,41 @@ class RegisterUsername extends PureComponent {
           margin="normal"
           onChange={this.handleUsername}
           type="password"
+        /> */}
+        <TextValidator
+          label="Password"
+          fullWidth
+          onChange={this.handleUsername}
+          name="password"
+          type="password"
+          validators={['required']}
+          errorMessages={['This field is required']}
+          margin="normal"
+          value={password}
+        />
+        <TextValidator
+          label="Repeat password"
+          fullWidth
+          onChange={this.handleUsername}
+          name="rePassword"
+          type="password"
+          validators={['isPasswordMatch', 'required']}
+          errorMessages={['Password mismatch', 'This field is required']}
+          margin="normal"
+          value={rePassword}
         />
         <DivControlBtnKeystore>
           <LinkPro href="/login">Login</LinkPro>
-          <ButtonPro onClick={this.gotoNext}>
+          {/* <ButtonPro onClick={this.gotoNext}>
+            Next
+            <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
+          </ButtonPro> */}
+          <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
           </ButtonPro>
         </DivControlBtnKeystore>
-      </div>
+      </ValidatorForm>
     );
   }
 }

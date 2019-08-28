@@ -2,7 +2,7 @@ import React from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 
-const BaseButton = withStyles({
+export const BaseButton = withStyles({
   root: {
     // boxShadow: 'none',
     textTransform: 'none',
@@ -48,7 +48,7 @@ const StyledButtonPro = withStyles({
     '&:hover': {
       // background: '#0069d9',
       // borderColor: '#0062cc',
-      // background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
+      background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
     },
   },
 })(BaseButton);
