@@ -10,7 +10,7 @@ import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
-import { DivControlBtnKeystore } from '../../../elements/Common';
+import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { savetoLocalStorage } from '../../../../helper';
 import encode from '../../../../helper/encode';
 

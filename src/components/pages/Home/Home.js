@@ -6,7 +6,7 @@ import InputBase from '@material-ui/core/InputBase';
 import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../helper';
 import * as actions from '../../../store/actions';
 
-import { FlexBox, FlexWidthBox, rem } from '../../elements/Common';
+import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import Icon from '../../elements/Icon';
 
 // import TopContrainer from './TopContrainer';
@@ -18,9 +18,9 @@ import PromiseConfirm from '../Propose/PromiseConfirm';
 import PromiseLeftAccept from './PromiseLeftAccept';
 import PromiseLeftPending from './PromiseLeftPending';
 
-// const BannerContainer = styled.div`
-//   margin-bottom: ${rem(20)};
-// `;
+const BannerContainer = styled.div`
+  margin-bottom: ${rem(20)};
+`;
 const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;
@@ -38,9 +38,9 @@ const LeftBox = styled.div`
   .btn_add_promise {
     width: 172px;
     height: 46px;
-    background: #ffffff;
     border-radius: 23px;
     font-weight: 600;
+    font-size: ${rem(14)};
     color: #8250c8;
     border: 1px solid #8250c8;
     display: flex;
@@ -106,7 +106,6 @@ const RightBox = styled.div`
     display: inline-block;
     .privacy {
       display: inline-block;
-      float: left;
     }
     button {
       width: 254px;
@@ -225,7 +224,6 @@ class Home extends PureComponent {
       const obj = allPropose[i];
       // if (obj.status === 1) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
-      console.log('addr', addr);
       const reps = await getTagsInfo(addr);
       const name = await getAlias(addr);
       obj.name = reps['display-name'];
@@ -401,7 +399,7 @@ class Home extends PureComponent {
                       <InputBase
                         fullWidth
                         margin="dense"
-                        defaultValue="Describe your Propose…."
+                        defaultValue="Describe your Memory…."
                         inputProps={{ 'aria-label': 'naked' }}
                         onChange={this.statusChange}
                       />
@@ -438,7 +436,7 @@ class Home extends PureComponent {
                     this.shareMemory(proIndex, memoryContent, date, file);
                   }}
                 >
-                  Add Propose
+                  Share
                 </button>
               </div>
               <MessageHistory />

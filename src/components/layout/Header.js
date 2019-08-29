@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { rem, FlexBox } from '../elements/Common';
+import { rem, FlexBox } from '../elements/StyledUtils';
 import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
 import { getTagsInfo } from '../../helper';

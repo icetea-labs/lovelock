@@ -8,7 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
-import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/Common';
+import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/StyledUtils';
 import tweb3 from '../../../../service/tweb3';
 import { decode } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';

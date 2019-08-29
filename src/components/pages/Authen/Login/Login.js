@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem } from '../../../elements/Common';
+import { rem } from '../../../elements/StyledUtils';
+import { HeaderAuthen } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import LoginRecover from './LoginRecover';
@@ -65,23 +66,6 @@ const ShadowBox = styled.div`
     min-width: ${rem(400)};
   }
 `;
-const Title = styled.div`
-  font-size: ${rem(20)};
-  /* font-weight: bold; */
-  margin-top: ${rem(10)};
-`;
-const StyledLogo = styled.div`
-  font-size: ${rem(20)};
-  display: flex;
-  align-items: center;
-  span {
-    margin: 0 ${rem(10)};
-  }
-  a {
-    text-decoration: none;
-  }
-  cursor: pointer;
-`;
 
 const styles = theme => ({
   //   button: {
@@ -114,16 +98,7 @@ class Login extends PureComponent {
           <DivWallet key={1}>
             <RegisterBox>
               <ShadowBox>
-                <div>
-                  <StyledLogo>
-                    <a href="/">
-                      <img src="/static/img/logo.svg" alt="itea-scan" />
-                      <span>LoveLock</span>
-                    </a>
-                  </StyledLogo>
-
-                  <Title>Sign In</Title>
-                </div>
+                <HeaderAuthen title="Sign In" />
                 {step === 'one' && <LoginWithPassWord />}
                 {step === 'two' && <LoginRecover />}
                 <div className="btRegister">

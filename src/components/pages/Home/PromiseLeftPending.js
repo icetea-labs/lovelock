@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem } from '../../elements/Common';
+import { rem } from '../../elements/StyledUtils';
 import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.div`
@@ -74,7 +74,6 @@ class PromiseLeftPending extends PureComponent {
     for (let i = 0; i < propose.length; i++) {
       const obj = propose[i];
       if (obj.status === 0) {
-        obj.index = i;
         tmp.push(obj);
       }
     }
@@ -88,9 +87,9 @@ class PromiseLeftPending extends PureComponent {
     return newPropose.map(item => {
       return (
         <WarrperAcceptedPromise
-          key={item.index}
+          key={item.id}
           onClick={() => {
-            this.props.openPendingPromise(item.index);
+            this.props.openPendingPromise(item.id);
           }}
         >
           <div className="icon">

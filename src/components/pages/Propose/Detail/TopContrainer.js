@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { getTagsInfo, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 

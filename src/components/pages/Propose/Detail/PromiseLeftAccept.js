@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem } from '../../../elements/Common';
+import { rem } from '../../../elements/StyledUtils';
 import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.a`

@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 // import { withRouter } from 'react-router-dom';
-import { rem } from '../../../elements/Common';
+import { rem } from '../../../elements/StyledUtils';
+import { HeaderAuthen } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import RegisterUsername from './RegisterUsername';
@@ -46,23 +47,7 @@ const ShadowBox = styled.div`
     min-width: ${rem(400)};
   }
 `;
-const Title = styled.div`
-  font-size: ${rem(20)};
-  /* font-weight: bold; */
-  margin-top: ${rem(10)};
-`;
-const StyledLogo = styled.div`
-  font-size: ${rem(20)};
-  display: flex;
-  align-items: center;
-  span {
-    margin: 0 ${rem(10)};
-  }
-  a {
-    text-decoration: none;
-  }
-  cursor: pointer;
-`;
+
 class Register extends PureComponent {
   _closeModal = () => {};
 
@@ -80,17 +65,7 @@ class Register extends PureComponent {
           <DivWallet key={1}>
             <RegisterBox>
               <ShadowBox>
-                {step !== 'three' && (
-                  <div>
-                    <StyledLogo>
-                      <a href="/">
-                        <img src="/static/img/logo.svg" alt="itea-scan" />
-                        <span>LoveLock</span>
-                      </a>
-                    </StyledLogo>
-                    <Title>Register Icetea Account</Title>
-                  </div>
-                )}
+                {step === 'one' && <HeaderAuthen title="Register Icetea Account" />}
                 {step === 'one' && <RegisterUsername />}
                 {step === 'two' && <RegisterSuccess />}
               </ShadowBox>

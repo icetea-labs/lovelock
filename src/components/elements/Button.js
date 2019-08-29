@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { BtnActive, BtnInactive, Loading } from "./Styled";
+import { BtnActive, BtnInactive, Loading } from "./StyledUtils";
 
 class Button extends PureComponent {
   _handleClick = e => {

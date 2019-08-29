@@ -6,10 +6,11 @@ import InputBase from '@material-ui/core/InputBase';
 import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import Icon from '../../../elements/Icon';
 
 import TopContrainer from './TopContrainer';
+import LeftContrainer from './LeftContrainer';
 import MessageHistory from '../../Memory/MessageHistory';
 import Promise from '../Promise';
 import CustomPost from './CustomPost';
@@ -368,7 +369,8 @@ class DetailPropose extends PureComponent {
 
         <FlexBox wrap="wrap">
           <FlexWidthBox width="30%">
-            <LeftBox>
+            <LeftContrainer address={address} tag={tag} />
+            {/* <LeftBox>
               <ShadowBox>
                 <button type="button" className="btn_add_promise" onClick={this.addPromise}>
                   <Icon type="add" />
@@ -385,7 +387,7 @@ class DetailPropose extends PureComponent {
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
               </ShadowBox>
-            </LeftBox>
+            </LeftBox> */}
           </FlexWidthBox>
           <FlexWidthBox width="70%">
             <RightBox>

@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import styled from "styled-components";
 // import { Icon } from "./utils";
-import { zIndex } from "./Styled";
+import { zIndex } from "./StyledUtils";
 
 const Container = styled.div`
   margin-top: 20px;
