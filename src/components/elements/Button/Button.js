@@ -78,7 +78,7 @@ export function LinkPro(props) {
   const { children } = props;
 
   return (
-    <StyledLinkPro color="primary" className={classes.styledLink} {...props}>
+    <StyledLinkPro color="primary" className={classes.styledButton} {...props}>
       {children}
     </StyledLinkPro>
   );

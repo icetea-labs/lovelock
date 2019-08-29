@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
 import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
@@ -94,7 +93,7 @@ class ByPassWord extends PureComponent {
     setStep('two');
   };
   render() {
-    const { rePassErr, password } = this.state;
+    const { password } = this.state;
     // const { classes } = this.props;
 
     return (

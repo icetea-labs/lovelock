@@ -71,7 +71,7 @@ class RegisterUsername extends PureComponent {
     const { username, firstname, lastname, password } = this.state;
     const { setStep, setLoading, setAccount } = this.props;
 
-    if (!this.isInvalidateData()) {
+    if (username) {
       const resp = await isAliasRegisted(username);
       if (resp) {
         this.setState({
@@ -327,10 +327,6 @@ class RegisterUsername extends PureComponent {
         />
         <DivControlBtnKeystore>
           <LinkPro href="/login">Login</LinkPro>
-          {/* <ButtonPro onClick={this.gotoNext}>
-            Next
-            <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
-          </ButtonPro> */}
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>

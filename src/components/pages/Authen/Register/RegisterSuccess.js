@@ -22,7 +22,6 @@ const WrapperImg = styled.div`
 const Title = styled.div`
   font-size: 18px;
   font-weight: bold;
-  /* font-family: DIN; */
   text-align: center;
   span {
     color: #f23051;

@@ -8,14 +8,6 @@ import RegisterUsername from './RegisterUsername';
 import RegisterSuccess from './RegisterSuccess';
 
 class Register extends PureComponent {
-  _closeModal = () => {};
-
-  _continue = () => {};
-
-  _hide = () => {};
-
-  gotoHome = () => {};
-
   render() {
     const { step } = this.props;
     return (
