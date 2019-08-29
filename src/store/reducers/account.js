@@ -12,8 +12,7 @@ const initialState = Object.assign(
     const resp = {};
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
 
-    if (user && JSON.parse(user).address) {
-      user = JSON.parse(user);
+    if ((user = (user && JSON.parse(user)) || {}).address) {
       console.log('user', user);
       resp.address = user.address;
       // resp.privateKey = user.privateKey;

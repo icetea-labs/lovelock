@@ -31,7 +31,7 @@ const WarrperAcceptedPromise = styled.a`
   }
 `;
 
-class PromiseLeftAccept extends PureComponent {
+class LeftAccept extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -114,4 +114,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   null
-)(PromiseLeftAccept);
+)(LeftAccept);

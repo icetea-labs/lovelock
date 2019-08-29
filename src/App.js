@@ -8,6 +8,7 @@ import { Login, Register } from './components/pages/Authen';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import GlobaLoading from './components/elements/GlobaLoading';
 import DetailPropose from './components/pages/Propose/Detail';
+import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -25,7 +26,8 @@ class App extends Component {
             <Route exact path="/register" component={Register} />
             <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
             <RouteWithLayout layout={HomeLayout} exact path={`/propose/:proposeIndex`} component={DetailPropose} />;
-            {/* <Route component={NotFound} /> */}
+            <RouteWithLayout layout={HomeLayout} exact path={`/exception`} component={Exception} />
+            <Route component={NotFound} />
           </Switch>
         </Router>
         {isLoading && <GlobaLoading />}

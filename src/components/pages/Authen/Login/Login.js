@@ -30,7 +30,7 @@ class Login extends PureComponent {
                 {step === 'one' && <ByPassWord />}
                 {step === 'two' && <ByMnemonic />}
                 <div className="btRegister">
-                  <span>Have not account yet?</span>
+                  <span>No account yet?</span>
                   <LinkPro href="/register">Register</LinkPro>
                 </div>
               </ShadowBoxAuthen>

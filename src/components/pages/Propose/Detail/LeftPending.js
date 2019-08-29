@@ -30,7 +30,7 @@ const WarrperAcceptedPromise = styled.div`
   }
 `;
 
-class PromiseLeftPending extends PureComponent {
+class LeftPending extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -119,4 +119,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   null
-)(PromiseLeftPending);
+)(LeftPending);

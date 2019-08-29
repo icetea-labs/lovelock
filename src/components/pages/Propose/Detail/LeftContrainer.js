@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { rem } from '../../../elements/StyledUtils';
 import Icon from '../../../elements/Icon';
-import PromiseLeftAccept from './PromiseLeftAccept';
-import PromiseLeftPending from './PromiseLeftPending';
+import LeftAccept from './LeftAccept';
+import LeftPending from './LeftPending';
 import * as actions from '../../../../store/actions';
 
 const LeftBox = styled.div`
@@ -103,11 +103,11 @@ class LeftContrainer extends PureComponent {
           </button>
           <div className="title">Accepted promise</div>
           <div>
-            <PromiseLeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
+            <LeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
           </div>
           <div className="title">Pending promise</div>
           <div>
-            <PromiseLeftPending address={address} openPendingPromise={this.openPending} />
+            <LeftPending address={address} openPendingPromise={this.openPending} />
           </div>
           <div className="title">Popular Tag</div>
           <TagBox>{this.renderTag(tag)}</TagBox>
