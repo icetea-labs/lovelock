@@ -25,7 +25,7 @@ const theme = createMuiTheme({
     },
   },
   typography: {
-    fontSize: 14,
+    // fontSize: 14,
     fontFamily: [
       'Montserrat',
       '-apple-system',
@@ -51,6 +51,25 @@ const theme = createMuiTheme({
       text: {
         // Some CSS
         // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+      },
+    },
+    MuiOutlinedInput: {
+      root: {
+        position: 'relative',
+        '& $notchedOutline': {
+          borderColor: 'rgba(234, 236, 239, 0.7)',
+        },
+        '&:hover:not($disabled):not($focused):not($error) $notchedOutline': {
+          borderColor: 'rgba(234, 236, 239, 0.7)',
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            borderColor: 'rgba(234, 236, 239, 0.7)',
+          },
+        },
+        '&$focused $notchedOutline': {
+          // borderColor: '#4A90E2',
+          borderWidth: 1,
+        },
       },
     },
     MuiInput: {

@@ -18,13 +18,6 @@ const styles = theme => ({
   // button: {
   //   margin: theme.spacing(1),
   //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  // },
-  // link: {
-  //   margin: theme.spacing(1),
-  // },
-  // rightIcon: {
-  //   marginLeft: theme.spacing(1),
-  // },
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
@@ -33,7 +26,7 @@ const styles = theme => ({
   },
 });
 
-class LoginRecover extends PureComponent {
+class ByMnemonic extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -170,5 +163,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withRouter(LoginRecover))
+  )(withRouter(ByMnemonic))
 );

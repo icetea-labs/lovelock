@@ -24,7 +24,7 @@ class Register extends PureComponent {
           <LayoutAuthen key={1}>
             <BoxAuthen>
               <ShadowBoxAuthen>
-                {step === 'one' && <HeaderAuthen title="Register Icetea Account" />}
+                {step === 'one' && <HeaderAuthen title="Create New Account" />}
                 {step === 'one' && <RegisterUsername />}
                 {step === 'two' && <RegisterSuccess />}
               </ShadowBoxAuthen>

@@ -12,21 +12,16 @@ import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/StyledU
 import tweb3 from '../../../../service/tweb3';
 import { decode } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
   // button: {
   //   margin: theme.spacing(1),
   //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
   // },
-  // link: {
-  //   margin: theme.spacing(0),
-  // },
-  // rightIcon: {
-  //   marginLeft: theme.spacing(1),
-  // },
 });
 
-class LoginWithPassWord extends PureComponent {
+class ByPassWord extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -99,12 +94,12 @@ class LoginWithPassWord extends PureComponent {
     setStep('two');
   };
   render() {
-    const { rePassErr } = this.state;
+    const { rePassErr, password } = this.state;
     // const { classes } = this.props;
 
     return (
-      <div>
-        <TextField
+      <ValidatorForm onSubmit={this.gotoLogin}>
+        {/* <TextField
           id="rePassword"
           label="Password"
           placeholder="Enter your password"
@@ -114,14 +109,26 @@ class LoginWithPassWord extends PureComponent {
           margin="normal"
           onChange={this.handlePassword}
           type="password"
+        /> */}
+        <TextValidator
+          label="Password"
+          fullWidth
+          onChange={this.handlePassword}
+          name="password"
+          type="password"
+          validators={['required']}
+          errorMessages={['This field is required']}
+          margin="normal"
+          value={password}
         />
         <DivControlBtnKeystore>
           <DivPassRecover>
             <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
           </DivPassRecover>
-          <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro>
+          {/* <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro> */}
+          <ButtonPro type="submit">Login</ButtonPro>
         </DivControlBtnKeystore>
-      </div>
+      </ValidatorForm>
     );
   }
 }
@@ -156,5 +163,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withRouter(LoginWithPassWord))
+  )(withRouter(ByPassWord))
 );

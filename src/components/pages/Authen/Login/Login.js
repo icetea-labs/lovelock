@@ -3,8 +3,8 @@ import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/Styl
 import { HeaderAuthen } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import LoginRecover from './LoginRecover';
-import LoginWithPassWord from './LoginWithPassWord';
+import ByMnemonic from './ByMnemonic';
+import ByPassWord from './ByPassWord';
 // import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import { LinkPro } from '../../../elements/Button';
@@ -14,23 +14,9 @@ const styles = theme => ({
   //     margin: theme.spacing(1),
   //     background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
   //   },
-  //   link: {
-  //     margin: theme.spacing(0),
-  //   },
-  //   rightIcon: {
-  //     marginLeft: theme.spacing(1),
-  //   },
 });
 
 class Login extends PureComponent {
-  _closeModal = () => {};
-
-  _continue = () => {};
-
-  _hide = () => {};
-
-  gotoHome = () => {};
-
   render() {
     const { step } = this.props;
     console.log('step', step);
@@ -41,8 +27,8 @@ class Login extends PureComponent {
             <BoxAuthen>
               <ShadowBoxAuthen>
                 <HeaderAuthen title="Sign In" />
-                {step === 'one' && <LoginWithPassWord />}
-                {step === 'two' && <LoginRecover />}
+                {step === 'one' && <ByPassWord />}
+                {step === 'two' && <ByMnemonic />}
                 <div className="btRegister">
                   <span>Have not account yet?</span>
                   <LinkPro href="/register">Register</LinkPro>
