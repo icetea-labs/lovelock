@@ -4,14 +4,8 @@ import Button from '@material-ui/core/Button';
 
 export const BaseButton = withStyles({
   root: {
-    // boxShadow: 'none',
-    textTransform: 'none',
     fontSize: 14,
-    // padding: '6px 8px',
-    // border: '1px solid',
     lineHeight: 1.5,
-    // backgroundColor: '#007bff',
-    // borderColor: '#007bff',
     fontFamily: [
       'Montserrat',
       '-apple-system',
@@ -39,15 +33,15 @@ export const BaseButton = withStyles({
       // boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
     },
   },
+  label: {
+    // textTransform: 'capitalize',
+  },
 })(Button);
 
 const StyledButtonPro = withStyles({
   root: {
-    textTransform: 'none',
     background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
     '&:hover': {
-      // background: '#0069d9',
-      // borderColor: '#0062cc',
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
     },
   },
@@ -55,7 +49,7 @@ const StyledButtonPro = withStyles({
 
 const StyledLinkPro = withStyles({
   root: {
-    textTransform: 'none',
+    // textTransform: 'none',
   },
 })(BaseButton);
 

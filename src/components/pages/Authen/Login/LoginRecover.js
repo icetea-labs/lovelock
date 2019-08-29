@@ -5,7 +5,7 @@ import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 // import Button from '@material-ui/core/Button';
-import { ButtonPro } from '../../../elements/ButtonPro';
+import { ButtonPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';

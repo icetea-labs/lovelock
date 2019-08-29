@@ -18,9 +18,6 @@ import PromiseConfirm from '../Propose/PromiseConfirm';
 import PromiseLeftAccept from './PromiseLeftAccept';
 import PromiseLeftPending from './PromiseLeftPending';
 
-const BannerContainer = styled.div`
-  margin-bottom: ${rem(20)};
-`;
 const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;

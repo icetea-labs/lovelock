@@ -184,7 +184,7 @@ export const FlexItem = styled.div`
   margin: ${props => props.margin};
   width: ${props => props.width};
 `;
-export const ShadowBox = styled.div.attrs({
+export const ShadowBoxBK = styled.div.attrs({
   className: 'shadow_box',
 })`
   width: ${props => props.width};
@@ -250,4 +250,44 @@ export const DivControlBtnKeystore = styled.div`
 
 export const DivPassRecover = styled.div`
   padding: 10px 0 0 0;
+`;
+export const LayoutAuthen = styled.div`
+  position: relative;
+  height: 100%;
+  display: flex;
+  padding-bottom: 50px;
+  justify-content: center;
+`;
+export const BoxAuthen = styled.div`
+  position: absolute;
+  top: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  @media (min-width: 1900px) {
+    top: 190px;
+  }
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+  .btRegister {
+    padding-top: 20px;
+    text-align: center;
+    /* font-size: ${rem(12)}; */
+  }
+`;
+export const ShadowBoxAuthen = styled.div`
+  /* width: 100%; */
+  background: #fff;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #e4e4e4;
+  padding: ${rem(40)} ${rem(54)};
+  @media (min-width: 320px) and (max-width: 623px) {
+    box-shadow: none;
+    padding: 5px 20px;
+    box-sizing: border-box;
+  }
+  @media (min-width: 624px) {
+    min-width: ${rem(400)};
+  }
 `;

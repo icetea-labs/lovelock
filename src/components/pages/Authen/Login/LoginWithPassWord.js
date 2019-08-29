@@ -11,7 +11,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/StyledUtils';
 import tweb3 from '../../../../service/tweb3';
 import { decode } from '../../../../helper';
-import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
 
 const styles = theme => ({
   // button: {
@@ -105,7 +105,6 @@ class LoginWithPassWord extends PureComponent {
     return (
       <div>
         <TextField
-          required
           id="rePassword"
           label="Password"
           placeholder="Enter your password"

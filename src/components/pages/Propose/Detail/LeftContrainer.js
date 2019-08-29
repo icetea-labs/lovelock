@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
+import { rem } from '../../../elements/StyledUtils';
 import Icon from '../../../elements/Icon';
 import PromiseLeftAccept from './PromiseLeftAccept';
 import PromiseLeftPending from './PromiseLeftPending';

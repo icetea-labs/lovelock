@@ -4,7 +4,7 @@ import { isAliasRegisted, wallet, registerAlias, setTagsInfo } from '../../../..
 import { withStyles } from '@material-ui/core/styles';
 // import TextField from '@material-ui/core/TextField';
 // import Button from '@material-ui/core/Button';
-import { ButtonPro, LinkPro } from '../../../elements/ButtonPro';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
 import Icon from '@material-ui/core/Icon';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
