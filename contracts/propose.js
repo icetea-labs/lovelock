@@ -176,6 +176,6 @@ class Propose {
 
     //emit Event
     const log = Object.assign({}, pro, { index });
-    this.emitEvent('_confirmPropose', { by: msg.sender, log }, ['by']);
+    this.emitEvent('confirmPropose', { by: msg.sender, log }, ['by']);
   }
 }
