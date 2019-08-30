@@ -138,7 +138,13 @@ class LeftContrainer extends PureComponent {
   };
 
   newPromise = () => {
-    this.setState({ step: 'new' });
+    const { setNeedAuth, privateKey } = this.props;
+    if (!privateKey) {
+      setNeedAuth(true);
+      this.setState({ step: 'new' });
+    } else {
+      this.setState({ step: 'new' });
+    }
   };
   selectPending = index => {
     this.setState({ step: 'pending', index: index });
@@ -167,7 +173,7 @@ class LeftContrainer extends PureComponent {
 
   render() {
     const { step, index } = this.state;
-    const { propose, address, tag } = this.props;
+    const { propose, address, tag, privateKey } = this.props;
     return (
       <React.Fragment>
         <LeftBox>
@@ -188,7 +194,7 @@ class LeftContrainer extends PureComponent {
             <TagBox>{this.renderTag(tag)}</TagBox>
           </ShadowBox>
         </LeftBox>
-        {step === 'new' && <Promise close={this.closePopup} />}
+        {step === 'new' && privateKey && <Promise close={this.closePopup} />}
         {step === 'pending' && (
           <PromiseAlert
             index={index}
@@ -230,6 +236,9 @@ const mapDispatchToProps = dispatch => {
     },
     setLoading: value => {
       dispatch(actions.setLoading(value));
+    },
+    setNeedAuth: value => {
+      dispatch(actions.setNeedAuth(value));
     },
   };
 };
