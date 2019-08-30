@@ -25,7 +25,8 @@ const theme = createMuiTheme({
     },
   },
   typography: {
-    // fontSize: 14,
+    // htmlFontSize: 16,
+    fontSize: 12,
     fontFamily: [
       'Montserrat',
       '-apple-system',
@@ -80,7 +81,7 @@ const theme = createMuiTheme({
         borderBottom: 'rgba(234, 236, 239, 0.7)',
         '&:after': {
           borderBottom: `1px solid #fe8dc3`,
-          transition: 'all .3s ease-in',
+          transition: 'all .2s ease-in',
         },
         '&:focused::after': {
           borderBottom: `1px solid rgba(234, 236, 239, 0.7)`,

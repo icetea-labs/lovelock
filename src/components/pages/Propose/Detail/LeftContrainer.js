@@ -1,11 +1,13 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import tweb3 from '../../../../service/tweb3';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../../helper';
+import { callView, getTagsInfo, getAlias } from '../../../../helper';
 import Icon from '../../../elements/Icon';
-import LeftAccept from './LeftAccept';
-import LeftPending from './LeftPending';
+import { LinkPro } from '../../../elements/Button';
+import LeftProposes from './LeftProposes';
 import * as actions from '../../../../store/actions';
 import Promise from '../Promise';
 import PromiseAlert from '../PromiseAlert';
@@ -41,8 +43,7 @@ const LeftBox = styled.div`
 const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;
-  /* margin-bottom: 20px; */
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 `;
 const TagBox = styled.div`
@@ -64,16 +65,14 @@ class LeftContrainer extends PureComponent {
     this.state = {
       index: -1,
       step: '',
+      propose: [],
     };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose, address } = nextProps;
+    const { propose } = nextProps;
 
     let value = {};
-    if (address !== prevState.address) {
-      value = Object.assign({}, { address });
-    }
     if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
       value = Object.assign({}, { propose });
     }
@@ -82,57 +81,77 @@ class LeftContrainer extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { address } = this.state;
+    const { propose } = this.state;
 
-    if (prevState.address !== address) {
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
       this.loadProposes();
     }
   }
 
   componentDidMount() {
     this.loadProposes();
+    this.watchPropose();
   }
-
-  async loadProposes() {
-    // const { reload } = this.state;
-    const { setPropose, address, setCurrentIndex } = this.props;
-    // console.log(' loadProposes address', address);
-    let allPropose = await callView('getProposeByAddress', [address]);
-
-    setPropose(allPropose);
-    this.setState({ reload: false });
-
-    let tmp = [];
-    if (!allPropose) allPropose = [];
-
-    for (let i = 0; i < allPropose.length; i++) {
-      const obj = allPropose[i];
-      // if (obj.status === 1) {
-      const addr = address === obj.sender ? obj.receiver : obj.sender;
-      const reps = await getTagsInfo(addr);
-      const name = await getAlias(addr);
-      console.log('name', name);
-      obj.name = reps['display-name'];
-      obj.nick = '@' + name;
-      obj.index = i;
-      tmp.push(obj);
-      // }
-    }
-    // console.log('tmp', tmp);
-    if (tmp.length > 0) {
-      this.setState({ index: tmp[0].index });
-      setCurrentIndex(tmp[0].index);
-      // this.loadMemory();
-    }
-  }
-
-  handlerSelectPropose = index => {
-    // console.log('index', index);
-    const { setCurrentIndex } = this.props;
-    this.setState({ index });
-    setCurrentIndex(index);
-    // this.loadMemory();
+  watchPropose = async () => {
+    const { address } = this.props;
+    const contract = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    const filter = {}; //{ by: address };
+    contract.events.confirmPropose(filter, async (error, data) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log('data.log', data.log);
+        const { setPropose, propose } = this.props;
+        const newArray = propose.slice() || [];
+        const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
+        console.log('objIndex', objIndex);
+        newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
+        console.log('newArray', newArray);
+        setPropose(newArray);
+      }
+    });
+    const contract1 = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    contract1.events.createPropose(filter, async (error, data) => {
+      if (error) {
+        console.error(error);
+      } else {
+        const { setPropose, propose } = this.props;
+        // console.log(propose);
+        const log = await this.addInfoToProposes(data.log);
+        console.log(log);
+        // propose.push(log);
+        setPropose([...propose, log]);
+      }
+    });
   };
+  async loadProposes() {
+    const { address, setPropose } = this.props;
+    const proposes = (await callView('getProposeByAddress', [address])) || [];
+    const newPropose = await this.addInfoToProposes(proposes);
+    setPropose(newPropose);
+  }
+
+  async addInfoToProposes(proposes) {
+    const { address } = this.props;
+    for (let i = 0; i < proposes.length; i++) {
+      const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
+      const reps = await getTagsInfo(newAddress);
+      const name = await getAlias(newAddress);
+      proposes[i].name = reps['display-name'];
+      proposes[i].nick = '@' + name;
+    }
+    return proposes;
+  }
+
+  selectAccepted = index => {
+    // console.log('index', index);
+    // const { setCurrentIndex } = this.props;
+    // this.setState({ index });
+    // setCurrentIndex(index);
+    // this.loadMemory();
+    this.props.history.push('/propose/' + index);
+  };
+
   newPromise = () => {
     const { setNeedAuth, privateKey } = this.props;
     if (!privateKey) {
@@ -142,7 +161,7 @@ class LeftContrainer extends PureComponent {
       this.setState({ step: 'new' });
     }
   };
-  openPending = index => {
+  selectPending = index => {
     this.setState({ step: 'pending', index: index });
     // console.log('view pending index', index);
   };
@@ -174,17 +193,17 @@ class LeftContrainer extends PureComponent {
       <React.Fragment>
         <LeftBox>
           <ShadowBox>
-            <button type="button" className="btn_add_promise" onClick={this.newPromise}>
+            <LinkPro className="btn_add_promise" onClick={this.newPromise}>
               <Icon type="add" />
               Add Promise
-            </button>
+            </LinkPro>
             <div className="title">Accepted promise</div>
             <div>
-              <LeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
+              <LeftProposes flag={1} handlerSelect={this.selectAccepted} />
             </div>
             <div className="title">Pending promise</div>
             <div>
-              <LeftPending address={address} openPendingPromise={this.openPending} />
+              <LeftProposes flag={0} handlerSelect={this.selectPending} />
             </div>
             <div className="title">Popular Tag</div>
             <TagBox>{this.renderTag(tag)}</TagBox>
@@ -209,11 +228,11 @@ class LeftContrainer extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
+  const { loveinfo, account } = state;
   return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
+    propose: loveinfo.propose,
+    currentIndex: loveinfo.currentProIndex,
+    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };
@@ -239,7 +258,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(LeftContrainer);
+export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(LeftContrainer)
+);

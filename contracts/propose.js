@@ -161,11 +161,12 @@ class Propose {
 
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
+     const sender = msg.sender;
     const pro = this.propose[index];
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:
-        expect(msg.sender === pro.receiver, "Can't accept propose. You must be receiver.");
+        expect(sender === pro.receiver, "Can't accept propose. You must be receiver.");
         break;
       case 2:
         this._isOwnerPropose(pro, "You can't cancel propose.");
@@ -176,6 +177,6 @@ class Propose {
 
     //emit Event
     const log = Object.assign({}, pro, { index });
-    this.emitEvent('_confirmPropose', { by: msg.sender, log }, ['by']);
+    this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
   }
 }

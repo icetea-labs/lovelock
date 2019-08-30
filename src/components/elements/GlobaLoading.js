@@ -51,24 +51,30 @@ const Rect = styled.div`
   }
 `;
 
+// function GlobaLoading() {
+//   return (
+//     <Wrapper>
+//       <BaseGlobaLoading />
+//     </Wrapper>
+//   );
+// }
 function GlobaLoading() {
   return (
-    <Wrapper>
-      <BaseGlobaLoading />
-    </Wrapper>
+    <div id="preloader">
+      <div id="loader"></div>
+    </div>
   );
 }
-
-function BaseGlobaLoading() {
-  return (
-    <Rect>
-      <div />
-      <div />
-      <div />
-      <div />
-    </Rect>
-  );
-}
+// function BaseGlobaLoading() {
+//   return (
+//     <Rect>
+//       <div />
+//       <div />
+//       <div />
+//       <div />
+//     </Rect>
+//   );
+// }
 
 export { GlobaLoading };
 export default GlobaLoading;

@@ -239,11 +239,11 @@ MessageHistory.defaultProps = {
 };
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
+  const { loveinfo, account } = state;
   return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
+    propose: loveinfo.propose,
+    currentIndex: loveinfo.currentProIndex,
+    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };
