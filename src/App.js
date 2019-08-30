@@ -25,7 +25,7 @@ class App extends Component {
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
-            <RouteWithLayout layout={HomeLayout} exact path={`/propose/:proposeIndex`} component={DetailPropose} />;
+            <RouteWithLayout layout={HomeLayout} exact path={`/propose/:index`} component={DetailPropose} />;
             <RouteWithLayout layout={HomeLayout} exact path={`/exception`} component={Exception} />
             <Route component={NotFound} />
           </Switch>

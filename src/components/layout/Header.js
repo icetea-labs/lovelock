@@ -60,6 +60,9 @@ const StyledLogo = styled.a`
   display: flex;
   align-items: center;
   text-decoration: none;
+  :hover {
+    text-decoration: none;
+  }
   color: inherit;
   span {
     margin: 0 ${rem(10)};
