@@ -25,7 +25,8 @@ const theme = createMuiTheme({
     },
   },
   typography: {
-    // fontSize: 14,
+    // htmlFontSize: 16,
+    fontSize: 12,
     fontFamily: [
       'Montserrat',
       '-apple-system',

@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import tweb3 from '../../../../service/tweb3';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { rem } from '../../../elements/StyledUtils';
@@ -41,8 +42,7 @@ const LeftBox = styled.div`
 const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;
-  /* margin-bottom: 20px; */
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 `;
 const TagBox = styled.div`
@@ -89,12 +89,34 @@ class LeftContrainer extends PureComponent {
 
   componentDidMount() {
     this.loadProposes();
+    this.watchPropose();
   }
-
+  watchPropose = async () => {
+    const { address } = this.props;
+    const contract = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    const filter = { by: address };
+    contract.events.createPropose(filter, async (error, data) => {
+      if (error) {
+        console.error(error);
+      } else {
+        const { setPropose, propose } = this.props;
+        // console.log(propose);
+        const log = await this.addInfoToProposes(data.log);
+        console.log(log);
+        // propose.push(log);
+        setPropose([...propose, log]);
+      }
+    });
+  };
   async loadProposes() {
     const { address, setPropose } = this.props;
     const proposes = (await callView('getProposeByAddress', [address])) || [];
+    const newPropose = await this.addInfoToProposes(proposes);
+    setPropose(newPropose);
+  }
 
+  async addInfoToProposes(proposes) {
+    const { address } = this.props;
     for (let i = 0; i < proposes.length; i++) {
       const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
       const reps = await getTagsInfo(newAddress);
@@ -102,7 +124,7 @@ class LeftContrainer extends PureComponent {
       proposes[i].name = reps['display-name'];
       proposes[i].nick = '@' + name;
     }
-    setPropose(proposes);
+    return proposes;
   }
 
   selectAccepted = index => {

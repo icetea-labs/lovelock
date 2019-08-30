@@ -121,9 +121,9 @@ class ByPassWord extends PureComponent {
           value={password}
         />
         <DivControlBtnKeystore>
-          <DivPassRecover>
-            <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
-          </DivPassRecover>
+          {/* <DivPassRecover> */}
+          <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
+          {/* </DivPassRecover> */}
           {/* <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro> */}
           <ButtonPro type="submit">Login</ButtonPro>
         </DivControlBtnKeystore>

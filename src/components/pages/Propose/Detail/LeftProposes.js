@@ -5,10 +5,9 @@ import { useSelector } from 'react-redux';
 
 const WarrperPromise = styled.div`
   display: flex;
-  align-items: center;
   margin-bottom: ${rem(20)};
-  padding: ${rem(5)} 0;
-  min-height: ${rem(48)};
+  padding: ${rem(5)};
+  min-height: ${rem(36)};
   :hover {
     cursor: pointer;
     background: #f5f2f0;
@@ -18,14 +17,12 @@ const WarrperPromise = styled.div`
     img {
       width: ${rem(36)};
       height: ${rem(36)};
+      border-radius: 50%;
+      margin-right: ${rem(10)};
     }
-    margin-right: ${rem(10)};
-    border-radius: 50%;
-    overflow: hidden;
   }
   .name {
     color: #5a5e67;
-    margin-bottom: ${rem(5)};
     text-transform: capitalize;
   }
   .nick {
@@ -57,7 +54,7 @@ export default function LeftProposes(props) {
         }}
       >
         <div className="icon">
-          <img src="https://trada.tech/assets/img/logo.svg" alt="imgTrada" />
+          <img src="/static/img/user-women.jpg" alt="imgTrada" />
         </div>
         <div className="pri_info">
           <div className="name">{item.name}</div>
