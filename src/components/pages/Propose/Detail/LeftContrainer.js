@@ -16,6 +16,7 @@ import PromiseConfirm from '../PromiseConfirm';
 const LeftBox = styled.div`
   width: 100%;
   min-height: ${rem(360)};
+  margin-bottom: ${rem(100)};
   i {
     padding: 0 5px;
   }
@@ -94,36 +95,44 @@ class LeftContrainer extends PureComponent {
   }
   watchPropose = async () => {
     const { address } = this.props;
-    const contract = tweb3.contract(process.env.REACT_APP_CONTRACT);
     const filter = {}; //{ by: address };
-    contract.events.confirmPropose(filter, async (error, data) => {
+    tweb3.subscribe('Tx', filter, async (error, result) => {
       if (error) {
         console.error(error);
       } else {
-        console.log('data.log', data.log);
-        const { setPropose, propose } = this.props;
-        const newArray = propose.slice() || [];
-        const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-        console.log('objIndex', objIndex);
-        newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-        console.log('newArray', newArray);
-        setPropose(newArray);
-      }
-    });
-    const contract1 = tweb3.contract(process.env.REACT_APP_CONTRACT);
-    contract1.events.createPropose(filter, async (error, data) => {
-      if (error) {
-        console.error(error);
-      } else {
-        const { setPropose, propose } = this.props;
-        // console.log(propose);
-        const log = await this.addInfoToProposes(data.log);
-        console.log(log);
-        // propose.push(log);
-        setPropose([...propose, log]);
+        const data = result.data.value.TxResult.events[0];
+        if (data.log.receiver !== address || data.log.sender !== address) {
+          return;
+        }
+        switch (data.eventName) {
+          case 'createPropose':
+            this.eventCreatePropose(data.eventData);
+            break;
+          case 'confirmPropose':
+            this.eventConfirmPropose(data.eventData);
+            break;
+          default:
+            break;
+        }
       }
     });
   };
+
+  eventConfirmPropose(data) {
+    const { setPropose, propose } = this.props;
+    const newArray = propose.slice() || [];
+    const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
+    // console.log('objIndex', objIndex);
+    newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
+    // console.log('newArray', newArray);
+
+    setPropose(newArray);
+  }
+  async eventCreatePropose(data) {
+    const { setPropose, propose } = this.props;
+    const log = await this.addInfoToProposes(data.log);
+    setPropose([...propose, log]);
+  }
   async loadProposes() {
     const { address, setPropose } = this.props;
     const proposes = (await callView('getProposeByAddress', [address])) || [];
