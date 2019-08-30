@@ -95,8 +95,23 @@ class LeftContrainer extends PureComponent {
   watchPropose = async () => {
     const { address } = this.props;
     const contract = tweb3.contract(process.env.REACT_APP_CONTRACT);
-    const filter = { by: address };
-    contract.events.createPropose(filter, async (error, data) => {
+    const filter = {}; //{ by: address };
+    contract.events.confirmPropose(filter, async (error, data) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log('data.log', data.log);
+        const { setPropose, propose } = this.props;
+        const newArray = propose.slice() || [];
+        const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
+        console.log('objIndex', objIndex);
+        newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
+        console.log('newArray', newArray);
+        setPropose(newArray);
+      }
+    });
+    const contract1 = tweb3.contract(process.env.REACT_APP_CONTRACT);
+    contract1.events.createPropose(filter, async (error, data) => {
       if (error) {
         console.error(error);
       } else {

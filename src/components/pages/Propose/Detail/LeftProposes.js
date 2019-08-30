@@ -54,7 +54,7 @@ export default function LeftProposes(props) {
         }}
       >
         <div className="icon">
-          <img src="/static/img/user-women.jpg" alt="imgTrada" />
+          <img src="/static/img/user-women.jpg" alt="avata" />
         </div>
         <div className="pri_info">
           <div className="name">{item.name}</div>
