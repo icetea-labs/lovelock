@@ -85,6 +85,7 @@ const MenuItem = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-transform: capitalize;
   }
   img {
     width: 46px;

@@ -274,25 +274,7 @@ class DetailPropose extends PureComponent {
 
         <FlexBox wrap="wrap" minHeight="100vh">
           <FlexWidthBox width="30%">
-            <LeftContrainer address={address} tag={tag} />
-            {/* <LeftBox>
-              <ShadowBox>
-                <button type="button" className="btn_add_promise" onClick={this.addPromise}>
-                  <Icon type="add" />
-                  Add Promise
-                </button>
-                <div className="title">Accepted promise</div>
-                <div>
-                  <PromiseLeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
-                </div>
-                <div className="title">Pending promise</div>
-                <div>
-                  <PromiseLeftPending address={address} openPendingPromise={this.openPending} />
-                </div>
-                <div className="title">Popular Tag</div>
-                <TagBox>{this.renderTag(tag)}</TagBox>
-              </ShadowBox>
-            </LeftBox> */}
+            <LeftContrainer />
           </FlexWidthBox>
           <FlexWidthBox width="70%">
             <RightBox>

@@ -1,11 +1,11 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../../helper';
+import { callView, getTagsInfo, getAlias } from '../../../../helper';
 import Icon from '../../../elements/Icon';
-import LeftAccept from './LeftAccept';
-import LeftPending from './LeftPending';
+import LeftProposes from './LeftProposes';
 import * as actions from '../../../../store/actions';
 import Promise from '../Promise';
 import PromiseAlert from '../PromiseAlert';
@@ -92,8 +92,8 @@ class LeftContrainer extends PureComponent {
   }
 
   async loadProposes() {
-    const { address, setPropose, setCurrentIndex } = this.props;
-    let proposes = (await callView('getProposeByAddress', [address])) || [];
+    const { address, setPropose } = this.props;
+    const proposes = (await callView('getProposeByAddress', [address])) || [];
 
     for (let i = 0; i < proposes.length; i++) {
       const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
@@ -103,25 +103,21 @@ class LeftContrainer extends PureComponent {
       proposes[i].nick = '@' + name;
     }
     setPropose(proposes);
-    // console.log('tmp', tmp);
-    // if (tmp.length > 0) {
-    //   this.setState({ index: tmp[0].index });
-    //   setCurrentIndex(tmp[0].index);
-    //   // this.loadMemory();
-    // }
   }
 
-  handlerSelectPropose = index => {
+  selectAccepted = index => {
     // console.log('index', index);
-    const { setCurrentIndex } = this.props;
-    this.setState({ index });
-    setCurrentIndex(index);
+    // const { setCurrentIndex } = this.props;
+    // this.setState({ index });
+    // setCurrentIndex(index);
     // this.loadMemory();
+    this.props.history.push('/propose/' + index);
   };
+
   newPromise = () => {
     this.setState({ step: 'new' });
   };
-  openPending = index => {
+  selectPending = index => {
     this.setState({ step: 'pending', index: index });
     // console.log('view pending index', index);
   };
@@ -159,11 +155,11 @@ class LeftContrainer extends PureComponent {
             </button>
             <div className="title">Accepted promise</div>
             <div>
-              <LeftAccept address={address} handlerSelectPropose={this.handlerSelectPropose} />
+              <LeftProposes flag={1} handlerSelect={this.selectAccepted} />
             </div>
             <div className="title">Pending promise</div>
             <div>
-              <LeftPending address={address} openPendingPromise={this.openPending} />
+              <LeftProposes flag={0} handlerSelect={this.selectPending} />
             </div>
             <div className="title">Popular Tag</div>
             <TagBox>{this.renderTag(tag)}</TagBox>
@@ -215,7 +211,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(LeftContrainer);
+export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(LeftContrainer)
+);
