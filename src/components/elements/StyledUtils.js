@@ -165,6 +165,7 @@ export const FlexBox = styled.div`
   padding: ${props => props.padding};
   height: ${props => props.height};
   width: ${props => props.width};
+  min-height: ${props => props.minHeight};
   flex-wrap: ${props => props.wrap};
   margin: ${props => props.margin};
   margin-top: ${props => props.marginTop};

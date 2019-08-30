@@ -80,7 +80,7 @@ const theme = createMuiTheme({
         borderBottom: 'rgba(234, 236, 239, 0.7)',
         '&:after': {
           borderBottom: `1px solid #fe8dc3`,
-          transition: 'all .3s ease-in',
+          transition: 'all .2s ease-in',
         },
         '&:focused::after': {
           borderBottom: `1px solid rgba(234, 236, 239, 0.7)`,

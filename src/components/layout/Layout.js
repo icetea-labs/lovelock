@@ -16,6 +16,10 @@ const Container = styled.div`
     min-width: ${mobile.pageminwidth};
   `}
 `;
+const MainContainer = styled.main`
+  height: 100%;
+  flex: 1 1 0%;
+`;
 
 const Content = styled.div`
   grid-area: content;
@@ -36,7 +40,9 @@ const Layout = ({ children, title }) => (
 const HomeLayout = ({ children, title }) => (
   <Container>
     <Header />
-    <Content> {children} </Content>
+    <MainContainer>
+      <Content> {children} </Content>
+    </MainContainer>
     {/* <Footer /> */}
   </Container>
 );

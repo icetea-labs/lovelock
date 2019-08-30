@@ -214,9 +214,9 @@ class TopContrainer extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose } = state;
+  const { loveinfo } = state;
   return {
-    propose: propose.propose,
+    propose: loveinfo.propose,
   };
 };
 
@@ -226,7 +226,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actions.setPropose(value));
     },
     setLoading: value => {
-      dispatch(actions.setLoading(value));
+      // dispatch(actions.setLoading(value));
     },
   };
 };

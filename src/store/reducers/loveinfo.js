@@ -1,4 +1,4 @@
-import { actionTypes } from '../actions/propose';
+import { actionTypes } from '../actions/loveinfo';
 
 const initialState = {
   propose: [],

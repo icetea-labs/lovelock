@@ -7,6 +7,7 @@ const WarrperAcceptedPromise = styled.div`
   display: flex;
   align-items: flex-start;
   margin-bottom: ${rem(20)};
+  padding: ${rem(5)} 0;
   :hover {
     cursor: pointer;
     background: #f5f2f0;
@@ -85,9 +86,9 @@ class LeftPending extends PureComponent {
     // const { newPropose } = this.state;
     const { propose } = this.props;
     const pendingPropose = propose.filter(item => item.status === 0);
-    console.log('pendingPropose', pendingPropose);
+    // console.log('pendingPropose', pendingPropose);
     return pendingPropose.map(item => {
-      console.log('item', item);
+      console.log('item', item.name);
       return (
         <WarrperAcceptedPromise
           key={item.id}
@@ -109,11 +110,11 @@ class LeftPending extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
+  const { loveinfo, account } = state;
   return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
+    propose: loveinfo.propose,
+    currentIndex: loveinfo.currentProIndex,
+    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };

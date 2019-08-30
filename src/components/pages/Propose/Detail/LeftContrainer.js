@@ -64,16 +64,14 @@ class LeftContrainer extends PureComponent {
     this.state = {
       index: -1,
       step: '',
+      propose: [],
     };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose, address } = nextProps;
+    const { propose } = nextProps;
 
     let value = {};
-    if (address !== prevState.address) {
-      value = Object.assign({}, { address });
-    }
     if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
       value = Object.assign({}, { propose });
     }
@@ -82,9 +80,9 @@ class LeftContrainer extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { address } = this.state;
+    const { propose } = this.state;
 
-    if (prevState.address !== address) {
+    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
       this.loadProposes();
     }
   }
@@ -94,36 +92,23 @@ class LeftContrainer extends PureComponent {
   }
 
   async loadProposes() {
-    // const { reload } = this.state;
-    const { setPropose, address, setCurrentIndex } = this.props;
-    // console.log(' loadProposes address', address);
-    let allPropose = await callView('getProposeByAddress', [address]);
+    const { address, setPropose, setCurrentIndex } = this.props;
+    let proposes = (await callView('getProposeByAddress', [address])) || [];
 
-    setPropose(allPropose);
-    this.setState({ reload: false });
-
-    let tmp = [];
-    if (!allPropose) allPropose = [];
-
-    for (let i = 0; i < allPropose.length; i++) {
-      const obj = allPropose[i];
-      // if (obj.status === 1) {
-      const addr = address === obj.sender ? obj.receiver : obj.sender;
-      const reps = await getTagsInfo(addr);
-      const name = await getAlias(addr);
-      console.log('name', name);
-      obj.name = reps['display-name'];
-      obj.nick = '@' + name;
-      obj.index = i;
-      tmp.push(obj);
-      // }
+    for (let i = 0; i < proposes.length; i++) {
+      const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
+      const reps = await getTagsInfo(newAddress);
+      const name = await getAlias(newAddress);
+      proposes[i].name = reps['display-name'];
+      proposes[i].nick = '@' + name;
     }
+    setPropose(proposes);
     // console.log('tmp', tmp);
-    if (tmp.length > 0) {
-      this.setState({ index: tmp[0].index });
-      setCurrentIndex(tmp[0].index);
-      // this.loadMemory();
-    }
+    // if (tmp.length > 0) {
+    //   this.setState({ index: tmp[0].index });
+    //   setCurrentIndex(tmp[0].index);
+    //   // this.loadMemory();
+    // }
   }
 
   handlerSelectPropose = index => {
@@ -203,11 +188,11 @@ class LeftContrainer extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
+  const { loveinfo, account } = state;
   return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
+    propose: loveinfo.propose,
+    currentIndex: loveinfo.currentProIndex,
+    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };

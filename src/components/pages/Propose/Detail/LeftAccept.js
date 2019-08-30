@@ -8,6 +8,7 @@ const WarrperAcceptedPromise = styled.a`
   display: flex;
   align-items: flex-start;
   margin-bottom: ${rem(20)};
+  padding: ${rem(5)} 0;
   :hover {
     cursor: pointer;
     background: #f5f2f0;
@@ -101,11 +102,11 @@ class LeftAccept extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
+  const { loveinfo, account } = state;
   return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
+    propose: loveinfo.propose,
+    currentIndex: loveinfo.currentProIndex,
+    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };

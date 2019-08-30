@@ -8,10 +8,7 @@ import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import TopContrainer from './TopContrainer';
 import LeftContrainer from './LeftContrainer';
 import MessageHistory from '../../Memory/MessageHistory';
-import Promise from '../Promise';
 import CustomPost from './CustomPost';
-import PromiseAlert from '../PromiseAlert';
-import PromiseConfirm from '../PromiseConfirm';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -118,10 +115,6 @@ class DetailPropose extends PureComponent {
     this.state = {
       tag: ['love', 'travel', 'honeymoon', 'relax', 'sweet'],
       ownerTag: ['honeymoon', 'travel'],
-      isPromise: false,
-      isPendingPromise: false,
-      isAccept: false,
-      isDeny: false,
       reload: true,
       proIndex: -1,
       pendingIndex: -1,
@@ -134,16 +127,16 @@ class DetailPropose extends PureComponent {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose, address } = nextProps;
-    const proIndex = parseInt(nextProps.match.params.proposeIndex);
+    // const { propose, address } = nextProps;
+    const proIndex = parseInt(nextProps.match.params.index);
 
     let value = {};
-    if (address !== prevState.address) {
-      value = Object.assign({}, { address });
-    }
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
-      value = Object.assign({}, { propose });
-    }
+    // if (address !== prevState.address) {
+    //   value = Object.assign({}, { address });
+    // }
+    // if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
+    //   value = Object.assign({}, { propose });
+    // }
     if (proIndex !== prevState.proIndex) {
       value = Object.assign({}, { proIndex });
     }
@@ -155,12 +148,12 @@ class DetailPropose extends PureComponent {
     const { address } = this.state;
 
     if (prevState.address !== address) {
-      this.loadAllPropose();
+      // this.loadAllPropose();
     }
   }
 
   componentDidMount() {
-    this.loadAllPropose();
+    // this.loadAllPropose();
   }
 
   async loadAllPropose() {
@@ -204,35 +197,6 @@ class DetailPropose extends PureComponent {
         </span>
       );
     });
-  };
-
-  addPromise = () => {
-    this.setState({ isPromise: true });
-  };
-
-  openPending = index => {
-    this.setState({ isPendingPromise: true, pendingIndex: index });
-    console.log('view pending index', index);
-  };
-
-  acceptPromise = () => {
-    this.setState({ isAccept: true, isPendingPromise: false });
-  };
-
-  denyPromise = () => {
-    this.setState({ isDeny: true, isPendingPromise: false });
-  };
-
-  closeConfirm = () => {
-    this.setState({ isAccept: false, isDeny: false });
-  };
-
-  closePromise = () => {
-    this.setState({ isPromise: false });
-  };
-
-  closePendingPromise = () => {
-    this.setState({ isPendingPromise: false });
   };
 
   handlerSelectPropose = proIndex => {
@@ -299,20 +263,7 @@ class DetailPropose extends PureComponent {
   }
 
   render() {
-    const {
-      tag,
-      isPromise,
-      isPendingPromise,
-      isAccept,
-      isDeny,
-      proIndex,
-      pendingIndex,
-      date,
-      file,
-      memoryContent,
-      address,
-      propose,
-    } = this.state;
+    const { tag, date, file, proIndex, memoryContent, address } = this.state;
     return (
       <React.Fragment>
         <BannerContainer>
@@ -321,7 +272,7 @@ class DetailPropose extends PureComponent {
           </ShadowBox>
         </BannerContainer>
 
-        <FlexBox wrap="wrap">
+        <FlexBox wrap="wrap" minHeight="100vh">
           <FlexWidthBox width="30%">
             <LeftContrainer address={address} tag={tag} />
             {/* <LeftBox>
@@ -396,19 +347,6 @@ class DetailPropose extends PureComponent {
                 </button>
               </div>
               <MessageHistory />
-              {isPromise && <Promise close={this.closePromise} />}
-              {isPendingPromise && (
-                <PromiseAlert
-                  propose={propose}
-                  address={address}
-                  index={pendingIndex}
-                  close={this.closePendingPromise}
-                  accept={this.acceptPromise}
-                  deny={this.denyPromise}
-                />
-              )}
-              {isAccept && <PromiseConfirm close={this.closeConfirm} index={pendingIndex} />}
-              {isDeny && <PromiseConfirm isDeny close={this.closeConfirm} index={pendingIndex} />}
             </RightBox>
           </FlexWidthBox>
         </FlexBox>
@@ -418,11 +356,11 @@ class DetailPropose extends PureComponent {
 }
 
 const mapStateToProps = state => {
-  const { propose, account } = state;
+  const { loveinfo, account } = state;
   return {
-    propose: propose.propose,
-    currentIndex: propose.currentProIndex,
-    memory: propose.memory,
+    propose: loveinfo.propose,
+    currentIndex: loveinfo.currentProIndex,
+    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };
@@ -440,7 +378,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actions.setMemory(value));
     },
     setLoading: value => {
-      dispatch(actions.setLoading(value));
+      // dispatch(actions.setLoading(value));
     },
   };
 };
