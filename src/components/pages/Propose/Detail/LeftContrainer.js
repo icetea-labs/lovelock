@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, getAlias } from '../../../../helper';
 import Icon from '../../../elements/Icon';
+import { LinkPro } from '../../../elements/Button';
 import LeftProposes from './LeftProposes';
 import * as actions from '../../../../store/actions';
 import Promise from '../Promise';
@@ -171,10 +172,10 @@ class LeftContrainer extends PureComponent {
       <React.Fragment>
         <LeftBox>
           <ShadowBox>
-            <button type="button" className="btn_add_promise" onClick={this.newPromise}>
+            <LinkPro className="btn_add_promise" onClick={this.newPromise}>
               <Icon type="add" />
               Add Promise
-            </button>
+            </LinkPro>
             <div className="title">Accepted promise</div>
             <div>
               <LeftProposes flag={1} handlerSelect={this.selectAccepted} />
