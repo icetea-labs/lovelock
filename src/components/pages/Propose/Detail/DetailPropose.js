@@ -2,21 +2,16 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import InputBase from '@material-ui/core/InputBase';
-
 import { callView, saveToIpfs, sendTransaction, getTagsInfo, getAlias } from '../../../../helper';
 import * as actions from '../../../../store/actions';
-
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
-import Icon from '../../../elements/Icon';
-
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import TopContrainer from './TopContrainer';
+import LeftContrainer from './LeftContrainer';
 import MessageHistory from '../../Memory/MessageHistory';
 import Promise from '../Promise';
 import CustomPost from './CustomPost';
 import PromiseAlert from '../PromiseAlert';
 import PromiseConfirm from '../PromiseConfirm';
-import PromiseLeftAccept from './PromiseLeftAccept';
-import PromiseLeftPending from './PromiseLeftPending';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -29,33 +24,6 @@ const ShadowBox = styled.div`
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 `;
 
-const LeftBox = styled.div`
-  width: 100%;
-  min-height: ${rem(360)};
-  i {
-    padding: 0 5px;
-  }
-  .btn_add_promise {
-    width: 172px;
-    height: 46px;
-    border-radius: 23px;
-    font-weight: 600;
-    font-size: ${rem(14)};
-    color: #8250c8;
-    border: 1px solid #8250c8;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  .title {
-    color: #141927;
-    font-weight: 600;
-    font-size: ${rem(14)};
-    text-transform: uppercase;
-    margin-bottom: ${rem(20)};
-  }
-`;
 const RightBox = styled.div`
   width: 100%;
   min-height: ${rem(360)};
@@ -140,19 +108,6 @@ const RightBox = styled.div`
       align-items: center;
       justify-content: space-between;
       padding: 0 10px;
-    }
-  }
-`;
-const TagBox = styled.div`
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  .tagName {
-    color: #8250c8;
-    margin-right: ${rem(7)};
-    font-size: ${rem(12)};
-    :hover {
-      cursor: pointer;
     }
   }
 `;
@@ -368,7 +323,8 @@ class DetailPropose extends PureComponent {
 
         <FlexBox wrap="wrap">
           <FlexWidthBox width="30%">
-            <LeftBox>
+            <LeftContrainer address={address} tag={tag} />
+            {/* <LeftBox>
               <ShadowBox>
                 <button type="button" className="btn_add_promise" onClick={this.addPromise}>
                   <Icon type="add" />
@@ -385,7 +341,7 @@ class DetailPropose extends PureComponent {
                 <div className="title">Popular Tag</div>
                 <TagBox>{this.renderTag(tag)}</TagBox>
               </ShadowBox>
-            </LeftBox>
+            </LeftBox> */}
           </FlexWidthBox>
           <FlexWidthBox width="70%">
             <RightBox>

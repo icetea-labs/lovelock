@@ -104,8 +104,10 @@ class Promise extends React.Component {
       // window.alert('Success');
       notifi.info('Success');
       this.props.close();
-      setLoading(false);
+    } else {
+      console.log('createPropose', result);
     }
+    setLoading(false);
   }
 
   render() {

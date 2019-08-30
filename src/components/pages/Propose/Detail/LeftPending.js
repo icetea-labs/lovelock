@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { rem } from '../../../elements/Common';
+import { rem } from '../../../elements/StyledUtils';
 import { connect } from 'react-redux';
 
 const WarrperAcceptedPromise = styled.div`
@@ -30,7 +30,7 @@ const WarrperAcceptedPromise = styled.div`
   }
 `;
 
-class PromiseLeftPending extends PureComponent {
+class LeftPending extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,50 +41,53 @@ class PromiseLeftPending extends PureComponent {
     };
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose, address } = nextProps;
-    let value = {};
-    if (address !== prevState.address) {
-      value = Object.assign({}, { address });
-    }
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
-      value = Object.assign({}, { basePropose: propose });
-    }
-    if (value) return value;
-    return null;
-  }
+  // static getDerivedStateFromProps(nextProps, prevState) {
+  //   const { propose, address } = nextProps;
+  //   let value = {};
+  //   if (address !== prevState.address) {
+  //     value = Object.assign({}, { address });
+  //   }
+  //   if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose)) {
+  //     value = Object.assign({}, { basePropose: propose });
+  //   }
+  //   if (value) return value;
+  //   return null;
+  // }
 
-  componentDidMount() {
-    this.loaddata();
-  }
+  // componentDidMount() {
+  //   this.loaddata();
+  // }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { basePropose, address } = this.state;
+  // componentDidUpdate(prevProps, prevState) {
+  //   const { basePropose, address } = this.state;
 
-    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) || prevState.address !== address) {
-      this.loaddata();
-    }
-  }
+  //   if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) || prevState.address !== address) {
+  //     this.loaddata();
+  //   }
+  // }
 
-  async loaddata() {
-    let { propose } = this.props;
-    // console.log('check propose', propose);
-    let tmp = [];
-    if (!propose) propose = [];
-    for (let i = 0; i < propose.length; i++) {
-      const obj = propose[i];
-      if (obj.status === 0) {
-        tmp.push(obj);
-      }
-    }
+  // async loaddata() {
+  //   let { propose } = this.props;
+  //   // console.log('check propose', propose);
+  //   let tmp = [];
+  //   if (!propose) propose = [];
+  //   for (let i = 0; i < propose.length; i++) {
+  //     const obj = propose[i];
+  //     if (obj.status === 0) {
+  //       tmp.push(obj);
+  //     }
+  //   }
 
-    this.setState({ newPropose: tmp });
-  }
+  //   this.setState({ newPropose: tmp });
+  // }
 
   render() {
-    const { newPropose } = this.state;
-
-    return newPropose.map(item => {
+    // const { newPropose } = this.state;
+    const { propose } = this.props;
+    const pendingPropose = propose.filter(item => item.status === 0);
+    console.log('pendingPropose', pendingPropose);
+    return pendingPropose.map(item => {
+      console.log('item', item);
       return (
         <WarrperAcceptedPromise
           key={item.id}
@@ -119,4 +122,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   null
-)(PromiseLeftPending);
+)(LeftPending);

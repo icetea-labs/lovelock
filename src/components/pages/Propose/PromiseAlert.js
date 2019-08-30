@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
-import { getTagsInfo, getAlias } from '../../../helper/';
+import { getAlias } from '../../../helper/';
 
 const ImgView = styled.div`
   margin: 31px 0 31px;
@@ -36,7 +36,7 @@ class PromiseAlert extends React.Component {
     const { index } = this.props;
 
     const obj = propose.filter(item => item.id === index)[0];
-
+    console.log('loaddata', obj);
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       // const reps = await getTagsInfo(addr);

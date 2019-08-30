@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/Common';
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { getTagsInfo, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 
@@ -128,14 +129,13 @@ class TopContrainer extends PureComponent {
   }
 
   async loaddata() {
-    const { topInfo } = this.state;
-    const { propose, proIndex, setLoading } = this.props;
+    // const { topInfo } = this.state;
+    const { propose, proIndex, setLoading, history } = this.props;
     let newTopInfor = {};
     setLoading(true);
-    if (propose.length > 0) {
-      const obj = propose[proIndex];
+    let obj = {};
+    if (propose.length > 0 && (obj = propose[proIndex] || {}).sender) {
       console.log('proIndex', proIndex);
-      console.log('propose', propose);
       newTopInfor.s_content = obj.s_content;
       newTopInfor.r_content = obj.r_content;
       const senderinfor = await getTagsInfo(obj.sender);
@@ -146,6 +146,8 @@ class TopContrainer extends PureComponent {
       newTopInfor.coverimg = info.hash;
       newTopInfor.s_date = info.date;
       newTopInfor.r_date = info.date;
+    } else {
+      // history.push('/exception');
     }
 
     // newTopInfor.s_content = 'I love you so much';
@@ -229,7 +231,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TopContrainer);
+export default withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(TopContrainer)
+);

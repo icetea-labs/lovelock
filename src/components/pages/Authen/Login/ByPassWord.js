@@ -4,29 +4,23 @@ import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
 import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
-import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/Common';
+import { DivControlBtnKeystore, DivPassRecover } from '../../../elements/StyledUtils';
 import tweb3 from '../../../../service/tweb3';
 import { decode } from '../../../../helper';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing(1),
-    background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  },
-  link: {
-    margin: theme.spacing(0),
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
+  // button: {
+  //   margin: theme.spacing(1),
+  //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
+  // },
 });
 
-class LoginWithPassWord extends PureComponent {
+class ByPassWord extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -38,6 +32,7 @@ class LoginWithPassWord extends PureComponent {
   componentDidMount() {
     window.document.body.addEventListener('keydown', this._keydown);
   }
+
   componentWillUnmount() {
     window.document.body.removeEventListener('keydown', this._keydown);
   }
@@ -98,23 +93,12 @@ class LoginWithPassWord extends PureComponent {
     setStep('two');
   };
   render() {
-    const { rePassErr } = this.state;
-    const { classes } = this.props;
+    const { password } = this.state;
+    // const { classes } = this.props;
 
     return (
-      <div>
+      <ValidatorForm onSubmit={this.gotoLogin}>
         {/* <TextField
-          id="username"
-          label="Privatekey"
-          placeholder="Enter your private key"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePrivatekey}
-        /> */}
-        <TextField
-          required
           id="rePassword"
           label="Password"
           placeholder="Enter your password"
@@ -124,19 +108,26 @@ class LoginWithPassWord extends PureComponent {
           margin="normal"
           onChange={this.handlePassword}
           type="password"
+        /> */}
+        <TextValidator
+          label="Password"
+          fullWidth
+          onChange={this.handlePassword}
+          name="password"
+          type="password"
+          validators={['required']}
+          errorMessages={['This field is required']}
+          margin="normal"
+          value={password}
         />
         <DivControlBtnKeystore>
           <DivPassRecover>
-            <span>Forgot password?</span>
-            <Button color="primary" onClick={this.loginWithSeed} className={classes.link}>
-              Recover
-            </Button>
+            <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
           </DivPassRecover>
-          <Button variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
-            Login
-          </Button>
+          {/* <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro> */}
+          <ButtonPro type="submit">Login</ButtonPro>
         </DivControlBtnKeystore>
-      </div>
+      </ValidatorForm>
     );
   }
 }
@@ -171,5 +162,5 @@ export default withStyles(styles)(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withRouter(LoginWithPassWord))
+  )(withRouter(ByPassWord))
 );

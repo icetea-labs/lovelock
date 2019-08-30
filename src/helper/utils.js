@@ -187,6 +187,12 @@ export async function registerAlias(username, address, privateKey) {
     throw err;
   }
 }
+
+export async function savetoLocalStorage(address, keyObject) {
+  localStorage.removeItem('user');
+  localStorage.setItem('user', JSON.stringify({ address, keyObject }));
+}
+
 export const wallet = {
   createAccountWithMneomnic(mnemonic, index = 0) {
     if (!mnemonic) mnemonic = bip39.generateMnemonic();

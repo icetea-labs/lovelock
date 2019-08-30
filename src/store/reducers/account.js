@@ -1,6 +1,4 @@
-import { AccountType } from '@iceteachain/common';
 import { actionTypes } from '../actions/account';
-import tweb3 from '../../service/tweb3';
 const initialState = Object.assign(
   {
     needAuth: false,
@@ -14,8 +12,7 @@ const initialState = Object.assign(
     const resp = {};
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
 
-    if (user && JSON.parse(user).address) {
-      user = JSON.parse(user);
+    if ((user = (user && JSON.parse(user)) || {}).address) {
       console.log('user', user);
       resp.address = user.address;
       // resp.privateKey = user.privateKey;

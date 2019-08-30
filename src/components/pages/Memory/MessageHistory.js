@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { rem } from '../../elements/Common';
+import { rem } from '../../elements/StyledUtils';
 import { TimeWithFormat } from '../../../helper';
 
 const Container = styled.div`

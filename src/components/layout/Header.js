@@ -2,10 +2,10 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { rem, FlexBox } from '../elements/Common';
+import { rem, FlexBox } from '../elements/StyledUtils';
 import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
-import { getAlias, getTagsInfo } from '../../helper';
+import { getTagsInfo } from '../../helper';
 
 const Container = styled.header`
   width: 100%;
@@ -60,6 +60,9 @@ const StyledLogo = styled.a`
   display: flex;
   align-items: center;
   text-decoration: none;
+  :hover {
+    text-decoration: none;
+  }
   color: inherit;
   span {
     margin: 0 ${rem(10)};
@@ -77,6 +80,11 @@ const MenuItem = styled.div`
   .expand {
     margin-left: ${rem(2)};
     font-weight: 600;
+  }
+  .username {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   img {
     width: 46px;
@@ -175,7 +183,9 @@ class Header extends PureComponent {
               <FlexBox flex={1} justify="flex-end">
                 <MenuItem>
                   <img src="/static/img/user-men.jpg" alt="" />
-                  <a href="/login">{username}</a>
+                  <a className="username" href="/login">
+                    {username}
+                  </a>
                 </MenuItem>
                 <MenuItem>
                   <a href="/login">Explore</a>
