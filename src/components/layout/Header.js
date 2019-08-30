@@ -6,6 +6,7 @@ import { rem, FlexBox } from '../elements/StyledUtils';
 import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
 import { getTagsInfo } from '../../helper';
+import GetKeyToAuthen from './GetKeyToAuthen';
 
 const Container = styled.header`
   width: 100%;
@@ -160,9 +161,12 @@ class Header extends PureComponent {
     const { history } = this.props;
     history.push('/login');
   };
+
+  closeConfirmPass = () => {};
+
   render() {
     const { username } = this.state;
-    const { address } = this.props;
+    const { address, needAuth } = this.props;
 
     return (
       <Container>
@@ -215,6 +219,7 @@ class Header extends PureComponent {
               </MenuItem>
             </FlexBox>
           )}
+          {needAuth && <GetKeyToAuthen />}
         </Content>
       </Container>
     );
@@ -225,6 +230,7 @@ const mapStateToProps = state => {
   const { account } = state;
   return {
     address: account.address,
+    needAuth: account.needAuth,
   };
 };
 

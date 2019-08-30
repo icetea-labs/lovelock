@@ -37,7 +37,7 @@ const account = (state = initialState, action) => {
         userInfo: action.data,
       });
     case actionTypes.SET_NEEDAUTH:
-      if (state.flags.isHardware) action.data = false;
+      // if (state.flags.isHardware) action.data = false;
       return Object.assign({}, state, {
         needAuth: action.data,
       });
