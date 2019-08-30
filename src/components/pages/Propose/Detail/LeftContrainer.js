@@ -101,19 +101,22 @@ class LeftContrainer extends PureComponent {
         console.error(error);
       } else {
         const data = result.data.value.TxResult.events[0];
-        if (data.log.receiver !== address || data.log.sender !== address) {
-          return;
+        const eventData = data.eventData;
+        console.log('data', data);
+        if (eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
+          console.log('to me');
+          switch (data.eventName) {
+            case 'createPropose':
+              await this.eventCreatePropose(eventData);
+              break;
+            case 'confirmPropose':
+              this.eventConfirmPropose(eventData);
+              break;
+            default:
+              break;
+          }
         }
-        switch (data.eventName) {
-          case 'createPropose':
-            this.eventCreatePropose(data.eventData);
-            break;
-          case 'confirmPropose':
-            this.eventConfirmPropose(data.eventData);
-            break;
-          default:
-            break;
-        }
+        console.log('not me');
       }
     });
   };
@@ -122,15 +125,15 @@ class LeftContrainer extends PureComponent {
     const { setPropose, propose } = this.props;
     const newArray = propose.slice() || [];
     const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-    // console.log('objIndex', objIndex);
     newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-    // console.log('newArray', newArray);
-
+    // console.log('newArray', newArray[objIndex]);
+    console.log('eventConfirmPropose');
     setPropose(newArray);
   }
   async eventCreatePropose(data) {
     const { setPropose, propose } = this.props;
     const log = await this.addInfoToProposes(data.log);
+    console.log('eventCreatePropose');
     setPropose([...propose, log]);
   }
   async loadProposes() {
