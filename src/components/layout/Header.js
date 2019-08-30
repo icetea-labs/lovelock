@@ -7,6 +7,8 @@ import Icon from '../elements/Icon';
 import Button from '@material-ui/core/Button';
 import { getTagsInfo } from '../../helper';
 import GetKeyToAuthen from './GetKeyToAuthen';
+import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
 
 const Container = styled.header`
   width: 100%;
@@ -103,18 +105,8 @@ const MenuItem = styled.div`
     font-size: ${rem(22)};
   }
   &:hover {
-    color: rebeccapurple;
+    /* color: rebeccapurple; */
   }
-`;
-const Rectangle = styled.a`
-  width: ${rem(18)};
-  height: ${rem(16)};
-  align-items: center;
-  border-radius: 8px;
-  background-color: #ff70d4;
-  position: relative;
-  top: -10px;
-  left: -5px;
 `;
 
 class Header extends PureComponent {
@@ -162,12 +154,15 @@ class Header extends PureComponent {
     const { history } = this.props;
     history.push('/login');
   };
-
+  handleProfileMenuOpen(event) {
+    // setAnchorEl(event.currentTarget);
+  }
   closeConfirmPass = () => {};
 
   render() {
     const { username } = this.state;
     const { address, needAuth } = this.props;
+    const menuId = 'primary-search-account-menu';
 
     return (
       <Container>
@@ -180,9 +175,6 @@ class Header extends PureComponent {
             <React.Fragment>
               <SearchBox>
                 <input type="text" name="" placeholder="Search" />
-                {/* <a className="search-bt">
-                  <Icon type="search" />
-                </a> */}
                 <Icon type="search" />
               </SearchBox>
               <FlexBox flex={1} justify="flex-end">
@@ -197,12 +189,31 @@ class Header extends PureComponent {
                   <Icon className="expand" type="expand_more" />
                 </MenuItem>
                 <MenuItem>
-                  <Icon type="group" />
-                  <Rectangle />
+                  <IconButton aria-label="show 17 new notifications" color="inherit">
+                    <Badge badgeContent={17} color="secondary">
+                      <Icon type="group" />
+                    </Badge>
+                  </IconButton>
                 </MenuItem>
                 <MenuItem>
-                  <Icon type="notifications" />
-                  <Rectangle />
+                  <IconButton aria-label="show 17 new notifications" color="inherit">
+                    <Badge badgeContent={17} color="secondary">
+                      <Icon type="notifications" />
+                    </Badge>
+                  </IconButton>
+                </MenuItem>
+                <MenuItem>
+                  <IconButton
+                    edge="end"
+                    aria-label="account of current user"
+                    aria-controls={menuId}
+                    aria-haspopup="true"
+                    onClick={this.handleProfileMenuOpen}
+                    color="inherit"
+                  >
+                    <Icon type="account_circle" />
+                    {/* <AccountCircle /> */}
+                  </IconButton>
                 </MenuItem>
               </FlexBox>
             </React.Fragment>
