@@ -1,61 +1,23 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { rem, FlexBox } from '../elements/StyledUtils';
-import Icon from '../elements/Icon';
-import Button from '@material-ui/core/Button';
-import { getTagsInfo } from '../../helper';
-import GetKeyToAuthen from './GetKeyToAuthen';
+import { rem } from '../elements/StyledUtils';
+import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import InputBase from '@material-ui/core/InputBase';
+import Badge from '@material-ui/core/Badge';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+import Avatar from '@material-ui/core/Avatar';
 
-const Container = styled.header`
-  width: 100%;
-  height: ${rem(81)};
-  /* background: linear-gradient(to right, #8250c8 0%, #15b5dd 50%, #8250c8 100%); */
-  background: #8250c8;
-  position: fixed;
-  top: 0;
-  left: 0;
-`;
-const Content = styled.div`
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: ${rem(960)};
-  margin: 0 auto;
-  color: #ffffff;
-`;
+import SearchIcon from '@material-ui/icons/Search';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import GroupIcon from '@material-ui/icons/Group';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import MoreIcon from '@material-ui/icons/MoreVert';
 
-const SearchBox = styled.div`
-  background: #fff;
-  /* height: 36px; */
-  /* padding: 10px; */
-  border-radius: ${rem(36)};
-  margin-left: ${rem(10)};
-  i {
-    color: #8f8f8f;
-    float: left;
-    width: ${rem(36)};
-    height: ${rem(36)};
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-  input {
-    border: none;
-    background: none;
-    outline: none;
-    float: right;
-    padding: 0;
-    transition: 0.4s;
-    line-height: ${rem(20)};
-    width: ${rem(295)};
-    padding: ${rem(8)};
-  }
-`;
 const StyledLogo = styled.a`
   font-size: ${rem(20)};
   display: flex;
@@ -70,180 +32,249 @@ const StyledLogo = styled.a`
   }
   cursor: pointer;
 `;
-const MenuItem = styled.div`
-  font-size: ${rem(14)};
-  line-height: ${rem(81)};
-  padding-left: ${rem(25)};
-  min-width: ${rem(60)};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  .expand {
-    margin-left: ${rem(2)};
-    font-weight: 600;
-  }
-  .username {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: capitalize;
-  }
-  img {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: ${rem(5)};
-  }
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-  i {
-    font-size: ${rem(22)};
-  }
-  &:hover {
-    color: rebeccapurple;
-  }
-`;
-const Rectangle = styled.a`
-  width: ${rem(18)};
-  height: ${rem(16)};
-  align-items: center;
-  border-radius: 8px;
-  background-color: #ff70d4;
-  position: relative;
-  top: -10px;
-  left: -5px;
-`;
 
-class Header extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: '',
-      address: '',
-    };
+const StyledAppBar = withStyles(theme => ({
+  root: {
+    background: '#8250c8',
+    // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
+    color: 'white',
+    height: 81,
+    padding: '0',
+    boxShadow: 'none',
+    alignItems: 'center',
+    // [theme.breakpoints.up('sm')]: {
+    //   background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
+    // },
+  },
+}))(AppBar);
+const StyledToolbar = withStyles({
+  root: {
+    // width: 960,
+    height: '100%',
+    padding: '0',
+  },
+})(Toolbar);
+
+const useStyles = makeStyles(theme => ({
+  grow: {
+    flexGrow: 1,
+  },
+  AppBar: {
+    [theme.breakpoints.up('md')]: {
+      // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
+    },
+  },
+  avatar: {
+    margin: 10,
+    width: 46,
+    height: 46,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    display: 'none',
+    [theme.breakpoints.up('sm')]: {
+      display: 'block',
+    },
+  },
+  search: {
+    position: 'relative',
+    borderRadius: 36,
+    backgroundColor: fade(theme.palette.common.white, 1),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.95),
+    },
+    marginRight: theme.spacing(2),
+    marginLeft: 0,
+    width: '100%',
+    height: 36,
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(3),
+      width: 'auto',
+    },
+  },
+  searchIcon: {
+    width: theme.spacing(7),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#5a5e67',
+  },
+  inputRoot: {
+    // background: '#fff',
+    height: '100%',
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 7),
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('md')]: {
+      width: 200,
+    },
+  },
+  sectionDesktop: {
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'flex',
+    },
+  },
+  sectionMobile: {
+    display: 'flex',
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
+  },
+}));
+
+export default function Header() {
+  const classes = useStyles();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+
+  const isMenuOpen = Boolean(anchorEl);
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  function handleProfileMenuOpen(event) {
+    setAnchorEl(event.currentTarget);
   }
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.address !== prevState.address) {
-      return {
-        address: nextProps.address,
-      };
-    } else {
-      return null;
-    }
-  }
-  componentDidMount() {
-    this.loaddata();
+
+  function handleMobileMenuClose() {
+    setMobileMoreAnchorEl(null);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { address } = this.state;
-    if (address !== prevState.address) {
-      this.loaddata();
-    }
-  }
-  async loaddata() {
-    const { address } = this.props;
-    console.log('address', address);
-    if (address === '') return;
-    const reps = await getTagsInfo(address);
-    // console.log('reps', reps);
-    this.setState({ username: reps['display-name'] });
+  function handleMenuClose() {
+    setAnchorEl(null);
+    handleMobileMenuClose();
   }
 
-  goRegister = () => {
-    const { history } = this.props;
-    history.push('/register');
-  };
+  function handleMobileMenuOpen(event) {
+    setMobileMoreAnchorEl(event.currentTarget);
+  }
 
-  goLogin = () => {
-    const { history } = this.props;
-    history.push('/login');
-  };
+  const menuId = 'primary-search-account-menu';
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      id={menuId}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+    </Menu>
+  );
 
-  closeConfirmPass = () => {};
+  const mobileMenuId = 'primary-search-account-menu-mobile';
+  const renderMobileMenu = (
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      id={mobileMenuId}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+    >
+      <MenuItem>
+        <IconButton aria-label="show 4 new mails" color="inherit">
+          <Badge badgeContent={4} color="secondary">
+            <GroupIcon />
+          </Badge>
+        </IconButton>
+        <p>Messages</p>
+      </MenuItem>
+      <MenuItem>
+        <IconButton aria-label="show 11 new notifications" color="inherit">
+          <Badge badgeContent={11} color="secondary">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
+        <p>Notifications</p>
+      </MenuItem>
+      <MenuItem onClick={handleProfileMenuOpen}>
+        <IconButton
+          aria-label="account of current user"
+          aria-controls="primary-search-account-menu"
+          aria-haspopup="true"
+          color="inherit"
+        >
+          <AccountCircle />
+        </IconButton>
+        <p>Profile</p>
+      </MenuItem>
+    </Menu>
+  );
 
-  render() {
-    const { username } = this.state;
-    const { address, needAuth } = this.props;
-
-    return (
-      <Container>
-        <Content>
+  return (
+    <div className={classes.grow}>
+      <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
+        <StyledToolbar variant="dense">
           <StyledLogo href="/">
             <img src="/static/img/logo.svg" alt="itea-scan" />
             <span>LoveLock</span>
           </StyledLogo>
-          {address ? (
-            <React.Fragment>
-              <SearchBox>
-                <input type="text" name="" placeholder="Search" />
-                {/* <a className="search-bt">
-                  <Icon type="search" />
-                </a> */}
-                <Icon type="search" />
-              </SearchBox>
-              <FlexBox flex={1} justify="flex-end">
-                <MenuItem>
-                  <img src="/static/img/user-men.jpg" alt="" />
-                  <a className="username" href="/login">
-                    {username}
-                  </a>
-                </MenuItem>
-                <MenuItem>
-                  <a href="/login">Explore</a>
-                  <Icon className="expand" type="expand_more" />
-                </MenuItem>
-                <MenuItem>
-                  <Icon type="group" />
-                  <Rectangle />
-                </MenuItem>
-                <MenuItem>
-                  <Icon type="notifications" />
-                  <Rectangle />
-                </MenuItem>
-              </FlexBox>
-            </React.Fragment>
-          ) : (
-            <FlexBox flex={1} justify="flex-end">
-              <MenuItem>
-                <Button variant="contained" color="primary" onClick={this.goLogin}>
-                  Login
-                </Button>
-              </MenuItem>
-              <MenuItem>
-                <Button variant="contained" color="primary" onClick={this.goRegister}>
-                  Register
-                </Button>
-              </MenuItem>
-            </FlexBox>
-          )}
-          {needAuth && <GetKeyToAuthen />}
-        </Content>
-      </Container>
-    );
-  }
+          <div className={classes.search}>
+            <div className={classes.searchIcon}>
+              <SearchIcon />
+            </div>
+            <InputBase
+              placeholder="Search…"
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput,
+              }}
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </div>
+          <div className={classes.grow} />
+          <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
+          <Typography className={classes.title} noWrap>
+            Material-UI
+          </Typography>
+          <div className={classes.sectionDesktop}>
+            <IconButton aria-label="show 4 new mails" color="inherit">
+              <Badge badgeContent={4} color="secondary">
+                <GroupIcon />
+              </Badge>
+            </IconButton>
+            <IconButton aria-label="show 17 new notifications" color="inherit">
+              <Badge badgeContent={1711} color="secondary">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+            <IconButton
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+          </div>
+          <div className={classes.sectionMobile}>
+            <IconButton
+              aria-label="show more"
+              aria-controls={mobileMenuId}
+              aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
+              color="inherit"
+            >
+              <MoreIcon />
+            </IconButton>
+          </div>
+        </StyledToolbar>
+      </StyledAppBar>
+      {renderMobileMenu}
+      {renderMenu}
+    </div>
+  );
 }
-
-const mapStateToProps = state => {
-  const { account } = state;
-  return {
-    address: account.address,
-    needAuth: account.needAuth,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    setPropose: value => {
-      // dispatch(actions.setPropose(value));
-    },
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withRouter(Header));
