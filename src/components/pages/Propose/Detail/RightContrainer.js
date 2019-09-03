@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actions from '../../../../store/actions';
 import styled from 'styled-components';
 import InputBase from '@material-ui/core/InputBase';
@@ -60,7 +61,7 @@ const RightBox = styled.div`
     }
     button {
       width: 254px;
-      line-height: 46px;
+      line-height: 34px;
       float: right;
       font-size: 16px;
       color: #ffffff;
@@ -94,10 +95,12 @@ const RightBox = styled.div`
   }
 `;
 export default function RightContrainer(props) {
+  const privateKey = useSelector(state => state.account.privateKey);
   const dispatch = useDispatch();
   const [memoryContent, setMemoryContent] = useState(null);
   const [date, setDate] = useState(new Date());
   const [filePath, setFilePath] = useState(null);
+  const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -106,11 +109,14 @@ export default function RightContrainer(props) {
     fetchData();
   }, []);
 
-  function setLoading(value) {
+  function setGLoading(value) {
     dispatch(actions.setLoading(value));
   }
   function setMemory(value) {
     dispatch(actions.setMemory(value));
+  }
+  function setNeedAuth(value) {
+    dispatch(actions.setNeedAuth(value));
   }
 
   function statusChange(e) {
@@ -142,7 +148,12 @@ export default function RightContrainer(props) {
   }
 
   async function shareMemory(memoryContent, date, file) {
-    setLoading(true);
+    if (!privateKey) {
+      console.log('privateKey', privateKey);
+      setNeedAuth(true);
+      return;
+    }
+    setGLoading(true);
     const { proIndex } = props;
     let hash = '';
     if (file) hash = await saveToIpfs(file);
@@ -154,9 +165,9 @@ export default function RightContrainer(props) {
     console.log('View result', result);
     if (result) {
       loadMemory();
-      window.alert('Success');
+      // window.alert('Success');
     }
-    setLoading(false);
+    setGLoading(false);
   }
 
   return (
@@ -201,17 +212,15 @@ export default function RightContrainer(props) {
             </div>
           </div>
         </div>
-        <button
-          type="button"
-          disabled=""
+        <ButtonPro
           onClick={() => {
             shareMemory(memoryContent, date, filePath);
           }}
         >
           Share
-        </button>
+        </ButtonPro>
       </div>
-      <MessageHistory />
+      <MessageHistory loading={loading} />
     </RightBox>
   );
 }
