@@ -14,7 +14,7 @@ import Avatar from '@material-ui/core/Avatar';
 
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
+import GroupIcon from '@material-ui/icons/Group';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 
@@ -185,7 +185,7 @@ export default function Header() {
       <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="secondary">
-            <MailIcon />
+            <GroupIcon />
           </Badge>
         </IconButton>
         <p>Messages</p>
@@ -216,9 +216,6 @@ export default function Header() {
     <div className={classes.grow}>
       <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
         <StyledToolbar variant="dense">
-          {/* <Typography className={classes.title} variant="h6" noWrap>
-            Material-UI
-          </Typography> */}
           <StyledLogo href="/">
             <img src="/static/img/logo.svg" alt="itea-scan" />
             <span>LoveLock</span>
@@ -237,16 +234,14 @@ export default function Header() {
             />
           </div>
           <div className={classes.grow} />
-          <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar}>
-            hoanghuy
-          </Avatar>
+          <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
           <Typography className={classes.title} noWrap>
             Material-UI
           </Typography>
           <div className={classes.sectionDesktop}>
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="secondary">
-                <MailIcon />
+                <GroupIcon />
               </Badge>
             </IconButton>
             <IconButton aria-label="show 17 new notifications" color="inherit">

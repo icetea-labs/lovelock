@@ -41,9 +41,9 @@ const Layout = ({ children, title }) => (
 const HomeLayout = ({ children, title }) => (
   <Container>
     <Header />
-    {/* <MainContainer>
+    <MainContainer>
       <Content> {children} </Content>
-    </MainContainer> */}
+    </MainContainer>
     {/* <Footer /> */}
   </Container>
 );
