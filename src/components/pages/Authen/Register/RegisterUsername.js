@@ -53,7 +53,7 @@ class RegisterUsername extends PureComponent {
     ValidatorForm.addValidationRule('isAliasRegisted', async username => {
       // const resp = this.checkAliasRegisted(value);
       const resp = await isAliasRegisted(username);
-      console.log('isAliasRegisted', !!resp);
+      // console.log('isAliasRegisted', !!resp);
       return !resp;
     });
   }

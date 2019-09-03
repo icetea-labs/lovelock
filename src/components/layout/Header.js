@@ -14,6 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Avatar from '@material-ui/core/Avatar';
 import GetKeyToAuthen from './GetKeyToAuthen';
+import Button from '@material-ui/core/Button';
 
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
@@ -25,6 +26,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 const StyledLogo = styled.a`
   font-size: ${rem(20)};
   display: flex;
+  flex-grow: 1;
   align-items: center;
   text-decoration: none;
   :hover {
@@ -56,6 +58,7 @@ const StyledToolbar = withStyles({
     width: 960,
     height: '100%',
     padding: '0',
+    flexGrow: 1,
   },
 })(Toolbar);
 
@@ -214,7 +217,7 @@ export default function Header() {
     >
       <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="secondary">
+          <Badge badgeContent={4} color="primary">
             <GroupIcon />
           </Badge>
         </IconButton>
@@ -222,7 +225,7 @@ export default function Header() {
       </MenuItem>
       <MenuItem>
         <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="secondary">
+          <Badge badgeContent={11} color="primary">
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -245,43 +248,45 @@ export default function Header() {
   return (
     <div className={classes.grow}>
       <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
-        <StyledToolbar variant="dense">
+        <StyledToolbar>
           <StyledLogo href="/">
             <img src="/static/img/logo.svg" alt="itea-scan" />
             <span>LoveLock</span>
           </StyledLogo>
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
-            </div>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </div>
-          <div className={classes.grow} />
-          <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
-          <Typography className={classes.title} noWrap>
-            {displayName}
-          </Typography>
-          <Typography noWrap>Explore</Typography>
-          <KeyboardArrowDownIcon className={classes.menuIcon} />
-          <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 4 new mails" color="inherit" className={classes.menuIcon}>
-              <Badge badgeContent={4} color="secondary">
-                <GroupIcon />
-              </Badge>
-            </IconButton>
-            <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.menuIcon}>
-              <Badge badgeContent={1711} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            {/* <IconButton
+          {address ? (
+            <React.Fragment>
+              <div className={classes.search}>
+                <div className={classes.searchIcon}>
+                  <SearchIcon />
+                </div>
+                <InputBase
+                  placeholder="Search…"
+                  classes={{
+                    root: classes.inputRoot,
+                    input: classes.inputInput,
+                  }}
+                  inputProps={{ 'aria-label': 'search' }}
+                />
+              </div>
+              <div className={classes.grow} />
+              <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
+              <Typography className={classes.title} noWrap>
+                {displayName}
+              </Typography>
+              <Typography noWrap>Explore</Typography>
+              <KeyboardArrowDownIcon className={classes.menuIcon} />
+              <div className={classes.sectionDesktop}>
+                <IconButton aria-label="show 4 new mails" color="inherit" className={classes.menuIcon}>
+                  <Badge badgeContent={4} color="primary">
+                    <GroupIcon />
+                  </Badge>
+                </IconButton>
+                <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.menuIcon}>
+                  <Badge badgeContent={12} color="primary">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+                {/* <IconButton
               edge="end"
               aria-label="account of current user"
               aria-controls={menuId}
@@ -291,18 +296,29 @@ export default function Header() {
             >
               <AccountCircle />
             </IconButton> */}
-          </div>
-          <div className={classes.sectionMobile}>
-            <IconButton
-              aria-label="show more"
-              aria-controls={mobileMenuId}
-              aria-haspopup="true"
-              onClick={handleMobileMenuOpen}
-              color="inherit"
-            >
-              <MoreIcon />
-            </IconButton>
-          </div>
+              </div>
+              <div className={classes.sectionMobile}>
+                <IconButton
+                  aria-label="show more"
+                  aria-controls={mobileMenuId}
+                  aria-haspopup="true"
+                  onClick={handleMobileMenuOpen}
+                  color="inherit"
+                >
+                  <MoreIcon />
+                </IconButton>
+              </div>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <Button href="/login" className={classes.menuButton} variant="contained" color="primary">
+                Login
+              </Button>
+              <Button href="/register" className={classes.menuButton} variant="contained" color="primary">
+                Register
+              </Button>
+            </React.Fragment>
+          )}
         </StyledToolbar>
       </StyledAppBar>
       {renderMobileMenu}
