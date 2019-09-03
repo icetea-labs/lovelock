@@ -67,30 +67,13 @@ export default function MessageHistory(props) {
   const memoryList = useSelector(state => state.loveinfo.memory);
   if (typeof memoryList !== 'undefined' && memoryList.length > 0) loading = false;
 
-  return memoryList.map(memory => {
+  if (memoryList.length <= 0) {
     return (
-      <Card key={memory.index} className={classes.card}>
+      <Card className={classes.card}>
         <CardHeader
-          avatar={
-            loading ? (
-              <Skeleton variant="circle" width={40} height={40} />
-            ) : (
-              <Avatar alt="avata" src="/static/img/user-women.jpg" />
-            )
-          }
-          title={loading ? <Skeleton height={6} width="80%" /> : memory.name}
-          subheader={
-            loading ? (
-              <Skeleton height={6} width="40%" />
-            ) : (
-              <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
-            )
-          }
-          action={
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
-          }
+          avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
+          title={loading ? <Skeleton height={6} width="80%" /> : ''}
+          subheader={loading ? <Skeleton height={6} width="40%" /> : ''}
         />
         <CardContent>
           {loading ? (
@@ -99,27 +82,44 @@ export default function MessageHistory(props) {
               <Skeleton height={6} width="80%" />
             </React.Fragment>
           ) : (
-            <Typography variant="body2" color="textSecondary" component="p">
-              {memory.content}
-            </Typography>
+            <Typography variant="body2" color="textSecondary" component="p"></Typography>
           )}
         </CardContent>
-        {loading ? (
-          <Skeleton variant="rect" className={classes.media} />
-        ) : (
-          <React.Fragment>
-            {memory.info.hash && (
-              <CardMedia className={classes.media} image={'https://ipfs.io/ipfs/' + memory.info.hash} title="img" />
-            )}
-            {/* <ImageGridList
+        {loading ? <Skeleton variant="rect" className={classes.media} /> : ''}
+      </Card>
+    );
+  }
+
+  return memoryList.map(memory => {
+    return (
+      <Card key={memory.index} className={classes.card}>
+        <CardHeader
+          avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
+          title={memory.name}
+          subheader={<TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />}
+          action={
+            <IconButton aria-label="settings">
+              <MoreVertIcon />
+            </IconButton>
+          }
+        />
+        <CardContent>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {memory.content}
+          </Typography>
+        </CardContent>
+        <React.Fragment>
+          {memory.info.hash && (
+            <CardMedia className={classes.media} image={'https://ipfs.io/ipfs/' + memory.info.hash} title="img" />
+          )}
+          {/* <ImageGridList
               imgs={[
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash, clos: 2 },
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
               ]}
             /> */}
-          </React.Fragment>
-        )}
+        </React.Fragment>
         <CardActions>
           <Tooltip title="Like">
             <IconButton aria-label="add to like">

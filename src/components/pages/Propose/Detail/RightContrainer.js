@@ -220,7 +220,7 @@ export default function RightContrainer(props) {
           Share
         </ButtonPro>
       </div>
-      <MessageHistory loading={loading} />
+      <MessageHistory />
     </RightBox>
   );
 }
