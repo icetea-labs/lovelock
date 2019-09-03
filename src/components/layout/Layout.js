@@ -20,14 +20,15 @@ const MainContainer = styled.main`
   height: 100%;
   flex: 1 1 0%;
 `;
-
-const Content = styled.div`
+const BoxContent = styled.div`
   grid-area: content;
   justify-items: center;
   align-items: center;
   width: ${rem(960)};
   margin: 0 auto;
-  margin-top: 95px;
+`;
+const Content = styled(BoxContent)`
+  margin-top: ${rem(30)};
 `;
 
 const Layout = ({ children, title }) => (
@@ -40,9 +41,9 @@ const Layout = ({ children, title }) => (
 const HomeLayout = ({ children, title }) => (
   <Container>
     <Header />
-    <MainContainer>
+    {/* <MainContainer>
       <Content> {children} </Content>
-    </MainContainer>
+    </MainContainer> */}
     {/* <Footer /> */}
   </Container>
 );
