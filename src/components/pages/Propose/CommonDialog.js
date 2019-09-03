@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import QueueAnim from 'rc-queue-anim';
 
-import { ButtonPro } from '../../elements/Button';
+import { ButtonPro, LinkPro } from '../../elements/Button';
 import { ValidatorForm } from 'react-material-ui-form-validator';
+import IconButton from '@material-ui/core/IconButton';
 
 const PuLayout = styled.div`
   position: fixed;
@@ -96,14 +97,7 @@ const Action = styled.div`
       border: 1px solid #5e5e5e;
       display: flex;
       justify-content: center;
-      font-family: Montserrat;
-      font-family: Montserrat;
-      font-size: 16px;
       font-weight: 600;
-      font-style: normal;
-      font-stretch: normal;
-      line-height: normal;
-      letter-spacing: normal;
       color: #373737;
     }
   }
@@ -125,9 +119,9 @@ class CommonDialog extends React.Component {
             <Container key={2}>
               <PuTitle>
                 <span className="title">{title}</span>
-                <i className="material-icons" onClick={close}>
-                  close
-                </i>
+                <IconButton onClick={close}>
+                  <i className="material-icons">close</i>
+                </IconButton>
               </PuTitle>
               <ContWrap>
                 {children}
@@ -135,9 +129,9 @@ class CommonDialog extends React.Component {
                   <div className="actionConfirm">
                     {isCancel && (
                       <ValidatorForm onSubmit={cancel}>
-                        <ButtonPro className="deny" type="submit">
+                        <LinkPro className="deny" type="submit">
                           {cancelText}
-                        </ButtonPro>
+                        </LinkPro>
                       </ValidatorForm>
                     )}
                     <ValidatorForm onSubmit={confirm}>
