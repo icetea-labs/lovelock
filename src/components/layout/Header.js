@@ -225,7 +225,7 @@ export default function Header() {
   useEffect(() => {
     async function fetchData() {
       if (address) {
-        console.log('address', address);
+        // console.log('address', address);
         const reps = await getTagsInfo(address);
         setDisplayName(reps['display-name']);
       } else {

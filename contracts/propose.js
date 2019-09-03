@@ -50,7 +50,7 @@ class Propose {
 
   @view getProposeByAddress(address) {
     if (address === 'undefined') address = msg.sender;
-    const arrPro = this.addressToPropose[address];
+    const arrPro = this.addressToPropose[address] || [];
     let resp = [];
     arrPro.forEach(index => {
       const pro = this.propose[index];
@@ -75,7 +75,7 @@ class Propose {
   }
 
   @view getMemoryByProIndex(proIndex: number) {
-    const memoryPro = this.proposeToMemories[proIndex];
+    const memoryPro = this.proposeToMemories[proIndex] || [];
     let res = [];
     memoryPro.forEach(index => {
       const mem = this.memories[index];
@@ -161,7 +161,7 @@ class Propose {
 
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
-     const sender = msg.sender;
+    const sender = msg.sender;
     const pro = this.propose[index];
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {

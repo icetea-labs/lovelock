@@ -173,7 +173,7 @@ class DetailPropose extends PureComponent {
   }
 
   render() {
-    const { tag, date, file, proIndex, memoryContent, address } = this.state;
+    const { proIndex } = this.state;
     return (
       <React.Fragment>
         <BannerContainer>

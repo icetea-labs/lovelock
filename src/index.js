@@ -55,6 +55,20 @@ const theme = createMuiTheme({
         // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
       },
     },
+    MuiCardHeader: {
+      root: {
+        cursor: 'pointer',
+      },
+      title: {
+        textTransform: 'capitalize',
+        color: '#8250c8',
+        fontWeight: 600,
+        fontSize: 14,
+      },
+      content: {
+        color: '#8f8f8f',
+      },
+    },
     MuiOutlinedInput: {
       root: {
         position: 'relative',
