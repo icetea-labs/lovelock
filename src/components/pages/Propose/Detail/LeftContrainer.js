@@ -221,7 +221,7 @@ class LeftContrainer extends PureComponent {
             <TagBox>{this.renderTag(tag)}</TagBox>
           </ShadowBox>
         </LeftBox>
-        {step === 'new' && privateKey && <Promise close={this.closePopup} />}
+        {step === 'new' && <Promise close={this.closePopup} />}
         {step === 'pending' && (
           <PromiseAlert
             index={index}

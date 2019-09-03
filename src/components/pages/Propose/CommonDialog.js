@@ -2,6 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import QueueAnim from 'rc-queue-anim';
 
+import { ButtonPro } from '../../elements/Button';
+import { ValidatorForm } from 'react-material-ui-form-validator';
+
 const PuLayout = styled.div`
   position: fixed;
   top: 0px;
@@ -131,13 +134,17 @@ class CommonDialog extends React.Component {
                 <Action>
                   <div className="actionConfirm">
                     {isCancel && (
-                      <button className="deny" type="button" disabled="" onClick={cancel}>
-                        {cancelText}
-                      </button>
+                      <ValidatorForm onSubmit={cancel}>
+                        <ButtonPro className="deny" type="submit">
+                          {cancelText}
+                        </ButtonPro>
+                      </ValidatorForm>
                     )}
-                    <button className="send" type="button" disabled="" onClick={confirm}>
-                      {okText}
-                    </button>
+                    <ValidatorForm onSubmit={confirm}>
+                      <ButtonPro className="send" type="submit">
+                        {okText}
+                      </ButtonPro>
+                    </ValidatorForm>
                   </div>
                 </Action>
               </ContWrap>
