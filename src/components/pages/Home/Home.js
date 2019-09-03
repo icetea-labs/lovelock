@@ -1,16 +1,13 @@
-import React, { PureComponent } from 'react';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { FlexBox, FlexWidthBox } from '../../elements/StyledUtils';
 import LeftContrainer from '../Propose/Detail/LeftContrainer';
-class Home extends PureComponent {
-  render() {
-    return (
-      <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
-          <LeftContrainer />
-        </FlexWidthBox>
-      </FlexBox>
-    );
-  }
-}
 
-export default Home;
+export default function Home() {
+  const address = useSelector(state => state.account.address);
+  return (
+    <FlexBox wrap="wrap">
+      <FlexWidthBox width="30%">{address && <LeftContrainer />}</FlexWidthBox>
+    </FlexBox>
+  );
+}

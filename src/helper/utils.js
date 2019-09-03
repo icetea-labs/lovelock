@@ -158,17 +158,11 @@ export async function isAliasRegisted(username) {
 }
 export async function getAlias(address) {
   try {
-    let info = await tweb3
+    const listAlias = await tweb3
       .contract('system.alias')
       .methods.byAddress(address)
       .call();
-
-    if (info) {
-      info = info.split('.');
-      info = info[1];
-    }
-    // console.log('info', info);
-    return info;
+    if (listAlias && Array.isArray(listAlias)) return listAlias[0].replace('account.', '');
   } catch (err) {
     console.log(tryStringifyJson(err));
     throw err;
