@@ -1,9 +1,12 @@
-import React, { PureComponent } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import * as actions from '../../../../store/actions';
 import styled from 'styled-components';
 import InputBase from '@material-ui/core/InputBase';
 import MessageHistory from '../../Memory/MessageHistory';
 import CustomPost from './CustomPost';
 import { rem } from '../../../elements/StyledUtils';
+import { saveToIpfs, sendTransaction, callView, getTagsInfo } from '../../../../helper';
 
 const RightBox = styled.div`
   width: 100%;
@@ -36,7 +39,6 @@ const RightBox = styled.div`
       .contentEditable {
         width: 100%;
         height: 19px;
-        font-family: Montserrat;
         font-size: 16px;
         font-weight: 500;
         font-style: normal;
@@ -77,7 +79,6 @@ const RightBox = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: Montserrat;
       font-size: 12px;
       font-weight: 500;
       font-style: normal;
@@ -92,9 +93,72 @@ const RightBox = styled.div`
     }
   }
 `;
-function statusChange() {}
-function onChangeCus() {}
-export default function RightContrainer() {
+export default function RightContrainer(props) {
+  const dispatch = useDispatch();
+  const [memoryContent, setMemoryContent] = useState(null);
+  const [date, setDate] = useState(new Date());
+  const [filePath, setFilePath] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      await loadMemory();
+    }
+    fetchData();
+  }, []);
+
+  function setLoading(value) {
+    dispatch(actions.setLoading(value));
+  }
+  function setMemory(value) {
+    dispatch(actions.setMemory(value));
+  }
+
+  function statusChange(e) {
+    setMemoryContent(e.target.value);
+  }
+
+  function onChangeCus(date, file) {
+    setDate(date);
+    setFilePath(file);
+  }
+
+  async function loadMemory() {
+    const { proIndex } = props;
+    const allMemory = await callView('getMemoryByProIndex', [proIndex]);
+    let newMemoryList = [];
+
+    for (let i = 0; i < allMemory.length; i++) {
+      const obj = allMemory[i];
+      const sender = obj.sender;
+      obj.info = JSON.parse(obj.info);
+      const reps = await getTagsInfo(sender);
+      obj.name = reps['display-name'];
+      obj.index = [i];
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    console.log('newMemoryList', newMemoryList);
+    setMemory(newMemoryList);
+  }
+
+  async function shareMemory(memoryContent, date, file) {
+    setLoading(true);
+    const { proIndex } = props;
+    let hash = '';
+    if (file) hash = await saveToIpfs(file);
+
+    const method = 'addMemory';
+    const info = JSON.stringify({ date, hash });
+    const params = [proIndex, memoryContent, info];
+    const result = await sendTransaction(method, params);
+    console.log('View result', result);
+    if (result) {
+      loadMemory();
+      window.alert('Success');
+    }
+    setLoading(false);
+  }
+
   return (
     <RightBox>
       <div className="memorypost__content">
@@ -141,7 +205,7 @@ export default function RightContrainer() {
           type="button"
           disabled=""
           onClick={() => {
-            // this.shareMemory(proIndex, memoryContent, date, file);
+            shareMemory(memoryContent, date, filePath);
           }}
         >
           Share

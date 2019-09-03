@@ -164,8 +164,9 @@ class LeftContrainer extends PureComponent {
       const r_nick = await getAlias(newAddress);
       proposes[i].r_name = receiver['display-name'];
       proposes[i].r_nick = '@' + r_nick;
+
       const info = JSON.parse(proposes[i].info);
-      proposes[i].coverimg = info.hash;
+      proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
       proposes[i].s_date = info.date;
       proposes[i].r_date = info.date;
     }
