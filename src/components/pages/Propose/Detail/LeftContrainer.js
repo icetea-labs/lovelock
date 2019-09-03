@@ -102,9 +102,9 @@ class LeftContrainer extends PureComponent {
       } else {
         const data = result.data.value.TxResult.events[0];
         const eventData = data.eventData;
-        console.log('data', data);
+        // console.log('data', data);
         if (eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
-          console.log('to me');
+          // console.log('to me');
           switch (data.eventName) {
             case 'createPropose':
               await this.eventCreatePropose(eventData);
@@ -116,7 +116,7 @@ class LeftContrainer extends PureComponent {
               break;
           }
         }
-        console.log('not me');
+        // console.log('not me');
       }
     });
   };
@@ -127,13 +127,13 @@ class LeftContrainer extends PureComponent {
     const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
     newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
     // console.log('newArray', newArray[objIndex]);
-    console.log('eventConfirmPropose');
+    // console.log('eventConfirmPropose');
     setPropose(newArray);
   }
   async eventCreatePropose(data) {
     const { setPropose, propose } = this.props;
     const log = await this.addInfoToProposes(data.log);
-    console.log('eventCreatePropose');
+    // console.log('eventCreatePropose');
     setPropose([...propose, log]);
   }
   async loadProposes() {
@@ -174,7 +174,13 @@ class LeftContrainer extends PureComponent {
     }
   };
   selectPending = index => {
-    this.setState({ step: 'pending', index: index });
+    const { setNeedAuth, privateKey } = this.props;
+    if (!privateKey) {
+      setNeedAuth(true);
+      this.setState({ step: 'pending', index: index });
+    } else {
+      this.setState({ step: 'pending', index: index });
+    }
     // console.log('view pending index', index);
   };
   closePopup = () => {
@@ -222,7 +228,7 @@ class LeftContrainer extends PureComponent {
           </ShadowBox>
         </LeftBox>
         {step === 'new' && privateKey && <Promise close={this.closePopup} />}
-        {step === 'pending' && (
+        {step === 'pending' && privateKey && (
           <PromiseAlert
             index={index}
             propose={propose}

@@ -16,6 +16,12 @@ import Avatar from '@material-ui/core/Avatar';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import Button from '@material-ui/core/Button';
 
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import DraftsIcon from '@material-ui/icons/Drafts';
+import SendIcon from '@material-ui/icons/Send';
+
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
@@ -149,6 +155,37 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const StyledMenu = withStyles({
+  paper: {
+    border: '1px solid #d3d4d5',
+  },
+})(props => (
+  <Menu
+    elevation={0}
+    getContentAnchorEl={null}
+    anchorOrigin={{
+      vertical: 'bottom',
+      horizontal: 'center',
+    }}
+    transformOrigin={{
+      vertical: 'top',
+      horizontal: 'center',
+    }}
+    {...props}
+  />
+));
+
+const StyledMenuItem = withStyles(theme => ({
+  root: {
+    '&:focus': {
+      backgroundColor: theme.palette.primary.main,
+      '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+        color: theme.palette.common.white,
+      },
+    },
+  },
+}))(MenuItem);
+
 export default function Header() {
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
@@ -174,6 +211,15 @@ export default function Header() {
   function handleMobileMenuOpen(event) {
     setMobileMoreAnchorEl(event.currentTarget);
   }
+
+  function handleFriReqOpen(event) {
+    setAnchorEl(event.currentTarget);
+  }
+
+  function handleFriReqClose() {
+    setAnchorEl(null);
+  }
+
   const address = useSelector(state => state.account.address);
   const [displayName, setDisplayName] = useState(null);
   useEffect(() => {
@@ -202,6 +248,35 @@ export default function Header() {
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
     </Menu>
+  );
+
+  const friReqMenu = (
+    <StyledMenu
+      id="customized-menu"
+      anchorEl={anchorEl}
+      keepMounted
+      open={Boolean(anchorEl)}
+      onClose={handleFriReqClose}
+    >
+      <StyledMenuItem>
+        <ListItemIcon>
+          <SendIcon />
+        </ListItemIcon>
+        <ListItemText primary="Sent mail" />
+      </StyledMenuItem>
+      <StyledMenuItem>
+        <ListItemIcon>
+          <DraftsIcon />
+        </ListItemIcon>
+        <ListItemText primary="Drafts" />
+      </StyledMenuItem>
+      <StyledMenuItem>
+        <ListItemIcon>
+          <InboxIcon />
+        </ListItemIcon>
+        <ListItemText primary="Inbox" />
+      </StyledMenuItem>
+    </StyledMenu>
   );
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
@@ -276,7 +351,15 @@ export default function Header() {
               <Typography noWrap>Explore</Typography>
               <KeyboardArrowDownIcon className={classes.menuIcon} />
               <div className={classes.sectionDesktop}>
-                <IconButton aria-label="show 4 new mails" color="inherit" className={classes.menuIcon}>
+                <IconButton
+                  aria-label="show 4 new mails"
+                  color="inherit"
+                  className={classes.menuIcon}
+                  aria-controls="customized-menu"
+                  // aria-haspopup="true"
+                  variant="contained"
+                  onClick={handleFriReqOpen}
+                >
                   <Badge badgeContent={4} color="primary">
                     <GroupIcon />
                   </Badge>
@@ -322,7 +405,8 @@ export default function Header() {
         </StyledToolbar>
       </StyledAppBar>
       {renderMobileMenu}
-      {renderMenu}
+      {/* {renderMenu} */}
+      {friReqMenu}
       {needAuth && <GetKeyToAuthen />}
     </div>
   );

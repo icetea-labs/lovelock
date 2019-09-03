@@ -41,10 +41,10 @@ class PromiseAlert extends React.Component {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       // const reps = await getTagsInfo(addr);
       const name = await getAlias(addr);
-      obj.name = name;
+      // obj.name = name;
       this.setState({
         sender: obj.sender,
-        name: obj.name,
+        name: name,
         info: obj.info,
         content: obj.s_content,
       });
