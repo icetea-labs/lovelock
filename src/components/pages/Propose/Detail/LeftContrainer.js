@@ -38,7 +38,7 @@ const LeftBox = styled.div`
     font-weight: 600;
     font-size: ${rem(14)};
     text-transform: uppercase;
-    margin-bottom: ${rem(20)};
+    /* margin-bottom: ${rem(20)}; */
   }
 `;
 const ShadowBox = styled.div`
@@ -67,6 +67,7 @@ class LeftContrainer extends PureComponent {
       index: -1,
       step: '',
       propose: [],
+      loading: true,
     };
   }
 
@@ -137,10 +138,12 @@ class LeftContrainer extends PureComponent {
     setPropose([...propose, log]);
   }
   async loadProposes() {
+    this.setState({ loading: true });
     const { address, setPropose } = this.props;
     const proposes = (await callView('getProposeByAddress', [address])) || [];
     const newPropose = await this.addInfoToProposes(proposes);
     setPropose(newPropose);
+    this.setState({ loading: false });
   }
 
   async addInfoToProposes(proposes) {
@@ -199,7 +202,7 @@ class LeftContrainer extends PureComponent {
   };
 
   render() {
-    const { step, index } = this.state;
+    const { step, loading, index } = this.state;
     const { propose, address, tag, privateKey } = this.props;
     return (
       <React.Fragment>
@@ -211,11 +214,11 @@ class LeftContrainer extends PureComponent {
             </LinkPro>
             <div className="title">Accepted promise</div>
             <div>
-              <LeftProposes flag={1} handlerSelect={this.selectAccepted} />
+              <LeftProposes loading={loading} flag={1} handlerSelect={this.selectAccepted} />
             </div>
             <div className="title">Pending promise</div>
             <div>
-              <LeftProposes flag={0} handlerSelect={this.selectPending} />
+              <LeftProposes loading={loading} flag={0} handlerSelect={this.selectPending} />
             </div>
             <div className="title">Popular Tag</div>
             <TagBox>{this.renderTag(tag)}</TagBox>

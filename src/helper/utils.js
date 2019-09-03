@@ -162,7 +162,7 @@ export async function getAlias(address) {
       .contract('system.alias')
       .methods.byAddress(address)
       .call();
-    if (listAlias && Array.isArray(listAlias)) return listAlias[0].replace('account.', '');
+    if (listAlias && Array.isArray(listAlias) && listAlias[0]) return listAlias[0].replace('account.', '');
   } catch (err) {
     console.log(tryStringifyJson(err));
     throw err;
