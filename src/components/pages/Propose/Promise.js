@@ -60,6 +60,11 @@ class Promise extends React.Component {
     };
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.timeoutHanle1);
+    clearTimeout(this.timeoutHanle2);
+  }
+
   partnerChange = e => {
     const value = e.target.value;
     this.setState({
@@ -87,27 +92,33 @@ class Promise extends React.Component {
     let hash;
     setLoading(true);
 
-    if (file) {
-      hash = await saveToIpfs(file);
-    }
-    let info = {
-      date: date,
-      hash: hash,
-    };
-    info = JSON.stringify(info);
-    const name = 'createPropose';
-    const params = [promiseStm, partner, info];
+    this.timeoutHanle1 = setTimeout(async () => {
+      try {
+        if (file) {
+          hash = await saveToIpfs(file);
+        }
+        let info = {
+          date: date,
+          hash: hash,
+        };
+        info = JSON.stringify(info);
+        const name = 'createPropose';
+        const params = [promiseStm, partner, info];
 
-    const result = await sendTransaction(name, params);
-    // console.log("View result", result);
-    if (result) {
-      // window.alert('Success');
-      notifi.info('Success');
-      this.props.close();
-    } else {
-      console.log('createPropose', result);
-    }
-    setLoading(false);
+        const result = await sendTransaction(name, params);
+
+        this.timeoutHanle2 = setTimeout(() => {
+          if (result) {
+            notifi.info('Success');
+            setLoading(false);
+            this.props.close();
+          }
+        }, 50);
+      } catch (err) {
+        // console.log(err);
+        setLoading(false);
+      }
+    }, 100);
   }
 
   render() {

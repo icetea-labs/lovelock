@@ -65,6 +65,7 @@ const PuTitle = styled.div`
   }
   .material-icons {
     cursor: pointer;
+    color: white;
   }
 `;
 

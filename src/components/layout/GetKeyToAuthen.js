@@ -1,14 +1,12 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import tweb3 from '../../service/tweb3';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 import * as actionsGlobal from '../../store/actions/globalData';
 import * as actions from '../../store/actions/account';
 import { codec } from '@iceteachain/common';
 import { wallet } from '../../helper';
 import { decode } from '../../helper';
-import { ButtonPro } from '../elements/Button';
 import CommonDialog from '../pages/Propose/CommonDialog';
 import TextField from '@material-ui/core/TextField';
 
@@ -47,7 +45,7 @@ class GetKeyToAuthen extends PureComponent {
 
   _confirm = () => {
     const { password } = this.state;
-    const { setLoading, setAccount, history, encryptedData } = this.props;
+    const { setLoading, setAccount, encryptedData } = this.props;
 
     if (encryptedData) {
       if (!password) {
@@ -81,13 +79,12 @@ class GetKeyToAuthen extends PureComponent {
   };
 
   _keydown = e => {
-    if (e.keyCode === 13) this._confirm();
+    e.keyCode === 13 && this._confirm();
+    e.keyCode === 27 && this._close();
   };
 
   render() {
-    const { needAuth, close } = this.props;
-    const { errMsg, loading, password } = this.state;
-    // console.log('render password');
+    const { needAuth } = this.props;
     return needAuth ? (
       <CommonDialog title="Password Confirm" okText="Confirm" close={this._close} confirm={this._confirm}>
         <TextField
@@ -95,6 +92,7 @@ class GetKeyToAuthen extends PureComponent {
           label="Password"
           placeholder="Enter your password"
           fullWidth
+          autoFocus
           margin="normal"
           onChange={this._passwordChange}
           type="password"
@@ -111,7 +109,6 @@ const mapStateToProps = state => {
     address: account.address,
     encryptedData: account.encryptedData,
     childKey: account.childKey,
-    // mnemonic: account.mnemonic,
     triggerElement: globalData.triggerElement,
   };
 };
