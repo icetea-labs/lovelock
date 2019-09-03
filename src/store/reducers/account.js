@@ -13,7 +13,7 @@ const initialState = Object.assign(
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
 
     if ((user = (user && JSON.parse(user)) || {}).address) {
-      console.log('user', user);
+      // console.log('user', user);
       resp.address = user.address;
       // resp.privateKey = user.privateKey;
       resp.encryptedData = user.keyObject;

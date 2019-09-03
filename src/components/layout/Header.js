@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
+import { getTagsInfo } from '../../helper';
 import { rem } from '../elements/StyledUtils';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -11,7 +13,9 @@ import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Avatar from '@material-ui/core/Avatar';
+import GetKeyToAuthen from './GetKeyToAuthen';
 
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
@@ -49,7 +53,7 @@ const StyledAppBar = withStyles(theme => ({
 }))(AppBar);
 const StyledToolbar = withStyles({
   root: {
-    // width: 960,
+    width: 960,
     height: '100%',
     padding: '0',
   },
@@ -76,6 +80,8 @@ const useStyles = makeStyles(theme => ({
     display: 'none',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
+      minWidth: 50,
+      margin: theme.spacing(0, 3, 0, 0),
     },
   },
   search: {
@@ -120,7 +126,17 @@ const useStyles = makeStyles(theme => ({
     display: 'none',
     [theme.breakpoints.up('md')]: {
       display: 'flex',
+      alignItems: 'centrer',
     },
+  },
+  avataDisplay: {
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'flex',
+    },
+  },
+  menuIcon: {
+    margin: theme.spacing(0, 1, 0, 0),
   },
   sectionMobile: {
     display: 'flex',
@@ -132,8 +148,9 @@ const useStyles = makeStyles(theme => ({
 
 export default function Header() {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const needAuth = useSelector(state => state.account.needAuth);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -154,7 +171,20 @@ export default function Header() {
   function handleMobileMenuOpen(event) {
     setMobileMoreAnchorEl(event.currentTarget);
   }
-
+  const address = useSelector(state => state.account.address);
+  const [displayName, setDisplayName] = useState(null);
+  useEffect(() => {
+    async function fetchData() {
+      if (address) {
+        console.log('address', address);
+        const reps = await getTagsInfo(address);
+        setDisplayName(reps['display-name']);
+      } else {
+        setDisplayName('no name');
+      }
+    }
+    fetchData();
+  });
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -236,20 +266,22 @@ export default function Header() {
           <div className={classes.grow} />
           <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
           <Typography className={classes.title} noWrap>
-            Material-UI
+            {displayName}
           </Typography>
+          <Typography noWrap>Explore</Typography>
+          <KeyboardArrowDownIcon className={classes.menuIcon} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 4 new mails" color="inherit">
+            <IconButton aria-label="show 4 new mails" color="inherit" className={classes.menuIcon}>
               <Badge badgeContent={4} color="secondary">
                 <GroupIcon />
               </Badge>
             </IconButton>
-            <IconButton aria-label="show 17 new notifications" color="inherit">
+            <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.menuIcon}>
               <Badge badgeContent={1711} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <IconButton
+            {/* <IconButton
               edge="end"
               aria-label="account of current user"
               aria-controls={menuId}
@@ -258,7 +290,7 @@ export default function Header() {
               color="inherit"
             >
               <AccountCircle />
-            </IconButton>
+            </IconButton> */}
           </div>
           <div className={classes.sectionMobile}>
             <IconButton
@@ -275,6 +307,7 @@ export default function Header() {
       </StyledAppBar>
       {renderMobileMenu}
       {renderMenu}
+      {needAuth && <GetKeyToAuthen />}
     </div>
   );
 }
