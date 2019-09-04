@@ -50,10 +50,10 @@ class Propose {
 
   @view getProposeByAddress(address) {
     if (address === 'undefined') address = msg.sender;
-    const arrPro = this.addressToPropose[address];
+    const arrPro = this._getDataByIndex(this.addressToPropose, address);
     let resp = [];
     arrPro.forEach(index => {
-      const pro = this.propose[index];
+      const pro = this._getDataByIndex(this.propose, index);
       if (pro.isPrivate && (msg.sender === pro.sender || msg.sender === pro.receiver)) {
         resp.push(pro);
       } else {
@@ -64,10 +64,10 @@ class Propose {
     return resp;
   }
 
-  @view getProposeByIndex(proIndex: number) {
-    const pro = this.propose[proIndex];
+  @view getProposeByIndex(index: number) {
+    const pro = this._getDataByIndex(this.propose, index);
     let resp = [];
-    if (pro.isPrivate) {
+    if (pro && pro.isPrivate) {
       this._isOwnerPropose(pro, "Can't get propose.");
     }
     resp.push(pro);
@@ -75,10 +75,10 @@ class Propose {
   }
 
   @view getMemoryByProIndex(proIndex: number) {
-    const memoryPro = this.proposeToMemories[proIndex];
+    const memoryPro = this._getDataByIndex(this.proposeToMemories, proIndex);
     let res = [];
     memoryPro.forEach(index => {
-      const mem = this.memories[index];
+      const mem = this._getDataByIndex(this.memories, index);
       res.push(mem);
     });
     return res;
@@ -86,7 +86,7 @@ class Propose {
 
   // Change info { img:Array, location:string, date:string }
   @transaction changeInfoPropose(index: number, info: string) {
-    const pro = this.propose[index];
+    const pro = this._getDataByIndex(this.propose, index);
     this._isOwnerPropose(pro, "You can't change propose info.");
     this.propose[index] = Object.assign({}, pro, { info });
 
@@ -96,15 +96,15 @@ class Propose {
   }
   // change privacy propose (public or private)
   @transaction changePrivacy(proIndex: number, isPrivate: boolean) {
-    const pro = this.propose[proIndex];
+    const pro = this._getDataByIndex(this.propose, index);
     this.propose[index] = Object.assign({}, pro, { isPrivate });
     //emit Event
-    const log = Object.assign({}, pro, { proIndex, isPrivate });
+    const log = Object.assign({}, pro, { index, isPrivate });
     this.emitEvent('changePrivacy', { by: msg.sender, log }, ['by']);
   }
   // info { img:Array, location:string, date:string }
   @transaction addMemory(proIndex: number, content: string, info: string) {
-    const pro = this.propose[proIndex];
+    const pro = this._getDataByIndex(this.propose, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
 
@@ -132,8 +132,8 @@ class Propose {
 
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
-    const proIndex = this.memoryToPropose[memoIndex];
-    const pro = this.propose[proIndex];
+    const proIndex = this._getDataByIndex(this.memoryToPropose, memoIndex);
+    const pro = this._getDataByIndex(this.propose, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.");
 
     //new memories
@@ -154,6 +154,12 @@ class Propose {
   }
 
   //private function
+  _getDataByIndex(array, index) {
+    const data = array[index];
+    expect(!!data, 'The array index out of bounds');
+    return data;
+  }
+  //private function
   _isOwnerPropose(propose, message: string) {
     const errmsg = message + ' You must be owner propose.';
     expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg);
@@ -161,8 +167,8 @@ class Propose {
 
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
-     const sender = msg.sender;
-    const pro = this.propose[index];
+    const sender = msg.sender;
+    const pro = this._getDataByIndex(this.propose, index);
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:

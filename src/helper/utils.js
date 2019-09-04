@@ -80,17 +80,20 @@ export async function setTagsInfo(address, name, value) {
     return {};
   }
 }
+let cacheTags = {};
 export async function getTagsInfo(address) {
-  const resp = await tweb3
-    .contract('system.did')
-    .methods.query(address)
-    .call();
-  if (resp) {
-    const { tags } = resp;
-    return tags;
-  } else {
-    return {};
+  if (!cacheTags[address]) {
+    const resp = await tweb3
+      .contract('system.did')
+      .methods.query(address)
+      .call();
+    if (resp && resp.tags) {
+      cacheTags[address] = resp.tags;
+    } else {
+      cacheTags[address] = {};
+    }
   }
+  return cacheTags[address];
 }
 
 export async function saveToIpfs(files) {
@@ -156,13 +159,21 @@ export async function isAliasRegisted(username) {
     throw err;
   }
 }
+let cacheAlias = {};
 export async function getAlias(address) {
   try {
-    const listAlias = await tweb3
-      .contract('system.alias')
-      .methods.byAddress(address)
-      .call();
-    if (listAlias && Array.isArray(listAlias) && listAlias[0]) return listAlias[0].replace('account.', '');
+    if (!cacheAlias[address]) {
+      const listAlias = await tweb3
+        .contract('system.alias')
+        .methods.byAddress(address)
+        .call();
+      if (listAlias && Array.isArray(listAlias) && listAlias[0]) {
+        cacheAlias[address] = listAlias[0].replace('account.', '');
+      } else {
+        cacheAlias[address] = '';
+      }
+    }
+    return cacheAlias[address];
   } catch (err) {
     console.log(tryStringifyJson(err));
     throw err;

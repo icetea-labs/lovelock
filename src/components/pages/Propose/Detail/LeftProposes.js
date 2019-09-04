@@ -28,7 +28,7 @@ export default function LeftProposes(props) {
   }
 
   return pendingPropose.map(item => {
-    console.log('item', item.name); //Not yet
+    // console.log('item', item.name); //Not yet
     return (
       <CardHeader
         key={item.id}

@@ -1,15 +1,21 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { makeStyles } from '@material-ui/core/styles';
+import { callView, getTagsInfo, getAlias } from '../../../../helper';
+
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-import { getTagsInfo, TimeWithFormat } from '../../../../helper';
-import * as actions from '../../../../store/actions';
+import { TimeWithFormat } from '../../../../helper';
+import CardHeader from '@material-ui/core/CardHeader';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
-    width: ${rem(900)};
-    height: ${rem(425)};
+    position: relative;
+    overflow: hidden;
+    max-width: ${rem(900)};
+    max-height: ${rem(425)};
+    min-height: ${rem(225)};
     img {
       width: 100%;
       height: 100%;
@@ -98,94 +104,87 @@ const WarrperChatBox = styled(FlexBox)`
   }
 `;
 
-class TopContrainer extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      topInfo: {},
-      proIndex: -1,
-      basePropose: [],
-    };
-  }
+const useStyles = makeStyles({
+  card: {
+    width: '100%',
+  },
+});
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose, proIndex } = nextProps;
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.basePropose) || proIndex !== prevState.proIndex) {
-      return { basePropose: propose, proIndex };
+export default function TopContrainer(props) {
+  const { proIndex } = props;
+  const address = useSelector(state => state.account.address);
+  const propose = useSelector(state => state.loveinfo.propose);
+  const [topInfo, setTopInfo] = useState({});
+  const [loading, setLoading] = useState(true);
+  const topInfoCache = propose.filter(item => item.id === proIndex)[0] || [];
+  if (typeof topInfoCache !== 'undefined' && topInfoCache.length > 0) {
+    setLoading(false);
+    setTopInfo(topInfoCache);
+  }
+  useEffect(() => {
+    async function fetchData() {
+      await loadProposes();
     }
-    return null;
+    loading && fetchData();
+  }, []);
+
+  async function loadProposes() {
+    const proposes = (await callView('getProposeByIndex', [proIndex])) || [];
+    const newPropose = await addInfoToProposes(proposes);
+    // console.log('newPropose', newPropose);
+    setTopInfo(newPropose[0] || []);
+    setLoading(false);
   }
 
-  componentDidMount() {
-    this.loaddata();
-  }
+  async function addInfoToProposes(proposes) {
+    for (let i = 0; i < proposes.length; i++) {
+      const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
+      const reps = await getTagsInfo(newAddress);
+      const nick = await getAlias(newAddress);
+      proposes[i].name = reps['display-name'];
+      proposes[i].nick = '@' + nick;
 
-  componentDidUpdate(prevProps, prevState) {
-    const { basePropose, proIndex } = this.state;
+      const sender = await getTagsInfo(proposes[i].sender);
+      const s_nick = await getAlias(newAddress);
+      proposes[i].s_name = sender['display-name'];
+      proposes[i].s_nick = '@' + s_nick;
 
-    if (JSON.stringify(prevState.basePropose) !== JSON.stringify(basePropose) || proIndex !== prevState.proIndex) {
-      this.loaddata();
+      const receiver = await getTagsInfo(proposes[i].receiver);
+      const r_nick = await getAlias(newAddress);
+      proposes[i].r_name = receiver['display-name'];
+      proposes[i].r_nick = '@' + r_nick;
+
+      const info = JSON.parse(proposes[i].info);
+      proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
+      proposes[i].s_date = info.date;
+      proposes[i].r_date = info.date;
     }
+    return proposes;
   }
 
-  async loaddata() {
-    // const { topInfo } = this.state;
-    const { propose, proIndex, setLoading, history } = this.props;
-    let newTopInfor = {};
-    setLoading(true);
-    let obj = {};
-    if (propose.length > 0 && (obj = propose[proIndex] || {}).sender) {
-      console.log('proIndex', proIndex);
-      newTopInfor.s_content = obj.s_content;
-      newTopInfor.r_content = obj.r_content;
-      const senderinfor = await getTagsInfo(obj.sender);
-      newTopInfor.s_displayname = senderinfor['display-name'];
-      const receiverinfor = await getTagsInfo(obj.receiver);
-      newTopInfor.r_displayname = receiverinfor['display-name'];
-      const info = JSON.parse(obj.info);
-      newTopInfor.coverimg = info.hash;
-      newTopInfor.s_date = info.date;
-      newTopInfor.r_date = info.date;
-    } else {
-      // history.push('/exception');
-    }
+  const classes = useStyles();
 
-    // newTopInfor.s_content = 'I love you so much';
-    // newTopInfor.s_displayname = 'LuongHV';
-    // newTopInfor.r_content = 'Will you marry me?';
-    // newTopInfor.r_displayname = 'Hana';
-    // newTopInfor.coverimg = 'https://ipfs.io/ipfs/QmUvGeKsdJg1LDfeqyHjrP5JGwaT53gmLfnxK3evxpMBpo';
-    // newTopInfor.title = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In facilisis sollicitudin ultricies.';
-    // newTopInfor.date = '2/4/2004';
-    // newTopInfor.s_date = '08/06/2019';
-    // newTopInfor.r_date = '09/06/2019';
-
-    this.setState({ topInfo: newTopInfor }, setLoading(false));
-  }
-
-  render() {
-    const { topInfo } = this.state;
-    // console.log("topInfo", topInfo);
-    return (
-      <TopContainerBox>
-        <div className="top__coverimg">
+  return (
+    <TopContainerBox>
+      <div className="top__coverimg">
+        {topInfo.coverimg ? (
           <img src={'https://ipfs.io/ipfs/' + topInfo.coverimg} alt="itea-scan" />
-        </div>
+        ) : loading ? (
+          <Skeleton variant="rect" width="100%" height={118} />
+        ) : (
+          ''
+        )}
+      </div>
 
-        {/* <div className="top__title">
-          <img src="/static/img/luggage.svg" alt="itea" />
-          <span className="title__content">{topInfo.title}</span>
-          <span className="title__date">{topInfo.date}</span>
-        </div> */}
-
-        <WarrperChatBox>
+      <WarrperChatBox>
+        {topInfo.s_content ? (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
               <img src="/static/img/user-men.jpg" alt="itea" />
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
-                <span className="user_name color-violet">{topInfo.s_displayname}</span>
+                <span className="user_name color-violet">{topInfo.s_name}</span>
                 <span className="time fr color-gray">
                   <TimeWithFormat value={topInfo.s_date} />
                 </span>
@@ -193,10 +192,21 @@ class TopContrainer extends PureComponent {
               <p>{topInfo.s_content}</p>
             </div>
           </FlexWidthBox>
+        ) : (
+          <FlexWidthBox width="50%" className="proposeMes">
+            <CardHeader
+              className={classes.card}
+              avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
+              title={loading ? <Skeleton height={6} width="80%" /> : ''}
+              subheader={loading ? <Skeleton height={12} width="80%" /> : ''}
+            />
+          </FlexWidthBox>
+        )}
+        {topInfo.r_content ? (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="content_detail fl clearfix">
               <div className="name_time">
-                <span className="user_name color-violet">{topInfo.r_displayname}</span>
+                <span className="user_name color-violet">{topInfo.r_name}</span>
                 <span className="time fr color-gray">
                   <TimeWithFormat value={topInfo.r_date} />
                 </span>
@@ -207,33 +217,42 @@ class TopContrainer extends PureComponent {
               <img src="/static/img/user-women.jpg" alt="itea" />
             </div>
           </FlexWidthBox>
-        </WarrperChatBox>
-      </TopContainerBox>
-    );
-  }
+        ) : (
+          <FlexWidthBox width="50%" className="proposeMes">
+            <CardHeader
+              className={classes.card}
+              avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
+              title={loading ? <Skeleton height={6} width="80%" /> : ''}
+              subheader={loading ? <Skeleton height={12} width="80%" /> : ''}
+            />
+          </FlexWidthBox>
+        )}
+      </WarrperChatBox>
+    </TopContainerBox>
+  );
 }
 
-const mapStateToProps = state => {
-  const { loveinfo } = state;
-  return {
-    propose: loveinfo.propose,
-  };
-};
+// const mapStateToProps = state => {
+//   const { loveinfo } = state;
+//   return {
+//     propose: loveinfo.propose,
+//   };
+// };
 
-const mapDispatchToProps = dispatch => {
-  return {
-    setPropose: value => {
-      dispatch(actions.setPropose(value));
-    },
-    setLoading: value => {
-      // dispatch(actions.setLoading(value));
-    },
-  };
-};
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     setPropose: value => {
+//       dispatch(actions.setPropose(value));
+//     },
+//     setLoading: value => {
+//       // dispatch(actions.setLoading(value));
+//     },
+//   };
+// };
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(TopContrainer)
-);
+// export default withRouter(
+//   connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+//   )(TopContrainer)
+// );

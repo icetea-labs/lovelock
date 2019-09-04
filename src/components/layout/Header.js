@@ -114,6 +114,7 @@ const useStyles = makeStyles(theme => ({
       display: 'block',
       minWidth: 50,
       margin: theme.spacing(0, 3, 0, 0),
+      textTransform: 'capitalize',
     },
   },
   search: {
@@ -267,7 +268,7 @@ export default function Header() {
   useEffect(() => {
     async function fetchData() {
       if (address) {
-        console.log('address', address);
+        // console.log('address', address);
         const reps = await getTagsInfo(address);
         setDisplayName(reps['display-name']);
       } else {
