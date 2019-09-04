@@ -155,20 +155,20 @@ class LeftContrainer extends PureComponent {
       proposes[i].name = reps['display-name'];
       proposes[i].nick = '@' + nick;
 
-      const sender = await getTagsInfo(proposes[i].sender);
-      const s_nick = await getAlias(newAddress);
-      proposes[i].s_name = sender['display-name'];
-      proposes[i].s_nick = '@' + s_nick;
+      // const sender = await getTagsInfo(proposes[i].sender);
+      // const s_nick = await getAlias(newAddress);
+      // proposes[i].s_name = sender['display-name'];
+      // proposes[i].s_nick = '@' + s_nick;
 
-      const receiver = await getTagsInfo(proposes[i].receiver);
-      const r_nick = await getAlias(newAddress);
-      proposes[i].r_name = receiver['display-name'];
-      proposes[i].r_nick = '@' + r_nick;
+      // const receiver = await getTagsInfo(proposes[i].receiver);
+      // const r_nick = await getAlias(newAddress);
+      // proposes[i].r_name = receiver['display-name'];
+      // proposes[i].r_nick = '@' + r_nick;
 
-      const info = JSON.parse(proposes[i].info);
-      proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
-      proposes[i].s_date = info.date;
-      proposes[i].r_date = info.date;
+      // const info = JSON.parse(proposes[i].info);
+      // proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
+      // proposes[i].s_date = info.date;
+      // proposes[i].r_date = info.date;
     }
     return proposes;
   }
@@ -267,8 +267,6 @@ const mapStateToProps = state => {
   const { loveinfo, account } = state;
   return {
     propose: loveinfo.propose,
-    currentIndex: loveinfo.currentProIndex,
-    memory: loveinfo.memory,
     address: account.address,
     privateKey: account.privateKey,
   };
@@ -278,15 +276,6 @@ const mapDispatchToProps = dispatch => {
   return {
     setPropose: value => {
       dispatch(actions.setPropose(value));
-    },
-    setCurrentIndex: value => {
-      dispatch(actions.setCurrentIndex(value));
-    },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
-    },
-    setLoading: value => {
-      dispatch(actions.setLoading(value));
     },
     setNeedAuth: value => {
       dispatch(actions.setNeedAuth(value));

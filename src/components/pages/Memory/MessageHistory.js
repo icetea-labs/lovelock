@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -62,32 +62,38 @@ function ImageGridList(props) {
 }
 
 export default function MessageHistory(props) {
-  let loading = true;
+  const { loading, memoryList } = props;
+  const arrayLoadin = [{}, {}, {}, {}];
   const classes = useStyles();
-  const memoryList = useSelector(state => state.loveinfo.memory);
-  if (typeof memoryList !== 'undefined' && memoryList.length > 0) loading = false;
+  // const memoryList = useSelector(state => state.loveinfo.memory);
+  // if (typeof memoryList !== 'undefined' && memoryList.length > 0) {
+  //   console.log('setLoading');
+  // }
 
   if (memoryList.length <= 0) {
-    return (
-      <Card className={classes.card}>
-        <CardHeader
-          avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
-          title={loading ? <Skeleton height={6} width="80%" /> : ''}
-          subheader={loading ? <Skeleton height={6} width="40%" /> : ''}
-        />
-        <CardContent>
-          {loading ? (
-            <React.Fragment>
-              <Skeleton height={6} />
-              <Skeleton height={6} width="80%" />
-            </React.Fragment>
-          ) : (
-            <Typography variant="body2" color="textSecondary" component="p"></Typography>
-          )}
-        </CardContent>
-        {loading ? <Skeleton variant="rect" className={classes.media} /> : ''}
-      </Card>
-    );
+    if (!loading) return <div />;
+    return arrayLoadin.map((item, index) => {
+      return (
+        <Card className={classes.card} key={index}>
+          <CardHeader
+            avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
+            title={loading ? <Skeleton height={6} width="80%" /> : ''}
+            subheader={loading ? <Skeleton height={6} width="40%" /> : ''}
+          />
+          <CardContent>
+            {loading ? (
+              <React.Fragment>
+                <Skeleton height={6} />
+                <Skeleton height={6} width="80%" />
+              </React.Fragment>
+            ) : (
+              <Typography variant="body2" color="textSecondary" component="p"></Typography>
+            )}
+          </CardContent>
+          {loading ? <Skeleton variant="rect" className={classes.media} /> : ''}
+        </Card>
+      );
+    });
   }
 
   return memoryList.map(memory => {
