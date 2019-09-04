@@ -16,11 +16,8 @@ import Avatar from '@material-ui/core/Avatar';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import Button from '@material-ui/core/Button';
 
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import DraftsIcon from '@material-ui/icons/Drafts';
-import SendIcon from '@material-ui/icons/Send';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
@@ -81,6 +78,32 @@ const useStyles = makeStyles(theme => ({
     margin: 10,
     width: 46,
     height: 46,
+  },
+  friReqTitle: {
+    width: 111,
+    height: 18,
+    marginLeft: theme.spacing(2),
+    color: '#373737',
+  },
+  // friReqStyle: {
+  //   width: 393,
+  //   height: 56,
+  // },
+  friReqSetting: {
+    width: 46,
+    height: 15,
+    fontSize: 12,
+    marginRight: theme.spacing(2),
+    color: '#8250c8',
+  },
+  friReqConfirm: {
+    color: '#8250c8',
+  },
+  friReqName: {
+    width: 135,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -159,6 +182,7 @@ const useStyles = makeStyles(theme => ({
 const StyledMenu = withStyles({
   paper: {
     border: '1px solid #d3d4d5',
+    width: 422,
   },
 })(props => (
   <Menu
@@ -186,6 +210,24 @@ const StyledMenuItem = withStyles(theme => ({
     },
   },
 }))(MenuItem);
+
+const friReqList = [
+  {
+    id: 0,
+    avatar: '/static/img/user-men.jpg',
+    name: 'HuyHQ',
+  },
+  {
+    id: 1,
+    avatar: '/static/img/user-women.jpg',
+    name: 'MyNTT',
+  },
+  {
+    id: 2,
+    avatar: '/static/img/user-men.jpg',
+    name: 'ChuChimNhoBoCaTheGioi',
+  },
+];
 
 export default function Header() {
   const classes = useStyles();
@@ -259,24 +301,20 @@ export default function Header() {
       open={Boolean(anchorEl)}
       onClose={handleFriReqClose}
     >
-      <StyledMenuItem>
-        <ListItemIcon>
-          <SendIcon />
-        </ListItemIcon>
-        <ListItemText primary="Sent mail" />
+      <StyledMenuItem className={classes.friReqStyle}>
+        <ListItemText primary="Friend Request" className={classes.friReqTitle} />
+        <ListItemText align="right" primary="Setting" className={classes.friReqSetting} />
       </StyledMenuItem>
-      <StyledMenuItem>
-        <ListItemIcon>
-          <DraftsIcon />
-        </ListItemIcon>
-        <ListItemText primary="Drafts" />
-      </StyledMenuItem>
-      <StyledMenuItem>
-        <ListItemIcon>
-          <InboxIcon />
-        </ListItemIcon>
-        <ListItemText primary="Inbox" />
-      </StyledMenuItem>
+      {friReqList.map(({ id, avatar, name }) => (
+        <StyledMenuItem className={classes.friReqStyle} key={id}>
+          <ListItemAvatar>
+            <Avatar alt="avatar" src={avatar} className={classes.avatar} />
+          </ListItemAvatar>
+          <ListItemText primary={name} className={classes.friReqName} />
+          <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
+          <ListItemText primary="DELETE" />
+        </StyledMenuItem>
+      ))}
     </StyledMenu>
   );
 
