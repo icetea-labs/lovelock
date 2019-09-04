@@ -85,10 +85,6 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(2),
     color: '#373737',
   },
-  // friReqStyle: {
-  //   width: 393,
-  //   height: 56,
-  // },
   friReqSetting: {
     width: 46,
     height: 15,
@@ -104,6 +100,7 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    margin: theme.spacing(1),
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -229,11 +226,20 @@ const friReqList = [
   },
 ];
 
+const notifiList = [
+  {
+    id: 0,
+    avatar: '/static/img/user-men.jpg',
+    name: 'HuyHQ',
+  },
+];
+
 export default function Header() {
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const [anchorElNoti, setAnchorElNoti] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -261,6 +267,14 @@ export default function Header() {
 
   function handleFriReqClose() {
     setAnchorEl(null);
+  }
+
+  function handleNotiOpen(event) {
+    setAnchorElNoti(event.currentTarget);
+  }
+
+  function handleNotiClose() {
+    setAnchorElNoti(null);
   }
 
   const address = useSelector(state => state.account.address);
@@ -294,13 +308,7 @@ export default function Header() {
   );
 
   const friReqMenu = (
-    <StyledMenu
-      id="customized-menu"
-      anchorEl={anchorEl}
-      keepMounted
-      open={Boolean(anchorEl)}
-      onClose={handleFriReqClose}
-    >
+    <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
       <StyledMenuItem className={classes.friReqStyle}>
         <ListItemText primary="Friend Request" className={classes.friReqTitle} />
         <ListItemText align="right" primary="Setting" className={classes.friReqSetting} />
@@ -315,6 +323,38 @@ export default function Header() {
           <ListItemText primary="DELETE" />
         </StyledMenuItem>
       ))}
+      <StyledMenuItem className={classes.friReqStyle}>
+        <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
+      </StyledMenuItem>
+    </StyledMenu>
+  );
+
+  const notiList = (
+    <StyledMenu
+      id="notifi-menu"
+      anchorEl={anchorElNoti}
+      keepMounted
+      open={Boolean(anchorElNoti)}
+      onClose={handleNotiClose}
+    >
+      <StyledMenuItem className={classes.friReqStyle}>
+        <ListItemText primary="Notification" className={classes.friReqTitle} />
+        <ListItemText align="right" primary="Mark all read" className={classes.friReqConfirm} />
+        <ListItemText align="center" primary="Setting" className={classes.friReqSetting} />
+      </StyledMenuItem>
+      {notifiList.map(({ id, avatar, name }) => (
+        <StyledMenuItem className={classes.friReqStyle} key={id}>
+          <ListItemAvatar>
+            <Avatar alt="avatar" src={avatar} className={classes.avatar} />
+          </ListItemAvatar>
+          <ListItemText primary={name} className={classes.friReqName} />
+          <ListItemText primary="Love" className={classes.friReqConfirm} />
+          <ListItemText primary="Hate" />
+        </StyledMenuItem>
+      ))}
+      <StyledMenuItem className={classes.friReqStyle}>
+        <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
+      </StyledMenuItem>
     </StyledMenu>
   );
 
@@ -391,11 +431,10 @@ export default function Header() {
               <KeyboardArrowDownIcon className={classes.menuIcon} />
               <div className={classes.sectionDesktop}>
                 <IconButton
-                  aria-label="show 4 new mails"
                   color="inherit"
                   className={classes.menuIcon}
-                  aria-controls="customized-menu"
-                  // aria-haspopup="true"
+                  aria-controls="friReq-menu"
+                  aria-haspopup="true"
                   variant="contained"
                   onClick={handleFriReqOpen}
                 >
@@ -403,7 +442,14 @@ export default function Header() {
                     <GroupIcon />
                   </Badge>
                 </IconButton>
-                <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.menuIcon}>
+                <IconButton
+                  color="inherit"
+                  className={classes.menuIcon}
+                  aria-controls="notifi-menu"
+                  aria-haspopup="true"
+                  variant="contained"
+                  onClick={handleNotiOpen}
+                >
                   <Badge badgeContent={12} color="primary">
                     <NotificationsIcon />
                   </Badge>
@@ -446,6 +492,7 @@ export default function Header() {
       {renderMobileMenu}
       {/* {renderMenu} */}
       {friReqMenu}
+      {notiList}
       {needAuth && <GetKeyToAuthen />}
     </div>
   );

@@ -12,8 +12,14 @@ const ImgView = styled.div`
   }
 `;
 
-const PageView = styled.p`
+const PageView = styled.div`
   font-family: Montserrat;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-height: 16px;
+  -webkit-line-clamp: 4; /* Write the number of lines you want to be displayed */
+  -webkit-box-orient: vertical;
 `;
 
 class PromiseAlert extends React.Component {
