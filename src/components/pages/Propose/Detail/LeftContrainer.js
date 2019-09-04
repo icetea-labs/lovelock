@@ -45,7 +45,7 @@ const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;
   background: #fff;
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
 const TagBox = styled.div`
   width: 100%;

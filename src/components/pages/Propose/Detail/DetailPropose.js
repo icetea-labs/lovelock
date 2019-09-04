@@ -16,7 +16,7 @@ const ShadowBox = styled.div`
   border-radius: 10px;
   /* margin-bottom: 20px; */
   background: #ffffff;
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
 `;
 
 class DetailPropose extends PureComponent {

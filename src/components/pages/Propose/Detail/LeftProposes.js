@@ -1,12 +1,23 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-
+import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
 import Skeleton from '@material-ui/lab/Skeleton';
 
+const useStyles = makeStyles(theme => ({
+  card: {
+    padding: theme.spacing(1),
+    margin: theme.spacing(1),
+    '&:hover': {
+      backgroundColor: '#f5f6f7',
+    },
+  },
+}));
+
 export default function LeftProposes(props) {
   const { loading = false } = props;
+  const classes = useStyles();
 
   const propose = useSelector(state => state.loveinfo.propose);
   const pendingPropose = propose.filter(item => item.status === props.flag);
@@ -32,6 +43,7 @@ export default function LeftProposes(props) {
     return (
       <CardHeader
         key={item.id}
+        className={classes.card}
         onClick={() => {
           props.handlerSelect(item.id);
         }}
