@@ -91,6 +91,7 @@ const useStyles = makeStyles(theme => ({
       display: 'block',
       minWidth: 50,
       margin: theme.spacing(0, 3, 0, 0),
+      textTransform: 'capitalize',
     },
   },
   search: {

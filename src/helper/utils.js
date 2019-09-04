@@ -35,7 +35,6 @@ async function callReadOrPure(funcName, params, method) {
     return tryStringifyJson(result || '' + result);
   } catch (error) {
     console.log(tryStringifyJson(error, true));
-    throw error;
   }
 }
 

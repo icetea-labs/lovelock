@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { ButtonPro, LinkPro } from '../../../elements/Button';
+import { ButtonPro } from '../../../elements/Button';
 import * as actions from '../../../../store/actions';
 import styled from 'styled-components';
 import InputBase from '@material-ui/core/InputBase';
@@ -95,26 +95,29 @@ const RightBox = styled.div`
   }
 `;
 export default function RightContrainer(props) {
-  const privateKey = useSelector(state => state.account.privateKey);
   const dispatch = useDispatch();
+  const privateKey = useSelector(state => state.account.privateKey);
+  const [loading, setLoading] = useState(true);
+  const [memoryList, setMemoryList] = useState([]);
+  const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState(null);
   const [date, setDate] = useState(new Date());
-  const [filePath, setFilePath] = useState(null);
-  const [loading, setLoading] = useState(null);
+
+  // const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
       await loadMemory();
     }
-    fetchData();
+    loading && fetchData();
   }, []);
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
   }
-  function setMemory(value) {
-    dispatch(actions.setMemory(value));
-  }
+  // function setMemory(value) {
+  //   dispatch(actions.setMemory(value));
+  // }
   function setNeedAuth(value) {
     dispatch(actions.setNeedAuth(value));
   }
@@ -144,7 +147,9 @@ export default function RightContrainer(props) {
     }
     newMemoryList = newMemoryList.reverse();
     console.log('newMemoryList', newMemoryList);
-    setMemory(newMemoryList);
+    // setMemory(newMemoryList);
+    setMemoryList(newMemoryList);
+    setLoading(false);
   }
 
   async function shareMemory(memoryContent, date, file) {
@@ -220,7 +225,7 @@ export default function RightContrainer(props) {
           Share
         </ButtonPro>
       </div>
-      <MessageHistory loading={loading} />
+      <MessageHistory loading={loading} memoryList={memoryList} />
     </RightBox>
   );
 }

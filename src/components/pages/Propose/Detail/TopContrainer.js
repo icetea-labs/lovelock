@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
+import { callView, getTagsInfo, getAlias } from '../../../../helper';
 
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { TimeWithFormat } from '../../../../helper';
@@ -110,12 +111,57 @@ const useStyles = makeStyles({
 });
 
 export default function TopContrainer(props) {
-  let loading = true;
-  const propose = useSelector(state => state.loveinfo.propose);
-  if (typeof propose !== 'undefined' && propose.length > 0) loading = false;
-
   const { proIndex } = props;
-  const topInfo = propose.filter(item => item.id === proIndex)[0] || [];
+  const address = useSelector(state => state.account.address);
+  const propose = useSelector(state => state.loveinfo.propose);
+  const [topInfo, setTopInfo] = useState({});
+  const [loading, setLoading] = useState(true);
+  const topInfoCache = propose.filter(item => item.id === proIndex)[0] || [];
+  if (typeof topInfoCache !== 'undefined' && topInfoCache.length > 0) {
+    setLoading(false);
+    setTopInfo(topInfoCache);
+  }
+  useEffect(() => {
+    async function fetchData() {
+      await loadProposes();
+    }
+    loading && fetchData();
+  }, []);
+
+  async function loadProposes() {
+    const proposes = (await callView('getProposeByIndex', [proIndex])) || [];
+    const newPropose = await addInfoToProposes(proposes);
+    // console.log('newPropose', newPropose);
+    setTopInfo(newPropose[0] || []);
+    setLoading(false);
+  }
+
+  async function addInfoToProposes(proposes) {
+    for (let i = 0; i < proposes.length; i++) {
+      const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
+      const reps = await getTagsInfo(newAddress);
+      const nick = await getAlias(newAddress);
+      proposes[i].name = reps['display-name'];
+      proposes[i].nick = '@' + nick;
+
+      const sender = await getTagsInfo(proposes[i].sender);
+      const s_nick = await getAlias(newAddress);
+      proposes[i].s_name = sender['display-name'];
+      proposes[i].s_nick = '@' + s_nick;
+
+      const receiver = await getTagsInfo(proposes[i].receiver);
+      const r_nick = await getAlias(newAddress);
+      proposes[i].r_name = receiver['display-name'];
+      proposes[i].r_nick = '@' + r_nick;
+
+      const info = JSON.parse(proposes[i].info);
+      proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
+      proposes[i].s_date = info.date;
+      proposes[i].r_date = info.date;
+    }
+    return proposes;
+  }
+
   const classes = useStyles();
 
   return (

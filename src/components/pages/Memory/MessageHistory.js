@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -16,8 +15,8 @@ import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import MessageIcon from '@material-ui/icons/Message';
 import ShareIcon from '@material-ui/icons/Share';
 import Tooltip from '@material-ui/core/Tooltip';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
+// import GridList from '@material-ui/core/GridList';
+// import GridListTile from '@material-ui/core/GridListTile';
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -32,60 +31,77 @@ const useStyles = makeStyles(theme => ({
     // minHeight: 150,
   },
 }));
-const useStylesImg = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
-    backgroundColor: theme.palette.background.paper,
-  },
-  gridList: {
-    width: '100%',
-    height: 360,
-  },
-}));
-function ImageGridList(props) {
-  const classes = useStylesImg();
-  const { imgs } = props;
-  return (
-    <div className={classes.root}>
-      <GridList cellHeight={170} className={classes.gridList} cols={2}>
-        {imgs.map((tile, index) => (
-          <GridListTile key={index} cols={tile.cols || 1} rows={tile.rows || 1}>
-            <img src={tile.img} alt={tile.title || 'img'} />
-          </GridListTile>
-        ))}
-      </GridList>
-    </div>
-  );
-}
+// const useStylesImg = makeStyles(theme => ({
+//   root: {
+//     display: 'flex',
+//     flexWrap: 'wrap',
+//     justifyContent: 'space-around',
+//     overflow: 'hidden',
+//     backgroundColor: theme.palette.background.paper,
+//   },
+//   gridList: {
+//     width: '100%',
+//     height: 360,
+//   },
+// }));
+// function ImageGridList(props) {
+//   const classes = useStylesImg();
+//   const { imgs } = props;
+//   return (
+//     <div className={classes.root}>
+//       <GridList cellHeight={170} className={classes.gridList} cols={2}>
+//         {imgs.map((tile, index) => (
+//           <GridListTile key={index} cols={tile.cols || 1} rows={tile.rows || 1}>
+//             <img src={tile.img} alt={tile.title || 'img'} />
+//           </GridListTile>
+//         ))}
+//       </GridList>
+//     </div>
+//   );
+// }
 
 export default function MessageHistory(props) {
-  let loading = true;
+  const { loading, memoryList } = props;
+  const arrayLoadin = [{}, {}, {}, {}];
   const classes = useStyles();
-  const memoryList = useSelector(state => state.loveinfo.memory);
-  if (typeof memoryList !== 'undefined' && memoryList.length > 0) loading = false;
+  // const memoryList = useSelector(state => state.loveinfo.memory);
+  // if (typeof memoryList !== 'undefined' && memoryList.length > 0) {
+  //   console.log('setLoading');
+  // }
+
+  if (memoryList.length <= 0) {
+    if (!loading) return <div />;
+    return arrayLoadin.map((item, index) => {
+      return (
+        <Card className={classes.card} key={index}>
+          <CardHeader
+            avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
+            title={loading ? <Skeleton height={6} width="80%" /> : ''}
+            subheader={loading ? <Skeleton height={6} width="40%" /> : ''}
+          />
+          <CardContent>
+            {loading ? (
+              <React.Fragment>
+                <Skeleton height={6} />
+                <Skeleton height={6} width="80%" />
+              </React.Fragment>
+            ) : (
+              <Typography variant="body2" color="textSecondary" component="p"></Typography>
+            )}
+          </CardContent>
+          {loading ? <Skeleton variant="rect" className={classes.media} /> : ''}
+        </Card>
+      );
+    });
+  }
 
   return memoryList.map(memory => {
     return (
       <Card key={memory.index} className={classes.card}>
         <CardHeader
-          avatar={
-            loading ? (
-              <Skeleton variant="circle" width={40} height={40} />
-            ) : (
-              <Avatar alt="avata" src="/static/img/user-women.jpg" />
-            )
-          }
-          title={loading ? <Skeleton height={6} width="80%" /> : memory.name}
-          subheader={
-            loading ? (
-              <Skeleton height={6} width="40%" />
-            ) : (
-              <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
-            )
-          }
+          avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
+          title={memory.name}
+          subheader={<TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />}
           action={
             <IconButton aria-label="settings">
               <MoreVertIcon />
@@ -93,33 +109,22 @@ export default function MessageHistory(props) {
           }
         />
         <CardContent>
-          {loading ? (
-            <React.Fragment>
-              <Skeleton height={6} />
-              <Skeleton height={6} width="80%" />
-            </React.Fragment>
-          ) : (
-            <Typography variant="body2" color="textSecondary" component="p">
-              {memory.content}
-            </Typography>
-          )}
+          <Typography variant="body2" color="textSecondary" component="p">
+            {memory.content}
+          </Typography>
         </CardContent>
-        {loading ? (
-          <Skeleton variant="rect" className={classes.media} />
-        ) : (
-          <React.Fragment>
-            {memory.info.hash && (
-              <CardMedia className={classes.media} image={'https://ipfs.io/ipfs/' + memory.info.hash} title="img" />
-            )}
-            {/* <ImageGridList
+        <React.Fragment>
+          {memory.info.hash && (
+            <CardMedia className={classes.media} image={'https://ipfs.io/ipfs/' + memory.info.hash} title="img" />
+          )}
+          {/* <ImageGridList
               imgs={[
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash, clos: 2 },
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
               ]}
             /> */}
-          </React.Fragment>
-        )}
+        </React.Fragment>
         <CardActions>
           <Tooltip title="Like">
             <IconButton aria-label="add to like">

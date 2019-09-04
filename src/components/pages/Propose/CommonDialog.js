@@ -83,7 +83,7 @@ const Action = styled.div`
     display: flex;
     button {
       width: 172px;
-      line-height: 46px;
+      line-height: 34px;
       font-size: 16px;
       color: #ffffff;
       font-weight: 600;
