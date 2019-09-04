@@ -135,6 +135,7 @@ export default function TopContrainer(props) {
     setTopInfo(newPropose[0] || []);
     setLoading(false);
   }
+
   async function addInfoToProposes(proposes) {
     for (let i = 0; i < proposes.length; i++) {
       const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;

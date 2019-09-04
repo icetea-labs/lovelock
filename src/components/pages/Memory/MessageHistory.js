@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -16,8 +15,8 @@ import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import MessageIcon from '@material-ui/icons/Message';
 import ShareIcon from '@material-ui/icons/Share';
 import Tooltip from '@material-ui/core/Tooltip';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
+// import GridList from '@material-ui/core/GridList';
+// import GridListTile from '@material-ui/core/GridListTile';
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -32,34 +31,34 @@ const useStyles = makeStyles(theme => ({
     // minHeight: 150,
   },
 }));
-const useStylesImg = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
-    backgroundColor: theme.palette.background.paper,
-  },
-  gridList: {
-    width: '100%',
-    height: 360,
-  },
-}));
-function ImageGridList(props) {
-  const classes = useStylesImg();
-  const { imgs } = props;
-  return (
-    <div className={classes.root}>
-      <GridList cellHeight={170} className={classes.gridList} cols={2}>
-        {imgs.map((tile, index) => (
-          <GridListTile key={index} cols={tile.cols || 1} rows={tile.rows || 1}>
-            <img src={tile.img} alt={tile.title || 'img'} />
-          </GridListTile>
-        ))}
-      </GridList>
-    </div>
-  );
-}
+// const useStylesImg = makeStyles(theme => ({
+//   root: {
+//     display: 'flex',
+//     flexWrap: 'wrap',
+//     justifyContent: 'space-around',
+//     overflow: 'hidden',
+//     backgroundColor: theme.palette.background.paper,
+//   },
+//   gridList: {
+//     width: '100%',
+//     height: 360,
+//   },
+// }));
+// function ImageGridList(props) {
+//   const classes = useStylesImg();
+//   const { imgs } = props;
+//   return (
+//     <div className={classes.root}>
+//       <GridList cellHeight={170} className={classes.gridList} cols={2}>
+//         {imgs.map((tile, index) => (
+//           <GridListTile key={index} cols={tile.cols || 1} rows={tile.rows || 1}>
+//             <img src={tile.img} alt={tile.title || 'img'} />
+//           </GridListTile>
+//         ))}
+//       </GridList>
+//     </div>
+//   );
+// }
 
 export default function MessageHistory(props) {
   const { loading, memoryList } = props;
