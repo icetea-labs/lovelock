@@ -1,12 +1,35 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-
+import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
 import Skeleton from '@material-ui/lab/Skeleton';
+import IconButton from '@material-ui/core/IconButton';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    padding: theme.spacing(1),
+    margin: theme.spacing(1),
+    '&:hover': {
+      backgroundColor: '#f5f6f7',
+    },
+  },
+  title: {
+    color: '#5a5e67',
+  },
+  subheader: {
+    color: '#8250c8',
+  },
+  progress: {
+    margin: theme.spacing(1),
+  },
+}));
 
 export default function LeftProposes(props) {
   const { loading = false } = props;
+  const classes = useStyles();
 
   const propose = useSelector(state => state.loveinfo.propose);
   const pendingPropose = propose.filter(item => item.status === props.flag);
@@ -32,10 +55,16 @@ export default function LeftProposes(props) {
     return (
       <CardHeader
         key={item.id}
+        classes={{
+          root: classes.root, // class name, e.g. `classes-nesting-root-x`
+          title: classes.title,
+          subheader: classes.subheader,
+        }}
         onClick={() => {
           props.handlerSelect(item.id);
         }}
         avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
+        // action={loading && <CircularProgress thickness={1} size={20} className={classes.progress} />}
         title={item.name}
         subheader={item.nick}
       />

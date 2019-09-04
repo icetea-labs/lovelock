@@ -83,7 +83,7 @@ class ByMnemonic extends PureComponent {
   handleMnemonic = event => {
     let isPrivateKey = false;
     const mnemonic = event.target.value.trim();
-    if (mnemonic.length === 44) isPrivateKey = true;
+    if (mnemonic.indexOf(' ') < 0) isPrivateKey = true;
     // console.log(mnemonic);
     this.setState({ mnemonic, isPrivateKey });
   };

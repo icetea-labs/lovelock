@@ -116,24 +116,26 @@ export default function TopContrainer(props) {
   const propose = useSelector(state => state.loveinfo.propose);
   const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
-  const topInfoCache = propose.filter(item => item.id === proIndex)[0] || [];
-  if (typeof topInfoCache !== 'undefined' && topInfoCache.length > 0) {
-    setLoading(false);
-    setTopInfo(topInfoCache);
-  }
+
   useEffect(() => {
     async function fetchData() {
-      await loadProposes();
+      await loadProposes(proIndex);
     }
-    loading && fetchData();
-  }, []);
+    fetchData();
+  }, [proIndex]);
 
-  async function loadProposes() {
-    const proposes = (await callView('getProposeByIndex', [proIndex])) || [];
-    const newPropose = await addInfoToProposes(proposes);
-    // console.log('newPropose', newPropose);
-    setTopInfo(newPropose[0] || []);
-    setLoading(false);
+  async function loadProposes(proIndex) {
+    const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
+    if (typeof infoCache !== 'undefined' && infoCache.length > 0) {
+      setLoading(false);
+      setTopInfo(infoCache);
+    } else {
+      const resp = (await callView('getProposeByIndex', [proIndex])) || [];
+      const newPropose = await addInfoToProposes(resp);
+      // console.log('newPropose', newPropose);
+      setTopInfo(newPropose[0] || []);
+      setLoading(false);
+    }
   }
 
   async function addInfoToProposes(proposes) {
