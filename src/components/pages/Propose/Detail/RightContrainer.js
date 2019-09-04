@@ -95,6 +95,7 @@ const RightBox = styled.div`
   }
 `;
 export default function RightContrainer(props) {
+  const { proIndex } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
   const [loading, setLoading] = useState(true);
@@ -109,8 +110,8 @@ export default function RightContrainer(props) {
     async function fetchData() {
       await loadMemory();
     }
-    loading && fetchData();
-  }, []);
+    fetchData();
+  }, [proIndex]);
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -146,7 +147,7 @@ export default function RightContrainer(props) {
       newMemoryList.push(obj);
     }
     newMemoryList = newMemoryList.reverse();
-    console.log('newMemoryList', newMemoryList);
+    // console.log('newMemoryList', newMemoryList);
     // setMemory(newMemoryList);
     setMemoryList(newMemoryList);
     setLoading(false);
@@ -154,7 +155,7 @@ export default function RightContrainer(props) {
 
   async function shareMemory(memoryContent, date, file) {
     if (!privateKey) {
-      console.log('privateKey', privateKey);
+      // console.log('privateKey', privateKey);
       setNeedAuth(true);
       return;
     }
@@ -167,7 +168,7 @@ export default function RightContrainer(props) {
     const info = JSON.stringify({ date, hash });
     const params = [proIndex, memoryContent, info];
     const result = await sendTransaction(method, params);
-    console.log('View result', result);
+    // console.log('View result', result);
     if (result) {
       loadMemory();
       // window.alert('Success');

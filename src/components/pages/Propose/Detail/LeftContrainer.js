@@ -102,9 +102,10 @@ class LeftContrainer extends PureComponent {
         console.error(error);
       } else {
         const data = result.data.value.TxResult.events[0];
-        const eventData = data.eventData;
+        console.log('data', data);
+        const eventData = data && data.eventData;
         // console.log('data', data);
-        if (eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
+        if (eventData && eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
           // console.log('to me');
           switch (data.eventName) {
             case 'createPropose':
@@ -141,6 +142,7 @@ class LeftContrainer extends PureComponent {
     this.setState({ loading: true });
     const { address, setPropose } = this.props;
     const proposes = (await callView('getProposeByAddress', [address])) || [];
+    // console.log('proposes', proposes, address);
     const newPropose = await this.addInfoToProposes(proposes);
     setPropose(newPropose);
     this.setState({ loading: false });
