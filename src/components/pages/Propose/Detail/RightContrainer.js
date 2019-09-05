@@ -11,95 +11,11 @@ import { saveToIpfs, sendTransaction, callView, getTagsInfo } from '../../../../
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputBase from '@material-ui/core/InputBase';
 
 const RightBox = styled.div`
- padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
-  /* position: relative;
-  width: 100%;
-  min-height: ${rem(360)};
-  box-sizing: border-box;
-  padding-left: ${rem(30)}; */
-  /* .fl {
-    float: left;
-  }
-  .fr {
-    float: right;
-  }
-  .post_container {
-    display: flex;
-    width: 100%;
-    .user_avatar {
-      img {
-        width: 58px;
-        height: 58px;
-      }
-      border-radius: 10px;
-      overflow: hidden;
-      margin-right: ${rem(10)};
-    }
-    .post_input {
-      width: 100%;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      .contentEditable {
-        width: 100%;
-        height: 19px;
-        font-size: 16px;
-        font-weight: 500;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: normal;
-        letter-spacing: normal;
-        color: #8f8f8f;
-        outline: none;
-        font-size: ${rem(16)};
-      }
-    } */
-  /* } */
-  /* .action {
-    width: 100%;
-    margin: 16px 0 16px;
-    display: inline-block;
-    .privacy {
-      display: inline-block;
-    }
-    button {
-      width: 254px;
-      line-height: 34px;
-      float: right;
-      font-weight: 600;
-      border-radius: 23px;
-    }
-    .btn_post_policy {
-      width: 102px;
-      height: 36px;
-      border-radius: 21px;
-      background: #ffffff;
-      border: 1px solid #8250c8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 12px;
-      font-weight: 500;
-      font-style: normal;
-      font-stretch: normal;
-      line-height: normal;
-      letter-spacing: normal;
-      color: #8f36b3;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-    }
-  } */
+  padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
 `;
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -176,15 +92,16 @@ const BootstrapInput = withStyles(theme => ({
   },
 }))(InputBase);
 
+const BootstrapTextField = withStyles(theme => ({
+  root: {
+    fontSize: 16,
+    paddingLeft: theme.spacing(1),
+  },
+}))(InputBase);
+
 export default function RightContrainer(props) {
   const classes = useStyles();
   const layoutRef = React.createRef();
-  const InputProps = {
-    classes: {
-      root: classes.outlinedRoot,
-      // underline: classes.outlinedRoot,
-    },
-  };
   const { proIndex } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
@@ -292,14 +209,12 @@ export default function RightContrainer(props) {
                   <Avatar alt="avata" src="/static/img/user-men.jpg" className={classes.avatar} />
                 </Grid>
                 <Grid item xs={9}>
-                  <TextField
+                  <BootstrapTextField
                     fullWidth
                     multiline
                     placeholder="Describe your Memory...."
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
-                    variant="outlined"
-                    InputProps={InputProps}
                   />
                 </Grid>
               </Grid>
