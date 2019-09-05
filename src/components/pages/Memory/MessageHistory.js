@@ -21,8 +21,10 @@ import Tooltip from '@material-ui/core/Tooltip';
 const useStyles = makeStyles(theme => ({
   card: {
     // maxWidth: 345,
-    margin: theme.spacing(2),
-    boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)',
+    margin: theme.spacing(3, 0),
+    boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
+    // boxShadow: 'none',
+    // border: '1px solid rgba(234, 236, 239, 0.7)',
   },
   media: {
     height: 350,
