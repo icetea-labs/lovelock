@@ -8,6 +8,9 @@ import { saveToIpfs, sendTransaction } from '../../../helper/index';
 import { connect } from 'react-redux';
 import notifi from '../../elements/Notification';
 import * as actions from '../../../store/actions';
+import Autosuggest from 'react-autosuggest';
+import { tryStringifyJson } from '../../../helper/utils';
+import tweb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -25,6 +28,25 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1),
   },
 }));
+
+// const people = [
+//   {
+//     nick: 'HuyHQ',
+//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
+//   },
+//   {
+//     nick: 'MyNTT',
+//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
+//   },
+//   {
+//     nick: 'ThiTH',
+//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
+//   },
+//   {
+//     nick: 'LuongHV',
+//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
+//   },
+// ];
 
 function TextFieldPlaceholder(props) {
   const classes = useStyles();
@@ -57,6 +79,8 @@ class Promise extends React.Component {
       date: new Date(),
       file: '',
       hash: '',
+      value: '',
+      suggestions: [],
     };
   }
 
@@ -121,10 +145,95 @@ class Promise extends React.Component {
     }, 100);
   }
 
+  escapeRegexCharacters(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  async getSuggestions(value) {
+    let escapedValue = this.escapeRegexCharacters(value.trim());
+
+    if (escapedValue === '@' || escapedValue === '') {
+      this.setState({
+        suggestions: [],
+      });
+    }
+
+    let people = [];
+    escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
+    console.log('escapedValue', escapedValue);
+
+    const regex = new RegExp('\\b' + escapedValue, 'i');
+    try {
+      const method = 'callReadonlyContractMethod';
+      const add = 'system.alias';
+      const func = 'query';
+      if (escapedValue.length > 2) {
+        const result = await tweb3[method](add, func, [escapedValue]);
+        people = Object.keys(result).map(function(key, index) {
+          const nick = key.substring(key.indexOf('.') + 1);
+          return { nick: nick, address: result[key].address };
+        });
+      }
+    } catch (err) {
+      console.log(tryStringifyJson(err));
+    }
+
+    people = people.filter(person => regex.test(this.getSuggestionValue(person)));
+    people = people.slice(0, 10);
+
+    this.setState({
+      suggestions: people,
+    });
+  }
+
+  getSuggestionValue(suggestion) {
+    return `@${suggestion.nick}`;
+  }
+
+  renderSuggestion(suggestion) {
+    return <div>{suggestion.nick}</div>;
+  }
+
+  onChange = (event, { newValue }) => {
+    const name = newValue.substring(1);
+    console.log('newValue', newValue);
+    const { suggestions } = this.state;
+    let address = '';
+    if (suggestions) {
+      const seletedItem = suggestions.filter(item => item.nick === name);
+      if (seletedItem && seletedItem.length > 0) {
+        address = seletedItem[0].address;
+      }
+      console.log('add', address);
+    }
+    this.setState({
+      value: newValue,
+    });
+  };
+
+  onSuggestionsFetchRequested = ({ value }) => {
+    this.getSuggestions(value);
+    // this.setState({
+    //   suggestions: this.getSuggestions(value),
+    // });
+  };
+
+  onSuggestionsClearRequested = () => {
+    this.setState({
+      suggestions: [],
+    });
+  };
+
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file } = this.state;
-    // console.log("State CK", this.state);
+    const { partner, promiseStm, date, file, suggestions, value } = this.state;
+    console.log('partner', partner);
+
+    const inputProps = {
+      placeholder: '@partner',
+      value,
+      onChange: this.onChange,
+    };
 
     return (
       <CommonDialog
@@ -132,17 +241,25 @@ class Promise extends React.Component {
         okText="Send"
         close={close}
         confirm={() => {
-          this.createPropose(partner, promiseStm, date, file);
+          this.createPropose(value, promiseStm, date, file);
         }}
       >
         <TagTitle>Tag your partner you promise</TagTitle>
-        <TextFieldPlaceholder
+        {/* <TextFieldPlaceholder
           id="outlined-helperText"
           placeholder="@partner"
           margin="normal"
           variant="outlined"
           fullWidth
           onChange={this.partnerChange}
+        /> */}
+        <Autosuggest
+          suggestions={suggestions}
+          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+          getSuggestionValue={this.getSuggestionValue}
+          renderSuggestion={this.renderSuggestion}
+          inputProps={inputProps}
         />
         <TagTitle>Your promise</TagTitle>
         <TextFieldMultiLine
