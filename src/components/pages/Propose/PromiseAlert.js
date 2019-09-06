@@ -75,9 +75,21 @@ class PromiseAlert extends React.Component {
           confirm={accept}
           isCancel
         >
-          <TagTitle>{address === sender ? 'You send ' + name + ' a promise' : name + ' send you a promise'}</TagTitle>
+          <TagTitle>
+            {address === sender ? (
+              <div>
+                <span>You send promise to </span>
+                <span className="highlight">{name}</span>
+              </div>
+            ) : (
+              <div>
+                <span className="highlight">{name}</span>
+                <span> send a promise to you</span>
+              </div>
+            )}
+          </TagTitle>
           <ImgView>
-            <img src={'https://ipfs.io/ipfs/' + hash} className="postImg" alt="promiseImg" />
+            <img src={'http://localhost:8080/ipfs/' + hash} className="postImg" alt="promiseImg" />
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
