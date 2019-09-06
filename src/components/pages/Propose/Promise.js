@@ -208,6 +208,7 @@ class Promise extends React.Component {
     }
     this.setState({
       value: newValue,
+      partner: address,
     });
   };
 
@@ -241,7 +242,7 @@ class Promise extends React.Component {
         okText="Send"
         close={close}
         confirm={() => {
-          this.createPropose(value, promiseStm, date, file);
+          this.createPropose(partner, promiseStm, date, file);
         }}
       >
         <TagTitle>Tag your partner you promise</TagTitle>
