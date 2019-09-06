@@ -12,7 +12,7 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import { TimeWithFormat } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import MessageIcon from '@material-ui/icons/Message';
+import CommentIcon from '@material-ui/icons/Comment';
 import ShareIcon from '@material-ui/icons/Share';
 import Tooltip from '@material-ui/core/Tooltip';
 // import GridList from '@material-ui/core/GridList';
@@ -136,7 +136,7 @@ export default function MessageHistory(props) {
           </Tooltip>
           <Tooltip title="Comment">
             <IconButton aria-label="add to message">
-              <MessageIcon />
+              <CommentIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Share">
