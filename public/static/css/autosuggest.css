@@ -8,13 +8,15 @@
   padding: 10px 20px;
   font-family: Montserrat, sans-serif;
   font-weight: 300;
+  font-size: 14px;
   border: 0.5px solid #eddada8f;
   border-radius: 4px;
   margin: 16px 0 32px 0;
 }
 
 .react-autosuggest__input:focus {
-  outline: none;
+  /* outline: none; */
+  outline-color: #fe8dc3;
 }
 
 .react-autosuggest__container--open .react-autosuggest__input {
@@ -30,10 +32,10 @@
   display: block;
   position: absolute;
   top: 51px;
-  width: 280px;
-  border: 1px solid #aaa;
+  width: 540px;
+  border: 0.5px solid #fe8dc3;
   background-color: #fff;
-  font-family: Helvetica, sans-serif;
+  font-family: Montserrat, sans-serif;
   font-weight: 300;
   font-size: 16px;
   border-bottom-left-radius: 4px;
@@ -49,15 +51,15 @@
 
 .react-autosuggest__suggestion {
   cursor: pointer;
-  padding: 10px 20px;
+  padding: 5px 10px;
 }
 
 .react-autosuggest__suggestion:not(:first-child) {
   border-top: 1px solid #ddd;
 }
 
-.react-autosuggest__suggestion--focused {
-  background-color: #0c7eaf;
+.react-autosuggest__suggestion--highlighted {
+  background-color: #ffabd3;
   color: #fff;
 }
 
@@ -67,25 +69,13 @@
   background-repeat: no-repeat;
 }
 
-/* .dancounsell {
-    background-image: url(https://s3.amazonaws.com/uifaces/faces/twitter/dancounsell/48.jpg);
-  }
-  
-  .ladylexy {
-    background-image: url(https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/48.jpg);
-  }
-  
-  .mtnmissy {
-    background-image: url(https://s3.amazonaws.com/uifaces/faces/twitter/mtnmissy/48.jpg);
-  }
-  
-  .steveodom {
-    background-image: url(https://s3.amazonaws.com/uifaces/faces/twitter/steveodom/48.jpg);
-  } */
-
 .name {
-  margin-left: 68px;
-  line-height: 45px;
+  margin-left: 20px;
+  line-height: 20px;
+}
+
+img {
+  width: 30px;
 }
 
 .highlight {
@@ -94,5 +84,5 @@
 }
 
 .react-autosuggest__suggestion--focused .highlight {
-  color: #120000;
+  color: #fe8dc3;
 }

@@ -11,6 +11,8 @@ import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
 import { tryStringifyJson } from '../../../helper/utils';
 import tweb3 from '../../../service/tweb3';
+import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
+import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -69,6 +71,9 @@ export const TagTitle = styled.div`
   line-height: normal;
   letter-spacing: normal;
   color: #141927;
+  .highlight {
+    color: #8250c8;
+  }
 `;
 class Promise extends React.Component {
   constructor(props) {
@@ -160,7 +165,7 @@ class Promise extends React.Component {
 
     let people = [];
     escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-    console.log('escapedValue', escapedValue);
+    // console.log('escapedValue', escapedValue);
 
     const regex = new RegExp('\\b' + escapedValue, 'i');
     try {
@@ -194,9 +199,34 @@ class Promise extends React.Component {
     return <div>{suggestion.nick}</div>;
   }
 
+  renderSuggestion1(suggestion, { query }) {
+    const suggestionText = `${suggestion.nick}`;
+    const matches = AutosuggestHighlightMatch(suggestionText, query);
+    const parts = AutosuggestHighlightParse(suggestionText, matches);
+
+    return (
+      <span className="suggestion-content">
+        <span>
+          <img src="/static/img/user-men.jpg" alt="itea" />
+        </span>
+        <span className="name">
+          {parts.map((part, index) => {
+            const className = part.highlight ? 'highlight' : null;
+
+            return (
+              <span className={className} key={index}>
+                {part.text}
+              </span>
+            );
+          })}
+        </span>
+      </span>
+    );
+  }
+
   onChange = (event, { newValue }) => {
     const name = newValue.substring(1);
-    console.log('newValue', newValue);
+    // console.log('newValue', newValue);
     const { suggestions } = this.state;
     let address = '';
     if (suggestions) {
@@ -259,7 +289,7 @@ class Promise extends React.Component {
           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
           onSuggestionsClearRequested={this.onSuggestionsClearRequested}
           getSuggestionValue={this.getSuggestionValue}
-          renderSuggestion={this.renderSuggestion}
+          renderSuggestion={this.renderSuggestion1}
           inputProps={inputProps}
         />
         <TagTitle>Your promise</TagTitle>
