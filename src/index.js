@@ -83,7 +83,6 @@ const theme = createMuiTheme({
           },
         },
         '&$focused $notchedOutline': {
-          // borderColor: '#4A90E2',
           borderWidth: 1,
         },
       },
@@ -114,9 +113,6 @@ const theme = createMuiTheme({
           borderBottom: `1px dotted rgba(234, 236, 239, 0.7)`,
         },
       },
-    },
-    label: {
-      color: 'red',
     },
   },
 });
