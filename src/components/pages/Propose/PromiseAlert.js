@@ -4,6 +4,8 @@ import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
 import { getAlias } from '../../../helper/';
 
+export const ipfs = process.env.REACT_APP_IPFS;
+
 const ImgView = styled.div`
   margin: 31px 0 31px;
   img {
@@ -89,7 +91,7 @@ class PromiseAlert extends React.Component {
             )}
           </TagTitle>
           <ImgView>
-            <img src={'http://localhost:8080/ipfs/' + hash} className="postImg" alt="promiseImg" />
+            <img src={ipfs + hash} className="postImg" alt="promiseImg" />
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
