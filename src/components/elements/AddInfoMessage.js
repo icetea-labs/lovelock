@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
@@ -90,30 +90,30 @@ const DateBox = styled.div`
     z-index: 1;
   }
 `;
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
-    backgroundColor: theme.palette.background.paper,
-  },
-  gridList: {
-    flexWrap: 'nowrap',
-    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-    transform: 'translateZ(0)',
-  },
-  img: {
-    width: 30,
-    height: 50,
-  },
-  titleBar: {
-    background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-  },
-  icon: {
-    color: 'white',
-  },
-}));
+// const useStyles = makeStyles(theme => ({
+//   root: {
+//     display: 'flex',
+//     flexWrap: 'wrap',
+//     justifyContent: 'flex-start',
+//     overflow: 'hidden',
+//     backgroundColor: theme.palette.background.paper,
+//   },
+//   gridList: {
+//     flexWrap: 'nowrap',
+//     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+//     transform: 'translateZ(0)',
+//   },
+//   img: {
+//     width: 30,
+//     height: 50,
+//   },
+//   titleBar: {
+//     background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+//   },
+//   icon: {
+//     color: 'white',
+//   },
+// }));
 function MaterialUIPickers(props) {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>

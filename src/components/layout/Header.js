@@ -17,7 +17,10 @@ import GetKeyToAuthen from './GetKeyToAuthen';
 import Button from '@material-ui/core/Button';
 
 import ListItemText from '@material-ui/core/ListItemText';
+import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItem from '@material-ui/core/ListItem';
+import Divider from '@material-ui/core/Divider';
 
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
@@ -102,6 +105,23 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     margin: theme.spacing(1),
   },
+  listNoti: {
+    width: '100%',
+    maxWidth: 400,
+    padding: theme.spacing(0),
+    backgroundColor: theme.palette.background.paper,
+  },
+  listItemNotiStyle: {
+    borderRadius: 10,
+    margin: theme.spacing(1),
+  },
+  notiPromise: {
+    width: '100%',
+    display: 'block',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
   menuButton: {
     marginRight: theme.spacing(2),
   },
@@ -180,6 +200,7 @@ const StyledMenu = withStyles({
   paper: {
     border: '1px solid #d3d4d5',
     width: 422,
+    borderRadius: 10,
   },
 })(props => (
   <Menu
@@ -199,6 +220,8 @@ const StyledMenu = withStyles({
 
 const StyledMenuItem = withStyles(theme => ({
   root: {
+    borderRadius: 10,
+    margin: theme.spacing(1),
     '&:focus': {
       backgroundColor: theme.palette.primary.main,
       '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
@@ -231,6 +254,22 @@ const notifiList = [
     id: 0,
     avatar: '/static/img/user-men.jpg',
     name: 'HuyHQ',
+    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+    time: 'just now',
+  },
+  {
+    id: 1,
+    avatar: '/static/img/user-women.jpg',
+    name: 'MyNTT',
+    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+    time: 'just now',
+  },
+  {
+    id: 2,
+    avatar: '/static/img/user-men.jpg',
+    name: 'ThiTH',
+    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+    time: 'just now',
   },
 ];
 
@@ -241,7 +280,7 @@ export default function Header() {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [anchorElNoti, setAnchorElNoti] = useState(null);
 
-  const isMenuOpen = Boolean(anchorEl);
+  // const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   function handleProfileMenuOpen(event) {
@@ -252,10 +291,10 @@ export default function Header() {
     setMobileMoreAnchorEl(null);
   }
 
-  function handleMenuClose() {
-    setAnchorEl(null);
-    handleMobileMenuClose();
-  }
+  // function handleMenuClose() {
+  //   setAnchorEl(null);
+  //   handleMobileMenuClose();
+  // }
 
   function handleMobileMenuOpen(event) {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -291,21 +330,21 @@ export default function Header() {
     }
     fetchData();
   });
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
-  );
+  // const menuId = 'primary-search-account-menu';
+  // const renderMenu = (
+  //   <Menu
+  //     anchorEl={anchorEl}
+  //     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+  //     id={menuId}
+  //     keepMounted
+  //     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+  //     open={isMenuOpen}
+  //     onClose={handleMenuClose}
+  //   >
+  //     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+  //     <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+  //   </Menu>
+  // );
 
   const friReqMenu = (
     <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
@@ -340,17 +379,37 @@ export default function Header() {
       <StyledMenuItem className={classes.friReqStyle}>
         <ListItemText primary="Notification" className={classes.friReqTitle} />
         <ListItemText align="right" primary="Mark all read" className={classes.friReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.friReqSetting} />
+        <ListItemText align="center" primary="Setting" className={classes.friReqConfirm} />
       </StyledMenuItem>
-      {notifiList.map(({ id, avatar, name }) => (
-        <StyledMenuItem className={classes.friReqStyle} key={id}>
-          <ListItemAvatar>
-            <Avatar alt="avatar" src={avatar} className={classes.avatar} />
-          </ListItemAvatar>
-          <ListItemText primary={name} className={classes.friReqName} />
-          <ListItemText primary="Love" className={classes.friReqConfirm} />
-          <ListItemText primary="Hate" />
-        </StyledMenuItem>
+      {notifiList.map(({ id, avatar, name, promise, time }) => (
+        <List className={classes.listNoti} component="nav" key={id}>
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+            <ListItemAvatar>
+              <Avatar alt="Remy Sharp" src={avatar} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <React.Fragment>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {name}
+                  </Typography>
+                  {' send you a promise'}
+                </React.Fragment>
+              }
+              secondary={
+                <React.Fragment>
+                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                    {promise}
+                  </Typography>
+                  <Typography component="span" variant="body2">
+                    {time}
+                  </Typography>
+                </React.Fragment>
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" />
+        </List>
       ))}
       <StyledMenuItem className={classes.friReqStyle}>
         <ListItemText align="center" primary="See all" className={classes.friReqSetting} />

@@ -102,7 +102,7 @@ class LeftContrainer extends PureComponent {
         console.error(error);
       } else {
         const data = result.data.value.TxResult.events[0];
-        console.log('data', data);
+        // console.log('data', data);
         const eventData = data && data.eventData;
         // console.log('data', data);
         if (eventData && eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
