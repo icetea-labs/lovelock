@@ -12,7 +12,7 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import { TimeWithFormat } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import MessageIcon from '@material-ui/icons/Message';
+import CommentIcon from '@material-ui/icons/Comment';
 import ShareIcon from '@material-ui/icons/Share';
 import Tooltip from '@material-ui/core/Tooltip';
 // import GridList from '@material-ui/core/GridList';
@@ -21,8 +21,10 @@ import Tooltip from '@material-ui/core/Tooltip';
 const useStyles = makeStyles(theme => ({
   card: {
     // maxWidth: 345,
-    margin: theme.spacing(2),
-    boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)',
+    margin: theme.spacing(3, 0),
+    boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
+    // boxShadow: 'none',
+    // border: '1px solid rgba(234, 236, 239, 0.7)',
   },
   media: {
     height: 350,
@@ -69,7 +71,6 @@ export default function MessageHistory(props) {
   // if (typeof memoryList !== 'undefined' && memoryList.length > 0) {
   //   console.log('setLoading');
   // }
-
   if (memoryList.length <= 0) {
     if (!loading) return <div />;
     return arrayLoadin.map((item, index) => {
@@ -134,7 +135,7 @@ export default function MessageHistory(props) {
           </Tooltip>
           <Tooltip title="Comment">
             <IconButton aria-label="add to message">
-              <MessageIcon />
+              <CommentIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Share">

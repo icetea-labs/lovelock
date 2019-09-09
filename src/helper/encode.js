@@ -5,7 +5,7 @@ const { codec } = require('@iceteachain/common');
  * @privateKey
  * @password
  */
-function encode(privateKey, password) {
+function encode(privateKey, password, ops) {
   const options = {
     kdf: 'pbkdf2',
     cipher: 'aes-128-ctr',
@@ -14,10 +14,15 @@ function encode(privateKey, password) {
       dklen: 32,
       prf: 'hmac-sha256',
     },
+    ...ops,
   };
 
   const dk = keythereum.create();
-  return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
+  if (options.noAddress) {
+    return keythereum.dump(password, privateKey, dk.salt, dk.iv, options);
+  } else {
+    return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
+  }
 }
 
 export default encode;
