@@ -103,13 +103,13 @@ class Propose {
     this.emitEvent('changePrivacy', { by: msg.sender, log }, ['by']);
   }
   // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, content: string, info: string) {
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info: string) {
     const pro = this._getDataByIndex(this.propose, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
 
     //new memories
-    const menory = { proIndex, content, info, sender };
+    const menory = { proIndex, isPrivate, content, info, sender };
     const x = this.memories;
     const index = x.push(menory) - 1;
     this.memories = x;

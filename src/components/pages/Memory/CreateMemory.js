@@ -11,6 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
+import { encodeWithPublicKey, decodeWithPublicKey } from '../../../helper';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -103,6 +104,7 @@ export default function CreateMemory(props) {
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
   const privateKey = useSelector(state => state.account.privateKey);
+  const propose = useSelector(state => state.loveinfo.propose);
   const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
@@ -143,23 +145,40 @@ export default function CreateMemory(props) {
       return;
     }
     setGLoading(true);
-    const { proIndex } = props;
-    let hash = '';
-    if (file) hash = await saveToIpfs(file);
-    const method = 'addMemory';
-    const info = JSON.stringify({ date, hash });
-    const params = [proIndex, memoryContent, info];
-    const result = await sendTransaction(method, params);
-    if (result) {
-      loadMemory();
-    }
-    setGLoading(false);
-    setGrayLayout(false);
-    //reset input value
-    setFilePath('');
-    setDate(new Date());
-    setMemoryContent('');
+    setTimeout(async () => {
+      const { proIndex } = props;
+      let hash = '';
+      if (file) hash = await saveToIpfs(file);
+      const method = 'addMemory';
+      const info = JSON.stringify({ date, hash });
+      let params = [];
+      if (privacy) {
+        const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
+        // console.log('privateKey', privateKey);
+        // console.log('publicKey', currentPropose.publicKey);
+        // console.log('currentPropose', currentPropose);
+        const newContent = await encodeWithPublicKey(memoryContent, privateKey, currentPropose.publicKey);
+        const newInfo = await encodeWithPublicKey(info, privateKey, currentPropose.publicKey);
+        // console.log('newContent', newContent);
+        // console.log('newInfo', newInfo);
+        params = [proIndex, !!privacy, newContent, newInfo];
+      } else {
+        params = [proIndex, !!privacy, memoryContent, info];
+      }
+
+      const result = await sendTransaction(method, params);
+      if (result) {
+        loadMemory();
+      }
+      setGLoading(false);
+      setGrayLayout(false);
+      //reset input value
+      setFilePath('');
+      setDate(new Date());
+      setMemoryContent('');
+    }, 100);
   }
+
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />

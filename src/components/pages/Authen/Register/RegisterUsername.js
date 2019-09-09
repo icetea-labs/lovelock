@@ -76,7 +76,7 @@ class RegisterUsername extends PureComponent {
           const account = await this._createAccountWithMneomnic();
           const { privateKey, address, publicKey, mnemonic } = account;
           const displayname = firstname + ' ' + lastname;
-          console.log('publicKey', publicKey);
+          // console.log('publicKey', publicKey);
           setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
@@ -85,7 +85,7 @@ class RegisterUsername extends PureComponent {
           // console.log('resp', resp);
           const respTagName = await setTagsInfo(address, 'display-name', displayname);
           const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
-          console.log('respTags', respTagName);
+          // console.log('respTags', respTagName);
 
           if (resp && respTagName && respTagPublicKey) {
             setStep('two');
@@ -118,7 +118,6 @@ class RegisterUsername extends PureComponent {
   };
 
   render() {
-    // const { usernameErr, rePassErr, lastnameErr, firstnameErr, passwordErr } = this.state;
     const { username, firstname, lastname, password, rePassword } = this.state;
     const { classes } = this.props;
 

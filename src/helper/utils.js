@@ -6,6 +6,8 @@ import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
 import decode from './decode';
+import encode from './encode';
+import eccrypto from 'eccrypto';
 
 const paths = 'm’/44’/60’/0’/0';
 
@@ -197,7 +199,28 @@ export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');
   localStorage.setItem('user', JSON.stringify({ address, keyObject }));
 }
-
+export async function generateSharedKey(privateKeyA, publicKeyB) {
+  const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
+  return sharekey;
+}
+export async function encodeWithSharedKey(data, sharekey) {
+  const encodeData = encode(sharekey, data, { noAddress: true });
+  return encodeData;
+}
+export async function decodeWithSharedKey(data, sharekey) {
+  const decodeData = decode(sharekey, data);
+  return decodeData;
+}
+export async function encodeWithPublicKey(data, privateKeyA, publicKeyB) {
+  const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
+  const encodeData = encode(sharekey, data, { noAddress: true });
+  return JSON.stringify(encodeData || {});
+}
+export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
+  const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
+  const decodeData = decode(sharekey, data);
+  return decodeData;
+}
 export const wallet = {
   createAccountWithMneomnic(mnemonic, index = 0) {
     if (!mnemonic) mnemonic = bip39.generateMnemonic();

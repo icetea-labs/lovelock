@@ -156,7 +156,7 @@ class LeftContrainer extends PureComponent {
       const nick = await getAlias(newAddress);
       proposes[i].name = reps['display-name'];
       proposes[i].nick = '@' + nick;
-
+      proposes[i].publicKey = reps['pub-key'] || '';
       // const sender = await getTagsInfo(proposes[i].sender);
       // const s_nick = await getAlias(newAddress);
       // proposes[i].s_name = sender['display-name'];
