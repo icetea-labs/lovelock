@@ -146,7 +146,6 @@ export default function CreateMemory(props) {
     const { proIndex } = props;
     let hash = '';
     if (file) hash = await saveToIpfs(file);
-
     const method = 'addMemory';
     const info = JSON.stringify({ date, hash });
     const params = [proIndex, memoryContent, info];

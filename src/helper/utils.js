@@ -202,12 +202,13 @@ export const wallet = {
   createAccountWithMneomnic(mnemonic, index = 0) {
     if (!mnemonic) mnemonic = bip39.generateMnemonic();
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
-    const { address } = ecc.toPubKeyAndAddress(privateKey);
+    const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
 
     return {
       mnemonic,
       privateKey,
       address,
+      publicKey,
     };
   },
   recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.BANK_ACCOUNT }) {

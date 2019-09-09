@@ -3,6 +3,7 @@ const initialState = Object.assign(
   {
     needAuth: false,
     address: '',
+    publicKey: '',
     cipher: '',
     privateKey: '',
     mnemonic: '',

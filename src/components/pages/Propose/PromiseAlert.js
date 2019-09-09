@@ -89,7 +89,7 @@ class PromiseAlert extends React.Component {
             )}
           </TagTitle>
           <ImgView>
-            <img src={'http://localhost:8080/ipfs/' + hash} className="postImg" alt="promiseImg" />
+            <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
