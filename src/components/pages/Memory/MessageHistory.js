@@ -71,7 +71,6 @@ export default function MessageHistory(props) {
   // if (typeof memoryList !== 'undefined' && memoryList.length > 0) {
   //   console.log('setLoading');
   // }
-
   if (memoryList.length <= 0) {
     if (!loading) return <div />;
     return arrayLoadin.map((item, index) => {
