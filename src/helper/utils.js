@@ -5,8 +5,8 @@ import moment from 'moment';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
-import decode from './decode';
-import encode from './encode';
+import { decodeTx, decode } from './decode';
+import { encodeTx } from './encode';
 import eccrypto from 'eccrypto';
 
 const paths = 'm’/44’/60’/0’/0';
@@ -84,18 +84,23 @@ export async function setTagsInfo(address, name, value) {
 }
 let cacheTags = {};
 export async function getTagsInfo(address) {
-  if (!cacheTags[address]) {
-    const resp = await tweb3
-      .contract('system.did')
-      .methods.query(address)
-      .call();
-    if (resp && resp.tags) {
-      cacheTags[address] = resp.tags;
-    } else {
-      cacheTags[address] = {};
+  try {
+    if (!cacheTags[address]) {
+      const resp = await tweb3
+        .contract('system.did')
+        .methods.query(address)
+        .call();
+      if (resp && resp.tags) {
+        cacheTags[address] = resp.tags;
+      } else {
+        cacheTags[address] = {};
+      }
     }
+  } catch (e) {
+    console.error(e);
   }
-  return cacheTags[address];
+
+  return cacheTags[address] || [];
 }
 
 export async function saveToIpfs(files) {
@@ -178,7 +183,7 @@ export async function getAlias(address) {
     return cacheAlias[address];
   } catch (err) {
     console.log(tryStringifyJson(err));
-    throw err;
+    // throw err;
   }
 }
 export async function registerAlias(username, address, privateKey) {
@@ -201,24 +206,38 @@ export async function savetoLocalStorage(address, keyObject) {
 }
 export async function generateSharedKey(privateKeyA, publicKeyB) {
   const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
-  return sharekey;
+  const p1 = '7xsfEQXkUiEMWn3N1Q8xmBCikZWU1aeuADBKXvjiNsFY';
+  const a2 = 'sDoXoi7VxPmpVQuMWegfuhcR9iH5j27RwM6A5JW7ypH5';
+
+  const p2 = '3JC5VYG3VwgRuU7h6GS7a2kiyXytKQPW2DDtoDGR4k8L';
+  const a1 = 'qCAeXugCQf6FoxBHDCkCPnNpffGh5e6go9TKNRwD469X';
+
+  const sharekey1 = await eccrypto.derive(codec.toKeyBuffer(p1), codec.toKeyBuffer(a2));
+  const sharekey2 = await eccrypto.derive(codec.toKeyBuffer(p2), codec.toKeyBuffer(a1));
+  console.log('sharekey1', codec.toString(sharekey1));
+  console.log('sharekey2', codec.toString(sharekey2));
+  // console.log('sharekey2', sharekey2);
+  console.log('privateKeyA', privateKeyA);
+  console.log('publicKeyB', publicKeyB);
+  console.log('codec.toString(sharekey)', codec.toString(sharekey));
+  return codec.toString(sharekey);
 }
 export async function encodeWithSharedKey(data, sharekey) {
-  const encodeData = encode(sharekey, data, { noAddress: true });
+  const encodeData = encodeTx(data, sharekey, { noAddress: true });
   return encodeData;
 }
 export async function decodeWithSharedKey(data, sharekey) {
-  const decodeData = decode(sharekey, data);
+  const decodeData = decodeTx(sharekey, data);
   return decodeData;
 }
 export async function encodeWithPublicKey(data, privateKeyA, publicKeyB) {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
-  const encodeData = encode(sharekey, data, { noAddress: true });
+  const encodeData = encodeTx(data, sharekey, { noAddress: true });
   return JSON.stringify(encodeData || {});
 }
 export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
-  const decodeData = decode(sharekey, data);
+  const decodeData = decodeTx(sharekey, data);
   return decodeData;
 }
 export const wallet = {

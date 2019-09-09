@@ -11,7 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
-import { encodeWithPublicKey, decodeWithPublicKey } from '../../../helper';
+import { encodeWithPublicKey } from '../../../helper';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
