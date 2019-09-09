@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:500,600&display=swap&subset=vietnamese');
+
+$base-size: 16;
+@function rem($target, $context: $base-size) {
+  @return ($target / $context) * 1rem;
+}
+
+body {
+  font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'PingFang  SC', 'Microsoft YaHei', 'WenQuanYi Micro Hei',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, 'Segoe UI', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  position: relative;
+  color: #212833;
+  background: #f5f5f8;
+  font-size: rem(14);
+}
+// a {
+//   // color: #4a90e2;
+//   text-decoration: none;
+//   // font-family: DINPro-Medium;
+// }
+// a:hover {
+//   text-decoration: underline;
+// }

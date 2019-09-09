@@ -1,18 +1,14 @@
 import { combineReducers } from 'redux';
-import chainInfo from './chainInfo';
-import globalData from './globalData';
-import userInfo from './userInfo';
-import propose from './propose';
 import create from './create';
 import account from './account';
+import globalData from './globalData';
+import loveinfo from './loveinfo';
 
 const myReducer = combineReducers({
-  chainInfo,
-  globalData,
-  userInfo,
-  propose,
   create,
   account,
+  globalData,
+  loveinfo,
 });
 
 export default myReducer;

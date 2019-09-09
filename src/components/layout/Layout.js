@@ -1,14 +1,9 @@
-import styled from "styled-components";
-import {
-  rem,
-  FlexBox,
-  pc,
-  mobile,
-  media
-} from "src/components/elements/Common";
-import Head from "next/head";
-import Header from "src/components/layout/Header";
-import Footer from "src/components/layout/Footer";
+import React from 'react';
+
+import styled from 'styled-components';
+import { rem, pc, mobile, media } from '../elements/StyledUtils';
+import Header from './Header';
+// import Footer from './Footer';
 
 const Container = styled.div`
   flex-direction: column;
@@ -21,34 +16,35 @@ const Container = styled.div`
     min-width: ${mobile.pageminwidth};
   `}
 `;
-
-const Content = styled.div`
+const MainContainer = styled.main`
+  height: 100%;
+  flex: 1 1 0%;
+`;
+const BoxContent = styled.div`
   grid-area: content;
   justify-items: center;
   align-items: center;
   width: ${rem(960)};
   margin: 0 auto;
-  margin-top: 114px;
+`;
+const Content = styled(BoxContent)`
+  margin-top: ${rem(30)};
 `;
 
 const Layout = ({ children, title }) => (
   <Container>
-    <Head>
-      <title>{title}</title>
-    </Head>
     <Header />
     <Content> {children} </Content>
-    <Footer />
+    {/* <Footer /> */}
   </Container>
 );
 const HomeLayout = ({ children, title }) => (
   <Container>
-    <Head>
-      <title>{title}</title>
-    </Head>
     <Header />
-    <Content> {children} </Content>
-    <Footer />
+    <MainContainer>
+      <Content> {children} </Content>
+    </MainContainer>
+    {/* <Footer /> */}
   </Container>
 );
 export { HomeLayout, Layout };

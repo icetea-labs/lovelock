@@ -4,7 +4,6 @@
 export const actionTypes = {
   SET_STEP: "createAccount/SET_STEP",
   SET_PASSWORD: "createAccount/SET_PASSWORD",
-  SET_USERNAME: "createAccount/SET_USERNAME",
   SET_ACCOUNT: "createAccount/SET_ACCOUNT",
   SET_SHOW_PRIVATEKEY: "createAccount/SET_SHOW_PRIVATEKEY",
   SET_CONFIRM_MNEMONIC: "createAccount/SET_CONFIRM_MNEMONIC"
@@ -20,10 +19,6 @@ export const setStep = step => ({
 export const setPassword = password => ({
   type: actionTypes.SET_PASSWORD,
   password
-});
-export const setUsername = username => ({
-  type: actionTypes.SET_USERNAME,
-  username
 });
 export const setAccount = data => ({
   type: actionTypes.SET_ACCOUNT,
