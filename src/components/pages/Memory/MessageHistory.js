@@ -18,6 +18,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 // import GridList from '@material-ui/core/GridList';
 // import GridListTile from '@material-ui/core/GridListTile';
 
+const ipfs = process.env.REACT_APP_IPFS;
+
 const useStyles = makeStyles(theme => ({
   card: {
     // maxWidth: 345,
@@ -116,9 +118,7 @@ export default function MessageHistory(props) {
           </Typography>
         </CardContent>
         <React.Fragment>
-          {memory.info.hash && (
-            <CardMedia className={classes.media} image={'https://ipfs.io/ipfs/' + memory.info.hash} title="img" />
-          )}
+          {memory.info.hash && <CardMedia className={classes.media} image={ipfs + memory.info.hash} title="img" />}
           {/* <ImageGridList
               imgs={[
                 { img: 'https://ipfs.io/ipfs/' + memory.info.hash, clos: 2 },
