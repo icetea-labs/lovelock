@@ -204,7 +204,13 @@ export default function CreateMemory(props) {
               </Grid>
             </Grid>
             <Grid item>
-              <AddInfoMessage grayLayout={grayLayout} onChangeDate={onChangeDate} onChangeMedia={onChangeMedia} />
+              <AddInfoMessage
+                files={filePath}
+                date={date}
+                grayLayout={grayLayout}
+                onChangeDate={onChangeDate}
+                onChangeMedia={onChangeMedia}
+              />
             </Grid>
             {grayLayout && (
               <Grid item classes={{ root: classes.btBox }}>
