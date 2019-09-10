@@ -33,7 +33,7 @@ function encodeTx(data, password, ops) {
   };
 
   const dk = keythereum.create();
-  return keythereum.dump(password, codec.toBuffer(data), dk.salt, dk.iv, options);
+  return keythereum.dump(password, data, dk.salt, dk.iv, options);
 }
 export { encodeTx, encode };
 export default encode;

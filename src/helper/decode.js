@@ -9,7 +9,7 @@ function decode(password, keyObject) {
 }
 function decodeTx(password, keyObject) {
   const data = keythereum.recover(password, keyObject);
-  return codec.toString(data);
+  return new TextDecoder('utf-8').decode(data).replace(/%20/g, ' ');
 }
 export { decodeTx, decode };
 export default decode;
