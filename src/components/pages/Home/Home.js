@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FlexBox, FlexWidthBox } from '../../elements/StyledUtils';
 import LeftContrainer from '../Propose/Detail/LeftContrainer';
 import { callView, getTagsInfo } from '../../../helper';
 import MessageHistory from '../Memory/MessageHistory';
+import { rem } from '../../elements/StyledUtils';
+
+const RightBox = styled.div`
+  padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
+`;
 
 export default function Home() {
   const address = useSelector(state => state.account.address);
@@ -37,7 +43,9 @@ export default function Home() {
     <FlexBox wrap="wrap">
       <FlexWidthBox width="30%">{address && <LeftContrainer />}</FlexWidthBox>
       <FlexWidthBox width="70%">
-        <MessageHistory loading={loading} memoryList={memoryList} />
+        <RightBox>
+          <MessageHistory loading={loading} memoryList={memoryList} />
+        </RightBox>
       </FlexWidthBox>
     </FlexBox>
   );

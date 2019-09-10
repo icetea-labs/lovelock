@@ -31,6 +31,7 @@ const CreatePost = styled.div`
   right: 0px;
   bottom: 0px;
   z-index: 2 !important;
+  margin-bottom: 24px;
 `;
 const ShadowBox = styled.div`
   padding: 30px;
@@ -103,10 +104,8 @@ export default function CreateMemory(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
-  const { privateKey, address, s_publicKey, s_address, r_publicKey, r_address, publicKey } = useSelector(
-    state => state.account
-  );
-  const propose = useSelector(state => state.loveinfo.propose);
+  const { privateKey, publicKey } = useSelector(state => state.account);
+  // const propose = useSelector(state => state.loveinfo.propose);
   const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
@@ -155,7 +154,7 @@ export default function CreateMemory(props) {
       const info = JSON.stringify({ date, hash });
       let params = [];
       if (privacy) {
-        const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
+        // const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
         // console.log('info', memoryContent, info);
         // console.log('publicKey', currentPropose.publicKey);
         const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
@@ -177,6 +176,7 @@ export default function CreateMemory(props) {
       setFilePath('');
       setDate(new Date());
       setMemoryContent('');
+      setPrivacy(0);
     }, 100);
   }
 
