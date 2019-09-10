@@ -4,6 +4,8 @@ import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
 import { getAlias } from '../../../helper/';
 
+export const ipfs = process.env.REACT_APP_IPFS;
+
 const ImgView = styled.div`
   margin: 31px 0 31px;
   img {

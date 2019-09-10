@@ -9,6 +9,9 @@ import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
+//https://ipfs.io/ipfs/
+export const ipfs = process.env.REACT_APP_IPFS;
+
 const TopContainerBox = styled.div`
   .top__coverimg {
     position: relative;
@@ -186,7 +189,7 @@ export default function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {topInfo.coverimg ? (
-          <img src={'https://ipfs.io/ipfs/' + topInfo.coverimg} alt="itea-scan" />
+          <img src={ipfs + topInfo.coverimg} alt="itea-scan" />
         ) : loading ? (
           <Skeleton variant="rect" width="100%" height={118} />
         ) : (
