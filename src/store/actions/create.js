@@ -4,7 +4,7 @@
 export const actionTypes = {
   SET_STEP: "createAccount/SET_STEP",
   SET_PASSWORD: "createAccount/SET_PASSWORD",
-  SET_ACCOUNT: "createAccount/SET_ACCOUNT",
+  // SET_ACCOUNT: "createAccount/SET_ACCOUNT",
   SET_SHOW_PRIVATEKEY: "createAccount/SET_SHOW_PRIVATEKEY",
   SET_CONFIRM_MNEMONIC: "createAccount/SET_CONFIRM_MNEMONIC"
 };
