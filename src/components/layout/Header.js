@@ -29,6 +29,8 @@ import GroupIcon from '@material-ui/icons/Group';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 
+import { withRouter } from 'react-router-dom';
+
 const StyledLogo = styled.a`
   font-size: ${rem(20)};
   display: flex;
@@ -76,6 +78,9 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.up('md')]: {
       // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
     },
+  },
+  profile: {
+    display: 'flex',
   },
   avatar: {
     margin: 10,
@@ -127,6 +132,7 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     display: 'none',
+    color: '#fff',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
       minWidth: 50,
@@ -273,28 +279,29 @@ const notifiList = [
   },
 ];
 
-export default function Header() {
+function Header(props) {
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [anchorElNoti, setAnchorElNoti] = useState(null);
+  const [anchorElMenu, setAnchorElMenu] = useState(null);
 
-  // const isMenuOpen = Boolean(anchorEl);
+  const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   function handleProfileMenuOpen(event) {
-    setAnchorEl(event.currentTarget);
+    setAnchorElMenu(event.currentTarget);
   }
 
   function handleMobileMenuClose() {
     setMobileMoreAnchorEl(null);
   }
 
-  // function handleMenuClose() {
-  //   setAnchorEl(null);
-  //   handleMobileMenuClose();
-  // }
+  function handleMenuClose() {
+    setAnchorElMenu(null);
+    handleMobileMenuClose();
+  }
 
   function handleMobileMenuOpen(event) {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -331,20 +338,25 @@ export default function Header() {
     fetchData();
   });
   // const menuId = 'primary-search-account-menu';
-  // const renderMenu = (
-  //   <Menu
-  //     anchorEl={anchorEl}
-  //     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-  //     id={menuId}
-  //     keepMounted
-  //     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-  //     open={isMenuOpen}
-  //     onClose={handleMenuClose}
-  //   >
-  //     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-  //     <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-  //   </Menu>
-  // );
+  const renderMenu = (
+    <StyledMenu anchorEl={anchorElMenu} keepMounted open={isMenuOpen} onClose={handleMenuClose}>
+      <MenuItem>Update Profile</MenuItem>
+      <MenuItem
+        onClick={() => {
+          props.history.push('/register');
+        }}
+      >
+        Create New Account
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          props.history.push('/login');
+        }}
+      >
+        Change Account
+      </MenuItem>
+    </StyledMenu>
+  );
 
   const friReqMenu = (
     <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
@@ -482,10 +494,12 @@ export default function Header() {
                 />
               </div>
               <div className={classes.grow} />
-              <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
-              <Typography className={classes.title} noWrap>
-                {displayName}
-              </Typography>
+              <IconButton className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
+                <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
+                <Typography className={classes.title} noWrap>
+                  {displayName}
+                </Typography>
+              </IconButton>
               {/* <Typography noWrap>Explore</Typography> */}
               {/* <KeyboardArrowDownIcon className={classes.menuIcon} /> */}
               <div className={classes.sectionDesktop}>
@@ -549,10 +563,12 @@ export default function Header() {
         </StyledToolbar>
       </StyledAppBar>
       {renderMobileMenu}
-      {/* {renderMenu} */}
+      {renderMenu}
       {friReqMenu}
       {notiList}
       {needAuth && <GetKeyToAuthen />}
     </div>
   );
 }
+
+export default withRouter(Header);
