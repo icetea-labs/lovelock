@@ -8,7 +8,7 @@ import { wallet } from '../../helper';
 import { decode } from '../../helper';
 import CommonDialog from '../pages/Propose/CommonDialog';
 import TextField from '@material-ui/core/TextField';
-import { SnackbarProvider, useSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 
 export default function GetKeyToAuthen(props) {
   const [password, setPassword] = useState('');
@@ -66,11 +66,11 @@ export default function GetKeyToAuthen(props) {
           privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
           const account = { address, privateKey, cipher: password };
-          console.log('view account', account);
+          // console.log('view account', account);
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
-          const result = setAccount(account);
-          console.log('view result', result);
+          setAccount(account);
+          // console.log('view result', result);
           setTimeout(() => {
             setLoading(false);
             close();
@@ -79,9 +79,7 @@ export default function GetKeyToAuthen(props) {
           // console.log(err);
           setLoading(false);
           const message = 'Wrong password. Please try again.';
-          enqueueSnackbar(message, {
-            variant: 'error',
-          });
+          enqueueSnackbar(message, { variant: 'error' });
         }
       }, 100);
     }
@@ -89,18 +87,16 @@ export default function GetKeyToAuthen(props) {
 
   return needAuth ? (
     <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={confirm}>
-      <SnackbarProvider>
-        <TextField
-          id="Password"
-          label="Password"
-          placeholder="Enter your password"
-          fullWidth
-          autoFocus
-          margin="normal"
-          onChange={passwordChange}
-          type="password"
-        />
-      </SnackbarProvider>
+      <TextField
+        id="Password"
+        label="Password"
+        placeholder="Enter your password"
+        fullWidth
+        autoFocus
+        margin="normal"
+        onChange={passwordChange}
+        type="password"
+      />
     </CommonDialog>
   ) : null;
 }
