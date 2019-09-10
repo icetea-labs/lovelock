@@ -8,10 +8,11 @@
   padding: 10px 20px;
   font-family: Montserrat, sans-serif;
   font-weight: 300;
-  font-size: 14px;
+  font-size: 0.857rem;
   border: 0.5px solid #eddada8f;
   border-radius: 4px;
   margin: 16px 0 32px 0;
+  box-sizing: content-box;
 }
 
 .react-autosuggest__input:focus {

@@ -13,6 +13,7 @@ import { tryStringifyJson } from '../../../helper/utils';
 import tweb3 from '../../../service/tweb3';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
+import { withSnackbar } from 'notistack';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -119,7 +120,9 @@ class Promise extends React.Component {
 
         this.timeoutHanle2 = setTimeout(() => {
           if (result) {
-            notifi.info('Success');
+            // notifi.info('Success');
+            const message = 'Your propose send successfully.';
+            this.props.enqueueSnackbar(message, { variant: 'success' });
             setLoading(false);
             this.props.close();
           }
@@ -317,4 +320,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Promise);
+)(withSnackbar(Promise));
