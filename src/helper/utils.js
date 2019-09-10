@@ -5,7 +5,9 @@ import moment from 'moment';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
-import decode from './decode';
+import { decodeTx, decode } from './decode';
+import { encodeTx } from './encode';
+import eccrypto from 'eccrypto';
 
 const paths = 'm’/44’/60’/0’/0';
 
@@ -82,18 +84,23 @@ export async function setTagsInfo(address, name, value) {
 }
 let cacheTags = {};
 export async function getTagsInfo(address) {
-  if (!cacheTags[address]) {
-    const resp = await tweb3
-      .contract('system.did')
-      .methods.query(address)
-      .call();
-    if (resp && resp.tags) {
-      cacheTags[address] = resp.tags;
-    } else {
-      cacheTags[address] = {};
+  try {
+    if (!cacheTags[address]) {
+      const resp = await tweb3
+        .contract('system.did')
+        .methods.query(address)
+        .call();
+      if (resp && resp.tags) {
+        cacheTags[address] = resp.tags;
+      } else {
+        cacheTags[address] = {};
+      }
     }
+  } catch (e) {
+    console.error(e);
   }
-  return cacheTags[address];
+
+  return cacheTags[address] || [];
 }
 
 export async function saveToIpfs(files) {
@@ -176,7 +183,7 @@ export async function getAlias(address) {
     return cacheAlias[address];
   } catch (err) {
     console.log(tryStringifyJson(err));
-    throw err;
+    // throw err;
   }
 }
 export async function registerAlias(username, address, privateKey) {
@@ -197,17 +204,48 @@ export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');
   localStorage.setItem('user', JSON.stringify({ address, keyObject }));
 }
-
+let cachesharekey = {};
+export async function generateSharedKey(privateKeyA, publicKeyB) {
+  console.log('a-b', privateKeyA, '-', publicKeyB);
+  const objkey = privateKeyA + publicKeyB;
+  if (cachesharekey[objkey]) {
+    console.log('cachesharekey', cachesharekey[objkey]);
+    return cachesharekey[objkey];
+  }
+  const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
+  const result = codec.toString(sharekey);
+  cachesharekey = { [objkey]: result };
+  return result;
+}
+export async function encodeWithSharedKey(data, sharekey) {
+  const encodeData = encodeTx(data, sharekey, { noAddress: true });
+  return encodeData;
+}
+export async function decodeWithSharedKey(data, sharekey) {
+  const decodeData = decodeTx(sharekey, data);
+  return decodeData;
+}
+export async function encodeWithPublicKey(data, privateKeyA, publicKeyB) {
+  const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
+  const encodeData = encodeTx(data, sharekey, { noAddress: true });
+  return JSON.stringify(encodeData || {});
+}
+export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
+  const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
+  const decodeData = decodeTx(sharekey, data);
+  return decodeData;
+}
 export const wallet = {
   createAccountWithMneomnic(mnemonic, index = 0) {
     if (!mnemonic) mnemonic = bip39.generateMnemonic();
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
-    const { address } = ecc.toPubKeyAndAddress(privateKey);
+    const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
 
     return {
       mnemonic,
       privateKey,
       address,
+      publicKey,
     };
   },
   recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.BANK_ACCOUNT }) {

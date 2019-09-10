@@ -24,7 +24,6 @@ const styles = theme => ({
   },
 });
 
-let myTime = '';
 class RegisterUsername extends PureComponent {
   constructor(props) {
     super(props);
@@ -42,7 +41,6 @@ class RegisterUsername extends PureComponent {
     };
   }
   componentDidMount() {
-    window.document.body.addEventListener('keydown', this._keydown);
     ValidatorForm.addValidationRule('isPasswordMatch', value => {
       if (value !== this.state.password) {
         return false;
@@ -51,21 +49,16 @@ class RegisterUsername extends PureComponent {
     });
 
     ValidatorForm.addValidationRule('isAliasRegisted', async username => {
-      // const resp = this.checkAliasRegisted(value);
       const resp = await isAliasRegisted(username);
       // console.log('isAliasRegisted', !!resp);
       return !resp;
     });
   }
   componentWillUnmount() {
-    window.document.body.removeEventListener('keydown', this._keydown);
     // remove rule when it is not needed
     ValidatorForm.removeValidationRule('isPasswordMatch');
     ValidatorForm.removeValidationRule('isAliasRegisted');
   }
-  _keydown = e => {
-    e.keyCode === 13 && this.gotoNext();
-  };
 
   gotoNext = async () => {
     const { username, firstname, lastname, password } = this.state;
@@ -81,92 +74,29 @@ class RegisterUsername extends PureComponent {
         setLoading(true);
         setTimeout(async () => {
           const account = await this._createAccountWithMneomnic();
-          const privateKey = account.privateKey;
-          const address = account.address;
+          const { privateKey, address, publicKey, mnemonic } = account;
           const displayname = firstname + ' ' + lastname;
-
-          setAccount({ username, address, privateKey, cipher: password, mnemonic: account.mnemonic });
+          // console.log('publicKey', publicKey);
+          setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
 
           const resp = await registerAlias(username, address, privateKey);
-          console.log('resp', resp);
-          const respTags = await setTagsInfo(address, 'display-name', displayname);
-          console.log('respTags', respTags);
+          // console.log('resp', resp);
+          const respTagName = await setTagsInfo(address, 'display-name', displayname);
+          const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
+          // console.log('respTags', respTagName);
 
-          if (resp && respTags) {
-            setLoading(false);
+          if (resp && respTagName && respTagPublicKey) {
             setStep('two');
           } else {
             notifi.info('Error registerAlias');
           }
+          setLoading(false);
         }, 500);
       }
     }
   };
-
-  // isInvalidateData() {
-  //   const { username, firstname, lastname, password, rePassword } = this.state;
-
-  //   if (!username) {
-  //     this.setState({
-  //       usernameErr: 'The Username field is required',
-  //     });
-  //     return true;
-  //   } else {
-  //     const { usernameErr } = this.state;
-  //     if (usernameErr) this.setState({ usernameErr: '' });
-  //   }
-
-  //   if (!firstname) {
-  //     this.setState({
-  //       firstnameErr: 'The Firstname field is required',
-  //     });
-  //     return true;
-  //   } else {
-  //     const { firstnameErr } = this.state;
-  //     if (firstnameErr) this.setState({ firstnameErr: '' });
-  //   }
-
-  //   if (!lastname) {
-  //     this.setState({
-  //       lastnameErr: 'The Lastname field is required',
-  //     });
-  //     return true;
-  //   } else {
-  //     const { lastnameErr } = this.state;
-  //     if (lastnameErr) this.setState({ lastnameErr: '' });
-  //   }
-
-  //   if (!password) {
-  //     this.setState({
-  //       passwordErr: 'The password field is required',
-  //     });
-  //     return true;
-  //   } else {
-  //     const { passwordErr } = this.state;
-  //     if (passwordErr) this.setState({ passwordErr: '' });
-  //   }
-
-  //   if (!rePassword) {
-  //     this.setState({
-  //       rePassErr: 'The confirm password field is required',
-  //     });
-  //     return true;
-  //   }
-
-  //   if (password !== rePassword) {
-  //     this.setState({
-  //       rePassErr: 'The confirmation password do not match.',
-  //     });
-  //     return true;
-  //   } else {
-  //     const { rePassErr } = this.state;
-  //     if (rePassErr) this.setState({ rePassErr: '' });
-  //   }
-
-  //   return false;
-  // }
 
   handleUsername = event => {
     const key = event.currentTarget.name;
@@ -174,27 +104,6 @@ class RegisterUsername extends PureComponent {
     console.log(event.currentTarget.id);
 
     this.setState({ [key]: value });
-    // if (key === 'username') {
-    //   this.checkAliasRegisted(value);
-    // }
-  };
-
-  checkAliasRegisted = username => {
-    if (myTime) clearTimeout(myTime);
-    myTime = setTimeout(async () => {
-      const resp = await isAliasRegisted(username);
-      if (resp) {
-        // this.setState({
-        //   usernameErr: 'Username already exists! Please choose another',
-        // });
-        return true;
-      } else {
-        // this.setState({
-        //   usernameErr: '',
-        // });
-        return false;
-      }
-    }, 1500);
   };
 
   _createAccountWithMneomnic = () => {
@@ -204,27 +113,16 @@ class RegisterUsername extends PureComponent {
       privateKey: resp.privateKey,
       address: resp.address,
       mnemonic: resp.mnemonic,
+      publicKey: resp.publicKey,
     };
   };
 
   render() {
-    // const { usernameErr, rePassErr, lastnameErr, firstnameErr, passwordErr } = this.state;
     const { username, firstname, lastname, password, rePassword } = this.state;
     const { classes } = this.props;
 
     return (
       <ValidatorForm onSubmit={this.gotoNext}>
-        {/* <TextField
-          id="username"
-          label="Username"
-          required
-          placeholder="Enter your username"
-          helperText={usernameErr}
-          error={usernameErr !== ''}
-          fullWidth
-          margin="normal"
-          onChange={this.handleUsername}
-        /> */}
         <TextValidator
           label="Username"
           fullWidth
@@ -236,27 +134,6 @@ class RegisterUsername extends PureComponent {
           value={username}
         />
         <FlexBox>
-          {/* <TextField
-            id="firstname"
-            label="First Name"
-            placeholder="Enter your fistname"
-            helperText={firstnameErr}
-            error={firstnameErr !== ''}
-            fullWidth
-            className={classes.marginRight}
-            margin="normal"
-            onChange={this.handleUsername}
-          />
-          <TextField
-            id="lastname"
-            label="Last Name"
-            helperText={lastnameErr}
-            error={lastnameErr !== ''}
-            placeholder="Enter your lastname"
-            fullWidth
-            margin="normal"
-            onChange={this.handleUsername}
-          /> */}
           <TextValidator
             label="First Name"
             fullWidth
@@ -279,30 +156,6 @@ class RegisterUsername extends PureComponent {
             value={lastname}
           />
         </FlexBox>
-        {/* <TextField
-          id="password"
-          label="Password"
-          helperText={passwordErr}
-          error={passwordErr !== ''}
-          required
-          placeholder="Password"
-          fullWidth
-          margin="normal"
-          onChange={this.handleUsername}
-          type="password"
-        />
-        <TextField
-          id="rePassword"
-          label="Confirm Password"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
-          required
-          placeholder="Confirm your password"
-          fullWidth
-          margin="normal"
-          onChange={this.handleUsername}
-          type="password"
-        /> */}
         <TextValidator
           label="Password"
           fullWidth
