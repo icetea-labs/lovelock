@@ -16,7 +16,7 @@ export default function RightContrainer(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [memoryList, setMemoryList] = useState([]);
-  const { privateKey, address, s_publicKey, s_address, r_publicKey, r_address } = useSelector(state => state.account);
+  const { privateKey, address, publicKey } = useSelector(state => state.account);
 
   useEffect(() => {
     async function fetchData() {
@@ -48,17 +48,18 @@ export default function RightContrainer(props) {
         obj.info = JSON.parse(obj.info);
         const reps = await getTagsInfo(sender);
         obj.name = reps['display-name'];
-        // obj.pubkey = reps['pub-key'];
+        obj.pubkey = reps['pub-key'];
         obj.index = [i];
         if (obj.isPrivate) {
-          if (privateKey && r_publicKey && s_publicKey) {
+          if (privateKey && publicKey && obj.pubkey) {
             // console.log('obj.pubkey', obj.pubkey);
-            if (s_address === sender) {
+            if (address === sender) {
               // console.log('r_publicKey', r_publicKey);
-              obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, r_publicKey);
+              obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, publicKey);
             } else {
-              obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, s_publicKey);
+              obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, obj.pubkey);
             }
+            obj.isUnlock = true;
           } else {
             obj.content = 'private message...';
             obj.info = {};

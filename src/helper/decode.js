@@ -1,5 +1,6 @@
 const keythereum = require('keythereum');
 const { getAccount } = require('@iceteachain/common/src/utils');
+const { codec } = require('@iceteachain/common');
 
 function decode(password, keyObject) {
   const privateKey = keythereum.recover(password, keyObject);
@@ -7,9 +8,8 @@ function decode(password, keyObject) {
   return account;
 }
 function decodeTx(password, keyObject) {
-  console.log('keyObject', keyObject);
   const data = keythereum.recover(password, keyObject);
-  return data;
+  return codec.toString(data);
 }
 export { decodeTx, decode };
 export default decode;

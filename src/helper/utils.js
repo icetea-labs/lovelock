@@ -206,10 +206,10 @@ export async function savetoLocalStorage(address, keyObject) {
 }
 let cachesharekey = {};
 export async function generateSharedKey(privateKeyA, publicKeyB) {
-  console.log('a-b', privateKeyA, '-', publicKeyB);
+  // console.log('a-b', privateKeyA, '-', publicKeyB);
   const objkey = privateKeyA + publicKeyB;
   if (cachesharekey[objkey]) {
-    console.log('cachesharekey', cachesharekey[objkey]);
+    // console.log('cachesharekey', cachesharekey[objkey]);
     return cachesharekey[objkey];
   }
   const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
@@ -219,7 +219,7 @@ export async function generateSharedKey(privateKeyA, publicKeyB) {
 }
 export async function encodeWithSharedKey(data, sharekey) {
   const encodeData = encodeTx(data, sharekey, { noAddress: true });
-  return encodeData;
+  return JSON.stringify(encodeData || {});
 }
 export async function decodeWithSharedKey(data, sharekey) {
   const decodeData = decodeTx(sharekey, data);
@@ -227,13 +227,11 @@ export async function decodeWithSharedKey(data, sharekey) {
 }
 export async function encodeWithPublicKey(data, privateKeyA, publicKeyB) {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
-  const encodeData = encodeTx(data, sharekey, { noAddress: true });
-  return JSON.stringify(encodeData || {});
+  return encodeWithSharedKey(data, sharekey);
 }
 export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
-  const decodeData = decodeTx(sharekey, data);
-  return decodeData;
+  return decodeWithSharedKey(data, sharekey);
 }
 export const wallet = {
   createAccountWithMneomnic(mnemonic, index = 0) {

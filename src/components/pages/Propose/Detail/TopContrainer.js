@@ -150,9 +150,9 @@ export default function TopContrainer(props) {
     for (let i = 0; i < proposes.length; i++) {
       const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
       const reps = await getTagsInfo(newAddress);
-      const nick = await getAlias(newAddress);
-      proposes[i].name = reps['display-name'];
-      proposes[i].nick = '@' + nick;
+      // const nick = await getAlias(newAddress);
+      // proposes[i].name = reps['display-name'];
+      // proposes[i].nick = '@' + nick;
       proposes[i].publicKey = reps['pub-key'] || '';
 
       const senderTags = await getTagsInfo(proposes[i].sender);
@@ -176,6 +176,7 @@ export default function TopContrainer(props) {
         s_address: proposes[i].sender,
         r_publicKey: proposes[i].r_publicKey,
         r_address: proposes[i].receiver,
+        publicKey: proposes[i].publicKey,
       };
       setAccount(data);
       // console.log('r_publicKey', data);
