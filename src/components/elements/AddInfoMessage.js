@@ -141,10 +141,9 @@ const tileData = [
 export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   // const [date, setDate] = useState(new Date());
-  const { date } = props;
+  const { files, date } = props;
   function captureUploadFile(event) {
-    const files = event.target.files;
-    onChangeMedia(files);
+    onChangeMedia(event.target.files);
   }
   function handleDateChange(value) {
     // setDate(value);
@@ -193,7 +192,8 @@ export default function AddInfoMessage(props) {
           <Grid item>
             <ImgUpLoad>
               <div className="icon-upload">
-                <i className="material-icons">insert_photo</i>
+                {files ? <i className="material-icons">done</i> : <i className="material-icons">insert_photo</i>}
+
                 <div>Photo/Video</div>
               </div>
               <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} />
