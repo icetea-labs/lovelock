@@ -140,14 +140,14 @@ const tileData = [
 ];
 export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
-  const [date, setDate] = useState(new Date());
-
+  // const [date, setDate] = useState(new Date());
+  const { files, date } = props;
   function captureUploadFile(event) {
     const files = event.target.files;
     onChangeMedia(files);
   }
   function handleDateChange(value) {
-    setDate(value);
+    // setDate(value);
     onChangeDate(value);
   }
   // const classes = useStyles();
