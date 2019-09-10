@@ -103,7 +103,9 @@ export default function CreateMemory(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
-  const privateKey = useSelector(state => state.account.privateKey);
+  const { privateKey, address, s_publicKey, s_address, r_publicKey, r_address, publicKey } = useSelector(
+    state => state.account
+  );
   const propose = useSelector(state => state.loveinfo.propose);
   const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState('');
@@ -154,11 +156,10 @@ export default function CreateMemory(props) {
       let params = [];
       if (privacy) {
         const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
-        // console.log('privateKey', privateKey);
+        // console.log('info', memoryContent, info);
         // console.log('publicKey', currentPropose.publicKey);
-        console.log('currentPropose', currentPropose);
-        const newContent = await encodeWithPublicKey(memoryContent, privateKey, currentPropose.publicKey);
-        const newInfo = await encodeWithPublicKey(info, privateKey, currentPropose.publicKey);
+        const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
+        const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
         // console.log('newContent', newContent);
         // console.log('newInfo', newInfo);
         params = [proIndex, !!privacy, newContent, newInfo];

@@ -11,6 +11,8 @@ import CardActions from '@material-ui/core/CardActions';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { TimeWithFormat } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import LockIcon from '@material-ui/icons/Lock';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import CommentIcon from '@material-ui/icons/Comment';
 import ShareIcon from '@material-ui/icons/Share';
@@ -107,9 +109,15 @@ export default function MessageHistory(props) {
           title={memory.name}
           subheader={<TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />}
           action={
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
+            <React.Fragment>
+              <IconButton aria-label="settings">
+                {/* {memory.isPrivate && (memory.isUnlock ? <LockOpenIcon /> : <LockIcon />)} */}
+                {memory.isPrivate && <LockIcon />}
+              </IconButton>
+              <IconButton aria-label="settings">
+                <MoreVertIcon />
+              </IconButton>
+            </React.Fragment>
           }
         />
         <CardContent>

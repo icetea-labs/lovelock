@@ -18,11 +18,7 @@ function encode(privateKey, password, ops) {
   };
 
   const dk = keythereum.create();
-  if (options.noAddress) {
-    return keythereum.dump(password, privateKey, dk.salt, dk.iv, options);
-  } else {
-    return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
-  }
+  return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
 }
 function encodeTx(data, password, ops) {
   const options = {
@@ -33,15 +29,11 @@ function encodeTx(data, password, ops) {
       dklen: 32,
       prf: 'hmac-sha256',
     },
-    ...ops,
+    noAddress: true,
   };
 
   const dk = keythereum.create();
-  if (options.noAddress) {
-    return keythereum.dump(password, data, dk.salt, dk.iv, options);
-  } else {
-    return keythereum.dump(password, codec.toBuffer(data), dk.salt, dk.iv, options);
-  }
+  return keythereum.dump(password, codec.toBuffer(data), dk.salt, dk.iv, options);
 }
 export { encodeTx, encode };
 export default encode;
