@@ -90,9 +90,7 @@ class PromiseAlert extends React.Component {
               </div>
             )}
           </TagTitle>
-          <ImgView>
-            <img src={ipfs + hash} className="postImg" alt="promiseImg" />
-          </ImgView>
+          <ImgView>{hash && <img src={ipfs + hash} className="postImg" alt="promiseImg" />}</ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
       </div>

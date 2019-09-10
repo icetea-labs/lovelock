@@ -73,13 +73,15 @@ export default function GetKeyToAuthen(props) {
           console.log('view result', result);
           setTimeout(() => {
             setLoading(false);
-            enqueueSnackbar('I love snacks.');
             close();
           }, 50);
         } catch (err) {
-          console.log(err);
+          // console.log(err);
           setLoading(false);
-          enqueueSnackbar('This is a warning message!', 'warning');
+          const message = 'Wrong password. Please try again.';
+          enqueueSnackbar(message, {
+            variant: 'error',
+          });
         }
       }, 100);
     }
