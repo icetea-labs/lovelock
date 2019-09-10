@@ -31,25 +31,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-// const people = [
-//   {
-//     nick: 'HuyHQ',
-//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
-//   },
-//   {
-//     nick: 'MyNTT',
-//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
-//   },
-//   {
-//     nick: 'ThiTH',
-//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
-//   },
-//   {
-//     nick: 'LuongHV',
-//     address: 'teat0v0nc8393l9sfav3a7fwj0ru5mhse2x96fv5jpd',
-//   },
-// ];
-
 function TextFieldPlaceholder(props) {
   const classes = useStyles();
   return <TextField className={classes.textField} {...props} />;
