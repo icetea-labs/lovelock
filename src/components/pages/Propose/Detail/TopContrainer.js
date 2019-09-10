@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { callView, getTagsInfo, getAlias } from '../../../../helper';
-
+import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -115,6 +115,7 @@ const useStyles = makeStyles({
 
 export default function TopContrainer(props) {
   const { proIndex } = props;
+  const dispatch = useDispatch();
   const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
   const [topInfo, setTopInfo] = useState({});
@@ -126,6 +127,10 @@ export default function TopContrainer(props) {
     }
     fetchData();
   }, [proIndex]);
+
+  function setAccount(value) {
+    dispatch(actions.setAccount(value));
+  }
 
   async function loadProposes(proIndex) {
     const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
@@ -148,21 +153,32 @@ export default function TopContrainer(props) {
       const nick = await getAlias(newAddress);
       proposes[i].name = reps['display-name'];
       proposes[i].nick = '@' + nick;
+      proposes[i].publicKey = reps['pub-key'] || '';
 
-      const sender = await getTagsInfo(proposes[i].sender);
-      const s_nick = await getAlias(newAddress);
-      proposes[i].s_name = sender['display-name'];
+      const senderTags = await getTagsInfo(proposes[i].sender);
+      proposes[i].s_name = senderTags['display-name'];
+      proposes[i].s_publicKey = senderTags['pub-key'] || '';
+      const s_nick = await getAlias(proposes[i].sender);
       proposes[i].s_nick = '@' + s_nick;
 
-      const receiver = await getTagsInfo(proposes[i].receiver);
-      const r_nick = await getAlias(newAddress);
-      proposes[i].r_name = receiver['display-name'];
+      const receiverTags = await getTagsInfo(proposes[i].receiver);
+      proposes[i].r_publicKey = receiverTags['pub-key'] || '';
+      proposes[i].r_name = receiverTags['display-name'];
+      const r_nick = await getAlias(proposes[i].receiver);
       proposes[i].r_nick = '@' + r_nick;
 
       const info = JSON.parse(proposes[i].info);
       proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
       proposes[i].s_date = info.date;
       proposes[i].r_date = info.date;
+      const data = {
+        s_publicKey: proposes[i].s_publicKey,
+        s_address: proposes[i].sender,
+        r_publicKey: proposes[i].r_publicKey,
+        r_address: proposes[i].receiver,
+      };
+      setAccount(data);
+      // console.log('r_publicKey', data);
     }
     return proposes;
   }
