@@ -156,7 +156,7 @@ export default function CreateMemory(props) {
         const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
         // console.log('privateKey', privateKey);
         // console.log('publicKey', currentPropose.publicKey);
-        // console.log('currentPropose', currentPropose);
+        console.log('currentPropose', currentPropose);
         const newContent = await encodeWithPublicKey(memoryContent, privateKey, currentPropose.publicKey);
         const newInfo = await encodeWithPublicKey(info, privateKey, currentPropose.publicKey);
         // console.log('newContent', newContent);

@@ -204,23 +204,18 @@ export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');
   localStorage.setItem('user', JSON.stringify({ address, keyObject }));
 }
+let cachesharekey = {};
 export async function generateSharedKey(privateKeyA, publicKeyB) {
+  console.log('a-b', privateKeyA, '-', publicKeyB);
+  const objkey = privateKeyA + publicKeyB;
+  if (cachesharekey[objkey]) {
+    console.log('cachesharekey', cachesharekey[objkey]);
+    return cachesharekey[objkey];
+  }
   const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
-  const p1 = '7xsfEQXkUiEMWn3N1Q8xmBCikZWU1aeuADBKXvjiNsFY';
-  const a2 = 'sDoXoi7VxPmpVQuMWegfuhcR9iH5j27RwM6A5JW7ypH5';
-
-  const p2 = '3JC5VYG3VwgRuU7h6GS7a2kiyXytKQPW2DDtoDGR4k8L';
-  const a1 = 'qCAeXugCQf6FoxBHDCkCPnNpffGh5e6go9TKNRwD469X';
-
-  const sharekey1 = await eccrypto.derive(codec.toKeyBuffer(p1), codec.toKeyBuffer(a2));
-  const sharekey2 = await eccrypto.derive(codec.toKeyBuffer(p2), codec.toKeyBuffer(a1));
-  console.log('sharekey1', codec.toString(sharekey1));
-  console.log('sharekey2', codec.toString(sharekey2));
-  // console.log('sharekey2', sharekey2);
-  console.log('privateKeyA', privateKeyA);
-  console.log('publicKeyB', publicKeyB);
-  console.log('codec.toString(sharekey)', codec.toString(sharekey));
-  return codec.toString(sharekey);
+  const result = codec.toString(sharekey);
+  cachesharekey = { [objkey]: result };
+  return result;
 }
 export async function encodeWithSharedKey(data, sharekey) {
   const encodeData = encodeTx(data, sharekey, { noAddress: true });

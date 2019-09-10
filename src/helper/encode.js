@@ -24,7 +24,7 @@ function encode(privateKey, password, ops) {
     return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
   }
 }
-function encodeTx(privateKey, password, ops) {
+function encodeTx(data, password, ops) {
   const options = {
     kdf: 'pbkdf2',
     cipher: 'aes-128-ctr',
@@ -38,9 +38,9 @@ function encodeTx(privateKey, password, ops) {
 
   const dk = keythereum.create();
   if (options.noAddress) {
-    return keythereum.dump(password, privateKey, dk.salt, dk.iv, options);
+    return keythereum.dump(password, data, dk.salt, dk.iv, options);
   } else {
-    return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
+    return keythereum.dump(password, codec.toBuffer(data), dk.salt, dk.iv, options);
   }
 }
 export { encodeTx, encode };

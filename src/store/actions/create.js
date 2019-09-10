@@ -20,10 +20,10 @@ export const setPassword = password => ({
   type: actionTypes.SET_PASSWORD,
   password
 });
-export const setAccount = data => ({
-  type: actionTypes.SET_ACCOUNT,
-  data
-});
+// export const setAccount = data => ({
+//   type: actionTypes.SET_ACCOUNT,
+//   data
+// });
 export const setShowPrivateKey = data => ({
   type: actionTypes.SET_SHOW_PRIVATEKEY,
   data

@@ -7,6 +7,7 @@ function decode(password, keyObject) {
   return account;
 }
 function decodeTx(password, keyObject) {
+  console.log('keyObject', keyObject);
   const data = keythereum.recover(password, keyObject);
   return data;
 }
