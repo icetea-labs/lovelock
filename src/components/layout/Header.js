@@ -486,8 +486,8 @@ export default function Header() {
               <Typography className={classes.title} noWrap>
                 {displayName}
               </Typography>
-              <Typography noWrap>Explore</Typography>
-              <KeyboardArrowDownIcon className={classes.menuIcon} />
+              {/* <Typography noWrap>Explore</Typography> */}
+              {/* <KeyboardArrowDownIcon className={classes.menuIcon} /> */}
               <div className={classes.sectionDesktop}>
                 <IconButton
                   color="inherit"
@@ -497,7 +497,7 @@ export default function Header() {
                   variant="contained"
                   onClick={handleFriReqOpen}
                 >
-                  <Badge badgeContent={4} color="primary">
+                  <Badge badgeContent={0} color="primary">
                     <GroupIcon />
                   </Badge>
                 </IconButton>
@@ -509,7 +509,7 @@ export default function Header() {
                   variant="contained"
                   onClick={handleNotiOpen}
                 >
-                  <Badge badgeContent={12} color="primary">
+                  <Badge badgeContent={0} color="primary">
                     <NotificationsIcon />
                   </Badge>
                 </IconButton>

@@ -84,6 +84,17 @@ class Propose {
     return res;
   }
 
+  @view getMemoryByRange(start: number, end: number) {
+    const allMem = this.memories;
+    let i = 0;
+    let res = [];
+    if (end > allMem.length) end = allMem.length;
+    for (i = start; i < end; i++) {
+      if (!allMem[i].isPrivate) res.push(allMem[i])
+    }
+    return res;
+  }
+
   // Change info { img:Array, location:string, date:string }
   @transaction changeInfoPropose(index: number, info: string) {
     const pro = this._getDataByIndex(this.propose, index);

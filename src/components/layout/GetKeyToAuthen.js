@@ -1,92 +1,95 @@
-import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import tweb3 from '../../service/tweb3';
 
-import * as actionsGlobal from '../../store/actions/globalData';
-import * as actions from '../../store/actions/account';
+import * as actions from '../../store/actions';
 import { codec } from '@iceteachain/common';
 import { wallet } from '../../helper';
 import { decode } from '../../helper';
 import CommonDialog from '../pages/Propose/CommonDialog';
 import TextField from '@material-ui/core/TextField';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 
-class GetKeyToAuthen extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      password: '',
-      errMsg: '',
-      loading: false,
+export default function GetKeyToAuthen(props) {
+  const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
+  const encryptedData = useSelector(state => state.account.encryptedData);
+  const needAuth = useSelector(state => state.account.needAuth);
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const handleUserKeyPress = function(event) {
+      if (event.keyCode === 13) {
+        confirm();
+      }
+      if (event.keyCode === 27) {
+        close();
+      }
     };
+    window.document.body.addEventListener('keydown', handleUserKeyPress);
+    return () => {
+      window.document.body.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, [password]);
+
+  function setLoading(value) {
+    dispatch(actions.setLoading(value));
   }
 
-  componentDidMount() {
-    window.document.body.addEventListener('keydown', this._keydown);
+  function setAccount(value) {
+    dispatch(actions.setAccount(value));
   }
 
-  componentWillUnmount() {
-    clearTimeout(this.timeoutHanle1);
-    clearTimeout(this.timeoutHanle2);
-    window.document.body.removeEventListener('keydown', this._keydown);
+  function passwordChange(event) {
+    const password = event.target.value;
+    setPassword(password);
   }
 
-  _passwordChange = value => {
-    const password = value.currentTarget.value;
-    this.setState({
-      password,
-    });
-  };
+  function setNeedAuth(value) {
+    dispatch(actions.setNeedAuth(value));
+  }
 
-  _close = () => {
-    const { props } = this;
-    props.setNeedAuth(false);
-    props.setAuthEle(null);
-  };
+  function close() {
+    setNeedAuth(false);
+  }
 
-  _confirm = () => {
-    const { password } = this.state;
-    const { setLoading, setAccount, encryptedData } = this.props;
-
+  function confirm() {
     if (encryptedData) {
       if (!password) {
-        this.setState({ errMsg: 'Password required.' });
         return;
       }
       setLoading(true);
 
-      this.timeoutHanle1 = setTimeout(() => {
+      setTimeout(() => {
         try {
           let privateKey = '';
           privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
           const account = { address, privateKey, cipher: password };
+          console.log('view account', account);
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
-          setAccount(account);
-          this.timeoutHanle2 = setTimeout(() => {
+          const result = setAccount(account);
+          console.log('view result', result);
+          setTimeout(() => {
             setLoading(false);
-            this._close();
+            close();
           }, 50);
         } catch (err) {
           // console.log(err);
-          this.setState({
-            errMsg: 'Wrong Password!',
-          });
           setLoading(false);
+          const message = 'Wrong password. Please try again.';
+          enqueueSnackbar(message, {
+            variant: 'error',
+          });
         }
       }, 100);
     }
-  };
+  }
 
-  _keydown = e => {
-    e.keyCode === 13 && this._confirm();
-    e.keyCode === 27 && this._close();
-  };
-
-  render() {
-    const { needAuth } = this.props;
-    return needAuth ? (
-      <CommonDialog title="Password Confirm" okText="Confirm" close={this._close} confirm={this._confirm}>
+  return needAuth ? (
+    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={confirm}>
+      <SnackbarProvider>
         <TextField
           id="Password"
           label="Password"
@@ -94,51 +97,51 @@ class GetKeyToAuthen extends PureComponent {
           fullWidth
           autoFocus
           margin="normal"
-          onChange={this._passwordChange}
+          onChange={passwordChange}
           type="password"
         />
-      </CommonDialog>
-    ) : null;
-  }
+      </SnackbarProvider>
+    </CommonDialog>
+  ) : null;
 }
 
-const mapStateToProps = state => {
-  const { account, globalData } = state;
-  return {
-    needAuth: account.needAuth,
-    address: account.address,
-    encryptedData: account.encryptedData,
-    childKey: account.childKey,
-    triggerElement: globalData.triggerElement,
-  };
-};
+// const mapStateToProps = state => {
+//   const { account, globalData } = state;
+//   return {
+//     needAuth: account.needAuth,
+//     address: account.address,
+//     encryptedData: account.encryptedData,
+//     childKey: account.childKey,
+//     triggerElement: globalData.triggerElement,
+//   };
+// };
 
-GetKeyToAuthen.defaultProps = {
-  needAuth: true,
-  setAccount() {},
-  setNeedAuth() {},
-  dispatch() {},
-  triggerElement: null,
-};
+// GetKeyToAuthen.defaultProps = {
+//   needAuth: true,
+//   setAccount() {},
+//   setNeedAuth() {},
+//   dispatch() {},
+//   triggerElement: null,
+// };
 
-const mapDispatchToProps = dispatch => {
-  return {
-    setAccount: data => {
-      dispatch(actions.setAccount(data));
-    },
-    setNeedAuth: data => {
-      dispatch(actions.setNeedAuth(data));
-    },
-    setAuthEle: data => {
-      dispatch(actionsGlobal.setAuthEle(data));
-    },
-    setLoading: value => {
-      dispatch(actionsGlobal.setLoading(value));
-    },
-  };
-};
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     setAccount: data => {
+//       dispatch(actions.setAccount(data));
+//     },
+//     setNeedAuth: data => {
+//       dispatch(actions.setNeedAuth(data));
+//     },
+//     setAuthEle: data => {
+//       dispatch(actionsGlobal.setAuthEle(data));
+//     },
+//     setLoading: value => {
+//       dispatch(actionsGlobal.setLoading(value));
+//     },
+//   };
+// };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(GetKeyToAuthen);
+// export default connect(
+//   mapStateToProps,
+//   mapDispatchToProps
+// )(GetKeyToAuthen);

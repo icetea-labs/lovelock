@@ -22,8 +22,8 @@ function create(state = initialState, action) {
       return Object.assign({}, state, {
         step: action.step
       });
-    case actionTypes.SET_ACCOUNT:
-      return Object.assign({}, state, action.data);
+    // case actionTypes.SET_ACCOUNT:
+    //   return Object.assign({}, state, action.data);
     case actionTypes.SET_SHOW_PRIVATEKEY:
       return Object.assign({}, state, {
         showPrivateKey: action.data

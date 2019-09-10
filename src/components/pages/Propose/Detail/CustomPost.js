@@ -146,10 +146,10 @@ class CustomPost extends React.Component {
             <div className="tags_tilte">
               <p>Tags: </p>
             </div>
-            <div className="tagName">
+            {/* <div className="tagName">
               <span>#honeymoon </span>
               <span>#travel</span>
-            </div>
+            </div> */}
           </div>
           <div className="postAbove">
             <div className="picktime">
@@ -164,9 +164,9 @@ class CustomPost extends React.Component {
               />
               {/* <i className="material-icons">today</i> */}
             </div>
-            <div className="place-wrapper">
+            {/* <div className="place-wrapper">
               <i className="material-icons">location_on</i>
-            </div>
+            </div> */}
             <div className="upload_img">
               <input id="fileInput" type="file" className="fileInput" onChange={this.captureFile} />
               <i className="material-icons">insert_photo</i>
