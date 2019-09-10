@@ -7,6 +7,7 @@ import { TagTitle } from './Promise';
 import { connect } from 'react-redux';
 import { sendTransaction } from '../../../helper/index';
 import notifi from '../../elements/Notification';
+import { withSnackbar } from 'notistack';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -58,7 +59,9 @@ class PromiseConfirm extends React.Component {
       // console.log('View result', result);
       if (result) {
         // window.alert('send success');
-        notifi.info('Success!');
+        // notifi.info('Success!');
+        const message = 'Your propose has been confirmed.';
+        this.props.enqueueSnackbar(message, { variant: 'success' });
         this.props.close();
       }
     } catch (error) {
@@ -157,4 +160,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   null
-)(PromiseConfirm);
+)(withSnackbar(PromiseConfirm));

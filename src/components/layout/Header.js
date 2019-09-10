@@ -20,6 +20,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
@@ -28,6 +29,9 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import PersonIcon from '@material-ui/icons/Person';
+import AddIcon from '@material-ui/icons/Add';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import { withRouter } from 'react-router-dom';
 
@@ -79,9 +83,6 @@ const useStyles = makeStyles(theme => ({
       // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
     },
   },
-  profile: {
-    display: 'flex',
-  },
   avatar: {
     margin: 10,
     width: 46,
@@ -102,6 +103,7 @@ const useStyles = makeStyles(theme => ({
   },
   friReqConfirm: {
     color: '#8250c8',
+    marginRight: theme.spacing(2),
   },
   friReqName: {
     width: 135,
@@ -111,8 +113,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
   },
   listNoti: {
-    width: '100%',
-    maxWidth: 400,
+    maxWidth: 330,
     padding: theme.spacing(0),
     backgroundColor: theme.palette.background.paper,
   },
@@ -205,7 +206,6 @@ const useStyles = makeStyles(theme => ({
 const StyledMenu = withStyles({
   paper: {
     border: '1px solid #d3d4d5',
-    width: 422,
     borderRadius: 10,
   },
 })(props => (
@@ -339,22 +339,40 @@ function Header(props) {
   });
   // const menuId = 'primary-search-account-menu';
   const renderMenu = (
-    <StyledMenu anchorEl={anchorElMenu} keepMounted open={isMenuOpen} onClose={handleMenuClose}>
-      <MenuItem>Update Profile</MenuItem>
-      <MenuItem
+    <StyledMenu
+      className={classes.profileMenu}
+      anchorEl={anchorElMenu}
+      keepMounted
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <StyledMenuItem>
+        <ListItemIcon>
+          <PersonIcon />
+        </ListItemIcon>
+        <ListItemText primary="Update Profile" />
+      </StyledMenuItem>
+      <StyledMenuItem
         onClick={() => {
           props.history.push('/register');
         }}
       >
-        Create New Account
-      </MenuItem>
-      <MenuItem
+        <ListItemIcon>
+          <AddIcon />
+        </ListItemIcon>
+        <ListItemText primary="Create New Account" />
+      </StyledMenuItem>
+      <Divider />
+      <StyledMenuItem
         onClick={() => {
           props.history.push('/login');
         }}
       >
-        Change Account
-      </MenuItem>
+        <ListItemIcon>
+          <ExitToAppIcon />
+        </ListItemIcon>
+        <ListItemText primary="Change Account" />
+      </StyledMenuItem>
     </StyledMenu>
   );
 
