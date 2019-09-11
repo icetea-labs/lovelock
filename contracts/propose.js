@@ -18,6 +18,8 @@ class Propose {
     const isPrivate = false;
     const id = this.id;
 
+    expect(sender !== receiver, "Can't create owner propose.");
+
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     const pendingPropose = { id, sender, s_content, receiver, status: 0, info, isPrivate };
 

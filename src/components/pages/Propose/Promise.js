@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CustomPost from './Detail/CustomPost';
 import CommonDialog from './CommonDialog';
@@ -15,6 +15,10 @@ import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { withSnackbar } from 'notistack';
 import AddInfoMessage from '../../elements/AddInfoMessage';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import { FlexBox } from '../../elements/StyledUtils';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -32,6 +36,16 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1),
   },
 }));
+
+const CustCheckbox = withStyles({
+  root: {
+    color: '#fe8dc3',
+    '&$checked': {
+      color: 'fe8dc3',
+    },
+  },
+  checked: {},
+})(props => <Checkbox color="default" {...props} />);
 
 function TextFieldPlaceholder(props) {
   const classes = useStyles();
@@ -69,6 +83,7 @@ class Promise extends React.Component {
       hash: '',
       value: '',
       suggestions: [],
+      checked: false,
     };
   }
 
@@ -260,9 +275,16 @@ class Promise extends React.Component {
     });
   };
 
+  handleCheckChange = e => {
+    document.activeElement.blur();
+    this.setState({
+      checked: e.target.checked,
+    });
+  };
+
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value } = this.state;
+    const { partner, promiseStm, date, file, suggestions, value, checked } = this.state;
     console.log('partner', partner);
 
     const inputProps = {
@@ -272,16 +294,17 @@ class Promise extends React.Component {
     };
 
     return (
-      <CommonDialog
-        title="Promise"
-        okText="Send"
-        close={close}
-        confirm={() => {
-          this.createPropose(partner, promiseStm, date, file);
-        }}
-      >
-        <TagTitle>Tag your partner you promise</TagTitle>
-        {/* <TextFieldPlaceholder
+      <ValidatorForm onSubmit={this.gotoNext}>
+        <CommonDialog
+          title="Promise"
+          okText="Send"
+          close={close}
+          confirm={() => {
+            this.createPropose(partner, promiseStm, date, file);
+          }}
+        >
+          <TagTitle>Tag your partner you promise</TagTitle>
+          {/* <TextFieldPlaceholder
           id="outlined-helperText"
           placeholder="@partner"
           margin="normal"
@@ -289,28 +312,63 @@ class Promise extends React.Component {
           fullWidth
           onChange={this.partnerChange}
         /> */}
-        <Autosuggest
-          suggestions={suggestions}
-          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-          getSuggestionValue={this.getSuggestionValue}
-          renderSuggestion={this.renderSuggestion1}
-          inputProps={inputProps}
-        />
-        <TagTitle>Your promise</TagTitle>
-        <TextFieldMultiLine
-          id="outlined-multiline-static"
-          placeholder="your promise ..."
-          multiline
-          fullWidth
-          rows="5"
-          margin="normal"
-          variant="outlined"
-          onChange={this.promiseStmChange}
-        />
-        {/* <CustomPost onChange={this.onChangeCus} /> */}
-        <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
-      </CommonDialog>
+          <Autosuggest
+            suggestions={suggestions}
+            onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+            onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+            getSuggestionValue={this.getSuggestionValue}
+            renderSuggestion={this.renderSuggestion1}
+            inputProps={inputProps}
+          />
+          <FormControlLabel
+            control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
+            label="or Send request to your crush(Imaginary Lover)"
+          />
+          {checked && (
+            <FlexBox>
+              <TextValidator
+                label="First Name"
+                fullWidth
+                // onChange={this.handleUsername}
+                name="firstname"
+                validators={['required']}
+                errorMessages={['This field is required']}
+                // className={classes.marginRight}
+                margin="normal"
+                // value={firstname}
+              />
+              <TextValidator
+                label="Last Name"
+                fullWidth
+                // onChange={this.handleUsername}
+                name="lastname"
+                validators={['required']}
+                errorMessages={['This field is required']}
+                margin="normal"
+                // value={lastname}
+              />
+            </FlexBox>
+          )}
+          <TagTitle>Your promise</TagTitle>
+          <TextFieldMultiLine
+            id="outlined-multiline-static"
+            placeholder="your promise ..."
+            multiline
+            fullWidth
+            rows="5"
+            margin="normal"
+            variant="outlined"
+            onChange={this.promiseStmChange}
+          />
+          {/* <CustomPost onChange={this.onChangeCus} /> */}
+          <AddInfoMessage
+            files={file}
+            date={date}
+            onChangeDate={this.onChangeDate}
+            onChangeMedia={this.onChangeMedia}
+          />
+        </CommonDialog>
+      </ValidatorForm>
     );
   }
 }
