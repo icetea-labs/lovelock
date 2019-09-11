@@ -122,6 +122,7 @@ export default function TopContrainer(props) {
   }, [props.proIndex]);
 
   function loadProposes(proIndex) {
+    window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
       const infoCache = propose.filter(item => item.id === proIndex)[0] || [];

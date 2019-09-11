@@ -111,14 +111,11 @@ export default function MemoryContent(props) {
             }
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
-          }, 10);
+          }, 100);
         } else {
-          // memory.content = 'private message...';
-          // obj.info = {};
           console.log('sharekey null');
         }
       }
-      // setMemoryDecrypted(obj);
     }, 100);
   }
 
