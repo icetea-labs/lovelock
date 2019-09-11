@@ -91,7 +91,7 @@ class PromiseAlert extends React.Component {
             )}
           </TagTitle>
           <ImgView>
-            <img src={ipfs + hash} className="postImg" alt="promiseImg" />
+            {hash && <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>

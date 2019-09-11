@@ -11,6 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
+import { encodeWithPublicKey } from '../../../helper';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -30,6 +31,7 @@ const CreatePost = styled.div`
   right: 0px;
   bottom: 0px;
   z-index: 2 !important;
+  margin-bottom: 24px;
 `;
 const ShadowBox = styled.div`
   padding: 30px;
@@ -94,6 +96,8 @@ const BootstrapTextField = withStyles(theme => ({
   root: {
     fontSize: 16,
     paddingLeft: theme.spacing(1),
+    borderColor: '#8250c8',
+    // background: 'red',
   },
 }))(InputBase);
 
@@ -102,7 +106,8 @@ export default function CreateMemory(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
-  const privateKey = useSelector(state => state.account.privateKey);
+  const { privateKey, publicKey } = useSelector(state => state.account);
+  // const propose = useSelector(state => state.loveinfo.propose);
   const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
@@ -143,24 +148,40 @@ export default function CreateMemory(props) {
       return;
     }
     setGLoading(true);
-    const { proIndex } = props;
-    let hash = '';
-    if (file) hash = await saveToIpfs(file);
+    setTimeout(async () => {
+      const { proIndex } = props;
+      let hash = '';
+      if (file) hash = await saveToIpfs(file);
+      const method = 'addMemory';
+      const info = JSON.stringify({ date, hash });
+      let params = [];
+      if (privacy) {
+        // const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
+        // console.log('info', memoryContent, info);
+        // console.log('publicKey', currentPropose.publicKey);
+        const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
+        const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
+        // console.log('newContent', newContent);
+        // console.log('newInfo', newInfo);
+        params = [proIndex, !!privacy, newContent, newInfo];
+      } else {
+        params = [proIndex, !!privacy, memoryContent, info];
+      }
 
-    const method = 'addMemory';
-    const info = JSON.stringify({ date, hash });
-    const params = [proIndex, memoryContent, info];
-    const result = await sendTransaction(method, params);
-    if (result) {
-      loadMemory();
-    }
-    setGLoading(false);
-    setGrayLayout(false);
-    //reset input value
-    setFilePath('');
-    setDate(new Date());
-    setMemoryContent('');
+      const result = await sendTransaction(method, params);
+      if (result) {
+        loadMemory();
+      }
+      setGLoading(false);
+      setGrayLayout(false);
+      //reset input value
+      setFilePath('');
+      setDate(new Date());
+      setMemoryContent('');
+      setPrivacy(0);
+    }, 100);
   }
+
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
@@ -168,12 +189,14 @@ export default function CreateMemory(props) {
         <ShadowBox>
           <Grid container direction="column" spacing={3}>
             <Grid item>
-              <Grid container spacing={1}>
+              <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
                   <Avatar alt="avata" src="/static/img/user-men.jpg" className={classes.avatar} />
                 </Grid>
-                <Grid item xs={9}>
+                <Grid item xs={12}>
                   <BootstrapTextField
+                    rows={3}
+                    rowsMax={10}
                     fullWidth
                     multiline
                     value={memoryContent}
@@ -185,7 +208,13 @@ export default function CreateMemory(props) {
               </Grid>
             </Grid>
             <Grid item>
-              <AddInfoMessage grayLayout={grayLayout} onChangeDate={onChangeDate} onChangeMedia={onChangeMedia} />
+              <AddInfoMessage
+                files={filePath}
+                date={date}
+                grayLayout={grayLayout}
+                onChangeDate={onChangeDate}
+                onChangeMedia={onChangeMedia}
+              />
             </Grid>
             {grayLayout && (
               <Grid item classes={{ root: classes.btBox }}>

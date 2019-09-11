@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { createMuiTheme } from '@material-ui/core/styles';
 // import { ThemeProvider } from '@material-ui/styles';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { SnackbarProvider } from 'notistack';
 
 import store from './store';
 
@@ -116,10 +117,19 @@ const theme = createMuiTheme({
     },
   },
 });
+
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
-      <App />
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <App />
+      </SnackbarProvider>
     </Provider>
   </MuiThemeProvider>,
   document.getElementById('root')

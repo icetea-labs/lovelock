@@ -20,6 +20,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
@@ -28,6 +29,11 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import PersonIcon from '@material-ui/icons/Person';
+import AddIcon from '@material-ui/icons/Add';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+import { withRouter } from 'react-router-dom';
 
 const StyledLogo = styled.a`
   font-size: ${rem(20)};
@@ -97,6 +103,7 @@ const useStyles = makeStyles(theme => ({
   },
   friReqConfirm: {
     color: '#8250c8',
+    marginRight: theme.spacing(2),
   },
   friReqName: {
     width: 135,
@@ -106,8 +113,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
   },
   listNoti: {
-    width: '100%',
-    maxWidth: 400,
+    maxWidth: 330,
     padding: theme.spacing(0),
     backgroundColor: theme.palette.background.paper,
   },
@@ -127,6 +133,7 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     display: 'none',
+    color: '#fff',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
       minWidth: 50,
@@ -199,7 +206,6 @@ const useStyles = makeStyles(theme => ({
 const StyledMenu = withStyles({
   paper: {
     border: '1px solid #d3d4d5',
-    width: 422,
     borderRadius: 10,
   },
 })(props => (
@@ -273,28 +279,29 @@ const notifiList = [
   },
 ];
 
-export default function Header() {
+function Header(props) {
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [anchorElNoti, setAnchorElNoti] = useState(null);
+  const [anchorElMenu, setAnchorElMenu] = useState(null);
 
-  // const isMenuOpen = Boolean(anchorEl);
+  const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   function handleProfileMenuOpen(event) {
-    setAnchorEl(event.currentTarget);
+    setAnchorElMenu(event.currentTarget);
   }
 
   function handleMobileMenuClose() {
     setMobileMoreAnchorEl(null);
   }
 
-  // function handleMenuClose() {
-  //   setAnchorEl(null);
-  //   handleMobileMenuClose();
-  // }
+  function handleMenuClose() {
+    setAnchorElMenu(null);
+    handleMobileMenuClose();
+  }
 
   function handleMobileMenuOpen(event) {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -331,20 +338,43 @@ export default function Header() {
     fetchData();
   });
   // const menuId = 'primary-search-account-menu';
-  // const renderMenu = (
-  //   <Menu
-  //     anchorEl={anchorEl}
-  //     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-  //     id={menuId}
-  //     keepMounted
-  //     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-  //     open={isMenuOpen}
-  //     onClose={handleMenuClose}
-  //   >
-  //     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-  //     <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-  //   </Menu>
-  // );
+  const renderMenu = (
+    <StyledMenu
+      className={classes.profileMenu}
+      anchorEl={anchorElMenu}
+      keepMounted
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <StyledMenuItem>
+        <ListItemIcon>
+          <PersonIcon />
+        </ListItemIcon>
+        <ListItemText primary="Update Profile" />
+      </StyledMenuItem>
+      <StyledMenuItem
+        onClick={() => {
+          props.history.push('/register');
+        }}
+      >
+        <ListItemIcon>
+          <AddIcon />
+        </ListItemIcon>
+        <ListItemText primary="Create New Account" />
+      </StyledMenuItem>
+      <Divider />
+      <StyledMenuItem
+        onClick={() => {
+          props.history.push('/login');
+        }}
+      >
+        <ListItemIcon>
+          <ExitToAppIcon />
+        </ListItemIcon>
+        <ListItemText primary="Change Account" />
+      </StyledMenuItem>
+    </StyledMenu>
+  );
 
   const friReqMenu = (
     <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
@@ -482,12 +512,14 @@ export default function Header() {
                 />
               </div>
               <div className={classes.grow} />
-              <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
-              <Typography className={classes.title} noWrap>
-                {displayName}
-              </Typography>
-              <Typography noWrap>Explore</Typography>
-              <KeyboardArrowDownIcon className={classes.menuIcon} />
+              <IconButton className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
+                <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
+                <Typography className={classes.title} noWrap>
+                  {displayName}
+                </Typography>
+              </IconButton>
+              {/* <Typography noWrap>Explore</Typography> */}
+              {/* <KeyboardArrowDownIcon className={classes.menuIcon} /> */}
               <div className={classes.sectionDesktop}>
                 <IconButton
                   color="inherit"
@@ -497,7 +529,7 @@ export default function Header() {
                   variant="contained"
                   onClick={handleFriReqOpen}
                 >
-                  <Badge badgeContent={4} color="primary">
+                  <Badge badgeContent={0} color="primary">
                     <GroupIcon />
                   </Badge>
                 </IconButton>
@@ -509,7 +541,7 @@ export default function Header() {
                   variant="contained"
                   onClick={handleNotiOpen}
                 >
-                  <Badge badgeContent={12} color="primary">
+                  <Badge badgeContent={0} color="primary">
                     <NotificationsIcon />
                   </Badge>
                 </IconButton>
@@ -549,10 +581,12 @@ export default function Header() {
         </StyledToolbar>
       </StyledAppBar>
       {renderMobileMenu}
-      {/* {renderMenu} */}
+      {renderMenu}
       {friReqMenu}
       {notiList}
       {needAuth && <GetKeyToAuthen />}
     </div>
   );
 }
+
+export default withRouter(Header);

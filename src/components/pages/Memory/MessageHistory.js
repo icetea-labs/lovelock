@@ -11,6 +11,8 @@ import CardActions from '@material-ui/core/CardActions';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { TimeWithFormat } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+// import LockOpenIcon from '@material-ui/icons/LockOpen';
+import LockIcon from '@material-ui/icons/Lock';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import CommentIcon from '@material-ui/icons/Comment';
 import ShareIcon from '@material-ui/icons/Share';
@@ -23,7 +25,7 @@ const ipfs = process.env.REACT_APP_IPFS;
 const useStyles = makeStyles(theme => ({
   card: {
     // maxWidth: 345,
-    margin: theme.spacing(3, 0),
+    marginBottom: theme.spacing(3),
     boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
     // boxShadow: 'none',
     // border: '1px solid rgba(234, 236, 239, 0.7)',
@@ -107,14 +109,30 @@ export default function MessageHistory(props) {
           title={memory.name}
           subheader={<TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />}
           action={
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
+            <React.Fragment>
+              {/* {memory.isPrivate && (memory.isUnlock ? <LockOpenIcon /> : <LockIcon />)} */}
+              {/* {memory.isPrivate && (
+                <IconButton aria-label="settings">
+                  <LockIcon />
+                </IconButton>
+              )} */}
+
+              <IconButton aria-label="settings">
+                <MoreVertIcon />
+              </IconButton>
+            </React.Fragment>
           }
         />
         <CardContent>
           <Typography variant="body2" color="textSecondary" component="p">
-            {memory.content}
+            {/* {memory.content} */}
+            {memory.isPrivate && !memory.isUnlock ? (
+              <IconButton aria-label="settings">
+                <LockIcon />
+              </IconButton>
+            ) : (
+              memory.content
+            )}
           </Typography>
         </CardContent>
         <React.Fragment>

@@ -60,9 +60,9 @@ class ByMnemonic extends PureComponent {
 
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const account = { address, privateKey, cipher: password };
+        setAccount(account);
         tweb3.wallet.importAccount(privateKey);
         tweb3.wallet.defaultAccount = address;
-        setAccount(account);
         // localStorage.removeItem('user');
         // localStorage.setItem('user', JSON.stringify(account));
         const keyObject = encode(privateKey, password);
