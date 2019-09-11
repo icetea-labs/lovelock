@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core/styles';
+// import { makeStyles } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Grid from '@material-ui/core/Grid';
 import DateFnsUtils from '@date-io/date-fns';
@@ -20,7 +20,7 @@ const Container = styled.div``;
 // `;
 const InfoBox = styled.div`
   min-height: 55px;
-  margin-top: 10px;
+  /* margin-top: 10px; */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -121,23 +121,24 @@ function MaterialUIPickers(props) {
     </MuiPickersUtilsProvider>
   );
 }
-const tileData = [
-  {
-    img: '/static/img/user-men.jpg',
-    title: 'Image',
-    author: 'author',
-  },
-  // {
-  //   img: '/static/img/user-men.jpg',
-  //   title: 'Image',
-  //   author: 'author',
-  // },
-  // {
-  //   img: '/static/img/user-men.jpg',
-  //   title: 'Image',
-  //   author: 'author',
-  // },
-];
+// const tileData = [
+//   {
+//     img: '/static/img/user-men.jpg',
+//     title: 'Image',
+//     author: 'author',
+//   },
+// {
+//   img: '/static/img/user-men.jpg',
+//   title: 'Image',
+//   author: 'author',
+// },
+// {
+//   img: '/static/img/user-men.jpg',
+//   title: 'Image',
+//   author: 'author',
+// },
+// ];
+
 export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   // const [date, setDate] = useState(new Date());
@@ -193,7 +194,6 @@ export default function AddInfoMessage(props) {
             <ImgUpLoad>
               <div className="icon-upload">
                 {files ? <i className="material-icons">done</i> : <i className="material-icons">insert_photo</i>}
-
                 <div>Photo/Video</div>
               </div>
               <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} />
