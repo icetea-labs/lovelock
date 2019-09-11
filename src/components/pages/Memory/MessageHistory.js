@@ -1,81 +1,30 @@
 import React from 'react';
+import MemoryContent from './MemoryContent';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
-import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import CardActions from '@material-ui/core/CardActions';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { TimeWithFormat } from '../../../helper';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-// import LockOpenIcon from '@material-ui/icons/LockOpen';
-import LockIcon from '@material-ui/icons/Lock';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import CommentIcon from '@material-ui/icons/Comment';
-import ShareIcon from '@material-ui/icons/Share';
-import Tooltip from '@material-ui/core/Tooltip';
-// import GridList from '@material-ui/core/GridList';
-// import GridListTile from '@material-ui/core/GridListTile';
-
-const ipfs = process.env.REACT_APP_IPFS;
 
 const useStyles = makeStyles(theme => ({
   card: {
-    // maxWidth: 345,
     marginBottom: theme.spacing(3),
     boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
-    // boxShadow: 'none',
-    // border: '1px solid rgba(234, 236, 239, 0.7)',
   },
   media: {
-    height: 350,
+    height: 100,
     position: 'relative',
     overflow: 'hidden',
-    // maxHeight: 350,
-    // minHeight: 150,
   },
 }));
-// const useStylesImg = makeStyles(theme => ({
-//   root: {
-//     display: 'flex',
-//     flexWrap: 'wrap',
-//     justifyContent: 'space-around',
-//     overflow: 'hidden',
-//     backgroundColor: theme.palette.background.paper,
-//   },
-//   gridList: {
-//     width: '100%',
-//     height: 360,
-//   },
-// }));
-// function ImageGridList(props) {
-//   const classes = useStylesImg();
-//   const { imgs } = props;
-//   return (
-//     <div className={classes.root}>
-//       <GridList cellHeight={170} className={classes.gridList} cols={2}>
-//         {imgs.map((tile, index) => (
-//           <GridListTile key={index} cols={tile.cols || 1} rows={tile.rows || 1}>
-//             <img src={tile.img} alt={tile.title || 'img'} />
-//           </GridListTile>
-//         ))}
-//       </GridList>
-//     </div>
-//   );
-// }
 
 export default function MessageHistory(props) {
-  const { loading, memoryList } = props;
+  const { loading, memoryList, proIndex } = props;
   const arrayLoadin = [{}, {}, {}, {}];
   const classes = useStyles();
-  // const memoryList = useSelector(state => state.loveinfo.memory);
-  // if (typeof memoryList !== 'undefined' && memoryList.length > 0) {
-  //   console.log('setLoading');
-  // }
-  if (memoryList.length <= 0) {
+
+  if (memoryList.length <= 0 || loading) {
     if (!loading) return <div />;
     return arrayLoadin.map((item, index) => {
       return (
@@ -100,69 +49,8 @@ export default function MessageHistory(props) {
       );
     });
   }
-
-  return memoryList.map(memory => {
-    return (
-      <Card key={memory.index} className={classes.card}>
-        <CardHeader
-          avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
-          title={memory.name}
-          subheader={<TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />}
-          action={
-            <React.Fragment>
-              {/* {memory.isPrivate && (memory.isUnlock ? <LockOpenIcon /> : <LockIcon />)} */}
-              {/* {memory.isPrivate && (
-                <IconButton aria-label="settings">
-                  <LockIcon />
-                </IconButton>
-              )} */}
-
-              <IconButton aria-label="settings">
-                <MoreVertIcon />
-              </IconButton>
-            </React.Fragment>
-          }
-        />
-        <CardContent>
-          <Typography variant="body2" color="textSecondary" component="p">
-            {/* {memory.content} */}
-            {memory.isPrivate && !memory.isUnlock ? (
-              <IconButton aria-label="settings">
-                <LockIcon />
-              </IconButton>
-            ) : (
-              memory.content
-            )}
-          </Typography>
-        </CardContent>
-        <React.Fragment>
-          {memory.info.hash && <CardMedia className={classes.media} image={ipfs + memory.info.hash} title="img" />}
-          {/* <ImageGridList
-              imgs={[
-                { img: 'https://ipfs.io/ipfs/' + memory.info.hash, clos: 2 },
-                { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
-                { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
-              ]}
-            /> */}
-        </React.Fragment>
-        <CardActions>
-          <Tooltip title="Like">
-            <IconButton aria-label="add to like">
-              <ThumbUpIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Comment">
-            <IconButton aria-label="add to message">
-              <CommentIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Share">
-            <IconButton aria-label="share">
-              <ShareIcon />
-            </IconButton>
-          </Tooltip>
-        </CardActions>
-      </Card>
-    );
+  // console.log('memoryList', memoryList);
+  return memoryList.map((memory, index) => {
+    return <MemoryContent key={index} proIndex={proIndex} memory={memory} />;
   });
 }

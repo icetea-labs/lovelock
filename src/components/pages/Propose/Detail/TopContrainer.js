@@ -9,9 +9,6 @@ import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-//https://ipfs.io/ipfs/
-export const ipfs = process.env.REACT_APP_IPFS;
-
 const TopContainerBox = styled.div`
   .top__coverimg {
     position: relative;
@@ -114,7 +111,6 @@ const useStyles = makeStyles({
 });
 
 export default function TopContrainer(props) {
-  const { proIndex } = props;
   const dispatch = useDispatch();
   const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
@@ -122,28 +118,23 @@ export default function TopContrainer(props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      await loadProposes(proIndex);
-    }
-    fetchData();
-  }, [proIndex]);
+    loadProposes(props.proIndex);
+  }, [props.proIndex]);
 
-  function setAccount(value) {
-    dispatch(actions.setAccount(value));
-  }
-
-  async function loadProposes(proIndex) {
-    const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
-    if (typeof infoCache !== 'undefined' && infoCache.length > 0) {
+  function loadProposes(proIndex) {
+    setLoading(true);
+    setTimeout(async () => {
+      const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
+      if (typeof infoCache !== 'undefined' && infoCache.length > 0) {
+        setTopInfo(infoCache);
+      } else {
+        const resp = (await callView('getProposeByIndex', [proIndex])) || [];
+        const newPropose = await addInfoToProposes(resp);
+        // console.log('newPropose', newPropose);
+        setTopInfo(newPropose[0] || []);
+      }
       setLoading(false);
-      setTopInfo(infoCache);
-    } else {
-      const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-      const newPropose = await addInfoToProposes(resp);
-      // console.log('newPropose', newPropose);
-      setTopInfo(newPropose[0] || []);
-      setLoading(false);
-    }
+    }, 10);
   }
 
   async function addInfoToProposes(proposes) {
@@ -178,7 +169,7 @@ export default function TopContrainer(props) {
         r_address: proposes[i].receiver,
         publicKey: proposes[i].publicKey,
       };
-      setAccount(data);
+      dispatch(actions.setAccount(data));
       // console.log('r_publicKey', data);
     }
     return proposes;
@@ -186,20 +177,41 @@ export default function TopContrainer(props) {
 
   const classes = useStyles();
 
+  if (loading) {
+    return (
+      <TopContainerBox>
+        <div className="top__coverimg">
+          <Skeleton variant="rect" width="100%" height={425} />
+        </div>
+        <WarrperChatBox>
+          <FlexWidthBox width="50%" className="proposeMes">
+            <CardHeader
+              className={classes.card}
+              avatar={<Skeleton variant="circle" width={40} height={40} />}
+              title={<Skeleton height={6} width="80%" />}
+              subheader={<Skeleton height={12} width="80%" />}
+            />
+          </FlexWidthBox>
+          <FlexWidthBox width="50%" className="proposeMes">
+            <CardHeader
+              className={classes.card}
+              avatar={<Skeleton variant="circle" width={40} height={40} />}
+              title={<Skeleton height={6} width="80%" />}
+              subheader={<Skeleton height={12} width="80%" />}
+            />
+          </FlexWidthBox>
+        </WarrperChatBox>
+      </TopContainerBox>
+    );
+  }
+
   return (
     <TopContainerBox>
       <div className="top__coverimg">
-        {topInfo.coverimg ? (
-          <img src={ipfs + topInfo.coverimg} alt="itea-scan" />
-        ) : loading ? (
-          <Skeleton variant="rect" width="100%" height={118} />
-        ) : (
-          ''
-        )}
+        {topInfo.coverimg && <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />}
       </div>
-
       <WarrperChatBox>
-        {topInfo.s_content ? (
+        {topInfo.s_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
               <img src="/static/img/user-men.jpg" alt="itea" />
@@ -214,17 +226,8 @@ export default function TopContrainer(props) {
               <p>{topInfo.s_content}</p>
             </div>
           </FlexWidthBox>
-        ) : (
-          <FlexWidthBox width="50%" className="proposeMes">
-            <CardHeader
-              className={classes.card}
-              avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
-              title={loading ? <Skeleton height={6} width="80%" /> : ''}
-              subheader={loading ? <Skeleton height={12} width="80%" /> : ''}
-            />
-          </FlexWidthBox>
         )}
-        {topInfo.r_content ? (
+        {topInfo.r_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="content_detail fl clearfix">
               <div className="name_time">
@@ -239,42 +242,8 @@ export default function TopContrainer(props) {
               <img src="/static/img/user-women.jpg" alt="itea" />
             </div>
           </FlexWidthBox>
-        ) : (
-          <FlexWidthBox width="50%" className="proposeMes">
-            <CardHeader
-              className={classes.card}
-              avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
-              title={loading ? <Skeleton height={6} width="80%" /> : ''}
-              subheader={loading ? <Skeleton height={12} width="80%" /> : ''}
-            />
-          </FlexWidthBox>
         )}
       </WarrperChatBox>
     </TopContainerBox>
   );
 }
-
-// const mapStateToProps = state => {
-//   const { loveinfo } = state;
-//   return {
-//     propose: loveinfo.propose,
-//   };
-// };
-
-// const mapDispatchToProps = dispatch => {
-//   return {
-//     setPropose: value => {
-//       dispatch(actions.setPropose(value));
-//     },
-//     setLoading: value => {
-//       // dispatch(actions.setLoading(value));
-//     },
-//   };
-// };
-
-// export default withRouter(
-//   connect(
-//     mapStateToProps,
-//     mapDispatchToProps
-//   )(TopContrainer)
-// );
