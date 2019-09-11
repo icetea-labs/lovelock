@@ -96,6 +96,8 @@ const BootstrapTextField = withStyles(theme => ({
   root: {
     fontSize: 16,
     paddingLeft: theme.spacing(1),
+    borderColor: '#8250c8',
+    // background: 'red',
   },
 }))(InputBase);
 
@@ -187,12 +189,14 @@ export default function CreateMemory(props) {
         <ShadowBox>
           <Grid container direction="column" spacing={3}>
             <Grid item>
-              <Grid container spacing={1}>
+              <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
                   <Avatar alt="avata" src="/static/img/user-men.jpg" className={classes.avatar} />
                 </Grid>
-                <Grid item xs={9}>
+                <Grid item xs={12}>
                   <BootstrapTextField
+                    rows={3}
+                    rowsMax={10}
                     fullWidth
                     multiline
                     value={memoryContent}
