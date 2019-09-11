@@ -14,6 +14,7 @@ import tweb3 from '../../../service/tweb3';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { withSnackbar } from 'notistack';
+import AddInfoMessage from '../../elements/AddInfoMessage';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -98,6 +99,13 @@ class Promise extends React.Component {
     this.setState({ date, file });
   };
 
+  onChangeDate = date => {
+    this.setState({ date });
+  };
+  onChangeMedia = file => {
+    this.setState({ file });
+  };
+
   async createPropose(partner, promiseStm, date, file) {
     const { setLoading } = this.props;
     let hash;
@@ -114,19 +122,32 @@ class Promise extends React.Component {
         };
         info = JSON.stringify(info);
         const name = 'createPropose';
-        const params = [promiseStm, partner, info];
+        if (!partner) {
+          const message = 'Please choose your partner.';
+          this.props.enqueueSnackbar(message, { variant: 'error' });
+          setLoading(false);
+          return;
+        }
+        if (!promiseStm) {
+          const message = 'Please input your promise.';
+          this.props.enqueueSnackbar(message, { variant: 'error' });
+          setLoading(false);
+          return;
+        } else {
+          const params = [promiseStm, partner, info];
 
-        const result = await sendTransaction(name, params);
+          const result = await sendTransaction(name, params);
 
-        this.timeoutHanle2 = setTimeout(() => {
-          if (result) {
-            // notifi.info('Success');
-            const message = 'Your propose send successfully.';
-            this.props.enqueueSnackbar(message, { variant: 'success' });
-            setLoading(false);
-            this.props.close();
-          }
-        }, 50);
+          this.timeoutHanle2 = setTimeout(() => {
+            if (result) {
+              // notifi.info('Success');
+              const message = 'Your propose send successfully.';
+              this.props.enqueueSnackbar(message, { variant: 'success' });
+              setLoading(false);
+              this.props.close();
+            }
+          }, 50);
+        }
       } catch (err) {
         // console.log(err);
         setLoading(false);
@@ -287,7 +308,8 @@ class Promise extends React.Component {
           variant="outlined"
           onChange={this.promiseStmChange}
         />
-        <CustomPost onChange={this.onChangeCus} />
+        {/* <CustomPost onChange={this.onChangeCus} /> */}
+        <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
       </CommonDialog>
     );
   }
