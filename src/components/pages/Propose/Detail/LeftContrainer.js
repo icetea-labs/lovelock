@@ -12,6 +12,7 @@ import * as actions from '../../../../store/actions';
 import Promise from '../Promise';
 import PromiseAlert from '../PromiseAlert';
 import PromiseConfirm from '../PromiseConfirm';
+import { withSnackbar } from 'notistack';
 
 const LeftBox = styled.div`
   width: 100%;
@@ -133,10 +134,15 @@ class LeftContrainer extends PureComponent {
     setPropose(newArray);
   }
   async eventCreatePropose(data) {
-    const { setPropose, propose } = this.props;
+    const { setPropose, propose, address } = this.props;
     const log = await this.addInfoToProposes(data.log);
     // console.log('eventCreatePropose');
     setPropose([...propose, log]);
+    console.log('propose.sender', log);
+    if (address !== log.sender) {
+      const message = 'You have a new propose.';
+      this.props.enqueueSnackbar(message, { variant: 'info' });
+    }
   }
   async loadProposes() {
     this.setState({ loading: true });
@@ -289,5 +295,5 @@ export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(LeftContrainer)
+  )(withSnackbar(LeftContrainer))
 );
