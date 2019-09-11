@@ -102,7 +102,7 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { loadMemory } = props;
+  const { reLoadMemory } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -167,10 +167,10 @@ export default function CreateMemory(props) {
       } else {
         params = [proIndex, !!privacy, memoryContent, info];
       }
-
+      console.log('params', params);
       const result = await sendTransaction(method, params);
       if (result) {
-        loadMemory();
+        reLoadMemory(proIndex);
       }
       setGLoading(false);
       setGrayLayout(false);
