@@ -6,7 +6,6 @@ import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
 import { connect } from 'react-redux';
 import { sendTransaction } from '../../../helper/index';
-import notifi from '../../elements/Notification';
 import { withSnackbar } from 'notistack';
 
 const useStyles = makeStyles(theme => ({
@@ -58,8 +57,6 @@ class PromiseConfirm extends React.Component {
       const result = await sendTransaction(name, params);
       // console.log('View result', result);
       if (result) {
-        // window.alert('send success');
-        // notifi.info('Success!');
         const message = 'Your propose has been confirmed.';
         this.props.enqueueSnackbar(message, { variant: 'success' });
         this.props.close();
@@ -78,7 +75,6 @@ class PromiseConfirm extends React.Component {
       // console.log('View result', result);
       if (result) {
         window.alert('Success');
-        // notifi.info("Success!");
         this.props.close();
       }
     } catch (error) {

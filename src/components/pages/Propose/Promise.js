@@ -2,11 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import CustomPost from './Detail/CustomPost';
 import CommonDialog from './CommonDialog';
 import { saveToIpfs, sendTransaction } from '../../../helper/index';
 import { connect } from 'react-redux';
-import notifi from '../../elements/Notification';
 import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
 import { tryStringifyJson } from '../../../helper/utils';
@@ -140,7 +138,6 @@ class Promise extends React.Component {
 
           this.timeoutHanle2 = setTimeout(() => {
             if (result) {
-              // notifi.info('Success');
               const message = 'Your propose send successfully.';
               this.props.enqueueSnackbar(message, { variant: 'success' });
               setLoading(false);
@@ -308,7 +305,6 @@ class Promise extends React.Component {
           variant="outlined"
           onChange={this.promiseStmChange}
         />
-        {/* <CustomPost onChange={this.onChangeCus} /> */}
         <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
       </CommonDialog>
     );
