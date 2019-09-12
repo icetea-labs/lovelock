@@ -11,7 +11,6 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
-import notifi from '../../../elements/Notification';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
@@ -90,7 +89,7 @@ class RegisterUsername extends PureComponent {
           if (resp && respTagName && respTagPublicKey) {
             setStep('two');
           } else {
-            notifi.info('Error registerAlias');
+            // notifi.info('Error registerAlias');
           }
           setLoading(false);
         }, 500);

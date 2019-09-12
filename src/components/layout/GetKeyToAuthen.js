@@ -15,7 +15,7 @@ export default function GetKeyToAuthen(props) {
   const dispatch = useDispatch();
   const encryptedData = useSelector(state => state.account.encryptedData);
   const needAuth = useSelector(state => state.account.needAuth);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const handleUserKeyPress = function(event) {

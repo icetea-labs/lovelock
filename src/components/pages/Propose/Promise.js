@@ -2,11 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import CustomPost from './Detail/CustomPost';
 import CommonDialog from './CommonDialog';
 import { saveToIpfs, sendTransaction } from '../../../helper/index';
 import { connect } from 'react-redux';
-import notifi from '../../elements/Notification';
 import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
 import { tryStringifyJson } from '../../../helper/utils';
@@ -155,7 +153,6 @@ class Promise extends React.Component {
 
           this.timeoutHanle2 = setTimeout(() => {
             if (result) {
-              // notifi.info('Success');
               const message = 'Your propose send successfully.';
               this.props.enqueueSnackbar(message, { variant: 'success' });
               setLoading(false);
@@ -294,13 +291,17 @@ class Promise extends React.Component {
     };
 
     return (
-      <ValidatorForm onSubmit={this.gotoNext}>
+      <ValidatorForm
+        onSubmit={() => {
+          this.createPropose(partner, promiseStm, date, file);
+        }}
+      >
         <CommonDialog
           title="Promise"
           okText="Send"
           close={close}
           confirm={() => {
-            this.createPropose(partner, promiseStm, date, file);
+            // this.createPropose(partner, promiseStm, date, file);
           }}
         >
           <TagTitle>Tag your partner you promise</TagTitle>

@@ -1,4 +1,5 @@
 import IpfsHttpClient from 'ipfs-http-client';
-const ipfs = IpfsHttpClient('localhost', '5001', { protocol: 'http' });
-// const ipfs = IpfsHttpClient('ipfs.infura.io', '5001', { protocol: 'https' });
+const ipfs = IpfsHttpClient(process.env.REACT_APP_IPFS_HOST, process.env.REACT_APP_IPFS_PORT, {
+  protocol: process.env.REACT_APP_IPFS_PROTOCOL,
+});
 export default ipfs;
