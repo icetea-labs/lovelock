@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CommonDialog from './CommonDialog';
-import { saveToIpfs, sendTransaction } from '../../../helper/index';
+import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
 import { connect } from 'react-redux';
 import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
@@ -13,6 +13,10 @@ import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { withSnackbar } from 'notistack';
 import AddInfoMessage from '../../elements/AddInfoMessage';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import { FlexBox } from '../../elements/StyledUtils';
+// import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -30,6 +34,16 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1),
   },
 }));
+
+const CustCheckbox = withStyles({
+  root: {
+    color: '#fe8dc3',
+    '&$checked': {
+      color: 'fe8dc3',
+    },
+  },
+  checked: {},
+})(props => <Checkbox color="default" {...props} />);
 
 function TextFieldPlaceholder(props) {
   const classes = useStyles();
@@ -67,6 +81,7 @@ class Promise extends React.Component {
       hash: '',
       value: '',
       suggestions: [],
+      checked: false,
     };
   }
 
@@ -105,8 +120,10 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading } = this.props;
+    const { setLoading, enqueueSnackbar, address } = this.props;
+    const { firstname, lastname, value } = this.state;
     let hash;
+    let message;
     setLoading(true);
 
     this.timeoutHanle1 = setTimeout(async () => {
@@ -121,25 +138,43 @@ class Promise extends React.Component {
         info = JSON.stringify(info);
         const name = 'createPropose';
         if (!partner) {
-          const message = 'Please choose your partner.';
-          this.props.enqueueSnackbar(message, { variant: 'error' });
+          message = 'Please choose your partner.';
+          enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
           return;
         }
         if (!promiseStm) {
-          const message = 'Please input your promise.';
-          this.props.enqueueSnackbar(message, { variant: 'error' });
+          message = 'Please input your promise.';
+          enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
           return;
         } else {
           const params = [promiseStm, partner, info];
 
+          if (value === '@bot-lover') {
+            if (!firstname) {
+              message = 'Please enter your crush first name.';
+              enqueueSnackbar(message, { variant: 'error' });
+              setLoading(false);
+              return;
+            }
+            if (!lastname) {
+              message = 'Please enter your crush last name.';
+              enqueueSnackbar(message, { variant: 'error' });
+              setLoading(false);
+              return;
+            } else {
+              const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
+              const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
+              console.log(respTagFirstName + ' ' + respTagLastName);
+            }
+          }
           const result = await sendTransaction(name, params);
 
           this.timeoutHanle2 = setTimeout(() => {
             if (result) {
-              const message = 'Your propose send successfully.';
-              this.props.enqueueSnackbar(message, { variant: 'success' });
+              message = 'Your propose send successfully.';
+              enqueueSnackbar(message, { variant: 'success' });
               setLoading(false);
               this.props.close();
             }
@@ -226,9 +261,14 @@ class Promise extends React.Component {
     );
   }
 
-  onChange = (event, { newValue }) => {
+  onPartnerChange = (event, { newValue }) => {
     const name = newValue.substring(1);
     // console.log('newValue', newValue);
+    if (newValue !== '@bot-lover') {
+      this.setState({ checked: false });
+    } else {
+      this.setState({ checked: true });
+    }
     const { suggestions } = this.state;
     let address = '';
     if (suggestions) {
@@ -236,7 +276,7 @@ class Promise extends React.Component {
       if (seletedItem && seletedItem.length > 0) {
         address = seletedItem[0].address;
       }
-      console.log('add', address);
+      // console.log('add', address);
     }
     this.setState({
       value: newValue,
@@ -257,15 +297,48 @@ class Promise extends React.Component {
     });
   };
 
+  handleCheckChange = e => {
+    document.activeElement.blur();
+
+    const checked = e.target.checked;
+
+    if (checked) {
+      this.setState({
+        checked,
+        value: '@bot-lover',
+        partner: 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn',
+      });
+      // document.addEventListener('DOMContentLoaded', function(event) {
+      //   document.getElementById('suggestPartner').disabled = true;
+      // });
+    } else {
+      this.setState({
+        checked: false,
+        value: '',
+      });
+      // document.addEventListener('DOMContentLoaded', function(event) {
+      //   document.getElementById('suggestPartner').disabled = false;
+      // });
+    }
+  };
+
+  handleUsername = event => {
+    const key = event.currentTarget.name;
+    const value = event.currentTarget.value;
+    // console.log(event.currentTarget.value);
+
+    this.setState({ [key]: value });
+  };
+
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value } = this.state;
-    console.log('partner', partner);
+    const { partner, promiseStm, date, file, suggestions, value, checked } = this.state;
+    console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',
       value,
-      onChange: this.onChange,
+      onChange: this.onPartnerChange,
     };
 
     return (
@@ -287,6 +360,7 @@ class Promise extends React.Component {
           onChange={this.partnerChange}
         /> */}
         <Autosuggest
+          id="suggestPartner"
           suggestions={suggestions}
           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
           onSuggestionsClearRequested={this.onSuggestionsClearRequested}
@@ -294,6 +368,33 @@ class Promise extends React.Component {
           renderSuggestion={this.renderSuggestion1}
           inputProps={inputProps}
         />
+        <FormControlLabel
+          control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
+          label="or Send request to your crush(Imaginary Lover)"
+        />
+        {checked && (
+          <FlexBox>
+            <TextFieldPlaceholder
+              label="First Name"
+              fullWidth
+              onChange={this.handleUsername}
+              name="firstname"
+              validators={['required']}
+              // className={classes.marginRight}
+              margin="normal"
+              // value={firstname}
+            />
+            <TextFieldPlaceholder
+              label="Last Name"
+              fullWidth
+              onChange={this.handleUsername}
+              name="lastname"
+              validators={['required']}
+              margin="normal"
+              // value={lastname}
+            />
+          </FlexBox>
+        )}
         <TagTitle>Your promise</TagTitle>
         <TextFieldMultiLine
           id="outlined-multiline-static"
@@ -305,6 +406,7 @@ class Promise extends React.Component {
           variant="outlined"
           onChange={this.promiseStmChange}
         />
+        {/* <CustomPost onChange={this.onChangeCus} /> */}
         <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
       </CommonDialog>
     );
