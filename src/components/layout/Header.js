@@ -512,12 +512,12 @@ function Header(props) {
                 />
               </div>
               <div className={classes.grow} />
-              <IconButton className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
+              <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
                 <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
                 <Typography className={classes.title} noWrap>
                   {displayName}
                 </Typography>
-              </IconButton>
+              </Button>
               {/* <Typography noWrap>Explore</Typography> */}
               {/* <KeyboardArrowDownIcon className={classes.menuIcon} /> */}
               <div className={classes.sectionDesktop}>
