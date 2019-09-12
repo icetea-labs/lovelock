@@ -64,7 +64,9 @@ export default function MemoryContent(props) {
   const [decoding, setDecoding] = useState(false);
 
   useEffect(() => {
-    decodePrivateMemory(privateKey, props.proIndex);
+    if (memoryDecrypted.isPrivate) {
+      decodePrivateMemory(privateKey, props.proIndex);
+    }
   }, [privateKey, props.proIndex]);
 
   useEffect(() => {
@@ -99,11 +101,10 @@ export default function MemoryContent(props) {
   function decodePrivateMemory(privateKey, proIndex) {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
-      // console.log('decodePrivateMemory', obj);
-      if (obj.isPrivate) {
-        if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
-          setDecoding(true);
-          setTimeout(async () => {
+      if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
+        setDecoding(true);
+        setTimeout(async () => {
+          try {
             if (address === obj.sender) {
               obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, publicKey);
             } else {
@@ -111,12 +112,15 @@ export default function MemoryContent(props) {
             }
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
-          }, 100);
-        } else {
-          console.log('sharekey null');
-        }
+          } catch (e) {
+            console.log(e);
+            setDecoding(false);
+          }
+        }, 100);
+      } else {
+        console.log('Request sharekey');
       }
-    }, 100);
+    }, 500);
   }
 
   return (
