@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getTagsInfo } from '../../helper';
 import { rem } from '../elements/StyledUtils';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
@@ -32,6 +32,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import * as actions from '../../store/actions';
 
 import { withRouter } from 'react-router-dom';
 
@@ -324,15 +325,19 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
-  const [displayName, setDisplayName] = useState(null);
+  // const [displayName, setDisplayName] = useState(null);
+  const dispatch = useDispatch();
+  const displayName = useSelector(state => state.account.displayName);
+
   useEffect(() => {
     async function fetchData() {
       if (address) {
         // console.log('address', address);
         const reps = await getTagsInfo(address);
-        setDisplayName(reps['display-name']);
+        // setDisplayName(reps['display-name']);
+        dispatch(actions.setAccount({ displayName: reps['display-name'] }));
       } else {
-        setDisplayName('no name');
+        // setDisplayName('no name');
       }
     }
     fetchData();
