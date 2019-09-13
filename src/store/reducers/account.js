@@ -12,6 +12,7 @@ const initialState = Object.assign(
     privateKey: '',
     mnemonic: '',
     encryptedData: '',
+    displayName: '',
   },
   (function getSessionStorage() {
     const resp = {};
