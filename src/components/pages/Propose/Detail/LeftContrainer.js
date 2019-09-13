@@ -139,10 +139,11 @@ class LeftContrainer extends PureComponent {
   }
   async eventCreatePropose(data) {
     const { setPropose, propose, address } = this.props;
+    // console.log('data.log', data.log);
     const log = await this.addInfoToProposes(data.log);
     // console.log('eventCreatePropose');
     setPropose([...propose, log]);
-    console.log('propose.sender', log);
+    // console.log('propose.sender', log);
     if (address !== log.sender) {
       const message = 'You have a new propose.';
       this.props.enqueueSnackbar(message, { variant: 'info' });
@@ -161,12 +162,36 @@ class LeftContrainer extends PureComponent {
   async addInfoToProposes(proposes) {
     const { address } = this.props;
     for (let i = 0; i < proposes.length; i++) {
-      const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
-      const reps = await getTagsInfo(newAddress);
+      let newAddress = '';
+      if (address === proposes[i].sender) {
+        if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+          newAddress = address;
+        } else {
+          newAddress = proposes[i].receiver;
+        }
+      } else {
+        newAddress = proposes[i].sender;
+      }
+      // console.log('address', newAddress);
+      let reps;
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        reps = await tweb3
+          .contract('system.did')
+          .methods.query(newAddress)
+          .call();
+      } else {
+        reps = await getTagsInfo(newAddress);
+      }
+
       const nick = await getAlias(newAddress);
-      proposes[i].name = reps['display-name'] || 'undefine';
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        proposes[i].name = reps.tags['bot-firstName'] + ' ' + reps.tags['bot-lastName'];
+      } else {
+        proposes[i].name = reps['display-name'] || 'undefine';
+      }
       proposes[i].nick = '@' + nick;
       proposes[i].publicKey = reps['pub-key'] || '';
+
       // const sender = await getTagsInfo(proposes[i].sender);
       // const s_nick = await getAlias(newAddress);
       // proposes[i].s_name = sender['display-name'];

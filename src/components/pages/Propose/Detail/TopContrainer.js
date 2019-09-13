@@ -8,6 +8,7 @@ import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
+import tweb3 from '../../../../service/tweb3';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -147,15 +148,32 @@ export default function TopContrainer(props) {
       // proposes[i].nick = '@' + nick;
       proposes[i].publicKey = reps['pub-key'] || '';
 
-      const senderTags = await getTagsInfo(proposes[i].sender);
-      proposes[i].s_name = senderTags['display-name'];
-      proposes[i].s_publicKey = senderTags['pub-key'] || '';
+      let senderTags;
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        senderTags = await tweb3
+          .contract('system.did')
+          .methods.query(proposes[i].sender)
+          .call();
+      } else {
+        senderTags = await getTagsInfo(proposes[i].sender);
+      }
+      // console.log('senderTags', senderTags);
+
       const s_nick = await getAlias(proposes[i].sender);
       proposes[i].s_nick = '@' + s_nick;
 
       const receiverTags = await getTagsInfo(proposes[i].receiver);
       proposes[i].r_publicKey = receiverTags['pub-key'] || '';
-      proposes[i].r_name = receiverTags['display-name'];
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        proposes[i].r_name = senderTags.tags['bot-firstName'] + ' ' + senderTags.tags['bot-lastName'];
+        proposes[i].s_name = senderTags.tags['display-name'];
+        proposes[i].s_publicKey = senderTags.tags['pub-key'] || '';
+      } else {
+        proposes[i].s_name = senderTags['display-name'];
+        proposes[i].s_publicKey = senderTags['pub-key'] || '';
+        proposes[i].r_name = receiverTags['display-name'];
+      }
+      proposes[i].r_content = proposes[i].r_content || 'I love you';
       const r_nick = await getAlias(proposes[i].receiver);
       proposes[i].r_nick = '@' + r_nick;
 

@@ -16,7 +16,6 @@ import AddInfoMessage from '../../elements/AddInfoMessage';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { FlexBox } from '../../elements/StyledUtils';
-// import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -166,7 +165,6 @@ class Promise extends React.Component {
             } else {
               const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
               const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
-              console.log(respTagFirstName + ' ' + respTagLastName);
             }
           }
           const result = await sendTransaction(name, params);
@@ -306,7 +304,7 @@ class Promise extends React.Component {
       this.setState({
         checked,
         value: '@bot-lover',
-        partner: 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn',
+        partner: process.env.REACT_APP_BOT_LOVER,
       });
       // document.addEventListener('DOMContentLoaded', function(event) {
       //   document.getElementById('suggestPartner').disabled = true;
@@ -333,7 +331,7 @@ class Promise extends React.Component {
   render() {
     const { close } = this.props;
     const { partner, promiseStm, date, file, suggestions, value, checked } = this.state;
-    console.log('state CK', this.state);
+    // console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',

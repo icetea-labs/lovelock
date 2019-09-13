@@ -40,6 +40,7 @@ export default function LeftProposes(props) {
   const propose = useSelector(state => state.loveinfo.propose);
   const { address } = useSelector(state => state.account);
   const pendingPropose = propose.filter(item => item.status === props.flag);
+  // console.log('pendingPropose', pendingPropose);
   if (pendingPropose.length <= 0) {
     return (
       <CardHeader
@@ -51,7 +52,7 @@ export default function LeftProposes(props) {
   }
 
   return pendingPropose.map(item => {
-    // console.log('item', item.name); //Not yet
+    // console.log('item', item);
     return (
       <CardHeader
         key={item.id}
@@ -68,7 +69,7 @@ export default function LeftProposes(props) {
         }
         avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
         title={item.name}
-        subheader={item.nick}
+        subheader={item.receiver === process.env.REACT_APP_BOT_LOVER ? '' : item.nick}
       />
     );
   });
