@@ -1,6 +1,7 @@
 const { expect } = require(';');
 const { isOwnerPropose, getDataByIndex } = require('./helper.js');
-@contract class Propose {
+@contract
+class Propose {
   @state propose = [];
   @state addressToPropose = {}; //1:n
   @state id = 0;
@@ -12,8 +13,8 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
   @view @state comments = [];
   @view @state memoryToComments = {}; //1:n
 
-  @state likes = [];
-  @state memoryToLikes = {}; //1:n
+  @view @state likes = [];
+  @view @state memoryToLikes = {}; //1:n
 
   @transaction createPropose(s_content: string, receiver: string, info: string) {
     const sender = msg.sender;
@@ -173,34 +174,55 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
     this.emitEvent('addComment', { by: msg.sender, log }, ['by']);
   }
 
-  // create like for memory
-  @transaction addLike(memoIndex: number, type: number = 0) {
-    const proIndex = getDataByIndex(this.memoryToPropose, memoIndex);
-    const pro = getDataByIndex(this.propose, proIndex);
-    // expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.");
+  // create like for memory: type -> 0:unlike, 1:like, 2:love
+  @transaction addLike(memoIndex: number, type: number) {
+    const address = msg.sender;
+    let like = { [address]: { memoIndex, type } };
+    let index = this.isLiked(memoIndex, address);
+    if (index >= 0) {
+      const x = this.likes;
+      if (this.likes[index][address].type === 0) {
+        this.likes[index][address].type = type;
+        like = { [address]: { memoIndex, type } };
+      } else {
+        this.likes[index][address].type = 0;
+        like = { [address]: { memoIndex, type: 0 } };
+      }
+      this.likes = x;
+    } else {
+      //add like or unlike
+      const x = this.likes;
+      index = x.push(like) - 1;
+      this.likes = x;
 
-    //new memories
-    const like = { memoIndex, type };
-    const x = this.likes;
-    const index = x.push(like) - 1;
-    this.likes = x;
-
-    //map index propose to index memory
-    const y = this.memoryToLikes;
-    if (!y[memoIndex]) y[memoIndex] = [];
-    y[memoIndex].push(index);
-    this.memoryToLikes = y;
-
-    //emit Event
+      //map index propose to index memory
+      const y = this.memoryToLikes;
+      if (!y[memoIndex]) y[memoIndex] = [];
+      y[memoIndex].push(index);
+      this.memoryToLikes = y;
+      //emit Event
+    }
     const log = Object.assign({}, like, { index });
     this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
   }
-
+  //return index of liked. return -1 when first time.
+  isLiked(memoIndex, address) {
+    if (this.likes.length > 0) {
+      const likeArrayIndex = getDataByIndex(this.memoryToLikes, memoIndex);
+      for (let i = 0; i < likeArrayIndex.length; i++) {
+        const likeData = getDataByIndex(this.likes, i);
+        //unlike
+        if (likeData[address]) {
+          return i;
+        }
+      }
+    }
+    return -1;
+  }
   @view getLikeByMemoIndex(memoIndex: number) {
     const mapLikes = getDataByIndex(this.memoryToLikes, memoIndex);
     return mapLikes;
   }
-
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
     const sender = msg.sender;

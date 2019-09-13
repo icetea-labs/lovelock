@@ -1,7 +1,7 @@
 //private function
-exports.isOwnerPropose = (propose, message) => {
+exports.isOwnerPropose = (propose, message, sender) => {
   const errmsg = message + ' You must be owner propose.';
-  expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg);
+  expect(sender === propose.receiver || sender === propose.sender, errmsg);
 };
 //private function
 exports.getDataByIndex = (array, index) => {
