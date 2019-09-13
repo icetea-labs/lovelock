@@ -17,7 +17,7 @@ const ShadowBox = styled.div`
 
 export default function DetailPropose(props) {
   const proIndex = parseInt(props.match.params.index);
-  console.log('DetailPropose');
+  // console.log('DetailPropose');
   return (
     <React.Fragment>
       <BannerContainer>

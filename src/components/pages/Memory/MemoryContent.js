@@ -1,26 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
-import Avatar from '@material-ui/core/Avatar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import CardActions from '@material-ui/core/CardActions';
-// import Skeleton from '@material-ui/lab/Skeleton';
+import { withStyles } from '@material-ui/styles';
+import { Card, CardHeader, CardContent, CardMedia, CardActions } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
+import { Avatar, Typography } from '@material-ui/core';
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-// import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import CommentIcon from '@material-ui/icons/Comment';
 import ShareIcon from '@material-ui/icons/Share';
-import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
+import Comments from './Comments';
+
+const useStylesFacebook = makeStyles({
+  root: {
+    position: 'relative',
+  },
+  top: {
+    color: '#eef3fd',
+  },
+  bottom: {
+    color: '#6798e5',
+    animationDuration: '550ms',
+    position: 'absolute',
+    left: 0,
+  },
+});
+
 const useStyles = makeStyles(theme => ({
+  button: {
+    color: 'rgba(0, 0, 0, 0.54)',
+    width: '100%',
+  },
+  rightIcon: {
+    marginRight: theme.spacing(1),
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
   card: {
     // maxWidth: 345,
     marginBottom: theme.spacing(3),
@@ -38,33 +58,28 @@ const useStyles = makeStyles(theme => ({
   progress: {
     margin: theme.spacing(1),
   },
+  acctionsBt: {
+    justifyContent: 'space-around',
+  },
 }));
 
-const useStylesFacebook = makeStyles({
+const StyledCardActions = withStyles(theme => ({
   root: {
-    position: 'relative',
+    padding: theme.spacing(0.4, 2),
+    borderTop: '1px solid #e1e1e1',
   },
-  top: {
-    color: '#eef3fd',
-  },
-  bottom: {
-    color: '#6798e5',
-    animationDuration: '550ms',
-    position: 'absolute',
-    left: 0,
-  },
-});
+}))(CardActions);
 
 export default function MemoryContent(props) {
-  const classes = useStyles();
   const { privateKey, publicKey, address } = useSelector(state => state.account);
-  // console.log('memory', memory);
-  // console.log('memoryDecrypted', memoryDecrypted);
   const [memoryDecrypted, setMemoryDecrypted] = useState(props.memory);
   const [decoding, setDecoding] = useState(false);
+  const [showComment, setShowComment] = useState(true);
 
   useEffect(() => {
-    decodePrivateMemory(privateKey, props.proIndex);
+    if (memoryDecrypted.isPrivate) {
+      decodePrivateMemory(privateKey, props.proIndex);
+    }
   }, [privateKey, props.proIndex]);
 
   useEffect(() => {
@@ -99,11 +114,10 @@ export default function MemoryContent(props) {
   function decodePrivateMemory(privateKey, proIndex) {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
-      // console.log('decodePrivateMemory', obj);
-      if (obj.isPrivate) {
-        if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
-          setDecoding(true);
-          setTimeout(async () => {
+      if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
+        setDecoding(true);
+        setTimeout(async () => {
+          try {
             if (address === obj.sender) {
               obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, publicKey);
             } else {
@@ -111,13 +125,22 @@ export default function MemoryContent(props) {
             }
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
-          }, 100);
-        } else {
-          console.log('sharekey null');
-        }
+          } catch (e) {
+            console.log(e);
+            setDecoding(false);
+          }
+        }, 100);
+      } else {
+        console.log('Request sharekey');
       }
-    }, 100);
+    }, 500);
   }
+
+  function handerShowComment() {
+    setShowComment(true);
+  }
+
+  const classes = useStyles();
 
   return (
     <Card key={memoryDecrypted.index} className={classes.card}>
@@ -169,24 +192,22 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <CardActions>
-          <Tooltip title="Like">
-            <IconButton aria-label="add to like">
-              <ThumbUpIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Comment">
-            <IconButton aria-label="add to message">
-              <CommentIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Share">
-            <IconButton aria-label="share">
-              <ShareIcon />
-            </IconButton>
-          </Tooltip>
-        </CardActions>
+        <StyledCardActions className={classes.acctionsBt}>
+          <Button className={classes.button}>
+            <ThumbUpIcon fontSize="small" className={classes.rightIcon} />
+            Like
+          </Button>
+          <Button className={classes.button} onClick={handerShowComment}>
+            <CommentIcon fontSize="small" className={classes.rightIcon} />
+            Comment
+          </Button>
+          <Button className={classes.button}>
+            <ShareIcon fontSize="small" className={classes.rightIcon} />
+            Share
+          </Button>
+        </StyledCardActions>
       )}
+      {showComment && <Comments />}
     </Card>
   );
 }

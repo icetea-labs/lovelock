@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getTagsInfo } from '../../helper';
 import { rem } from '../elements/StyledUtils';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
@@ -22,6 +22,7 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 // import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
@@ -32,6 +33,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import * as actions from '../../store/actions';
 
 import { withRouter } from 'react-router-dom';
 
@@ -87,6 +89,7 @@ const useStyles = makeStyles(theme => ({
     margin: 10,
     width: 46,
     height: 46,
+    backgroundColor: '#fff',
   },
   friReqTitle: {
     width: 111,
@@ -187,7 +190,9 @@ const useStyles = makeStyles(theme => ({
     },
   },
   avataDisplay: {
-    display: 'none',
+    margin: 10,
+    width: 46,
+    height: 46,
     [theme.breakpoints.up('md')]: {
       display: 'flex',
     },
@@ -324,15 +329,19 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
-  const [displayName, setDisplayName] = useState(null);
+  // const [displayName, setDisplayName] = useState(null);
+  const dispatch = useDispatch();
+  const displayName = useSelector(state => state.account.displayName);
+
   useEffect(() => {
     async function fetchData() {
       if (address) {
         // console.log('address', address);
         const reps = await getTagsInfo(address);
-        setDisplayName(reps['display-name']);
+        // setDisplayName(reps['display-name']);
+        dispatch(actions.setAccount({ displayName: reps['display-name'] }));
       } else {
-        setDisplayName('no name');
+        // setDisplayName('no name');
       }
     }
     fetchData();
@@ -513,7 +522,9 @@ function Header(props) {
               </div>
               <div className={classes.grow} />
               <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
+                <Avatar alt="avatar" className={classes.avatar} color="primary">
+                  <AccountCircleIcon color="action" />
+                </Avatar>
                 <Typography className={classes.title} noWrap>
                   {displayName}
                 </Typography>
