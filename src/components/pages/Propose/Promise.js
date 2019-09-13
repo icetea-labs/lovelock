@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CommonDialog from './CommonDialog';
-import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
+import { saveToIpfs, sendTransaction, setTagsInfo, getTagsInfo } from '../../../helper';
 import { connect } from 'react-redux';
 import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
@@ -166,7 +166,6 @@ class Promise extends React.Component {
             } else {
               const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
               const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
-              console.log(respTagFirstName + ' ' + respTagLastName);
             }
           }
           const result = await sendTransaction(name, params);
@@ -306,7 +305,7 @@ class Promise extends React.Component {
       this.setState({
         checked,
         value: '@bot-lover',
-        partner: 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn',
+        partner: process.env.REACT_APP_BOT_LOVER,
       });
       // document.addEventListener('DOMContentLoaded', function(event) {
       //   document.getElementById('suggestPartner').disabled = true;
@@ -333,7 +332,7 @@ class Promise extends React.Component {
   render() {
     const { close } = this.props;
     const { partner, promiseStm, date, file, suggestions, value, checked } = this.state;
-    console.log('state CK', this.state);
+    // console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',

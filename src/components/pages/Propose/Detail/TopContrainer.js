@@ -148,6 +148,7 @@ export default function TopContrainer(props) {
       proposes[i].publicKey = reps['pub-key'] || '';
 
       const senderTags = await getTagsInfo(proposes[i].sender);
+      // console.log('senderTags', senderTags);
       proposes[i].s_name = senderTags['display-name'];
       proposes[i].s_publicKey = senderTags['pub-key'] || '';
       const s_nick = await getAlias(proposes[i].sender);
@@ -155,7 +156,12 @@ export default function TopContrainer(props) {
 
       const receiverTags = await getTagsInfo(proposes[i].receiver);
       proposes[i].r_publicKey = receiverTags['pub-key'] || '';
-      proposes[i].r_name = receiverTags['display-name'];
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        proposes[i].r_name = senderTags['bot-firstName'] + ' ' + senderTags['bot-lastName'];
+      } else {
+        proposes[i].r_name = receiverTags['display-name'];
+      }
+      proposes[i].r_content = proposes[i].r_content || 'I love you';
       const r_nick = await getAlias(proposes[i].receiver);
       proposes[i].r_nick = '@' + r_nick;
 
