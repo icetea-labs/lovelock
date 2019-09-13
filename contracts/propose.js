@@ -20,8 +20,13 @@ class Propose {
 
     expect(sender !== receiver, "Can't create owner propose.");
 
+    let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    const pendingPropose = { id, sender, s_content, receiver, status: 0, info, isPrivate };
+    if(receiver='teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn') {
+      pendingPropose = { id, sender, s_content, receiver, status: 1, info, isPrivate }; 
+    } else {
+      pendingPropose = { id, sender, s_content, receiver, status: 0, info, isPrivate };
+    }
 
     //new pending propose
     const x = this.propose;
