@@ -1,7 +1,6 @@
 const { expect } = require(';');
-const { _isOwnerPropose, _getDataByIndex } = require('./helper.js');
-@contract
-class Propose {
+const { isOwnerPropose, getDataByIndex } = require('./helper.js');
+@contract class Propose {
   @state propose = [];
   @state addressToPropose = {}; //1:n
   @state id = 0;
@@ -23,8 +22,13 @@ class Propose {
 
     expect(sender !== receiver, "Can't create owner propose.");
 
+    let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    const pendingPropose = { id, sender, s_content, receiver, status: 0, info, isPrivate };
+    if ((receiver = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn')) {
+      pendingPropose = { id, sender, s_content, receiver, status: 1, info, isPrivate };
+    } else {
+      pendingPropose = { id, sender, s_content, receiver, status: 0, info, isPrivate };
+    }
 
     //new pending propose
     const x = this.propose;
@@ -55,10 +59,10 @@ class Propose {
 
   @view getProposeByAddress(address) {
     if (address === 'undefined') address = msg.sender;
-    const arrPro = this._getDataByIndex(this.addressToPropose, address);
+    const arrPro = getDataByIndex(this.addressToPropose, address);
     let resp = [];
     arrPro.forEach(index => {
-      const pro = this._getDataByIndex(this.propose, index);
+      const pro = getDataByIndex(this.propose, index);
       if (pro.isPrivate && (msg.sender === pro.sender || msg.sender === pro.receiver)) {
         resp.push(pro);
       } else {
@@ -70,20 +74,20 @@ class Propose {
   }
 
   @view getProposeByIndex(index: number) {
-    const pro = this._getDataByIndex(this.propose, index);
+    const pro = getDataByIndex(this.propose, index);
     let resp = [];
     if (pro && pro.isPrivate) {
-      this._isOwnerPropose(pro, "Can't get propose.");
+      isOwnerPropose(pro, "Can't get propose.", msg.sender);
     }
     resp.push(pro);
     return resp;
   }
 
   @view getMemoriesByProIndex(proIndex: number) {
-    const memoryPro = this._getDataByIndex(this.proposeToMemories, proIndex);
+    const memoryPro = getDataByIndex(this.proposeToMemories, proIndex);
     let res = [];
     memoryPro.forEach(index => {
-      const mem = this._getDataByIndex(this.memories, index);
+      const mem = getDataByIndex(this.memories, index);
       res.push(mem);
     });
     return res;
@@ -102,8 +106,8 @@ class Propose {
 
   // Change info { img:Array, location:string, date:string }
   @transaction changeInfoPropose(index: number, info: string) {
-    const pro = this._getDataByIndex(this.propose, index);
-    this._isOwnerPropose(pro, "You can't change propose info.");
+    const pro = getDataByIndex(this.propose, index);
+    isOwnerPropose(pro, "You can't change propose info.", msg.sender);
     this.propose[index] = Object.assign({}, pro, { info });
 
     //emit Event
@@ -112,7 +116,7 @@ class Propose {
   }
   // change privacy propose (public or private)
   @transaction changePrivacy(proIndex: number, isPrivate: boolean) {
-    const pro = this._getDataByIndex(this.propose, index);
+    const pro = getDataByIndex(this.propose, index);
     this.propose[index] = Object.assign({}, pro, { isPrivate });
     //emit Event
     const log = Object.assign({}, pro, { index, isPrivate });
@@ -120,7 +124,7 @@ class Propose {
   }
   // info { img:Array, location:string, date:string }
   @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info: string) {
-    const pro = this._getDataByIndex(this.propose, proIndex);
+    const pro = getDataByIndex(this.propose, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
 
@@ -148,8 +152,8 @@ class Propose {
 
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
-    const proIndex = this._getDataByIndex(this.memoryToPropose, memoIndex);
-    const pro = this._getDataByIndex(this.propose, proIndex);
+    const proIndex = getDataByIndex(this.memoryToPropose, memoIndex);
+    const pro = getDataByIndex(this.propose, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.");
 
     //new memories
@@ -171,8 +175,8 @@ class Propose {
 
   // create like for memory
   @transaction addLike(memoIndex: number, type: number = 0) {
-    const proIndex = this._getDataByIndex(this.memoryToPropose, memoIndex);
-    const pro = this._getDataByIndex(this.propose, proIndex);
+    const proIndex = getDataByIndex(this.memoryToPropose, memoIndex);
+    const pro = getDataByIndex(this.propose, proIndex);
     // expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.");
 
     //new memories
@@ -193,21 +197,21 @@ class Propose {
   }
 
   @view getLikeByMemoIndex(memoIndex: number) {
-    const mapLikes = this._getDataByIndex(this.memoryToLikes, memoIndex);
+    const mapLikes = getDataByIndex(this.memoryToLikes, memoIndex);
     return mapLikes;
   }
 
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
     const sender = msg.sender;
-    const pro = this._getDataByIndex(this.propose, index);
+    const pro = getDataByIndex(this.propose, index);
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:
         expect(sender === pro.receiver, "Can't accept propose. You must be receiver.");
         break;
       case 2:
-        this._isOwnerPropose(pro, "You can't cancel propose.");
+        isOwnerPropose(pro, "You can't cancel propose.", msg.sender);
         break;
     }
     const x = Object.assign({}, pro, { r_content, status });

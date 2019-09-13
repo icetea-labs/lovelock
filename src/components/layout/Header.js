@@ -22,6 +22,7 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 // import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
@@ -88,6 +89,7 @@ const useStyles = makeStyles(theme => ({
     margin: 10,
     width: 46,
     height: 46,
+    backgroundColor: '#fff',
   },
   friReqTitle: {
     width: 111,
@@ -188,7 +190,9 @@ const useStyles = makeStyles(theme => ({
     },
   },
   avataDisplay: {
-    display: 'none',
+    margin: 10,
+    width: 46,
+    height: 46,
     [theme.breakpoints.up('md')]: {
       display: 'flex',
     },
@@ -518,7 +522,9 @@ function Header(props) {
               </div>
               <div className={classes.grow} />
               <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                <Avatar alt="avatar" src="/static/img/user-men.jpg" className={classes.avatar} />
+                <Avatar alt="avatar" className={classes.avatar} color="primary">
+                  <AccountCircleIcon color="action" />
+                </Avatar>
                 <Typography className={classes.title} noWrap>
                   {displayName}
                 </Typography>
