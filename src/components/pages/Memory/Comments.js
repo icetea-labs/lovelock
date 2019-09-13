@@ -73,6 +73,7 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function Comments(props) {
+  const { handerNumberComment } = props;
   const displayName = useSelector(state => state.account.displayName);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([{ text: '1' }, { text: '2' }, { text: '3' }]);
@@ -80,10 +81,10 @@ export default function Comments(props) {
 
   function newComment() {
     if (comment) {
-      const newArray = [...comments, { text: comment }]; //comments.slice();
-      // const newdata = Object.assign({}, comments, comment);
+      const newArray = [...comments, { text: comment }];
       setComments(newArray);
       setComment('');
+      handerNumberComment(newArray.length);
     }
   }
   function onKeyDownPostComment(event) {

@@ -1,5 +1,5 @@
 const { expect } = require(';');
-
+const { _isOwnerPropose, _getDataByIndex } = require('./helper.js');
 @contract
 class Propose {
   @state propose = [];
@@ -12,7 +12,10 @@ class Propose {
 
   @view @state comments = [];
   @view @state memoryToComments = {}; //1:n
-  //info { img:Array, location:string, date:string }
+
+  @state likes = [];
+  @state memoryToLikes = {}; //1:n
+
   @transaction createPropose(s_content: string, receiver: string, info: string) {
     const sender = msg.sender;
     const isPrivate = false;
@@ -76,7 +79,7 @@ class Propose {
     return resp;
   }
 
-  @view getMemoryByProIndex(proIndex: number) {
+  @view getMemoriesByProIndex(proIndex: number) {
     const memoryPro = this._getDataByIndex(this.proposeToMemories, proIndex);
     let res = [];
     memoryPro.forEach(index => {
@@ -92,7 +95,7 @@ class Propose {
     let res = [];
     if (end > allMem.length) end = allMem.length;
     for (i = start; i < end; i++) {
-      if (!allMem[i].isPrivate) res.push(allMem[i])
+      if (!allMem[i].isPrivate) res.push(allMem[i]);
     }
     return res;
   }
@@ -166,16 +169,32 @@ class Propose {
     this.emitEvent('addComment', { by: msg.sender, log }, ['by']);
   }
 
-  //private function
-  _getDataByIndex(array, index) {
-    const data = array[index];
-    expect(!!data, 'The array index out of bounds');
-    return data;
+  // create like for memory
+  @transaction addLike(memoIndex: number, type: number = 0) {
+    const proIndex = this._getDataByIndex(this.memoryToPropose, memoIndex);
+    const pro = this._getDataByIndex(this.propose, proIndex);
+    // expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.");
+
+    //new memories
+    const like = { memoIndex, type };
+    const x = this.likes;
+    const index = x.push(like) - 1;
+    this.likes = x;
+
+    //map index propose to index memory
+    const y = this.memoryToLikes;
+    if (!y[memoIndex]) y[memoIndex] = [];
+    y[memoIndex].push(index);
+    this.memoryToLikes = y;
+
+    //emit Event
+    const log = Object.assign({}, like, { index });
+    this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
   }
-  //private function
-  _isOwnerPropose(propose, message: string) {
-    const errmsg = message + ' You must be owner propose.';
-    expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg);
+
+  @view getLikeByMemoIndex(memoIndex: number) {
+    const mapLikes = this._getDataByIndex(this.memoryToLikes, memoIndex);
+    return mapLikes;
   }
 
   //private function

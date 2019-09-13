@@ -71,10 +71,14 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function MemoryContent(props) {
-  const { privateKey, publicKey, address } = useSelector(state => state.account);
+  const privateKey = useSelector(state => state.account.privateKey);
+  const publicKey = useSelector(state => state.account.publicKey);
+  const address = useSelector(state => state.account.address);
   const [memoryDecrypted, setMemoryDecrypted] = useState(props.memory);
   const [decoding, setDecoding] = useState(false);
-  const [showComment, setShowComment] = useState(true);
+  const [showComment, setShowComment] = useState(false);
+  const [numLike, setNumLike] = useState(0);
+  const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -136,6 +140,12 @@ export default function MemoryContent(props) {
     }, 500);
   }
 
+  function handerLike() {
+    setNumLike(numLike + 1);
+  }
+  function handerNumberComment(number) {
+    setNumComment(number);
+  }
   function handerShowComment() {
     setShowComment(true);
   }
@@ -193,13 +203,14 @@ export default function MemoryContent(props) {
         ''
       ) : (
         <StyledCardActions className={classes.acctionsBt}>
-          <Button className={classes.button}>
+          <Button className={classes.button} onClick={handerLike}>
             <ThumbUpIcon fontSize="small" className={classes.rightIcon} />
-            Like
+            Like {numLike > 0 && `( ${numLike} )`}
           </Button>
+
           <Button className={classes.button} onClick={handerShowComment}>
             <CommentIcon fontSize="small" className={classes.rightIcon} />
-            Comment
+            Comment {numComment > 0 && `( ${numComment} )`}
           </Button>
           <Button className={classes.button}>
             <ShareIcon fontSize="small" className={classes.rightIcon} />
@@ -207,7 +218,7 @@ export default function MemoryContent(props) {
           </Button>
         </StyledCardActions>
       )}
-      {showComment && <Comments />}
+      {showComment && <Comments handerNumberComment={handerNumberComment} />}
     </Card>
   );
 }
