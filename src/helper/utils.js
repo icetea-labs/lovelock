@@ -42,7 +42,7 @@ async function callReadOrPure(funcName, params, method) {
 
 export async function sendTransaction(funcName, params) {
   // const { address } = this.props;
-  console.log('params', params);
+  // console.log('params', params);
   try {
     const ct = tweb3.contract(contract);
     const result = await ct.methods[funcName](...(params || [])).sendCommit();

@@ -44,7 +44,7 @@ class PromiseAlert extends React.Component {
     const { index } = this.props;
 
     const obj = propose.filter(item => item.id === index)[0];
-    console.log('loaddata', obj);
+    // console.log('loaddata', obj);
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       // const reps = await getTagsInfo(addr);
@@ -64,7 +64,7 @@ class PromiseAlert extends React.Component {
     const { sender, info, content, name } = this.state;
     const infoParse = info && JSON.parse(info);
     const hash = (infoParse && infoParse.hash) || '';
-    console.log('infoParse', infoParse);
+    // console.log('infoParse', infoParse);
     // console.log('view state', this.state);
     return (
       <div>

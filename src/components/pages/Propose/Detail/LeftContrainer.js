@@ -173,11 +173,19 @@ class LeftContrainer extends PureComponent {
         newAddress = proposes[i].sender;
       }
       // console.log('address', newAddress);
-      const reps = await getTagsInfo(newAddress);
-      console.log('addInfoToProposes left', reps);
+      let reps;
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        reps = await tweb3
+          .contract('system.did')
+          .methods.query(newAddress)
+          .call();
+      } else {
+        reps = await getTagsInfo(newAddress);
+      }
+
       const nick = await getAlias(newAddress);
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        proposes[i].name = reps['bot-firstName'] + ' ' + reps['bot-lastName'];
+        proposes[i].name = reps.tags['bot-firstName'] + ' ' + reps.tags['bot-lastName'];
       } else {
         proposes[i].name = reps['display-name'] || 'undefine';
       }

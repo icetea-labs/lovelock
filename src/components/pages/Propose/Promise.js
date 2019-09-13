@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import CommonDialog from './CommonDialog';
-import { saveToIpfs, sendTransaction, setTagsInfo, getTagsInfo } from '../../../helper';
+import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
 import { connect } from 'react-redux';
 import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
@@ -16,7 +16,6 @@ import AddInfoMessage from '../../elements/AddInfoMessage';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { FlexBox } from '../../elements/StyledUtils';
-// import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const useStyles = makeStyles(theme => ({
   container: {
