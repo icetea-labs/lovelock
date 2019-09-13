@@ -11,6 +11,7 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
+import ImageUpload from '../../../elements/ImageUpload';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
@@ -177,6 +178,7 @@ class RegisterUsername extends PureComponent {
           margin="normal"
           value={rePassword}
         />
+        {/* <ImageUpload /> */}
         <DivControlBtnKeystore>
           <LinkPro href="/login">Login</LinkPro>
           <ButtonPro type="submit">
