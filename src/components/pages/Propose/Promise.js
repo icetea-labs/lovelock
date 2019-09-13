@@ -191,6 +191,7 @@ class Promise extends React.Component {
 
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
+    const address = this.props.address;
 
     if (escapedValue === '@' || escapedValue === '') {
       this.setState({
@@ -218,6 +219,7 @@ class Promise extends React.Component {
       console.log(tryStringifyJson(err));
     }
 
+    people = people.filter(person => person.address !== address);
     people = people.filter(person => regex.test(this.getSuggestionValue(person)));
     people = people.slice(0, 10);
 
