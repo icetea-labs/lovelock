@@ -438,7 +438,7 @@ function Header(props) {
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
                   </Typography>
-                  {' send you a promise'}
+                  {' sent you a promise'}
                 </React.Fragment>
               }
               secondary={

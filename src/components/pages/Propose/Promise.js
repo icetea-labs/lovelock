@@ -105,12 +105,6 @@ class Promise extends React.Component {
     // console.log("view promiseStmChange", value);
   };
 
-  onChangeCus = (date, file) => {
-    console.log('view Date', date);
-    console.log('view File', file);
-    this.setState({ date, file });
-  };
-
   onChangeDate = date => {
     this.setState({ date });
   };
@@ -120,7 +114,7 @@ class Promise extends React.Component {
 
   async createPropose(partner, promiseStm, date, file) {
     const { setLoading, enqueueSnackbar, address } = this.props;
-    const { firstname, lastname, value } = this.state;
+    const { firstname, lastname, value, checked } = this.state;
     let hash;
     let message;
     setLoading(true);
@@ -150,7 +144,7 @@ class Promise extends React.Component {
         } else {
           const params = [promiseStm, partner, info];
 
-          if (value === '@bot-lover') {
+          if (checked) {
             if (!firstname) {
               message = 'Please enter your crush first name.';
               enqueueSnackbar(message, { variant: 'error' });
@@ -171,7 +165,7 @@ class Promise extends React.Component {
 
           this.timeoutHanle2 = setTimeout(() => {
             if (result) {
-              message = 'Your propose send successfully.';
+              message = 'Your propose sent successfully.';
               enqueueSnackbar(message, { variant: 'success' });
               setLoading(false);
               this.props.close();
@@ -305,7 +299,6 @@ class Promise extends React.Component {
     if (checked) {
       this.setState({
         checked,
-        value: '@bot-lover',
         partner: process.env.REACT_APP_BOT_LOVER,
       });
       // document.addEventListener('DOMContentLoaded', function(event) {
@@ -406,7 +399,6 @@ class Promise extends React.Component {
           variant="outlined"
           onChange={this.promiseStmChange}
         />
-        {/* <CustomPost onChange={this.onChangeCus} /> */}
         <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
       </CommonDialog>
     );

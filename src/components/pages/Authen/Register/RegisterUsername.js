@@ -269,7 +269,7 @@ class RegisterUsername extends PureComponent {
           </div>
         </PreviewContainter>
         <DivControlBtnKeystore>
-          <LinkPro href="/login">Login</LinkPro>
+          <LinkPro href="/login">Already had an account? Login</LinkPro>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>

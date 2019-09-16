@@ -99,8 +99,8 @@ class ByMnemonic extends PureComponent {
       <div>
         <TextField
           id="outlined-multiline-static"
-          label="Recovery phase or key"
-          placeholder="Enter your recovery phase or key"
+          label="Recovery phrase or key"
+          placeholder="Enter your Recovery phrase or key"
           multiline
           rows="4"
           className={classes.textField}
