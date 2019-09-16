@@ -105,6 +105,21 @@ export async function getTagsInfo(address) {
   return cacheTags[address] || [];
 }
 
+export async function getTags(address) {
+  let tags = {};
+  try {
+    const resp = await tweb3
+      .contract('system.did')
+      .methods.query(address)
+      .call();
+    tags = resp.tags;
+  } catch (e) {
+    console.error(e);
+  }
+
+  return tags;
+}
+
 export async function saveToIpfs(files) {
   // const file = [...files][0];
   let ipfsId;

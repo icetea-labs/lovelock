@@ -34,6 +34,9 @@ const Desc = styled.ul`
   li {
     text-align: center;
   }
+  span {
+    line-height: 14px;
+  }
 `;
 const MnemonixText = styled.div`
   text-align: center;
@@ -86,11 +89,11 @@ class RegisterSuccess extends React.Component {
             <MnemonixText>
               <p data-cy="mnemonic">{mnemonic}</p>
             </MnemonixText>
-            <span>In case you forget your password, use this recovery phase to gain access to your account.</span>
+            <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
           </Desc>
           <FoolterBtn>
             <Button variant="contained" color="primary" onClick={this.gotoHome}>
-              I've saved the recovery phase
+              I've saved the recovery phrase
             </Button>
           </FoolterBtn>
         </WrapperImg>

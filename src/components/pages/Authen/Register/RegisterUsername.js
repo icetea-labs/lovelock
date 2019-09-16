@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
+import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo } from '../../../../helper';
+import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 // import TextField from '@material-ui/core/TextField';
 // import Button from '@material-ui/core/Button';
@@ -11,6 +12,7 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
+// import ImageUpload from '../../../elements/ImageUpload';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
@@ -22,6 +24,58 @@ const styles = theme => ({
     paddingRight: theme.spacing(1),
   },
 });
+
+const PreviewContainter = styled.div`
+  display: flex;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  /* justify-content: space-between; */
+  padding: 20px 0 0 0;
+  font-size: 14px;
+  cursor: pointer;
+  .upload_img input[type='file'] {
+      font-size: 100px;
+      position: absolute;
+      left: 10;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload_img {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      cursor: pointer;
+    }
+  .fileInput {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #eddada8f;
+    padding: 2px;
+    margin: 10px;
+    cursor: pointer;
+  }
+  .imgPreview {
+    text-align: center;
+    margin-right: 15px;
+    height: 150px;
+    width: 150px;
+    border: 1px solid #eddada8f;
+    border-radius: 50%;
+    cursor: pointer;
+    img {
+      width: 100%
+      height: 100%
+      cursor: pointer;
+      border-radius: 50%;
+    }
+  }
+  .previewText {
+    margin-top: 70px;
+    cursor: pointer;
+    color: #736e6e
+  }
+`;
 
 class RegisterUsername extends PureComponent {
   constructor(props) {
@@ -37,6 +91,8 @@ class RegisterUsername extends PureComponent {
       passwordErr: '',
       rePassword: '',
       rePassErr: '',
+      file: '',
+      imgPreviewUrl: '',
     };
   }
   componentDidMount() {
@@ -60,7 +116,7 @@ class RegisterUsername extends PureComponent {
   }
 
   gotoNext = async () => {
-    const { username, firstname, lastname, password } = this.state;
+    const { username, firstname, lastname, password, file } = this.state;
     const { setStep, setLoading, setAccount } = this.props;
 
     if (username) {
@@ -84,6 +140,10 @@ class RegisterUsername extends PureComponent {
           // console.log('resp', resp);
           const respTagName = await setTagsInfo(address, 'display-name', displayname);
           const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
+          if (file) {
+            const hash = await saveToIpfs(file);
+            const respAvatar = await setTagsInfo(address, 'avartar', hash);
+          }
           // console.log('respTags', respTagName);
 
           if (resp && respTagName && respTagPublicKey) {
@@ -116,9 +176,34 @@ class RegisterUsername extends PureComponent {
     };
   };
 
+  handleImageChange = e => {
+    e.preventDefault();
+
+    let reader = new FileReader();
+    let files = e.target.files;
+
+    reader.onloadend = () => {
+      this.setState({
+        file: files,
+        imgPreviewUrl: reader.result,
+      });
+    };
+
+    files && reader.readAsDataURL(files[0]);
+  };
+
   render() {
-    const { username, firstname, lastname, password, rePassword } = this.state;
+    const { username, firstname, lastname, password, rePassword, imgPreviewUrl } = this.state;
     const { classes } = this.props;
+
+    // console.log('view file', this.state.file);
+
+    let $imagePreview = null;
+    if (imgPreviewUrl) {
+      $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
+    } else {
+      $imagePreview = <div className="previewText">Your avatar</div>;
+    }
 
     return (
       <ValidatorForm onSubmit={this.gotoNext}>
@@ -177,8 +262,14 @@ class RegisterUsername extends PureComponent {
           margin="normal"
           value={rePassword}
         />
+        <PreviewContainter>
+          <div className="upload_img">
+            <input className="fileInput" type="file" onChange={this.handleImageChange} />
+            <div className="imgPreview">{$imagePreview}</div>
+          </div>
+        </PreviewContainter>
         <DivControlBtnKeystore>
-          <LinkPro href="/login">Login</LinkPro>
+          <LinkPro href="/login">Already had an account? Login</LinkPro>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>

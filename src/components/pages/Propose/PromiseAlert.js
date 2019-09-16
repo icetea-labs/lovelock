@@ -80,13 +80,13 @@ class PromiseAlert extends React.Component {
           <TagTitle>
             {address === sender ? (
               <div>
-                <span>You send promise to </span>
+                <span>You sent promise to </span>
                 <span className="highlight">{name}</span>
               </div>
             ) : (
               <div>
                 <span className="highlight">{name}</span>
-                <span> send a promise to you</span>
+                <span> sent a promise to you</span>
               </div>
             )}
           </TagTitle>
