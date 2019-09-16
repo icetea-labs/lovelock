@@ -22,7 +22,7 @@ export default function Home() {
     fetchData();
   }, []);
   async function loadMemory() {
-    const allMemory = await callView('getMemoryByRange', [0, 10]);
+    const allMemory = await callView('getMemoriesByRange', [0, 10]);
     let newMemoryList = [];
 
     for (let i = 0; i < allMemory.length; i++) {
@@ -31,7 +31,6 @@ export default function Home() {
       obj.info = JSON.parse(obj.info);
       const reps = await getTagsInfo(sender);
       obj.name = reps['display-name'];
-      obj.index = [i];
       newMemoryList.push(obj);
     }
     newMemoryList = newMemoryList.reverse();

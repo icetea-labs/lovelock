@@ -177,7 +177,7 @@ export default function TopContrainer(props) {
       const r_nick = await getAlias(proposes[i].receiver);
       proposes[i].r_nick = '@' + r_nick;
 
-      const info = JSON.parse(proposes[i].info);
+      const info = JSON.parse(proposes[i].s_info);
       proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
       proposes[i].s_date = info.date;
       proposes[i].r_date = info.date;

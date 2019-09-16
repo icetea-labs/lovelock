@@ -50,7 +50,7 @@ export default function LeftProposes(props) {
       />
     );
   }
-
+  console.log('pendingPropose', pendingPropose);
   return pendingPropose.map(item => {
     // console.log('item', item);
     return (

@@ -27,7 +27,7 @@ export default function RightContrainer(props) {
   }
 
   async function loadMemory(proIndex) {
-    const allMemory = await callView('getMemoryByProIndex', [proIndex]);
+    const allMemory = await callView('getMemoriesByProIndex', [proIndex]);
     let newMemoryList = [];
     setLoading(true);
     setTimeout(async () => {
@@ -46,7 +46,6 @@ export default function RightContrainer(props) {
         const reps = await getTagsInfo(sender);
         obj.name = reps['display-name'];
         obj.pubkey = reps['pub-key'];
-        obj.index = [i];
         newMemoryList.push(obj);
       }
 
