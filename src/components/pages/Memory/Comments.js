@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/styles';
 import { Grid, CardActions } from '@material-ui/core';
 import { Avatar, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
-import { sendTransaction, callView } from '../../../helper';
+import { sendTransaction, callView, getAlias } from '../../../helper';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -90,9 +90,13 @@ export default function Comments(props) {
 
   async function loaddata(index) {
     const comments = await callView('getCommentsByMemoIndex', [index]);
-    const numcomment = Object.keys(comments).length;
+    // const numcomment = Object.keys(comments).length;
     console.log('comments', comments);
     // setComments(numcomment);
+    for (let index = 0; index < comments.length; index++) {
+      const element = comments[index];
+      comments[index].nick = await getAlias(element.sender);
+    }
     setComments(comments);
   }
 
@@ -143,7 +147,7 @@ export default function Comments(props) {
                   </Grid>
                   <Grid item>
                     <Typography margin="dense" className={classes.contentComment}>
-                      <Link to="/" className={classes.linkUserName}>{`${displayName}`}</Link>
+                      <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
                       <span> {item.content}</span>
                     </Typography>
                     <Link className={classes.buttonLike}>Like</Link>
