@@ -23,7 +23,7 @@ export async function callPure(funcName, params) {
 }
 export async function callView(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callReadonlyContractMethod');
-  console.log('resp', funcName, resp);
+  // console.log('resp', funcName, resp);
   if (resp) {
     return JSON.parse(resp);
   } else {
@@ -37,6 +37,7 @@ async function callReadOrPure(funcName, params, method) {
     const result = await tweb3[method](address, funcName, params || []);
     return tryStringifyJson(result || '' + result);
   } catch (error) {
+    console.log('funcName', funcName);
     console.log(tryStringifyJson(error, true));
   }
 }

@@ -6,6 +6,6 @@ exports.isOwnerPropose = (propose, message, sender) => {
 //private function
 exports.getDataByIndex = (array, index) => {
   const data = array[index];
-  expect(!!data, 'The array index out of bounds');
+  expect(!!data, 'The array index (' + index + ') out of bounds ');
   return data;
 };

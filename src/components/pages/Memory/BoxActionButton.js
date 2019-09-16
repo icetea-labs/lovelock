@@ -50,32 +50,20 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function BoxActionButton(props) {
-  const { memoryIndex, handerShowComment } = props;
+  const { memoryIndex, handerShowComment, likes } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
-  const [numLike, setNumLike] = useState(0);
+  const [numLike, setNumLike] = useState(Object.keys(likes || {}).length || 0);
   const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
-    console.log('memoryIndex', memoryIndex);
     loaddata(memoryIndex);
   }, [memoryIndex]);
 
   async function loaddata(index) {
     const likes = await callView('getLikeByMemoIndex', [index]);
-    console.log('likes', likes);
-    let newMemoryList = [];
-    // setLoading(true);
-    setTimeout(async () => {
-      for (let i = 0; i < likes.length; i++) {
-        const obj = likes[i];
-        newMemoryList.push(obj);
-      }
-
-      newMemoryList = newMemoryList.reverse();
-      // setMemoryList(newMemoryList);
-      // setLoading(false);
-    }, 100);
+    const numLike = Object.keys(likes).length;
+    setNumLike(numLike);
   }
 
   async function handerLike() {
@@ -85,11 +73,10 @@ export default function BoxActionButton(props) {
     }
     const method = 'addLike';
     let params = [memoryIndex, 1];
-    console.log('memoryIndex', memoryIndex);
+    // console.log('memoryIndex', memoryIndex);
     const result = await sendTransaction(method, params);
     if (result) {
-      // reLoadMemory(memoIndex);
-      setNumLike(numLike + 1);
+      loaddata(memoryIndex);
     }
   }
 

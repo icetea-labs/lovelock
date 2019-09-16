@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/styles';
-import { Card, CardHeader, CardContent, CardMedia, CardActions } from '@material-ui/core';
-import { Button, IconButton } from '@material-ui/core';
+import { Card, CardHeader, CardContent, CardMedia } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { Avatar, Typography } from '@material-ui/core';
-import { TimeWithFormat, decodeWithPublicKey, sendTransaction } from '../../../helper';
+import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import CommentIcon from '@material-ui/icons/Comment';
-import ShareIcon from '@material-ui/icons/Share';
+// import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+// import CommentIcon from '@material-ui/icons/Comment';
+// import ShareIcon from '@material-ui/icons/Share';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import * as actions from '../../../store/actions';
+// import * as actions from '../../../store/actions';
 import BoxActionButton from './BoxActionButton';
 
 import Comments from './Comments';
@@ -67,14 +66,13 @@ const useStyles = makeStyles(theme => ({
 
 export default function MemoryContent(props) {
   const { memory, proIndex } = props;
-  const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(false);
-  const [numLike, setNumLike] = useState(0);
+  // const [numLike, setNumLike] = useState(0);
   const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
@@ -196,7 +194,7 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <BoxActionButton handerShowComment={handerShowComment} memoryIndex={memory.id} />
+        <BoxActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
       )}
       {showComment && <Comments handerNumberComment={handerNumberComment} />}
     </Card>
