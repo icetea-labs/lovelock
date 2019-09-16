@@ -46,7 +46,6 @@ export default function RightContrainer(props) {
         const reps = await getTagsInfo(sender);
         obj.name = reps['display-name'];
         obj.pubkey = reps['pub-key'];
-        obj.index = [i];
         newMemoryList.push(obj);
       }
 

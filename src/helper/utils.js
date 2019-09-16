@@ -23,6 +23,7 @@ export async function callPure(funcName, params) {
 }
 export async function callView(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callReadonlyContractMethod');
+  console.log('resp', funcName, resp);
   if (resp) {
     return JSON.parse(resp);
   } else {
