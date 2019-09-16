@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { getTagsInfo } from '../../helper';
+import { getTagsInfo, getTags } from '../../helper';
 import { rem } from '../elements/StyledUtils';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -332,14 +332,16 @@ function Header(props) {
   // const [displayName, setDisplayName] = useState(null);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
+  const avatar = useSelector(state => state.account.avatar);
 
   useEffect(() => {
     async function fetchData() {
       if (address) {
         // console.log('address', address);
-        const reps = await getTagsInfo(address);
+        const reps = await getTags(address);
+
         // setDisplayName(reps['display-name']);
-        dispatch(actions.setAccount({ displayName: reps['display-name'] }));
+        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps['avartar'] }));
       } else {
         // setDisplayName('no name');
       }
@@ -355,7 +357,11 @@ function Header(props) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <StyledMenuItem>
+      <StyledMenuItem
+        onClick={() => {
+          props.history.push('/profile');
+        }}
+      >
         <ListItemIcon>
           <PersonIcon />
         </ListItemIcon>
@@ -522,9 +528,14 @@ function Header(props) {
               </div>
               <div className={classes.grow} />
               <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                <Avatar alt="avatar" className={classes.avatar} color="primary">
-                  <AccountCircleIcon color="action" />
-                </Avatar>
+                {avatar ? (
+                  <Avatar alt="avatar" src={process.env.REACT_APP_IPFS + avatar} className={classes.avatar} />
+                ) : (
+                  <Avatar alt="avatar" className={classes.avatar} color="primary">
+                    <AccountCircleIcon color="action" />
+                  </Avatar>
+                )}
+
                 <Typography className={classes.title} noWrap>
                   {displayName}
                 </Typography>
