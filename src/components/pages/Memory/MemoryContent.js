@@ -196,7 +196,7 @@ export default function MemoryContent(props) {
       ) : (
         <BoxActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
       )}
-      {showComment && <Comments handerNumberComment={handerNumberComment} />}
+      {showComment && <Comments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>
   );
 }

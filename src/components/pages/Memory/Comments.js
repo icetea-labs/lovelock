@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/styles';
 import { Grid, CardActions } from '@material-ui/core';
 import { Avatar, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
+import { sendTransaction, callView } from '../../../helper';
+import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
   avatarComment: {
@@ -73,20 +75,50 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function Comments(props) {
-  const { handerNumberComment } = props;
+  const { handerNumberComment, memoryIndex } = props;
+  const dispatch = useDispatch();
+  const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
   const [comment, setComment] = useState('');
-  const [comments, setComments] = useState([{ text: '1' }, { text: '2' }, { text: '3' }]);
+  // const [comments, setComments] = useState([{ text: '1' }, { text: '2' }, { text: '3' }]);
+  const [comments, setComments] = useState([]);
   let myFormRef = React.createRef();
 
-  function newComment() {
-    if (comment) {
-      const newArray = [...comments, { text: comment }];
-      setComments(newArray);
-      setComment('');
-      handerNumberComment(newArray.length);
+  useEffect(() => {
+    loaddata(memoryIndex);
+  }, [memoryIndex]);
+
+  async function loaddata(index) {
+    const comments = await callView('getCommentsByMemoIndex', [index]);
+    const numcomment = Object.keys(comments).length;
+    console.log('comments', comments);
+    // setComments(numcomment);
+    setComments(comments);
+  }
+
+  async function newComment() {
+    if (!privateKey) {
+      dispatch(actions.setNeedAuth(true));
+      return;
+    }
+    const method = 'addComment';
+    let params = [memoryIndex, comment, ''];
+    // console.log('memoryIndex', memoryIndex);
+    const result = await sendTransaction(method, params);
+    if (result) {
+      loaddata(memoryIndex);
     }
   }
+
+  // function newComment() {
+  //   if (comment) {
+  //     const newArray = [...comments, { text: comment }];
+  //     setComments(newArray);
+  //     setComment('');
+  //     handerNumberComment(newArray.length);
+  //   }
+  // }
+
   function onKeyDownPostComment(event) {
     if (event.keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
@@ -112,7 +144,7 @@ export default function Comments(props) {
                   <Grid item>
                     <Typography margin="dense" className={classes.contentComment}>
                       <Link to="/" className={classes.linkUserName}>{`${displayName}`}</Link>
-                      <span> {item.text}</span>
+                      <span> {item.content}</span>
                     </Typography>
                     <Link className={classes.buttonLike}>Like</Link>
                     <span className={classes.bullet}>•</span>
@@ -139,7 +171,7 @@ export default function Comments(props) {
               <TextField
                 fullWidth
                 multiline
-                autoFocus
+                // autoFocus
                 // value={comment}
                 className={classes.textComment}
                 placeholder="Write a comment..."

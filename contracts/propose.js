@@ -138,7 +138,7 @@ class Propose {
     const sender = msg.sender;
 
     //new memories
-    const menory = { isPrivate, sender, proIndex, content, info, likes: {}, comments: [{}] };
+    const menory = { isPrivate, sender, proIndex, content, info, likes: {}, comments: [] };
     const x = this.memories;
     const index = x.push(menory) - 1;
     this.memories = x;
@@ -164,13 +164,13 @@ class Propose {
 
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
-    const address = msg.sender;
+    const sender = msg.sender;
     let obj = getDataByIndex(this.memories, memoIndex);
-    if (obj.likes[address]) {
-      delete obj.likes[address];
+    if (obj.likes[sender]) {
+      delete obj.likes[sender];
     } else {
-      obj.likes[address] = {};
-      obj.likes[address].type = type;
+      obj.likes[sender] = {};
+      obj.likes[sender].type = type;
     }
     this.memories[memoIndex] = obj;
     // const log = Object.assign({}, like, { index });
@@ -178,32 +178,23 @@ class Propose {
   }
 
   @view getLikeByMemoIndex(memoIndex: number) {
-    const address = msg.sender;
-    let obj = getDataByIndex(this.memories, memoIndex);
-    return obj.likes || {};
+    const obj = getDataByIndex(this.memories, memoIndex);
+    return obj.likes;
   }
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
-    const proIndex = getDataByIndex(this.m2p, memoIndex);
-    const pro = getDataByIndex(this.propose, proIndex);
-    expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add comment. You must be owner propose.");
-
-    //new memories
-    const comment = { memoIndex, content, info };
-    const x = this.comments;
-    const index = x.push(comment) - 1;
-    this.comments = x;
-
-    //map index propose to index memory
-    const y = this.memoryToComments;
-    if (!y[memoIndex]) y[memoIndex] = [];
-    y[memoIndex].push(index);
-    this.memoryToComments = y;
-
-    //emit Event
-    const log = Object.assign({}, comment, { id: index });
-    this.emitEvent('addComment', { by: msg.sender, log }, ['by']);
+    const sender = msg.sender;
+    let obj = getDataByIndex(this.memories, memoIndex);
+    const comment = { sender, content, info };
+    obj.comments.push(comment);
+    this.memories[memoIndex] = obj;
   }
+
+  @view getCommentsByMemoIndex(memoIndex: number) {
+    const obj = getDataByIndex(this.memories, memoIndex);
+    return obj.comments;
+  }
+
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
     const sender = msg.sender;
