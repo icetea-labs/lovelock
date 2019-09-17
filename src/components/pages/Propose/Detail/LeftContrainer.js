@@ -130,7 +130,7 @@ class LeftContrainer extends PureComponent {
     const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
     newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
     // console.log('newArray', newArray[objIndex]);
-    // console.log('eventConfirmPropose');
+    console.log('eventConfirmPropose');
     if (address === data.log.sender) {
       const message = 'Your propose has been approved.';
       this.props.enqueueSnackbar(message, { variant: 'info' });
@@ -160,14 +160,15 @@ class LeftContrainer extends PureComponent {
   }
 
   async addInfoToProposes(proposes) {
-    // const { address } = this.props;
-
+    const { address } = this.props;
     for (let i = 0; i < proposes.length; i++) {
-      let newAddress = proposes[i].receiver;
+      let partnerAddress = '';
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        newAddress = proposes[i].sender;
+        partnerAddress = proposes[i].sender;
+      } else {
+        partnerAddress = proposes[i].sender === address ? proposes[i].receiver : proposes[i].sender;
       }
-      const reps = await getTagsInfo(newAddress);
+      const reps = await getTagsInfo(partnerAddress);
 
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         proposes[i].name = reps['bot-firstName'] + ' ' + reps['bot-lastName'];
@@ -177,7 +178,7 @@ class LeftContrainer extends PureComponent {
         proposes[i].avatar = reps['avatar'];
       }
       // console.log('reps', proposes[i].avatar);
-      const nick = await getAlias(newAddress);
+      const nick = await getAlias(partnerAddress);
       proposes[i].nick = '@' + nick;
       proposes[i].publicKey = reps['pub-key'] || '';
     }
