@@ -68,33 +68,37 @@ class PromiseAlert extends React.Component {
     // console.log('view state', this.state);
     return (
       <div>
-        <CommonDialog
-          title="Promise alert"
-          okText="Accept"
-          cancelText="Deny"
-          close={close}
-          cancel={deny}
-          confirm={accept}
-          isCancel
-        >
-          <TagTitle>
-            {address === sender ? (
-              <div>
-                <span>You send promise to </span>
-                <span className="highlight">{name}</span>
-              </div>
-            ) : (
-              <div>
-                <span className="highlight">{name}</span>
-                <span> send a promise to you</span>
-              </div>
-            )}
-          </TagTitle>
-          <ImgView>
-            {hash && <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />}
-          </ImgView>
-          <PageView>{content}</PageView>
-        </CommonDialog>
+        {address === sender ? (
+          <CommonDialog title="Promise alert" okText="Cancel" close={close} confirm={deny}>
+            <TagTitle>
+              <span>You sent promise to </span>
+              <span className="highlight">{name}</span>
+            </TagTitle>
+            <ImgView>
+              {hash && <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />}
+            </ImgView>
+            <PageView>{content}</PageView>
+          </CommonDialog>
+        ) : (
+          <CommonDialog
+            title="Promise alert"
+            okText="Accept"
+            cancelText="Deny"
+            close={close}
+            cancel={deny}
+            confirm={accept}
+            isCancel
+          >
+            <TagTitle>
+              <span className="highlight">{name}</span>
+              <span> sent a promise to you</span>
+            </TagTitle>
+            <ImgView>
+              {hash && <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />}
+            </ImgView>
+            <PageView>{content}</PageView>
+          </CommonDialog>
+        )}
       </div>
     );
   }

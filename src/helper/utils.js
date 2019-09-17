@@ -23,6 +23,7 @@ export async function callPure(funcName, params) {
 }
 export async function callView(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callReadonlyContractMethod');
+  // console.log('resp', funcName, resp);
   if (resp) {
     return JSON.parse(resp);
   } else {
@@ -36,6 +37,7 @@ async function callReadOrPure(funcName, params, method) {
     const result = await tweb3[method](address, funcName, params || []);
     return tryStringifyJson(result || '' + result);
   } catch (error) {
+    console.log('funcName', funcName);
     console.log(tryStringifyJson(error, true));
   }
 }
@@ -82,25 +84,40 @@ export async function setTagsInfo(address, name, value) {
     return {};
   }
 }
-let cacheTags = {};
+// let cacheTags = {};
 export async function getTagsInfo(address) {
   try {
-    if (!cacheTags[address]) {
-      const resp = await tweb3
-        .contract('system.did')
-        .methods.query(address)
-        .call();
-      if (resp && resp.tags) {
-        cacheTags[address] = resp.tags;
-      } else {
-        cacheTags[address] = {};
-      }
-    }
+    // if (!cacheTags[address]) {
+    const resp = await tweb3
+      .contract('system.did')
+      .methods.query(address)
+      .call();
+    // if (resp && resp.tags) {
+    //   cacheTags[address] = resp.tags;
+    // } else {
+    //   cacheTags[address] = {};
+    // }
+    // }
+    return (resp && resp.tags) || [];
+  } catch (e) {
+    console.error(e);
+  }
+  // return cacheTags[address] || [];
+}
+
+export async function getTags(address) {
+  let tags = {};
+  try {
+    const resp = await tweb3
+      .contract('system.did')
+      .methods.query(address)
+      .call();
+    tags = resp.tags;
   } catch (e) {
     console.error(e);
   }
 
-  return cacheTags[address] || [];
+  return tags;
 }
 
 export async function saveToIpfs(files) {

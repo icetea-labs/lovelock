@@ -24,8 +24,8 @@ const PreviewContainter = styled.div`
       cursor: pointer;
     }
   .fileInput {
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
     border: 1px solid #eddada8f;
     padding: 2px;
     margin: 10px;
@@ -37,23 +37,26 @@ const PreviewContainter = styled.div`
     height: 150px;
     width: 150px;
     border: 1px solid #eddada8f;
+    border-radius: 50%;
     cursor: pointer;
     img {
       width: 100%
       height: 100%
       cursor: pointer;
+      border-radius: 50%;
     }
   }
   .previewText {
     margin-top: 70px;
     cursor: pointer;
-    color: #c9c7c7
+    color: #736e6e
   }
 `;
 
 export default function ImageUpload(props) {
   const [file, setFile] = useState('');
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
+
 
   function handleImageChange(e) {
     e.preventDefault();

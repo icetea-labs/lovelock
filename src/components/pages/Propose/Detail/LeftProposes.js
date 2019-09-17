@@ -50,7 +50,7 @@ export default function LeftProposes(props) {
       />
     );
   }
-
+  // console.log('pendingPropose', pendingPropose);
   return pendingPropose.map(item => {
     // console.log('item', item);
     return (
@@ -67,7 +67,7 @@ export default function LeftProposes(props) {
         action={
           <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
         }
-        avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
+        avatar={<Avatar alt="" src={process.env.REACT_APP_IPFS + item.avatar} />}
         title={item.name}
         subheader={item.receiver === process.env.REACT_APP_BOT_LOVER ? '' : item.nick}
       />

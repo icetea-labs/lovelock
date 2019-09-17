@@ -58,8 +58,8 @@ const WarrperChatBox = styled(FlexBox)`
     img {
       width: 58px;
       height: 58px;
+      border-radius: 10px;
     }
-    border-radius: 10px;
     object-fit: contain;
     overflow: hidden;
   }
@@ -168,16 +168,19 @@ export default function TopContrainer(props) {
         proposes[i].r_name = senderTags.tags['bot-firstName'] + ' ' + senderTags.tags['bot-lastName'];
         proposes[i].s_name = senderTags.tags['display-name'];
         proposes[i].s_publicKey = senderTags.tags['pub-key'] || '';
+        proposes[i].s_avatar = senderTags.tags['avatar'];
       } else {
         proposes[i].s_name = senderTags['display-name'];
         proposes[i].s_publicKey = senderTags['pub-key'] || '';
         proposes[i].r_name = receiverTags['display-name'];
+        proposes[i].s_avatar = senderTags['avatar'];
       }
+      proposes[i].r_avatar = receiverTags['avatar'];
       proposes[i].r_content = proposes[i].r_content || 'I love you';
       const r_nick = await getAlias(proposes[i].receiver);
       proposes[i].r_nick = '@' + r_nick;
 
-      const info = JSON.parse(proposes[i].info);
+      const info = JSON.parse(proposes[i].s_info);
       proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
       proposes[i].s_date = info.date;
       proposes[i].r_date = info.date;
@@ -233,7 +236,7 @@ export default function TopContrainer(props) {
         {topInfo.s_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
-              <img src="/static/img/user-men.jpg" alt="itea" />
+              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
@@ -258,7 +261,7 @@ export default function TopContrainer(props) {
               <p>{topInfo.r_content}</p>
             </div>
             <div className="user_photo fr">
-              <img src="/static/img/user-women.jpg" alt="itea" />
+              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
             </div>
           </FlexWidthBox>
         )}

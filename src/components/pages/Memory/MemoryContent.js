@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/styles';
-import { Card, CardHeader, CardContent, CardMedia, CardActions } from '@material-ui/core';
-import { Button, IconButton } from '@material-ui/core';
+import { Card, CardHeader, CardContent, CardMedia } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { Avatar, Typography } from '@material-ui/core';
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import CommentIcon from '@material-ui/icons/Comment';
-import ShareIcon from '@material-ui/icons/Share';
+// import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+// import CommentIcon from '@material-ui/icons/Comment';
+// import ShareIcon from '@material-ui/icons/Share';
 import CircularProgress from '@material-ui/core/CircularProgress';
+// import * as actions from '../../../store/actions';
+import BoxActionButton from './BoxActionButton';
 
 import Comments from './Comments';
 
@@ -63,24 +64,22 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const StyledCardActions = withStyles(theme => ({
-  root: {
-    padding: theme.spacing(0.4, 2),
-    borderTop: '1px solid #e1e1e1',
-  },
-}))(CardActions);
-
 export default function MemoryContent(props) {
-  const { privateKey, publicKey, address } = useSelector(state => state.account);
-  const [memoryDecrypted, setMemoryDecrypted] = useState(props.memory);
+  const { memory, proIndex } = props;
+  const privateKey = useSelector(state => state.account.privateKey);
+  const publicKey = useSelector(state => state.account.publicKey);
+  const address = useSelector(state => state.account.address);
+  const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
+  // const [numLike, setNumLike] = useState(0);
+  const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
-      decodePrivateMemory(privateKey, props.proIndex);
+      decodePrivateMemory(privateKey);
     }
-  }, [privateKey, props.proIndex]);
+  }, [privateKey, proIndex]);
 
   useEffect(() => {
     setMemoryDecrypted(props.memory);
@@ -111,7 +110,7 @@ export default function MemoryContent(props) {
     );
   }
 
-  function decodePrivateMemory(privateKey, proIndex) {
+  function decodePrivateMemory(privateKey) {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
       if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
@@ -136,6 +135,9 @@ export default function MemoryContent(props) {
     }, 500);
   }
 
+  function handerNumberComment(number) {
+    setNumComment(number);
+  }
   function handerShowComment() {
     setShowComment(true);
   }
@@ -145,7 +147,7 @@ export default function MemoryContent(props) {
   return (
     <Card key={memoryDecrypted.index} className={classes.card}>
       <CardHeader
-        avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
+        avatar={<Avatar alt="avata" src={process.env.REACT_APP_IPFS + memoryDecrypted.avatar} />}
         title={memoryDecrypted.name}
         subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
         action={
@@ -192,22 +194,9 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <StyledCardActions className={classes.acctionsBt}>
-          <Button className={classes.button}>
-            <ThumbUpIcon fontSize="small" className={classes.rightIcon} />
-            Like
-          </Button>
-          <Button className={classes.button} onClick={handerShowComment}>
-            <CommentIcon fontSize="small" className={classes.rightIcon} />
-            Comment
-          </Button>
-          <Button className={classes.button}>
-            <ShareIcon fontSize="small" className={classes.rightIcon} />
-            Share
-          </Button>
-        </StyledCardActions>
+        <BoxActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
       )}
-      {showComment && <Comments />}
+      {showComment && <Comments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>
   );
 }

@@ -160,52 +160,26 @@ class LeftContrainer extends PureComponent {
   }
 
   async addInfoToProposes(proposes) {
-    const { address } = this.props;
+    // const { address } = this.props;
+
     for (let i = 0; i < proposes.length; i++) {
-      let newAddress = '';
-      if (address === proposes[i].sender) {
-        if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-          newAddress = address;
-        } else {
-          newAddress = proposes[i].receiver;
-        }
-      } else {
+      let newAddress = proposes[i].receiver;
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         newAddress = proposes[i].sender;
       }
-      // console.log('address', newAddress);
-      let reps;
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        reps = await tweb3
-          .contract('system.did')
-          .methods.query(newAddress)
-          .call();
-      } else {
-        reps = await getTagsInfo(newAddress);
-      }
+      const reps = await getTagsInfo(newAddress);
 
-      const nick = await getAlias(newAddress);
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        proposes[i].name = reps.tags['bot-firstName'] + ' ' + reps.tags['bot-lastName'];
+        proposes[i].name = reps['bot-firstName'] + ' ' + reps['bot-lastName'];
+        proposes[i].avatar = reps['bot-avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
       } else {
         proposes[i].name = reps['display-name'] || 'undefine';
+        proposes[i].avatar = reps['avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
       }
+      // console.log('reps', proposes[i].avatar);
+      const nick = await getAlias(newAddress);
       proposes[i].nick = '@' + nick;
       proposes[i].publicKey = reps['pub-key'] || '';
-
-      // const sender = await getTagsInfo(proposes[i].sender);
-      // const s_nick = await getAlias(newAddress);
-      // proposes[i].s_name = sender['display-name'];
-      // proposes[i].s_nick = '@' + s_nick;
-
-      // const receiver = await getTagsInfo(proposes[i].receiver);
-      // const r_nick = await getAlias(newAddress);
-      // proposes[i].r_name = receiver['display-name'];
-      // proposes[i].r_nick = '@' + r_nick;
-
-      // const info = JSON.parse(proposes[i].info);
-      // proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
-      // proposes[i].s_date = info.date;
-      // proposes[i].r_date = info.date;
     }
     return proposes;
   }
