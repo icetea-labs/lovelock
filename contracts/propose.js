@@ -48,7 +48,7 @@ class Propose {
 
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if ((receiver = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn')) {
+    if (receiver === 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn') {
       pendingPropose = { ...defaultPropose, status: 1 };
     } else {
       pendingPropose = { ...defaultPropose, status: 0 };

@@ -74,7 +74,9 @@ class PromiseConfirm extends React.Component {
       const result = await sendTransaction(name, params);
       // console.log('View result', result);
       if (result) {
-        window.alert('Success');
+        // window.alert('Success');
+        const message = 'Your propose has been removed.';
+        this.props.enqueueSnackbar(message, { variant: 'info' });
         this.props.close();
       }
     } catch (error) {
