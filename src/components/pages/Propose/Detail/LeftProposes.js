@@ -35,13 +35,15 @@ const BoxAction = styled.div`
 
 export default function LeftProposes(props) {
   const { loading = false } = props;
-  const classes = useStyles();
 
   const propose = useSelector(state => state.loveinfo.propose);
-  const { address } = useSelector(state => state.account);
-  const pendingPropose = propose.filter(item => item.status === props.flag);
-  // console.log('pendingPropose', pendingPropose);
-  if (pendingPropose.length <= 0) {
+  const address = useSelector(state => state.account.address);
+  const proposes = propose.filter(item => item.status === props.flag);
+
+  // console.log('Proposes', proposes);
+  const classes = useStyles();
+
+  if (proposes.length <= 0) {
     return (
       <CardHeader
         avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
@@ -50,8 +52,7 @@ export default function LeftProposes(props) {
       />
     );
   }
-  // console.log('pendingPropose', pendingPropose);
-  return pendingPropose.map(item => {
+  return proposes.map(item => {
     // console.log('item', item);
     return (
       <CardHeader

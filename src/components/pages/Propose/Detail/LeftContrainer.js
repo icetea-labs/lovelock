@@ -103,11 +103,9 @@ class LeftContrainer extends PureComponent {
         console.error(error);
       } else {
         const data = result.data.value.TxResult.events[0];
-        // console.log('data', data);
         const eventData = data && data.eventData;
-        // console.log('data', data);
         if (eventData && eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
-          // console.log('to me');
+          // console.log('eventData', eventData);
           switch (data.eventName) {
             case 'createPropose':
               await this.eventCreatePropose(eventData);
@@ -161,36 +159,32 @@ class LeftContrainer extends PureComponent {
 
   async addInfoToProposes(proposes) {
     const { address } = this.props;
+
     for (let i = 0; i < proposes.length; i++) {
+      // Get address partner
       let partnerAddress = '';
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         partnerAddress = proposes[i].sender;
       } else {
         partnerAddress = proposes[i].sender === address ? proposes[i].receiver : proposes[i].sender;
       }
+      // Get info tags partner. case on receiver is bot address -> get tags info of sender address
       const reps = await getTagsInfo(partnerAddress);
-
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         proposes[i].name = reps['bot-firstName'] + ' ' + reps['bot-lastName'];
         proposes[i].avatar = reps['bot-avatar'];
       } else {
-        proposes[i].name = reps['display-name'] || 'undefine';
+        proposes[i].name = reps['display-name'];
         proposes[i].avatar = reps['avatar'];
       }
-      // console.log('reps', proposes[i].avatar);
+
       const nick = await getAlias(partnerAddress);
       proposes[i].nick = '@' + nick;
-      proposes[i].publicKey = reps['pub-key'] || '';
     }
     return proposes;
   }
 
   selectAccepted = index => {
-    // console.log('index', index);
-    // const { setCurrentIndex } = this.props;
-    // this.setState({ index });
-    // setCurrentIndex(index);
-    // this.loadMemory();
     this.props.history.push('/propose/' + index);
   };
 
@@ -203,6 +197,7 @@ class LeftContrainer extends PureComponent {
       this.setState({ step: 'new' });
     }
   };
+
   selectPending = index => {
     const { setNeedAuth, privateKey } = this.props;
     if (!privateKey) {
