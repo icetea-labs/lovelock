@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
+import AvatarPro from '../../../elements/AvatarPro';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Icon from '../../../elements/Icon';
 
@@ -67,7 +67,7 @@ export default function LeftProposes(props) {
         action={
           <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
         }
-        avatar={<Avatar alt="" src={process.env.REACT_APP_IPFS + item.avatar} />}
+        avatar={<AvatarPro alt="" hash={item.avatar} />}
         title={item.name}
         subheader={item.receiver === process.env.REACT_APP_BOT_LOVER ? '' : item.nick}
       />

@@ -8,7 +8,7 @@ import * as actions from '../../../store/actions';
 import { saveToIpfs, sendTransaction } from '../../../helper';
 // import { rem } from '../../elements/StyledUtils';
 import Grid from '@material-ui/core/Grid';
-import Avatar from '@material-ui/core/Avatar';
+import AvatarPro from '../../elements/AvatarPro';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { encodeWithPublicKey } from '../../../helper';
@@ -106,7 +106,7 @@ export default function CreateMemory(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
-  const avatar = process.env.REACT_APP_IPFS + useSelector(state => state.account.avatar);
+  const avatar = useSelector(state => state.account.avatar);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   // const propose = useSelector(state => state.loveinfo.propose);
@@ -193,7 +193,7 @@ export default function CreateMemory(props) {
             <Grid item>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
-                  <Avatar alt="img" src={avatar} className={classes.avatar} />
+                  <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
                 </Grid>
                 <Grid item xs={12}>
                   <BootstrapTextField

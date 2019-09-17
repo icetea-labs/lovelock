@@ -46,7 +46,7 @@ export default function RightContrainer(props) {
         const reps = await getTagsInfo(sender);
         obj.name = reps['display-name'];
         obj.pubkey = reps['pub-key'];
-        obj.avatar = reps['avatar'];
+        obj.avatar = reps['avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
         newMemoryList.push(obj);
       }
 

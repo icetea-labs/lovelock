@@ -12,7 +12,7 @@ import InputBase from '@material-ui/core/InputBase';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import Avatar from '@material-ui/core/Avatar';
+import AvatarPro from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import Button from '@material-ui/core/Button';
 
@@ -400,7 +400,7 @@ function Header(props) {
       {friReqList.map(({ id, avatar, name }) => (
         <StyledMenuItem className={classes.friReqStyle} key={id}>
           <ListItemAvatar>
-            <Avatar alt="avatar" src={avatar} className={classes.avatar} />
+            <AvatarPro alt="avatar" src={avatar} className={classes.avatar} />
           </ListItemAvatar>
           <ListItemText primary={name} className={classes.friReqName} />
           <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
@@ -430,7 +430,7 @@ function Header(props) {
         <List className={classes.listNoti} component="nav" key={id}>
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
-              <Avatar alt="Remy Sharp" src={avatar} />
+              <AvatarPro alt="Remy Sharp" src={avatar} />
             </ListItemAvatar>
             <ListItemText
               primary={
@@ -529,11 +529,11 @@ function Header(props) {
               <div className={classes.grow} />
               <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
                 {avatar ? (
-                  <Avatar alt="avatar" src={process.env.REACT_APP_IPFS + avatar} className={classes.avatar} />
+                  <AvatarPro alt="avatar" src={process.env.REACT_APP_IPFS + avatar} className={classes.avatar} />
                 ) : (
-                  <Avatar alt="avatar" className={classes.avatar} color="primary">
+                  <AvatarPro alt="avatar" className={classes.avatar} color="primary">
                     <AccountCircleIcon color="action" />
-                  </Avatar>
+                  </AvatarPro>
                 )}
 
                 <Typography className={classes.title} noWrap>
