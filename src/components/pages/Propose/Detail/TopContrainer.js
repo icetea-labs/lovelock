@@ -157,7 +157,7 @@ export default function TopContrainer(props) {
       } else {
         senderTags = await getTagsInfo(proposes[i].sender);
       }
-      console.log('senderTags', senderTags);
+      // console.log('senderTags', senderTags);
 
       const s_nick = await getAlias(proposes[i].sender);
       proposes[i].s_nick = '@' + s_nick;

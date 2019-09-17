@@ -19,7 +19,7 @@ const styles = theme => ({
 class Login extends PureComponent {
   render() {
     const { step } = this.props;
-    console.log('step', step);
+    // console.log('step', step);
     return (
       <div>
         <QueueAnim delay={200} type={['top', 'bottom']}>
