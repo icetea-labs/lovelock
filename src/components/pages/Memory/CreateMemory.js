@@ -169,7 +169,7 @@ export default function CreateMemory(props) {
       } else {
         params = [proIndex, !!privacy, memoryContent, info];
       }
-      console.log('params', params);
+      // console.log('params', params);
       const result = await sendTransaction(method, params);
       if (result) {
         reLoadMemory(proIndex);

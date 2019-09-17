@@ -101,7 +101,7 @@ class ChangeProfile extends PureComponent {
     const { address } = this.props;
     if (address) {
       const reps = await getTagsInfo(address);
-      console.log('reps', reps);
+      // console.log('reps', reps);
       const displayName = reps['display-name'];
       const avatar = reps['avatar'];
       var temp = displayName.split(' ');
@@ -156,7 +156,7 @@ class ChangeProfile extends PureComponent {
   handleUsername = event => {
     const key = event.currentTarget.name;
     const value = event.currentTarget.value;
-    console.log(event.currentTarget.id);
+    // console.log(event.currentTarget.id);
 
     this.setState({ [key]: value });
   };

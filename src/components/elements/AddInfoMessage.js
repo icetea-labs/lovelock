@@ -196,7 +196,7 @@ export default function AddInfoMessage(props) {
                 {files ? <i className="material-icons">done</i> : <i className="material-icons">insert_photo</i>}
                 <div>Photo/Video</div>
               </div>
-              <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} />
+              <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} accept="image/*" />
             </ImgUpLoad>
           </Grid>
         </Grid>
