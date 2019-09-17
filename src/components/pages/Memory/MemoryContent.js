@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, CardMedia } from '@material-ui/core';
 import { IconButton } from '@material-ui/core';
-import { Avatar, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
+import AvatarPro from '../../elements/AvatarPro';
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
@@ -147,7 +148,7 @@ export default function MemoryContent(props) {
   return (
     <Card key={memoryDecrypted.index} className={classes.card}>
       <CardHeader
-        avatar={<Avatar alt="avata" src={process.env.REACT_APP_IPFS + memoryDecrypted.avatar} />}
+        avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
         title={memoryDecrypted.name}
         subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
         action={

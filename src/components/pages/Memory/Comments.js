@@ -3,7 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/styles';
 import { Grid, CardActions } from '@material-ui/core';
-import { Avatar, TextField, Typography } from '@material-ui/core';
+import { TextField, Typography } from '@material-ui/core';
+import AvatarPro from '../../elements/AvatarPro';
 import Link from '@material-ui/core/Link';
 import { sendTransaction, callView, getTags } from '../../../helper';
 import * as actions from '../../../store/actions';
@@ -136,7 +137,7 @@ export default function Comments(props) {
               <Grid item key={index}>
                 <Grid container wrap="nowrap" spacing={2} alignItems="flex-start">
                   <Grid item>
-                    <Avatar alt="avata" className={classes.avatarContentComment} src={item.avatar} />
+                    <AvatarPro alt="img" className={classes.avatarContentComment} hash={item.avatar} />
                   </Grid>
                   <Grid item>
                     <Typography margin="dense" className={classes.contentComment}>
@@ -155,7 +156,7 @@ export default function Comments(props) {
         <Grid item xs={12}>
           <Grid container wrap="nowrap" alignItems="flex-start" component="form" ref={el => (myFormRef = el)}>
             <Grid item>
-              <Avatar alt="avata" className={classes.avatarComment} src={avatar} />
+              <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
             </Grid>
             <Grid item xs={12}>
               <TextField

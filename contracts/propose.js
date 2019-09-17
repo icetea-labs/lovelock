@@ -198,7 +198,7 @@ class Propose {
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
     const sender = msg.sender;
-    const pro = getDataByIndex(this.propose, index);
+    let pro = getDataByIndex(this.propose, index);
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:
@@ -208,11 +208,11 @@ class Propose {
         isOwnerPropose(pro, "You can't cancel propose.", msg.sender);
         break;
     }
-    const x = Object.assign({}, pro, { r_content, status });
-    this.propose[index] = x;
+    pro = Object.assign({}, pro, { r_content, status });
+    this.propose[index] = pro;
 
     //emit Event
-    const log = Object.assign({}, pro, { index });
+    const log = Object.assign({}, pro, { id: index });
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
   }
 }
