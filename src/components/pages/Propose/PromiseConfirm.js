@@ -50,7 +50,7 @@ class PromiseConfirm extends React.Component {
 
   async messageAccept(message) {
     const { index } = this.props;
-    console.log('view confirm props', this.props);
+    // console.log('view confirm props', this.props);
     try {
       const name = 'acceptPropose';
       const params = [index, message];
@@ -75,7 +75,7 @@ class PromiseConfirm extends React.Component {
       // console.log('View result', result);
       if (result) {
         // window.alert('Success');
-        const message = 'Your propose has been removed.';
+        const message = 'Your propose has been rejected.';
         this.props.enqueueSnackbar(message, { variant: 'info' });
         this.props.close();
       }

@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
 import { getAlias } from '../../../helper/';
+import { sendTransaction } from '../../../helper/index';
+import { withSnackbar } from 'notistack';
 
 export const ipfs = process.env.REACT_APP_IPFS;
 
@@ -59,8 +61,26 @@ class PromiseAlert extends React.Component {
     }
   }
 
+  async cancelPromise(index) {
+    // console.log('index', index);
+    try {
+      const name = 'cancelPropose';
+      const params = [index, 'no'];
+      const result = await sendTransaction(name, params);
+      // console.log('View result', result);
+      if (result) {
+        // window.alert('Success');
+        const message = 'Your propose has been removed.';
+        this.props.enqueueSnackbar(message, { variant: 'info' });
+        this.props.close();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   render() {
-    const { deny, close, accept, address } = this.props;
+    const { deny, close, accept, address, index } = this.props;
     const { sender, info, content, name } = this.state;
     const infoParse = info && JSON.parse(info);
     const hash = (infoParse && infoParse.hash) || '';
@@ -69,7 +89,14 @@ class PromiseAlert extends React.Component {
     return (
       <div>
         {address === sender ? (
-          <CommonDialog title="Promise alert" okText="Cancel" close={close} confirm={deny}>
+          <CommonDialog
+            title="Promise alert"
+            okText="Cancel Promise"
+            close={close}
+            confirm={() => {
+              this.cancelPromise(index);
+            }}
+          >
             <TagTitle>
               <span>You sent promise to </span>
               <span className="highlight">{name}</span>
@@ -111,4 +138,4 @@ PromiseAlert.defaultProps = {
   close() {},
 };
 
-export default PromiseAlert;
+export default withSnackbar(PromiseAlert);
