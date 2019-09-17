@@ -373,9 +373,7 @@ class Promise extends React.Component {
               onChange={this.handleUsername}
               name="firstname"
               validators={['required']}
-              // className={classes.marginRight}
               margin="normal"
-              // value={firstname}
             />
             <TextFieldPlaceholder
               label="Last Name"
@@ -384,7 +382,6 @@ class Promise extends React.Component {
               name="lastname"
               validators={['required']}
               margin="normal"
-              // value={lastname}
             />
           </FlexBox>
         )}
