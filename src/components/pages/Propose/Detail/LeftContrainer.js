@@ -183,12 +183,14 @@ class LeftContrainer extends PureComponent {
         reps = await getTagsInfo(newAddress);
       }
 
-      const nick = await getAlias(newAddress);
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         proposes[i].name = reps.tags['bot-firstName'] + ' ' + reps.tags['bot-lastName'];
+        // proposes[i].avatar = reps['avatar'];
       } else {
         proposes[i].name = reps['display-name'] || 'undefine';
+        proposes[i].avatar = reps['avatar'];
       }
+      const nick = await getAlias(newAddress);
       proposes[i].nick = '@' + nick;
       proposes[i].publicKey = reps['pub-key'] || '';
 

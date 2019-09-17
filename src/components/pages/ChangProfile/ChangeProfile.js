@@ -103,7 +103,7 @@ class ChangeProfile extends PureComponent {
       const reps = await getTagsInfo(address);
       console.log('reps', reps);
       const displayName = reps['display-name'];
-      const avatar = reps['avartar'];
+      const avatar = reps['avatar'];
       var temp = displayName.split(' ');
       var first = temp.slice(0, 1).join(' ');
       var second = temp.slice(1).join(' ');
@@ -136,10 +136,10 @@ class ChangeProfile extends PureComponent {
         const respTagName = await setTagsInfo(address, 'display-name', displayName);
         if (file) {
           const hash = await saveToIpfs(file);
-          respAvatar = await setTagsInfo(address, 'avartar', hash);
+          respAvatar = await setTagsInfo(address, 'avatar', hash);
           setAccount({ address, cipher: password, displayName, avatar: hash });
         } else {
-          respAvatar = await setTagsInfo(address, 'avartar', avatar);
+          respAvatar = await setTagsInfo(address, 'avatar', avatar);
           setAccount({ address, cipher: password, displayName, avatar });
         }
 

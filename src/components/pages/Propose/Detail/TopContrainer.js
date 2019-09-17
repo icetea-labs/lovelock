@@ -58,8 +58,8 @@ const WarrperChatBox = styled(FlexBox)`
     img {
       width: 58px;
       height: 58px;
+      border-radius: 10px;
     }
-    border-radius: 10px;
     object-fit: contain;
     overflow: hidden;
   }
@@ -173,6 +173,8 @@ export default function TopContrainer(props) {
         proposes[i].s_publicKey = senderTags['pub-key'] || '';
         proposes[i].r_name = receiverTags['display-name'];
       }
+      proposes[i].r_avatar = receiverTags['avatar'];
+      proposes[i].s_avatar = senderTags.tags['avatar'];
       proposes[i].r_content = proposes[i].r_content || 'I love you';
       const r_nick = await getAlias(proposes[i].receiver);
       proposes[i].r_nick = '@' + r_nick;
@@ -233,7 +235,7 @@ export default function TopContrainer(props) {
         {topInfo.s_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
-              <img src="/static/img/user-men.jpg" alt="itea" />
+              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
@@ -258,7 +260,7 @@ export default function TopContrainer(props) {
               <p>{topInfo.r_content}</p>
             </div>
             <div className="user_photo fr">
-              <img src="/static/img/user-women.jpg" alt="itea" />
+              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
             </div>
           </FlexWidthBox>
         )}

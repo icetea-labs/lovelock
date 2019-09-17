@@ -71,7 +71,7 @@ export default function MemoryContent(props) {
   const address = useSelector(state => state.account.address);
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
-  const [showComment, setShowComment] = useState(false);
+  const [showComment, setShowComment] = useState(true);
   // const [numLike, setNumLike] = useState(0);
   const [numComment, setNumComment] = useState(0);
 
@@ -147,7 +147,7 @@ export default function MemoryContent(props) {
   return (
     <Card key={memoryDecrypted.index} className={classes.card}>
       <CardHeader
-        avatar={<Avatar alt="avata" src="/static/img/user-women.jpg" />}
+        avatar={<Avatar alt="avata" src={process.env.REACT_APP_IPFS + memoryDecrypted.avatar} />}
         title={memoryDecrypted.name}
         subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
         action={
