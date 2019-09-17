@@ -31,6 +31,7 @@ export default function Home() {
       obj.info = JSON.parse(obj.info);
       const reps = await getTagsInfo(sender);
       obj.name = reps['display-name'];
+      obj.avatar = reps['avatar'];
       newMemoryList.push(obj);
     }
     newMemoryList = newMemoryList.reverse();

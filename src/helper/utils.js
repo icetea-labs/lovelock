@@ -84,25 +84,25 @@ export async function setTagsInfo(address, name, value) {
     return {};
   }
 }
-let cacheTags = {};
+// let cacheTags = {};
 export async function getTagsInfo(address) {
   try {
-    if (!cacheTags[address]) {
-      const resp = await tweb3
-        .contract('system.did')
-        .methods.query(address)
-        .call();
-      if (resp && resp.tags) {
-        cacheTags[address] = resp.tags;
-      } else {
-        cacheTags[address] = {};
-      }
-    }
+    // if (!cacheTags[address]) {
+    const resp = await tweb3
+      .contract('system.did')
+      .methods.query(address)
+      .call();
+    // if (resp && resp.tags) {
+    //   cacheTags[address] = resp.tags;
+    // } else {
+    //   cacheTags[address] = {};
+    // }
+    // }
+    return (resp && resp.tags) || [];
   } catch (e) {
     console.error(e);
   }
-
-  return cacheTags[address] || [];
+  // return cacheTags[address] || [];
 }
 
 export async function getTags(address) {
