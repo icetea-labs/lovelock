@@ -149,12 +149,12 @@ export default function TopContrainer(props) {
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
       proposes.r_name = senderTags['bot-firstName'] + ' ' + senderTags['bot-lastName'];
       proposes.r_publicKey = senderTags['pub-key'] || '';
-      proposes.r_avatar = senderTags['bot-avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
+      proposes.r_avatar = senderTags['bot-avatar'];
     } else {
       const receiverTags = await getTagsInfo(receiver);
       proposes.r_name = receiverTags['display-name'];
       proposes.r_publicKey = receiverTags['pub-key'] || '';
-      proposes.r_avatar = receiverTags['avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
+      proposes.r_avatar = receiverTags['avatar'];
     }
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
     proposes.r_content = proposes.r_content || 'I love you';

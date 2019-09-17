@@ -171,10 +171,10 @@ class LeftContrainer extends PureComponent {
 
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         proposes[i].name = reps['bot-firstName'] + ' ' + reps['bot-lastName'];
-        proposes[i].avatar = reps['bot-avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
+        proposes[i].avatar = reps['bot-avatar'];
       } else {
         proposes[i].name = reps['display-name'] || 'undefine';
-        proposes[i].avatar = reps['avatar'] || process.env.REACT_APP_AVATAR_DEFAULT;
+        proposes[i].avatar = reps['avatar'];
       }
       // console.log('reps', proposes[i].avatar);
       const nick = await getAlias(newAddress);

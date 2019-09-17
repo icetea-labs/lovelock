@@ -9,7 +9,7 @@ export default function AvatarPro(props) {
       {src ? (
         <Avatar {...props} />
       ) : (
-        <Avatar {...props} src={process.env.REACT_APP_IPFS + hash || process.env.REACT_APP_AVATAR_DEFAULT} />
+        <Avatar {...props} src={process.env.REACT_APP_IPFS + (hash || process.env.REACT_APP_AVATAR_DEFAULT)} />
       )}
     </React.Fragment>
   );
