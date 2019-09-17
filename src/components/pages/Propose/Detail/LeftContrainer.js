@@ -129,8 +129,8 @@ class LeftContrainer extends PureComponent {
     const newArray = propose.slice() || [];
     const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
     newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-    console.log('newArray', newArray[objIndex]);
-    console.log('eventConfirmPropose');
+    // console.log('newArray', newArray[objIndex]);
+    // console.log('eventConfirmPropose');
     if (address === data.log.sender) {
       const message = 'Your propose has been approved.';
       this.props.enqueueSnackbar(message, { variant: 'info' });
