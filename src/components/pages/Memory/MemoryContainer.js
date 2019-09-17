@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function MessageHistory(props) {
+export default function MemoryContainer(props) {
   const { loading, memoryList, proIndex } = props;
   const arrayLoadin = [{}, {}, {}, {}];
   const classes = useStyles();

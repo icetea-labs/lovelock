@@ -341,7 +341,7 @@ function Header(props) {
         const reps = await getTags(address);
 
         // setDisplayName(reps['display-name']);
-        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps['avartar'] }));
+        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps['avatar'] }));
       } else {
         // setDisplayName('no name');
       }

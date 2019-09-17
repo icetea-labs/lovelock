@@ -142,7 +142,7 @@ class RegisterUsername extends PureComponent {
           const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
           if (file) {
             const hash = await saveToIpfs(file);
-            const respAvatar = await setTagsInfo(address, 'avartar', hash);
+            const respAvatar = await setTagsInfo(address, 'avatar', hash);
           }
           // console.log('respTags', respTagName);
 

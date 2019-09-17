@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { FlexBox, FlexWidthBox } from '../../elements/StyledUtils';
 import LeftContrainer from '../Propose/Detail/LeftContrainer';
 import { callView, getTagsInfo } from '../../../helper';
-import MessageHistory from '../Memory/MessageHistory';
+import MemoryContainer from '../Memory/MemoryContainer';
 import { rem } from '../../elements/StyledUtils';
 
 const RightBox = styled.div`
@@ -43,7 +43,7 @@ export default function Home() {
       <FlexWidthBox width="30%">{address && <LeftContrainer />}</FlexWidthBox>
       <FlexWidthBox width="70%">
         <RightBox>
-          <MessageHistory loading={loading} memoryList={memoryList} />
+          <MemoryContainer loading={loading} memoryList={memoryList} />
         </RightBox>
       </FlexWidthBox>
     </FlexBox>

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo } from '../../../../helper';
-import MessageHistory from '../../Memory/MessageHistory';
+import MemoryContainer from '../../Memory/MemoryContainer';
 import CreateMemory from '../../Memory/CreateMemory';
 import * as actions from '../../../../store/actions';
 
@@ -46,6 +46,7 @@ export default function RightContrainer(props) {
         const reps = await getTagsInfo(sender);
         obj.name = reps['display-name'];
         obj.pubkey = reps['pub-key'];
+        obj.avatar = reps['avatar'];
         newMemoryList.push(obj);
       }
 
@@ -58,7 +59,7 @@ export default function RightContrainer(props) {
   return (
     <RightBox>
       <CreateMemory proIndex={props.proIndex} reLoadMemory={loadMemory} />
-      <MessageHistory proIndex={props.proIndex} loading={loading} memoryList={memoryList} />
+      <MemoryContainer proIndex={props.proIndex} loading={loading} memoryList={memoryList} />
     </RightBox>
   );
 }

@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     width: 58,
     height: 58,
-    borderRadius: 1,
+    borderRadius: 10,
   },
   btShare: {
     width: 254,
@@ -106,7 +106,9 @@ export default function CreateMemory(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
-  const { privateKey, publicKey } = useSelector(state => state.account);
+  const avatar = process.env.REACT_APP_IPFS + useSelector(state => state.account.avatar);
+  const privateKey = useSelector(state => state.account.privateKey);
+  const publicKey = useSelector(state => state.account.publicKey);
   // const propose = useSelector(state => state.loveinfo.propose);
   const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState('');
@@ -191,7 +193,7 @@ export default function CreateMemory(props) {
             <Grid item>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
-                  <Avatar alt="avata" src="/static/img/user-men.jpg" className={classes.avatar} />
+                  <Avatar alt="img" src={avatar} className={classes.avatar} />
                 </Grid>
                 <Grid item xs={12}>
                   <BootstrapTextField
