@@ -5,7 +5,8 @@
   "rules": {
     "react/prop-types": 0,
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
-    "no-use-before-define": ["error", { "functions": false, "classes": true }]
+    "no-use-before-define": ["error", { "functions": false, "classes": true }],
+    "react/jsx-one-expression-per-line": 0
   },
   "env": {
     "node": true,

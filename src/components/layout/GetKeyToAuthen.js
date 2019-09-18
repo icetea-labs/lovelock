@@ -4,7 +4,6 @@ import { useSnackbar } from 'notistack';
 import { codec } from '@iceteachain/common';
 import TextField from '@material-ui/core/TextField';
 import tweb3 from '../../service/tweb3';
-
 import * as actions from '../../store/actions';
 import { wallet, decode } from '../../helper';
 import CommonDialog from '../pages/Propose/CommonDialog';
