@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSnackbar } from 'notistack';
+import { codec } from '@iceteachain/common';
+import TextField from '@material-ui/core/TextField';
 import tweb3 from '../../service/tweb3';
 
 import * as actions from '../../store/actions';
-import { codec } from '@iceteachain/common';
-import { wallet } from '../../helper';
-import { decode } from '../../helper';
+import { wallet, decode } from '../../helper';
 import CommonDialog from '../pages/Propose/CommonDialog';
-import TextField from '@material-ui/core/TextField';
-import { useSnackbar } from 'notistack';
 
-export default function GetKeyToAuthen(props) {
+export default function GetKeyToAuthen() {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const encryptedData = useSelector(state => state.account.encryptedData);
@@ -18,7 +17,7 @@ export default function GetKeyToAuthen(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    const handleUserKeyPress = function(event) {
+    const handleUserKeyPress = event => {
       if (event.keyCode === 13) {
         confirm();
       }
@@ -30,7 +29,7 @@ export default function GetKeyToAuthen(props) {
     return () => {
       window.document.body.removeEventListener('keydown', handleUserKeyPress);
     };
-  }, [password]);
+  }, []);
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -41,8 +40,8 @@ export default function GetKeyToAuthen(props) {
   }
 
   function passwordChange(event) {
-    const password = event.target.value;
-    setPassword(password);
+    const { value } = event.target;
+    setPassword(value);
   }
 
   function setNeedAuth(value) {
@@ -100,44 +99,3 @@ export default function GetKeyToAuthen(props) {
     </CommonDialog>
   ) : null;
 }
-
-// const mapStateToProps = state => {
-//   const { account, globalData } = state;
-//   return {
-//     needAuth: account.needAuth,
-//     address: account.address,
-//     encryptedData: account.encryptedData,
-//     childKey: account.childKey,
-//     triggerElement: globalData.triggerElement,
-//   };
-// };
-
-// GetKeyToAuthen.defaultProps = {
-//   needAuth: true,
-//   setAccount() {},
-//   setNeedAuth() {},
-//   dispatch() {},
-//   triggerElement: null,
-// };
-
-// const mapDispatchToProps = dispatch => {
-//   return {
-//     setAccount: data => {
-//       dispatch(actions.setAccount(data));
-//     },
-//     setNeedAuth: data => {
-//       dispatch(actions.setNeedAuth(data));
-//     },
-//     setAuthEle: data => {
-//       dispatch(actionsGlobal.setAuthEle(data));
-//     },
-//     setLoading: value => {
-//       dispatch(actionsGlobal.setLoading(value));
-//     },
-//   };
-// };
-
-// export default connect(
-//   mapStateToProps,
-//   mapDispatchToProps
-// )(GetKeyToAuthen);

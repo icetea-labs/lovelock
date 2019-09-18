@@ -49,7 +49,7 @@ const StyledCardActions = withStyles(theme => ({
   },
 }))(CardActions);
 
-export default function BoxActionButton(props) {
+export default function MemoryActionButton(props) {
   const { memoryIndex, handerShowComment, likes } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);

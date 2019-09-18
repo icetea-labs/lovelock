@@ -8,6 +8,7 @@ import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
+import AvatarPro from '../../../elements/AvatarPro';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -107,6 +108,11 @@ const WarrperChatBox = styled(FlexBox)`
 const useStyles = makeStyles({
   card: {
     width: '100%',
+  },
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 10,
   },
 });
 
@@ -214,7 +220,7 @@ export default function TopContrainer(props) {
         {topInfo.s_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
-              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
+              <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
@@ -239,7 +245,7 @@ export default function TopContrainer(props) {
               <p>{topInfo.r_content}</p>
             </div>
             <div className="user_photo fr">
-              <img src={process.env.REACT_APP_IPFS + topInfo.r_avatar} alt="img" />
+              <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
             </div>
           </FlexWidthBox>
         )}

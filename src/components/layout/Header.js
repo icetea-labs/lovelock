@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { getTagsInfo, getTags } from '../../helper';
+import { getTags } from '../../helper';
 import { rem } from '../elements/StyledUtils';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -22,9 +22,6 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
@@ -329,7 +326,6 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
-  // const [displayName, setDisplayName] = useState(null);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
   const avatar = useSelector(state => state.account.avatar);
@@ -337,18 +333,14 @@ function Header(props) {
   useEffect(() => {
     async function fetchData() {
       if (address) {
-        // console.log('address', address);
         const reps = await getTags(address);
-
-        // setDisplayName(reps['display-name']);
         dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps['avatar'] }));
       } else {
         // setDisplayName('no name');
       }
     }
     fetchData();
-  });
-  // const menuId = 'primary-search-account-menu';
+  }, [address, dispatch]);
   const renderMenu = (
     <StyledMenu
       className={classes.profileMenu}
@@ -528,20 +520,11 @@ function Header(props) {
               </div>
               <div className={classes.grow} />
               <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                {avatar ? (
-                  <AvatarPro alt="avatar" src={process.env.REACT_APP_IPFS + avatar} className={classes.avatar} />
-                ) : (
-                  <AvatarPro alt="avatar" className={classes.avatar} color="primary">
-                    <AccountCircleIcon color="action" />
-                  </AvatarPro>
-                )}
-
+                <AvatarPro alt="avatar" hash={avatar} className={classes.avatar} />
                 <Typography className={classes.title} noWrap>
                   {displayName}
                 </Typography>
               </Button>
-              {/* <Typography noWrap>Explore</Typography> */}
-              {/* <KeyboardArrowDownIcon className={classes.menuIcon} /> */}
               <div className={classes.sectionDesktop}>
                 <IconButton
                   color="inherit"
