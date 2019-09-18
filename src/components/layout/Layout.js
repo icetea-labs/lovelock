@@ -47,5 +47,11 @@ const HomeLayout = ({ children }) => (
     {/* <Footer /> */}
   </Container>
 );
-export { HomeLayout, Layout };
+const LandingLayout = ({ children }) => (
+  <React.Fragment>
+    <Header />
+    <Content> {children} </Content>
+  </React.Fragment>
+);
+export { HomeLayout, Layout, LandingLayout };
 export default Layout;

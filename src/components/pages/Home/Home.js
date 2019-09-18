@@ -40,13 +40,17 @@ export default function Home() {
     setLoading(false);
   }
   return (
-    <FlexBox wrap="wrap">
-      <FlexWidthBox width="30%">{address && <LeftContrainer />}</FlexWidthBox>
-      <FlexWidthBox width="70%">
-        <RightBox>
-          <MemoryContainer loading={loading} memoryList={memoryList} />
-        </RightBox>
-      </FlexWidthBox>
-    </FlexBox>
+    address && (
+      <FlexBox wrap="wrap">
+        <FlexWidthBox width="30%">
+          <LeftContrainer />
+        </FlexWidthBox>
+        <FlexWidthBox width="70%">
+          <RightBox>
+            <MemoryContainer loading={loading} memoryList={memoryList} />
+          </RightBox>
+        </FlexWidthBox>
+      </FlexBox>
+    )
   );
 }

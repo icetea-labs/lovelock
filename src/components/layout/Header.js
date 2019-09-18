@@ -32,6 +32,7 @@ import AvatarPro from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import * as actions from '../../store/actions';
 import { getTags } from '../../helper';
+import LandingPage from './LandingPage';
 
 const StyledLogo = styled.a`
   font-size: ${rem(20)};
@@ -498,61 +499,62 @@ function Header(props) {
   );
 
   return (
-    <div className={classes.grow}>
-      <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
-        <StyledToolbar>
-          <StyledLogo href="/">
-            <img src="/static/img/logo.svg" alt="itea-scan" />
-            <span>LoveLock</span>
-          </StyledLogo>
-          {address ? (
-            <React.Fragment>
-              <div className={classes.search}>
-                <div className={classes.searchIcon}>
-                  <SearchIcon />
+    <div>
+      {address ? (
+        <div className={classes.grow}>
+          <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
+            <StyledToolbar>
+              <StyledLogo href="/">
+                <img src="/static/img/logo.svg" alt="itea-scan" />
+                <span>LoveLock</span>
+              </StyledLogo>
+              <React.Fragment>
+                <div className={classes.search}>
+                  <div className={classes.searchIcon}>
+                    <SearchIcon />
+                  </div>
+                  <InputBase
+                    placeholder="Search…"
+                    classes={{
+                      root: classes.inputRoot,
+                      input: classes.inputInput,
+                    }}
+                    inputProps={{ 'aria-label': 'search' }}
+                  />
                 </div>
-                <InputBase
-                  placeholder="Search…"
-                  classes={{
-                    root: classes.inputRoot,
-                    input: classes.inputInput,
-                  }}
-                  inputProps={{ 'aria-label': 'search' }}
-                />
-              </div>
-              <div className={classes.grow} />
-              <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
-                <Typography className={classes.title} noWrap>
-                  {displayName}
-                </Typography>
-              </Button>
-              <div className={classes.sectionDesktop}>
-                <IconButton
-                  color="inherit"
-                  className={classes.menuIcon}
-                  aria-controls="friReq-menu"
-                  aria-haspopup="true"
-                  variant="contained"
-                  onClick={handleFriReqOpen}
-                >
-                  <Badge badgeContent={0} color="primary">
-                    <GroupIcon />
-                  </Badge>
-                </IconButton>
-                <IconButton
-                  color="inherit"
-                  className={classes.menuIcon}
-                  aria-controls="notifi-menu"
-                  aria-haspopup="true"
-                  variant="contained"
-                  onClick={handleNotiOpen}
-                >
-                  <Badge badgeContent={0} color="primary">
-                    <NotificationsIcon />
-                  </Badge>
-                </IconButton>
-                {/* <IconButton
+                <div className={classes.grow} />
+                <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
+                  <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
+                  <Typography className={classes.title} noWrap>
+                    {displayName}
+                  </Typography>
+                </Button>
+                <div className={classes.sectionDesktop}>
+                  <IconButton
+                    color="inherit"
+                    className={classes.menuIcon}
+                    aria-controls="friReq-menu"
+                    aria-haspopup="true"
+                    variant="contained"
+                    onClick={handleFriReqOpen}
+                  >
+                    <Badge badgeContent={0} color="primary">
+                      <GroupIcon />
+                    </Badge>
+                  </IconButton>
+                  <IconButton
+                    color="inherit"
+                    className={classes.menuIcon}
+                    aria-controls="notifi-menu"
+                    aria-haspopup="true"
+                    variant="contained"
+                    onClick={handleNotiOpen}
+                  >
+                    <Badge badgeContent={0} color="primary">
+                      <NotificationsIcon />
+                    </Badge>
+                  </IconButton>
+                  {/* <IconButton
               edge="end"
               aria-label="account of current user"
               aria-controls={menuId}
@@ -562,31 +564,33 @@ function Header(props) {
             >
               <AccountCircle />
             </IconButton> */}
-              </div>
-              <div className={classes.sectionMobile}>
-                <IconButton
-                  aria-label="show more"
-                  aria-controls={mobileMenuId}
-                  aria-haspopup="true"
-                  onClick={handleMobileMenuOpen}
-                  color="inherit"
-                >
-                  <MoreIcon />
-                </IconButton>
-              </div>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              <Button href="/login" className={classes.menuButton} variant="contained" color="primary">
-                Login
-              </Button>
-              <Button href="/register" className={classes.menuButton} variant="contained" color="primary">
-                Register
-              </Button>
-            </React.Fragment>
-          )}
-        </StyledToolbar>
-      </StyledAppBar>
+                </div>
+                <div className={classes.sectionMobile}>
+                  <IconButton
+                    aria-label="show more"
+                    aria-controls={mobileMenuId}
+                    aria-haspopup="true"
+                    onClick={handleMobileMenuOpen}
+                    color="inherit"
+                  >
+                    <MoreIcon />
+                  </IconButton>
+                </div>
+              </React.Fragment>
+            </StyledToolbar>
+          </StyledAppBar>
+        </div>
+      ) : (
+        // <React.Fragment>
+        //   <Button href="/login" className={classes.menuButton} variant="contained" color="primary">
+        //     Login
+        //   </Button>
+        //   <Button href="/register" className={classes.menuButton} variant="contained" color="primary">
+        //     Register
+        //   </Button>
+        // </React.Fragment>
+        <LandingPage />
+      )}
       {renderMobileMenu}
       {renderMenu}
       {friReqMenu}
