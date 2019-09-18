@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './assets/sass/common.scss';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { HomeLayout } from './components/layout/Layout';
+import { HomeLayout, LandingLayout } from './components/layout/Layout';
 import Home from './components/pages/Home';
 import { Login, Register } from './components/pages/Authen';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
@@ -18,7 +18,7 @@ function RouteWithLayout({ layout, component, ...rest }) {
 }
 class App extends Component {
   render() {
-    const { isLoading } = this.props;
+    const { isLoading, address } = this.props;
     return (
       <div className="App">
         <Router>
@@ -26,7 +26,7 @@ class App extends Component {
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
-            <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
+            <RouteWithLayout layout={address ? HomeLayout : LandingLayout} exact path="/" component={Home} />
             <RouteWithLayout layout={HomeLayout} exact path={`/propose/:index`} component={DetailPropose} />;
             <RouteWithLayout layout={HomeLayout} exact path={`/exception`} component={Exception} />
             <Route component={NotFound} />
@@ -41,6 +41,7 @@ class App extends Component {
 const mapStateToProps = state => {
   return {
     isLoading: state.globalData.isLoading,
+    address: state.account.address,
   };
 };
 
