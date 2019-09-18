@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
-import { callView, getTagsInfo, getAlias } from '../../../../helper';
+import { callView, getTagsInfo } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
-import tweb3 from '../../../../service/tweb3';
+import AvatarPro from '../../../elements/AvatarPro';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -109,6 +109,11 @@ const useStyles = makeStyles({
   card: {
     width: '100%',
   },
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 10,
+  },
 });
 
 export default function TopContrainer(props) {
@@ -131,69 +136,48 @@ export default function TopContrainer(props) {
         setTopInfo(infoCache);
       } else {
         const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-        const newPropose = await addInfoToProposes(resp);
+        const newPropose = await addInfoToProposes(resp[0]);
         // console.log('newPropose', newPropose);
-        setTopInfo(newPropose[0] || []);
+        setTopInfo(newPropose || []);
       }
       setLoading(false);
     }, 10);
   }
 
   async function addInfoToProposes(proposes) {
-    for (let i = 0; i < proposes.length; i++) {
-      const newAddress = address === proposes[i].sender ? proposes[i].receiver : proposes[i].sender;
-      const reps = await getTagsInfo(newAddress);
-      // const nick = await getAlias(newAddress);
-      // proposes[i].name = reps['display-name'];
-      // proposes[i].nick = '@' + nick;
-      proposes[i].publicKey = reps['pub-key'] || '';
+    const { sender, receiver } = proposes;
 
-      let senderTags;
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        senderTags = await tweb3
-          .contract('system.did')
-          .methods.query(proposes[i].sender)
-          .call();
-      } else {
-        senderTags = await getTagsInfo(proposes[i].sender);
-      }
-      // console.log('senderTags', senderTags);
+    const senderTags = await getTagsInfo(sender);
+    proposes.s_name = senderTags['display-name'];
+    proposes.s_publicKey = senderTags['pub-key'] || '';
+    proposes.s_avatar = senderTags['avatar'];
 
-      const s_nick = await getAlias(proposes[i].sender);
-      proposes[i].s_nick = '@' + s_nick;
-
-      const receiverTags = await getTagsInfo(proposes[i].receiver);
-      proposes[i].r_publicKey = receiverTags['pub-key'] || '';
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        proposes[i].r_name = senderTags.tags['bot-firstName'] + ' ' + senderTags.tags['bot-lastName'];
-        proposes[i].s_name = senderTags.tags['display-name'];
-        proposes[i].s_publicKey = senderTags.tags['pub-key'] || '';
-        proposes[i].s_avatar = senderTags.tags['avatar'];
-      } else {
-        proposes[i].s_name = senderTags['display-name'];
-        proposes[i].s_publicKey = senderTags['pub-key'] || '';
-        proposes[i].r_name = receiverTags['display-name'];
-        proposes[i].s_avatar = senderTags['avatar'];
-      }
-      proposes[i].r_avatar = receiverTags['avatar'];
-      proposes[i].r_content = proposes[i].r_content || 'I love you';
-      const r_nick = await getAlias(proposes[i].receiver);
-      proposes[i].r_nick = '@' + r_nick;
-
-      const info = JSON.parse(proposes[i].s_info);
-      proposes[i].coverimg = info.hash || 'QmWxBin3miysL3vZw4eWk83W5WzoUE7qa5FMtdgES17GNM';
-      proposes[i].s_date = info.date;
-      proposes[i].r_date = info.date;
-      const data = {
-        s_publicKey: proposes[i].s_publicKey,
-        s_address: proposes[i].sender,
-        r_publicKey: proposes[i].r_publicKey,
-        r_address: proposes[i].receiver,
-        publicKey: proposes[i].publicKey,
-      };
-      dispatch(actions.setAccount(data));
-      // console.log('r_publicKey', data);
+    if (receiver === process.env.REACT_APP_BOT_LOVER) {
+      proposes.r_name = senderTags['bot-firstName'] + ' ' + senderTags['bot-lastName'];
+      proposes.r_publicKey = senderTags['pub-key'] || '';
+      proposes.r_avatar = senderTags['bot-avatar'];
+    } else {
+      const receiverTags = await getTagsInfo(receiver);
+      proposes.r_name = receiverTags['display-name'];
+      proposes.r_publicKey = receiverTags['pub-key'] || '';
+      proposes.r_avatar = receiverTags['avatar'];
     }
+    proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
+    proposes.r_content = proposes.r_content || 'I love you';
+
+    const info = JSON.parse(proposes.s_info);
+    proposes.coverimg = info.hash || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+    proposes.s_date = info.date;
+    proposes.r_date = info.date;
+
+    const data = {
+      s_publicKey: proposes.s_publicKey,
+      s_address: proposes.sender,
+      r_publicKey: proposes.r_publicKey,
+      r_address: proposes.receiver,
+      publicKey: proposes.publicKey,
+    };
+    dispatch(actions.setAccount(data));
     return proposes;
   }
 
@@ -236,7 +220,7 @@ export default function TopContrainer(props) {
         {topInfo.s_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="user_photo fl">
-              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
+              <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
             </div>
             <div className="content_detail fl clearfix">
               <div className="name_time">
@@ -261,7 +245,7 @@ export default function TopContrainer(props) {
               <p>{topInfo.r_content}</p>
             </div>
             <div className="user_photo fr">
-              <img src={process.env.REACT_APP_IPFS + topInfo.s_avatar} alt="img" />
+              <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
             </div>
           </FlexWidthBox>
         )}

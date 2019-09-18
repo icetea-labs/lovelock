@@ -205,10 +205,10 @@ class ChangeProfile extends PureComponent {
                 <FlexBox>
                   <PreviewContainter>
                     <div className="upload_img">
-                      <input className="fileInput" type="file" onChange={this.handleImageChange} />
+                      <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
                       {avatar ? (
                         <div className="imgPreview">
-                          <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
+                          <img src={avatar} alt="imgPreview" />
                         </div>
                       ) : (
                         <div className="imgPreview">{$imagePreview}</div>

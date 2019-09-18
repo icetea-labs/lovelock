@@ -31,14 +31,14 @@ const Content = styled(BoxContent)`
   margin-top: ${rem(30)};
 `;
 
-const Layout = ({ children, title }) => (
+const Layout = ({ children }) => (
   <Container>
     <Header />
     <Content> {children} </Content>
     {/* <Footer /> */}
   </Container>
 );
-const HomeLayout = ({ children, title }) => (
+const HomeLayout = ({ children }) => (
   <Container>
     <Header />
     <MainContainer>
@@ -47,5 +47,11 @@ const HomeLayout = ({ children, title }) => (
     {/* <Footer /> */}
   </Container>
 );
-export { HomeLayout, Layout };
+const LandingLayout = ({ children }) => (
+  <React.Fragment>
+    <Header />
+    <Content> {children} </Content>
+  </React.Fragment>
+);
+export { HomeLayout, Layout, LandingLayout };
 export default Layout;
