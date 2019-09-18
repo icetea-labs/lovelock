@@ -1,5 +1,5 @@
 {
-  "name": "icetea-memory",
+  "name": "love-lock",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -45,7 +45,7 @@
     "ignore": [
       "**/tmp/",
       "**/example/",
-      "/contracts/**"
+      "contracts/**"
     ]
   },
   "browserslist": {
