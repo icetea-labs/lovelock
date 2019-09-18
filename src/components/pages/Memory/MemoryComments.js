@@ -75,11 +75,11 @@ const StyledCardActions = withStyles(theme => ({
   },
 }))(CardActions);
 
-export default function Comments(props) {
+export default function MemoryContent(props) {
   const { handerNumberComment, memoryIndex } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
-  const avatar = process.env.REACT_APP_IPFS + useSelector(state => state.account.avatar);
+  const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
   // const [comments, setComments] = useState([{ text: '1' }, { text: '2' }, { text: '3' }]);
   const [comments, setComments] = useState([]);
@@ -98,7 +98,7 @@ export default function Comments(props) {
       const element = comments[index];
       const tags = await getTags(element.sender);
       comments[index].nick = tags['display-name'];
-      comments[index].avatar = process.env.REACT_APP_IPFS + tags['avatar'];
+      comments[index].avatar = tags['avatar'];
     }
     setComments(comments);
   }

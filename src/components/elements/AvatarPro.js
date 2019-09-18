@@ -1,15 +1,13 @@
 import React from 'react';
 import Avatar from '@material-ui/core/Avatar';
 
-export default function AvatarPro(props) {
-  const { hash, src } = props;
-  // hash && delete props.hash;
+export default function AvatarPro({ hash, ...rest }) {
   return (
     <React.Fragment>
-      {src ? (
-        <Avatar {...props} />
+      {hash ? (
+        <Avatar {...rest} src={process.env.REACT_APP_IPFS + hash} />
       ) : (
-        <Avatar {...props} src={process.env.REACT_APP_IPFS + (hash || process.env.REACT_APP_AVATAR_DEFAULT)} />
+        <Avatar {...rest} src={rest.src || '/static/img/no-avatar.jpg'} />
       )}
     </React.Fragment>
   );

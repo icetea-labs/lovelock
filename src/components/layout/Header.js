@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { getTagsInfo, getTags } from '../../helper';
-import { rem } from '../elements/StyledUtils';
 import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -12,19 +10,13 @@ import InputBase from '@material-ui/core/InputBase';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import AvatarPro from '../elements/AvatarPro';
-import GetKeyToAuthen from './GetKeyToAuthen';
 import Button from '@material-ui/core/Button';
-
 import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
@@ -33,9 +25,13 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import * as actions from '../../store/actions';
 
 import { withRouter } from 'react-router-dom';
+import { rem } from '../elements/StyledUtils';
+import AvatarPro from '../elements/AvatarPro';
+import GetKeyToAuthen from './GetKeyToAuthen';
+import * as actions from '../../store/actions';
+import { getTags } from '../../helper';
 import LandingPage from './LandingPage';
 
 const StyledLogo = styled.a`
@@ -54,7 +50,7 @@ const StyledLogo = styled.a`
   cursor: pointer;
 `;
 
-const StyledAppBar = withStyles(theme => ({
+const StyledAppBar = withStyles(() => ({
   root: {
     background: '#8250c8',
     // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
@@ -330,26 +326,22 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
-  // const [displayName, setDisplayName] = useState(null);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
-  const avatar = useSelector(state => state.account.avatar);
+  const avatarRedux = useSelector(state => state.account.avatar);
 
   useEffect(() => {
     async function fetchData() {
       if (address) {
-        // console.log('address', address);
         const reps = await getTags(address);
-
-        // setDisplayName(reps['display-name']);
-        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps['avatar'] }));
+        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
       } else {
         // setDisplayName('no name');
       }
     }
     fetchData();
-  });
-  // const menuId = 'primary-search-account-menu';
+  }, []);
+
   const renderMenu = (
     <StyledMenu
       className={classes.profileMenu}
@@ -435,6 +427,7 @@ function Header(props) {
             </ListItemAvatar>
             <ListItemText
               primary={
+                // eslint-disable-next-line react/jsx-wrap-multilines
                 <React.Fragment>
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
@@ -443,6 +436,7 @@ function Header(props) {
                 </React.Fragment>
               }
               secondary={
+                // eslint-disable-next-line react/jsx-wrap-multilines
                 <React.Fragment>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
                     {promise}
@@ -510,11 +504,11 @@ function Header(props) {
         <div className={classes.grow}>
           <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
             <StyledToolbar>
+              <StyledLogo href="/">
+                <img src="/static/img/logo.svg" alt="itea-scan" />
+                <span>LoveLock</span>
+              </StyledLogo>
               <React.Fragment>
-                <StyledLogo href="/">
-                  <img src="/static/img/logo.svg" alt="itea-scan" />
-                  <span>LoveLock</span>
-                </StyledLogo>
                 <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
@@ -530,20 +524,11 @@ function Header(props) {
                 </div>
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                  {avatar ? (
-                    <AvatarPro alt="avatar" src={process.env.REACT_APP_IPFS + avatar} className={classes.avatar} />
-                  ) : (
-                    <AvatarPro alt="avatar" className={classes.avatar} color="primary">
-                      <AccountCircleIcon color="action" />
-                    </AvatarPro>
-                  )}
-
+                  <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
                   <Typography className={classes.title} noWrap>
                     {displayName}
                   </Typography>
                 </Button>
-                {/* <Typography noWrap>Explore</Typography> */}
-                {/* <KeyboardArrowDownIcon className={classes.menuIcon} /> */}
                 <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
@@ -606,7 +591,6 @@ function Header(props) {
         // </React.Fragment>
         <LandingPage />
       )}
-
       {renderMobileMenu}
       {renderMenu}
       {friReqMenu}
