@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
-import { getAlias } from '../../../helper/';
+import { getAlias, getTagsInfo } from '../../../helper/';
 import { sendTransaction } from '../../../helper/index';
 import { withSnackbar } from 'notistack';
 
@@ -46,7 +46,7 @@ class PromiseAlert extends React.Component {
     const { index } = this.props;
 
     const obj = propose.filter(item => item.id === index)[0];
-    // console.log('loaddata', obj);
+    console.log('loaddata', obj);
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       // const reps = await getTagsInfo(addr);
@@ -55,7 +55,7 @@ class PromiseAlert extends React.Component {
       this.setState({
         sender: obj.sender,
         name: name,
-        info: obj.info,
+        info: obj.s_info,
         content: obj.s_content,
       });
     }
@@ -85,7 +85,7 @@ class PromiseAlert extends React.Component {
     const infoParse = info && JSON.parse(info);
     const hash = (infoParse && infoParse.hash) || '';
     // console.log('infoParse', infoParse);
-    // console.log('view state', this.state);
+    console.log('view state', this.state);
     return (
       <div>
         {address === sender ? (

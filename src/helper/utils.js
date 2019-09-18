@@ -8,7 +8,6 @@ import { ecc, codec, AccountType } from '@iceteachain/common';
 import { decodeTx, decode } from './decode';
 import { encodeTx } from './encode';
 import eccrypto from 'eccrypto';
-import { tr } from 'date-fns/esm/locale';
 
 const paths = 'm’/44’/60’/0’/0';
 

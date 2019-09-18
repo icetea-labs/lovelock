@@ -98,9 +98,9 @@ class Promise extends React.Component {
   };
 
   promiseStmChange = e => {
-    const value = e.target.value;
+    const val = e.target.value;
     this.setState({
-      promiseStm: value,
+      promiseStm: val,
     });
     // console.log("view promiseStmChange", value);
   };
@@ -108,6 +108,7 @@ class Promise extends React.Component {
   onChangeDate = date => {
     this.setState({ date });
   };
+
   onChangeMedia = file => {
     this.setState({ file });
   };
@@ -125,8 +126,8 @@ class Promise extends React.Component {
           hash = await saveToIpfs(file);
         }
         let info = {
-          date: date,
-          hash: hash,
+          date,
+          hash,
         };
         info = JSON.stringify(info);
         const name = 'createPropose';
@@ -141,37 +142,35 @@ class Promise extends React.Component {
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
           return;
-        } else {
-          const params = [promiseStm, partner, info];
-
-          if (checked) {
-            if (!firstname) {
-              message = 'Please enter your crush first name.';
-              enqueueSnackbar(message, { variant: 'error' });
-              setLoading(false);
-              return;
-            }
-            if (!lastname) {
-              message = 'Please enter your crush last name.';
-              enqueueSnackbar(message, { variant: 'error' });
-              setLoading(false);
-              return;
-            } else {
-              const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
-              const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
-            }
-          }
-          const result = await sendTransaction(name, params);
-
-          this.timeoutHanle2 = setTimeout(() => {
-            if (result) {
-              message = 'Your propose sent successfully.';
-              enqueueSnackbar(message, { variant: 'success' });
-              setLoading(false);
-              this.props.close();
-            }
-          }, 50);
         }
+        const params = [promiseStm, partner, info];
+
+        if (checked) {
+          if (!firstname) {
+            message = 'Please enter your crush first name.';
+            enqueueSnackbar(message, { variant: 'error' });
+            setLoading(false);
+            return;
+          }
+          if (!lastname) {
+            message = 'Please enter your crush last name.';
+            enqueueSnackbar(message, { variant: 'error' });
+            setLoading(false);
+            return;
+          }
+          const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
+          const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
+        }
+        const result = await sendTransaction(name, params);
+
+        this.timeoutHanle2 = setTimeout(() => {
+          if (result) {
+            message = 'Your propose sent successfully.';
+            enqueueSnackbar(message, { variant: 'success' });
+            setLoading(false);
+            this.props.close();
+          }
+        }, 50);
       } catch (err) {
         // console.log(err);
         setLoading(false);
@@ -226,11 +225,7 @@ class Promise extends React.Component {
     return `@${suggestion.nick}`;
   }
 
-  renderSuggestion(suggestion) {
-    return <div>{suggestion.nick}</div>;
-  }
-
-  renderSuggestion1(suggestion, { query }) {
+  renderSuggestion(suggestion, { query }) {
     const suggestionText = `${suggestion.nick}`;
     const matches = AutosuggestHighlightMatch(suggestionText, query);
     const parts = AutosuggestHighlightParse(suggestionText, matches);
@@ -358,7 +353,7 @@ class Promise extends React.Component {
           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
           onSuggestionsClearRequested={this.onSuggestionsClearRequested}
           getSuggestionValue={this.getSuggestionValue}
-          renderSuggestion={this.renderSuggestion1}
+          renderSuggestion={this.renderSuggestion}
           inputProps={inputProps}
         />
         <FormControlLabel
