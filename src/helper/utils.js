@@ -8,6 +8,7 @@ import { ecc, codec, AccountType } from '@iceteachain/common';
 import { decodeTx, decode } from './decode';
 import { encodeTx } from './encode';
 import eccrypto from 'eccrypto';
+import { tr } from 'date-fns/esm/locale';
 
 const paths = 'm’/44’/60’/0’/0';
 
@@ -152,7 +153,7 @@ export async function saveToIpfs(files) {
 
   // simple upload
   await ipfs
-    .add([...files], { progress: prog => console.log(`received: ${prog}`) })
+    .add([...files], { progress: false })
     .then(response => {
       console.log(response);
       ipfsId = response[0].hash;
