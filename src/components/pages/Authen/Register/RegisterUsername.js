@@ -179,17 +179,22 @@ class RegisterUsername extends PureComponent {
   handleImageChange = e => {
     e.preventDefault();
 
-    let reader = new FileReader();
-    let files = e.target.files;
+    const reader = new FileReader();
+    const { files } = e.target;
+    const file = files[0];
 
     reader.onloadend = () => {
-      this.setState({
-        file: files,
-        imgPreviewUrl: reader.result,
-      });
+      if (files) {
+        this.setState({
+          file: files,
+          imgPreviewUrl: reader.result,
+        });
+      }
     };
 
-    files && reader.readAsDataURL(files[0]);
+    if (file && file.type.match('image.*')) {
+      reader.readAsDataURL(file);
+    }
   };
 
   render() {

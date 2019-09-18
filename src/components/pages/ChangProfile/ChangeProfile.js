@@ -2,8 +2,8 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
 import { withStyles } from '@material-ui/core/styles';
+import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
@@ -87,6 +87,7 @@ class ChangeProfile extends PureComponent {
       avatar: '',
     };
   }
+
   componentDidMount() {
     ValidatorForm.addValidationRule('isPasswordMatch', value => {
       if (value !== this.state.password) {
@@ -97,26 +98,26 @@ class ChangeProfile extends PureComponent {
     this.getData();
   }
 
+  componentWillUnmount() {
+    ValidatorForm.removeValidationRule('isPasswordMatch');
+  }
+
   async getData() {
     const { address } = this.props;
     if (address) {
       const reps = await getTagsInfo(address);
       // console.log('reps', reps);
       const displayName = reps['display-name'];
-      const avatar = reps['avatar'];
-      var temp = displayName.split(' ');
-      var first = temp.slice(0, 1).join(' ');
-      var second = temp.slice(1).join(' ');
+      const avatar = reps.avatar;
+      const temp = displayName.split(' ');
+      const first = temp.slice(0, 1).join(' ');
+      const second = temp.slice(1).join(' ');
       this.setState({
         firstname: first,
         lastname: second,
-        avatar: avatar,
+        avatar,
       });
     }
-  }
-
-  componentWillUnmount() {
-    ValidatorForm.removeValidationRule('isPasswordMatch');
   }
 
   saveChange = async () => {
@@ -127,7 +128,7 @@ class ChangeProfile extends PureComponent {
     } else {
       setLoading(true);
       setTimeout(async () => {
-        const displayName = firstname + ' ' + lastname;
+        const displayName = `${firstname} ${lastname}`;
 
         tweb3.wallet.importAccount(privateKey);
         tweb3.wallet.defaultAccount = address;
@@ -155,7 +156,7 @@ class ChangeProfile extends PureComponent {
 
   handleUsername = event => {
     const key = event.currentTarget.name;
-    const value = event.currentTarget.value;
+    const { value } = event.currentTarget;
     // console.log(event.currentTarget.id);
 
     this.setState({ [key]: value });
@@ -164,17 +165,18 @@ class ChangeProfile extends PureComponent {
   handleImageChange = e => {
     e.preventDefault();
 
-    let reader = new FileReader();
-    const files = e.target.files;
+    const reader = new FileReader();
+    const { files } = e.target;
     const file = files[0];
 
     reader.onloadend = () => {
-      files &&
+      if (files) {
         this.setState({
           avatar: '',
           file: files,
           imgPreviewUrl: reader.result,
         });
+      }
     };
 
     if (file && file.type.match('image.*')) {
@@ -208,7 +210,7 @@ class ChangeProfile extends PureComponent {
                       <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
                       {avatar ? (
                         <div className="imgPreview">
-                          <img src={avatar} alt="imgPreview" />
+                          <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
                         </div>
                       ) : (
                         <div className="imgPreview">{$imagePreview}</div>
@@ -276,7 +278,7 @@ class ChangeProfile extends PureComponent {
 
 const mapStateToProps = state => {
   const e = state.create;
-  const account = state.account;
+  const { account } = state;
   return {
     password: e.password,
     address: account.address,

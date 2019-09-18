@@ -28,7 +28,7 @@ export default function GetKeyToAuthen() {
     return () => {
       window.document.body.removeEventListener('keydown', handleUserKeyPress);
     };
-  }, []);
+  }, [password]);
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));

@@ -35,7 +35,7 @@ const Desc = styled.ul`
     text-align: center;
   }
   span {
-    line-height: 14px;
+    line-height: 18px;
   }
 `;
 const MnemonixText = styled.div`
@@ -85,7 +85,7 @@ class RegisterSuccess extends React.Component {
           <img src="/static/img/success.svg" alt="" />
           <Title>Wow, you have registered successfuly!</Title>
           <Desc>
-            <span>Here is your account's</span>
+            <span>Here is your account's recovery phrase:</span>
             <MnemonixText>
               <p data-cy="mnemonic">{mnemonic}</p>
             </MnemonixText>
