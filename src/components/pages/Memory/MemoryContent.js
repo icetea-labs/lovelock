@@ -13,9 +13,9 @@ import LockIcon from '@material-ui/icons/Lock';
 // import ShareIcon from '@material-ui/icons/Share';
 import CircularProgress from '@material-ui/core/CircularProgress';
 // import * as actions from '../../../store/actions';
-import BoxActionButton from './BoxActionButton';
+import MemoryActionButton from './MemoryActionButton';
 
-import Comments from './Comments';
+import MemoryComments from './MemoryComments';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -195,9 +195,9 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <BoxActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
+        <MemoryActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
       )}
-      {showComment && <Comments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
+      {showComment && <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>
   );
 }
