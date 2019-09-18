@@ -92,7 +92,7 @@ export default function MemoryContent(props) {
   async function loaddata(index) {
     const comments = await callView('getCommentsByMemoIndex', [index]);
     // const numcomment = Object.keys(comments).length;
-    console.log('comments', comments);
+    // console.log('comments', comments);
     // setComments(numcomment);
     for (let index = 0; index < comments.length; index++) {
       const element = comments[index];
