@@ -108,14 +108,14 @@ class ChangeProfile extends PureComponent {
       const reps = await getTagsInfo(address);
       // console.log('reps', reps);
       const displayName = reps['display-name'];
-      const avatar = reps.avatar;
+      const ava = reps.avatar;
       const temp = displayName.split(' ');
       const first = temp.slice(0, 1).join(' ');
       const second = temp.slice(1).join(' ');
       this.setState({
         firstname: first,
         lastname: second,
-        avatar,
+        avatar: ava,
       });
     }
   }
