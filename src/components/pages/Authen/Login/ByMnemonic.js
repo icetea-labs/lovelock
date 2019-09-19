@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { wallet } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import { wallet , savetoLocalStorage } from '../../../../helper';
 // import Button from '@material-ui/core/Button';
 import { ButtonPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
@@ -11,7 +11,7 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
-import { savetoLocalStorage } from '../../../../helper';
+
 import encode from '../../../../helper/encode';
 
 const styles = theme => ({

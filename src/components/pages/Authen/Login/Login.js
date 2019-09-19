@@ -1,13 +1,14 @@
 import React, { PureComponent } from 'react';
+import { withRouter } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
+import QueueAnim from 'rc-queue-anim';
+import { connect } from 'react-redux';
 import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
 import { HeaderAuthen } from '../../../elements/Common';
-import { connect } from 'react-redux';
-import QueueAnim from 'rc-queue-anim';
 import ByMnemonic from './ByMnemonic';
 import ByPassWord from './ByPassWord';
-// import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
 import { LinkPro } from '../../../elements/Button';
+import * as actionCreate from '../../../../store/actions/create';
 
 const styles = theme => ({
   //   button: {
@@ -17,6 +18,12 @@ const styles = theme => ({
 });
 
 class Login extends PureComponent {
+  gotoRegister = () => {
+    const { history, setStep } = this.props;
+    setStep('one');
+    history.push('/register');
+  };
+
   render() {
     const { step } = this.props;
     // console.log('step', step);
@@ -31,7 +38,7 @@ class Login extends PureComponent {
                 {step === 'two' && <ByMnemonic />}
                 <div className="btRegister">
                   <span>No account yet?</span>
-                  <LinkPro href="/register">Register</LinkPro>
+                  <LinkPro onClick={this.gotoRegister}>Register</LinkPro>
                 </div>
               </ShadowBoxAuthen>
             </BoxAuthen>
@@ -54,13 +61,16 @@ const mapStateToProps = state => {
   };
 };
 
-// const mapDispatchToProps = (dispatch) => {
-//   return {
-//   };
-// }
-export default withStyles(styles)(
+const mapDispatchToProps = dispatch => {
+  return {
+    setStep: value => {
+      dispatch(actionCreate.setStep(value));
+    },
+  };
+};
+export default withRouter(
   connect(
     mapStateToProps,
-    null
-  )(Login)
+    mapDispatchToProps
+  )(withStyles(styles)(Login))
 );

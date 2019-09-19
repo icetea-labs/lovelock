@@ -2,16 +2,15 @@ import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
-import { wallet } from '../../../../helper';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { withStyles } from '@material-ui/core/styles';
+import { wallet, decode } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import tweb3 from '../../../../service/tweb3';
-import { decode } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
   // button: {
@@ -158,9 +157,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
+export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withRouter(ByPassWord))
+  )(withStyles(styles)(ByPassWord))
 );

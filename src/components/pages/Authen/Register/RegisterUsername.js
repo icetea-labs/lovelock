@@ -1,19 +1,17 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
-// import TextField from '@material-ui/core/TextField';
-// import Button from '@material-ui/core/Button';
-import { ButtonPro, LinkPro } from '../../../elements/Button';
 import Icon from '@material-ui/core/Icon';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
-// import ImageUpload from '../../../elements/ImageUpload';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
   rightIcon: {
@@ -130,7 +128,7 @@ class RegisterUsername extends PureComponent {
         setTimeout(async () => {
           const account = await this._createAccountWithMneomnic();
           const { privateKey, address, publicKey, mnemonic } = account;
-          const displayname = firstname + ' ' + lastname;
+          const displayname = `${firstname} ${lastname}`;
           // console.log('publicKey', publicKey);
           setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
           tweb3.wallet.importAccount(privateKey);
@@ -159,7 +157,7 @@ class RegisterUsername extends PureComponent {
 
   handleUsername = event => {
     const key = event.currentTarget.name;
-    const value = event.currentTarget.value;
+    const { value } = event.currentTarget;
     console.log(event.currentTarget.id);
 
     this.setState({ [key]: value });
@@ -195,6 +193,11 @@ class RegisterUsername extends PureComponent {
     if (file && file.type.match('image.*')) {
       reader.readAsDataURL(file);
     }
+  };
+
+  gotoLogin = () => {
+    const { history } = this.props;
+    history.push('/login');
   };
 
   render() {
@@ -274,7 +277,7 @@ class RegisterUsername extends PureComponent {
           </div>
         </PreviewContainter>
         <DivControlBtnKeystore>
-          <LinkPro href="/login">Already had an account? Login</LinkPro>
+          <LinkPro onClick={this.gotoLogin}>Already had an account? Login</LinkPro>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
@@ -309,9 +312,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
+export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(RegisterUsername)
+  )(withStyles(styles)(RegisterUsername))
 );

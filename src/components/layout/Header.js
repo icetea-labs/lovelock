@@ -26,7 +26,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-import { withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
 import AvatarPro from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
@@ -34,7 +34,7 @@ import * as actions from '../../store/actions';
 import { getTags } from '../../helper';
 import LandingPage from './LandingPage';
 
-const StyledLogo = styled.a`
+const StyledLogo = styled(Link)`
   font-size: ${rem(20)};
   display: flex;
   flex-grow: 1;
@@ -504,7 +504,7 @@ function Header(props) {
         <div className={classes.grow}>
           <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
             <StyledToolbar>
-              <StyledLogo href="/">
+              <StyledLogo to="/">
                 <img src="/static/img/logo.svg" alt="itea-scan" />
                 <span>LoveLock</span>
               </StyledLogo>
