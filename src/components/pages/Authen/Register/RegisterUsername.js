@@ -48,9 +48,9 @@ const PreviewContainter = styled.div`
   .fileInput {
     width: 200px;
     height: 30px;
-    border: 1px solid #eddada8f;
-    padding: 2px;
-    margin: 10px;
+    /* border: 1px solid #eddada8f; */
+    /* padding: 2px; */
+    margin-top: 8px;
     cursor: pointer;
     /* :hover {
       background: red;
@@ -59,8 +59,8 @@ const PreviewContainter = styled.div`
   .imgPreview {
     text-align: center;
     margin-right: 15px;
-    height: 100px;
-    width: 100px;
+    height: 80px;
+    width: 80px;
     border: 1px solid #eddada8f;
     border-radius: 50%;
     cursor: pointer;
