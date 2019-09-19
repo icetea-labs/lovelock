@@ -76,7 +76,7 @@ export default function GetKeyToAuthen() {
         } catch (err) {
           // console.log(err);
           setLoading(false);
-          const message = 'Wrong password. Please try again.';
+          const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
         }
       }, 100);

@@ -1,19 +1,17 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
 import { withStyles } from '@material-ui/core/styles';
-// import TextField from '@material-ui/core/TextField';
-// import Button from '@material-ui/core/Button';
-import { ButtonPro, LinkPro } from '../../../elements/Button';
 import Icon from '@material-ui/core/Icon';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
-// import ImageUpload from '../../../elements/ImageUpload';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
   rightIcon: {
@@ -27,53 +25,60 @@ const styles = theme => ({
 
 const PreviewContainter = styled.div`
   display: flex;
-  flex-direction: row;
-  -webkit-box-pack: justify;
+  /* flex-direction: row; */
+  /* -webkit-box-pack: justify; */
   /* justify-content: space-between; */
   padding: 20px 0 0 0;
   font-size: 14px;
   cursor: pointer;
-  .upload_img input[type='file'] {
-      font-size: 100px;
-      position: absolute;
-      left: 10;
-      top: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-    .upload_img {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-      cursor: pointer;
-    }
-  .fileInput {
-    width: 100px;
-    height: 100px;
-    border: 1px solid #eddada8f;
-    padding: 2px;
-    margin: 10px;
+  /* .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 10;
+    top: 0;
+    opacity: 0;
     cursor: pointer;
+  } */
+  .upload_img {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+  }
+  .fileInput {
+    width: 200px;
+    height: 30px;
+    /* border: 1px solid #eddada8f; */
+    /* padding: 2px; */
+    margin-top: 8px;
+    cursor: pointer;
+    /* :hover {
+      background: red;
+    } */
   }
   .imgPreview {
     text-align: center;
     margin-right: 15px;
-    height: 150px;
-    width: 150px;
+    height: 80px;
+    width: 80px;
     border: 1px solid #eddada8f;
     border-radius: 50%;
     cursor: pointer;
+    /* :hover {
+      background: red;
+    } */
     img {
-      width: 100%
-      height: 100%
+      width: 100%;
+      height: 100%;
       cursor: pointer;
       border-radius: 50%;
     }
   }
-  .previewText {
-    margin-top: 70px;
+  .previewAvaDefault {
+    width: 50px;
+    height: 50px;
     cursor: pointer;
-    color: #736e6e
+    color: #736e6e;
   }
 `;
 
@@ -197,6 +202,11 @@ class RegisterUsername extends PureComponent {
     }
   };
 
+  gotoLogin = () => {
+    const { history } = this.props;
+    history.push('/login');
+  };
+
   render() {
     const { username, firstname, lastname, password, rePassword, imgPreviewUrl } = this.state;
     const { classes } = this.props;
@@ -207,7 +217,7 @@ class RegisterUsername extends PureComponent {
     if (imgPreviewUrl) {
       $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
     } else {
-      $imagePreview = <div className="previewText">Your avatar</div>;
+      $imagePreview = <img src="/static/img/no-avatar.jpg" alt="avaDefault" className="previewAvaDefault" />;
     }
 
     return (
@@ -268,13 +278,14 @@ class RegisterUsername extends PureComponent {
           value={rePassword}
         />
         <PreviewContainter>
+          <span>Avatar</span>
           <div className="upload_img">
-            <input className="fileInput" type="file" onChange={this.handleImageChange} />
             <div className="imgPreview">{$imagePreview}</div>
+            <input className="fileInput" type="file" onChange={this.handleImageChange} />
           </div>
         </PreviewContainter>
         <DivControlBtnKeystore>
-          <LinkPro href="/login">Already had an account? Login</LinkPro>
+          <LinkPro onClick={this.gotoLogin}>Already had an account? Login</LinkPro>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
@@ -309,9 +320,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
+export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(RegisterUsername)
+  )(withStyles(styles)(RegisterUsername))
 );

@@ -1,151 +1,126 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
-import { wallet } from '../../../../helper';
-import { withStyles } from '@material-ui/core/styles';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { makeStyles } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
+import { Grid, TextField } from '@material-ui/core';
+import AvatarPro from '../../../elements/AvatarPro';
+
+import tweb3 from '../../../../service/tweb3';
+import { wallet, decode, getTagsInfo } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
-import tweb3 from '../../../../service/tweb3';
-import { decode } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
-const styles = theme => ({
-  // button: {
-  //   margin: theme.spacing(1),
-  //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  // },
-});
+const useStyles = makeStyles(theme => ({
+  avatar: {
+    marginTop: theme.spacing(1),
+  },
+}));
 
-class ByPassWord extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rePassErr: '',
-      privateKey: '',
-      password: '',
-    };
+function ByPassWord(props) {
+  const { setLoading, setAccount, setStep, history, encryptedData } = props;
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    loaddata();
+  }, []);
+
+  async function loaddata() {
+    const { address } = props;
+    if (address) {
+      const reps = await getTagsInfo(address);
+      setUsername(reps['display-name']);
+      setAvatar(reps.avatar);
+    } else {
+      setUsername('undefined');
+    }
   }
-  componentDidMount() {
-    window.document.body.addEventListener('keydown', this._keydown);
-  }
 
-  componentWillUnmount() {
-    window.document.body.removeEventListener('keydown', this._keydown);
-  }
-
-  _keydown = e => {
-    e.keyCode === 13 && this.gotoLogin();
-  };
-
-  gotoLogin = async () => {
-    const { password } = this.state;
-    const { setLoading, setAccount, history, encryptedData } = this.props;
-
+  async function gotoLogin() {
     if (encryptedData) {
-      if (!password) {
-        this.setState({ rePassErr: 'Password required.' });
-        return;
-      }
       setLoading(true);
 
-      this.timeoutHanle1 = setTimeout(() => {
+      setTimeout(() => {
         try {
-          let privateKey = '';
-          privateKey = codec.toString(decode(password, encryptedData).privateKey);
+          console.log(password);
+          const privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
           const account = { address, privateKey, cipher: password };
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
           setAccount(account);
-          // localStorage.removeItem('user');
-          // localStorage.setItem('user', JSON.stringify(account));
           history.push('/');
-          setLoading(false);
         } catch (err) {
-          // console.log(err);
-          this.setState({
-            rePassErr: 'Wrong Password!',
-          });
-          setLoading(false);
+          console.log('e1', err);
+          const message = 'Your password is invalid. Please try again.';
+          enqueueSnackbar(message, { variant: 'error' });
         }
+
+        setLoading(false);
       }, 100);
+    } else {
+      const message = `An error has occured. Please try using forgot password.`;
+      enqueueSnackbar(message, { variant: 'error' });
     }
-  };
-
-  handlePassword = event => {
-    const password = event.currentTarget.value;
-    if (!password) {
-      this.setState({ rePassErr: 'Password required.' });
-    }
-    // console.log(password);
-    this.setState({ password });
-  };
-  handlePrivatekey = event => {
-    const privateKey = event.currentTarget.value;
-    this.setState({ privateKey });
-  };
-  loginWithSeed = () => {
-    const { setStep } = this.props;
-    setStep('two');
-  };
-  render() {
-    const { password } = this.state;
-    // const { classes } = this.props;
-
-    return (
-      <ValidatorForm onSubmit={this.gotoLogin}>
-        {/* <TextField
-          id="rePassword"
-          label="Password"
-          placeholder="Enter your password"
-          helperText={rePassErr}
-          error={rePassErr.length === 0 ? false : true}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePassword}
-          type="password"
-        /> */}
-        <TextValidator
-          label="Password"
-          fullWidth
-          onChange={this.handlePassword}
-          name="password"
-          type="password"
-          validators={['required']}
-          errorMessages={['This field is required']}
-          margin="normal"
-          value={password}
-        />
-        <DivControlBtnKeystore>
-          {/* <DivPassRecover> */}
-          <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
-          {/* </DivPassRecover> */}
-          {/* <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro> */}
-          <ButtonPro type="submit">Login</ButtonPro>
-        </DivControlBtnKeystore>
-      </ValidatorForm>
-    );
   }
+
+  function handlePassword(event) {
+    const { value } = event.currentTarget;
+    console.log('value', value);
+    setPassword(value);
+  }
+
+  function loginWithSeed() {
+    setStep('two');
+  }
+  const classes = useStyles();
+
+  return (
+    <ValidatorForm onSubmit={gotoLogin}>
+      <Grid className={classes.avatar} container spacing={2} alignItems="flex-end">
+        <Grid item>
+          <AvatarPro hash={avatar} />
+        </Grid>
+        <Grid item>
+          <TextField label="Username" value={username} disabled />
+        </Grid>
+      </Grid>
+      <TextValidator
+        label="Password"
+        fullWidth
+        onChange={handlePassword}
+        name="password"
+        type="password"
+        validators={['required']}
+        errorMessages={['This field is required']}
+        margin="normal"
+        value={password}
+      />
+      <DivControlBtnKeystore>
+        <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>
+        <ButtonPro type="submit">Login</ButtonPro>
+      </DivControlBtnKeystore>
+    </ValidatorForm>
+  );
 }
 
 const mapStateToProps = state => {
-  const e = state.create;
-  const account = state.account;
   return {
-    password: e.password,
-    encryptedData: account.encryptedData,
+    encryptedData: state.account.encryptedData,
+    address: state.account.address,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    // setPassword: value => {
-    //   dispatch(actions.setPassword(value));
-    // },
     setAccount: value => {
       dispatch(actionAccount.setAccount(value));
     },
@@ -158,9 +133,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
+export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withRouter(ByPassWord))
+  )(ByPassWord)
 );
