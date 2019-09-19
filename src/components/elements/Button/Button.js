@@ -1,6 +1,8 @@
 import React from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
 export const BaseButton = withStyles({
   root: {
@@ -53,6 +55,9 @@ const StyledLinkPro = withStyles({
   },
 })(BaseButton);
 
+const StyledLinkPro2 = styled(StyledLinkPro);
+const StyledLinkPro3 = styled(StyledLinkPro);
+
 const useStyles = makeStyles(theme => ({
   styledButton: {
     margin: theme.spacing(1),
@@ -72,14 +77,29 @@ export function ButtonPro(props) {
     </StyledButtonPro>
   );
 }
+// withRouter
+// export const LinkPro = withRouter(({ herf, history, ...props }) => {
+//   const classes = useStyles();
+//   const { children } = props;
+//   return (
+//     <StyledLinkPro
+//       onClick={() => {
+//         history.push(herf);
+//       }}
+//       color="primary"
+//       className={classes.styledButton}
+//       {...props}
+//     >
+//       {children}
+//     </StyledLinkPro>
+//   );
+// });
 
-export function LinkPro(props) {
+export const LinkPro = ({ children, href, ...props }) => {
   const classes = useStyles();
-  const { children } = props;
-
   return (
     <StyledLinkPro color="primary" className={classes.styledButton} {...props}>
       {children}
     </StyledLinkPro>
   );
-}
+};

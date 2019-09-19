@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
 // import { withRouter } from 'react-router-dom';
-import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
-import { HeaderAuthen } from '../../../elements/Common';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
+import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
+import { HeaderAuthen } from '../../../elements/Common';
 import RegisterUsername from './RegisterUsername';
 import RegisterSuccess from './RegisterSuccess';
 
