@@ -158,8 +158,8 @@ class Promise extends React.Component {
             setLoading(false);
             return;
           }
-          // const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
-          // const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
+          const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
+          const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
           botInfo = {
             firstname,
             lastname,
