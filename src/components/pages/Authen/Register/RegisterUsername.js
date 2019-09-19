@@ -1,19 +1,17 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
-// import TextField from '@material-ui/core/TextField';
-// import Button from '@material-ui/core/Button';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
-// import ImageUpload from '../../../elements/ImageUpload';
 
 const styles = theme => ({
   rightIcon: {
@@ -204,6 +202,11 @@ class RegisterUsername extends PureComponent {
     }
   };
 
+  gotoLogin = () => {
+    const { history } = this.props;
+    history.push('/login');
+  };
+
   render() {
     const { username, firstname, lastname, password, rePassword, imgPreviewUrl } = this.state;
     const { classes } = this.props;
@@ -282,7 +285,7 @@ class RegisterUsername extends PureComponent {
           </div>
         </PreviewContainter>
         <DivControlBtnKeystore>
-          <LinkPro href="/login">Already had an account? Login</LinkPro>
+          <LinkPro onClick={this.gotoLogin}>Already had an account? Login</LinkPro>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
@@ -317,9 +320,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
+export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(RegisterUsername)
+  )(withStyles(styles)(RegisterUsername))
 );
