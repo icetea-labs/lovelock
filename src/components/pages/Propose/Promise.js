@@ -143,8 +143,8 @@ class Promise extends React.Component {
           setLoading(false);
           return;
         }
-        const params = [promiseStm, partner, info];
 
+        let botInfo = {};
         if (checked) {
           if (!firstname) {
             message = 'Please enter your crush first name.';
@@ -160,7 +160,16 @@ class Promise extends React.Component {
           }
           const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
           const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
+          botInfo = {
+            firstname,
+            lastname,
+          };
         }
+
+        botInfo = JSON.stringify(botInfo);
+
+        // const params = [promiseStm, partner, info, botInfo];
+        const params = [promiseStm, partner, info];
         const result = await sendTransaction(name, params);
 
         this.timeoutHanle2 = setTimeout(() => {
@@ -289,11 +298,11 @@ class Promise extends React.Component {
   handleCheckChange = e => {
     document.activeElement.blur();
 
-    const checked = e.target.checked;
+    const check = e.target.checked;
 
-    if (checked) {
+    if (check) {
       this.setState({
-        checked,
+        checked: check,
         partner: process.env.REACT_APP_BOT_LOVER,
       });
       // document.addEventListener('DOMContentLoaded', function(event) {
@@ -312,10 +321,10 @@ class Promise extends React.Component {
 
   handleUsername = event => {
     const key = event.currentTarget.name;
-    const value = event.currentTarget.value;
+    const val = event.currentTarget.value;
     // console.log(event.currentTarget.value);
 
-    this.setState({ [key]: value });
+    this.setState({ [key]: val });
   };
 
   render() {
