@@ -1,11 +1,11 @@
 import React from 'react';
-import MemoryContent from './MemoryContent';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
+import MemoryContent from './MemoryContent';
 
 const useStyles = makeStyles(theme => ({
   card: {
