@@ -31,7 +31,7 @@ import { rem } from '../elements/StyledUtils';
 import AvatarPro from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import * as actions from '../../store/actions';
-import { getTags } from '../../helper';
+import { getTagsInfo } from '../../helper';
 import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
@@ -333,7 +333,7 @@ function Header(props) {
   useEffect(() => {
     async function fetchData() {
       if (address) {
-        const reps = await getTags(address);
+        const reps = await getTagsInfo(address);
         dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
       } else {
         // setDisplayName('no name');

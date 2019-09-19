@@ -3,30 +3,35 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
+import { Grid, TextField } from '@material-ui/core';
+import AvatarPro from '../../../elements/AvatarPro';
 
 import tweb3 from '../../../../service/tweb3';
-import { wallet, decode } from '../../../../helper';
+import { wallet, decode, getTagsInfo } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 
-const styles = () => ({
-  // button: {
-  //   margin: theme.spacing(1),
-  //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
-  // },
-});
+const useStyles = makeStyles(theme => ({
+  avatar: {
+    marginTop: theme.spacing(1),
+  },
+}));
 
 function ByPassWord(props) {
   const { setLoading, setAccount, setStep, history, encryptedData } = props;
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [avatar, setAvatar] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+    loaddata();
+
     const handleUserKeyPress = event => {
       if (event.keyCode === 13) {
         gotoLogin();
@@ -38,21 +43,30 @@ function ByPassWord(props) {
     };
   }, []);
 
+  async function loaddata() {
+    const { address } = props;
+    if (address) {
+      const reps = await getTagsInfo(address);
+      setUsername(reps['display-name']);
+      setAvatar(reps.avatar);
+    } else {
+      setUsername('undefine');
+    }
+  }
+
   async function gotoLogin() {
     if (encryptedData) {
       setLoading(true);
 
       setTimeout(() => {
         try {
-          let privateKey = '';
-          privateKey = codec.toString(decode(password, encryptedData).privateKey);
+          const privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
           const account = { address, privateKey, cipher: password };
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
           setAccount(account);
           history.push('/');
-          setLoading(false);
         } catch (err) {
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
@@ -74,9 +88,18 @@ function ByPassWord(props) {
   function loginWithSeed() {
     setStep('two');
   }
+  const classes = useStyles();
 
   return (
     <ValidatorForm onSubmit={gotoLogin}>
+      <Grid className={classes.avatar} container spacing={2} alignItems="flex-end">
+        <Grid item>
+          <AvatarPro hash={avatar} />
+        </Grid>
+        <Grid item>
+          <TextField label="Username" value={username} disabled />
+        </Grid>
+      </Grid>
       <TextValidator
         label="Password"
         fullWidth
@@ -99,6 +122,7 @@ function ByPassWord(props) {
 const mapStateToProps = state => {
   return {
     encryptedData: state.account.encryptedData,
+    address: state.account.address,
   };
 };
 
@@ -120,5 +144,5 @@ export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withStyles(styles)(ByPassWord))
+  )(ByPassWord)
 );
