@@ -261,7 +261,7 @@ export const LayoutAuthen = styled.div`
 `;
 export const BoxAuthen = styled.div`
   position: absolute;
-  top: 130px;
+  top: 100px;
   left: 50%;
   transform: translateX(-50%);
   @media (min-width: 1900px) {

@@ -31,16 +31,6 @@ function ByPassWord(props) {
 
   useEffect(() => {
     loaddata();
-
-    const handleUserKeyPress = event => {
-      if (event.keyCode === 13) {
-        gotoLogin();
-      }
-    };
-    window.document.body.addEventListener('keydown', handleUserKeyPress);
-    return () => {
-      window.document.body.removeEventListener('keydown', handleUserKeyPress);
-    };
   }, []);
 
   async function loaddata() {
@@ -50,7 +40,7 @@ function ByPassWord(props) {
       setUsername(reps['display-name']);
       setAvatar(reps.avatar);
     } else {
-      setUsername('undefine');
+      setUsername('undefined');
     }
   }
 
@@ -60,6 +50,7 @@ function ByPassWord(props) {
 
       setTimeout(() => {
         try {
+          console.log(password);
           const privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
           const account = { address, privateKey, cipher: password };
@@ -68,6 +59,7 @@ function ByPassWord(props) {
           setAccount(account);
           history.push('/');
         } catch (err) {
+          console.log('e1', err);
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
         }
@@ -82,6 +74,7 @@ function ByPassWord(props) {
 
   function handlePassword(event) {
     const { value } = event.currentTarget;
+    console.log('value', value);
     setPassword(value);
   }
 
