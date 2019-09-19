@@ -50,7 +50,7 @@ function ByPassWord(props) {
       setUsername(reps['display-name']);
       setAvatar(reps.avatar);
     } else {
-      setUsername('undefine');
+      setUsername('undefined');
     }
   }
 
