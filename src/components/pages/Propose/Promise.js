@@ -168,7 +168,8 @@ class Promise extends React.Component {
 
         botInfo = JSON.stringify(botInfo);
 
-        const params = [promiseStm, partner, info, botInfo];
+        // const params = [promiseStm, partner, info, botInfo];
+        const params = [promiseStm, partner, info];
         const result = await sendTransaction(name, params);
 
         this.timeoutHanle2 = setTimeout(() => {
