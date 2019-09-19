@@ -1,10 +1,11 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import { wallet , savetoLocalStorage } from '../../../../helper';
-// import Button from '@material-ui/core/Button';
+import { useSnackbar } from 'notistack';
+
+import { wallet, savetoLocalStorage } from '../../../../helper';
 import { ButtonPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -12,7 +13,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 
-import encode from '../../../../helper/encode';
+import { encode } from '../../../../helper/encode';
 
 const styles = theme => ({
   // button: {
@@ -26,31 +27,31 @@ const styles = theme => ({
   },
 });
 
-class ByMnemonic extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rePassErr: '',
-      mnemonic: '',
-      isPrivateKey: false,
-      password: '',
+function ByMnemonic(props) {
+  const { setLoading, setAccount, setStep, history } = props;
+  const [isPrivateKey, setIsPrivateKey] = useState(false);
+  const [password, setPassword] = useState('');
+  const [mnemonic, setMnemonic] = useState('');
+  const [rePassErr] = useState('');
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const handleUserKeyPress = event => {
+      if (event.keyCode === 13) {
+        gotoLogin();
+      }
     };
-  }
-  componentDidMount() {
-    window.document.body.addEventListener('keydown', this._keydown);
-  }
-  componentWillUnmount() {
-    window.document.body.removeEventListener('keydown', this._keydown);
-  }
-  _keydown = e => {
-    e.keyCode === 13 && this.gotoLogin();
-  };
-  gotoLogin = async () => {
-    const { mnemonic, password, isPrivateKey } = this.state;
-    const { setLoading, setAccount, history } = this.props;
-    try {
-      setLoading(true);
-      setTimeout(async () => {
+    window.document.body.addEventListener('keydown', handleUserKeyPress);
+    return () => {
+      window.document.body.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, []);
+
+  async function gotoLogin() {
+    setLoading(true);
+    setTimeout(async () => {
+      try {
         let privateKey = '';
         if (isPrivateKey) {
           privateKey = mnemonic;
@@ -63,90 +64,75 @@ class ByMnemonic extends PureComponent {
         setAccount(account);
         tweb3.wallet.importAccount(privateKey);
         tweb3.wallet.defaultAccount = address;
-        // localStorage.removeItem('user');
-        // localStorage.setItem('user', JSON.stringify(account));
+
         const keyObject = encode(privateKey, password);
         savetoLocalStorage(address, keyObject);
         history.push('/');
-        setLoading(false);
-      }, 500);
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  handlePassword = event => {
-    const password = event.target.value;
-    // console.log(value);
-    this.setState({ password });
-  };
-  handleMnemonic = event => {
-    let isPrivateKey = false;
-    const mnemonic = event.target.value.trim();
-    if (mnemonic.indexOf(' ') < 0) isPrivateKey = true;
-    // console.log(mnemonic);
-    this.setState({ mnemonic, isPrivateKey });
-  };
-  loginWithPrivatekey = () => {
-    const { setStep } = this.props;
-    setStep('one');
-  };
-  render() {
-    const { rePassErr } = this.state;
-    const { classes } = this.props;
-
-    return (
-      <div>
-        <TextField
-          id="outlined-multiline-static"
-          label="Recovery phrase or key"
-          placeholder="Enter your Recovery phrase or key"
-          multiline
-          rows="4"
-          className={classes.textField}
-          onChange={this.handleMnemonic}
-          margin="normal"
-          variant="outlined"
-          fullWidth
-          helperText={rePassErr}
-          error={rePassErr !== ''}
-        />
-        <TextField
-          id="rePassword"
-          label="New Password"
-          placeholder="Enter your password"
-          helperText={rePassErr}
-          error={rePassErr !== ''}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePassword}
-          type="password"
-        />
-        <DivControlBtnKeystore>
-          <ButtonPro color="primary" onClick={this.loginWithPrivatekey} className={classes.link}>
-            Back
-          </ButtonPro>
-          <ButtonPro variant="contained" color="primary" className={classes.button} onClick={this.gotoLogin}>
-            Recover
-          </ButtonPro>
-        </DivControlBtnKeystore>
-      </div>
-    );
+      } catch (err) {
+        const message = `An error has occured. Please try again.`;
+        enqueueSnackbar(message, { variant: 'error' });
+      }
+      setLoading(false);
+    }, 100);
   }
-}
 
-const mapStateToProps = state => {
-  const e = state.create;
-  return {
-    password: e.password,
-  };
-};
+  function handlePassword(event) {
+    const { value } = event.target;
+    setPassword(value);
+  }
+
+  function handleMnemonic(event) {
+    const value = event.target.value.trim();
+    if (value.indexOf(' ') < 0) {
+      setIsPrivateKey(true);
+    }
+    setMnemonic(value);
+  }
+
+  function loginWithPrivatekey() {
+    setStep('one');
+  }
+
+  return (
+    <div>
+      <TextField
+        id="outlined-multiline-static"
+        label="Recovery phrase or key"
+        placeholder="Enter your Recovery phrase or key"
+        multiline
+        rows="4"
+        onChange={handleMnemonic}
+        margin="normal"
+        variant="outlined"
+        fullWidth
+        helperText={rePassErr}
+        error={rePassErr !== ''}
+      />
+      <TextField
+        id="rePassword"
+        label="New Password"
+        placeholder="Enter your password"
+        helperText={rePassErr}
+        error={rePassErr !== ''}
+        fullWidth
+        margin="normal"
+        onChange={handlePassword}
+        type="password"
+      />
+      <DivControlBtnKeystore>
+        <ButtonPro color="primary" onClick={loginWithPrivatekey}>
+          Back
+        </ButtonPro>
+        <ButtonPro variant="contained" color="primary" onClick={gotoLogin}>
+          Recover
+        </ButtonPro>
+      </DivControlBtnKeystore>
+    </div>
+  );
+}
 
 const mapDispatchToProps = dispatch => {
   return {
-    // setPassword: value => {
-    //   dispatch(actions.setPassword(value));
-    // },
     setAccount: value => {
       dispatch(actionAccount.setAccount(value));
     },
@@ -161,7 +147,7 @@ const mapDispatchToProps = dispatch => {
 
 export default withStyles(styles)(
   connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
   )(withRouter(ByMnemonic))
 );

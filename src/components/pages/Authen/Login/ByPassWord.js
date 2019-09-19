@@ -1,57 +1,48 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { withStyles } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
+
+import tweb3 from '../../../../service/tweb3';
 import { wallet, decode } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
-import tweb3 from '../../../../service/tweb3';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 
-const styles = theme => ({
+const styles = () => ({
   // button: {
   //   margin: theme.spacing(1),
   //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
   // },
 });
 
-class ByPassWord extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rePassErr: '',
-      privateKey: '',
-      password: '',
-    };
-  }
-  componentDidMount() {
-    window.document.body.addEventListener('keydown', this._keydown);
-  }
+function ByPassWord(props) {
+  const { setLoading, setAccount, setStep, history, encryptedData } = props;
+  const [password, setPassword] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
 
-  componentWillUnmount() {
-    window.document.body.removeEventListener('keydown', this._keydown);
-  }
-
-  _keydown = e => {
-    e.keyCode === 13 && this.gotoLogin();
-  };
-
-  gotoLogin = async () => {
-    const { password } = this.state;
-    const { setLoading, setAccount, history, encryptedData } = this.props;
-
-    if (encryptedData) {
-      if (!password) {
-        this.setState({ rePassErr: 'Password required.' });
-        return;
+  useEffect(() => {
+    const handleUserKeyPress = event => {
+      if (event.keyCode === 13) {
+        gotoLogin();
       }
+    };
+    window.document.body.addEventListener('keydown', handleUserKeyPress);
+    return () => {
+      window.document.body.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, []);
+
+  async function gotoLogin() {
+    if (encryptedData) {
       setLoading(true);
 
-      this.timeoutHanle1 = setTimeout(() => {
+      setTimeout(() => {
         try {
           let privateKey = '';
           privateKey = codec.toString(decode(password, encryptedData).privateKey);
@@ -60,91 +51,59 @@ class ByPassWord extends PureComponent {
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
           setAccount(account);
-          // localStorage.removeItem('user');
-          // localStorage.setItem('user', JSON.stringify(account));
           history.push('/');
           setLoading(false);
         } catch (err) {
-          // console.log(err);
-          this.setState({
-            rePassErr: 'Wrong Password!',
-          });
-          setLoading(false);
+          const message = 'Your password is invalid. Please try again.';
+          enqueueSnackbar(message, { variant: 'error' });
         }
+
+        setLoading(false);
       }, 100);
+    } else {
+      const message = `An error has occured. Please try using forgot password.`;
+      enqueueSnackbar(message, { variant: 'error' });
     }
-  };
-
-  handlePassword = event => {
-    const password = event.currentTarget.value;
-    if (!password) {
-      this.setState({ rePassErr: 'Password required.' });
-    }
-    // console.log(password);
-    this.setState({ password });
-  };
-  handlePrivatekey = event => {
-    const privateKey = event.currentTarget.value;
-    this.setState({ privateKey });
-  };
-  loginWithSeed = () => {
-    const { setStep } = this.props;
-    setStep('two');
-  };
-  render() {
-    const { password } = this.state;
-    // const { classes } = this.props;
-
-    return (
-      <ValidatorForm onSubmit={this.gotoLogin}>
-        {/* <TextField
-          id="rePassword"
-          label="Password"
-          placeholder="Enter your password"
-          helperText={rePassErr}
-          error={rePassErr.length === 0 ? false : true}
-          fullWidth
-          margin="normal"
-          onChange={this.handlePassword}
-          type="password"
-        /> */}
-        <TextValidator
-          label="Password"
-          fullWidth
-          onChange={this.handlePassword}
-          name="password"
-          type="password"
-          validators={['required']}
-          errorMessages={['This field is required']}
-          margin="normal"
-          value={password}
-        />
-        <DivControlBtnKeystore>
-          {/* <DivPassRecover> */}
-          <LinkPro onClick={this.loginWithSeed}>Forgot password?</LinkPro>
-          {/* </DivPassRecover> */}
-          {/* <ButtonPro onClick={this.gotoLogin}>Login</ButtonPro> */}
-          <ButtonPro type="submit">Login</ButtonPro>
-        </DivControlBtnKeystore>
-      </ValidatorForm>
-    );
   }
+
+  function handlePassword(event) {
+    const { value } = event.currentTarget;
+    setPassword(value);
+  }
+
+  function loginWithSeed() {
+    setStep('two');
+  }
+
+  return (
+    <ValidatorForm onSubmit={gotoLogin}>
+      <TextValidator
+        label="Password"
+        fullWidth
+        onChange={handlePassword}
+        name="password"
+        type="password"
+        validators={['required']}
+        errorMessages={['This field is required']}
+        margin="normal"
+        value={password}
+      />
+      <DivControlBtnKeystore>
+        <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>
+        <ButtonPro type="submit">Login</ButtonPro>
+      </DivControlBtnKeystore>
+    </ValidatorForm>
+  );
 }
 
 const mapStateToProps = state => {
-  const e = state.create;
-  const account = state.account;
   return {
-    password: e.password,
-    encryptedData: account.encryptedData,
+    encryptedData: state.account.encryptedData,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    // setPassword: value => {
-    //   dispatch(actions.setPassword(value));
-    // },
     setAccount: value => {
       dispatch(actionAccount.setAccount(value));
     },
