@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/styles';
-import { Grid, CardActions } from '@material-ui/core';
-import { TextField, Typography } from '@material-ui/core';
-import AvatarPro from '../../elements/AvatarPro';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
+
+import AvatarPro from '../../elements/AvatarPro';
 import { sendTransaction, callView, getTags } from '../../../helper';
 import * as actions from '../../../store/actions';
 
@@ -144,9 +143,9 @@ export default function MemoryContent(props) {
                       <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
                       <span> {item.content}</span>
                     </Typography>
-                    <Link className={classes.buttonLike}>Like</Link>
-                    <span className={classes.bullet}>•</span>
-                    <Link className={classes.buttonLike}>Reply</Link>
+                    {/* <Link className={classes.buttonLike}>Like</Link> */}
+                    {/* <span className={classes.bullet}>•</span> */}
+                    {/* <Link className={classes.buttonLike}>Reply</Link> */}
                   </Grid>
                 </Grid>
               </Grid>

@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, CardMedia } from '@material-ui/core';
-import { IconButton } from '@material-ui/core';
-import { Typography } from '@material-ui/core';
-import AvatarPro from '../../elements/AvatarPro';
-import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
+import { Card, CardHeader, CardContent, CardMedia, IconButton, Typography } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
-// import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-// import CommentIcon from '@material-ui/icons/Comment';
-// import ShareIcon from '@material-ui/icons/Share';
 import CircularProgress from '@material-ui/core/CircularProgress';
-// import * as actions from '../../../store/actions';
+import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
+import AvatarPro from '../../elements/AvatarPro';
 import MemoryActionButton from './MemoryActionButton';
 
 import MemoryComments from './MemoryComments';
