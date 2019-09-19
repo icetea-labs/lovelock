@@ -164,9 +164,7 @@ class RegisterUsername extends PureComponent {
 
   handleUsername = event => {
     const key = event.currentTarget.name;
-    const value = event.currentTarget.value;
-    console.log(event.currentTarget.id);
-
+    const { value } = event.currentTarget;
     this.setState({ [key]: value });
   };
 
@@ -229,7 +227,7 @@ class RegisterUsername extends PureComponent {
           name="username"
           validators={['required', 'isAliasRegisted']}
           errorMessages={['This field is required', 'Username already exists! Please choose another']}
-          margin="normal"
+          margin="dense"
           value={username}
         />
         <FlexBox>
@@ -241,7 +239,7 @@ class RegisterUsername extends PureComponent {
             validators={['required']}
             errorMessages={['This field is required']}
             className={classes.marginRight}
-            margin="normal"
+            margin="dense"
             value={firstname}
           />
           <TextValidator
@@ -251,7 +249,7 @@ class RegisterUsername extends PureComponent {
             name="lastname"
             validators={['required']}
             errorMessages={['This field is required']}
-            margin="normal"
+            margin="dense"
             value={lastname}
           />
         </FlexBox>
@@ -263,7 +261,7 @@ class RegisterUsername extends PureComponent {
           type="password"
           validators={['required']}
           errorMessages={['This field is required']}
-          margin="normal"
+          margin="dense"
           value={password}
         />
         <TextValidator
@@ -274,7 +272,7 @@ class RegisterUsername extends PureComponent {
           type="password"
           validators={['isPasswordMatch', 'required']}
           errorMessages={['Password mismatch', 'This field is required']}
-          margin="normal"
+          margin="dense"
           value={rePassword}
         />
         <PreviewContainter>
