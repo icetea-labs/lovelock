@@ -2,19 +2,19 @@ import React from 'react';
 import styled from 'styled-components';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import CommonDialog from './CommonDialog';
-import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
 import { connect } from 'react-redux';
-import * as actions from '../../../store/actions';
 import Autosuggest from 'react-autosuggest';
-import { tryStringifyJson } from '../../../helper/utils';
-import tweb3 from '../../../service/tweb3';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { withSnackbar } from 'notistack';
-import AddInfoMessage from '../../elements/AddInfoMessage';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { tryStringifyJson } from '../../../helper/utils';
+import * as actions from '../../../store/actions';
+import tweb3 from '../../../service/tweb3';
+import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
+import AddInfoMessage from '../../elements/AddInfoMessage';
+import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
 
 const useStyles = makeStyles(theme => ({
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
   textField: {
     marginLeft: theme.spacing(0),
     marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(4),
+    marginBottom: theme.spacing(1),
   },
   textMulti: {
     marginLeft: theme.spacing(0),
@@ -69,6 +69,56 @@ export const TagTitle = styled.div`
     color: #8250c8;
   }
 `;
+
+const PreviewContainter = styled.div`
+  display: flex;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  padding: 20px 0 0 0;
+  font-size: 14px;
+  cursor: pointer;
+  .upload_img input[type='file'] {
+      font-size: 100px;
+      position: absolute;
+      left: 10;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload_img {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      cursor: pointer;
+    }
+  .fileInput {
+    width: 70px;
+    height: 70px;
+    border: 1px solid #eddada8f;
+    padding: 2px;
+    margin: 10px;
+    cursor: pointer;
+  }
+  .imgPreview {
+    text-align: center;
+    margin-right: 15px;
+    height: 100px;
+    width: 100px;
+    border: 1px solid #eddada8f;
+    border-radius: 50%;
+    cursor: pointer;
+    img {
+      width: 100%
+      height: 100%
+      cursor: pointer;
+      border-radius: 50%;
+    }
+  }
+  .previewAvaDefault {
+    cursor: pointer;
+    color: #736e6e
+  }
+`;
 class Promise extends React.Component {
   constructor(props) {
     super(props);
@@ -77,10 +127,10 @@ class Promise extends React.Component {
       promiseStm: '',
       date: new Date(),
       file: '',
-      hash: '',
       value: '',
       suggestions: [],
       checked: false,
+      imgPreviewUrl: '',
     };
   }
 
@@ -327,9 +377,30 @@ class Promise extends React.Component {
     this.setState({ [key]: val });
   };
 
+  handleImageChange = e => {
+    e.preventDefault();
+
+    const reader = new FileReader();
+    const { files } = e.target;
+    const file = files[0];
+
+    reader.onloadend = () => {
+      if (files) {
+        this.setState({
+          file: files,
+          imgPreviewUrl: reader.result,
+        });
+      }
+    };
+
+    if (file && file.type.match('image.*')) {
+      reader.readAsDataURL(file);
+    }
+  };
+
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value, checked } = this.state;
+    const { partner, promiseStm, date, file, suggestions, value, checked, imgPreviewUrl } = this.state;
     // console.log('state CK', this.state);
 
     const inputProps = {
@@ -337,6 +408,13 @@ class Promise extends React.Component {
       value,
       onChange: this.onPartnerChange,
     };
+
+    let $imagePreview = null;
+    if (imgPreviewUrl) {
+      $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
+    } else {
+      $imagePreview = <img src="/static/img/no-avatar.jpg" alt="avaDefault" className="previewAvaDefault" />;
+    }
 
     return (
       <CommonDialog
@@ -371,22 +449,30 @@ class Promise extends React.Component {
         />
         {checked && (
           <FlexBox>
-            <TextFieldPlaceholder
-              label="First Name"
-              fullWidth
-              onChange={this.handleUsername}
-              name="firstname"
-              validators={['required']}
-              margin="normal"
-            />
-            <TextFieldPlaceholder
-              label="Last Name"
-              fullWidth
-              onChange={this.handleUsername}
-              name="lastname"
-              validators={['required']}
-              margin="normal"
-            />
+            <PreviewContainter>
+              <div className="upload_img">
+                <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                <div className="imgPreview">{$imagePreview}</div>
+              </div>
+            </PreviewContainter>
+            <div>
+              <TextFieldPlaceholder
+                label="First Name"
+                fullWidth
+                onChange={this.handleUsername}
+                name="firstname"
+                validators={['required']}
+                // margin="normal"
+              />
+              <TextFieldPlaceholder
+                label="Last Name"
+                fullWidth
+                onChange={this.handleUsername}
+                name="lastname"
+                validators={['required']}
+                // margin="normal"
+              />
+            </div>
           </FlexBox>
         )}
         <TagTitle>Your promise</TagTitle>
