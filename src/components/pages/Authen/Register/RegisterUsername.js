@@ -53,6 +53,7 @@ function RegisterUsername(props) {
       return true;
     });
 
+    // Fix issue #148
     ValidatorForm.addValidationRule('specialCharacter', async name => {
       // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
       const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
@@ -149,6 +150,7 @@ function RegisterUsername(props) {
         label="Username"
         fullWidth
         onChange={event => {
+          // Fix issue #148
           setUsername(event.currentTarget.value.toLowerCase());
         }}
         name="username"
@@ -214,13 +216,13 @@ function RegisterUsername(props) {
         margin="dense"
         value={rePassword}
       />
-      {/* <Box display="flex" className={classes.avatarBox}>
+      <Box display="flex" className={classes.avatarBox}>
         <span>Avatar</span>
         <div>
           <AvatarPro src={avatar} className={classes.avatar} />
           <input className="fileInput" type="file" onChange={handleImageInput} accept="image/*" />
         </div>
-      </Box> */}
+      </Box>
 
       <DivControlBtnKeystore>
         <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
