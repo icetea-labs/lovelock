@@ -9,6 +9,7 @@ import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Divider from '@material-ui/core/Divider';
 import { tryStringifyJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
@@ -28,9 +29,12 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1),
   },
   textMulti: {
-    marginLeft: theme.spacing(0),
+    marginTop: theme.spacing(1),
     marginRight: theme.spacing(1),
     marginBottom: theme.spacing(1),
+  },
+  devidePrm: {
+    marginBottom: '12px',
   },
 }));
 
@@ -54,6 +58,11 @@ function TextFieldMultiLine(props) {
   return <TextField className={classes.textMulti} {...props} />;
 }
 
+function DividerCus(props) {
+  const classes = useStyles();
+  return <Divider className={classes.devidePrm} {...props} />;
+}
+
 export const TagTitle = styled.div`
   width: 100%;
   height: 18px;
@@ -67,6 +76,9 @@ export const TagTitle = styled.div`
   color: #141927;
   .highlight {
     color: #8250c8;
+  }
+  .prmContent {
+    margin-top: 8px;
   }
 `;
 
@@ -92,8 +104,8 @@ const PreviewContainter = styled.div`
       cursor: pointer;
     }
   .fileInput {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     border: 1px solid #eddada8f;
     padding: 2px;
     margin: 10px;
@@ -102,8 +114,8 @@ const PreviewContainter = styled.div`
   .imgPreview {
     text-align: center;
     margin-right: 15px;
-    height: 100px;
-    width: 100px;
+    height: 70px;
+    width: 70px;
     border: 1px solid #eddada8f;
     border-radius: 50%;
     cursor: pointer;
@@ -131,6 +143,7 @@ class Promise extends React.Component {
       suggestions: [],
       checked: false,
       imgPreviewUrl: '',
+      botAvaFile: '',
     };
   }
 
@@ -164,8 +177,9 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, address } = this.props;
-    const { firstname, lastname, value, checked } = this.state;
+    const { setLoading, enqueueSnackbar, address, close } = this.props;
+    const { firstname, lastname, botAvaFile, checked, botReply } = this.state;
+    let botAva;
     let hash;
     let message;
     setLoading(true);
@@ -174,6 +188,9 @@ class Promise extends React.Component {
       try {
         if (file) {
           hash = await saveToIpfs(file);
+        }
+        if (botAvaFile) {
+          botAva = await saveToIpfs(botAvaFile);
         }
         let info = {
           date,
@@ -208,18 +225,32 @@ class Promise extends React.Component {
             setLoading(false);
             return;
           }
-          const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
-          const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
+          if (!botAvaFile) {
+            message = 'Please enter avatar of your crush.';
+            enqueueSnackbar(message, { variant: 'error' });
+            setLoading(false);
+            return;
+          }
+          if (!botReply) {
+            message = 'Please enter the reply from your crush.';
+            enqueueSnackbar(message, { variant: 'error' });
+            setLoading(false);
+            return;
+          }
+          // const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
+          // const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
           botInfo = {
             firstname,
             lastname,
+            botAva,
+            botReply,
           };
         }
 
         botInfo = JSON.stringify(botInfo);
 
-        // const params = [promiseStm, partner, info, botInfo];
-        const params = [promiseStm, partner, info];
+        const params = [promiseStm, partner, info, botInfo];
+        // const params = [promiseStm, partner, info];
         const result = await sendTransaction(name, params);
 
         this.timeoutHanle2 = setTimeout(() => {
@@ -227,7 +258,7 @@ class Promise extends React.Component {
             message = 'Your propose sent successfully.';
             enqueueSnackbar(message, { variant: 'success' });
             setLoading(false);
-            this.props.close();
+            close();
           }
         }, 50);
       } catch (err) {
@@ -387,7 +418,7 @@ class Promise extends React.Component {
     reader.onloadend = () => {
       if (files) {
         this.setState({
-          file: files,
+          botAvaFile: files,
           imgPreviewUrl: reader.result,
         });
       }
@@ -445,7 +476,7 @@ class Promise extends React.Component {
         />
         <FormControlLabel
           control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
-          label="or Send request to your crush(Imaginary Lover)"
+          label="or create a secret crush"
         />
         {checked && (
           <FlexBox>
@@ -472,17 +503,24 @@ class Promise extends React.Component {
                 validators={['required']}
                 // margin="normal"
               />
+              <TextFieldPlaceholder
+                label="Crush's response to your promise"
+                fullWidth
+                onChange={this.handleUsername}
+                name="botReply"
+                validators={['required']}
+              />
             </div>
           </FlexBox>
         )}
-        <TagTitle>Your promise</TagTitle>
+        <DividerCus />
+        <TagTitle className="prmContent">Promise content</TagTitle>
         <TextFieldMultiLine
           id="outlined-multiline-static"
-          placeholder="your promise ..."
+          placeholder="promise content ..."
           multiline
           fullWidth
-          rows="5"
-          margin="normal"
+          rows="4"
           variant="outlined"
           onChange={this.promiseStmChange}
         />

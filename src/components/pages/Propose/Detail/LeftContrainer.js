@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import tweb3 from '../../../../service/tweb3';
-import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import { withSnackbar } from 'notistack';
+import tweb3 from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, getAlias } from '../../../../helper';
 import Icon from '../../../elements/Icon';
@@ -12,7 +13,6 @@ import * as actions from '../../../../store/actions';
 import Promise from '../Promise';
 import PromiseAlert from '../PromiseAlert';
 import PromiseConfirm from '../PromiseConfirm';
-import { withSnackbar } from 'notistack';
 
 const LeftBox = styled.div`
   width: 100%;
@@ -83,6 +83,11 @@ class LeftContrainer extends PureComponent {
     return null;
   }
 
+  componentDidMount() {
+    this.loadProposes();
+    this.watchPropose();
+  }
+
   componentDidUpdate(prevProps, prevState) {
     const { propose } = this.state;
 
@@ -91,10 +96,6 @@ class LeftContrainer extends PureComponent {
     }
   }
 
-  componentDidMount() {
-    this.loadProposes();
-    this.watchPropose();
-  }
   watchPropose = async () => {
     const { address } = this.props;
     const filter = {}; //{ by: address };
@@ -122,67 +123,17 @@ class LeftContrainer extends PureComponent {
     });
   };
 
-  eventConfirmPropose(data) {
-    const { setPropose, propose, address } = this.props;
-    const newArray = propose.slice() || [];
-    const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-    newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-    // console.log('newArray', newArray[objIndex]);
-    // console.log('eventConfirmPropose');
-    if (address === data.log.sender) {
-      const message = 'Your propose has been approved.';
-      this.props.enqueueSnackbar(message, { variant: 'info' });
-    }
-    setPropose(newArray);
-  }
-  async eventCreatePropose(data) {
-    const { setPropose, propose, address } = this.props;
-    // console.log('data.log', data.log);
-    const log = await this.addInfoToProposes(data.log);
-    // console.log('eventCreatePropose');
-    setPropose([...propose, log]);
-    // console.log('propose.sender', log);
-    if (address !== log.sender) {
-      const message = 'You have a new propose.';
-      this.props.enqueueSnackbar(message, { variant: 'info' });
-    }
-  }
-  async loadProposes() {
-    this.setState({ loading: true });
-    const { address, setPropose } = this.props;
-    const proposes = (await callView('getProposeByAddress', [address])) || [];
-    // console.log('proposes', proposes, address);
-    const newPropose = await this.addInfoToProposes(proposes);
-    setPropose(newPropose);
-    this.setState({ loading: false });
-  }
+  closePopup = () => {
+    this.setState({ step: '' });
+  };
 
-  async addInfoToProposes(proposes) {
-    const { address } = this.props;
+  nextToAccept = () => {
+    this.setState({ step: 'accept' });
+  };
 
-    for (let i = 0; i < proposes.length; i++) {
-      // Get address partner
-      let partnerAddress = '';
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        partnerAddress = proposes[i].sender;
-      } else {
-        partnerAddress = proposes[i].sender === address ? proposes[i].receiver : proposes[i].sender;
-      }
-      // Get info tags partner. case on receiver is bot address -> get tags info of sender address
-      const reps = await getTagsInfo(partnerAddress);
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        proposes[i].name = reps['bot-firstName'] + ' ' + reps['bot-lastName'];
-        proposes[i].avatar = reps['bot-avatar'];
-      } else {
-        proposes[i].name = reps['display-name'];
-        proposes[i].avatar = reps['avatar'];
-      }
-
-      const nick = await getAlias(partnerAddress);
-      proposes[i].nick = '@' + nick;
-    }
-    return proposes;
-  }
+  nextToDeny = () => {
+    this.setState({ step: 'deny' });
+  };
 
   selectAccepted = index => {
     this.props.history.push('/propose/' + index);
@@ -208,15 +159,71 @@ class LeftContrainer extends PureComponent {
     }
     // console.log('view pending index', index);
   };
-  closePopup = () => {
-    this.setState({ step: '' });
-  };
-  nextToAccept = () => {
-    this.setState({ step: 'accept' });
-  };
-  nextToDeny = () => {
-    this.setState({ step: 'deny' });
-  };
+
+  eventConfirmPropose(data) {
+    const { setPropose, propose, address } = this.props;
+    const newArray = propose.slice() || [];
+    const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
+    newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
+    // console.log('newArray', newArray[objIndex]);
+    // console.log('eventConfirmPropose');
+    if (address === data.log.sender) {
+      const message = 'Your propose has been approved.';
+      this.props.enqueueSnackbar(message, { variant: 'info' });
+    }
+    setPropose(newArray);
+  }
+
+  async eventCreatePropose(data) {
+    const { setPropose, propose, address } = this.props;
+    // console.log('data.log', data.log);
+    const log = await this.addInfoToProposes(data.log);
+    // console.log('eventCreatePropose');
+    setPropose([...propose, log]);
+    // console.log('propose.sender', log);
+    if (address !== log.sender) {
+      const message = 'You have a new propose.';
+      this.props.enqueueSnackbar(message, { variant: 'info' });
+    }
+  }
+
+  async loadProposes() {
+    this.setState({ loading: true });
+    const { address, setPropose } = this.props;
+    const proposes = (await callView('getProposeByAddress', [address])) || [];
+    // console.log('proposes', proposes, address);
+    const newPropose = await this.addInfoToProposes(proposes);
+    setPropose(newPropose);
+    this.setState({ loading: false });
+  }
+
+  async addInfoToProposes(proposes) {
+    const { address } = this.props;
+
+    for (let i = 0; i < proposes.length; i++) {
+      // Get address partner
+      let partnerAddress = '';
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        partnerAddress = proposes[i].sender;
+      } else {
+        partnerAddress = proposes[i].sender === address ? proposes[i].receiver : proposes[i].sender;
+      }
+      // Get info tags partner. case on receiver is bot address -> get tags info of sender address
+      const reps = await getTagsInfo(partnerAddress);
+      const botInfo = JSON.parse(proposes[i].bot_info || {});
+      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        proposes[i].name = `${botInfo.firstname} ${botInfo.lastname}`;
+        proposes[i].avatar = botInfo.botAva;
+      } else {
+        proposes[i].name = reps['display-name'];
+        proposes[i].avatar = reps['avatar'];
+      }
+
+      const nick = await getAlias(partnerAddress);
+      proposes[i].nick = '@' + nick;
+    }
+    return proposes;
+  }
 
   renderTag = tag => {
     // const { tag } = this.state;
