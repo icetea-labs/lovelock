@@ -1,10 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
+import { withSnackbar } from 'notistack';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
-import { getAlias, getTagsInfo } from '../../../helper/';
-import { sendTransaction } from '../../../helper/index';
-import { withSnackbar } from 'notistack';
+import { getAlias, sendTransaction } from '../../../helper';
 
 export const ipfs = process.env.REACT_APP_IPFS;
 
@@ -42,11 +41,11 @@ class PromiseAlert extends React.Component {
   }
 
   async loaddata() {
-    let { propose, address } = this.props;
+    const { propose, address } = this.props;
     const { index } = this.props;
 
     const obj = propose.filter(item => item.id === index)[0];
-    console.log('loaddata', obj);
+    // console.log('loaddata', obj);
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       // const reps = await getTagsInfo(addr);
@@ -54,7 +53,7 @@ class PromiseAlert extends React.Component {
       // obj.name = name;
       this.setState({
         sender: obj.sender,
-        name: name,
+        name,
         info: obj.s_info,
         content: obj.s_content,
       });
@@ -63,6 +62,7 @@ class PromiseAlert extends React.Component {
 
   async cancelPromise(index) {
     // console.log('index', index);
+    const { enqueueSnackbar, close } = this.props;
     try {
       const name = 'cancelPropose';
       const params = [index, 'no'];
@@ -71,8 +71,8 @@ class PromiseAlert extends React.Component {
       if (result) {
         // window.alert('Success');
         const message = 'Your propose has been removed.';
-        this.props.enqueueSnackbar(message, { variant: 'info' });
-        this.props.close();
+        enqueueSnackbar(message, { variant: 'info' });
+        close();
       }
     } catch (error) {
       console.log(error);
@@ -85,7 +85,7 @@ class PromiseAlert extends React.Component {
     const infoParse = info && JSON.parse(info);
     const hash = (infoParse && infoParse.hash) || '';
     // console.log('infoParse', infoParse);
-    console.log('view state', this.state);
+    // console.log('view state', this.state);
     return (
       <div>
         {address === sender ? (

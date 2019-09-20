@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
-import Divider from '@material-ui/core/Divider';
 import { callView, getTagsInfo, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
@@ -154,7 +153,7 @@ export default function TopContrainer(props) {
     proposes.s_avatar = senderTags['avatar'];
 
     const botInfo = JSON.parse(proposes.bot_info);
-    console.log('botInfo', botInfo);
+    // console.log('botInfo', botInfo);
 
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
       proposes.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
