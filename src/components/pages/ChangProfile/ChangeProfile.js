@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { withStyles } from '@material-ui/core/styles';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -11,7 +12,6 @@ import * as actionCreate from '../../../store/actions/create';
 import tweb3 from '../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 const styles = theme => ({
   rightIcon: {
@@ -80,8 +80,8 @@ class ChangeProfile extends PureComponent {
     this.state = {
       firstname: '',
       lastname: '',
-      password: '',
-      rePassword: '',
+      // password: '',
+      // rePassword: '',
       file: '',
       imgPreviewUrl: '',
       avatar: '',
@@ -89,18 +89,18 @@ class ChangeProfile extends PureComponent {
   }
 
   componentDidMount() {
-    ValidatorForm.addValidationRule('isPasswordMatch', value => {
-      if (value !== this.state.password) {
-        return false;
-      }
-      return true;
-    });
+    // ValidatorForm.addValidationRule('isPasswordMatch', value => {
+    //   if (value !== this.state.password) {
+    //     return false;
+    //   }
+    //   return true;
+    // });
     this.getData();
   }
 
-  componentWillUnmount() {
-    ValidatorForm.removeValidationRule('isPasswordMatch');
-  }
+  // componentWillUnmount() {
+  //   ValidatorForm.removeValidationRule('isPasswordMatch');
+  // }
 
   async getData() {
     const { address } = this.props;
@@ -185,7 +185,7 @@ class ChangeProfile extends PureComponent {
   };
 
   render() {
-    const { firstname, lastname, password, rePassword, imgPreviewUrl, avatar } = this.state;
+    const { firstname, lastname, imgPreviewUrl, avatar } = this.state;
     const { classes } = this.props;
 
     // console.log('view file', this.state.file);
