@@ -94,17 +94,22 @@ export default function MemoryContent(props) {
   }, [memoryIndex]);
 
   async function loaddata(index) {
-    const coms = await callView('getCommentsByMemoIndex', [index]);
-    for (let i = 0; i < coms.length; i++) {
-      const element = coms[i];
-      const tags = await getTags(element.sender);
-      coms[i].nick = tags['display-name'];
-      coms[i].avatar = tags.avatar;
+    const respComment = await callView('getCommentsByMemoIndex', [index]);
+    let respTags = [];
+    for (let i = 0; i < respComment.length; i++) {
+      const resp = getTags(respComment[i].sender);
+      respTags.push(resp);
     }
-    setComments(coms);
+    respTags = await Promise.all(respTags);
+    for (let i = 0; i < respComment.length; i++) {
+      respComment[i].nick = respTags[i]['display-name'];
+      respComment[i].avatar = respTags[i].avatar;
+    }
+    setComments(respComment);
   }
 
   async function newComment() {
+    if (!comment) return;
     if (!privateKey) {
       dispatch(actions.setNeedAuth(true));
       return;
@@ -117,6 +122,7 @@ export default function MemoryContent(props) {
       loaddata(memoryIndex);
     }
     myFormRef.reset();
+    setComment('');
   }
 
   function onKeyDownPostComment(event) {
