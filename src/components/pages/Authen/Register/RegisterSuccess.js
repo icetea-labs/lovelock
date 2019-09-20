@@ -5,8 +5,7 @@ import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import * as actionCreate from '../../../../store/actions/create';
 import * as actionGlobal from '../../../../store/actions/globalData';
-import encode from '../../../../helper/encode';
-// import decode from '../../../../helper/decode';
+import { encode } from '../../../../helper/encode';
 import { savetoLocalStorage } from '../../../../helper';
 
 const WrapperImg = styled.div`
@@ -61,50 +60,44 @@ const FoolterBtn = styled.div`
   justify-content: center;
 `;
 
-class RegisterSuccess extends React.Component {
-  gotoHome = () => {
-    const { address, privateKey, setLoading, setStep, history, password } = this.props;
-    // let keyObject = '';
+function RegisterSuccess(props) {
+  const { address, privateKey, setLoading, setStep, history, password, mnemonic } = props;
+
+  function gotoHome() {
     setLoading(true);
     setTimeout(async () => {
       const keyObject = encode(privateKey, password);
-      setLoading(false);
       savetoLocalStorage(address, keyObject);
-      // localStorage.removeItem('user');
-      // localStorage.setItem('user', JSON.stringify({ address, keyObject }));
       setStep('one');
+      setLoading(false);
       history.push('/');
     }, 500);
-  };
-
-  render() {
-    const { mnemonic } = this.props;
-    return (
-      <div>
-        <WrapperImg>
-          <img src="/static/img/success.svg" alt="" />
-          <Title>Wow, you have registered successfuly!</Title>
-          <Desc>
-            <span>Here is your account's recovery phrase:</span>
-            <MnemonixText>
-              <p data-cy="mnemonic">{mnemonic}</p>
-            </MnemonixText>
-            <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
-          </Desc>
-          <FoolterBtn>
-            <Button variant="contained" color="primary" onClick={this.gotoHome}>
-              I've saved the recovery phrase
-            </Button>
-          </FoolterBtn>
-        </WrapperImg>
-      </div>
-    );
   }
+
+  return (
+    <div>
+      <WrapperImg>
+        <img src="/static/img/success.svg" alt="" />
+        <Title>Wow, you have registered successfuly!</Title>
+        <Desc>
+          <span>Here is your account&apos;s recovery phrase:</span>
+          <MnemonixText>
+            <p data-cy="mnemonic">{mnemonic}</p>
+          </MnemonixText>
+          <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
+        </Desc>
+        <FoolterBtn>
+          <Button variant="contained" size="large" color="primary" onClick={gotoHome}>
+            I&apos;ve saved the recovery phrase
+          </Button>
+        </FoolterBtn>
+      </WrapperImg>
+    </div>
+  );
 }
 
 const mapStateToProps = state => {
   return {
-    keyStore: state.create.keyStore,
     mnemonic: state.account.mnemonic,
     address: state.account.address,
     privateKey: state.account.privateKey,
@@ -121,11 +114,6 @@ const mapDispatchToProps = dispatch => {
       dispatch(actionGlobal.setLoading(value));
     },
   };
-};
-
-RegisterSuccess.defaultProps = {
-  setStep() {},
-  history: {},
 };
 
 export default connect(

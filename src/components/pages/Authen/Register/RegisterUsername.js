@@ -1,19 +1,22 @@
-import React, { PureComponent } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import Box from '@material-ui/core/Box';
+import { useSnackbar } from 'notistack';
+
+import tweb3 from '../../../../service/tweb3';
 import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
+import AvatarPro from '../../../elements/AvatarPro';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
-import tweb3 from '../../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
   },
@@ -21,291 +24,223 @@ const styles = theme => ({
     marginRight: theme.spacing(1),
     paddingRight: theme.spacing(1),
   },
-});
+  avatarBox: {
+    marginTop: theme.spacing(1),
+  },
+  avatar: {
+    width: 75,
+    height: 75,
+    margin: theme.spacing(0, 1, 1, 0),
+  },
+}));
 
-const PreviewContainter = styled.div`
-  display: flex;
-  /* flex-direction: row; */
-  /* -webkit-box-pack: justify; */
-  /* justify-content: space-between; */
-  padding: 20px 0 0 0;
-  font-size: 14px;
-  cursor: pointer;
-  /* .upload_img input[type='file'] {
-    font-size: 100px;
-    position: absolute;
-    left: 10;
-    top: 0;
-    opacity: 0;
-    cursor: pointer;
-  } */
-  .upload_img {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    cursor: pointer;
-  }
-  .fileInput {
-    width: 200px;
-    height: 30px;
-    /* border: 1px solid #eddada8f; */
-    /* padding: 2px; */
-    margin-top: 8px;
-    cursor: pointer;
-    /* :hover {
-      background: red;
-    } */
-  }
-  .imgPreview {
-    text-align: center;
-    margin-right: 15px;
-    height: 80px;
-    width: 80px;
-    border: 1px solid #eddada8f;
-    border-radius: 50%;
-    cursor: pointer;
-    /* :hover {
-      background: red;
-    } */
-    img {
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      border-radius: 50%;
-    }
-  }
-  .previewAvaDefault {
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    color: #736e6e;
-  }
-`;
+function RegisterUsername(props) {
+  const { setStep, setLoading, setAccount } = props;
+  const [username, setUsername] = useState('');
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [password, setPassword] = useState('');
+  const [rePassword, setRePassword] = useState('');
+  const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
+  const [avatarData, setAvatarData] = useState('');
+  const { enqueueSnackbar } = useSnackbar();
 
-class RegisterUsername extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: '',
-      usernameErr: '',
-      firstname: '',
-      firstnameErr: '',
-      lastname: '',
-      lastnameErr: '',
-      password: '',
-      passwordErr: '',
-      rePassword: '',
-      rePassErr: '',
-      file: '',
-      imgPreviewUrl: '',
-    };
-  }
-  componentDidMount() {
+  useEffect(() => {
     ValidatorForm.addValidationRule('isPasswordMatch', value => {
-      if (value !== this.state.password) {
+      if (value !== password) {
         return false;
       }
       return true;
     });
 
-    ValidatorForm.addValidationRule('isAliasRegisted', async username => {
-      const resp = await isAliasRegisted(username);
-      // console.log('isAliasRegisted', !!resp);
+    ValidatorForm.addValidationRule('specialCharacter', async name => {
+      // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      return regex.test(name);
+    });
+
+    ValidatorForm.addValidationRule('isAliasRegisted', async name => {
+      const resp = await isAliasRegisted(name);
       return !resp;
     });
-  }
-  componentWillUnmount() {
-    // remove rule when it is not needed
-    ValidatorForm.removeValidationRule('isPasswordMatch');
-    ValidatorForm.removeValidationRule('isAliasRegisted');
-  }
 
-  gotoNext = async () => {
-    const { username, firstname, lastname, password, file } = this.state;
-    const { setStep, setLoading, setAccount } = this.props;
+    return () => {
+      ValidatorForm.removeValidationRule('isPasswordMatch');
+      ValidatorForm.removeValidationRule('isAliasRegisted');
+    };
+  }, [password]);
 
-    if (username) {
-      const resp = await isAliasRegisted(username);
-      if (resp) {
-        this.setState({
-          usernameErr: 'Username already exists! Please choose another',
-        });
-      } else {
-        setLoading(true);
-        setTimeout(async () => {
-          const account = await this._createAccountWithMneomnic();
+  async function gotoNext() {
+    const isUsernameRegisted = await isAliasRegisted(username);
+    if (isUsernameRegisted) {
+      const message = 'Username already exists! Please choose another.';
+      enqueueSnackbar(message, { variant: 'error' });
+    } else {
+      setLoading(true);
+      setTimeout(async () => {
+        try {
+          const account = await createAccountWithMneomnic();
           const { privateKey, address, publicKey, mnemonic } = account;
-          const displayname = firstname + ' ' + lastname;
-          // console.log('publicKey', publicKey);
+          const displayname = `${firstname} ${lastname}`;
+
           setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
 
-          const resp = await registerAlias(username, address, privateKey);
-          // console.log('resp', resp);
+          const resp = await registerAlias(username, address);
           const respTagName = await setTagsInfo(address, 'display-name', displayname);
           const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
-          if (file) {
-            const hash = await saveToIpfs(file);
-            const respAvatar = await setTagsInfo(address, 'avatar', hash);
+          if (avatarData) {
+            const hash = await saveToIpfs(avatarData);
+            await setTagsInfo(address, 'avatar', hash);
           }
-          // console.log('respTags', respTagName);
 
           if (resp && respTagName && respTagPublicKey) {
             setStep('two');
           } else {
-            // notifi.info('Error registerAlias');
+            const message = 'An error has occured. Please try again.';
+            enqueueSnackbar(message, { variant: 'error' });
           }
-          setLoading(false);
-        }, 500);
-      }
+        } catch (e) {
+          const message = `An error has occured. Detail:${e}`;
+          enqueueSnackbar(message, { variant: 'error' });
+        }
+        setLoading(false);
+      }, 100);
     }
-  };
+  }
 
-  handleUsername = event => {
-    const key = event.currentTarget.name;
-    const { value } = event.currentTarget;
-    this.setState({ [key]: value });
-  };
-
-  _createAccountWithMneomnic = () => {
+  function createAccountWithMneomnic() {
     const resp = wallet.createAccountWithMneomnic();
-    // const keyObject = encode(resp.privateKey, 'a');
     return {
       privateKey: resp.privateKey,
       address: resp.address,
       mnemonic: resp.mnemonic,
       publicKey: resp.publicKey,
     };
-  };
+  }
 
-  handleImageChange = e => {
+  function handleImageInput(e) {
     e.preventDefault();
-
     const reader = new FileReader();
     const { files } = e.target;
-    const file = files[0];
+    const data = files[0];
 
-    reader.onloadend = () => {
-      if (files) {
-        this.setState({
-          file: files,
-          imgPreviewUrl: reader.result,
-        });
-      }
-    };
-
-    if (file && file.type.match('image.*')) {
-      reader.readAsDataURL(file);
+    if (data) {
+      reader.onloadend = () => {
+        if (data) {
+          setAvatar(reader.result);
+          setAvatarData(files);
+        }
+      };
+      reader.readAsDataURL(data);
     }
-  };
+  }
 
-  gotoLogin = () => {
-    const { history } = this.props;
+  function gotoLogin() {
+    const { history } = props;
     history.push('/login');
-  };
+  }
 
-  render() {
-    const { username, firstname, lastname, password, rePassword, imgPreviewUrl } = this.state;
-    const { classes } = this.props;
-
-    // console.log('view file', this.state.file);
-
-    let $imagePreview = null;
-    if (imgPreviewUrl) {
-      $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
-    } else {
-      $imagePreview = <img src="/static/img/no-avatar.jpg" alt="avaDefault" className="previewAvaDefault" />;
-    }
-
-    return (
-      <ValidatorForm onSubmit={this.gotoNext}>
+  const classes = useStyles();
+  return (
+    <ValidatorForm onSubmit={gotoNext}>
+      <TextValidator
+        label="Username"
+        fullWidth
+        onChange={event => {
+          setUsername(event.currentTarget.value.toLowerCase());
+        }}
+        name="username"
+        validators={['required', 'specialCharacter', 'isAliasRegisted']}
+        errorMessages={[
+          'This field is required',
+          'Username cannot contain spaces and special character',
+          'Username already exists! Please choose another',
+        ]}
+        margin="dense"
+        value={username}
+      />
+      <FlexBox>
         <TextValidator
-          label="Username"
+          label="First Name"
           fullWidth
-          onChange={this.handleUsername}
-          name="username"
-          validators={['required', 'isAliasRegisted']}
-          errorMessages={['This field is required', 'Username already exists! Please choose another']}
+          onChange={event => {
+            setFirstname(event.currentTarget.value);
+          }}
+          name="firstname"
+          validators={['required']}
+          errorMessages={['This field is required']}
+          className={classes.marginRight}
           margin="dense"
-          value={username}
+          value={firstname}
         />
-        <FlexBox>
-          <TextValidator
-            label="First Name"
-            fullWidth
-            onChange={this.handleUsername}
-            name="firstname"
-            validators={['required']}
-            errorMessages={['This field is required']}
-            className={classes.marginRight}
-            margin="dense"
-            value={firstname}
-          />
-          <TextValidator
-            label="Last Name"
-            fullWidth
-            onChange={this.handleUsername}
-            name="lastname"
-            validators={['required']}
-            errorMessages={['This field is required']}
-            margin="dense"
-            value={lastname}
-          />
-        </FlexBox>
         <TextValidator
-          label="Password"
+          label="Last Name"
           fullWidth
-          onChange={this.handleUsername}
-          name="password"
-          type="password"
+          onChange={event => {
+            setLastname(event.currentTarget.value);
+          }}
+          name="lastname"
           validators={['required']}
           errorMessages={['This field is required']}
           margin="dense"
-          value={password}
+          value={lastname}
         />
-        <TextValidator
-          label="Repeat password"
-          fullWidth
-          onChange={this.handleUsername}
-          name="rePassword"
-          type="password"
-          validators={['isPasswordMatch', 'required']}
-          errorMessages={['Password mismatch', 'This field is required']}
-          margin="dense"
-          value={rePassword}
-        />
-        <PreviewContainter>
-          <span>Avatar</span>
-          <div className="upload_img">
-            <div className="imgPreview">{$imagePreview}</div>
-            <input className="fileInput" type="file" onChange={this.handleImageChange} />
-          </div>
-        </PreviewContainter>
-        <DivControlBtnKeystore>
-          <LinkPro onClick={this.gotoLogin}>Already had an account? Login</LinkPro>
-          <ButtonPro type="submit">
-            Next
-            <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
-          </ButtonPro>
-        </DivControlBtnKeystore>
-      </ValidatorForm>
-    );
-  }
+      </FlexBox>
+      <TextValidator
+        label="Password"
+        fullWidth
+        onChange={event => {
+          setPassword(event.currentTarget.value);
+        }}
+        name="password"
+        type="password"
+        validators={['required']}
+        errorMessages={['This field is required']}
+        margin="dense"
+        value={password}
+      />
+      <TextValidator
+        label="Repeat password"
+        fullWidth
+        onChange={event => {
+          setRePassword(event.currentTarget.value);
+        }}
+        name="rePassword"
+        type="password"
+        validators={['isPasswordMatch', 'required']}
+        errorMessages={['Password mismatch', 'This field is required']}
+        margin="dense"
+        value={rePassword}
+      />
+      {/* <Box display="flex" className={classes.avatarBox}>
+        <span>Avatar</span>
+        <div>
+          <AvatarPro src={avatar} className={classes.avatar} />
+          <input className="fileInput" type="file" onChange={handleImageInput} accept="image/*" />
+        </div>
+      </Box> */}
+
+      <DivControlBtnKeystore>
+        <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
+        <ButtonPro type="submit">
+          Next
+          <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
+        </ButtonPro>
+      </DivControlBtnKeystore>
+    </ValidatorForm>
+  );
 }
 
-const mapStateToProps = state => {
-  const e = state.create;
-  return {
-    password: e.password,
-  };
-};
+// const mapStateToProps = state => {
+//   const e = state.create;
+//   return {
+//   };
+// };
 
 const mapDispatchToProps = dispatch => {
   return {
-    // setPassword: value => {
-    //   dispatch(actions.setPassword(value));
-    // },
     setAccount: value => {
       dispatch(actionAccount.setAccount(value));
     },
@@ -320,7 +255,7 @@ const mapDispatchToProps = dispatch => {
 
 export default withRouter(
   connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
-  )(withStyles(styles)(RegisterUsername))
+  )(RegisterUsername)
 );
