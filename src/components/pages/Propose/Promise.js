@@ -92,8 +92,8 @@ const PreviewContainter = styled.div`
       cursor: pointer;
     }
   .fileInput {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     border: 1px solid #eddada8f;
     padding: 2px;
     margin: 10px;
@@ -102,8 +102,8 @@ const PreviewContainter = styled.div`
   .imgPreview {
     text-align: center;
     margin-right: 15px;
-    height: 100px;
-    width: 100px;
+    height: 70px;
+    width: 70px;
     border: 1px solid #eddada8f;
     border-radius: 50%;
     cursor: pointer;
@@ -448,32 +448,40 @@ class Promise extends React.Component {
           label="or Send request to your crush(Imaginary Lover)"
         />
         {checked && (
-          <FlexBox>
-            <PreviewContainter>
-              <div className="upload_img">
-                <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
-                <div className="imgPreview">{$imagePreview}</div>
+          <div>
+            <FlexBox>
+              <PreviewContainter>
+                <div className="upload_img">
+                  <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                  <div className="imgPreview">{$imagePreview}</div>
+                </div>
+              </PreviewContainter>
+              <div>
+                <TextFieldPlaceholder
+                  label="First Name"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="firstname"
+                  validators={['required']}
+                  // margin="normal"
+                />
+                <TextFieldPlaceholder
+                  label="Last Name"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="lastname"
+                  validators={['required']}
+                  // margin="normal"
+                />
               </div>
-            </PreviewContainter>
-            <div>
-              <TextFieldPlaceholder
-                label="First Name"
-                fullWidth
-                onChange={this.handleUsername}
-                name="firstname"
-                validators={['required']}
-                // margin="normal"
-              />
-              <TextFieldPlaceholder
-                label="Last Name"
-                fullWidth
-                onChange={this.handleUsername}
-                name="lastname"
-                validators={['required']}
-                // margin="normal"
-              />
-            </div>
-          </FlexBox>
+            </FlexBox>
+            <TextFieldPlaceholder
+              label="The rely from crush"
+              fullWidth
+              onChange={this.handleUsername}
+              name="botReply"
+            />
+          </div>
         )}
         <TagTitle>Your promise</TagTitle>
         <TextFieldMultiLine

@@ -111,6 +111,7 @@ class CommonDialog extends React.Component {
       smt: '',
     };
   }
+
   render() {
     const { cancel, confirm, close, okText, cancelText, children, title, isCancel } = this.props;
     return (
