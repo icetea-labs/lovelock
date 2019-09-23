@@ -213,12 +213,12 @@ class ChangeProfile extends PureComponent {
         <Cropper
           ref="cropper"
           src={imgPreviewUrl}
-          style={{ height: 200, width: 200 }}
+          style={{ height: 200, width: '100%' }}
           // Cropper.js options
           aspectRatio={1}
           guides={false}
           crop={this.crop}
-          viewMode={3}
+          viewMode={1}
           autoCrop
           minContainerWidth={200}
           minContainerHeight={200}
