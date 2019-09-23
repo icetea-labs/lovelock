@@ -50,7 +50,6 @@ function ByPassWord(props) {
 
       setTimeout(() => {
         try {
-          console.log(password);
           const privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
           const account = { address, privateKey, cipher: password };

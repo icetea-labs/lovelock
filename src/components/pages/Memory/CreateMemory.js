@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
+import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
@@ -105,15 +106,19 @@ export default function CreateMemory(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
+
   const avatar = useSelector(state => state.account.avatar);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
-  // const propose = useSelector(state => state.loveinfo.propose);
+
   const [filePath, setFilePath] = useState(null);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
   const [date, setDate] = useState(new Date());
-  const [privacy, setPrivacy] = React.useState(0);
+  const [privacy, setPrivacy] = useState(0);
+  const [disableShare, setDisableShare] = useState(true);
+
+  const { enqueueSnackbar } = useSnackbar();
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -123,14 +128,20 @@ export default function CreateMemory(props) {
     dispatch(actions.setNeedAuth(value));
   }
 
-  function memoryOnFocus(e) {
+  function memoryOnFocus() {
     if (!grayLayout) setGrayLayout(true);
   }
   function clickLayout(e) {
     if (e.target === layoutRef.current) setGrayLayout(false);
   }
   function memoryChange(e) {
-    setMemoryContent(e.target.value);
+    const { value } = e.target;
+    if (value || filePath) {
+      setDisableShare(false);
+    } else {
+      setDisableShare(true);
+    }
+    setMemoryContent(value);
   }
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
@@ -139,12 +150,22 @@ export default function CreateMemory(props) {
     setDate(value);
   }
   function onChangeMedia(value) {
+    if (value || memoryContent) {
+      setDisableShare(false);
+    } else {
+      setDisableShare(true);
+    }
     setFilePath(value);
   }
 
   async function handleShareMemory() {
+    if (!memoryContent && !filePath) {
+      const message = 'Please enter memory content or add a photo.';
+      enqueueSnackbar(message, { variant: 'error' });
+      return;
+    }
+
     if (!privateKey) {
-      // console.log('privateKey', privateKey);
       setNeedAuth(true);
       return;
     }
@@ -158,18 +179,12 @@ export default function CreateMemory(props) {
       const info = JSON.stringify({ date, hash });
       let params = [];
       if (privacy) {
-        // const currentPropose = propose.filter(item => item.id === proIndex)[0] || [];
-        // console.log('info', memoryContent, info);
-        // console.log('publicKey', currentPropose.publicKey);
         const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
         const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
-        // console.log('newContent', newContent);
-        // console.log('newInfo', newInfo);
         params = [proIndex, !!privacy, newContent, newInfo];
       } else {
         params = [proIndex, !!privacy, memoryContent, info];
       }
-      // console.log('params', params);
       const result = await sendTransaction(method, params);
       if (result) {
         reLoadMemory(proIndex);
@@ -234,6 +249,7 @@ export default function CreateMemory(props) {
                 </Select>
                 <ButtonPro
                   type="submit"
+                  isGrayout={disableShare}
                   onClick={() => {
                     handleShareMemory();
                   }}

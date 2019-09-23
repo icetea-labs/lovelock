@@ -183,40 +183,28 @@ export async function isAliasRegisted(username) {
     throw err;
   }
 }
-let cacheAlias = {};
+const cacheAlias = {};
 export async function getAlias(address) {
-  try {
-    if (!cacheAlias[address]) {
-      const listAlias = await tweb3
-        .contract('system.alias')
-        .methods.byAddress(address)
-        .call();
-      if (listAlias && Array.isArray(listAlias) && listAlias[0]) {
-        cacheAlias[address] = listAlias[0].replace('account.', '');
-      } else {
-        cacheAlias[address] = '';
-      }
-    }
-    return cacheAlias[address];
-  } catch (err) {
-    console.log(tryStringifyJson(err));
-    // throw err;
-  }
-}
-export async function registerAlias(username, address, privateKey) {
-  try {
-    // tweb3.wallet.importAccount(privateKey);
-    const info = await tweb3
+  if (!cacheAlias[address]) {
+    const listAlias = await tweb3
       .contract('system.alias')
-      .methods.register(username, address)
-      .sendCommit({ from: address });
-    return info;
-  } catch (err) {
-    console.log(tryStringifyJson(err));
-    throw err;
+      .methods.byAddress(address)
+      .call();
+    if (listAlias && Array.isArray(listAlias) && listAlias[0]) {
+      cacheAlias[address] = listAlias[0].replace('account.', '');
+    } else {
+      cacheAlias[address] = '';
+    }
   }
+  return cacheAlias[address];
 }
-
+export async function registerAlias(username, address) {
+  const info = await tweb3
+    .contract('system.alias')
+    .methods.register(username, address)
+    .sendCommit({ from: address });
+  return info;
+}
 export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');
   localStorage.setItem('user', JSON.stringify({ address, keyObject }));

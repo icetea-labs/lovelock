@@ -1,7 +1,6 @@
 import React from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const BaseButton = withStyles({
@@ -40,11 +39,20 @@ export const BaseButton = withStyles({
   },
 })(Button);
 
-const StyledButtonPro = withStyles({
+const StyledBtnActive = withStyles({
   root: {
     background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
     '&:hover': {
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+    },
+  },
+})(BaseButton);
+
+const StyledBtnInactive = withStyles({
+  root: {
+    background: '#b2b7bf',
+    '&:hover': {
+      background: '#848e9c',
     },
   },
 })(BaseButton);
@@ -55,9 +63,6 @@ const StyledLinkPro = withStyles({
   },
 })(BaseButton);
 
-const StyledLinkPro2 = styled(StyledLinkPro);
-const StyledLinkPro3 = styled(StyledLinkPro);
-
 const useStyles = makeStyles(theme => ({
   styledButton: {
     margin: theme.spacing(1),
@@ -67,14 +72,21 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export function ButtonPro(props) {
+export function ButtonPro({ children, isGrayout, ...props }) {
   const classes = useStyles();
-  const { children } = props;
 
   return (
-    <StyledButtonPro variant="contained" color="primary" className={classes.styledButton} {...props}>
-      {children}
-    </StyledButtonPro>
+    <React.Fragment>
+      {isGrayout ? (
+        <StyledBtnInactive variant="contained" color="primary" className={classes.styledButton} {...props}>
+          {children}
+        </StyledBtnInactive>
+      ) : (
+        <StyledBtnActive variant="contained" color="primary" className={classes.styledButton} {...props}>
+          {children}
+        </StyledBtnActive>
+      )}
+    </React.Fragment>
   );
 }
 // withRouter

@@ -72,13 +72,13 @@ export default function MemoryContent(props) {
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
-      decodePrivateMemory(privateKey);
+      decodePrivateMemory();
     }
   }, [privateKey, proIndex]);
 
   useEffect(() => {
-    setMemoryDecrypted(props.memory);
-  }, [props.memory]);
+    setMemoryDecrypted(memory);
+  }, [memory]);
 
   function FacebookProgress(props) {
     const classes = useStylesFacebook();
@@ -105,7 +105,7 @@ export default function MemoryContent(props) {
     );
   }
 
-  function decodePrivateMemory(privateKey) {
+  function decodePrivateMemory() {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
       if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {

@@ -41,7 +41,7 @@ export default function MemoryContainer(props) {
                 <Skeleton height={6} width="80%" />
               </React.Fragment>
             ) : (
-              <Typography variant="body2" color="textSecondary" component="p"></Typography>
+              <Typography variant="body2" color="textSecondary" component="p" />
             )}
           </CardContent>
           {loading ? <Skeleton variant="rect" className={classes.media} /> : ''}

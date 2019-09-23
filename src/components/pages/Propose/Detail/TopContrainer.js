@@ -117,6 +117,7 @@ const useStyles = makeStyles({
 });
 
 export default function TopContrainer(props) {
+  const { proIndex } = props;
   const dispatch = useDispatch();
   const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
@@ -124,10 +125,10 @@ export default function TopContrainer(props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadProposes(props.proIndex);
-  }, [props.proIndex]);
+    loadProposes();
+  }, [proIndex]);
 
-  function loadProposes(proIndex) {
+  function loadProposes() {
     window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
@@ -144,13 +145,14 @@ export default function TopContrainer(props) {
     }, 10);
   }
 
-  async function addInfoToProposes(proposes) {
+  async function addInfoToProposes(respPro) {
+    const proposes = respPro;
     const { sender, receiver } = proposes;
 
     const senderTags = await getTagsInfo(sender);
     proposes.s_name = senderTags['display-name'];
     proposes.s_publicKey = senderTags['pub-key'] || '';
-    proposes.s_avatar = senderTags['avatar'];
+    proposes.s_avatar = senderTags.avatar;
 
     const botInfo = JSON.parse(proposes.bot_info);
     // console.log('botInfo', botInfo);
@@ -164,7 +166,7 @@ export default function TopContrainer(props) {
       const receiverTags = await getTagsInfo(receiver);
       proposes.r_name = receiverTags['display-name'];
       proposes.r_publicKey = receiverTags['pub-key'] || '';
-      proposes.r_avatar = receiverTags['avatar'];
+      proposes.r_avatar = receiverTags.avatar;
       proposes.r_content = proposes.r_content;
     }
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
@@ -174,14 +176,14 @@ export default function TopContrainer(props) {
     proposes.s_date = info.date;
     proposes.r_date = info.date;
 
-    const data = {
+    const accountInfo = {
       s_publicKey: proposes.s_publicKey,
       s_address: proposes.sender,
       r_publicKey: proposes.r_publicKey,
       r_address: proposes.receiver,
       publicKey: proposes.publicKey,
     };
-    dispatch(actions.setAccount(data));
+    dispatch(actions.setAccount(accountInfo));
     return proposes;
   }
 
