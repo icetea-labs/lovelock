@@ -10,6 +10,7 @@ import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
+import Cropper from 'react-cropper';
 import { tryStringifyJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
@@ -17,6 +18,7 @@ import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
+import 'cropperjs/dist/cropper.css';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -89,47 +91,49 @@ const PreviewContainter = styled.div`
   padding: 20px 0 0 0;
   font-size: 14px;
   cursor: pointer;
-  .upload_img input[type='file'] {
-      font-size: 100px;
-      position: absolute;
-      left: 10;
-      top: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-    .upload_img {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-      cursor: pointer;
-    }
+  /* .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 10;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  } */
+  .upload_img {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+    /* width: 200px; */
+    /* height: 140px; */
+  }
   .fileInput {
-    width: 50px;
-    height: 50px;
-    border: 1px solid #eddada8f;
+    width: 120px;
+    height: 20px;
     padding: 2px;
-    margin: 10px;
     cursor: pointer;
   }
   .imgPreview {
     text-align: center;
     margin-right: 15px;
-    height: 70px;
-    width: 70px;
+    height: 100px;
+    width: 100px;
     border: 1px solid #eddada8f;
-    border-radius: 50%;
     cursor: pointer;
     img {
-      width: 100%
-      height: 100%
+      width: 100px;
+      height: 10px;
       cursor: pointer;
-      border-radius: 50%;
     }
   }
   .previewAvaDefault {
     cursor: pointer;
-    color: #736e6e
+    color: #736e6e;
   }
+`;
+
+const RightBotInfo = styled.div`
+  margin-left: 8px;
 `;
 class Promise extends React.Component {
   constructor(props) {
@@ -144,7 +148,12 @@ class Promise extends React.Component {
       checked: false,
       imgPreviewUrl: '',
       botAvaFile: '',
+      cropFile: '',
     };
+  }
+
+  componentDidMount() {
+    React.createRef(null);
   }
 
   componentWillUnmount() {
@@ -178,7 +187,7 @@ class Promise extends React.Component {
 
   async createPropose(partner, promiseStm, date, file) {
     const { setLoading, enqueueSnackbar, address, close } = this.props;
-    const { firstname, lastname, botAvaFile, checked, botReply } = this.state;
+    const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva;
     let hash;
     let message;
@@ -189,8 +198,8 @@ class Promise extends React.Component {
         if (file) {
           hash = await saveToIpfs(file);
         }
-        if (botAvaFile) {
-          botAva = await saveToIpfs(botAvaFile);
+        if (cropFile) {
+          botAva = await saveToIpfs(cropFile);
         }
         let info = {
           date,
@@ -225,7 +234,7 @@ class Promise extends React.Component {
             setLoading(false);
             return;
           }
-          if (!botAvaFile) {
+          if (!cropFile) {
             message = 'Please enter avatar of your crush.';
             enqueueSnackbar(message, { variant: 'error' });
             setLoading(false);
@@ -415,24 +424,38 @@ class Promise extends React.Component {
     const { files } = e.target;
     const file = files[0];
 
-    reader.onloadend = () => {
-      if (files) {
+    if (file && file.type.match('image.*')) {
+      reader.onloadend = e => {
         this.setState({
           botAvaFile: files,
           imgPreviewUrl: reader.result,
         });
-      }
-    };
-
-    if (file && file.type.match('image.*')) {
+      };
       reader.readAsDataURL(file);
     }
+  };
+
+  crop = async e => {
+    // image in dataUrl
+    const dataUrl = this.refs.cropper.getCroppedCanvas().toDataURL();
+    const file = this.state;
+    const { name, type } = file.botAvaFile[0];
+    const list = new DataTransfer();
+    await fetch(dataUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const parseFile = new File([blob], name, { type });
+        list.items.add(parseFile);
+      });
+    this.setState({
+      cropFile: list.files,
+    });
   };
 
   render() {
     const { close } = this.props;
     const { partner, promiseStm, date, file, suggestions, value, checked, imgPreviewUrl } = this.state;
-    // console.log('state CK', this.state);
+    console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',
@@ -441,10 +464,31 @@ class Promise extends React.Component {
     };
 
     let $imagePreview = null;
+    // if (imgPreviewUrl) {
+    //   $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
+    // } else {
+    //   $imagePreview = <img src="/static/img/no-avatar.jpg" alt="avaDefault" className="previewAvaDefault" />;
+    // }
     if (imgPreviewUrl) {
-      $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
+      $imagePreview = (
+        <Cropper
+          ref="cropper"
+          src={imgPreviewUrl}
+          style={{ height: '100%', width: '100%' }}
+          // Cropper.js options
+          aspectRatio={1}
+          guides={false}
+          crop={this.crop}
+          viewMode={3}
+          autoCrop
+        />
+      );
     } else {
-      $imagePreview = <img src="/static/img/no-avatar.jpg" alt="avaDefault" className="previewAvaDefault" />;
+      $imagePreview = (
+        <div className="imgPreview">
+          <img src="/static/img/no-avatar.jpg" alt="imgPreview" />
+        </div>
+      );
     }
 
     return (
@@ -482,11 +526,11 @@ class Promise extends React.Component {
           <FlexBox>
             <PreviewContainter>
               <div className="upload_img">
+                {$imagePreview}
                 <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
-                <div className="imgPreview">{$imagePreview}</div>
               </div>
             </PreviewContainter>
-            <div>
+            <RightBotInfo>
               <TextFieldPlaceholder
                 label="First Name"
                 fullWidth
@@ -510,7 +554,7 @@ class Promise extends React.Component {
                 name="botReply"
                 validators={['required']}
               />
-            </div>
+            </RightBotInfo>
           </FlexBox>
         )}
         <DividerCus />
