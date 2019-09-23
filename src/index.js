@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
 import { Provider } from 'react-redux';
 import { createMuiTheme } from '@material-ui/core/styles';
-// import { ThemeProvider } from '@material-ui/styles';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
+import App from './App';
+import * as serviceWorker from './serviceWorker';
 
 import store from './store';
 
@@ -122,7 +121,9 @@ ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
       <SnackbarProvider
-        maxSnack={3}
+        preventDuplicate
+        autoHideDuration={3000}
+        maxSnack={2}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'right',

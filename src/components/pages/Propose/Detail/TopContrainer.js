@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
-import { callView, getTagsInfo } from '../../../../helper';
-import * as actions from '../../../../store/actions';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-import { TimeWithFormat } from '../../../../helper';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { callView, getTagsInfo, TimeWithFormat } from '../../../../helper';
+import * as actions from '../../../../store/actions';
+import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
+
 import AvatarPro from '../../../elements/AvatarPro';
 
 const TopContainerBox = styled.div`
@@ -117,6 +117,7 @@ const useStyles = makeStyles({
 });
 
 export default function TopContrainer(props) {
+  const { proIndex } = props;
   const dispatch = useDispatch();
   const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
@@ -124,10 +125,10 @@ export default function TopContrainer(props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadProposes(props.proIndex);
-  }, [props.proIndex]);
+    loadProposes();
+  }, [proIndex]);
 
-  function loadProposes(proIndex) {
+  function loadProposes() {
     window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
@@ -144,40 +145,45 @@ export default function TopContrainer(props) {
     }, 10);
   }
 
-  async function addInfoToProposes(proposes) {
+  async function addInfoToProposes(respPro) {
+    const proposes = respPro;
     const { sender, receiver } = proposes;
 
     const senderTags = await getTagsInfo(sender);
     proposes.s_name = senderTags['display-name'];
     proposes.s_publicKey = senderTags['pub-key'] || '';
-    proposes.s_avatar = senderTags['avatar'];
+    proposes.s_avatar = senderTags.avatar;
+
+    const botInfo = JSON.parse(proposes.bot_info);
+    // console.log('botInfo', botInfo);
 
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
-      proposes.r_name = senderTags['bot-firstName'] + ' ' + senderTags['bot-lastName'];
+      proposes.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
       proposes.r_publicKey = senderTags['pub-key'] || '';
-      proposes.r_avatar = senderTags['bot-avatar'];
+      proposes.r_avatar = botInfo.botAva;
+      proposes.r_content = botInfo.botReply;
     } else {
       const receiverTags = await getTagsInfo(receiver);
       proposes.r_name = receiverTags['display-name'];
       proposes.r_publicKey = receiverTags['pub-key'] || '';
-      proposes.r_avatar = receiverTags['avatar'];
+      proposes.r_avatar = receiverTags.avatar;
+      proposes.r_content = proposes.r_content;
     }
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
-    proposes.r_content = proposes.r_content || 'I love you';
 
     const info = JSON.parse(proposes.s_info);
     proposes.coverimg = info.hash || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
     proposes.s_date = info.date;
     proposes.r_date = info.date;
 
-    const data = {
+    const accountInfo = {
       s_publicKey: proposes.s_publicKey,
       s_address: proposes.sender,
       r_publicKey: proposes.r_publicKey,
       r_address: proposes.receiver,
       publicKey: proposes.publicKey,
     };
-    dispatch(actions.setAccount(data));
+    dispatch(actions.setAccount(accountInfo));
     return proposes;
   }
 

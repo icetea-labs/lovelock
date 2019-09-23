@@ -24,7 +24,7 @@ const InfoBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #e1e1e1;
+  /* border-top: 1px solid #e1e1e1; */
   border-bottom: ${props => props.grayLayout && '1px solid #e1e1e1'};
   color: '#8250c8';
 `;

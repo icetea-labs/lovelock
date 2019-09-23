@@ -12,41 +12,46 @@ const RightBox = styled.div`
 `;
 
 export default function RightContrainer(props) {
-  // const { proIndex } = props;
+  const { proIndex } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
   const [loading, setLoading] = useState(true);
   const [memoryList, setMemoryList] = useState([]);
 
   useEffect(() => {
-    loadMemory(props.proIndex);
-  }, [props.proIndex]);
+    loadMemory(proIndex);
+  }, [proIndex]);
 
   function setNeedAuth(value) {
     dispatch(actions.setNeedAuth(value));
   }
 
-  async function loadMemory(proIndex) {
-    const allMemory = await callView('getMemoriesByProIndex', [proIndex]);
+  async function loadMemory(index) {
+    const respMemories = await callView('getMemoriesByProIndex', [index]);
     let newMemoryList = [];
     setLoading(true);
     setTimeout(async () => {
-      for (let i = 0; i < allMemory.length; i++) {
-        const obj = allMemory[i];
+      for (let i = 0; i < respMemories.length; i++) {
+        const obj = respMemories[i];
         if (obj.isPrivate && !privateKey) {
           setNeedAuth(true);
           break;
         }
       }
 
-      for (let i = 0; i < allMemory.length; i++) {
-        const obj = allMemory[i];
-        const sender = obj.sender;
+      let tags = [];
+      for (let i = 0; i < respMemories.length; i++) {
+        const reps = getTagsInfo(respMemories[i].sender);
+        tags.push(reps);
+      }
+      tags = await Promise.all(tags);
+
+      for (let i = 0; i < respMemories.length; i++) {
+        const obj = respMemories[i];
         obj.info = JSON.parse(obj.info);
-        const reps = await getTagsInfo(sender);
-        obj.name = reps['display-name'];
-        obj.pubkey = reps['pub-key'];
-        obj.avatar = reps['avatar'];
+        obj.name = tags[i]['display-name'];
+        obj.pubkey = tags[i]['pub-key'];
+        obj.avatar = tags[i].avatar;
         newMemoryList.push(obj);
       }
 
@@ -58,8 +63,8 @@ export default function RightContrainer(props) {
 
   return (
     <RightBox>
-      <CreateMemory proIndex={props.proIndex} reLoadMemory={loadMemory} />
-      <MemoryContainer proIndex={props.proIndex} loading={loading} memoryList={memoryList} />
+      <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} />
+      <MemoryContainer proIndex={proIndex} loading={loading} memoryList={memoryList} />
     </RightBox>
   );
 }
