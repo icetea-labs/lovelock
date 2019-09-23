@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { withStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import Cropper from 'react-cropper';
 import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -12,6 +13,7 @@ import * as actionCreate from '../../../store/actions/create';
 import tweb3 from '../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
+import 'cropperjs/dist/cropper.css';
 
 const styles = theme => ({
   rightIcon: {
@@ -85,6 +87,7 @@ class ChangeProfile extends PureComponent {
       file: '',
       imgPreviewUrl: '',
       avatar: '',
+      canvas: '',
     };
   }
 
@@ -95,6 +98,7 @@ class ChangeProfile extends PureComponent {
     //   }
     //   return true;
     // });
+    const cropper = React.createRef(null);
     this.getData();
   }
 
@@ -162,26 +166,51 @@ class ChangeProfile extends PureComponent {
     this.setState({ [key]: value });
   };
 
-  handleImageChange = e => {
-    e.preventDefault();
-
+  handleImageChange = event => {
+    console.log(event);
+    event.preventDefault();
+    const { canvas } = this.state;
+    console.log('canvas', canvas);
     const reader = new FileReader();
-    const { files } = e.target;
+    const { files } = event.target;
     const file = files[0];
-
-    reader.onloadend = () => {
-      if (files) {
+    if (file && file.type.match('image.*')) {
+      reader.onloadend = e => {
         this.setState({
           avatar: '',
           file: files,
           imgPreviewUrl: reader.result,
         });
-      }
-    };
 
-    if (file && file.type.match('image.*')) {
+        // const image = new Image();
+        // image.src = e.target.result;
+        // image.onload = ev => {
+        //   const canvas = document.getElementById('canvas');
+        //   canvas.width = image.naturalWidth;
+        //   canvas.height = image.height;
+        //   const ctx = canvas.getContext('2d');
+        //   ctx.drawImage(image, 0, 0);
+        // };
+      };
       reader.readAsDataURL(file);
     }
+  };
+
+  crop = event => {
+    // image in dataUrl
+    const dataUrl = this.refs.cropper.getCroppedCanvas().toDataURL();
+    // console.log(event);
+    // console.log(event.detail.x);
+    // console.log(event.detail.y);
+    // console.log(event.detail.width);
+    // console.log(event.detail.height);
+    // console.log(event.detail.rotate);
+    // console.log(event.detail.scaleX);
+    // console.log(event.detail.scaleY);
+    this.setState({
+      canvas: event.detail,
+    });
+    this.refs.cropper.crop();
   };
 
   render() {
@@ -190,12 +219,12 @@ class ChangeProfile extends PureComponent {
 
     // console.log('view file', this.state.file);
 
-    let $imagePreview = null;
-    if (imgPreviewUrl) {
-      $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
-    } else {
-      $imagePreview = <div className="previewText">Your avatar</div>;
-    }
+    // let $imagePreview = null;
+    // if (imgPreviewUrl) {
+    //   $imagePreview = <img src={imgPreviewUrl} alt="img" />;
+    // } else {
+    //   $imagePreview = <div className="previewText">Your avatar</div>;
+    // }
 
     return (
       <QueueAnim delay={200} type={['top', 'bottom']}>
@@ -213,7 +242,18 @@ class ChangeProfile extends PureComponent {
                           <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
                         </div>
                       ) : (
-                        <div className="imgPreview">{$imagePreview}</div>
+                        // <div className="imgPreview">{$imagePreview}</div>
+                        <Cropper
+                          ref="cropper"
+                          src={imgPreviewUrl}
+                          style={{ height: 200, width: '100%' }}
+                          // Cropper.js options
+                          aspectRatio={9 / 9}
+                          guides={false}
+                          crop={this.handleImageChanges}
+                          viewMode={3}
+                          autoCrop
+                        />
                       )}
                     </div>
                   </PreviewContainter>
@@ -263,7 +303,17 @@ class ChangeProfile extends PureComponent {
                   margin="normal"
                   value={rePassword}
                 /> */}
-
+                {/* <Cropper
+                  ref="cropper"
+                  src={imgPreviewUrl}
+                  style={{ height: 200, width: '100%' }}
+                  // Cropper.js options
+                  aspectRatio={9 / 9}
+                  guides={false}
+                  crop={this.crop}
+                  viewMode={3}
+                  autoCrop
+                /> */}
                 <DivControlBtnKeystore>
                   <ButtonPro type="submit">Save change</ButtonPro>
                 </DivControlBtnKeystore>
