@@ -32,48 +32,49 @@ const PreviewContainter = styled.div`
   padding: 20px 0 0 0;
   font-size: 14px;
   cursor: pointer;
-  .upload_img input[type='file'] {
+  /* .upload_img input[type='file'] {
       font-size: 100px;
       position: absolute;
       left: 10;
       top: 0;
       opacity: 0;
       cursor: pointer;
-    }
-    .upload_img {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-      cursor: pointer;
-    }
+  } */
+  .upload_img {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+  }
   .fileInput {
-    width: 100px;
-    height: 100px;
-    border: 1px solid #eddada8f;
+    width: 100%;
+    height: 25px;
+    /* border: 1px solid #eddada8f; */
     padding: 2px;
     margin: 10px;
     cursor: pointer;
   }
   .imgPreview {
     text-align: center;
-    margin-right: 15px;
-    height: 150px;
-    width: 150px;
+    height: 200px;
+    width: 200px;
     border: 1px solid #eddada8f;
-    border-radius: 50%;
     cursor: pointer;
     img {
-      width: 100%
-      height: 100%
+      width: 200px;
+      height: 200px;
       cursor: pointer;
-      border-radius: 50%;
     }
   }
   .previewText {
     margin-top: 70px;
     cursor: pointer;
-    color: #736e6e
+    color: #736e6e;
   }
+`;
+
+const RightProfile = styled.div`
+  margin-left: 8px;
 `;
 
 class ChangeProfile extends PureComponent {
@@ -87,7 +88,7 @@ class ChangeProfile extends PureComponent {
       file: '',
       imgPreviewUrl: '',
       avatar: '',
-      canvas: '',
+      cropFile: '',
     };
   }
 
@@ -98,7 +99,7 @@ class ChangeProfile extends PureComponent {
     //   }
     //   return true;
     // });
-    const cropper = React.createRef(null);
+    React.createRef(null);
     this.getData();
   }
 
@@ -125,7 +126,7 @@ class ChangeProfile extends PureComponent {
   }
 
   saveChange = async () => {
-    const { firstname, lastname, password, file, avatar } = this.state;
+    const { firstname, lastname, password, file, avatar, cropFile } = this.state;
     const { setLoading, setAccount, history, address, privateKey, setNeedAuth } = this.props;
     if (!privateKey) {
       setNeedAuth(true);
@@ -139,8 +140,8 @@ class ChangeProfile extends PureComponent {
 
         let respAvatar;
         const respTagName = await setTagsInfo(address, 'display-name', displayName);
-        if (file) {
-          const hash = await saveToIpfs(file);
+        if (cropFile) {
+          const hash = await saveToIpfs(cropFile);
           respAvatar = await setTagsInfo(address, 'avatar', hash);
           setAccount({ address, cipher: password, displayName, avatar: hash });
         } else {
@@ -167,13 +168,11 @@ class ChangeProfile extends PureComponent {
   };
 
   handleImageChange = event => {
-    console.log(event);
     event.preventDefault();
-    const { canvas } = this.state;
-    console.log('canvas', canvas);
     const reader = new FileReader();
     const { files } = event.target;
     const file = files[0];
+
     if (file && file.type.match('image.*')) {
       reader.onloadend = e => {
         this.setState({
@@ -181,50 +180,69 @@ class ChangeProfile extends PureComponent {
           file: files,
           imgPreviewUrl: reader.result,
         });
-
-        // const image = new Image();
-        // image.src = e.target.result;
-        // image.onload = ev => {
-        //   const canvas = document.getElementById('canvas');
-        //   canvas.width = image.naturalWidth;
-        //   canvas.height = image.height;
-        //   const ctx = canvas.getContext('2d');
-        //   ctx.drawImage(image, 0, 0);
-        // };
       };
       reader.readAsDataURL(file);
     }
   };
 
-  crop = event => {
+  crop = async e => {
     // image in dataUrl
     const dataUrl = this.refs.cropper.getCroppedCanvas().toDataURL();
-    // console.log(event);
-    // console.log(event.detail.x);
-    // console.log(event.detail.y);
-    // console.log(event.detail.width);
-    // console.log(event.detail.height);
-    // console.log(event.detail.rotate);
-    // console.log(event.detail.scaleX);
-    // console.log(event.detail.scaleY);
+    const file = this.state;
+    const { name, type } = file.file[0];
+    const list = new DataTransfer();
+    await fetch(dataUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const parseFile = new File([blob], name, { type });
+        list.items.add(parseFile);
+      });
     this.setState({
-      canvas: event.detail,
+      cropFile: list.files,
     });
-    this.refs.cropper.crop();
   };
 
   render() {
     const { firstname, lastname, imgPreviewUrl, avatar } = this.state;
     const { classes } = this.props;
 
-    // console.log('view file', this.state.file);
+    // console.log('view file', this.state);
 
-    // let $imagePreview = null;
+    let $imagePreview = null;
     // if (imgPreviewUrl) {
     //   $imagePreview = <img src={imgPreviewUrl} alt="img" />;
     // } else {
     //   $imagePreview = <div className="previewText">Your avatar</div>;
     // }
+
+    // if (avatar) {
+    //   $imagePreview = (
+    //     <div className="imgPreview">
+    //       <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
+    //     </div>
+    //   );
+    // }
+    if (imgPreviewUrl) {
+      $imagePreview = (
+        <Cropper
+          ref="cropper"
+          src={imgPreviewUrl}
+          style={{ height: 200, width: 200 }}
+          // Cropper.js options
+          aspectRatio={1}
+          guides={false}
+          crop={this.crop}
+          viewMode={3}
+          autoCrop
+        />
+      );
+    } else {
+      $imagePreview = (
+        <div className="imgPreview">
+          <img src="/static/img/no-avatar.jpg" alt="imgPreview" />
+        </div>
+      );
+    }
 
     return (
       <QueueAnim delay={200} type={['top', 'bottom']}>
@@ -236,28 +254,17 @@ class ChangeProfile extends PureComponent {
                 <FlexBox>
                   <PreviewContainter>
                     <div className="upload_img">
-                      <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
                       {avatar ? (
                         <div className="imgPreview">
                           <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
                         </div>
                       ) : (
-                        // <div className="imgPreview">{$imagePreview}</div>
-                        <Cropper
-                          ref="cropper"
-                          src={imgPreviewUrl}
-                          style={{ height: 200, width: '100%' }}
-                          // Cropper.js options
-                          aspectRatio={9 / 9}
-                          guides={false}
-                          crop={this.handleImageChanges}
-                          viewMode={3}
-                          autoCrop
-                        />
+                        $imagePreview
                       )}
+                      <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
                     </div>
                   </PreviewContainter>
-                  <div>
+                  <RightProfile>
                     <TextValidator
                       label="First Name"
                       fullWidth
@@ -279,7 +286,7 @@ class ChangeProfile extends PureComponent {
                       margin="normal"
                       value={lastname}
                     />
-                  </div>
+                  </RightProfile>
                 </FlexBox>
                 {/* <TextValidator
                   label="New Password"
