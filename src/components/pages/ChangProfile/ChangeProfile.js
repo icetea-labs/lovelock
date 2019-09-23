@@ -205,23 +205,9 @@ class ChangeProfile extends PureComponent {
   render() {
     const { firstname, lastname, imgPreviewUrl, avatar } = this.state;
     const { classes } = this.props;
-
     // console.log('view file', this.state);
 
     let $imagePreview = null;
-    // if (imgPreviewUrl) {
-    //   $imagePreview = <img src={imgPreviewUrl} alt="img" />;
-    // } else {
-    //   $imagePreview = <div className="previewText">Your avatar</div>;
-    // }
-
-    // if (avatar) {
-    //   $imagePreview = (
-    //     <div className="imgPreview">
-    //       <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
-    //     </div>
-    //   );
-    // }
     if (imgPreviewUrl) {
       $imagePreview = (
         <Cropper
