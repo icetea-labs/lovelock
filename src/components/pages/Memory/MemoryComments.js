@@ -47,6 +47,11 @@ const useStyles = makeStyles(theme => ({
     cursor: 'pointer',
     marginRight: theme.spacing(0.8),
   },
+  linkViewMore: {
+    color: '#8250c8',
+    cursor: 'pointer',
+    fontSize: 12,
+  },
   bullet: {
     display: 'inline-block',
     margin: '0 1px',
@@ -79,7 +84,7 @@ const StyledCardActions = withStyles(theme => ({
     borderTop: '1px solid #e1e1e1',
   },
 }))(CardActions);
-
+const numComment = 4;
 export default function MemoryContent(props) {
   const { handerNumberComment, memoryIndex } = props;
   const dispatch = useDispatch();
@@ -87,25 +92,39 @@ export default function MemoryContent(props) {
   const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
+  const [numHidencmt, setNumHidencmt] = useState(0);
+  const [showComments, setShowComments] = useState([]);
   let myFormRef = React.createRef();
 
   useEffect(() => {
     loaddata(memoryIndex);
   }, [memoryIndex]);
 
-  async function loaddata(index) {
-    const respComment = await callView('getCommentsByMemoIndex', [index]);
-    let respTags = [];
-    for (let i = 0; i < respComment.length; i++) {
-      const resp = getTags(respComment[i].sender);
-      respTags.push(resp);
-    }
-    respTags = await Promise.all(respTags);
-    for (let i = 0; i < respComment.length; i++) {
-      respComment[i].nick = respTags[i]['display-name'];
-      respComment[i].avatar = respTags[i].avatar;
-    }
-    setComments(respComment);
+  function loaddata(index) {
+    setTimeout(async () => {
+      const respComment = await callView('getCommentsByMemoIndex', [index]);
+      let respTags = [];
+      for (let i = 0; i < respComment.length; i++) {
+        const resp = getTags(respComment[i].sender);
+        respTags.push(resp);
+      }
+      respTags = await Promise.all(respTags);
+      // console.log('respTags', respTags);
+      for (let i = 0; i < respComment.length; i++) {
+        respComment[i].nick = respTags[i]['display-name'];
+        respComment[i].avatar = respTags[i].avatar;
+      }
+
+      if (respComment.length > numComment) {
+        const numMore = respComment.length - numComment;
+        // console.log('numMore', numMore);
+        setNumHidencmt(numMore);
+        setShowComments(respComment.slice(numMore));
+      } else {
+        setShowComments(respComment);
+      }
+      setComments(respComment);
+    }, 100);
   }
 
   async function newComment() {
@@ -133,6 +152,11 @@ export default function MemoryContent(props) {
     }
   }
 
+  function viewMoreComment() {
+    setShowComments(comments);
+    setNumHidencmt(0);
+  }
+
   const classes = useStyles();
 
   return (
@@ -140,10 +164,17 @@ export default function MemoryContent(props) {
       <Grid container direction="column" spacing={1}>
         <Grid item>
           <Grid container direction="column" spacing={2} className={classes.boxCommentContent}>
-            {comments.map((item, indexKey) => {
+            {numHidencmt > 0 && (
+              <Grid item>
+                <Link onClick={viewMoreComment} className={classes.linkViewMore}>
+                  View {numHidencmt} more comments
+                </Link>
+              </Grid>
+            )}
+            {showComments.map((item, indexKey) => {
               return (
                 <Grid item key={indexKey}>
-                  <Grid container wrap="nowrap" spacing={2} alignItems="flex-start">
+                  <Grid container wrap="nowrap" spacing={1} alignItems="flex-start">
                     <Grid item>
                       <AvatarPro alt="img" className={classes.avatarContentComment} hash={item.avatar} />
                     </Grid>
