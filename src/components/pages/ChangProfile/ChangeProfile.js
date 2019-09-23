@@ -220,6 +220,9 @@ class ChangeProfile extends PureComponent {
           crop={this.crop}
           viewMode={3}
           autoCrop
+          minContainerWidth={200}
+          minContainerHeight={200}
+          cropBoxResizable={false}
         />
       );
     } else {
