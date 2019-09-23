@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import { ButtonPro } from '../../elements/Button';
 import styled from 'styled-components';
-import AddInfoMessage from '../../elements/AddInfoMessage';
-import * as actions from '../../../store/actions';
-import { saveToIpfs, sendTransaction } from '../../../helper';
-// import { rem } from '../../elements/StyledUtils';
 import Grid from '@material-ui/core/Grid';
-import AvatarPro from '../../elements/AvatarPro';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
-import { encodeWithPublicKey } from '../../../helper';
+
+import { ButtonPro } from '../../elements/Button';
+import AddInfoMessage from '../../elements/AddInfoMessage';
+import * as actions from '../../../store/actions';
+import { saveToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import AvatarPro from '../../elements/AvatarPro';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -128,7 +127,7 @@ export default function CreateMemory(props) {
     if (!grayLayout) setGrayLayout(true);
   }
   function clickLayout(e) {
-    e.target === layoutRef.current && setGrayLayout(false);
+    if (e.target === layoutRef.current) setGrayLayout(false);
   }
   function memoryChange(e) {
     setMemoryContent(e.target.value);
@@ -143,17 +142,18 @@ export default function CreateMemory(props) {
     setFilePath(value);
   }
 
-  async function handleShareMemory(memoryContent, date, file) {
+  async function handleShareMemory() {
     if (!privateKey) {
       // console.log('privateKey', privateKey);
       setNeedAuth(true);
       return;
     }
+
     setGLoading(true);
     setTimeout(async () => {
       const { proIndex } = props;
       let hash = '';
-      if (file) hash = await saveToIpfs(file);
+      if (filePath) hash = await saveToIpfs(filePath);
       const method = 'addMemory';
       const info = JSON.stringify({ date, hash });
       let params = [];
@@ -176,7 +176,6 @@ export default function CreateMemory(props) {
       }
       setGLoading(false);
       setGrayLayout(false);
-      //reset input value
       setFilePath('');
       setDate(new Date());
       setMemoryContent('');
@@ -236,7 +235,7 @@ export default function CreateMemory(props) {
                 <ButtonPro
                   type="submit"
                   onClick={() => {
-                    handleShareMemory(memoryContent, date, filePath);
+                    handleShareMemory();
                   }}
                   className={classes.btShare}
                 >

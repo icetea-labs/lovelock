@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import * as actions from '../../../store/actions';
-import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/styles';
-import { CardActions } from '@material-ui/core';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { CardActions, Button, Typography } from '@material-ui/core';
 import CommentIcon from '@material-ui/icons/Comment';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import ShareIcon from '@material-ui/icons/Share';
-import { Button } from '@material-ui/core';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
+
+import * as actions from '../../../store/actions';
 import { sendTransaction, callView } from '../../../helper';
 
 const useStyles = makeStyles(theme => ({
@@ -16,6 +16,9 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
   },
   rightIcon: {
+    marginRight: theme.spacing(1),
+  },
+  liked: {
     marginRight: theme.spacing(1),
   },
   margin: {
@@ -50,10 +53,12 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function MemoryActionButton(props) {
-  const { memoryIndex, handerShowComment, likes } = props;
+  const { memoryIndex, handerShowComment } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
-  const [numLike, setNumLike] = useState(Object.keys(likes || {}).length || 0);
+  const address = useSelector(state => state.account.address);
+  const [numLike, setNumLike] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
@@ -61,9 +66,14 @@ export default function MemoryActionButton(props) {
   }, [memoryIndex]);
 
   async function loaddata(index) {
-    const likes = await callView('getLikeByMemoIndex', [index]);
-    const numLike = Object.keys(likes).length;
-    setNumLike(numLike);
+    const data = await callView('getLikeByMemoIndex', [index]);
+    const num = Object.keys(data).length;
+    if (data[address]) {
+      setIsLiked(true);
+    } else {
+      setIsLiked(false);
+    }
+    setNumLike(num);
   }
 
   async function handerLike() {
@@ -72,8 +82,7 @@ export default function MemoryActionButton(props) {
       return;
     }
     const method = 'addLike';
-    let params = [memoryIndex, 1];
-    // console.log('memoryIndex', memoryIndex);
+    const params = [memoryIndex, 1];
     const result = await sendTransaction(method, params);
     if (result) {
       loaddata(memoryIndex);
@@ -84,8 +93,21 @@ export default function MemoryActionButton(props) {
   return (
     <StyledCardActions className={classes.acctionsBt}>
       <Button className={classes.button} onClick={handerLike}>
-        <ThumbUpIcon fontSize="small" className={classes.rightIcon} />
-        Like {numLike > 0 && `( ${numLike} )`}
+        {isLiked ? (
+          <React.Fragment>
+            <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
+            <Typography component="span" variant="body2" color="primary">
+              Congrats {numLike > 0 && `( ${numLike} )`}
+            </Typography>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <FavoriteBorderIcon fontSize="small" className={classes.rightIcon} />
+            <Typography component="span" variant="body2">
+              Congrats {numLike > 0 && `( ${numLike} )`}
+            </Typography>
+          </React.Fragment>
+        )}
       </Button>
 
       <Button className={classes.button} onClick={handerShowComment}>
