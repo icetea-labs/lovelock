@@ -147,7 +147,6 @@ function ChangeProfile(props) {
   async function crop(e) {
     // image in dataUrl
     console.log('cropper', cropper);
-    console.log('e', e.target);
     // const dataUrl = cropper.getCroppedCanvas().toDataURL();
     // console.log('dataUrl', dataUrl);
     // const { name, type } = file.file[0];
