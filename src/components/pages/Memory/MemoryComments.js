@@ -5,7 +5,7 @@ import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 
 import AvatarPro from '../../elements/AvatarPro';
-import { sendTransaction, callView, getTags } from '../../../helper';
+import { sendTransaction, callView, getTagsInfo } from '../../../helper';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -105,7 +105,7 @@ export default function MemoryContent(props) {
       const respComment = await callView('getCommentsByMemoIndex', [index]);
       let respTags = [];
       for (let i = 0; i < respComment.length; i++) {
-        const resp = getTags(respComment[i].sender);
+        const resp = getTagsInfo(respComment[i].sender);
         respTags.push(resp);
       }
       respTags = await Promise.all(respTags);

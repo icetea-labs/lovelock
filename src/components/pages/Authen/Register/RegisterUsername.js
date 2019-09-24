@@ -90,13 +90,15 @@ function RegisterUsername(props) {
 
           const resp = await registerAlias(username, address);
           const respTagName = await setTagsInfo(address, 'display-name', displayname);
+          const respTagFristname = await setTagsInfo(address, 'firstname', firstname);
+          const respTagLastname = await setTagsInfo(address, 'lastname', lastname);
           const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
           if (avatarData) {
             const hash = await saveToIpfs(avatarData);
             await setTagsInfo(address, 'avatar', hash);
           }
 
-          if (resp && respTagName && respTagPublicKey) {
+          if (resp && respTagName && respTagPublicKey && respTagFristname && respTagLastname) {
             setStep('two');
           } else {
             const message = 'An error has occured. Please try again.';
