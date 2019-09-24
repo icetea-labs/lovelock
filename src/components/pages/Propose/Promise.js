@@ -88,7 +88,7 @@ const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
   -webkit-box-pack: justify;
-  padding: 20px 0 0 0;
+  /* padding: 20px 0 0 0; */
   font-size: 14px;
   cursor: pointer;
   /* .upload_img input[type='file'] {
@@ -122,7 +122,7 @@ const PreviewContainter = styled.div`
     cursor: pointer;
     img {
       width: 100px;
-      height: 10px;
+      height: 100px;
       cursor: pointer;
     }
   }
@@ -135,6 +135,8 @@ const PreviewContainter = styled.div`
 const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
+
+const cropper = React.createRef(null);
 class Promise extends React.Component {
   constructor(props) {
     super(props);
@@ -150,10 +152,6 @@ class Promise extends React.Component {
       botAvaFile: '',
       cropFile: '',
     };
-  }
-
-  componentDidMount() {
-    React.createRef(null);
   }
 
   componentWillUnmount() {
@@ -235,7 +233,7 @@ class Promise extends React.Component {
             return;
           }
           if (!cropFile) {
-            message = 'Please enter avatar of your crush.';
+            message = 'Please choose avatar of your crush.';
             enqueueSnackbar(message, { variant: 'error' });
             setLoading(false);
             return;
@@ -437,7 +435,14 @@ class Promise extends React.Component {
 
   crop = async e => {
     // image in dataUrl
-    const dataUrl = this.refs.cropper.getCroppedCanvas().toDataURL();
+    const { cropper } = this.refs.cropper;
+    const cropBoxWidth = 100;
+    const cropBoxHeight = 100;
+
+    // const cropContainer = cropper.getContainerData();
+
+    // cropper.setCanvasData({ left: 100, top: 100, width: cropBoxWidth, height: cropBoxHeight });
+    const dataUrl = cropper.getCroppedCanvas().toDataURL();
     const file = this.state;
     const { name, type } = file.botAvaFile[0];
     const list = new DataTransfer();
@@ -474,13 +479,16 @@ class Promise extends React.Component {
         <Cropper
           ref="cropper"
           src={imgPreviewUrl}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: 100, width: 100 }}
           // Cropper.js options
           aspectRatio={1}
           guides={false}
           crop={this.crop}
           viewMode={3}
           autoCrop
+          minContainerWidth={100}
+          minContainerHeight={100}
+          cropBoxResizable={false}
         />
       );
     } else {
