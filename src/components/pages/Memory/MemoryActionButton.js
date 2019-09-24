@@ -67,7 +67,6 @@ export default function MemoryActionButton(props) {
 
   async function getNumLikes(index) {
     const data = await callView('getLikeByMemoIndex', [index]);
-    console.log('data', data);
     const num = Object.keys(data).length;
     if (data[address]) {
       setIsLiked(true);

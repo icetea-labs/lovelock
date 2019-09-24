@@ -3,9 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
+import ArrowTooltip from '../../elements/ArrowTooltip';
 
 import AvatarPro from '../../elements/AvatarPro';
-import { sendTransaction, callView, getTagsInfo } from '../../../helper';
+import { sendTransaction, callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -24,7 +25,7 @@ const useStyles = makeStyles(theme => ({
     width: 30,
     height: 30,
   },
-  textComment: {
+  postComment: {
     [`& fieldset`]: {
       borderRadius: 20,
       background: 'transparent',
@@ -66,6 +67,11 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(0.8, 1.5),
     borderRadius: 20,
     fontSize: 12,
+  },
+  timeComment: {
+    fontSize: 11,
+    color: '#606770',
+    padding: theme.spacing(0, 1.5),
   },
   boxCommentContent: {
     marginTop: theme.spacing(1),
@@ -183,6 +189,14 @@ export default function MemoryContent(props) {
                         <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
                         <span> {item.content}</span>
                       </Typography>
+
+                      <ArrowTooltip
+                        title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}
+                      >
+                        <Typography margin="dense" className={classes.timeComment}>
+                          {diffTime(item.timestamp)}
+                        </Typography>
+                      </ArrowTooltip>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -199,7 +213,7 @@ export default function MemoryContent(props) {
               <TextField
                 fullWidth
                 multiline
-                className={classes.textComment}
+                className={classes.postComment}
                 placeholder="Write a comment..."
                 margin="dense"
                 variant="outlined"

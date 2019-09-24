@@ -67,7 +67,6 @@ export default function MemoryContent(props) {
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
-  // const [numLike, setNumLike] = useState(0);
   const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
