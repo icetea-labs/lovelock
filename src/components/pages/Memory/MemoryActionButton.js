@@ -62,11 +62,12 @@ export default function MemoryActionButton(props) {
   const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
-    loaddata(memoryIndex);
+    getNumLikes(memoryIndex);
   }, [memoryIndex]);
 
-  async function loaddata(index) {
+  async function getNumLikes(index) {
     const data = await callView('getLikeByMemoIndex', [index]);
+    console.log('data', data);
     const num = Object.keys(data).length;
     if (data[address]) {
       setIsLiked(true);
@@ -85,7 +86,7 @@ export default function MemoryActionButton(props) {
     const params = [memoryIndex, 1];
     const result = await sendTransaction(method, params);
     if (result) {
-      loaddata(memoryIndex);
+      getNumLikes(memoryIndex);
     }
   }
 
