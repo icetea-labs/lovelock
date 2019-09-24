@@ -14,7 +14,7 @@ import Cropper from 'react-cropper';
 import { tryStringifyJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
-import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
+import { saveToIpfs, sendTransaction } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
@@ -460,7 +460,7 @@ class Promise extends React.Component {
   render() {
     const { close } = this.props;
     const { partner, promiseStm, date, file, suggestions, value, checked, imgPreviewUrl } = this.state;
-    console.log('state CK', this.state);
+    // console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',
