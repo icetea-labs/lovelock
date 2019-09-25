@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-import AvatarPro from '../../../elements/AvatarPro';
+import { AvatarPro } from '../../../elements';
 import Icon from '../../../elements/Icon';
 
 const useStyles = makeStyles(theme => ({

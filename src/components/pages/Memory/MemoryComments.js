@@ -4,8 +4,8 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 
-import AvatarPro from '../../elements/AvatarPro';
-import { sendTransaction, callView, getTags } from '../../../helper';
+import { ArrowTooltip, AvatarPro } from '../../elements';
+import { sendTransaction, callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     width: 30,
     height: 30,
   },
-  textComment: {
+  postComment: {
     [`& fieldset`]: {
       borderRadius: 20,
       background: 'transparent',
@@ -67,6 +67,11 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 20,
     fontSize: 12,
   },
+  timeComment: {
+    fontSize: 11,
+    color: '#606770',
+    padding: theme.spacing(0, 1.5),
+  },
   boxCommentContent: {
     marginTop: theme.spacing(1),
   },
@@ -105,7 +110,7 @@ export default function MemoryContent(props) {
       const respComment = await callView('getCommentsByMemoIndex', [index]);
       let respTags = [];
       for (let i = 0; i < respComment.length; i++) {
-        const resp = getTags(respComment[i].sender);
+        const resp = getTagsInfo(respComment[i].sender);
         respTags.push(resp);
       }
       respTags = await Promise.all(respTags);
@@ -124,6 +129,7 @@ export default function MemoryContent(props) {
         setShowComments(respComment);
       }
       setComments(respComment);
+      handerNumberComment(respComment.length);
     }, 100);
   }
 
@@ -183,6 +189,13 @@ export default function MemoryContent(props) {
                         <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
                         <span> {item.content}</span>
                       </Typography>
+                      <ArrowTooltip
+                        title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}
+                      >
+                        <Typography margin="dense" className={classes.timeComment}>
+                          {diffTime(item.timestamp)}
+                        </Typography>
+                      </ArrowTooltip>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -191,7 +204,14 @@ export default function MemoryContent(props) {
           </Grid>
         </Grid>
         <Grid item>
-          <Grid container wrap="nowrap" component="form" ref={el => (myFormRef = el)}>
+          <Grid
+            container
+            wrap="nowrap"
+            component="form"
+            ref={el => {
+              myFormRef = el;
+            }}
+          >
             <Grid item>
               <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
             </Grid>
@@ -199,7 +219,7 @@ export default function MemoryContent(props) {
               <TextField
                 fullWidth
                 multiline
-                className={classes.textComment}
+                className={classes.postComment}
                 placeholder="Write a comment..."
                 margin="dense"
                 variant="outlined"

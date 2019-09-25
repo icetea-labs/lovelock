@@ -53,19 +53,19 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function MemoryActionButton(props) {
-  const { memoryIndex, handerShowComment } = props;
+  const { memoryIndex, handerShowComment, numComment } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
   const address = useSelector(state => state.account.address);
   const [numLike, setNumLike] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
-  const [numComment, setNumComment] = useState(0);
+  // const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
-    loaddata(memoryIndex);
+    getNumLikes(memoryIndex);
   }, [memoryIndex]);
 
-  async function loaddata(index) {
+  async function getNumLikes(index) {
     const data = await callView('getLikeByMemoIndex', [index]);
     const num = Object.keys(data).length;
     if (data[address]) {
@@ -85,7 +85,7 @@ export default function MemoryActionButton(props) {
     const params = [memoryIndex, 1];
     const result = await sendTransaction(method, params);
     if (result) {
-      loaddata(memoryIndex);
+      getNumLikes(memoryIndex);
     }
   }
 

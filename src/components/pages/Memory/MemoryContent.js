@@ -6,7 +6,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
-import AvatarPro from '../../elements/AvatarPro';
+import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 
 import MemoryComments from './MemoryComments';
@@ -67,7 +67,6 @@ export default function MemoryContent(props) {
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
-  // const [numLike, setNumLike] = useState(0);
   const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
@@ -80,7 +79,7 @@ export default function MemoryContent(props) {
     setMemoryDecrypted(memory);
   }, [memory]);
 
-  function FacebookProgress(props) {
+  function FacebookProgress(propsFb) {
     const classes = useStylesFacebook();
 
     return (
@@ -91,7 +90,7 @@ export default function MemoryContent(props) {
           className={classes.top}
           size={24}
           thickness={4}
-          {...props}
+          {...propsFb}
         />
         <CircularProgress
           variant="indeterminate"
@@ -99,7 +98,7 @@ export default function MemoryContent(props) {
           className={classes.bottom}
           size={24}
           thickness={4}
-          {...props}
+          {...propsFb}
         />
       </div>
     );
@@ -189,7 +188,12 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <MemoryActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
+        <MemoryActionButton
+          handerShowComment={handerShowComment}
+          likes={memory.likes}
+          memoryIndex={memory.id}
+          numComment={numComment}
+        />
       )}
       {showComment && <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>

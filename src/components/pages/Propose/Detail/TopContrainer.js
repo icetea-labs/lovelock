@@ -8,7 +8,7 @@ import { callView, getTagsInfo, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 
-import AvatarPro from '../../../elements/AvatarPro';
+import { AvatarPro } from '../../../elements';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -132,14 +132,18 @@ export default function TopContrainer(props) {
     window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
-      const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
-      if (typeof infoCache !== 'undefined' && infoCache.length > 0) {
-        setTopInfo(infoCache);
-      } else {
-        const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-        const newPropose = await addInfoToProposes(resp[0]);
-        // console.log('newPropose', newPropose);
-        setTopInfo(newPropose || []);
+      try {
+        const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
+        if (typeof infoCache !== 'undefined' && infoCache.length > 0) {
+          setTopInfo(infoCache);
+        } else {
+          const resp = (await callView('getProposeByIndex', [proIndex])) || [];
+          const newPropose = await addInfoToProposes(resp[0]);
+          // console.log('newPropose', newPropose);
+          setTopInfo(newPropose || []);
+        }
+      } catch (e) {
+        console.log('loadProposes', e);
       }
       setLoading(false);
     }, 10);
@@ -154,7 +158,7 @@ export default function TopContrainer(props) {
     proposes.s_publicKey = senderTags['pub-key'] || '';
     proposes.s_avatar = senderTags.avatar;
 
-    const botInfo = JSON.parse(proposes.bot_info);
+    const botInfo = JSON.parse(proposes.bot_info || '{}');
     // console.log('botInfo', botInfo);
 
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
@@ -171,7 +175,7 @@ export default function TopContrainer(props) {
     }
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
 
-    const info = JSON.parse(proposes.s_info);
+    const info = JSON.parse(proposes.s_info) || {};
     proposes.coverimg = info.hash || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
     proposes.s_date = info.date;
     proposes.r_date = info.date;

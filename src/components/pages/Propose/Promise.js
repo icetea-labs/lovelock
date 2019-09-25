@@ -10,15 +10,15 @@ import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
-import Cropper from 'react-cropper';
 import { tryStringifyJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
-import { saveToIpfs, sendTransaction, setTagsInfo } from '../../../helper';
+import { saveToIpfs, sendTransaction } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
-import 'cropperjs/dist/cropper.css';
+import ImageCrop from '../../elements/ImageCrop';
+import { AvatarPro } from '../../elements';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -37,6 +37,11 @@ const useStyles = makeStyles(theme => ({
   },
   devidePrm: {
     marginBottom: '12px',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    margin: theme.spacing(0, 1, 1, 0),
   },
 }));
 
@@ -63,6 +68,11 @@ function TextFieldMultiLine(props) {
 function DividerCus(props) {
   const classes = useStyles();
   return <Divider className={classes.devidePrm} {...props} />;
+}
+
+function AvatarProCus(props) {
+  const classes = useStyles();
+  return <AvatarPro className={classes.avatar} {...props} />;
 }
 
 export const TagTitle = styled.div`
@@ -136,7 +146,6 @@ const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
 
-const cropper = React.createRef(null);
 class Promise extends React.Component {
   constructor(props) {
     super(props);
@@ -148,9 +157,9 @@ class Promise extends React.Component {
       value: '',
       suggestions: [],
       checked: false,
-      imgPreviewUrl: '',
-      botAvaFile: '',
       cropFile: '',
+      isOpenCrop: false,
+      avatar: '/static/img/no-avatar.jpg',
     };
   }
 
@@ -184,7 +193,7 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, address, close } = this.props;
+    const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva;
     let hash;
@@ -244,8 +253,6 @@ class Promise extends React.Component {
             setLoading(false);
             return;
           }
-          // const respTagFirstName = await setTagsInfo(address, 'bot-firstName', firstname);
-          // const respTagLastName = await setTagsInfo(address, 'bot-lastName', lastname);
           botInfo = {
             firstname,
             lastname,
@@ -281,7 +288,7 @@ class Promise extends React.Component {
 
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
-    const address = this.props.address;
+    const address = this.props;
 
     if (escapedValue === '@' || escapedValue === '') {
       this.setState({
@@ -302,7 +309,7 @@ class Promise extends React.Component {
         const result = await tweb3[method](add, func, [escapedValue]);
         people = Object.keys(result).map(function(key, index) {
           const nick = key.substring(key.indexOf('.') + 1);
-          return { nick: nick, address: result[key].address };
+          return { nick, address: result[key].address };
         });
       }
     } catch (err) {
@@ -415,89 +422,33 @@ class Promise extends React.Component {
     this.setState({ [key]: val });
   };
 
-  handleImageChange = e => {
-    e.preventDefault();
-
-    const reader = new FileReader();
-    const { files } = e.target;
-    const file = files[0];
-
-    if (file && file.type.match('image.*')) {
-      reader.onloadend = e => {
-        this.setState({
-          botAvaFile: files,
-          imgPreviewUrl: reader.result,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
+  openCrop = () => {
+    this.setState({
+      isOpenCrop: true,
+    });
   };
 
-  crop = async e => {
-    // image in dataUrl
-    const { cropper } = this.refs.cropper;
-    const cropBoxWidth = 100;
-    const cropBoxHeight = 100;
-
-    // const cropContainer = cropper.getContainerData();
-
-    // cropper.setCanvasData({ left: 100, top: 100, width: cropBoxWidth, height: cropBoxHeight });
-    const dataUrl = cropper.getCroppedCanvas().toDataURL();
-    const file = this.state;
-    const { name, type } = file.botAvaFile[0];
-    const list = new DataTransfer();
-    await fetch(dataUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const parseFile = new File([blob], name, { type });
-        list.items.add(parseFile);
-      });
+  closeCrop = () => {
     this.setState({
-      cropFile: list.files,
+      isOpenCrop: false,
     });
+  };
+
+  acceptCrop = e => {
+    this.closeCrop();
+    this.setState({ cropFile: e.cropFile, avatar: e.avaPreview });
   };
 
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value, checked, imgPreviewUrl } = this.state;
-    console.log('state CK', this.state);
+    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar } = this.state;
+    // console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',
       value,
       onChange: this.onPartnerChange,
     };
-
-    let $imagePreview = null;
-    // if (imgPreviewUrl) {
-    //   $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
-    // } else {
-    //   $imagePreview = <img src="/static/img/no-avatar.jpg" alt="avaDefault" className="previewAvaDefault" />;
-    // }
-    if (imgPreviewUrl) {
-      $imagePreview = (
-        <Cropper
-          ref="cropper"
-          src={imgPreviewUrl}
-          style={{ height: 100, width: 100 }}
-          // Cropper.js options
-          aspectRatio={1}
-          guides={false}
-          crop={this.crop}
-          viewMode={3}
-          autoCrop
-          minContainerWidth={100}
-          minContainerHeight={100}
-          cropBoxResizable={false}
-        />
-      );
-    } else {
-      $imagePreview = (
-        <div className="imgPreview">
-          <img src="/static/img/no-avatar.jpg" alt="imgPreview" />
-        </div>
-      );
-    }
 
     return (
       <CommonDialog
@@ -534,8 +485,12 @@ class Promise extends React.Component {
           <FlexBox>
             <PreviewContainter>
               <div className="upload_img">
-                {$imagePreview}
-                <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                <AvatarProCus src={avatar} />
+                {/* {$imagePreview} */}
+                {/* <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" /> */}
+                <button type="button" onClick={this.openCrop}>
+                  Create Avatar
+                </button>
               </div>
             </PreviewContainter>
             <RightBotInfo>
@@ -577,6 +532,7 @@ class Promise extends React.Component {
           onChange={this.promiseStmChange}
         />
         <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
+        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} />}
       </CommonDialog>
     );
   }
