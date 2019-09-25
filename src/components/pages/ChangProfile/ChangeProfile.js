@@ -4,8 +4,6 @@ import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import Cropper from 'react-cropper';
-import 'cropperjs/dist/cropper.css';
 
 import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
@@ -15,6 +13,7 @@ import * as actionCreate from '../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
 import AvatarPro from '../../elements/AvatarPro';
+import ImageCrop from '../../elements/ImageCrop';
 
 const useStyles = makeStyles(theme => ({
   avatar: {
@@ -22,6 +21,10 @@ const useStyles = makeStyles(theme => ({
     height: 120,
   },
 }));
+
+const BoxAuthenCus = styled(BoxAuthen)`
+  top: 30px;
+`;
 
 const PreviewContainter = styled.div`
   display: flex;
@@ -44,6 +47,14 @@ const PreviewContainter = styled.div`
     display: inline-block;
     cursor: pointer;
   }
+  .createBtnWrapper {
+    padding: 10px 0 0 0;
+    cursor: pointer;
+  }
+
+  .createBtn {
+    margin: 0 10px 0 10px;
+  }
   .fileInput {
     width: 100%;
     height: 25px;
@@ -64,11 +75,6 @@ const PreviewContainter = styled.div`
       cursor: pointer;
     }
   }
-  .previewText {
-    margin-top: 70px;
-    cursor: pointer;
-    color: #736e6e;
-  }
 `;
 
 const RightProfile = styled.div`
@@ -76,14 +82,12 @@ const RightProfile = styled.div`
 `;
 
 function ChangeProfile(props) {
-  const cropper = React.createRef(null);
   const { setLoading, setAccount, history, address, privateKey, setNeedAuth } = props;
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
-  const [file, setFile] = useState('');
   const [avatar, setAvatar] = useState('');
-  const [newAvatar, setNewAvatar] = useState('');
   const [cropFile, setCropFile] = useState('');
+  const [isOpenCrop, setIsOpenCrop] = useState(false);
 
   useEffect(() => {
     getData();
@@ -129,35 +133,18 @@ function ChangeProfile(props) {
     }
   }
 
-  function handleImageChange(event) {
-    event.preventDefault();
-    const reader = new FileReader();
-    const { files } = event.target;
-    const upFile = files[0];
-
-    if (upFile && upFile.type.match('image.*')) {
-      reader.onloadend = () => {
-        setNewAvatar(reader.result);
-        setFile(files);
-      };
-      reader.readAsDataURL(upFile);
-    }
+  function openCrop() {
+    setIsOpenCrop(true);
   }
 
-  async function crop(e) {
-    // image in dataUrl
-    // console.log('cropper', cropper);
-    // const dataUrl = cropper.getCroppedCanvas().toDataURL();
-    // console.log('dataUrl', dataUrl);
-    // const { name, type } = file.file[0];
-    // const list = new DataTransfer();
-    // await fetch(dataUrl)
-    //   .then(res => res.blob())
-    //   .then(blob => {
-    //     const parseFile = new File([blob], name, { type });
-    //     list.items.add(parseFile);
-    //   });
-    // setCropFile(list.files);
+  function closeCrop() {
+    setIsOpenCrop(false);
+  }
+
+  function acceptCrop(e) {
+    closeCrop();
+    setCropFile(e.cropFile);
+    setAvatar(e.avaPreview);
   }
 
   const classes = useStyles();
@@ -165,29 +152,23 @@ function ChangeProfile(props) {
   return (
     <QueueAnim delay={200} type={['top', 'bottom']}>
       <LayoutAuthen key={1}>
-        <BoxAuthen>
+        <BoxAuthenCus>
           <ShadowBoxAuthen>
             <HeaderAuthen title="Change Profile" />
             <ValidatorForm onSubmit={saveChange}>
               <FlexBox>
                 <PreviewContainter>
                   <div className="upload_img">
-                    {newAvatar ? (
-                      <Cropper
-                        ref={cropper}
-                        src={newAvatar}
-                        style={{ height: 200, width: 200 }}
-                        // Cropper.js options
-                        aspectRatio={1}
-                        guides={false}
-                        crop={e => crop(e)}
-                        viewMode={3}
-                        autoCrop
-                      />
+                    {cropFile ? (
+                      <AvatarPro src={avatar} className={classes.avatar} />
                     ) : (
                       <AvatarPro hash={avatar} className={classes.avatar} />
                     )}
-                    <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
+                    <div className="createBtnWrapper">
+                      <button className="createBtn" type="button" onClick={openCrop}>
+                        Create Avatar
+                      </button>
+                    </div>
                   </div>
                 </PreviewContainter>
                 <RightProfile>
@@ -217,8 +198,9 @@ function ChangeProfile(props) {
                 <ButtonPro type="submit">Save change</ButtonPro>
               </DivControlBtnKeystore>
             </ValidatorForm>
+            {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} />}
           </ShadowBoxAuthen>
-        </BoxAuthen>
+        </BoxAuthenCus>
       </LayoutAuthen>
     </QueueAnim>
   );

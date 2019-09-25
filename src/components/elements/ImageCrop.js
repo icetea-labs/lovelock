@@ -9,17 +9,16 @@ export default function ImageCrop(props) {
   const [originFile, setOriginFile] = useState([]);
   const [cropFile, setCropFile] = useState('');
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
+  const [avaPreview, setAvaPreview] = useState('');
   const { close, accept } = props;
 
   const acceptCrop = React.useCallback(() => {
     const cropData = {
       cropFile,
-      imgPreviewUrl,
+      avaPreview,
     };
     accept(cropData);
-  }, [cropFile, imgPreviewUrl]);
-
-  // console.log('originFile', originFile);
+  }, [cropFile, avaPreview]);
 
   function handleImageChange(event) {
     event.preventDefault();
@@ -40,6 +39,7 @@ export default function ImageCrop(props) {
     // image in dataUr
     const dataUrl = cropper.getCroppedCanvas().toDataURL();
     // const dataUrl = cropper.getCroppedCanvas();
+    setAvaPreview(dataUrl);
     const newName = originFile[0].name;
     const newType = originFile[0].type;
     const list = new DataTransfer();

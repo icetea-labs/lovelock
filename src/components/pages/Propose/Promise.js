@@ -441,13 +441,14 @@ class Promise extends React.Component {
 
   acceptCrop = e => {
     this.closeCrop();
-    this.setState({ cropFile: e.cropFile, avatar: e.imgPreviewUrl });
+    this.setState({ cropFile: e.cropFile, avatar: e.avaPreview });
   };
 
   render() {
     const { close } = this.props;
     const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar } = this.state;
     // console.log('state CK', this.state);
+
 
     const inputProps = {
       placeholder: '@partner',
