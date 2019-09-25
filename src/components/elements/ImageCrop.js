@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
 import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
+import '../../assets/sass/cropper.css';
 import CommonDialog from '../pages/Propose/CommonDialog';
 
 let cropper = React.createRef(null);
+let timeout = null;
 
 export default function ImageCrop(props) {
   const [originFile, setOriginFile] = useState([]);
@@ -35,33 +37,27 @@ export default function ImageCrop(props) {
     }
   }
 
-  async function crop() {
-    // image in dataUr
-    const dataUrl = cropper.getCroppedCanvas().toDataURL();
-    // const dataUrl = cropper.getCroppedCanvas();
-    setAvaPreview(dataUrl);
-    const newName = originFile[0].name;
-    const newType = originFile[0].type;
-    const list = new DataTransfer();
-    try {
-      await fetch(dataUrl)
-        .then(res => res.blob())
-        .then(blob => {
-          const parseFile = new File([blob], newName, { type: newType });
-          list.items.add(parseFile);
-        });
-      setCropFile(list.files);
-    } catch (err) {
-      console.log(err);
-    }
+  function crop() {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      const dataUrl = cropper.getCroppedCanvas().toDataURL();
+      setAvaPreview(dataUrl);
+      const newName = originFile[0].name;
+      const newType = originFile[0].type;
+      const list = new DataTransfer();
+      try {
+        fetch(dataUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const parseFile = new File([blob], newName, { type: newType });
+            list.items.add(parseFile);
+          });
+        setCropFile(list.files);
+      } catch (err) {
+        console.log(err);
+      }
+    }, 500);
   }
-
-  //   let $imagePreview = null;
-  //   if (imgPreviewUrl) {
-  //     $imagePreview = <img src={imgPreviewUrl} alt="imgPreview" />;
-  //   } else {
-  //     $imagePreview = <div className="previewText">Your avatar</div>;
-  //   }
 
   return (
     <CommonDialog
@@ -91,7 +87,6 @@ export default function ImageCrop(props) {
           autoCrop
           minContainerWidth={200}
           minContainerHeight={200}
-          cropBoxResizable={false}
           movable={false}
         />
       )}

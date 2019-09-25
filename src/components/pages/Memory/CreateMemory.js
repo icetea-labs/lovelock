@@ -11,7 +11,7 @@ import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
 import { saveToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
-import AvatarPro from '../../elements/AvatarPro';
+import { AvatarPro } from '../../elements';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};

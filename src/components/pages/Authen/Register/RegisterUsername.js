@@ -10,7 +10,7 @@ import { useSnackbar } from 'notistack';
 import tweb3 from '../../../../service/tweb3';
 import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
-import AvatarPro from '../../../elements/AvatarPro';
+import { AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';

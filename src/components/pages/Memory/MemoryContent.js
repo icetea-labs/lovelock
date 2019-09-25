@@ -6,7 +6,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
-import AvatarPro from '../../elements/AvatarPro';
+import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 
 import MemoryComments from './MemoryComments';

@@ -8,7 +8,7 @@ import { callView, getTagsInfo, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 
-import AvatarPro from '../../../elements/AvatarPro';
+import { AvatarPro } from '../../../elements';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
