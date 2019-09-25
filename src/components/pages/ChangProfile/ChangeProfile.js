@@ -12,7 +12,7 @@ import * as actionAccount from '../../../store/actions/account';
 import * as actionCreate from '../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
-import AvatarPro from '../../elements/AvatarPro';
+import { AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
 
 const useStyles = makeStyles(theme => ({

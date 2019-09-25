@@ -1,13 +1,13 @@
 import React from 'react';
-import tweb3 from '../service/tweb3';
-import ipfs from '../service/ipfs';
 import moment from 'moment';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
-import { decodeTx, decode } from './decode';
-import { encodeTx } from './encode';
 import eccrypto from 'eccrypto';
+import { encodeTx } from './encode';
+import tweb3 from '../service/tweb3';
+import ipfs from '../service/ipfs';
+import { decodeTx, decode } from './decode';
 
 const paths = 'm’/44’/60’/0’/0';
 
@@ -17,18 +17,18 @@ export async function callPure(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callPureContractMethod');
   if (resp) {
     return JSON.parse(resp);
-  } else {
-    return [];
   }
+
+  return [];
 }
 export async function callView(funcName, params) {
   const resp = await callReadOrPure(funcName, params, 'callReadonlyContractMethod');
   // console.log('resp', funcName, resp);
   if (resp) {
     return JSON.parse(resp);
-  } else {
-    return [];
   }
+
+  return [];
 }
 async function callReadOrPure(funcName, params, method) {
   const address = contract;
@@ -150,9 +150,39 @@ export async function saveToIpfs(files) {
 }
 
 export function TimeWithFormat(props) {
-  // console.log(props.value);
-  const formatValue = props.format ? props.format : 'MM/DD/YYYY';
-  return <span>{moment(props.value).format(formatValue)}</span>;
+  const { format, value } = props;
+  const formatValue = format || 'MM/DD/YYYY';
+  return <span>{moment(value).format(formatValue)}</span>;
+}
+
+export function diffTime(time) {
+  // Set new thresholds
+  // moment.relativeTimeThreshold("s", 10);
+  moment.relativeTimeThreshold('ss', 60);
+  moment.relativeTimeThreshold('m', 60);
+  moment.relativeTimeThreshold('h', 20);
+  // moment.relativeTimeThreshold("d", 25);
+  // moment.relativeTimeThreshold("M", 10);
+
+  moment.updateLocale('en', {
+    relativeTime: {
+      future: 'in %s',
+      past: '%s ago',
+      s: '%d secs',
+      ss: '%d secs',
+      m: 'a minute',
+      mm: '%d minutes',
+      h: '%d hour',
+      hh: '%d hours',
+      d: 'a day',
+      dd: '%d days',
+      M: 'a month',
+      MM: '%d months',
+      y: 'a year',
+      yy: '%d years',
+    },
+  });
+  return moment(time).fromNow();
 }
 
 export async function isAliasRegisted(username) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import Avatar from '@material-ui/core/Avatar';
 
-export default function AvatarPro({ hash, ...rest }) {
+function AvatarPro({ hash, ...rest }) {
   return (
     <React.Fragment>
       {hash ? (
@@ -12,3 +12,6 @@ export default function AvatarPro({ hash, ...rest }) {
     </React.Fragment>
   );
 }
+
+export { AvatarPro };
+export default AvatarPro;

@@ -17,9 +17,8 @@ import { saveToIpfs, sendTransaction } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
-import 'cropperjs/dist/cropper.css';
 import ImageCrop from '../../elements/ImageCrop';
-import AvatarPro from '../../elements/AvatarPro';
+import { AvatarPro } from '../../elements';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -444,7 +443,6 @@ class Promise extends React.Component {
     const { close } = this.props;
     const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar } = this.state;
     // console.log('state CK', this.state);
-
 
     const inputProps = {
       placeholder: '@partner',

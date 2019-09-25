@@ -186,8 +186,9 @@ class Propose {
   @transaction addComment(memoIndex: number, content: string, info: string) {
     const sender = msg.sender;
     let obj = getDataByIndex(this.memories, memoIndex);
-    const timestamp = block.timestamp;
-    const comment = { sender, content, info, timestamp };
+    const newblock = block;
+    const timestamp = Date.now();
+    const comment = { sender, content, info, timestamp, newblock };
     obj.comments.push(comment);
     this.memories[memoIndex] = obj;
   }

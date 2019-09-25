@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './assets/sass/common.scss';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { HomeLayout, LandingLayout } from './components/layout/Layout';
 import Home from './components/pages/Home';
 import { Login, Register } from './components/pages/Authen';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
-import GlobaLoading from './components/elements/GlobaLoading';
+import { GlobaLoading } from './components/elements';
 import DetailPropose from './components/pages/Propose/Detail';
 import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
@@ -16,26 +16,25 @@ function RouteWithLayout({ layout, component, ...rest }) {
     <Route {...rest} render={props => React.createElement(layout, props, React.createElement(component, props))} />
   );
 }
-class App extends Component {
-  render() {
-    const { isLoading, address } = this.props;
-    return (
-      <div className="App">
-        <Router>
-          <Switch>
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/register" component={Register} />
-            <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
-            <RouteWithLayout layout={address ? HomeLayout : LandingLayout} exact path="/" component={Home} />
-            <RouteWithLayout layout={HomeLayout} exact path={`/propose/:index`} component={DetailPropose} />;
-            <RouteWithLayout layout={HomeLayout} exact path={`/exception`} component={Exception} />
-            <Route component={NotFound} />
-          </Switch>
-        </Router>
-        {isLoading && <GlobaLoading />}
-      </div>
-    );
-  }
+
+function App(props) {
+  const { isLoading, address } = props;
+  return (
+    <div className="App">
+      <Router>
+        <Switch>
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/register" component={Register} />
+          <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
+          <RouteWithLayout layout={address ? HomeLayout : LandingLayout} exact path="/" component={Home} />
+          <RouteWithLayout layout={HomeLayout} exact path="/propose/:index" component={DetailPropose} />;
+          <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
+          <Route component={NotFound} />
+        </Switch>
+      </Router>
+      {isLoading && <GlobaLoading />}
+    </div>
+  );
 }
 
 const mapStateToProps = state => {
