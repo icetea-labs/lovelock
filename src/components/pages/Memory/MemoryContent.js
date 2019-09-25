@@ -79,7 +79,7 @@ export default function MemoryContent(props) {
     setMemoryDecrypted(memory);
   }, [memory]);
 
-  function FacebookProgress(props) {
+  function FacebookProgress(propsFb) {
     const classes = useStylesFacebook();
 
     return (
@@ -90,7 +90,7 @@ export default function MemoryContent(props) {
           className={classes.top}
           size={24}
           thickness={4}
-          {...props}
+          {...propsFb}
         />
         <CircularProgress
           variant="indeterminate"
@@ -98,7 +98,7 @@ export default function MemoryContent(props) {
           className={classes.bottom}
           size={24}
           thickness={4}
-          {...props}
+          {...propsFb}
         />
       </div>
     );
@@ -188,7 +188,12 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <MemoryActionButton handerShowComment={handerShowComment} likes={memory.likes} memoryIndex={memory.id} />
+        <MemoryActionButton
+          handerShowComment={handerShowComment}
+          likes={memory.likes}
+          memoryIndex={memory.id}
+          numComment={numComment}
+        />
       )}
       {showComment && <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>

@@ -65,10 +65,10 @@ const useStylesArrow = makeStyles(theme => ({
       borderStyle: 'solid',
     },
   },
-  popper: arrowGenerator(theme.palette.grey[900]),
+  popper: arrowGenerator(theme.palette.grey[700]),
 }));
 
-export default function ArrowTooltip(props) {
+function ArrowTooltip(props) {
   const { arrow, ...classes } = useStylesArrow();
   const [arrowRef, setArrowRef] = React.useState(null);
   const { title } = props;
@@ -96,3 +96,5 @@ export default function ArrowTooltip(props) {
     />
   );
 }
+export { ArrowTooltip };
+export default ArrowTooltip;

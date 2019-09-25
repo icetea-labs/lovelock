@@ -184,6 +184,7 @@ export function diffTime(time) {
   });
   return moment(time).fromNow();
 }
+
 export async function isAliasRegisted(username) {
   try {
     const alias = 'account.'.concat(username);

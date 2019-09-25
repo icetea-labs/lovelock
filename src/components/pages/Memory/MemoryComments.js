@@ -3,9 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
-import ArrowTooltip from '../../elements/ArrowTooltip';
 
-import AvatarPro from '../../elements/AvatarPro';
+import { ArrowTooltip, AvatarPro } from '../../elements';
 import { sendTransaction, callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
 import * as actions from '../../../store/actions';
 
@@ -130,6 +129,7 @@ export default function MemoryContent(props) {
         setShowComments(respComment);
       }
       setComments(respComment);
+      handerNumberComment(respComment.length);
     }, 100);
   }
 
@@ -189,7 +189,6 @@ export default function MemoryContent(props) {
                         <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
                         <span> {item.content}</span>
                       </Typography>
-
                       <ArrowTooltip
                         title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}
                       >
@@ -205,7 +204,14 @@ export default function MemoryContent(props) {
           </Grid>
         </Grid>
         <Grid item>
-          <Grid container wrap="nowrap" component="form" ref={el => (myFormRef = el)}>
+          <Grid
+            container
+            wrap="nowrap"
+            component="form"
+            ref={el => {
+              myFormRef = el;
+            }}
+          >
             <Grid item>
               <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
             </Grid>
