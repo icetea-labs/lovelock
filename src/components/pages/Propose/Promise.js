@@ -164,6 +164,7 @@ class Promise extends React.Component {
       botAvaFile: '',
       cropFile: '',
       isOpenCrop: false,
+      avatar: '/static/img/no-avatar.jpg',
     };
   }
 
@@ -440,13 +441,12 @@ class Promise extends React.Component {
 
   acceptCrop = e => {
     this.closeCrop();
-    console.log('3', e);
-    this.setState({ cropFile: e });
+    this.setState({ cropFile: e.cropFile, avatar: e.imgPreviewUrl });
   };
 
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, cropFile } = this.state;
+    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar } = this.state;
     // console.log('state CK', this.state);
 
     const inputProps = {
@@ -490,7 +490,7 @@ class Promise extends React.Component {
           <FlexBox>
             <PreviewContainter>
               <div className="upload_img">
-                {!cropFile && <AvatarProCus src="/static/img/no-avatar.jpg" />}
+                <AvatarProCus src={avatar} />
                 {/* {$imagePreview} */}
                 {/* <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" /> */}
                 <button type="button" onClick={this.openCrop}>
