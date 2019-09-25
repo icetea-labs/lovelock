@@ -11,6 +11,7 @@ import tweb3 from '../../../../service/tweb3';
 import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import AvatarPro from '../../../elements/AvatarPro';
+import ImageCrop from '../../../elements/ImageCrop';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
@@ -28,8 +29,8 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
   },
   avatar: {
-    width: 75,
-    height: 75,
+    width: 100,
+    height: 100,
     margin: theme.spacing(0, 1, 1, 0),
   },
 }));
@@ -43,6 +44,7 @@ function RegisterUsername(props) {
   const [rePassword, setRePassword] = useState('');
   const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
   const [avatarData, setAvatarData] = useState('');
+  const [isOpenCrop, setIsOpenCrop] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -123,117 +125,120 @@ function RegisterUsername(props) {
     };
   }
 
-  function handleImageInput(e) {
-    e.preventDefault();
-    const reader = new FileReader();
-    const { files } = e.target;
-    const data = files[0];
-
-    if (data) {
-      reader.onloadend = () => {
-        if (data) {
-          setAvatar(reader.result);
-          setAvatarData(files);
-        }
-      };
-      reader.readAsDataURL(data);
-    }
-  }
-
   function gotoLogin() {
     const { history } = props;
     history.push('/login');
   }
 
+  function openCrop() {
+    setIsOpenCrop(true);
+  }
+
+  function closeCrop() {
+    setIsOpenCrop(false);
+  }
+
+  function acceptCrop(e) {
+    closeCrop();
+    setAvatarData(e.cropFile);
+    setAvatar(e.avaPreview);
+  }
+
   const classes = useStyles();
   return (
-    <ValidatorForm onSubmit={gotoNext}>
-      <TextValidator
-        label="Username"
-        fullWidth
-        onChange={event => {
-          // Fix issue #148
-          setUsername(event.currentTarget.value.toLowerCase());
-        }}
-        name="username"
-        validators={['required', 'specialCharacter', 'isAliasRegisted']}
-        errorMessages={[
-          'This field is required',
-          'Username cannot contain spaces and special character',
-          'Username already exists! Please choose another',
-        ]}
-        margin="dense"
-        value={username}
-      />
-      <FlexBox>
+    <div>
+      <ValidatorForm onSubmit={gotoNext}>
         <TextValidator
-          label="First Name"
+          label="Username"
           fullWidth
           onChange={event => {
-            setFirstname(event.currentTarget.value);
+            // Fix issue #148
+            setUsername(event.currentTarget.value.toLowerCase());
           }}
-          name="firstname"
-          validators={['required']}
-          errorMessages={['This field is required']}
-          className={classes.marginRight}
+          name="username"
+          validators={['required', 'specialCharacter', 'isAliasRegisted']}
+          errorMessages={[
+            'This field is required',
+            'Username cannot contain spaces and special character',
+            'Username already exists! Please choose another',
+          ]}
           margin="dense"
-          value={firstname}
+          value={username}
         />
+        <FlexBox>
+          <TextValidator
+            label="First Name"
+            fullWidth
+            onChange={event => {
+              setFirstname(event.currentTarget.value);
+            }}
+            name="firstname"
+            validators={['required']}
+            errorMessages={['This field is required']}
+            className={classes.marginRight}
+            margin="dense"
+            value={firstname}
+          />
+          <TextValidator
+            label="Last Name"
+            fullWidth
+            onChange={event => {
+              setLastname(event.currentTarget.value);
+            }}
+            name="lastname"
+            validators={['required']}
+            errorMessages={['This field is required']}
+            margin="dense"
+            value={lastname}
+          />
+        </FlexBox>
         <TextValidator
-          label="Last Name"
+          label="Password"
           fullWidth
           onChange={event => {
-            setLastname(event.currentTarget.value);
+            setPassword(event.currentTarget.value);
           }}
-          name="lastname"
+          name="password"
+          type="password"
           validators={['required']}
           errorMessages={['This field is required']}
           margin="dense"
-          value={lastname}
+          value={password}
         />
-      </FlexBox>
-      <TextValidator
-        label="Password"
-        fullWidth
-        onChange={event => {
-          setPassword(event.currentTarget.value);
-        }}
-        name="password"
-        type="password"
-        validators={['required']}
-        errorMessages={['This field is required']}
-        margin="dense"
-        value={password}
-      />
-      <TextValidator
-        label="Repeat password"
-        fullWidth
-        onChange={event => {
-          setRePassword(event.currentTarget.value);
-        }}
-        name="rePassword"
-        type="password"
-        validators={['isPasswordMatch', 'required']}
-        errorMessages={['Password mismatch', 'This field is required']}
-        margin="dense"
-        value={rePassword}
-      />
-      <Box display="flex" className={classes.avatarBox}>
-        <span>Avatar</span>
-        <div>
-          <AvatarPro src={avatar} className={classes.avatar} />
-          <input className="fileInput" type="file" onChange={handleImageInput} accept="image/*" />
-        </div>
-      </Box>
+        <TextValidator
+          label="Repeat password"
+          fullWidth
+          onChange={event => {
+            setRePassword(event.currentTarget.value);
+          }}
+          name="rePassword"
+          type="password"
+          validators={['isPasswordMatch', 'required']}
+          errorMessages={['Password mismatch', 'This field is required']}
+          margin="dense"
+          value={rePassword}
+        />
+        <Box display="flex" className={classes.avatarBox}>
+          <span>Avatar</span>
+          <div>
+            <AvatarPro src={avatar} className={classes.avatar} />
+            {/* <input className="fileInput" type="file" onChange={handleImageInput} accept="image/*" /> */}
+            <button type="button" onClick={openCrop}>
+              Create Avatar
+            </button>
+          </div>
+        </Box>
 
-      <DivControlBtnKeystore>
-        <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
-        <ButtonPro type="submit">
-          Next
-          <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
-        </ButtonPro>
-      </DivControlBtnKeystore>
-    </ValidatorForm>
+        <DivControlBtnKeystore>
+          <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
+          <ButtonPro type="submit">
+            Next
+            <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
+          </ButtonPro>
+        </DivControlBtnKeystore>
+      </ValidatorForm>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} />}
+    </div>
   );
 }
 

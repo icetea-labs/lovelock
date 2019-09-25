@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { withSnackbar } from 'notistack';
+import { makeStyles } from '@material-ui/core/styles';
+import { CardMedia } from '@material-ui/core';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
 import { getAlias, sendTransaction } from '../../../helper';
@@ -8,11 +10,7 @@ import { getAlias, sendTransaction } from '../../../helper';
 export const ipfs = process.env.REACT_APP_IPFS;
 
 const ImgView = styled.div`
-  margin: 31px 0 31px;
-  img {
-    width: 100%;
-    height: 335px;
-  }
+  margin: 20px 0 20px;
 `;
 
 const PageView = styled.div`
@@ -24,6 +22,20 @@ const PageView = styled.div`
   -webkit-line-clamp: 4; /* Write the number of lines you want to be displayed */
   -webkit-box-orient: vertical;
 `;
+
+const useStyles = makeStyles(theme => ({
+  media: {
+    height: 350,
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundSize: 'contain',
+  },
+}));
+
+function CardMediaCus(props) {
+  const classes = useStyles();
+  return <CardMedia className={classes.media} {...props} />;
+}
 
 class PromiseAlert extends React.Component {
   constructor(props) {
@@ -101,9 +113,7 @@ class PromiseAlert extends React.Component {
               <span>You sent promise to </span>
               <span className="highlight">{name}</span>
             </TagTitle>
-            <ImgView>
-              {hash && <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />}
-            </ImgView>
+            <ImgView>{hash && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="promiseImg" />}</ImgView>
             <PageView>{content}</PageView>
           </CommonDialog>
         ) : (
@@ -120,9 +130,7 @@ class PromiseAlert extends React.Component {
               <span className="highlight">{name}</span>
               <span> sent a promise to you</span>
             </TagTitle>
-            <ImgView>
-              {hash && <img src={process.env.REACT_APP_IPFS + hash} className="postImg" alt="promiseImg" />}
-            </ImgView>
+            <ImgView>{hash && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="promiseImg" />}</ImgView>
             <PageView>{content}</PageView>
           </CommonDialog>
         )}

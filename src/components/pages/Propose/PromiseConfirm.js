@@ -2,11 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import { connect } from 'react-redux';
+import { withSnackbar } from 'notistack';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './Promise';
-import { connect } from 'react-redux';
 import { sendTransaction } from '../../../helper/index';
-import { withSnackbar } from 'notistack';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -35,21 +35,21 @@ class PromiseConfirm extends React.Component {
   }
 
   messageAcceptChange = e => {
-    const value = e.target.value;
+    const val = e.target.value;
     this.setState({
-      messageAccept: value,
+      messageAccept: val,
     });
   };
 
   messageDenyChange = e => {
-    const value = e.target.value;
+    const val = e.target.value;
     this.setState({
-      messageDeny: value,
+      messageDeny: val,
     });
   };
 
   async messageAccept(message) {
-    const { index } = this.props;
+    const { index, enqueueSnackbar, close } = this.props;
     // console.log('view confirm props', this.props);
     try {
       const name = 'acceptPropose';
@@ -57,9 +57,9 @@ class PromiseConfirm extends React.Component {
       const result = await sendTransaction(name, params);
       // console.log('View result', result);
       if (result) {
-        const message = 'Your propose has been confirmed.';
-        this.props.enqueueSnackbar(message, { variant: 'success' });
-        this.props.close();
+        const errMessage = 'Your propose has been confirmed.';
+        enqueueSnackbar(errMessage, { variant: 'success' });
+        close();
       }
     } catch (error) {
       console.log(error);
@@ -67,7 +67,7 @@ class PromiseConfirm extends React.Component {
   }
 
   async messageDeny(message) {
-    const { index } = this.props;
+    const { index, enqueueSnackbar, close } = this.props;
     try {
       const name = 'cancelPropose';
       const params = [index, message];
@@ -75,9 +75,9 @@ class PromiseConfirm extends React.Component {
       // console.log('View result', result);
       if (result) {
         // window.alert('Success');
-        const message = 'Your propose has been rejected.';
-        this.props.enqueueSnackbar(message, { variant: 'info' });
-        this.props.close();
+        const errMessage = 'Your propose has been rejected.';
+        enqueueSnackbar(errMessage, { variant: 'info' });
+        close();
       }
     } catch (error) {
       console.log(error);
