@@ -10,7 +10,6 @@ import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
-import Cropper from 'react-cropper';
 import { tryStringifyJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
@@ -148,7 +147,6 @@ const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
 
-const cropper = React.createRef(null);
 class Promise extends React.Component {
   constructor(props) {
     super(props);
@@ -160,8 +158,6 @@ class Promise extends React.Component {
       value: '',
       suggestions: [],
       checked: false,
-      imgPreviewUrl: '',
-      botAvaFile: '',
       cropFile: '',
       isOpenCrop: false,
       avatar: '/static/img/no-avatar.jpg',
