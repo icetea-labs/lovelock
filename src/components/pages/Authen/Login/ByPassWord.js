@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withstyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 import { Grid, TextField } from '@material-ui/core';
 import AvatarPro from '../../../elements/AvatarPro';
@@ -37,7 +37,7 @@ function ByPassWord(props) {
     const { address } = props;
     if (address) {
       const reps = await getTagsInfo(address);
-      setUsername(reps['display-name']);
+      setUsername(reps['display-name'] || '');
       setAvatar(reps.avatar);
     } else {
       setUsername('undefined');
@@ -83,7 +83,7 @@ function ByPassWord(props) {
   const classes = useStyles();
 
   return (
-    <ValidatorForm onSubmit={gotoLogin}>
+    <React.Fragment>
       <Grid className={classes.avatar} container spacing={2} alignItems="flex-end">
         <Grid item>
           <AvatarPro hash={avatar} />
@@ -92,22 +92,24 @@ function ByPassWord(props) {
           <TextField label="Username" value={username} disabled />
         </Grid>
       </Grid>
-      <TextValidator
-        label="Password"
-        fullWidth
-        onChange={handlePassword}
-        name="password"
-        type="password"
-        validators={['required']}
-        errorMessages={['This field is required']}
-        margin="normal"
-        value={password}
-      />
-      <DivControlBtnKeystore>
-        <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>
-        <ButtonPro type="submit">Login</ButtonPro>
-      </DivControlBtnKeystore>
-    </ValidatorForm>
+      <ValidatorForm onSubmit={gotoLogin}>
+        <TextValidator
+          label="Password"
+          fullWidth
+          onChange={handlePassword}
+          name="password"
+          type="password"
+          validators={['required']}
+          errorMessages={['This field is required']}
+          margin="normal"
+          value={password}
+        />
+        <DivControlBtnKeystore>
+          <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>
+          <ButtonPro type="submit">Login</ButtonPro>
+        </DivControlBtnKeystore>
+      </ValidatorForm>
+    </React.Fragment>
   );
 }
 

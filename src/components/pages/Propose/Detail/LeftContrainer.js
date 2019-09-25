@@ -191,7 +191,6 @@ class LeftContrainer extends PureComponent {
     this.setState({ loading: true });
     const { address, setPropose } = this.props;
     const proposes = (await callView('getProposeByAddress', [address])) || [];
-    // console.log('proposes', proposes, address);
     const newPropose = await this.addInfoToProposes(proposes);
     setPropose(newPropose);
     this.setState({ loading: false });
@@ -210,7 +209,7 @@ class LeftContrainer extends PureComponent {
       }
       // Get info tags partner. case on receiver is bot address -> get tags info of sender address
       const reps = await getTagsInfo(partnerAddress);
-      const botInfo = JSON.parse(proposes[i].bot_info || {});
+      const botInfo = JSON.parse(proposes[i].bot_info || '{}');
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         proposes[i].name = `${botInfo.firstname} ${botInfo.lastname}`;
         proposes[i].avatar = botInfo.botAva;

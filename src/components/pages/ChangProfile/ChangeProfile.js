@@ -1,29 +1,27 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
+
 import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
 import * as actionCreate from '../../../store/actions/create';
-import tweb3 from '../../../service/tweb3';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
-import 'cropperjs/dist/cropper.css';
+import AvatarPro from '../../elements/AvatarPro';
 
-const styles = theme => ({
-  rightIcon: {
-    marginLeft: theme.spacing(1),
+const useStyles = makeStyles(theme => ({
+  avatar: {
+    width: 120,
+    height: 120,
   },
-  marginRight: {
-    marginRight: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-  },
-});
+}));
 
 const PreviewContainter = styled.div`
   display: flex;
@@ -77,57 +75,30 @@ const RightProfile = styled.div`
   margin-left: 8px;
 `;
 
-class ChangeProfile extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      firstname: '',
-      lastname: '',
-      // password: '',
-      // rePassword: '',
-      file: '',
-      imgPreviewUrl: '',
-      avatar: '',
-      cropFile: '',
-    };
-  }
+function ChangeProfile(props) {
+  const cropper = React.createRef(null);
+  const { setLoading, setAccount, history, address, privateKey, setNeedAuth } = props;
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [file, setFile] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [newAvatar, setNewAvatar] = useState('');
+  const [cropFile, setCropFile] = useState('');
 
-  componentDidMount() {
-    // ValidatorForm.addValidationRule('isPasswordMatch', value => {
-    //   if (value !== this.state.password) {
-    //     return false;
-    //   }
-    //   return true;
-    // });
-    React.createRef(null);
-    this.getData();
-  }
+  useEffect(() => {
+    getData();
+  }, []);
 
-  // componentWillUnmount() {
-  //   ValidatorForm.removeValidationRule('isPasswordMatch');
-  // }
-
-  async getData() {
-    const { address } = this.props;
+  async function getData() {
     if (address) {
       const reps = await getTagsInfo(address);
-      // console.log('reps', reps);
-      const displayName = reps['display-name'];
-      const ava = reps.avatar;
-      const temp = displayName.split(' ');
-      const first = temp.slice(0, 1).join(' ');
-      const second = temp.slice(1).join(' ');
-      this.setState({
-        firstname: first,
-        lastname: second,
-        avatar: ava,
-      });
+      setFirstname(reps.firstname || '');
+      setLastname(reps.lastname || '');
+      setAvatar(reps.avatar);
     }
   }
 
-  saveChange = async () => {
-    const { firstname, lastname, password, file, avatar, cropFile } = this.state;
-    const { setLoading, setAccount, history, address, privateKey, setNeedAuth } = this.props;
+  async function saveChange() {
     if (!privateKey) {
       setNeedAuth(true);
     } else {
@@ -135,21 +106,20 @@ class ChangeProfile extends PureComponent {
       setTimeout(async () => {
         const displayName = `${firstname} ${lastname}`;
 
-        tweb3.wallet.importAccount(privateKey);
-        tweb3.wallet.defaultAccount = address;
-
         let respAvatar;
         const respTagName = await setTagsInfo(address, 'display-name', displayName);
+        const respTagFirst = await setTagsInfo(address, 'firstname', firstname);
+        const respTagLast = await setTagsInfo(address, 'lastname', lastname);
         if (cropFile) {
           const hash = await saveToIpfs(cropFile);
           respAvatar = await setTagsInfo(address, 'avatar', hash);
-          setAccount({ address, cipher: password, displayName, avatar: hash });
+          setAccount({ displayName, avatar: hash });
         } else {
           respAvatar = await setTagsInfo(address, 'avatar', avatar);
-          setAccount({ address, cipher: password, displayName, avatar });
+          setAccount({ displayName, avatar });
         }
 
-        if (respTagName && respAvatar) {
+        if (respTagName && respAvatar && respTagFirst && respTagLast) {
           history.push('/');
         } else {
           // notifi.info('Error registerAlias');
@@ -157,169 +127,101 @@ class ChangeProfile extends PureComponent {
         setLoading(false);
       }, 500);
     }
-  };
+  }
 
-  handleUsername = event => {
-    const key = event.currentTarget.name;
-    const { value } = event.currentTarget;
-    // console.log(event.currentTarget.id);
-
-    this.setState({ [key]: value });
-  };
-
-  handleImageChange = event => {
+  function handleImageChange(event) {
     event.preventDefault();
     const reader = new FileReader();
     const { files } = event.target;
-    const file = files[0];
+    const upFile = files[0];
 
-    if (file && file.type.match('image.*')) {
-      reader.onloadend = e => {
-        this.setState({
-          avatar: '',
-          file: files,
-          imgPreviewUrl: reader.result,
-        });
+    if (upFile && upFile.type.match('image.*')) {
+      reader.onloadend = () => {
+        setNewAvatar(reader.result);
+        setFile(files);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(upFile);
     }
-  };
-
-  crop = async e => {
-    // image in dataUrl
-    const dataUrl = this.refs.cropper.getCroppedCanvas().toDataURL();
-    const file = this.state;
-    const { name, type } = file.file[0];
-    const list = new DataTransfer();
-    await fetch(dataUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const parseFile = new File([blob], name, { type });
-        list.items.add(parseFile);
-      });
-    this.setState({
-      cropFile: list.files,
-    });
-  };
-
-  render() {
-    const { firstname, lastname, imgPreviewUrl, avatar } = this.state;
-    const { classes } = this.props;
-    // console.log('view file', this.state);
-
-    let $imagePreview = null;
-    if (imgPreviewUrl) {
-      $imagePreview = (
-        <Cropper
-          ref="cropper"
-          src={imgPreviewUrl}
-          style={{ height: 200, width: '100%' }}
-          // Cropper.js options
-          aspectRatio={1}
-          guides={false}
-          crop={this.crop}
-          viewMode={1}
-          autoCrop
-          minContainerWidth={200}
-          minContainerHeight={200}
-          cropBoxResizable={false}
-        />
-      );
-    } else {
-      $imagePreview = (
-        <div className="imgPreview">
-          <img src="/static/img/no-avatar.jpg" alt="imgPreview" />
-        </div>
-      );
-    }
-
-    return (
-      <QueueAnim delay={200} type={['top', 'bottom']}>
-        <LayoutAuthen key={1}>
-          <BoxAuthen>
-            <ShadowBoxAuthen>
-              <HeaderAuthen title="Change Profile" />
-              <ValidatorForm onSubmit={this.saveChange}>
-                <FlexBox>
-                  <PreviewContainter>
-                    <div className="upload_img">
-                      {avatar ? (
-                        <div className="imgPreview">
-                          <img src={process.env.REACT_APP_IPFS + avatar} alt="imgPreview" />
-                        </div>
-                      ) : (
-                        $imagePreview
-                      )}
-                      <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
-                    </div>
-                  </PreviewContainter>
-                  <RightProfile>
-                    <TextValidator
-                      label="First Name"
-                      fullWidth
-                      onChange={this.handleUsername}
-                      name="firstname"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      className={classes.marginRight}
-                      margin="normal"
-                      value={firstname}
-                    />
-                    <TextValidator
-                      label="Last Name"
-                      fullWidth
-                      onChange={this.handleUsername}
-                      name="lastname"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      margin="normal"
-                      value={lastname}
-                    />
-                  </RightProfile>
-                </FlexBox>
-                {/* <TextValidator
-                  label="New Password"
-                  fullWidth
-                  onChange={this.handleUsername}
-                  name="password"
-                  type="password"
-                  validators={['required']}
-                  errorMessages={['This field is required']}
-                  margin="normal"
-                  value={password}
-                />
-                <TextValidator
-                  label="Repeat new password"
-                  fullWidth
-                  onChange={this.handleUsername}
-                  name="rePassword"
-                  type="password"
-                  validators={['isPasswordMatch', 'required']}
-                  errorMessages={['Password mismatch', 'This field is required']}
-                  margin="normal"
-                  value={rePassword}
-                /> */}
-                {/* <Cropper
-                  ref="cropper"
-                  src={imgPreviewUrl}
-                  style={{ height: 200, width: '100%' }}
-                  // Cropper.js options
-                  aspectRatio={9 / 9}
-                  guides={false}
-                  crop={this.crop}
-                  viewMode={3}
-                  autoCrop
-                /> */}
-                <DivControlBtnKeystore>
-                  <ButtonPro type="submit">Save change</ButtonPro>
-                </DivControlBtnKeystore>
-              </ValidatorForm>
-            </ShadowBoxAuthen>
-          </BoxAuthen>
-        </LayoutAuthen>
-      </QueueAnim>
-    );
   }
+
+  async function crop(e) {
+    // image in dataUrl
+    // console.log('cropper', cropper);
+    // const dataUrl = cropper.getCroppedCanvas().toDataURL();
+    // console.log('dataUrl', dataUrl);
+    // const { name, type } = file.file[0];
+    // const list = new DataTransfer();
+    // await fetch(dataUrl)
+    //   .then(res => res.blob())
+    //   .then(blob => {
+    //     const parseFile = new File([blob], name, { type });
+    //     list.items.add(parseFile);
+    //   });
+    // setCropFile(list.files);
+  }
+
+  const classes = useStyles();
+
+  return (
+    <QueueAnim delay={200} type={['top', 'bottom']}>
+      <LayoutAuthen key={1}>
+        <BoxAuthen>
+          <ShadowBoxAuthen>
+            <HeaderAuthen title="Change Profile" />
+            <ValidatorForm onSubmit={saveChange}>
+              <FlexBox>
+                <PreviewContainter>
+                  <div className="upload_img">
+                    {newAvatar ? (
+                      <Cropper
+                        ref={cropper}
+                        src={newAvatar}
+                        style={{ height: 200, width: 200 }}
+                        // Cropper.js options
+                        aspectRatio={1}
+                        guides={false}
+                        crop={e => crop(e)}
+                        viewMode={3}
+                        autoCrop
+                      />
+                    ) : (
+                      <AvatarPro hash={avatar} className={classes.avatar} />
+                    )}
+                    <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
+                  </div>
+                </PreviewContainter>
+                <RightProfile>
+                  <TextValidator
+                    label="First Name"
+                    fullWidth
+                    onChange={event => setFirstname(event.currentTarget.value)}
+                    name="firstname"
+                    validators={['required']}
+                    errorMessages={['This field is required']}
+                    margin="normal"
+                    value={firstname}
+                  />
+                  <TextValidator
+                    label="Last Name"
+                    fullWidth
+                    onChange={event => setLastname(event.currentTarget.value)}
+                    name="lastname"
+                    validators={['required']}
+                    errorMessages={['This field is required']}
+                    margin="normal"
+                    value={lastname}
+                  />
+                </RightProfile>
+              </FlexBox>
+              <DivControlBtnKeystore>
+                <ButtonPro type="submit">Save change</ButtonPro>
+              </DivControlBtnKeystore>
+            </ValidatorForm>
+          </ShadowBoxAuthen>
+        </BoxAuthen>
+      </LayoutAuthen>
+    </QueueAnim>
+  );
 }
 
 const mapStateToProps = state => {
@@ -349,9 +251,7 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(ChangeProfile)
-);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ChangeProfile);
