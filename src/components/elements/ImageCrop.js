@@ -9,18 +9,28 @@ let timeout = null;
 
 export default function ImageCrop(props) {
   const [originFile, setOriginFile] = useState([]);
-  const [cropFile, setCropFile] = useState('');
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
   const [avaPreview, setAvaPreview] = useState('');
   const { close, accept } = props;
 
-  const acceptCrop = React.useCallback(() => {
-    const cropData = {
-      cropFile,
-      avaPreview,
-    };
+  const acceptCrop = React.useCallback(async () => {
+    const cropFile = await base64toBlob(avaPreview);
+    const cropData = { cropFile, avaPreview };
+
     accept(cropData);
-  }, [cropFile, avaPreview]);
+  }, [avaPreview]);
+
+  async function base64toBlob(b64Data) {
+    const newName = originFile[0].name;
+    const newType = originFile[0].type;
+    const list = new DataTransfer();
+
+    const response = await fetch(b64Data);
+    const blob = await response.blob();
+    const parseFile = new File([blob], newName, { type: newType });
+    list.items.add(parseFile);
+    return list.files;
+  }
 
   function handleImageChange(event) {
     event.preventDefault();
@@ -29,8 +39,7 @@ export default function ImageCrop(props) {
     const file = orFiles[0];
     if (file && orFiles) {
       setOriginFile(orFiles);
-      reader.onloadend = e => {
-        // setOriginFile(files);
+      reader.onloadend = () => {
         setImgPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
@@ -42,20 +51,6 @@ export default function ImageCrop(props) {
     timeout = setTimeout(() => {
       const dataUrl = cropper.getCroppedCanvas().toDataURL();
       setAvaPreview(dataUrl);
-      const newName = originFile[0].name;
-      const newType = originFile[0].type;
-      const list = new DataTransfer();
-      try {
-        fetch(dataUrl)
-          .then(res => res.blob())
-          .then(blob => {
-            const parseFile = new File([blob], newName, { type: newType });
-            list.items.add(parseFile);
-          });
-        setCropFile(list.files);
-      } catch (err) {
-        console.log(err);
-      }
     }, 500);
   }
 
@@ -84,10 +79,12 @@ export default function ImageCrop(props) {
             crop();
           }}
           viewMode={1}
-          autoCrop
           minContainerWidth={200}
           minContainerHeight={200}
-          movable={false}
+          autoCropArea={1}
+          cropBoxResizable={false}
+          cropBoxMovable={false}
+          dragMode="move"
         />
       )}
     </CommonDialog>
