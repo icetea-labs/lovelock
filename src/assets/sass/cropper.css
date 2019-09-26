@@ -13,3 +13,10 @@
 .cropper-line {
   background-color: transparent;
 }
+.cropper-bg {
+  background-image: none;
+  background: #f2f2f2;
+}
+.cropper-modal {
+  background-color: #f2f2f2;
+}
