@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
+import Button from '@material-ui/core/Button';
+import {Editor, EditorState} from 'draft-js';
+import SimpleModal from '../../elements/Modal';
 import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
@@ -117,6 +121,8 @@ export default function CreateMemory(props) {
   const [date, setDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
+  const [isOpenModal, setOpenModal] = useState(true);
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -247,6 +253,16 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
+                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
+                  Advanced
+                </Button>
+                <SimpleModal
+                  open={isOpenModal}
+                  handleClose={() => setOpenModal(false)}
+                  title="Create your note"
+                >
+                  <Editor editorState={editorState} onChange={setEditorState} placeholder="Hello" />
+                </SimpleModal>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
