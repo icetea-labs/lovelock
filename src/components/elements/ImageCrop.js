@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 import '../../assets/sass/cropper.css';
@@ -8,54 +8,63 @@ let cropper = React.createRef(null);
 let timeout = null;
 
 export default function ImageCrop(props) {
-  const [originFile, setOriginFile] = useState([]);
-  const [cropFile, setCropFile] = useState('');
+  // const [originFile, setOriginFile] = useState([]);
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
   const [avaPreview, setAvaPreview] = useState('');
-  const { close, accept } = props;
+  const { close, accept, originFile } = props;
 
-  const acceptCrop = React.useCallback(() => {
-    const cropData = {
-      cropFile,
-      avaPreview,
-    };
-    accept(cropData);
-  }, [cropFile, avaPreview]);
-
-  function handleImageChange(event) {
-    event.preventDefault();
+  useEffect(() => {
     const reader = new FileReader();
-    const orFiles = event.target.files;
-    const file = orFiles[0];
-    if (file && orFiles) {
-      setOriginFile(orFiles);
-      reader.onloadend = e => {
-        // setOriginFile(files);
+    const file = originFile[0];
+    if (originFile && file) {
+      reader.onloadend = () => {
         setImgPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
     }
+  }, []);
+
+  const acceptCrop = useCallback(async () => {
+    const dataUrl = avaPreview.getCroppedCanvas().toDataURL();
+
+    const cropFile = await base64toBlob(dataUrl);
+    const cropData = { cropFile, avaPreview: dataUrl };
+
+    accept(cropData);
+  }, [avaPreview]);
+
+  async function base64toBlob(b64Data) {
+    const newName = originFile[0].name;
+    const newType = originFile[0].type;
+    const list = new DataTransfer();
+
+    const response = await fetch(b64Data);
+    const blob = await response.blob();
+    const parseFile = new File([blob], newName, { type: newType });
+    list.items.add(parseFile);
+    return list.files;
   }
+
+  // function handleImageChange(event) {
+  //   event.preventDefault();
+  //   const reader = new FileReader();
+  //   const orFiles = event.target.files;
+  //   const file = orFiles[0];
+  //   if (file && orFiles) {
+  //     setOriginFile(orFiles);
+  //     reader.onloadend = () => {
+  //       setImgPreviewUrl(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // }
 
   function crop() {
     if (timeout) clearTimeout(timeout);
+
     timeout = setTimeout(() => {
-      const dataUrl = cropper.getCroppedCanvas().toDataURL();
-      setAvaPreview(dataUrl);
-      const newName = originFile[0].name;
-      const newType = originFile[0].type;
-      const list = new DataTransfer();
-      try {
-        fetch(dataUrl)
-          .then(res => res.blob())
-          .then(blob => {
-            const parseFile = new File([blob], newName, { type: newType });
-            list.items.add(parseFile);
-          });
-        setCropFile(list.files);
-      } catch (err) {
-        console.log(err);
-      }
+      // const dataUrl = cropper.getCroppedCanvas().toDataURL();
+      setAvaPreview(cropper);
     }, 500);
   }
 
@@ -69,14 +78,14 @@ export default function ImageCrop(props) {
       confirm={acceptCrop}
       isCancel
     >
-      <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
-      {imgPreviewUrl && (
+      {/* <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" /> */}
+      {originFile && (
         <Cropper
           ref={value => {
             cropper = value;
           }}
           src={imgPreviewUrl}
-          style={{ height: 400, width: '100%' }}
+          style={{ width: '100%', padding: '20px 0', background: '#f2f2f2' }}
           // Cropper.js options
           aspectRatio={1}
           guides={false}
@@ -84,12 +93,11 @@ export default function ImageCrop(props) {
             crop();
           }}
           viewMode={1}
-          autoCrop
           minContainerWidth={200}
-          minContainerHeight={200}
+          minContainerHeight={300}
           autoCropArea={1}
-          cropBoxMovable={false}
           cropBoxResizable={false}
+          cropBoxMovable={false}
           dragMode="move"
         />
       )}

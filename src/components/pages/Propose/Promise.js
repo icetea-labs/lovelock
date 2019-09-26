@@ -160,6 +160,7 @@ class Promise extends React.Component {
       cropFile: '',
       isOpenCrop: false,
       avatar: '/static/img/no-avatar.jpg',
+      originFile: '',
     };
   }
 
@@ -422,10 +423,20 @@ class Promise extends React.Component {
     this.setState({ [key]: val });
   };
 
-  openCrop = () => {
-    this.setState({
-      isOpenCrop: true,
-    });
+  handleImageChange = event => {
+    event.preventDefault();
+    const orFiles = event.target.files;
+
+    if (orFiles.length > 0) {
+      this.setState({
+        originFile: orFiles,
+        isOpenCrop: true,
+      });
+    } else {
+      this.setState({
+        isOpenCrop: false,
+      });
+    }
   };
 
   closeCrop = () => {
@@ -441,7 +452,7 @@ class Promise extends React.Component {
 
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar } = this.state;
+    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar, originFile } = this.state;
     // console.log('state CK', this.state);
 
     const inputProps = {
@@ -486,11 +497,7 @@ class Promise extends React.Component {
             <PreviewContainter>
               <div className="upload_img">
                 <AvatarProCus src={avatar} />
-                {/* {$imagePreview} */}
-                {/* <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" /> */}
-                <button type="button" onClick={this.openCrop}>
-                  Create Avatar
-                </button>
+                <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
               </div>
             </PreviewContainter>
             <RightBotInfo>
@@ -532,7 +539,7 @@ class Promise extends React.Component {
           onChange={this.promiseStmChange}
         />
         <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
-        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} />}
+        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
       </CommonDialog>
     );
   }
