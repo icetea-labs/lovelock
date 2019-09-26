@@ -46,6 +46,7 @@ function RegisterUsername(props) {
   const [avatarData, setAvatarData] = useState('');
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const [originFile, setOriginFile] = useState([]);
 
   useEffect(() => {
     ValidatorForm.addValidationRule('isPasswordMatch', value => {
@@ -130,8 +131,16 @@ function RegisterUsername(props) {
     history.push('/login');
   }
 
-  function openCrop() {
-    setIsOpenCrop(true);
+  function handleImageChange(event) {
+    event.preventDefault();
+    const orFiles = event.target.files;
+
+    if (orFiles.length > 0) {
+      setOriginFile(orFiles);
+      setIsOpenCrop(true);
+    } else {
+      setIsOpenCrop(false);
+    }
   }
 
   function closeCrop() {
@@ -222,10 +231,7 @@ function RegisterUsername(props) {
           <span>Avatar</span>
           <div>
             <AvatarPro src={avatar} className={classes.avatar} />
-            {/* <input className="fileInput" type="file" onChange={handleImageInput} accept="image/*" /> */}
-            <button type="button" onClick={openCrop}>
-              Create Avatar
-            </button>
+            <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
           </div>
         </Box>
 
@@ -237,7 +243,7 @@ function RegisterUsername(props) {
           </ButtonPro>
         </DivControlBtnKeystore>
       </ValidatorForm>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
     </div>
   );
 }
