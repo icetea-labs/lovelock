@@ -87,7 +87,10 @@ export default function ImageCrop(props) {
           autoCrop
           minContainerWidth={200}
           minContainerHeight={200}
-          movable={false}
+          autoCropArea={1}
+          cropBoxMovable={false}
+          cropBoxResizable={false}
+          dragMode="move"
         />
       )}
     </CommonDialog>
