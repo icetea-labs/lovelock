@@ -1,23 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-// import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Grid from '@material-ui/core/Grid';
 import DateFnsUtils from '@date-io/date-fns';
-// import GridList from '@material-ui/core/GridList';
-// import GridListTile from '@material-ui/core/GridListTile';
-// import GridListTileBar from '@material-ui/core/GridListTileBar';
-// import IconButton from '@material-ui/core/IconButton';
-// import CloseIcon from '@material-ui/icons/Close';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import AddIcon from '@material-ui/icons/Add';
 
 const Container = styled.div``;
-// const ImgList = styled.div`
-//   width: 100%;
-//   img {
-//     width: 100px;
-//     height: 100px;
-//   }
-// `;
+const ImgList = styled.div`
+  width: 100%;
+  img {
+    width: 100px;
+    height: 100px;
+  }
+`;
 const InfoBox = styled.div`
   min-height: 55px;
   /* margin-top: 10px; */
@@ -90,30 +91,113 @@ const DateBox = styled.div`
     z-index: 1;
   }
 `;
-// const useStyles = makeStyles(theme => ({
-//   root: {
-//     display: 'flex',
-//     flexWrap: 'wrap',
-//     justifyContent: 'flex-start',
-//     overflow: 'hidden',
-//     backgroundColor: theme.palette.background.paper,
-//   },
-//   gridList: {
-//     flexWrap: 'nowrap',
-//     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-//     transform: 'translateZ(0)',
-//   },
-//   img: {
-//     width: 30,
-//     height: 50,
-//   },
-//   titleBar: {
-//     background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-//   },
-//   icon: {
-//     color: 'white',
-//   },
-// }));
+
+const ImgUploadPreview = styled.div`
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  .scrollWrap {
+    width: 100%;
+    overflow-y: hidden;
+    overflow-x: auto;
+    position: relative;
+    height: 150%;
+  }
+  .scrollBody {
+    position: relative;
+    display: inline-block;
+  }
+  .scrollContent {
+    white-space: nowrap;
+  }
+  .imgContent {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 5px;
+    img {
+      width: 100px;
+      height: 100px;
+    }
+  }
+`;
+const AddMoreImg = styled.span`
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: top;
+  height: 112px;
+  /* width: 100%; */
+  .addImgBox {
+    position: relative;
+    display: inline-block;
+  }
+  .btAddImg {
+    margin-right: 12px;
+    background-image: url('/static/img/no-avatar.jpg');
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: 20px;
+
+    border: 2px dashed #dddfe2;
+    border-radius: 2px;
+    box-sizing: border-box;
+    display: inline-block;
+    height: 100px;
+    margin-right: 5px;
+    min-width: 100px;
+    position: relative;
+    width: auto;
+
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .wrapperInput {
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+  }
+  .btInput {
+    bottom: 0;
+    cursor: inherit;
+    font-size: 1000px !important;
+    height: 300px;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    outline: none;
+  }
+`;
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+  },
+  gridList: {
+    flexWrap: 'nowrap',
+    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: 'translateZ(0)',
+  },
+  img: {
+    width: 30,
+    height: 50,
+  },
+  titleBar: {
+    background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+  },
+  icon: {
+    color: 'white',
+  },
+}));
+
 function MaterialUIPickers(props) {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -121,38 +205,68 @@ function MaterialUIPickers(props) {
     </MuiPickersUtilsProvider>
   );
 }
-// const tileData = [
-//   {
-//     img: '/static/img/user-men.jpg',
-//     title: 'Image',
-//     author: 'author',
-//   },
-// {
-//   img: '/static/img/user-men.jpg',
-//   title: 'Image',
-//   author: 'author',
-// },
-// {
-//   img: '/static/img/user-men.jpg',
-//   title: 'Image',
-//   author: 'author',
-// },
-// ];
 
 export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   // const [date, setDate] = useState(new Date());
   const { files, date } = props;
+  const [pictures, setPictures] = useState(null);
+
   function captureUploadFile(event) {
-    onChangeMedia(event.target.files);
+    const imgFile = event.target.files;
+    onChangeMedia(imgFile);
+
+    const file = imgFile[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // setPictures(pictures.concat({ img: reader.result }));
+      setPictures([{ img: reader.result }]);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    } else {
+      // preview.src = '';
+    }
   }
   function handleDateChange(value) {
-    // setDate(value);
     onChangeDate(value);
   }
-  // const classes = useStyles();
+  const classes = useStyles();
+
   return (
     <Container>
+      {pictures && (
+        <ImgUploadPreview>
+          <div className="scrollWrap">
+            <div className="scrollBody">
+              <div className="scrollContent">
+                {pictures.map((tile, index) => (
+                  <div key={index} className="imgContent">
+                    <img src={tile.img} alt="" />
+                  </div>
+                ))}
+                <AddMoreImg>
+                  <div className="addImgBox">
+                    <a className="btAddImg" rel="ignore">
+                      <div className="wrapperInput">
+                        <input
+                          accept="video/*,  video/x-m4v, video/webm, video/x-ms-wmv, video/x-msvideo, video/3gpp, video/flv, video/x-flv, video/mp4, video/quicktime, video/mpeg, video/ogv, .ts, .mkv, image/*, image/heic, image/heif"
+                          title="Choose a file to upload"
+                          display="inline-block"
+                          type="file"
+                          className="btInput"
+                          onChange={captureUploadFile}
+                        />
+                      </div>
+                    </a>
+                  </div>
+                </AddMoreImg>
+              </div>
+            </div>
+          </div>
+        </ImgUploadPreview>
+      )}
+
       {/* <ImgList>
         <div className={classes.root}>
           <GridList cellHeight={100} className={classes.gridList} cols={1}>

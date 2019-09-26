@@ -195,6 +195,7 @@ export default function CreateMemory(props) {
       setDate(new Date());
       setMemoryContent('');
       setPrivacy(0);
+      setDisableShare(true);
     }, 100);
   }
 
