@@ -4,8 +4,7 @@
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "^1.3.11",
-    "@iceteachain/common": "0.1.2",
-    "@iceteachain/web3": "0.1.9",
+    "@iceteachain/web3": "0.1.14",
     "@material-ui/core": "^4.4.2",
     "@material-ui/icons": "^4.4.1",
     "@material-ui/lab": "^4.0.0-alpha.26",
@@ -41,7 +40,12 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "icetea": "icetea start -n private",
+    "icetea:debug": "icetea start -n private -d",
+    "deploy": "node script/deploy.js",
+    "deploy:all": "node script/deploy.js && node script/deploy.js prod",
+    "deploy:prod": "node script/deploy.js prod"
   },
   "eslintConfig": {
     "extends": "react-app",
@@ -64,6 +68,8 @@
     ]
   },
   "devDependencies": {
+    "@iceteachain/sunseed": "github:TradaTech/sunseed",
+    "envfile": "^3.0.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-import": "^2.14.0",
