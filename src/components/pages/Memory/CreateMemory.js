@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -7,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import Button from '@material-ui/core/Button';
-import Dante from "Dante2";
+import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import { useSnackbar } from 'notistack';
 
@@ -122,6 +121,7 @@ export default function CreateMemory(props) {
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
+  const [editorContent, setEditorContent] = useState(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -161,6 +161,18 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setFilePath(value);
+  }
+
+  function onSubmitEditor(){
+    let content = JSON.stringify(editorContent)
+    setMemoryContent(content)
+    handleShareMemory(content)
+    localStorage.setItem("editorContent", content)
+  }
+
+  function onChangeEditor(value){
+    console.log('handleSumit: ', value)
+    setEditorContent(value)
   }
 
   async function handleShareMemory() {
@@ -258,9 +270,10 @@ export default function CreateMemory(props) {
                 <SimpleModal
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}
+                  handleSumit={() => onSubmitEditor()}
                   title="Create your note"
                 >
-                  <Dante />
+                  <Editor onChange={(value) => onChangeEditor(value)} />
                 </SimpleModal>
                 <ButtonPro
                   type="submit"
