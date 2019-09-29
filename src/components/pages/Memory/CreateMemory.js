@@ -7,7 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import Button from '@material-ui/core/Button';
-import {Editor, EditorState} from 'draft-js';
+import Dante from "Dante2";
 import SimpleModal from '../../elements/Modal';
 import { useSnackbar } from 'notistack';
 
@@ -121,8 +121,7 @@ export default function CreateMemory(props) {
   const [date, setDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
-  const [isOpenModal, setOpenModal] = useState(true);
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [isOpenModal, setOpenModal] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -261,7 +260,7 @@ export default function CreateMemory(props) {
                   handleClose={() => setOpenModal(false)}
                   title="Create your note"
                 >
-                  <Editor editorState={editorState} onChange={setEditorState} placeholder="Hello" />
+                  <Dante />
                 </SimpleModal>
                 <ButtonPro
                   type="submit"

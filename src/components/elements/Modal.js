@@ -1,6 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
     paper: {
@@ -19,6 +20,9 @@ const useStyles = makeStyles(theme => ({
     title: {
         fontSize: 22,
         marginBottom: 30,
+    },
+    wrapper:{
+        overflow: 'auto'
     }
 }));
 
@@ -30,10 +34,16 @@ export default function SimpleModal(props) {
             aria-describedby="simple-modal-description"
             open={props.open}
             onClose={props.handleClose}
+            className={classes.wrapper}
         >
             <div className={classes.paper}>
                 <div className={classes.title}>{props.title}</div>
                 {props.children}
+                <div>
+                    <Button variant="contained" color="primary">
+                        Publish
+                    </Button>
+                </div>
             </div>
         </Modal>
     );
