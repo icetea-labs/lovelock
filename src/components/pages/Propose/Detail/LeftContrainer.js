@@ -209,7 +209,7 @@ class LeftContrainer extends PureComponent {
       }
       // Get info tags partner. case on receiver is bot address -> get tags info of sender address
       const reps = await getTagsInfo(partnerAddress);
-      const botInfo = JSON.parse(proposes[i].bot_info || '{}');
+      const botInfo = proposes[i].bot_info;
       if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
         proposes[i].name = `${botInfo.firstname} ${botInfo.lastname}`;
         proposes[i].avatar = botInfo.botAva;

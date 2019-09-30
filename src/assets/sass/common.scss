@@ -15,6 +15,10 @@ body {
   background: #e9ebee;
   font-size: rem(14);
 }
+textarea:focus,
+input:focus {
+  outline: none;
+}
 // a {
 //   // color: #4a90e2;
 //   text-decoration: none;

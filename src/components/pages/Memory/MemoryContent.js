@@ -61,7 +61,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function MemoryContent(props) {
-  const { memory, proIndex } = props;
+  const { memory, proIndex, db } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -75,6 +75,8 @@ export default function MemoryContent(props) {
     if (memoryDecrypted.isPrivate) {
       decodePrivateMemory();
     }
+    // create the store
+    // console.log('db', db);
   }, [privateKey, proIndex]);
 
   useEffect(() => {

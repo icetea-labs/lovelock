@@ -208,11 +208,7 @@ class Promise extends React.Component {
         if (cropFile) {
           botAva = await saveToIpfs(cropFile);
         }
-        let info = {
-          date,
-          hash,
-        };
-        info = JSON.stringify(info);
+        const info = { date, hash };
         const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
@@ -253,15 +249,8 @@ class Promise extends React.Component {
             setLoading(false);
             return;
           }
-          botInfo = {
-            firstname,
-            lastname,
-            botAva,
-            botReply,
-          };
+          botInfo = { firstname, lastname, botAva, botReply };
         }
-
-        botInfo = JSON.stringify(botInfo);
 
         const params = [promiseStm, partner, info, botInfo];
         // const params = [promiseStm, partner, info];

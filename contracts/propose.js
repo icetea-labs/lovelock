@@ -29,7 +29,7 @@ class Propose {
   @view @state p2m = {}; //1:n  { 'proindex':[1,2,3...] }
   @view @state m2p = {}; //1:1  { 'memoryindex':'proindex' }
 
-  @transaction createPropose(s_content: string, receiver: string, s_info: string, bot_info: string) {
+  @transaction createPropose(s_content: string, receiver: string, s_info, bot_info) {
     const sender = msg.sender;
     const isPrivate = false;
     const defaultPropose = {
