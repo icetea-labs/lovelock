@@ -3,10 +3,9 @@
 1. Install
 
 - Rename `.env.example` to `.env`
-- `npm i -g TradaTech/icetea`
-- `npm install -g ndb`
+- `npm i -g ndb TradaTech/icetea`
 - `icetea init`
-- `npm install`
+- `npm i`
 
 2. Start Icetea Node
 
@@ -14,10 +13,6 @@
 - Or debug mode: `icetea start -d`
 
 To start the Icetea web, run `icetea app`. To reset Icetea state, run `icetea reset`.
-
-To debug contract, run 
-
-For debug, you can run
 
 3. Deploy contracts
 
