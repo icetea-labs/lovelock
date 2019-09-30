@@ -41,8 +41,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "icetea": "icetea start -n private",
-    "icetea:debug": "icetea start -n private -d",
     "deploy": "node script/deploy.js",
     "deploy:all": "node script/deploy.js && node script/deploy.js prod",
     "deploy:prod": "node script/deploy.js prod"
