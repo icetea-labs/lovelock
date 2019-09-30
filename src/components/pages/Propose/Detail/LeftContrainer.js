@@ -124,7 +124,12 @@ class LeftContrainer extends PureComponent {
   };
 
   closePopup = () => {
+    const { propose, history } = this.props;
     this.setState({ step: '' });
+    if (propose[propose.length - 1].receiver === process.env.REACT_APP_BOT_LOVER) {
+      const index = propose[propose.length - 1].id;
+      history.push(`/propose/${index}`);
+    }
   };
 
   nextToAccept = () => {
@@ -136,7 +141,8 @@ class LeftContrainer extends PureComponent {
   };
 
   selectAccepted = index => {
-    this.props.history.push('/propose/' + index);
+    const { history } = this.props;
+    history.push(`/propose/${index}`);
   };
 
   newPromise = () => {
@@ -153,15 +159,15 @@ class LeftContrainer extends PureComponent {
     const { setNeedAuth, privateKey } = this.props;
     if (!privateKey) {
       setNeedAuth(true);
-      this.setState({ step: 'pending', index: index });
+      this.setState({ step: 'pending', index });
     } else {
-      this.setState({ step: 'pending', index: index });
+      this.setState({ step: 'pending', index });
     }
     // console.log('view pending index', index);
   };
 
   eventConfirmPropose(data) {
-    const { setPropose, propose, address } = this.props;
+    const { setPropose, propose, address, enqueueSnackbar } = this.props;
     const newArray = propose.slice() || [];
     const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
     newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
@@ -169,13 +175,13 @@ class LeftContrainer extends PureComponent {
     // console.log('eventConfirmPropose');
     if (address === data.log.sender) {
       const message = 'Your propose has been approved.';
-      this.props.enqueueSnackbar(message, { variant: 'info' });
+      enqueueSnackbar(message, { variant: 'info' });
     }
     setPropose(newArray);
   }
 
   async eventCreatePropose(data) {
-    const { setPropose, propose, address } = this.props;
+    const { setPropose, propose, address, enqueueSnackbar } = this.props;
     // console.log('data.log', data.log);
     const log = await this.addInfoToProposes(data.log);
     // console.log('eventCreatePropose');
@@ -183,7 +189,7 @@ class LeftContrainer extends PureComponent {
     // console.log('propose.sender', log);
     if (address !== log.sender) {
       const message = 'You have a new propose.';
-      this.props.enqueueSnackbar(message, { variant: 'info' });
+      enqueueSnackbar(message, { variant: 'info' });
     }
   }
 

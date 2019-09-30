@@ -16,26 +16,29 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [memoryList, setMemoryList] = useState([]);
   useEffect(() => {
-    async function fetchData() {
-      await loadMemory();
-    }
-    fetchData();
+    // async function fetchData() {
+    loadMemory();
+    // }
+    // fetchData();
   }, []);
   async function loadMemory() {
-    const allMemory = await callView('getMemoriesByRange', [0, 10]);
+    const allMemory = await callView('getMemoriesByRange', [0, 100]);
     let newMemoryList = [];
-
-    for (let i = 0; i < allMemory.length; i++) {
-      const obj = allMemory[i];
-      const sender = obj.sender;
-      obj.info = JSON.parse(obj.info);
-      const reps = await getTagsInfo(sender);
-      obj.name = reps['display-name'];
-      obj.avatar = reps['avatar'];
-      newMemoryList.push(obj);
+    if (allMemory && allMemory.length) {
+      for (let i = 0; i < 10; i++) {
+        const obj = allMemory[i];
+        if (obj) {
+          const sender = obj.sender;
+          obj.info = JSON.parse(obj.info);
+          const reps = await getTagsInfo(sender);
+          obj.name = reps['display-name'];
+          obj.avatar = reps['avatar'];
+          newMemoryList.push(obj);
+        }
+      }
+      newMemoryList = newMemoryList.reverse();
     }
-    newMemoryList = newMemoryList.reverse();
-    // console.log('newMemoryList', newMemoryList);
+    console.log('newMemoryList', newMemoryList);
     setMemoryList(newMemoryList);
     setLoading(false);
   }

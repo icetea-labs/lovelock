@@ -47,18 +47,17 @@ const PreviewContainter = styled.div`
     display: inline-block;
     cursor: pointer;
   }
-  .createBtnWrapper {
+  /* .createBtnWrapper {
     padding: 10px 0 0 0;
     cursor: pointer;
-  }
+  } */
 
-  .createBtn {
+  /* .createBtn {
     margin: 0 10px 0 10px;
-  }
+  } */
   .fileInput {
     width: 100%;
     height: 25px;
-    /* border: 1px solid #eddada8f; */
     padding: 2px;
     margin: 10px;
     cursor: pointer;
@@ -88,6 +87,7 @@ function ChangeProfile(props) {
   const [avatar, setAvatar] = useState('');
   const [cropFile, setCropFile] = useState('');
   const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [originFile, setOriginFile] = useState([]);
 
   useEffect(() => {
     getData();
@@ -133,8 +133,16 @@ function ChangeProfile(props) {
     }
   }
 
-  function openCrop() {
-    setIsOpenCrop(true);
+  function handleImageChange(event) {
+    event.preventDefault();
+    const orFiles = event.target.files;
+
+    if (orFiles.length > 0) {
+      setOriginFile(orFiles);
+      setIsOpenCrop(true);
+    } else {
+      setIsOpenCrop(false);
+    }
   }
 
   function closeCrop() {
@@ -165,9 +173,7 @@ function ChangeProfile(props) {
                       <AvatarPro hash={avatar} className={classes.avatar} />
                     )}
                     <div className="createBtnWrapper">
-                      <button className="createBtn" type="button" onClick={openCrop}>
-                        Create Avatar
-                      </button>
+                      <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
                     </div>
                   </div>
                 </PreviewContainter>
@@ -198,7 +204,7 @@ function ChangeProfile(props) {
                 <ButtonPro type="submit">Save change</ButtonPro>
               </DivControlBtnKeystore>
             </ValidatorForm>
-            {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} />}
+            {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
           </ShadowBoxAuthen>
         </BoxAuthenCus>
       </LayoutAuthen>
