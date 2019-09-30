@@ -15,10 +15,6 @@
 
 To start the Icetea web, run `icetea app`. To reset Icetea state, run `icetea reset`.
 
-To debug contract, run 
-
-For debug, you can run
-
 3. Deploy contracts
 
 - `npm run deploy` (this will load and update `.env`)
