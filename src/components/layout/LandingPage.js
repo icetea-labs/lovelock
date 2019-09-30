@@ -157,7 +157,9 @@ const theme = createMuiTheme({
 
 class LandingPage extends PureComponent {
   render() {
-    return (
+    const currentUrl = window.location.href;
+    const isPropose = currentUrl.includes('propose');
+    return !isPropose ? (
       <React.Fragment>
         <OutBox>
           <SplitLeft>
@@ -218,6 +220,8 @@ class LandingPage extends PureComponent {
           </CopyRight>
         </FooterWapper>
       </React.Fragment>
+    ) : (
+      <div />
     );
   }
 }
