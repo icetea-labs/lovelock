@@ -13,7 +13,7 @@ class LoveLock {
   //   r_info: '',
   //   status: 0
   // },
-  @view @state propose = [];
+  @view @state proposes = [];
   @view @state a2p = {}; //1:n { 'address':[1,2,3...] }
 
   // {
@@ -56,7 +56,7 @@ class LoveLock {
     }
 
     //new pending propose
-    const index = this.propose.push(pendingPropose) - 1;
+    const index = this.proposes.push(pendingPropose) - 1;
 
     //map address to propose
     const a2p = this.a2p;
@@ -83,7 +83,7 @@ class LoveLock {
     const arrPro = this.a2p[address] || [];
     let resp = [];
     arrPro.forEach(index => {
-      let pro = getDataByIndex(this.propose, index);
+      let pro = getDataByIndex(this.proposes, index);
       pro = Object.assign({}, pro, { id: index });
       if (pro.isPrivate && (msg.sender === pro.sender || msg.sender === pro.receiver)) {
         resp.push(pro);
@@ -96,7 +96,7 @@ class LoveLock {
   }
 
   @view getProposeByIndex(index: number) {
-    const pro = getDataByIndex(this.propose, index);
+    const pro = getDataByIndex(this.proposes, index);
     let resp = [];
     if (pro && pro.isPrivate) {
       isOwnerPropose(pro, "Cannot get propose.", msg.sender);
@@ -131,7 +131,7 @@ class LoveLock {
   }
   // info { img:Array, location:string, date:string }
   @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info: string) {
-    let pro = getDataByIndex(this.propose, proIndex);
+    let pro = getDataByIndex(this.proposes, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Cannot add memory to other people's timeline.");
     const sender = msg.sender;
 
@@ -189,7 +189,7 @@ class LoveLock {
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
     const sender = msg.sender;
-    let pro = getDataByIndex(this.propose, index);
+    let pro = getDataByIndex(this.proposes, index);
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:
