@@ -5,15 +5,19 @@
 - Rename `.env.example` to `.env`
 - `npm i -g TradaTech/icetea`
 - `npm install -g ndb`
-- `icetea init -n private`
+- `icetea init`
 - `npm install`
 
 2. Start Icetea Node
 
-- Normal node: `npm run icetea`
-- Or debug mode: `npm run icetea:debug`
+- Normal node: `icetea start`
+- Or debug mode: `icetea start -d`
 
 To start the Icetea web, run `icetea app`. To reset Icetea state, run `icetea reset`.
+
+To debug contract, run 
+
+For debug, you can run
 
 3. Deploy contracts
 
