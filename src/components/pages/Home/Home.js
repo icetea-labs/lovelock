@@ -8,6 +8,7 @@ import { callView, getTagsInfo } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
 import Promise from '../Propose/Promise';
+import LoadPromise from './LoadPromise';
 
 const RightBox = styled.div`
   padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
@@ -22,8 +23,6 @@ function Home(props) {
   useEffect(() => {
     loadMemory();
   }, []);
-
-  console.log('propose', propose);
 
   async function loadMemory() {
     const allMemory = await callView('getMemoriesByRange', [0, 100]);
@@ -68,7 +67,8 @@ function Home(props) {
         {propose.length > 0 ? (
           <FlexWidthBox width="70%">
             <RightBox>
-              <MemoryContainer loading={loading} memoryList={memoryList} />
+              {/* <MemoryContainer loading={loading} memoryList={memoryList} /> */}
+              <LoadPromise />
             </RightBox>
           </FlexWidthBox>
         ) : (
