@@ -159,7 +159,7 @@ export default function MemoryContent(props) {
     try {
       let content = JSON.parse(memoryDecrypted.content)
       if (content) {
-        console.log(content.blocks)
+        console.log(content)
         return content.blocks.map((line, i) => {
           if (i <= 3) {
             return (
@@ -203,10 +203,10 @@ export default function MemoryContent(props) {
               )}
           </React.Fragment>
         ) : (
-            <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-              {previewEditorMemory()}
-            </Typography>
-          )}
+          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+            {previewEditorMemory()}
+          </Typography>
+        )}
         {decodeEditorMemory() &&
           <>
             <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>See more...</Link>
