@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, CardMedia, IconButton, Typography } from '@material-ui/core';
+import Link from '@material-ui/core/Link';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
+import Editor from './Editor';
+import SimpleModal from '../../elements/Modal';
 
 import MemoryComments from './MemoryComments';
 
@@ -36,6 +39,11 @@ const useStyles = makeStyles(theme => ({
   },
   margin: {
     margin: theme.spacing(1),
+  },
+  seeMore: {
+    cursor: 'pointer',
+    marginTop: 10,
+    display: 'inline-block'
   },
   card: {
     // maxWidth: 345,
@@ -68,6 +76,7 @@ export default function MemoryContent(props) {
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
+  const [isOpenModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -136,6 +145,36 @@ export default function MemoryContent(props) {
     setShowComment(true);
   }
 
+  function decodeEditorMemory() {
+    try {
+      let content = JSON.parse(memoryDecrypted.content)
+      if (content) {
+        return content
+      }
+    } catch (e) { }
+    return false
+  }
+
+  function previewEditorMemory() {
+    try {
+      let content = JSON.parse(memoryDecrypted.content)
+      if (content) {
+        console.log(content.blocks)
+        return content.blocks.map((line, i) => {
+          if (i <= 3) {
+            return (
+              <span key={i}>
+                <span>{line.text}</span> 
+                <br />
+              </span>
+            )
+          }
+        })
+      }
+    } catch (e) { }
+    return memoryDecrypted.content
+  }
+
   const classes = useStyles();
 
   return (
@@ -158,16 +197,29 @@ export default function MemoryContent(props) {
                 <FacebookProgress /> Unlock...
               </span>
             ) : (
-              <IconButton aria-label="settings">
-                <LockIcon />
-              </IconButton>
-            )}
+                <IconButton aria-label="settings">
+                  <LockIcon />
+                </IconButton>
+              )}
           </React.Fragment>
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-            {memoryDecrypted.content}
-          </Typography>
-        )}
+            <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+              {previewEditorMemory()}
+            </Typography>
+          )}
+        {decodeEditorMemory() &&
+          <>
+            <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>See more...</Link>
+            <SimpleModal
+              open={isOpenModal}
+              handleClose={() => setOpenModal(false)}
+              // handleSumit={() => onSubmitEditor()}
+              title="Your memory"
+            >
+              <Editor initContent={decodeEditorMemory()} read_only={true} />
+            </SimpleModal>
+          </>
+        }
       </CardContent>
       <React.Fragment>
         {memoryDecrypted.info.hash && (
@@ -188,13 +240,13 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-        <MemoryActionButton
-          handerShowComment={handerShowComment}
-          likes={memory.likes}
-          memoryIndex={memory.id}
-          numComment={numComment}
-        />
-      )}
+          <MemoryActionButton
+            handerShowComment={handerShowComment}
+            likes={memory.likes}
+            memoryIndex={memory.id}
+            numComment={numComment}
+          />
+        )}
       {showComment && <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>
   );

@@ -25,6 +25,8 @@ if (mode) {
     envPath = '.env.production'
   } else if (mode === 'dev') {
     envPath = '.env.development'
+  } else {
+    envPath = mode
   }
 } else {
   envPath = '.env'

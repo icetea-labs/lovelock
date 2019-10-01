@@ -5,6 +5,9 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
+import Button from '@material-ui/core/Button';
+import Editor from './Editor';
+import SimpleModal from '../../elements/Modal';
 import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
@@ -117,6 +120,8 @@ export default function CreateMemory(props) {
   const [date, setDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
+  const [isOpenModal, setOpenModal] = useState(false);
+  const [editorContent, setEditorContent] = useState(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -156,6 +161,18 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setFilePath(value);
+  }
+
+  function onSubmitEditor(){
+    let content = JSON.stringify(editorContent)
+    setMemoryContent(content)
+    handleShareMemory(content)
+    localStorage.setItem("editorContent", content)
+  }
+
+  function onChangeEditor(value){
+    console.log('handleSumit: ', value)
+    setEditorContent(value)
   }
 
   async function handleShareMemory() {
@@ -247,6 +264,17 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
+                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
+                  Advanced
+                </Button>
+                <SimpleModal
+                  open={isOpenModal}
+                  handleClose={() => setOpenModal(false)}
+                  handleSumit={() => onSubmitEditor()}
+                  title="Create your note"
+                >
+                  <Editor onChange={(value) => onChangeEditor(value)} />
+                </SimpleModal>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
