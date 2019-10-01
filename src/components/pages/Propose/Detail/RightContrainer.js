@@ -14,7 +14,7 @@ const RightBox = styled.div`
 function RightContrainer(props) {
   const { proIndex, privateKey, setMemory, setNeedAuth } = props;
   const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
+  // const [memoryList, setMemoryList] = useState([]);
 
   useEffect(() => {
     loadMemory(proIndex);
@@ -22,6 +22,7 @@ function RightContrainer(props) {
 
   async function loadMemory(index) {
     const respMemories = await callView('getMemoriesByProIndex', [index]);
+
     let newMemoryList = [];
     setLoading(true);
     setTimeout(async () => {
@@ -42,7 +43,6 @@ function RightContrainer(props) {
 
       for (let i = 0; i < respMemories.length; i++) {
         const obj = respMemories[i];
-        obj.info = JSON.parse(obj.info);
         obj.name = tags[i]['display-name'];
         obj.pubkey = tags[i]['pub-key'];
         obj.avatar = tags[i].avatar;
@@ -50,7 +50,7 @@ function RightContrainer(props) {
       }
 
       newMemoryList = newMemoryList.reverse();
-      setMemoryList(newMemoryList);
+      // setMemoryList(newMemoryList);
       setMemory(newMemoryList);
 
       setLoading(false);

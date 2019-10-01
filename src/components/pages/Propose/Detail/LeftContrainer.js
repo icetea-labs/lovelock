@@ -97,11 +97,12 @@ class LeftContrainer extends PureComponent {
   }
 
   watchPropose = async () => {
-    const { address } = this.props;
-    const filter = {}; //{ by: address };
+    const { address, enqueueSnackbar } = this.props;
+    const filter = {};
     tweb3.subscribe('Tx', filter, async (error, result) => {
       if (error) {
-        console.error(error);
+        const message = 'WatchPropose Error';
+        enqueueSnackbar(message, { variant: 'error' });
       } else {
         const data = result.data.value.TxResult.events[0];
         const eventData = data && data.eventData;
@@ -204,33 +205,34 @@ class LeftContrainer extends PureComponent {
 
   async addInfoToProposes(proposes) {
     const { address } = this.props;
-
-    for (let i = 0; i < proposes.length; i++) {
+    const clonePro = proposes;
+    for (let i = 0; i < clonePro.length; i++) {
       // Get address partner
       let partnerAddress = '';
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        partnerAddress = proposes[i].sender;
+      if (clonePro[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        partnerAddress = clonePro[i].sender;
       } else {
-        partnerAddress = proposes[i].sender === address ? proposes[i].receiver : proposes[i].sender;
+        partnerAddress = clonePro[i].sender === address ? clonePro[i].receiver : clonePro[i].sender;
       }
-      // Get info tags partner. case on receiver is bot address -> get tags info of sender address
-      const reps = await getTagsInfo(partnerAddress);
-      const botInfo = proposes[i].bot_info;
-      if (proposes[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-        proposes[i].name = `${botInfo.firstname} ${botInfo.lastname}`;
-        proposes[i].avatar = botInfo.botAva;
+      const botInfo = clonePro[i].bot_info;
+      if (clonePro[i].receiver === process.env.REACT_APP_BOT_LOVER) {
+        clonePro[i].name = `${botInfo.firstname} ${botInfo.lastname}`;
+        clonePro[i].avatar = botInfo.botAva;
       } else {
-        proposes[i].name = reps['display-name'];
-        proposes[i].avatar = reps['avatar'];
+        // Get info tags partner. case on receiver is bot address -> get tags info of sender address
+        // eslint-disable-next-line no-await-in-loop
+        const reps = await getTagsInfo(partnerAddress);
+        clonePro[i].name = reps['display-name'];
+        clonePro[i].avatar = reps.avatar;
       }
-
+      // eslint-disable-next-line no-await-in-loop
       const nick = await getAlias(partnerAddress);
-      proposes[i].nick = '@' + nick;
+      clonePro[i].nick = `@${nick}`;
     }
-    return proposes;
+    return clonePro;
   }
 
-  renderTag = tag => {
+  renderTag = () => {
     // const { tag } = this.state;
     // return tag.map((item, index) => {
     //   return (

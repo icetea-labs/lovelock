@@ -30,12 +30,13 @@ export async function callView(funcName, params) {
 
   return [];
 }
+
 async function callReadOrPure(funcName, params, method) {
   const address = contract;
 
   try {
     const result = await tweb3[method](address, funcName, params || []);
-    return tryStringifyJson(result || '' + result);
+    return tryStringifyJson(result || `${result}`);
   } catch (error) {
     console.log('funcName', funcName);
     console.log(tryStringifyJson(error, true));
@@ -53,12 +54,13 @@ export async function sendTransaction(funcName, params) {
     console.log(error);
   }
 }
+
 export function tryStringifyJson(p, replacer = undefined, space = 2) {
   if (typeof p === 'string') {
     return p;
   }
   try {
-    return '' + JSON.stringify(p, replacer, space);
+    return `${JSON.stringify(p, replacer, space)}`;
   } catch (e) {
     return String(p);
   }
@@ -139,9 +141,7 @@ export async function saveToIpfs(files) {
   await ipfs
     .add([...files], { progress: false })
     .then(response => {
-      console.log(response);
       ipfsId = response[0].hash;
-      console.log(ipfsId);
     })
     .catch(err => {
       console.error(err);

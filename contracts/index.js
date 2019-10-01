@@ -130,7 +130,7 @@ class LoveLock {
     return res;
   }
   // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info: string) {
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info) {
     let pro = getDataByIndex(this.proposes, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Cannot add memory to other people's timeline.");
     const sender = msg.sender;
@@ -173,7 +173,7 @@ class LoveLock {
   }
 
   // create comment for memory
-  @transaction addComment(memoIndex: number, content: string, info: string) {
+  @transaction addComment(memoIndex: number, content: string, info) {
     const sender = msg.sender;
     let obj = getDataByIndex(this.memories, memoIndex);
     const timestamp = block.timestamp;

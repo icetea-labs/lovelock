@@ -61,7 +61,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function MemoryContent(props) {
-  const { memory, proIndex, db } = props;
+  const { memory, proIndex } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -115,13 +115,13 @@ export default function MemoryContent(props) {
         setDecoding(true);
         setTimeout(async () => {
           try {
-            let key = obj.pubkey;
+            let partnerKey = obj.pubkey;
             if (address === obj.sender) {
-              key = publicKey;
+              partnerKey = publicKey;
             }
-            obj.content = await decodeWithPublicKey(JSON.parse(obj.content || '{}'), privateKey, key);
-            obj.info = await decodeWithPublicKey(obj.info, privateKey, key);
-            obj.info = JSON.parse(obj.info || '{}');
+            obj.content = await decodeWithPublicKey(JSON.parse(obj.content || '{}'), privateKey, partnerKey);
+            obj.info = await decodeWithPublicKey(obj.info, privateKey, partnerKey);
+            obj.info = JSON.parse(obj.info);
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
           } catch (e) {

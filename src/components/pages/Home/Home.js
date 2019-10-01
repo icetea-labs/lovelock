@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { FlexBox, FlexWidthBox } from '../../elements/StyledUtils';
+import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import LeftContrainer from '../Propose/Detail/LeftContrainer';
 import { callView, getTagsInfo } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
-import { rem } from '../../elements/StyledUtils';
 
 const RightBox = styled.div`
   padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
@@ -28,11 +27,9 @@ export default function Home() {
       for (let i = 0; i < 10; i++) {
         const obj = allMemory[i];
         if (obj) {
-          const sender = obj.sender;
-          obj.info = JSON.parse(obj.info);
-          const reps = await getTagsInfo(sender);
+          const reps = await getTagsInfo(obj.sender);
           obj.name = reps['display-name'];
-          obj.avatar = reps['avatar'];
+          obj.avatar = reps.avatar;
           newMemoryList.push(obj);
         }
       }

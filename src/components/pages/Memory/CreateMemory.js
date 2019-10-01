@@ -176,11 +176,11 @@ export default function CreateMemory(props) {
       let hash = '';
       if (filePath) hash = await saveToIpfs(filePath);
       const method = 'addMemory';
-      const info = JSON.stringify({ date, hash });
+      const info = { date, hash };
       let params = [];
       if (privacy) {
         const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
-        const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
+        const newInfo = await encodeWithPublicKey(JSON.stringify(info), privateKey, publicKey);
         params = [proIndex, !!privacy, newContent, newInfo];
       } else {
         params = [proIndex, !!privacy, memoryContent, info];
