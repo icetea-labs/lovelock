@@ -19,31 +19,43 @@ function Home(props) {
   const [memoryList, setMemoryList] = useState([]);
   const [openPromise, setOpenPromise] = useState(false);
   const { propose, address, history, setNeedAuth, privateKey } = props;
+  const [acceptPropose, setAcceptPropose] = useState([]);
 
   useEffect(() => {
-    loadMemory();
+    // loadMemory();
+    loadAcceptPropose();
   }, []);
 
   async function loadMemory() {
     const allMemory = await callView('getMemoriesByRange', [0, 100]);
     let newMemoryList = [];
     if (allMemory && allMemory.length) {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < allMemory.length; i++) {
         const obj = allMemory[i];
         if (obj) {
-          const sender = obj.sender;
+          const send = obj.sender;
           obj.info = JSON.parse(obj.info);
-          const reps = await getTagsInfo(sender);
+          const reps = await getTagsInfo(send);
           obj.name = reps['display-name'];
-          obj.avatar = reps['avatar'];
+          obj.avatar = reps.avatar;
           newMemoryList.push(obj);
         }
       }
       newMemoryList = newMemoryList.reverse();
+      newMemoryList = newMemoryList.slice(0, 10);
+      setMemoryList(newMemoryList);
+      setLoading(false);
     }
-    console.log('newMemoryList', newMemoryList);
-    setMemoryList(newMemoryList);
-    setLoading(false);
+  }
+
+  async function loadAcceptPropose() {
+    let proposes;
+    proposes = (await callView('getProposeByAddress', [address])) || [];
+    proposes = proposes.filter(item => item.status === 1);
+    if (proposes.length > 0) {
+      const index = proposes[0].id;
+      history.push(`/propose/${index}`);
+    }
   }
 
   function openPopup() {
@@ -65,16 +77,10 @@ function Home(props) {
     address && (
       <FlexBox wrap="wrap">
         <FlexWidthBox width="30%">
-          <LeftContrainer />
+          {/* <LeftContrainer /> */}
         </FlexWidthBox>
-        {propose.length > 0 ? (
-          <FlexWidthBox width="70%">
-            <RightBox>
-              {/* <MemoryContainer loading={loading} memoryList={memoryList} /> */}
-              <LoadPromise />
-            </RightBox>
-          </FlexWidthBox>
-        ) : (
+        <FlexWidthBox width="70%">
+          {/* <RightBox><MemoryContainer loading={loading} memoryList={memoryList} /></RightBox> */}
           <RightBox>
             <div>
               <span>
@@ -82,12 +88,16 @@ function Home(props) {
                 <LinkPro className="btn_add_promise" onClick={openPopup}>
                   Create one
                 </LinkPro>
-                or explorer others.
+                or
+                <LinkPro className="btn_add_promise" onClick={openPopup}>
+                  explorer
+                </LinkPro>
+                others.
               </span>
             </div>
           </RightBox>
-        )}
-        {openPromise && privateKey && <Promise close={closePopup} />}
+          {openPromise && privateKey && <Promise close={closePopup} />}
+        </FlexWidthBox>
       </FlexBox>
     )
   );

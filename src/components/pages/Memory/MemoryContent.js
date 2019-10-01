@@ -159,7 +159,7 @@ export default function MemoryContent(props) {
     try {
       let content = JSON.parse(memoryDecrypted.content)
       if (content) {
-        console.log(content.blocks)
+        // console.log(content.blocks)
         return content.blocks.map((line, i) => {
           if (i <= 3) {
             return (

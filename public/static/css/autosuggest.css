@@ -84,6 +84,11 @@ img {
   font-weight: bold;
 }
 
+.proposeTarget {
+  color: #8250c8;
+  font-weight: bold;
+}
+
 .react-autosuggest__suggestion--focused .highlight {
   color: #fe8dc3;
 }
