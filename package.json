@@ -10,7 +10,7 @@
     "@material-ui/lab": "^4.0.0-alpha.26",
     "@material-ui/pickers": "^3.2.6",
     "@material-ui/styles": "^4.4.1",
-    "Dante2": "^0.5.0-rc4",
+    "Dante2": "^0.5.0-rc9",
     "autosuggest-highlight": "^3.1.1",
     "bip39": "^3.0.2",
     "cropperjs": "^1.5.5",

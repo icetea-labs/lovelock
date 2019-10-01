@@ -126,7 +126,7 @@ class LeftContrainer extends PureComponent {
   closePopup = () => {
     const { propose, history } = this.props;
     this.setState({ step: '' });
-    if (propose[propose.length - 1].receiver === process.env.REACT_APP_BOT_LOVER) {
+    if (propose.length > 0 && propose[propose.length - 1].receiver === process.env.REACT_APP_BOT_LOVER) {
       const index = propose[propose.length - 1].id;
       history.push(`/propose/${index}`);
     }
