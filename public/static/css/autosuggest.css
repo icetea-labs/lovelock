@@ -16,7 +16,6 @@
 }
 
 .react-autosuggest__input:focus {
-  outline: none;
   border: 1px solid #fe8dc3;
 }
 

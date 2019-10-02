@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo } from '../../../../helper';
@@ -11,20 +11,14 @@ const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
 `;
 
-export default function RightContrainer(props) {
-  const { proIndex } = props;
-  const dispatch = useDispatch();
-  const privateKey = useSelector(state => state.account.privateKey);
+function RightContrainer(props) {
+  const { proIndex, privateKey, setMemory, setNeedAuth } = props;
   const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
+  // const [memoryList, setMemoryList] = useState([]);
 
   useEffect(() => {
     loadMemory(proIndex);
   }, [proIndex]);
-
-  function setNeedAuth(value) {
-    dispatch(actions.setNeedAuth(value));
-  }
 
   async function loadMemory(index) {
     const respMemories = await callView('getMemoriesByProIndex', [index]);
@@ -48,7 +42,6 @@ export default function RightContrainer(props) {
 
       for (let i = 0; i < respMemories.length; i++) {
         const obj = respMemories[i];
-        obj.info = JSON.parse(obj.info);
         obj.name = tags[i]['display-name'];
         obj.pubkey = tags[i]['pub-key'];
         obj.avatar = tags[i].avatar;
@@ -56,7 +49,9 @@ export default function RightContrainer(props) {
       }
 
       newMemoryList = newMemoryList.reverse();
-      setMemoryList(newMemoryList);
+      // setMemoryList(newMemoryList);
+      setMemory(newMemoryList);
+
       setLoading(false);
     }, 100);
   }
@@ -64,7 +59,29 @@ export default function RightContrainer(props) {
   return (
     <RightBox>
       <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} />
-      <MemoryContainer proIndex={proIndex} loading={loading} memoryList={memoryList} />
+      <MemoryContainer proIndex={proIndex} loading={loading} />
     </RightBox>
   );
 }
+
+const mapStateToProps = state => {
+  return {
+    privateKey: state.account.privateKey,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+    setNeedAuth(value) {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RightContrainer);

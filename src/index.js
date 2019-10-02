@@ -4,10 +4,12 @@ import { Provider } from 'react-redux';
 import { createMuiTheme } from '@material-ui/core/styles';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
+import { PersistGate } from 'redux-persist/lib/integration/react';
+
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-
-import store from './store';
+import { GlobaLoading } from './components/elements';
+import { persistor, store } from './store';
 
 // const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
@@ -120,6 +122,7 @@ const theme = createMuiTheme({
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
+      {/* <PersistGate loading={<GlobaLoading />} persistor={persistor}> */}
       <SnackbarProvider
         preventDuplicate
         autoHideDuration={3000}
@@ -131,6 +134,7 @@ ReactDOM.render(
       >
         <App />
       </SnackbarProvider>
+      {/* </PersistGate> */}
     </Provider>
   </MuiThemeProvider>,
   document.getElementById('root')

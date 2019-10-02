@@ -21,6 +21,7 @@ function Explore(props) {
 
   async function loadMemory() {
     const allMemory = await callView('getMemoriesByRange', [0, 100]);
+
     let newMemoryList = [];
     if (allMemory && allMemory.length) {
       for (let i = 0; i < allMemory.length; i++) {
@@ -37,8 +38,8 @@ function Explore(props) {
       newMemoryList = newMemoryList.reverse();
       newMemoryList = newMemoryList.slice(0, 10);
       setMemoryList(newMemoryList);
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   return (

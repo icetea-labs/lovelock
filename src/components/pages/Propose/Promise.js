@@ -372,11 +372,10 @@ class Promise extends React.Component {
         if (cropFile) {
           botAva = await saveToIpfs(cropFile);
         }
-        let info = {
+        const info = {
           date,
           hash,
         };
-        info = JSON.stringify(info);
         const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
@@ -424,8 +423,6 @@ class Promise extends React.Component {
             botReply,
           };
         }
-
-        botInfo = JSON.stringify(botInfo);
 
         const params = [promiseStm, partner, info, botInfo];
         // const params = [promiseStm, partner, info];

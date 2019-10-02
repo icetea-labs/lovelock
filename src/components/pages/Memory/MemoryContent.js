@@ -6,12 +6,13 @@ import Link from '@material-ui/core/Link';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { useSnackbar } from 'notistack';
+
 import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
-
 import MemoryComments from './MemoryComments';
 
 const useStylesFacebook = makeStyles({
@@ -78,12 +79,15 @@ export default function MemoryContent(props) {
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
+  const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
       decodePrivateMemory();
     }
+    // create the store
+    // console.log('db', db);
   }, [privateKey, proIndex]);
 
   useEffect(() => {
@@ -122,20 +126,24 @@ export default function MemoryContent(props) {
         setDecoding(true);
         setTimeout(async () => {
           try {
+            let partnerKey = obj.pubkey;
             if (address === obj.sender) {
-              obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, publicKey);
-            } else {
-              obj.content = await decodeWithPublicKey(JSON.parse(obj.content), privateKey, obj.pubkey);
+              partnerKey = publicKey;
             }
+            obj.content = await decodeWithPublicKey(JSON.parse(obj.content || '{}'), privateKey, partnerKey);
+            obj.info = await decodeWithPublicKey(obj.info, privateKey, partnerKey);
+            obj.info = JSON.parse(obj.info);
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
           } catch (e) {
-            console.log(e);
+            const message = JSON.stringify(e);
+            enqueueSnackbar(message, { variant: 'error' });
             setDecoding(false);
           }
         }, 100);
       } else {
-        console.log('Request sharekey');
+        // const message = 'Request sharekey';
+        // enqueueSnackbar(message, { variant: 'error' });
       }
     }, 500);
   }
@@ -252,7 +260,9 @@ export default function MemoryContent(props) {
           numComment={numComment}
         />
       )}
-      {showComment && <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
+      {showComment && (
+        <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+      )}
     </Card>
   );
 }
