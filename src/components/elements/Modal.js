@@ -6,17 +6,15 @@ import Button from '@material-ui/core/Button';
 const useStyles = makeStyles(theme => ({
 	paper: {
 		position: 'absolute',
-		width: '90%',
 		maxWidth: '100%',
-		minHeight: 'calc(100vh - 200px)',
+		minHeight: '100vh',
 		backgroundColor: theme.palette.background.paper,
 		boxShadow: theme.shadows[5],
 		boxSizing: 'border-box',
-		padding: theme.spacing(4, 30, 10),
-		left: '50%',
-		top: 50,
-		transform: 'translateX(-50%)',
-		borderRadius: 3,
+		padding: '32px 3.6% 80px',
+		left: 0,
+		top: 0,
+		width: '100%',
 		outline: 'none',
 	},
 	title: {
@@ -35,6 +33,19 @@ const useStyles = makeStyles(theme => ({
 	},
 	closeBtn: {
 		marginLeft: 10,
+	},
+	closeIcon: {
+		position: 'absolute',
+    right: '7%',
+    top: 24,
+    cursor: 'pointer',
+    fontSize: 40,
+	},
+	subtitle: {
+		marginTop: -15,
+    marginBottom: 50,
+    fontSize: '0.8em',
+    opacity: 0.5,
 	}
 }));
 
@@ -50,6 +61,10 @@ export default function SimpleModal(props) {
 		>
 			<div className={classes.paper}>
 				<div className={classes.title}>{props.title}</div>
+				{props.subtitle && 
+					<div className={classes.subtitle}>{props.subtitle}</div>
+				}
+				<div className={classes.closeIcon} onClick={props.handleClose}>&times;</div>
 				{props.children}
 				<div className={classes.footer}>
 					{props.handleSumit &&
@@ -58,7 +73,7 @@ export default function SimpleModal(props) {
             </Button>
 					}
 					<Button variant="contained" className={classes.closeBtn} onClick={props.handleClose}>
-						Cancel
+						{props.closeText || 'Cancel'}
           </Button>
 				</div>
 			</div>

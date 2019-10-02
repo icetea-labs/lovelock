@@ -72,6 +72,8 @@ export default function MemoryContent(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
+  const propose = useSelector(state => state.loveinfo.propose);
+
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
@@ -213,8 +215,9 @@ export default function MemoryContent(props) {
             <SimpleModal
               open={isOpenModal}
               handleClose={() => setOpenModal(false)}
-              // handleSumit={() => onSubmitEditor()}
-              title="Your memory"
+              closeText="Close"
+              title={`${memoryDecrypted.name} > ${propose[0].name}`}
+              subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
             >
               <Editor initContent={decodeEditorMemory()} read_only={true} />
             </SimpleModal>

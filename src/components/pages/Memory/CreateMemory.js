@@ -74,6 +74,20 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-between',
     paddingBottom: '25px !important',
   },
+  blogBtn: {
+    color: '#8250c8',
+    border: '1px solid #8250c8',
+    padding: '10px 18px 11px 18px',
+    boxSizing: 'border-box',
+    borderRadius: 23,
+    height: 36,
+    fontSize: 12,
+    minWidth: 110,
+    marginTop: 5,
+    marginLeft: -50,
+    outline: 'none',
+    cursor: 'pointer'
+  }
 }));
 
 const BootstrapInput = withStyles(theme => ({
@@ -271,9 +285,7 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
-                  Advanced
-                </Button>
+                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>Write blog...</button>
                 <SimpleModal
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}
