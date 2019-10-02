@@ -25,8 +25,6 @@ const Container = styled.div`
   background-color: #ffffff;
   /* padding: 10px; */
   box-sizing: border-box;
-  background: ${props => props.theme.popupBg};
-  box-shadow: ${props => props.theme.boxShadow};
   position: fixed;
   top: 10%;
   left: 50%;

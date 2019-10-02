@@ -20,7 +20,6 @@ import Divider from '@material-ui/core/Divider';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
@@ -329,7 +328,9 @@ function Header(props) {
     setAnchorElNoti(null);
   }
 
-  function handeExplore() {}
+  function handeExplore() {
+    props.history.push('/explore');
+  }
 
   const address = useSelector(state => state.account.address);
   const dispatch = useDispatch();
@@ -338,11 +339,13 @@ function Header(props) {
 
   useEffect(() => {
     async function fetchData() {
-      if (address) {
-        const reps = await getTagsInfo(address);
-        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
-      } else {
-        // setDisplayName('no name');
+      try {
+        if (address) {
+          const reps = await getTagsInfo(address);
+          dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
+        }
+      } catch (e) {
+        console.log(e);
       }
     }
     fetchData();
@@ -539,7 +542,6 @@ function Header(props) {
                   <Typography className={classes.title} noWrap>
                     Explore
                   </Typography>
-                  <ExpandMoreIcon className={classes.expandMore} />
                 </Button>
                 <div className={classes.sectionDesktop}>
                   <IconButton

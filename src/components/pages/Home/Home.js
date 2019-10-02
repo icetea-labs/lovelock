@@ -3,47 +3,32 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import { LinkPro } from '../../elements/Button';
-import LeftContrainer from '../Propose/Detail/LeftContrainer';
-import { callView, getTagsInfo } from '../../../helper';
-import MemoryContainer from '../Memory/MemoryContainer';
+import { callView } from '../../../helper';
 import * as actions from '../../../store/actions';
 import Promise from '../Propose/Promise';
-import LoadPromise from './LoadPromise';
 
 const RightBox = styled.div`
   padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
 `;
 
 function Home(props) {
-  const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
   const [openPromise, setOpenPromise] = useState(false);
-  const { propose, address, history, setNeedAuth, privateKey } = props;
+  const { address, history, setNeedAuth, privateKey } = props;
+  const [homePropose, setHomePropose] = useState([]);
 
   useEffect(() => {
-    loadMemory();
+    loadAcceptPropose();
   }, []);
 
-  async function loadMemory() {
-    const allMemory = await callView('getMemoriesByRange', [0, 100]);
-    let newMemoryList = [];
-    if (allMemory && allMemory.length) {
-      for (let i = 0; i < 10; i++) {
-        const obj = allMemory[i];
-        if (obj) {
-          const sender = obj.sender;
-          obj.info = JSON.parse(obj.info);
-          const reps = await getTagsInfo(sender);
-          obj.name = reps['display-name'];
-          obj.avatar = reps['avatar'];
-          newMemoryList.push(obj);
-        }
-      }
-      newMemoryList = newMemoryList.reverse();
+  async function loadAcceptPropose() {
+    let proposes;
+    proposes = (await callView('getProposeByAddress', [address])) || [];
+    proposes = proposes.filter(item => item.status === 1);
+    setHomePropose(proposes);
+    if (proposes.length > 0) {
+      const index = proposes[0].id;
+      history.push(`/propose/${index}`);
     }
-    console.log('newMemoryList', newMemoryList);
-    setMemoryList(newMemoryList);
-    setLoading(false);
   }
 
   function openPopup() {
@@ -53,10 +38,14 @@ function Home(props) {
     setOpenPromise(true);
   }
 
+  function openExplore() {
+    history.push('/explore');
+  }
+
   function closePopup() {
     setOpenPromise(false);
-    if (propose.length > 0 && propose[propose.length - 1].receiver === process.env.REACT_APP_BOT_LOVER) {
-      const index = propose[propose.length - 1].id;
+    if (homePropose.length > 0) {
+      const index = homePropose[homePropose.length - 1].id;
       history.push(`/propose/${index}`);
     }
   }
@@ -64,17 +53,8 @@ function Home(props) {
   return (
     address && (
       <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
-          <LeftContrainer />
-        </FlexWidthBox>
-        {propose.length > 0 ? (
-          <FlexWidthBox width="70%">
-            <RightBox>
-              {/* <MemoryContainer loading={loading} memoryList={memoryList} /> */}
-              <LoadPromise />
-            </RightBox>
-          </FlexWidthBox>
-        ) : (
+        <FlexWidthBox width="30%">{/* <LeftContrainer /> */}</FlexWidthBox>
+        <FlexWidthBox width="70%">
           <RightBox>
             <div>
               <span>
@@ -82,12 +62,16 @@ function Home(props) {
                 <LinkPro className="btn_add_promise" onClick={openPopup}>
                   Create one
                 </LinkPro>
-                or explorer others.
+                or
+                <LinkPro className="btn_add_promise" onClick={openExplore}>
+                  explorer
+                </LinkPro>
+                others.
               </span>
             </div>
           </RightBox>
-        )}
-        {openPromise && privateKey && <Promise close={closePopup} />}
+          {openPromise && privateKey && <Promise close={closePopup} />}
+        </FlexWidthBox>
       </FlexBox>
     )
   );

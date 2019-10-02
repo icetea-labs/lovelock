@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => ({
   seeMore: {
     cursor: 'pointer',
     marginTop: 10,
-    display: 'inline-block'
+    display: 'inline-block',
   },
   card: {
     // maxWidth: 345,
@@ -147,32 +147,32 @@ export default function MemoryContent(props) {
 
   function decodeEditorMemory() {
     try {
-      let content = JSON.parse(memoryDecrypted.content)
+      let content = JSON.parse(memoryDecrypted.content);
       if (content) {
-        return content
+        return content;
       }
-    } catch (e) { }
-    return false
+    } catch (e) {}
+    return false;
   }
 
   function previewEditorMemory() {
     try {
-      let content = JSON.parse(memoryDecrypted.content)
+      let content = JSON.parse(memoryDecrypted.content);
       if (content) {
-        console.log(content)
+        console.log(content);
         return content.blocks.map((line, i) => {
           if (i <= 3) {
             return (
               <span key={i}>
-                <span>{line.text}</span> 
+                <span>{line.text}</span>
                 <br />
               </span>
-            )
+            );
           }
-        })
+        });
       }
-    } catch (e) { }
-    return memoryDecrypted.content
+    } catch (e) {}
+    return memoryDecrypted.content;
   }
 
   const classes = useStyles();
@@ -197,19 +197,21 @@ export default function MemoryContent(props) {
                 <FacebookProgress /> Unlock...
               </span>
             ) : (
-                <IconButton aria-label="settings">
-                  <LockIcon />
-                </IconButton>
-              )}
+              <IconButton aria-label="settings">
+                <LockIcon />
+              </IconButton>
+            )}
           </React.Fragment>
         ) : (
           <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
             {previewEditorMemory()}
           </Typography>
         )}
-        {decodeEditorMemory() &&
+        {decodeEditorMemory() && (
           <>
-            <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>See more...</Link>
+            <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>
+              See more...
+            </Link>
             <SimpleModal
               open={isOpenModal}
               handleClose={() => setOpenModal(false)}
@@ -219,7 +221,7 @@ export default function MemoryContent(props) {
               <Editor initContent={decodeEditorMemory()} read_only={true} />
             </SimpleModal>
           </>
-        }
+        )}
       </CardContent>
       <React.Fragment>
         {memoryDecrypted.info.hash && (
@@ -240,13 +242,13 @@ export default function MemoryContent(props) {
       {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
         ''
       ) : (
-          <MemoryActionButton
-            handerShowComment={handerShowComment}
-            likes={memory.likes}
-            memoryIndex={memory.id}
-            numComment={numComment}
-          />
-        )}
+        <MemoryActionButton
+          handerShowComment={handerShowComment}
+          likes={memory.likes}
+          memoryIndex={memory.id}
+          numComment={numComment}
+        />
+      )}
       {showComment && <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} />}
     </Card>
   );
