@@ -163,24 +163,31 @@ export default function CreateMemory(props) {
     setFilePath(value);
   }
 
-  function onSubmitEditor(){
-    let content = JSON.stringify(editorContent)
-    setMemoryContent(content)
-    handleShareMemory(content)
-    localStorage.setItem("editorContent", content)
+  async function onSubmitEditor(e){
+    let blocks = editorContent.blocks
+    for(let i in blocks){
+      if(blocks[i].type == 'image'){
+        let blob = await fetch(blocks[i].data.url).then(r => r.blob())
+        let file = new File([blob], "name");
+        let hash = await saveToIpfs([file])
+        blocks[i].data.url = process.env.REACT_APP_IPFS + hash
+      }
+    }
+    handleShareMemory(JSON.stringify({...editorContent}))
   }
 
   function onChangeEditor(value){
-    console.log('handleSumit: ', value)
     setEditorContent(value)
   }
 
-  async function handleShareMemory() {
-    if (!memoryContent && !filePath) {
+  async function handleShareMemory(advancedMemory) {
+    if (!advancedMemory && !memoryContent && !filePath) {
       const message = 'Please enter memory content or add a photo.';
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }
+
+    let content = advancedMemory || memoryContent
 
     if (!privateKey) {
       setNeedAuth(true);
@@ -196,11 +203,11 @@ export default function CreateMemory(props) {
       const info = JSON.stringify({ date, hash });
       let params = [];
       if (privacy) {
-        const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
+        const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
         params = [proIndex, !!privacy, newContent, newInfo];
       } else {
-        params = [proIndex, !!privacy, memoryContent, info];
+        params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction(method, params);
       if (result) {
@@ -270,7 +277,7 @@ export default function CreateMemory(props) {
                 <SimpleModal
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}
-                  handleSumit={() => onSubmitEditor()}
+                  handleSumit={onSubmitEditor}
                   title="Create your note"
                 >
                   <Editor onChange={(value) => onChangeEditor(value)} />
