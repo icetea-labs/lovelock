@@ -10,6 +10,7 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
+import { Z_BLOCK } from 'zlib';
 
 const Container = styled.div``;
 const ImgList = styled.div`
@@ -133,7 +134,7 @@ const AddMoreImg = styled.span`
   }
   .btAddImg {
     margin-right: 12px;
-    background-image: url('/static/img/no-avatar.jpg');
+    background-image: url('/static/img/plus.png');
     background-position: 50%;
     background-repeat: no-repeat;
     background-size: 20px;
@@ -187,8 +188,12 @@ const useStyles = makeStyles(theme => ({
     transform: 'translateZ(0)',
   },
   img: {
-    width: 30,
-    height: 50,
+    display: 'block',
+    width: 100,
+    height: 100,
+  },
+  title: {
+    color: theme.palette.primary.light,
   },
   titleBar: {
     background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
@@ -242,7 +247,23 @@ export default function AddInfoMessage(props) {
               <div className="scrollContent">
                 {pictures.map((tile, index) => (
                   <div key={index} className="imgContent">
-                    <img src={tile.img} alt="" />
+                    {/* <img src={tile.img} alt="" />
+                    <IconButton aria-label={`close ${tile.title}`}>
+                      <CloseIcon className={classes.icon} />
+                    </IconButton> */}
+                    <GridListTile key={tile.img} className={classes.img}>
+                      <img src={tile.img} alt="" />
+                      <GridListTileBar
+                        actionPosition="right"
+                        className={classes.titleBar}
+                        titlePosition="top"
+                        actionIcon={
+                          <IconButton>
+                            <CloseIcon className={classes.icon} />
+                          </IconButton>
+                        }
+                      />
+                    </GridListTile>
                   </div>
                 ))}
                 <AddMoreImg>
@@ -266,27 +287,6 @@ export default function AddInfoMessage(props) {
           </div>
         </ImgUploadPreview>
       )}
-
-      {/* <ImgList>
-        <div className={classes.root}>
-          <GridList cellHeight={100} className={classes.gridList} cols={1}>
-            {tileData.map((tile, index) => (
-              <GridListTile key={index} className={classes.img}>
-                <img src={tile.img} alt={tile.title} />
-                <GridListTileBar
-                  titlePosition="top"
-                  actionIcon={
-                    <IconButton aria-label={`close ${tile.title}`}>
-                      <CloseIcon className={classes.icon} />
-                    </IconButton>
-                  }
-                  className={classes.titleBar}
-                />
-              </GridListTile>
-            ))}
-          </GridList>
-        </div>
-      </ImgList> */}
       <InfoBox grayLayout={grayLayout}>
         <Grid container spacing={3} alignItems="center" justify="flex-end">
           <Grid item>
