@@ -22,7 +22,6 @@ function RightContrainer(props) {
 
   async function loadMemory(index) {
     const respMemories = await callView('getMemoriesByProIndex', [index]);
-
     let newMemoryList = [];
     setLoading(true);
     setTimeout(async () => {

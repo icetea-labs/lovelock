@@ -28,7 +28,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
-import AvatarPro from '../elements/AvatarPro';
+import { AvatarPro } from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
@@ -128,6 +128,9 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  expandMore: {
+    color: '#fff',
+  },
   menuButton: {
     marginRight: theme.spacing(2),
   },
@@ -137,7 +140,7 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.up('sm')]: {
       display: 'block',
       minWidth: 50,
-      margin: theme.spacing(0, 3, 0, 0),
+      // margin: theme.spacing(0, 3, 0, 0),
       textTransform: 'capitalize',
     },
   },
@@ -325,6 +328,10 @@ function Header(props) {
     setAnchorElNoti(null);
   }
 
+  function handeExplore() {
+    props.history.push('/explore');
+  }
+
   const address = useSelector(state => state.account.address);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
@@ -332,11 +339,13 @@ function Header(props) {
 
   useEffect(() => {
     async function fetchData() {
-      if (address) {
-        const reps = await getTagsInfo(address);
-        dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
-      } else {
-        // setDisplayName('no name');
+      try {
+        if (address) {
+          const reps = await getTagsInfo(address);
+          dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
+        }
+      } catch (e) {
+        console.log(e);
       }
     }
     fetchData();
@@ -529,6 +538,11 @@ function Header(props) {
                     {displayName}
                   </Typography>
                 </Button>
+                <Button className={classes.sectionDesktop} onClick={handeExplore}>
+                  <Typography className={classes.title} noWrap>
+                    Explore
+                  </Typography>
+                </Button>
                 <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
@@ -554,16 +568,6 @@ function Header(props) {
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>
-                  {/* <IconButton
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton> */}
                 </div>
                 <div className={classes.sectionMobile}>
                   <IconButton
@@ -581,14 +585,6 @@ function Header(props) {
           </StyledAppBar>
         </div>
       ) : (
-        // <React.Fragment>
-        //   <Button href="/login" className={classes.menuButton} variant="contained" color="primary">
-        //     Login
-        //   </Button>
-        //   <Button href="/register" className={classes.menuButton} variant="contained" color="primary">
-        //     Register
-        //   </Button>
-        // </React.Fragment>
         <LandingPage />
       )}
       {renderMobileMenu}

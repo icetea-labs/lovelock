@@ -5,6 +5,9 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
+import Button from '@material-ui/core/Button';
+import Editor from './Editor';
+import SimpleModal from '../../elements/Modal';
 import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
@@ -117,6 +120,8 @@ export default function CreateMemory(props) {
   const [date, setDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
+  const [isOpenModal, setOpenModal] = useState(false);
+  const [editorContent, setEditorContent] = useState(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -158,12 +163,31 @@ export default function CreateMemory(props) {
     setFilePath(value);
   }
 
-  async function handleShareMemory() {
-    if (!memoryContent && !filePath) {
+  async function onSubmitEditor(e) {
+    let blocks = editorContent.blocks;
+    for (let i in blocks) {
+      if (blocks[i].type == 'image') {
+        let blob = await fetch(blocks[i].data.url).then(r => r.blob());
+        let file = new File([blob], 'name');
+        let hash = await saveToIpfs([file]);
+        blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
+      }
+    }
+    handleShareMemory(JSON.stringify({ ...editorContent }));
+  }
+
+  function onChangeEditor(value) {
+    setEditorContent(value);
+  }
+
+  async function handleShareMemory(advancedMemory) {
+    if (!advancedMemory && !memoryContent && !filePath) {
       const message = 'Please enter memory content or add a photo.';
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }
+
+    let content = advancedMemory || memoryContent;
 
     if (!privateKey) {
       setNeedAuth(true);
@@ -179,13 +203,14 @@ export default function CreateMemory(props) {
       const info = { date, hash };
       let params = [];
       if (privacy) {
-        const newContent = await encodeWithPublicKey(memoryContent, privateKey, publicKey);
-        const newInfo = await encodeWithPublicKey(JSON.stringify(info), privateKey, publicKey);
+        const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
+        const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
         params = [proIndex, !!privacy, newContent, newInfo];
       } else {
-        params = [proIndex, !!privacy, memoryContent, info];
+        params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction(method, params);
+      console.log('result', result);
       if (result) {
         reLoadMemory(proIndex);
       }
@@ -248,6 +273,17 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
+                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
+                  Advanced
+                </Button>
+                <SimpleModal
+                  open={isOpenModal}
+                  handleClose={() => setOpenModal(false)}
+                  handleSumit={onSubmitEditor}
+                  title="Create your note"
+                >
+                  <Editor onChange={value => onChangeEditor(value)} />
+                </SimpleModal>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}

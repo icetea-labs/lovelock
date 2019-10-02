@@ -1,56 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
-import LeftContrainer from '../Propose/Detail/LeftContrainer';
-import { callView, getTagsInfo } from '../../../helper';
-import MemoryContainer from '../Memory/MemoryContainer';
+import { LinkPro } from '../../elements/Button';
+import { callView } from '../../../helper';
+import * as actions from '../../../store/actions';
+import Promise from '../Propose/Promise';
 
 const RightBox = styled.div`
   padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
 `;
 
-export default function Home() {
-  const address = useSelector(state => state.account.address);
-  const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
+function Home(props) {
+  const [openPromise, setOpenPromise] = useState(false);
+  const { address, history, setNeedAuth, privateKey } = props;
+  const [homePropose, setHomePropose] = useState([]);
+
   useEffect(() => {
-    // async function fetchData() {
-    loadMemory();
-    // }
-    // fetchData();
+    loadAcceptPropose();
   }, []);
-  async function loadMemory() {
-    const allMemory = await callView('getMemoriesByRange', [0, 100]);
-    let newMemoryList = [];
-    if (allMemory && allMemory.length) {
-      for (let i = 0; i < 10; i++) {
-        const obj = allMemory[i];
-        if (obj) {
-          const reps = await getTagsInfo(obj.sender);
-          obj.name = reps['display-name'];
-          obj.avatar = reps.avatar;
-          newMemoryList.push(obj);
-        }
-      }
-      newMemoryList = newMemoryList.reverse();
+
+  async function loadAcceptPropose() {
+    let proposes;
+    proposes = (await callView('getProposeByAddress', [address])) || [];
+    proposes = proposes.filter(item => item.status === 1);
+    setHomePropose(proposes);
+    if (proposes.length > 0) {
+      const index = proposes[0].id;
+      history.push(`/propose/${index}`);
     }
-    console.log('newMemoryList', newMemoryList);
-    setMemoryList(newMemoryList);
-    setLoading(false);
   }
+
+  function openPopup() {
+    if (!privateKey) {
+      setNeedAuth(true);
+    }
+    setOpenPromise(true);
+  }
+
+  function openExplore() {
+    history.push('/explore');
+  }
+
+  function closePopup() {
+    setOpenPromise(false);
+    if (homePropose.length > 0) {
+      const index = homePropose[homePropose.length - 1].id;
+      history.push(`/propose/${index}`);
+    }
+  }
+
   return (
     address && (
       <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
-          <LeftContrainer />
-        </FlexWidthBox>
+        <FlexWidthBox width="30%">{/* <LeftContrainer /> */}</FlexWidthBox>
         <FlexWidthBox width="70%">
           <RightBox>
-            <MemoryContainer loading={loading} memoryList={memoryList} />
+            <div>
+              <span>
+                You have no relationship yet.
+                <LinkPro className="btn_add_promise" onClick={openPopup}>
+                  Create one
+                </LinkPro>
+                or
+                <LinkPro className="btn_add_promise" onClick={openExplore}>
+                  explorer
+                </LinkPro>
+                others.
+              </span>
+            </div>
           </RightBox>
+          {openPromise && privateKey && <Promise close={closePopup} />}
         </FlexWidthBox>
       </FlexBox>
     )
   );
 }
+
+const mapStateToProps = state => {
+  const { loveinfo, account } = state;
+  return {
+    propose: loveinfo.propose,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setNeedAuth: value => {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);
