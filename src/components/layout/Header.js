@@ -328,7 +328,9 @@ function Header(props) {
     setAnchorElNoti(null);
   }
 
-  function handeExplore() {}
+  function handeExplore() {
+    props.history.push('/explore');
+  }
 
   const address = useSelector(state => state.account.address);
   const dispatch = useDispatch();

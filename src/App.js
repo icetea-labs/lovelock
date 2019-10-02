@@ -10,6 +10,7 @@ import { GlobaLoading } from './components/elements';
 import DetailPropose from './components/pages/Propose/Detail';
 import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
+import Explore from './components/pages/Home/Explore';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -27,6 +28,7 @@ function App(props) {
           <Route exact path="/register" component={Register} />
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
           <RouteWithLayout layout={address ? HomeLayout : LandingLayout} exact path="/" component={Home} />
+          <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
           <RouteWithLayout layout={HomeLayout} exact path="/propose/:index" component={DetailPropose} />;
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
           <Route component={NotFound} />
