@@ -241,8 +241,6 @@ export default function AddInfoMessage(props) {
   }
   const classes = useStyles();
 
-  console.log('pictures', pictures);
-
   return (
     <Container>
       {pictures.length > 0 && files && (

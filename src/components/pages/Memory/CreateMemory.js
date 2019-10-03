@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
-import Button from '@material-ui/core/Button';
+import { MentionsInput, Mention } from 'react-mentions';
+import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
-import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
@@ -201,7 +201,7 @@ export default function CreateMemory(props) {
       return;
     }
 
-    let content = advancedMemory || memoryContent;
+    const content = advancedMemory || memoryContent;
 
     if (!privateKey) {
       setNeedAuth(true);
@@ -224,7 +224,7 @@ export default function CreateMemory(props) {
         params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction(method, params);
-      console.log('result', result);
+      // console.log('result', result);
       if (result) {
         reLoadMemory(proIndex);
       }
