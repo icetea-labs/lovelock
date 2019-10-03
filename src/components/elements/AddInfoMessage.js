@@ -9,8 +9,6 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import AddIcon from '@material-ui/icons/Add';
-import { Z_BLOCK } from 'zlib';
 
 const Container = styled.div``;
 const ImgList = styled.div`
@@ -189,8 +187,12 @@ const useStyles = makeStyles(theme => ({
   },
   img: {
     display: 'block',
-    width: 100,
     height: 100,
+    '&:hover': {
+      '& $icon': {
+        display: 'block',
+      },
+    },
   },
   title: {
     color: theme.palette.primary.light,
@@ -200,6 +202,7 @@ const useStyles = makeStyles(theme => ({
   },
   icon: {
     color: 'white',
+    display: 'none',
   },
 }));
 
@@ -215,7 +218,7 @@ export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   // const [date, setDate] = useState(new Date());
   const { files, date } = props;
-  const [pictures, setPictures] = useState(null);
+  const [pictures, setPictures] = useState([]);
 
   function captureUploadFile(event) {
     const imgFile = event.target.files;
@@ -224,8 +227,8 @@ export default function AddInfoMessage(props) {
     const file = imgFile[0];
     const reader = new FileReader();
     reader.onloadend = () => {
-      // setPictures(pictures.concat({ img: reader.result }));
-      setPictures([{ img: reader.result }]);
+      setPictures(pictures.concat({ img: reader.result }));
+      // setPictures([{ img: reader.result }]);
     };
     if (file) {
       reader.readAsDataURL(file);
@@ -238,27 +241,31 @@ export default function AddInfoMessage(props) {
   }
   const classes = useStyles();
 
+  console.log('pictures', pictures);
+
   return (
     <Container>
-      {pictures && (
+      {pictures.length > 0 && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
               <div className="scrollContent">
                 {pictures.map((tile, index) => (
                   <div key={index} className="imgContent">
-                    {/* <img src={tile.img} alt="" />
-                    <IconButton aria-label={`close ${tile.title}`}>
-                      <CloseIcon className={classes.icon} />
-                    </IconButton> */}
                     <GridListTile key={tile.img} className={classes.img}>
                       <img src={tile.img} alt="" />
                       <GridListTileBar
-                        actionPosition="right"
                         className={classes.titleBar}
                         titlePosition="top"
                         actionIcon={
-                          <IconButton>
+                          <IconButton
+                            onClick={() => {
+                              const filtered = pictures.filter((value, id) => {
+                                return id !== index;
+                              });
+                              setPictures(filtered);
+                            }}
+                          >
                             <CloseIcon className={classes.icon} />
                           </IconButton>
                         }
