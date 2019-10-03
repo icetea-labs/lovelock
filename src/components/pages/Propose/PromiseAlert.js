@@ -94,7 +94,7 @@ class PromiseAlert extends React.Component {
   render() {
     const { deny, close, accept, address, index } = this.props;
     const { sender, info, content, name } = this.state;
-    const infoParse = info && JSON.parse(info);
+    const infoParse = info;
     const hash = (infoParse && infoParse.hash) || '';
     // console.log('infoParse', infoParse);
     // console.log('view state', this.state);

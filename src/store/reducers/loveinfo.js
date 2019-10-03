@@ -11,6 +11,8 @@ const userInfo = (state = initialState, action) => {
       return Object.assign({}, state, {
         propose: action.data,
       });
+    case actionTypes.ADD_PROPOSE:
+      return Object.assign({}, state, { propose: [...state.propose, action.data] });
     case actionTypes.SET_CURRENTIDX:
       return Object.assign({}, state, {
         currentProIndex: action.data,
