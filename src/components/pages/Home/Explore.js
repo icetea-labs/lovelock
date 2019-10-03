@@ -28,7 +28,7 @@ function Explore(props) {
         const obj = allMemory[i];
         if (obj) {
           const send = obj.sender;
-          obj.info = JSON.parse(obj.info);
+          // obj.info = JSON.parse(obj.info);
           const reps = await getTagsInfo(send);
           obj.name = reps['display-name'];
           obj.avatar = reps.avatar;

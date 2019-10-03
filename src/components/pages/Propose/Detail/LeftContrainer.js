@@ -74,10 +74,8 @@ function LeftContrainer(props) {
   }, []);
 
   function watchPropose() {
-    console.log('watchPropose');
     const filter = {};
     return tweb3.subscribe('Tx', filter, async (error, result) => {
-      console.log('subscribe');
       if (error) {
         const message = 'WatchPropose Error';
         enqueueSnackbar(message, { variant: 'error' });
