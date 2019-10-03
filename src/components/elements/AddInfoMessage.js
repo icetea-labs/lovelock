@@ -9,7 +9,6 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import AddIcon from '@material-ui/icons/Add';
 
 const Container = styled.div``;
 const ImgList = styled.div`
@@ -133,7 +132,7 @@ const AddMoreImg = styled.span`
   }
   .btAddImg {
     margin-right: 12px;
-    background-image: url('/static/img/no-avatar.jpg');
+    background-image: url('/static/img/plus.png');
     background-position: 50%;
     background-repeat: no-repeat;
     background-size: 20px;
@@ -187,14 +186,23 @@ const useStyles = makeStyles(theme => ({
     transform: 'translateZ(0)',
   },
   img: {
-    width: 30,
-    height: 50,
+    display: 'block',
+    height: 100,
+    '&:hover': {
+      '& $icon': {
+        display: 'block',
+      },
+    },
+  },
+  title: {
+    color: theme.palette.primary.light,
   },
   titleBar: {
     background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
   },
   icon: {
     color: 'white',
+    display: 'none',
   },
 }));
 
@@ -210,7 +218,7 @@ export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   // const [date, setDate] = useState(new Date());
   const { files, date } = props;
-  const [pictures, setPictures] = useState(null);
+  const [pictures, setPictures] = useState([]);
 
   function captureUploadFile(event) {
     const imgFile = event.target.files;
@@ -219,8 +227,8 @@ export default function AddInfoMessage(props) {
     const file = imgFile[0];
     const reader = new FileReader();
     reader.onloadend = () => {
-      // setPictures(pictures.concat({ img: reader.result }));
-      setPictures([{ img: reader.result }]);
+      setPictures(pictures.concat({ img: reader.result }));
+      // setPictures([{ img: reader.result }]);
     };
     if (file) {
       reader.readAsDataURL(file);
@@ -233,16 +241,36 @@ export default function AddInfoMessage(props) {
   }
   const classes = useStyles();
 
+  console.log('pictures', pictures);
+
   return (
     <Container>
-      {pictures && (
+      {pictures.length > 0 && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
               <div className="scrollContent">
                 {pictures.map((tile, index) => (
                   <div key={index} className="imgContent">
-                    <img src={tile.img} alt="" />
+                    <GridListTile key={tile.img} className={classes.img}>
+                      <img src={tile.img} alt="" />
+                      <GridListTileBar
+                        className={classes.titleBar}
+                        titlePosition="top"
+                        actionIcon={
+                          <IconButton
+                            onClick={() => {
+                              const filtered = pictures.filter((value, id) => {
+                                return id !== index;
+                              });
+                              setPictures(filtered);
+                            }}
+                          >
+                            <CloseIcon className={classes.icon} />
+                          </IconButton>
+                        }
+                      />
+                    </GridListTile>
                   </div>
                 ))}
                 <AddMoreImg>
@@ -266,27 +294,6 @@ export default function AddInfoMessage(props) {
           </div>
         </ImgUploadPreview>
       )}
-
-      {/* <ImgList>
-        <div className={classes.root}>
-          <GridList cellHeight={100} className={classes.gridList} cols={1}>
-            {tileData.map((tile, index) => (
-              <GridListTile key={index} className={classes.img}>
-                <img src={tile.img} alt={tile.title} />
-                <GridListTileBar
-                  titlePosition="top"
-                  actionIcon={
-                    <IconButton aria-label={`close ${tile.title}`}>
-                      <CloseIcon className={classes.icon} />
-                    </IconButton>
-                  }
-                  className={classes.titleBar}
-                />
-              </GridListTile>
-            ))}
-          </GridList>
-        </div>
-      </ImgList> */}
       <InfoBox grayLayout={grayLayout}>
         <Grid container spacing={3} alignItems="center" justify="flex-end">
           <Grid item>
