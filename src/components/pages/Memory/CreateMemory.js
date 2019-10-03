@@ -86,8 +86,8 @@ const useStyles = makeStyles(theme => ({
     marginTop: 5,
     marginLeft: -50,
     outline: 'none',
-    cursor: 'pointer'
-  }
+    cursor: 'pointer',
+  },
 }));
 
 const BootstrapInput = withStyles(theme => ({
@@ -230,7 +230,7 @@ export default function CreateMemory(props) {
       }
       setGLoading(false);
       setGrayLayout(false);
-      setFilePath('');
+      setFilePath(null);
       setDate(new Date());
       setMemoryContent('');
       setPrivacy(0);
@@ -287,7 +287,9 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>Write blog...</button>
+                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
+                  Write blog...
+                </button>
                 <SimpleModal
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}

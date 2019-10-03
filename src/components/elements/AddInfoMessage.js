@@ -245,7 +245,7 @@ export default function AddInfoMessage(props) {
 
   return (
     <Container>
-      {pictures.length > 0 && (
+      {pictures.length > 0 && files && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
