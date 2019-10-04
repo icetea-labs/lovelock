@@ -236,11 +236,18 @@ export default function MemoryContent(props) {
       </CardContent>
       <React.Fragment>
         {memoryDecrypted.info.hash && (
-          <CardMedia
-            className={classes.media}
-            image={process.env.REACT_APP_IPFS + memoryDecrypted.info.hash}
-            title="img"
-          />
+          <React.Fragment>
+            {memoryDecrypted.info.hash.map((hash, index) => {
+              return (
+                <CardMedia
+                  key={index}
+                  className={classes.media}
+                  image={process.env.REACT_APP_IPFS + hash}
+                  title="img"
+                />
+              );
+            })}
+          </React.Fragment>
         )}
         {/* <ImageGridList
               imgs={[

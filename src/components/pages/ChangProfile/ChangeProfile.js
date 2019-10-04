@@ -5,7 +5,7 @@ import QueueAnim from 'rc-queue-anim';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
-import { getTagsInfo, setTagsInfo, saveToIpfs } from '../../../helper';
+import { getTagsInfo, setTagsInfo, saveFileToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
@@ -115,7 +115,7 @@ function ChangeProfile(props) {
         const respTagFirst = await setTagsInfo(address, 'firstname', firstname);
         const respTagLast = await setTagsInfo(address, 'lastname', lastname);
         if (cropFile) {
-          const hash = await saveToIpfs(cropFile);
+          const hash = await saveFileToIpfs(cropFile);
           respAvatar = await setTagsInfo(address, 'avatar', hash);
           setAccount({ displayName, avatar: hash });
         } else {

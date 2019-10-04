@@ -8,7 +8,7 @@ import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
 
 import tweb3 from '../../../../service/tweb3';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveToIpfs } from '../../../../helper';
+import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
@@ -97,7 +97,7 @@ function RegisterUsername(props) {
           const respTagLastname = await setTagsInfo(address, 'lastname', lastname);
           const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
           if (avatarData) {
-            const hash = await saveToIpfs(avatarData);
+            const hash = await saveFileToIpfs(avatarData);
             await setTagsInfo(address, 'avatar', hash);
           }
 

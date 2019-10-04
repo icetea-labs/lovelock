@@ -5,15 +5,14 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
-import Button from '@material-ui/core/Button';
+import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
-import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveFileToIpfs, saveFilesToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 
 const GrayLayout = styled.div`
@@ -86,8 +85,8 @@ const useStyles = makeStyles(theme => ({
     marginTop: 5,
     marginLeft: -50,
     outline: 'none',
-    cursor: 'pointer'
-  }
+    cursor: 'pointer',
+  },
 }));
 
 const BootstrapInput = withStyles(theme => ({
@@ -174,6 +173,7 @@ export default function CreateMemory(props) {
     } else {
       setDisableShare(true);
     }
+    console.log('value', value);
     setFilePath(value);
   }
 
@@ -183,7 +183,7 @@ export default function CreateMemory(props) {
       if (blocks[i].type == 'image') {
         let blob = await fetch(blocks[i].data.url).then(r => r.blob());
         let file = new File([blob], 'name');
-        let hash = await saveToIpfs([file]);
+        let hash = await saveFileToIpfs([file]);
         blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
       }
     }
@@ -201,7 +201,7 @@ export default function CreateMemory(props) {
       return;
     }
 
-    let content = advancedMemory || memoryContent;
+    const content = advancedMemory || memoryContent;
 
     if (!privateKey) {
       setNeedAuth(true);
@@ -211,11 +211,10 @@ export default function CreateMemory(props) {
     setGLoading(true);
     setTimeout(async () => {
       const { proIndex } = props;
-      let hash = '';
-      if (filePath) hash = await saveToIpfs(filePath);
-      const method = 'addMemory';
+      const hash = await saveFilesToIpfs(filePath);
       const info = { date, hash };
       let params = [];
+
       if (privacy) {
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
@@ -223,8 +222,9 @@ export default function CreateMemory(props) {
       } else {
         params = [proIndex, !!privacy, content, info];
       }
+      const method = 'addMemory';
       const result = await sendTransaction(method, params);
-      console.log('result', result);
+
       if (result) {
         reLoadMemory(proIndex);
       }
@@ -287,7 +287,9 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>Write blog...</button>
+                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
+                  Write blog...
+                </button>
                 <SimpleModal
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}

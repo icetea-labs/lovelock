@@ -13,7 +13,7 @@ import Divider from '@material-ui/core/Divider';
 import { tryStringifyJson, getTagsInfo } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
-import { saveToIpfs, sendTransaction } from '../../../helper';
+import { saveFileToIpfs, sendTransaction } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
@@ -367,10 +367,10 @@ class Promise extends React.Component {
     this.timeoutHanle1 = setTimeout(async () => {
       try {
         if (file) {
-          hash = await saveToIpfs(file);
+          hash = await saveFileToIpfs(file);
         }
         if (cropFile) {
-          botAva = await saveToIpfs(cropFile);
+          botAva = await saveFileToIpfs(cropFile);
         }
         const info = {
           date,

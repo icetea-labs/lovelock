@@ -218,23 +218,35 @@ export default function AddInfoMessage(props) {
   // const [date, setDate] = useState(new Date());
   const { files, date } = props;
   const [pictures, setPictures] = useState([]);
+  const [picPreview, setPicPreview] = useState([]);
 
   function captureUploadFile(event) {
     const imgFile = event.target.files;
-    onChangeMedia(imgFile);
+    if (files) {
+      setPictures(pictures.concat(imgFile[0]));
+    } else {
+      // reset image when post new memory
+      setPictures([imgFile[0]]);
+    }
+    onChangeMedia([...pictures, imgFile[0]]);
+    // onChangeMedia(imgFile);
+    showPreview(imgFile);
+  }
 
+  function showPreview(imgFile) {
     const file = imgFile[0];
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPictures(pictures.concat({ img: reader.result }));
-      // setPictures([{ img: reader.result }]);
+      if (files) {
+        setPicPreview(picPreview.concat({ img: reader.result }));
+      } else {
+        // reset preview when post new memory
+        setPicPreview([{ img: reader.result }]);
+      }
     };
-    if (file) {
-      reader.readAsDataURL(file);
-    } else {
-      // preview.src = '';
-    }
+    if (file) reader.readAsDataURL(file);
   }
+
   function handleDateChange(value) {
     onChangeDate(value);
   }
@@ -242,14 +254,14 @@ export default function AddInfoMessage(props) {
   const classes = useStyles();
   return (
     <Container>
-      {pictures.length > 0 && (
+      {files && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
               <div className="scrollContent">
-                {pictures.map((tile, index) => (
+                {picPreview.map((tile, index) => (
                   <div key={index} className="imgContent">
-                    <GridListTile key={tile.img} className={classes.img}>
+                    <GridListTile className={classes.img}>
                       <img src={tile.img} alt="" />
                       <GridListTileBar
                         className={classes.titleBar}
@@ -257,10 +269,10 @@ export default function AddInfoMessage(props) {
                         actionIcon={
                           <IconButton
                             onClick={() => {
-                              const filtered = pictures.filter((value, id) => {
+                              const filtered = picPreview.filter((value, id) => {
                                 return id !== index;
                               });
-                              setPictures(filtered);
+                              setPicPreview(filtered);
                             }}
                           >
                             <CloseIcon className={classes.icon} />
@@ -311,7 +323,6 @@ export default function AddInfoMessage(props) {
           <Grid item>
             <ImgUpLoad>
               <div className="icon-upload">
-                {files ? <i className="material-icons">done</i> : <i className="material-icons">insert_photo</i>}
                 <div>Photo/Video</div>
               </div>
               <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} accept="image/*" />

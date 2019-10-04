@@ -86,67 +86,45 @@ export async function setTagsInfo(address, name, value) {
     return {};
   }
 }
+
 // let cacheTags = {};
 export async function getTagsInfo(address) {
+  let tags = {};
   try {
-    // if (!cacheTags[address]) {
     const resp = await tweb3
       .contract('system.did')
       .methods.query(address)
       .call();
-    // if (resp && resp.tags) {
-    //   cacheTags[address] = resp.tags;
-    // } else {
-    //   cacheTags[address] = {};
-    // }
-    // }
-    return (resp && resp.tags) || {};
+    tags = resp && resp.tags;
   } catch (e) {
     console.error(e);
   }
-  // return cacheTags[address] || [];
+  return tags;
 }
 
-export async function saveToIpfs(files) {
-  // const file = [...files][0];
-  let ipfsId;
-  // const fileDetails = {
-  //   path: file.name,
-  //   content: file,
-  // };
-  // const options = {
-  //   wrapWithDirectory: true,
-  //   progress: prog => console.log(`received: ${prog}`),
-  // };
-  // console.log('fileDetails', fileDetails);
-
-  //ipfs
-  //   .add(fileDetails, options)
-  //   .then(response => {
-  //     console.log(response);
-  //     // CID of wrapping directory is returned last
-  //     ipfsId = response[response.length - 1].hash;
-  //     console.log(ipfsId);
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //   });
-
-  // upload usung file nam
-  // const response = await ipfs.add(fileDetails, options);
-  // ipfsId = response[response.length - 1].hash;
-  // console.log(ipfsId);
-
+async function saveToIpfs(files) {
+  if (!files) return '';
   // simple upload
-  await ipfs
-    .add([...files], { progress: false })
-    .then(response => {
-      ipfsId = response[0].hash;
-    })
-    .catch(err => {
-      console.error(err);
+  let ipfsId = [];
+  try {
+    const results = await ipfs.add([...files]);
+    ipfsId = results.map(el => {
+      return el.hash;
     });
+  } catch (e) {
+    console.error(e);
+  }
   return ipfsId;
+}
+// upload multiple file
+export async function saveFilesToIpfs(files) {
+  const ipfsId = await saveToIpfs(files);
+  return ipfsId;
+}
+// upload one file
+export async function saveFileToIpfs(files) {
+  const ipfsId = await saveToIpfs(files);
+  return ipfsId[0];
 }
 
 export function TimeWithFormat(props) {
