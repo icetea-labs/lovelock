@@ -139,15 +139,17 @@ function LeftContrainer(props) {
   }
 
   function eventConfirmPropose(data) {
-    const newArray = proposes.slice() || [];
-    const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-    newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-    if (address === data.log.sender) {
-      const message = 'Your propose has been approved.';
-      enqueueSnackbar(message, { variant: 'info' });
-    }
+    // console.log('data', data);
+    // const newArray = proposes.slice() || [];
+    // const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
+    // newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
 
-    setPropose(newArray);
+    // if (address === data.log.sender) {
+    //   const message = 'Your propose has been approved.';
+    //   enqueueSnackbar(message, { variant: 'info' });
+    // }
+    // console.log('data', newArray);
+    // addPropose(newArray);
   }
 
   async function eventCreatePropose(data) {

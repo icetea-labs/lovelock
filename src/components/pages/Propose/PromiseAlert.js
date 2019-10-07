@@ -41,8 +41,8 @@ function PromiseAlert(props) {
   const [info, setInfo] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
-  const hash = (info && info.hash) || '';
-
+  const hash = (info && info.hash) || [];
+  console.log('hash', hash);
   useEffect(() => {
     loaddata();
   }, []);
@@ -90,7 +90,9 @@ function PromiseAlert(props) {
             <span>You sent promise to </span>
             <span className="highlight">{name}</span>
           </TagTitle>
-          <ImgView>{hash && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="promiseImg" />}</ImgView>
+          <ImgView>
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="promiseImg" />}
+          </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
       ) : (
@@ -107,7 +109,9 @@ function PromiseAlert(props) {
             <span className="highlight">{name}</span>
             <span> sent a promise to you</span>
           </TagTitle>
-          <ImgView>{hash && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="promiseImg" />}</ImgView>
+          <ImgView>
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="promiseImg" />}
+          </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
       )}

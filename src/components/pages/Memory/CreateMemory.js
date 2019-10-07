@@ -12,7 +12,7 @@ import SimpleModal from '../../elements/Modal';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveFileToIpfs, saveFilesToIpfs, saveJsonToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 
 const GrayLayout = styled.div`
@@ -213,7 +213,7 @@ export default function CreateMemory(props) {
     setTimeout(async () => {
       const { proIndex } = props;
       // const hash = await saveFilesToIpfs(filePath);
-      const hash = await saveJsonToIpfs(filePath);
+      const hash = await saveBufferToIpfs(filePath);
       const info = { date, hash };
       let params = [];
 

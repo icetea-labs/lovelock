@@ -121,24 +121,28 @@ async function saveToIpfs(files) {
   return ipfsId;
 }
 // upload multiple file
-export async function saveFilesToIpfs(files) {
-  const ipfsId = await saveToIpfs(files);
-  return ipfsId;
-}
+// export async function saveFilesToIpfs(files) {
+//   const ipfsId = await saveToIpfs(files);
+//   return ipfsId;
+// }
 // upload one file
 export async function saveFileToIpfs(files) {
   const ipfsId = await saveToIpfs(files);
   return ipfsId[0];
 }
-// upload one file
-export async function saveJsonToIpfs(files) {
+
+/**
+ * @param: files: array
+ * @return: ipfsId: array
+ */
+export async function saveBufferToIpfs(files) {
   // simple upload
   let ipfsId = [];
   try {
+    console.log('files', files);
     const content = files.map(el => {
       return Buffer.from(el.img);
     });
-    console.log('files', files);
     console.log('content', content);
     ipfsId = await saveToIpfs(content);
   } catch (e) {

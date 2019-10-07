@@ -238,19 +238,13 @@ export default function AddInfoMessage(props) {
     const reader = new FileReader();
     reader.onloadend = loadedEvent => {
       const arrayBuffer = loadedEvent.target.result;
-      console.log('arrayBuffer', arrayBuffer);
-      const theUrl = URL.createObjectURL(new Blob([arrayBuffer]));
-
+      const blobUrl = URL.createObjectURL(new Blob([arrayBuffer]));
       if (files) {
-        setPicPreview(picPreview.concat({ img: theUrl }));
+        setPicPreview(picPreview.concat({ img: blobUrl }));
       } else {
         // reset preview when post new memory
-        setPicPreview([{ img: theUrl }]);
+        setPicPreview([{ img: blobUrl }]);
       }
-      // const stringify = picPreview.map(value => {
-      //   return JSON.stringify(value);
-      // });
-      // console.log('files', files);
       onChangeMedia([...files, { img: arrayBuffer }]);
     };
     if (file) reader.readAsArrayBuffer(file);
