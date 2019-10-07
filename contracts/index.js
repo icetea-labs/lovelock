@@ -1,7 +1,6 @@
 const { expect } = require(';');
 const { isOwnerPropose, getDataByIndex } = require('./helper.js');
-@contract
-class Propose {
+@contract class LoveLock {
   // {
   //   isPrivate: false,
   //   sender: '',
@@ -13,7 +12,7 @@ class Propose {
   //   status: 0,
   //   memoryIndex: [],
   // },
-  @view @state propose = [];
+  @view @state proposes = [];
   @view @state add2p = {}; //1:n { 'address':[1,2,3...] }
 
   // {
@@ -29,7 +28,7 @@ class Propose {
   @view @state p2m = {}; //1:n  { 'proindex':[1,2,3...] }
   @view @state m2p = {}; //1:1  { 'memoryindex':'proindex' }
 
-  @transaction createPropose(s_content: string, receiver: string, s_info: string, bot_info: string) {
+  @transaction createPropose(s_content: string, receiver: string, s_info, bot_info) {
     const sender = msg.sender;
     const isPrivate = false;
     const defaultPropose = {
@@ -56,9 +55,9 @@ class Propose {
     }
 
     //new pending propose
-    const x = this.propose;
+    const x = this.proposes;
     const index = x.push(pendingPropose) - 1;
-    this.propose = x;
+    this.proposes = x;
 
     //map address to propose
     const y = this.add2p;
@@ -86,7 +85,7 @@ class Propose {
     const arrPro = this.add2p[address] || [];
     let resp = [];
     arrPro.forEach(index => {
-      let pro = getDataByIndex(this.propose, index);
+      let pro = getDataByIndex(this.proposes, index);
       pro = Object.assign({}, pro, { id: index });
       if (pro.isPrivate && (msg.sender === pro.sender || msg.sender === pro.receiver)) {
         resp.push(pro);
@@ -99,7 +98,7 @@ class Propose {
   }
 
   @view getProposeByIndex(index: number) {
-    const pro = getDataByIndex(this.propose, index);
+    const pro = getDataByIndex(this.proposes, index);
     let resp = [];
     if (pro && pro.isPrivate) {
       isOwnerPropose(pro, "Can't get propose.", msg.sender);
@@ -133,8 +132,8 @@ class Propose {
     return res;
   }
   // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info: string) {
-    let pro = getDataByIndex(this.propose, proIndex);
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info) {
+    let pro = getDataByIndex(this.proposes, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
 
@@ -157,7 +156,7 @@ class Propose {
 
     //
     pro.memoryIndex.push(index);
-    this.propose[proIndex] = pro;
+    this.proposes[proIndex] = pro;
     //emit Event
     const log = Object.assign({}, menory, { id: index });
     this.emitEvent('addMemory', { by: msg.sender, log }, ['by']);
@@ -201,7 +200,7 @@ class Propose {
   //private function
   _confirmPropose(index: number, r_content: string, status: number) {
     const sender = msg.sender;
-    let pro = getDataByIndex(this.propose, index);
+    let pro = getDataByIndex(this.proposes, index);
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:
@@ -212,7 +211,7 @@ class Propose {
         break;
     }
     pro = Object.assign({}, pro, { r_content, status });
-    this.propose[index] = pro;
+    this.proposes[index] = pro;
 
     //emit Event
     const log = Object.assign({}, pro, { id: index });

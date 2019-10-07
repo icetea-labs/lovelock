@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-// import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Grid from '@material-ui/core/Grid';
 import DateFnsUtils from '@date-io/date-fns';
-// import GridList from '@material-ui/core/GridList';
-// import GridListTile from '@material-ui/core/GridListTile';
-// import GridListTileBar from '@material-ui/core/GridListTileBar';
-// import IconButton from '@material-ui/core/IconButton';
-// import CloseIcon from '@material-ui/icons/Close';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -90,30 +89,122 @@ const DateBox = styled.div`
     z-index: 1;
   }
 `;
-// const useStyles = makeStyles(theme => ({
-//   root: {
-//     display: 'flex',
-//     flexWrap: 'wrap',
-//     justifyContent: 'flex-start',
-//     overflow: 'hidden',
-//     backgroundColor: theme.palette.background.paper,
-//   },
-//   gridList: {
-//     flexWrap: 'nowrap',
-//     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-//     transform: 'translateZ(0)',
-//   },
-//   img: {
-//     width: 30,
-//     height: 50,
-//   },
-//   titleBar: {
-//     background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-//   },
-//   icon: {
-//     color: 'white',
-//   },
-// }));
+
+const ImgUploadPreview = styled.div`
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  .scrollWrap {
+    width: 100%;
+    overflow-y: hidden;
+    overflow-x: auto;
+    position: relative;
+    height: 150%;
+  }
+  .scrollBody {
+    position: relative;
+    display: inline-block;
+  }
+  .scrollContent {
+    white-space: nowrap;
+  }
+  .imgContent {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 5px;
+    img {
+      width: 100px;
+      height: 100px;
+    }
+  }
+`;
+const AddMoreImg = styled.span`
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: top;
+  height: 112px;
+  /* width: 100%; */
+  .addImgBox {
+    position: relative;
+    display: inline-block;
+  }
+  .btAddImg {
+    margin-right: 12px;
+    background-image: url('/static/img/plus.png');
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: 20px;
+
+    border: 2px dashed #dddfe2;
+    border-radius: 2px;
+    box-sizing: border-box;
+    display: inline-block;
+    height: 100px;
+    margin-right: 5px;
+    min-width: 100px;
+    position: relative;
+    width: auto;
+
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .wrapperInput {
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+  }
+  .btInput {
+    bottom: 0;
+    cursor: inherit;
+    font-size: 1000px !important;
+    height: 300px;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    outline: none;
+  }
+`;
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+  },
+  gridList: {
+    flexWrap: 'nowrap',
+    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: 'translateZ(0)',
+  },
+  img: {
+    display: 'block',
+    height: 100,
+    '&:hover': {
+      '& $icon': {
+        display: 'block',
+      },
+    },
+  },
+  title: {
+    color: theme.palette.primary.light,
+  },
+  titleBar: {
+    background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+  },
+  icon: {
+    color: 'white',
+    display: 'none',
+  },
+}));
+
 function MaterialUIPickers(props) {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -121,58 +212,105 @@ function MaterialUIPickers(props) {
     </MuiPickersUtilsProvider>
   );
 }
-// const tileData = [
-//   {
-//     img: '/static/img/user-men.jpg',
-//     title: 'Image',
-//     author: 'author',
-//   },
-// {
-//   img: '/static/img/user-men.jpg',
-//   title: 'Image',
-//   author: 'author',
-// },
-// {
-//   img: '/static/img/user-men.jpg',
-//   title: 'Image',
-//   author: 'author',
-// },
-// ];
 
 export default function AddInfoMessage(props) {
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   // const [date, setDate] = useState(new Date());
   const { files, date } = props;
+  const [pictures, setPictures] = useState([]);
+  const [picPreview, setPicPreview] = useState([]);
+
   function captureUploadFile(event) {
-    onChangeMedia(event.target.files);
+    const imgFile = event.target.files;
+    if (files) {
+      setPictures(pictures.concat(imgFile[0]));
+    } else {
+      // reset image when post new memory
+      setPictures([imgFile[0]]);
+    }
+    // onChangeMedia([...pictures, imgFile[0]]);
+    // onChangeMedia(imgFile);
+    showPreview(imgFile);
   }
+
+  function showPreview(imgFile) {
+    const file = imgFile[0];
+    const reader = new FileReader();
+    reader.onloadend = loadedEvent => {
+      const arrayBuffer = loadedEvent.target.result;
+      const blobUrl = URL.createObjectURL(new Blob([arrayBuffer]));
+      if (files) {
+        setPicPreview(picPreview.concat({ img: blobUrl }));
+      } else {
+        // reset preview when post new memory
+        setPicPreview([{ img: blobUrl }]);
+      }
+      onChangeMedia([...files, { img: arrayBuffer }]);
+    };
+    if (file) reader.readAsArrayBuffer(file);
+  }
+
   function handleDateChange(value) {
-    // setDate(value);
     onChangeDate(value);
   }
-  // const classes = useStyles();
+
+  const classes = useStyles();
   return (
     <Container>
-      {/* <ImgList>
-        <div className={classes.root}>
-          <GridList cellHeight={100} className={classes.gridList} cols={1}>
-            {tileData.map((tile, index) => (
-              <GridListTile key={index} className={classes.img}>
-                <img src={tile.img} alt={tile.title} />
-                <GridListTileBar
-                  titlePosition="top"
-                  actionIcon={
-                    <IconButton aria-label={`close ${tile.title}`}>
-                      <CloseIcon className={classes.icon} />
-                    </IconButton>
-                  }
-                  className={classes.titleBar}
-                />
-              </GridListTile>
-            ))}
-          </GridList>
-        </div>
-      </ImgList> */}
+      {files.length > 0 && (
+        <ImgUploadPreview>
+          <div className="scrollWrap">
+            <div className="scrollBody">
+              <div className="scrollContent">
+                {picPreview.map((tile, index) => (
+                  <div key={index} className="imgContent">
+                    <GridListTile className={classes.img}>
+                      <img src={tile.img} alt="" onLoad={() => URL.revokeObjectURL(tile.img)} />
+                      <GridListTileBar
+                        className={classes.titleBar}
+                        titlePosition="top"
+                        actionIcon={
+                          <IconButton
+                            onClick={() => {
+                              const filtered = picPreview.filter((value, id) => {
+                                return id !== index;
+                              });
+                              setPicPreview(filtered);
+
+                              const filesFiltered = files.filter((value, id) => {
+                                return id !== index;
+                              });
+                              onChangeMedia(filesFiltered);
+                            }}
+                          >
+                            <CloseIcon className={classes.icon} />
+                          </IconButton>
+                        }
+                      />
+                    </GridListTile>
+                  </div>
+                ))}
+                <AddMoreImg>
+                  <div className="addImgBox">
+                    <div className="btAddImg" rel="ignore">
+                      <div className="wrapperInput">
+                        <input
+                          accept="video/*,  video/x-m4v, video/webm, video/x-ms-wmv, video/x-msvideo, video/3gpp, video/flv, video/x-flv, video/mp4, video/quicktime, video/mpeg, video/ogv, .ts, .mkv, image/*, image/heic, image/heif"
+                          title="Choose a file to upload"
+                          display="inline-block"
+                          type="file"
+                          className="btInput"
+                          onChange={captureUploadFile}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </AddMoreImg>
+              </div>
+            </div>
+          </div>
+        </ImgUploadPreview>
+      )}
       <InfoBox grayLayout={grayLayout}>
         <Grid container spacing={3} alignItems="center" justify="flex-end">
           <Grid item>
@@ -193,7 +331,6 @@ export default function AddInfoMessage(props) {
           <Grid item>
             <ImgUpLoad>
               <div className="icon-upload">
-                {files ? <i className="material-icons">done</i> : <i className="material-icons">insert_photo</i>}
                 <div>Photo/Video</div>
               </div>
               <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} accept="image/*" />

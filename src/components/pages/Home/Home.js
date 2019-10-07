@@ -1,56 +1,99 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { FlexBox, FlexWidthBox } from '../../elements/StyledUtils';
-import LeftContrainer from '../Propose/Detail/LeftContrainer';
-import { callView, getTagsInfo } from '../../../helper';
-import MemoryContainer from '../Memory/MemoryContainer';
-import { rem } from '../../elements/StyledUtils';
+import { connect } from 'react-redux';
+import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
+import { LinkPro } from '../../elements/Button';
+import { callView } from '../../../helper';
+import * as actions from '../../../store/actions';
+import Promise from '../Propose/Promise';
 
 const RightBox = styled.div`
   padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
 `;
 
-export default function Home() {
-  const address = useSelector(state => state.account.address);
-  const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
-  useEffect(() => {
-    async function fetchData() {
-      await loadMemory();
-    }
-    fetchData();
-  }, []);
-  async function loadMemory() {
-    const allMemory = await callView('getMemoriesByRange', [0, 10]);
-    let newMemoryList = [];
+function Home(props) {
+  const [openPromise, setOpenPromise] = useState(false);
+  const { address, history, setNeedAuth, privateKey } = props;
+  const [homePropose, setHomePropose] = useState([]);
 
-    for (let i = 0; i < allMemory.length; i++) {
-      const obj = allMemory[i];
-      const sender = obj.sender;
-      obj.info = JSON.parse(obj.info);
-      const reps = await getTagsInfo(sender);
-      obj.name = reps['display-name'];
-      obj.avatar = reps['avatar'];
-      newMemoryList.push(obj);
+  useEffect(() => {
+    loadAcceptPropose();
+  }, []);
+
+  async function loadAcceptPropose() {
+    let proposes;
+    proposes = (await callView('getProposeByAddress', [address])) || [];
+    proposes = proposes.filter(item => item.status === 1);
+    setHomePropose(proposes);
+    if (proposes.length > 0) {
+      const index = proposes[0].id;
+      history.push(`/propose/${index}`);
     }
-    newMemoryList = newMemoryList.reverse();
-    // console.log('newMemoryList', newMemoryList);
-    setMemoryList(newMemoryList);
-    setLoading(false);
   }
+
+  function openPopup() {
+    if (!privateKey) {
+      setNeedAuth(true);
+    }
+    setOpenPromise(true);
+  }
+
+  function openExplore() {
+    history.push('/explore');
+  }
+
+  function closePopup() {
+    setOpenPromise(false);
+    loadAcceptPropose();
+  }
+
   return (
     address && (
       <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
-          <LeftContrainer />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightBox>
-            <MemoryContainer loading={loading} memoryList={memoryList} />
-          </RightBox>
-        </FlexWidthBox>
+        <FlexWidthBox width="30%">{/* <LeftContrainer /> */}</FlexWidthBox>
+        {homePropose.length < 1 && (
+          <FlexWidthBox width="70%">
+            <RightBox>
+              <div>
+                <span>
+                  You have no relationship yet.
+                  <LinkPro className="btn_add_promise" onClick={openPopup}>
+                    Create one
+                  </LinkPro>
+                  or
+                  <LinkPro className="btn_add_promise" onClick={openExplore}>
+                    explorer
+                  </LinkPro>
+                  others.
+                </span>
+              </div>
+            </RightBox>
+            {openPromise && privateKey && <Promise close={closePopup} />}
+          </FlexWidthBox>
+        )}
       </FlexBox>
     )
   );
 }
+
+const mapStateToProps = state => {
+  const { loveinfo, account } = state;
+  return {
+    propose: loveinfo.propose,
+    address: account.address,
+    privateKey: account.privateKey,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setNeedAuth: value => {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);

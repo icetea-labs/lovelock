@@ -30,12 +30,13 @@ export async function callView(funcName, params) {
 
   return [];
 }
+
 async function callReadOrPure(funcName, params, method) {
   const address = contract;
 
   try {
     const result = await tweb3[method](address, funcName, params || []);
-    return tryStringifyJson(result || '' + result);
+    return tryStringifyJson(result || `${result}`);
   } catch (error) {
     console.log('funcName', funcName);
     console.log(tryStringifyJson(error, true));
@@ -46,6 +47,8 @@ export async function sendTransaction(funcName, params) {
   // const { address } = this.props;
   // console.log('params', params);
   try {
+    console.log('contract', contract);
+    console.log('params', params);
     const ct = tweb3.contract(contract);
     const result = await ct.methods[funcName](...(params || [])).sendCommit();
     return result;
@@ -53,12 +56,13 @@ export async function sendTransaction(funcName, params) {
     console.log(error);
   }
 }
+
 export function tryStringifyJson(p, replacer = undefined, space = 2) {
   if (typeof p === 'string') {
     return p;
   }
   try {
-    return '' + JSON.stringify(p, replacer, space);
+    return `${JSON.stringify(p, replacer, space)}`;
   } catch (e) {
     return String(p);
   }
@@ -84,75 +88,139 @@ export async function setTagsInfo(address, name, value) {
     return {};
   }
 }
+
 // let cacheTags = {};
 export async function getTagsInfo(address) {
+  let tags = {};
   try {
-    // if (!cacheTags[address]) {
-    const resp = await tweb3
-      .contract('system.did')
-      .methods.query(address)
-      .call();
-    // if (resp && resp.tags) {
-    //   cacheTags[address] = resp.tags;
-    // } else {
-    //   cacheTags[address] = {};
-    // }
-    // }
-    return (resp && resp.tags) || {};
+    if (address) {
+      const resp = await tweb3
+        .contract('system.did')
+        .methods.query(address)
+        .call();
+      tags = resp && resp.tags;
+    }
   } catch (e) {
     console.error(e);
   }
-  // return cacheTags[address] || [];
+  return tags;
 }
 
-export async function saveToIpfs(files) {
-  // const file = [...files][0];
-  let ipfsId;
-  // const fileDetails = {
-  //   path: file.name,
-  //   content: file,
-  // };
-  // const options = {
-  //   wrapWithDirectory: true,
-  //   progress: prog => console.log(`received: ${prog}`),
-  // };
-  // console.log('fileDetails', fileDetails);
-
-  //ipfs
-  //   .add(fileDetails, options)
-  //   .then(response => {
-  //     console.log(response);
-  //     // CID of wrapping directory is returned last
-  //     ipfsId = response[response.length - 1].hash;
-  //     console.log(ipfsId);
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //   });
-
-  // upload usung file nam
-  // const response = await ipfs.add(fileDetails, options);
-  // ipfsId = response[response.length - 1].hash;
-  // console.log(ipfsId);
-
+async function saveToIpfs(files) {
+  if (!files) return '';
   // simple upload
-  await ipfs
-    .add([...files], { progress: false })
-    .then(response => {
-      console.log(response);
-      ipfsId = response[0].hash;
-      console.log(ipfsId);
-    })
-    .catch(err => {
-      console.error(err);
+  let ipfsId = [];
+  try {
+    const results = await ipfs.add([...files]);
+    ipfsId = results.map(el => {
+      return el.hash;
     });
+  } catch (e) {
+    console.error(e);
+  }
   return ipfsId;
+}
+// upload multiple file
+// export async function saveFilesToIpfs(files) {
+//   const ipfsId = await saveToIpfs(files);
+//   return ipfsId;
+// }
+// upload one file
+export async function saveFileToIpfs(files) {
+  const ipfsId = await saveToIpfs(files);
+  return ipfsId[0];
+}
+
+/**
+ * @param: files: array
+ * @return: ipfsId: array
+ */
+export async function saveBufferToIpfs(files) {
+  // simple upload
+  let ipfsId = [];
+  try {
+    console.log('files', files);
+    const content = files.map(el => {
+      return Buffer.from(el.img);
+    });
+    console.log('content', content);
+    ipfsId = await saveToIpfs(content);
+  } catch (e) {
+    console.error(e);
+  }
+  return ipfsId;
+}
+// upload one file
+export async function getJsonFromIpfs(cid) {
+  const result = {};
+  try {
+    const files = await ipfs.get(cid);
+    const json = `data:image/*;charset=utf-8;base64,${files[0].content.toString('base64')}`;
+    // console.log('json', json);
+    const dimensions = await getImageDimensions(json);
+    console.log('dimensions', dimensions);
+    result.src = json;
+    // const isWithLager = dimensions.w > dimensions.h;
+    // const rate = dimensions.w / dimensions.h;
+    result.width = dimensions.w;
+    result.height = dimensions.h;
+    // if (rate <= 0.5) {
+    //   result.width = 2;
+    //   result.height = 4;
+    // } else if (rate <= 0.8) {
+    //   result.width = 3;
+    //   result.height = 4;
+    // } else if (rate <= 1.2) {
+    //   result.width = 1;
+    //   result.height = 1;
+    // } else if (rate <= 1.8) {
+    //   result.width = 4;
+    //   result.height = 3;
+    // } else {
+    //   result.width = 4;
+    //   result.height = 2;
+    // }
+  } catch (e) {
+    console.error(e);
+  }
+  return result;
+}
+
+function getImageDimensions(file) {
+  return new Promise((resolved, rejected) => {
+    const i = new Image();
+    i.onload = () => {
+      resolved({ w: i.width, h: i.height });
+    };
+    i.src = file;
+  });
 }
 
 export function TimeWithFormat(props) {
   const { format, value } = props;
   const formatValue = format || 'MM/DD/YYYY';
   return <span>{moment(value).format(formatValue)}</span>;
+}
+
+export function summaryDayCal(value) {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const acceptDay = value.split('T')[0];
+  const acceptTime = value.split('T')[1];
+  const slugDay = acceptDay.split('-');
+  const slugTime = acceptTime.split('Z')[0].split(':');
+
+  const convertAccDay = new Date(slugDay[0], slugDay[1] - 1, slugDay[2], slugTime[0], slugTime[1], slugTime[2]);
+  const today = new Date();
+  const summaryDay = Math.round(Math.abs(convertAccDay - today) / oneDay);
+  return summaryDay;
+}
+
+export function HolidayEvent(props) {
+  const { day } = props;
+  if (day > 0 && day % 100 === 0) {
+    return <span>{`Your relationship reached ${day} days.`}</span>;
+  }
+  return <span>Have a nice day!</span>;
 }
 
 export function diffTime(time) {
@@ -239,7 +307,7 @@ export async function generateSharedKey(privateKeyA, publicKeyB) {
 }
 export async function encodeWithSharedKey(data, sharekey) {
   const encodeData = encodeTx(data, sharekey, { noAddress: true });
-  return JSON.stringify(encodeData || {});
+  return encodeData;
 }
 export async function decodeWithSharedKey(data, sharekey) {
   const decodeData = decodeTx(sharekey, data);

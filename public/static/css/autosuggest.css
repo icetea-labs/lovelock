@@ -16,8 +16,7 @@
 }
 
 .react-autosuggest__input:focus {
-  /* outline: none; */
-  outline-color: #fe8dc3;
+  border: 1px solid #fe8dc3;
 }
 
 .react-autosuggest__container--open .react-autosuggest__input {
@@ -76,11 +75,16 @@
 }
 
 img {
-  width: 30px;
+  /* width: 30px; */
 }
 
 .highlight {
   color: #ee0000;
+  font-weight: bold;
+}
+
+.proposeTarget {
+  color: #8250c8;
   font-weight: bold;
 }
 

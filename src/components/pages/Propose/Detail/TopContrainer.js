@@ -4,10 +4,10 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { callView, getTagsInfo, TimeWithFormat } from '../../../../helper';
+
+import { callView, getTagsInfo, summaryDayCal, HolidayEvent, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-
 import { AvatarPro } from '../../../elements';
 
 const TopContainerBox = styled.div`
@@ -20,6 +20,18 @@ const TopContainerBox = styled.div`
     img {
       width: 100%;
       height: 100%;
+    }
+  }
+  .summaryCard {
+    display: flex;
+    margin-top: 15px;
+    img {
+      width: 22px;
+      height: 24px;
+      object-fit: contain;
+    }
+    .summaryDay {
+      margin: 7px;
     }
   }
   .top__title {
@@ -158,7 +170,7 @@ export default function TopContrainer(props) {
     proposes.s_publicKey = senderTags['pub-key'] || '';
     proposes.s_avatar = senderTags.avatar;
 
-    const botInfo = JSON.parse(proposes.bot_info || '{}');
+    const botInfo = proposes.bot_info;
     // console.log('botInfo', botInfo);
 
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
@@ -175,8 +187,8 @@ export default function TopContrainer(props) {
     }
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
 
-    const info = JSON.parse(proposes.s_info) || {};
-    proposes.coverimg = info.hash || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+    const info = proposes.s_info;
+    proposes.coverimg = info.hash.length > 0 ? info.hash[0] : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
     proposes.s_date = info.date;
     proposes.r_date = info.date;
 
@@ -224,7 +236,16 @@ export default function TopContrainer(props) {
   return (
     <TopContainerBox>
       <div className="top__coverimg">
-        {topInfo.coverimg && <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />}
+        <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />
+      </div>
+      <div className="summaryCard">
+        <img src="/static/img/hourglass.svg" alt="hourGlass" />
+        <div className="summaryDay">
+          <span>{summaryDayCal(topInfo.r_date)} days</span>
+        </div>
+        <div className="summaryDay">
+          <HolidayEvent day={summaryDayCal(topInfo.r_date)} />
+        </div>
       </div>
       <WarrperChatBox>
         {topInfo.s_content && (

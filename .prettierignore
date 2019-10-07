@@ -1,0 +1,19 @@
+*.*
+!*.js
+!*.json
+!*.md
+
+# npm files
+node_modules
+package.json
+package-lock.json
+public/static/css/reset.css
+# Package build products
+/lib
+/es
+/umd
+/coverage
+
+# Demo build products
+/.cache
+/dist

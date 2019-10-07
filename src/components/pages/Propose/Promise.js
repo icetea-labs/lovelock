@@ -10,10 +10,10 @@ import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
-import { tryStringifyJson } from '../../../helper/utils';
+import { tryStringifyJson, getTagsInfo } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
-import { saveToIpfs, sendTransaction } from '../../../helper';
+import { saveFileToIpfs, saveBufferToIpfs, sendTransaction } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
@@ -42,6 +42,11 @@ const useStyles = makeStyles(theme => ({
     width: 100,
     height: 100,
     margin: theme.spacing(0, 1, 1, 0),
+  },
+  avatarSug: {
+    width: 30,
+    height: 30,
+    // margin: theme.spacing(0, 1, 1, 0),
   },
 }));
 
@@ -75,6 +80,11 @@ function AvatarProCus(props) {
   return <AvatarPro className={classes.avatar} {...props} />;
 }
 
+function AvatarProSug(props) {
+  const classes = useStyles();
+  return <AvatarPro className={classes.avatarSug} {...props} />;
+}
+
 export const TagTitle = styled.div`
   width: 100%;
   height: 18px;
@@ -98,24 +108,13 @@ const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
   -webkit-box-pack: justify;
-  /* padding: 20px 0 0 0; */
   font-size: 14px;
   cursor: pointer;
-  /* .upload_img input[type='file'] {
-    font-size: 100px;
-    position: absolute;
-    left: 10;
-    top: 0;
-    opacity: 0;
-    cursor: pointer;
-  } */
   .upload_img {
     position: relative;
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
-    /* width: 200px; */
-    /* height: 140px; */
   }
   .fileInput {
     width: 120px;
@@ -169,10 +168,66 @@ class Promise extends React.Component {
     clearTimeout(this.timeoutHanle2);
   }
 
-  partnerChange = e => {
-    const value = e.target.value;
+  onChangeDate = date => {
+    this.setState({ date });
+  };
+
+  onChangeMedia = file => {
+    this.setState({ file });
+  };
+
+  async getSuggestions(value) {
+    let escapedValue = this.escapeRegexCharacters(value.trim());
+    const { props } = this;
+
+    if (escapedValue.length <= 3) {
+      this.setState({ suggestions: [] });
+      return;
+    }
+
+    let people = [];
+    escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
+    const regex = new RegExp(`\\b${escapedValue}`, 'i');
+
+    const peopleAva = [];
+
+    try {
+      const method = 'callReadonlyContractMethod';
+      const add = 'system.alias';
+      const func = 'query';
+
+      const result = await tweb3[method](add, func, [escapedValue]);
+      people = Object.keys(result).map(key => {
+        const nick = key.substring(key.indexOf('.') + 1);
+        return { nick, address: result[key].address };
+      });
+    } catch (err) {
+      console.log(tryStringifyJson(err));
+    }
+
+    people = people.filter(person => person.address !== props.address);
+    people = people.filter(person => regex.test(this.getSuggestionValue(person)));
+    people = people.slice(0, 10);
+    for (let i = 0; i < people.length; i++) {
+      const resp = await getTagsInfo(people[i].address);
+      peopleAva.push(resp.avatar);
+    }
+    for (let i = 0; i < people.length; i++) {
+      Object.assign(people[i], { avatar: peopleAva[i] });
+    }
     this.setState({
-      partner: value,
+      suggestions: people,
+    });
+  }
+
+  getSuggestionValue = suggestion => {
+    return `@${suggestion.nick}`;
+  };
+
+  partnerChange = e => {
+    const val = e.target.value;
+    this.setState({
+      partner: val,
     });
     // console.log("view partnerChange", value);
   };
@@ -185,35 +240,142 @@ class Promise extends React.Component {
     // console.log("view promiseStmChange", value);
   };
 
-  onChangeDate = date => {
-    this.setState({ date });
+  escapeRegexCharacters = str => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
 
-  onChangeMedia = file => {
-    this.setState({ file });
+  renderSuggestion = (suggestion, { query }) => {
+    const suggestionText = `${suggestion.nick}`;
+    const suggestionAva = suggestion.avatar;
+    const matches = AutosuggestHighlightMatch(suggestionText, query);
+    const parts = AutosuggestHighlightParse(suggestionText, matches);
+    return (
+      <span className="suggestion-content">
+        <AvatarProSug hash={suggestionAva} />
+        <span className="name">
+          {parts.map((part, index) => {
+            const className = part.highlight ? 'highlight' : null;
+            return (
+              <span className={className} key={index}>
+                {part.text}
+              </span>
+            );
+          })}
+        </span>
+      </span>
+    );
+  };
+
+  onPartnerChange = (event, { newValue }) => {
+    const name = newValue.substring(1);
+    if (newValue !== '@bot-lover') {
+      this.setState({ checked: false });
+    } else {
+      this.setState({ checked: true });
+    }
+    const { suggestions } = this.state;
+    let add = '';
+    if (suggestions) {
+      const seletedItem = suggestions.filter(item => item.nick === name);
+      if (seletedItem && seletedItem.length > 0) {
+        add = seletedItem[0].address;
+      }
+    }
+    this.setState({
+      value: newValue,
+      partner: add,
+    });
+  };
+
+  onSuggestionsFetchRequested = ({ value }) => {
+    this.getSuggestions(value);
+  };
+
+  onSuggestionsClearRequested = () => {
+    this.setState({
+      suggestions: [],
+    });
+  };
+
+  handleCheckChange = e => {
+    document.activeElement.blur();
+
+    const check = e.target.checked;
+
+    if (check) {
+      this.setState({
+        checked: check,
+        partner: process.env.REACT_APP_BOT_LOVER,
+      });
+      // document.addEventListener('DOMContentLoaded', function(event) {
+      //   document.getElementById('suggestPartner').disabled = true;
+      // });
+    } else {
+      this.setState({
+        checked: false,
+        value: '',
+      });
+      // document.addEventListener('DOMContentLoaded', function(event) {
+      //   document.getElementById('suggestPartner').disabled = false;
+      // });
+    }
+  };
+
+  handleUsername = event => {
+    const key = event.currentTarget.name;
+    const val = event.currentTarget.value;
+
+    this.setState({ [key]: val });
+  };
+
+  handleImageChange = event => {
+    event.preventDefault();
+    const orFiles = event.target.files;
+
+    if (orFiles.length > 0) {
+      this.setState({
+        originFile: orFiles,
+        isOpenCrop: true,
+      });
+    } else {
+      this.setState({
+        isOpenCrop: false,
+      });
+    }
+  };
+
+  closeCrop = () => {
+    this.setState({
+      isOpenCrop: false,
+    });
+  };
+
+  acceptCrop = e => {
+    this.closeCrop();
+    this.setState({ cropFile: e.cropFile, avatar: e.avaPreview });
   };
 
   async createPropose(partner, promiseStm, date, file) {
     const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
-    let botAva;
-    let hash;
-    let message;
+    let botAva = '';
+    let hash = [];
+    let message = '';
+
     setLoading(true);
 
     this.timeoutHanle1 = setTimeout(async () => {
       try {
         if (file) {
-          hash = await saveToIpfs(file);
+          hash = await saveBufferToIpfs(file);
         }
         if (cropFile) {
-          botAva = await saveToIpfs(cropFile);
+          botAva = await saveFileToIpfs(cropFile);
         }
-        let info = {
+        const info = {
           date,
           hash,
         };
-        info = JSON.stringify(info);
         const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
@@ -262,8 +424,6 @@ class Promise extends React.Component {
           };
         }
 
-        botInfo = JSON.stringify(botInfo);
-
         const params = [promiseStm, partner, info, botInfo];
         // const params = [promiseStm, partner, info];
         const result = await sendTransaction(name, params);
@@ -282,173 +442,6 @@ class Promise extends React.Component {
       }
     }, 100);
   }
-
-  escapeRegexCharacters(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
-  async getSuggestions(value) {
-    let escapedValue = this.escapeRegexCharacters(value.trim());
-    const address = this.props;
-
-    if (escapedValue === '@' || escapedValue === '') {
-      this.setState({
-        suggestions: [],
-      });
-    }
-
-    let people = [];
-    escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-    // console.log('escapedValue', escapedValue);
-
-    const regex = new RegExp('\\b' + escapedValue, 'i');
-    try {
-      const method = 'callReadonlyContractMethod';
-      const add = 'system.alias';
-      const func = 'query';
-      if (escapedValue.length > 2) {
-        const result = await tweb3[method](add, func, [escapedValue]);
-        people = Object.keys(result).map(function(key, index) {
-          const nick = key.substring(key.indexOf('.') + 1);
-          return { nick, address: result[key].address };
-        });
-      }
-    } catch (err) {
-      console.log(tryStringifyJson(err));
-    }
-
-    people = people.filter(person => person.address !== address);
-    people = people.filter(person => regex.test(this.getSuggestionValue(person)));
-    people = people.slice(0, 10);
-
-    this.setState({
-      suggestions: people,
-    });
-  }
-
-  getSuggestionValue(suggestion) {
-    return `@${suggestion.nick}`;
-  }
-
-  renderSuggestion(suggestion, { query }) {
-    const suggestionText = `${suggestion.nick}`;
-    const matches = AutosuggestHighlightMatch(suggestionText, query);
-    const parts = AutosuggestHighlightParse(suggestionText, matches);
-
-    return (
-      <span className="suggestion-content">
-        <span>
-          <img src="/static/img/user-men.jpg" alt="itea" />
-        </span>
-        <span className="name">
-          {parts.map((part, index) => {
-            const className = part.highlight ? 'highlight' : null;
-
-            return (
-              <span className={className} key={index}>
-                {part.text}
-              </span>
-            );
-          })}
-        </span>
-      </span>
-    );
-  }
-
-  onPartnerChange = (event, { newValue }) => {
-    const name = newValue.substring(1);
-    // console.log('newValue', newValue);
-    if (newValue !== '@bot-lover') {
-      this.setState({ checked: false });
-    } else {
-      this.setState({ checked: true });
-    }
-    const { suggestions } = this.state;
-    let address = '';
-    if (suggestions) {
-      const seletedItem = suggestions.filter(item => item.nick === name);
-      if (seletedItem && seletedItem.length > 0) {
-        address = seletedItem[0].address;
-      }
-      // console.log('add', address);
-    }
-    this.setState({
-      value: newValue,
-      partner: address,
-    });
-  };
-
-  onSuggestionsFetchRequested = ({ value }) => {
-    this.getSuggestions(value);
-    // this.setState({
-    //   suggestions: this.getSuggestions(value),
-    // });
-  };
-
-  onSuggestionsClearRequested = () => {
-    this.setState({
-      suggestions: [],
-    });
-  };
-
-  handleCheckChange = e => {
-    document.activeElement.blur();
-
-    const check = e.target.checked;
-
-    if (check) {
-      this.setState({
-        checked: check,
-        partner: process.env.REACT_APP_BOT_LOVER,
-      });
-      // document.addEventListener('DOMContentLoaded', function(event) {
-      //   document.getElementById('suggestPartner').disabled = true;
-      // });
-    } else {
-      this.setState({
-        checked: false,
-        value: '',
-      });
-      // document.addEventListener('DOMContentLoaded', function(event) {
-      //   document.getElementById('suggestPartner').disabled = false;
-      // });
-    }
-  };
-
-  handleUsername = event => {
-    const key = event.currentTarget.name;
-    const val = event.currentTarget.value;
-    // console.log(event.currentTarget.value);
-
-    this.setState({ [key]: val });
-  };
-
-  handleImageChange = event => {
-    event.preventDefault();
-    const orFiles = event.target.files;
-
-    if (orFiles.length > 0) {
-      this.setState({
-        originFile: orFiles,
-        isOpenCrop: true,
-      });
-    } else {
-      this.setState({
-        isOpenCrop: false,
-      });
-    }
-  };
-
-  closeCrop = () => {
-    this.setState({
-      isOpenCrop: false,
-    });
-  };
-
-  acceptCrop = e => {
-    this.closeCrop();
-    this.setState({ cropFile: e.cropFile, avatar: e.avaPreview });
-  };
 
   render() {
     const { close } = this.props;
@@ -470,24 +463,20 @@ class Promise extends React.Component {
           this.createPropose(partner, promiseStm, date, file);
         }}
       >
-        <TagTitle>Tag your partner you promise</TagTitle>
-        {/* <TextFieldPlaceholder
-          id="outlined-helperText"
-          placeholder="@partner"
-          margin="normal"
-          variant="outlined"
-          fullWidth
-          onChange={this.partnerChange}
-        /> */}
-        <Autosuggest
-          id="suggestPartner"
-          suggestions={suggestions}
-          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-          getSuggestionValue={this.getSuggestionValue}
-          renderSuggestion={this.renderSuggestion}
-          inputProps={inputProps}
-        />
+        {!checked && (
+          <div>
+            <TagTitle>Tag your partner you promise</TagTitle>
+            <Autosuggest
+              id="suggestPartner"
+              suggestions={suggestions}
+              onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+              onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+              getSuggestionValue={this.getSuggestionValue}
+              renderSuggestion={this.renderSuggestion}
+              inputProps={inputProps}
+            />
+          </div>
+        )}
         <FormControlLabel
           control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
           label="or create a secret crush"
