@@ -168,9 +168,13 @@ export function summaryDayCal(value) {
   return summaryDay;
 }
 
-export function holidayCal(){
-  
-} 
+export function HolidayEvent(props) {
+  const { day } = props;
+  if (day > 0 && day % 100 === 0) {
+    return <span>{`Your relationship reached ${day} days.`}</span>;
+  }
+  return <span>Have a nice day!</span>;
+}
 
 export function diffTime(time) {
   // Set new thresholds

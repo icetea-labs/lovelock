@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-import { callView, getTagsInfo, summaryDayCal, TimeWithFormat } from '../../../../helper';
+import { callView, getTagsInfo, summaryDayCal, HolidayEvent, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { AvatarPro } from '../../../elements';
@@ -244,7 +244,7 @@ export default function TopContrainer(props) {
           <span>{summaryDayCal(topInfo.r_date)} days</span>
         </div>
         <div className="summaryDay">
-          <span>You have an annniversary now! </span>
+          <HolidayEvent day={summaryDayCal(topInfo.r_date)} />
         </div>
       </div>
       <WarrperChatBox>
