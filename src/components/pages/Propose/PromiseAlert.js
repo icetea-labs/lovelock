@@ -33,7 +33,7 @@ const useStyles = makeStyles(() => ({
 function CardMediaCus(props) {
   const classes = useStyles();
   return <CardMedia className={classes.media} {...props} />;
-}
+} 
 
 function PromiseAlert(props) {
   const { deny, close, accept, address, index, propose, enqueueSnackbar } = props;
