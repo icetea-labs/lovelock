@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-import { callView, getTagsInfo, TimeWithFormat } from '../../../../helper';
+import { callView, getTagsInfo, summaryDayCal, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { AvatarPro } from '../../../elements';
@@ -20,6 +20,18 @@ const TopContainerBox = styled.div`
     img {
       width: 100%;
       height: 100%;
+    }
+  }
+  .summaryCard {
+    display: flex;
+    margin-top: 15px;
+    img {
+      width: 22px;
+      height: 24px;
+      object-fit: contain;
+    }
+    .summaryDay {
+      margin: 7px;
     }
   }
   .top__title {
@@ -225,6 +237,15 @@ export default function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {topInfo.coverimg && <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />}
+      </div>
+      <div className="summaryCard">
+        <img src="/static/img/hourglass.svg" alt="hourGlass" />
+        <div className="summaryDay">
+          <span>{summaryDayCal(topInfo.r_date)} days</span>
+        </div>
+        <div className="summaryDay">
+          <span>You have an annniversary now! </span>
+        </div>
       </div>
       <WarrperChatBox>
         {topInfo.s_content && (

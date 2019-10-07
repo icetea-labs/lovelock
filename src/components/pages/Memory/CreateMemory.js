@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
-import { MentionsInput, Mention } from 'react-mentions';
 import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
