@@ -30,6 +30,7 @@ function encodeTx(data, password, ops) {
       prf: 'hmac-sha256',
     },
     noAddress: true,
+    ...ops,
   };
 
   const dk = keythereum.create();

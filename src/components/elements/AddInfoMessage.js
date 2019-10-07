@@ -228,7 +228,7 @@ export default function AddInfoMessage(props) {
       // reset image when post new memory
       setPictures([imgFile[0]]);
     }
-    onChangeMedia([...pictures, imgFile[0]]);
+    // onChangeMedia([...pictures, imgFile[0]]);
     // onChangeMedia(imgFile);
     showPreview(imgFile);
   }
@@ -236,15 +236,24 @@ export default function AddInfoMessage(props) {
   function showPreview(imgFile) {
     const file = imgFile[0];
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = loadedEvent => {
+      const arrayBuffer = loadedEvent.target.result;
+      console.log('arrayBuffer', arrayBuffer);
+      const theUrl = URL.createObjectURL(new Blob([arrayBuffer]));
+
       if (files) {
-        setPicPreview(picPreview.concat({ img: reader.result }));
+        setPicPreview(picPreview.concat({ img: theUrl }));
       } else {
         // reset preview when post new memory
-        setPicPreview([{ img: reader.result }]);
+        setPicPreview([{ img: theUrl }]);
       }
+      // const stringify = picPreview.map(value => {
+      //   return JSON.stringify(value);
+      // });
+      // console.log('files', files);
+      onChangeMedia([...files, { img: arrayBuffer }]);
     };
-    if (file) reader.readAsDataURL(file);
+    if (file) reader.readAsArrayBuffer(file);
   }
 
   function handleDateChange(value) {
@@ -254,7 +263,7 @@ export default function AddInfoMessage(props) {
   const classes = useStyles();
   return (
     <Container>
-      {files && (
+      {files.length > 0 && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
@@ -262,7 +271,7 @@ export default function AddInfoMessage(props) {
                 {picPreview.map((tile, index) => (
                   <div key={index} className="imgContent">
                     <GridListTile className={classes.img}>
-                      <img src={tile.img} alt="" />
+                      <img src={tile.img} alt="" onLoad={() => URL.revokeObjectURL(tile.img)} />
                       <GridListTileBar
                         className={classes.titleBar}
                         titlePosition="top"
@@ -273,6 +282,11 @@ export default function AddInfoMessage(props) {
                                 return id !== index;
                               });
                               setPicPreview(filtered);
+
+                              const filesFiltered = files.filter((value, id) => {
+                                return id !== index;
+                              });
+                              onChangeMedia(filesFiltered);
                             }}
                           >
                             <CloseIcon className={classes.icon} />

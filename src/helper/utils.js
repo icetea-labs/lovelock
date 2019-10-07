@@ -47,6 +47,8 @@ export async function sendTransaction(funcName, params) {
   // const { address } = this.props;
   // console.log('params', params);
   try {
+    console.log('contract', contract);
+    console.log('params', params);
     const ct = tweb3.contract(contract);
     const result = await ct.methods[funcName](...(params || [])).sendCommit();
     return result;
@@ -91,11 +93,13 @@ export async function setTagsInfo(address, name, value) {
 export async function getTagsInfo(address) {
   let tags = {};
   try {
-    const resp = await tweb3
-      .contract('system.did')
-      .methods.query(address)
-      .call();
-    tags = resp && resp.tags;
+    if (address) {
+      const resp = await tweb3
+        .contract('system.did')
+        .methods.query(address)
+        .call();
+      tags = resp && resp.tags;
+    }
   } catch (e) {
     console.error(e);
   }
@@ -125,6 +129,67 @@ export async function saveFilesToIpfs(files) {
 export async function saveFileToIpfs(files) {
   const ipfsId = await saveToIpfs(files);
   return ipfsId[0];
+}
+// upload one file
+export async function saveJsonToIpfs(files) {
+  // simple upload
+  let ipfsId = [];
+  try {
+    const content = files.map(el => {
+      return Buffer.from(el.img);
+    });
+    console.log('files', files);
+    console.log('content', content);
+    ipfsId = await saveToIpfs(content);
+  } catch (e) {
+    console.error(e);
+  }
+  return ipfsId;
+}
+// upload one file
+export async function getJsonFromIpfs(cid) {
+  const result = {};
+  try {
+    const files = await ipfs.get(cid);
+    const json = `data:image/*;charset=utf-8;base64,${files[0].content.toString('base64')}`;
+    // console.log('json', json);
+    const dimensions = await getImageDimensions(json);
+    console.log('dimensions', dimensions);
+    result.src = json;
+    // const isWithLager = dimensions.w > dimensions.h;
+    // const rate = dimensions.w / dimensions.h;
+    result.width = dimensions.w;
+    result.height = dimensions.h;
+    // if (rate <= 0.5) {
+    //   result.width = 2;
+    //   result.height = 4;
+    // } else if (rate <= 0.8) {
+    //   result.width = 3;
+    //   result.height = 4;
+    // } else if (rate <= 1.2) {
+    //   result.width = 1;
+    //   result.height = 1;
+    // } else if (rate <= 1.8) {
+    //   result.width = 4;
+    //   result.height = 3;
+    // } else {
+    //   result.width = 4;
+    //   result.height = 2;
+    // }
+  } catch (e) {
+    console.error(e);
+  }
+  return result;
+}
+
+function getImageDimensions(file) {
+  return new Promise((resolved, rejected) => {
+    const i = new Image();
+    i.onload = () => {
+      resolved({ w: i.width, h: i.height });
+    };
+    i.src = file;
+  });
 }
 
 export function TimeWithFormat(props) {
@@ -217,7 +282,7 @@ export async function generateSharedKey(privateKeyA, publicKeyB) {
 }
 export async function encodeWithSharedKey(data, sharekey) {
   const encodeData = encodeTx(data, sharekey, { noAddress: true });
-  return JSON.stringify(encodeData || {});
+  return encodeData;
 }
 export async function decodeWithSharedKey(data, sharekey) {
   const decodeData = decodeTx(sharekey, data);

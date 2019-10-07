@@ -94,8 +94,8 @@ function ChangeProfile(props) {
   }, []);
 
   async function getData() {
-    if (address) {
-      const reps = await getTagsInfo(address);
+    const reps = await getTagsInfo(address);
+    if (reps) {
       setFirstname(reps.firstname || '');
       setLastname(reps.lastname || '');
       setAvatar(reps.avatar);

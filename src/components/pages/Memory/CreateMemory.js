@@ -12,7 +12,7 @@ import SimpleModal from '../../elements/Modal';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveFileToIpfs, saveFilesToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveFileToIpfs, saveFilesToIpfs, saveJsonToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 
 const GrayLayout = styled.div`
@@ -32,7 +32,7 @@ const CreatePost = styled.div`
   left: 0px;
   right: 0px;
   bottom: 0px;
-  z-index: 2 !important;
+  z-index: ${props => props.grayLayout && '2 !important'};
   margin-bottom: 24px;
 `;
 const ShadowBox = styled.div`
@@ -127,7 +127,7 @@ export default function CreateMemory(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
 
-  const [filePath, setFilePath] = useState(null);
+  const [filePath, setFilePath] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -167,6 +167,7 @@ export default function CreateMemory(props) {
   function onChangeDate(value) {
     setDate(value);
   }
+
   function onChangeMedia(value) {
     if (value || memoryContent) {
       setDisableShare(false);
@@ -211,14 +212,14 @@ export default function CreateMemory(props) {
     setGLoading(true);
     setTimeout(async () => {
       const { proIndex } = props;
-      const hash = await saveFilesToIpfs(filePath);
+      // const hash = await saveFilesToIpfs(filePath);
+      const hash = await saveJsonToIpfs(filePath);
       const info = { date, hash };
       let params = [];
 
       if (privacy) {
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        const newInfo = await encodeWithPublicKey(info, privateKey, publicKey);
-        params = [proIndex, !!privacy, newContent, newInfo];
+        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
       } else {
         params = [proIndex, !!privacy, content, info];
       }
@@ -241,7 +242,7 @@ export default function CreateMemory(props) {
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
-      <CreatePost>
+      <CreatePost grayLayout={grayLayout}>
         <ShadowBox>
           <Grid container direction="column" spacing={3}>
             <Grid item>
