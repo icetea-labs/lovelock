@@ -17,10 +17,12 @@ export default function ImageCrop(props) {
     const reader = new FileReader();
     const file = originFile[0];
     if (originFile && file) {
-      reader.onloadend = () => {
-        setImgPreviewUrl(reader.result);
+      reader.onloadend = loadedEvent => {
+        const arrayBuffer = loadedEvent.target.result;
+        const blobUrl = URL.createObjectURL(new Blob([arrayBuffer]));
+        setImgPreviewUrl(blobUrl);
       };
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file);
     }
   }, []);
 

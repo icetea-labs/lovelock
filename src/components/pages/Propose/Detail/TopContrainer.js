@@ -188,7 +188,7 @@ export default function TopContrainer(props) {
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
 
     const info = proposes.s_info;
-    proposes.coverimg = info.hash || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+    proposes.coverimg = info.hash.length > 0 ? info.hash[0] : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
     proposes.s_date = info.date;
     proposes.r_date = info.date;
 
@@ -236,7 +236,7 @@ export default function TopContrainer(props) {
   return (
     <TopContainerBox>
       <div className="top__coverimg">
-        {topInfo.coverimg && <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />}
+        <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />
       </div>
       <div className="summaryCard">
         <img src="/static/img/hourglass.svg" alt="hourGlass" />

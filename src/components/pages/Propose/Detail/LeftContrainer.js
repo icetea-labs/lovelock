@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
@@ -61,45 +61,21 @@ const TagBox = styled.div`
     }
   }
 `;
-class LeftContrainer extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      index: -1,
-      step: '',
-      propose: [],
-      loading: true,
-    };
-  }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { propose } = nextProps;
+function LeftContrainer(props) {
+  const { proposes, setPropose, addPropose, address, tag, privateKey, enqueueSnackbar, setNeedAuth, history } = props;
+  const [index, setIndex] = useState(-1);
+  const [step, setStep] = useState('');
+  const [loading, setLoading] = useState(true);
 
-    let value = {};
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
-      value = Object.assign({}, { propose });
-    }
-    if (value) return value;
-    return null;
-  }
+  useEffect(() => {
+    loadProposes();
+    watchPropose();
+  }, []);
 
-  componentDidMount() {
-    this.loadProposes();
-    this.watchPropose();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { propose } = this.state;
-
-    if (JSON.stringify(propose) !== JSON.stringify(prevState.propose)) {
-      this.loadProposes();
-    }
-  }
-
-  watchPropose = async () => {
-    const { address, enqueueSnackbar } = this.props;
+  function watchPropose() {
     const filter = {};
-    tweb3.subscribe('Tx', filter, async (error, result) => {
+    return tweb3.subscribe('Tx', filter, async (error, result) => {
       if (error) {
         const message = 'WatchPropose Error';
         enqueueSnackbar(message, { variant: 'error' });
@@ -110,10 +86,10 @@ class LeftContrainer extends PureComponent {
           // console.log('eventData', eventData);
           switch (data.eventName) {
             case 'createPropose':
-              await this.eventCreatePropose(eventData);
+              await eventCreatePropose(eventData);
               break;
             case 'confirmPropose':
-              this.eventConfirmPropose(eventData);
+              eventConfirmPropose(eventData);
               break;
             default:
               break;
@@ -122,90 +98,85 @@ class LeftContrainer extends PureComponent {
         // console.log('not me');
       }
     });
-  };
-
-  closePopup = () => {
-    const { propose, history } = this.props;
-    this.setState({ step: '' });
-    if (propose.length > 0 && propose[propose.length - 1].receiver === process.env.REACT_APP_BOT_LOVER) {
-      const index = propose[propose.length - 1].id;
-      history.push(`/propose/${index}`);
-    }
-  };
-
-  nextToAccept = () => {
-    this.setState({ step: 'accept' });
-  };
-
-  nextToDeny = () => {
-    this.setState({ step: 'deny' });
-  };
-
-  selectAccepted = index => {
-    const { history } = this.props;
-    history.push(`/propose/${index}`);
-  };
-
-  newPromise = () => {
-    const { setNeedAuth, privateKey } = this.props;
-    if (!privateKey) {
-      setNeedAuth(true);
-      this.setState({ step: 'new' });
-    } else {
-      this.setState({ step: 'new' });
-    }
-  };
-
-  selectPending = index => {
-    const { setNeedAuth, privateKey } = this.props;
-    if (!privateKey) {
-      setNeedAuth(true);
-      this.setState({ step: 'pending', index });
-    } else {
-      this.setState({ step: 'pending', index });
-    }
-    // console.log('view pending index', index);
-  };
-
-  eventConfirmPropose(data) {
-    const { setPropose, propose, address, enqueueSnackbar } = this.props;
-    const newArray = propose.slice() || [];
-    const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-    newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-    // console.log('newArray', newArray[objIndex]);
-    // console.log('eventConfirmPropose');
-    if (address === data.log.sender) {
-      const message = 'Your propose has been approved.';
-      enqueueSnackbar(message, { variant: 'info' });
-    }
-    setPropose(newArray);
   }
 
-  async eventCreatePropose(data) {
-    const { setPropose, propose, address, enqueueSnackbar } = this.props;
-    // console.log('data.log', data.log);
-    const log = await this.addInfoToProposes(data.log);
-    // console.log('eventCreatePropose');
-    setPropose([...propose, log]);
-    // console.log('propose.sender', log);
+  function closePopup() {
+    setStep('');
+  }
+
+  function nextToAccept() {
+    setStep('accept');
+  }
+
+  function nextToDeny() {
+    setStep('deny');
+  }
+
+  function selectAccepted(proIndex) {
+    history.push(`/propose/${proIndex}`);
+  }
+  // const newPromise = useCallback(() => {
+  //   if (!privateKey) {
+  //     setNeedAuth(true);
+  //   }
+  //   setStep('new');
+  // }, [proposes]);
+
+  function newPromise() {
+    if (!privateKey) {
+      setNeedAuth(true);
+    }
+    setStep('new');
+  }
+
+  function selectPending(proIndex) {
+    if (!privateKey) {
+      setNeedAuth(true);
+    }
+    setStep('pending');
+    setIndex(proIndex);
+    // console.log('view pending index', index);
+  }
+
+  function eventConfirmPropose(data) {
+    // console.log('data', data);
+    // const newArray = proposes.slice() || [];
+    // const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
+    // newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
+
+    // if (address === data.log.sender) {
+    //   const message = 'Your propose has been approved.';
+    //   enqueueSnackbar(message, { variant: 'info' });
+    // }
+    // console.log('data', newArray);
+    // addPropose(newArray);
+  }
+
+  async function eventCreatePropose(data) {
+    const log = await addInfoToProposes([data.log]);
+    addPropose(log[0]);
+
     if (address !== log.sender) {
       const message = 'You have a new propose.';
       enqueueSnackbar(message, { variant: 'info' });
     }
+    // goto propose detail when sent to bot.
+    if (log.receiver === process.env.REACT_APP_BOT_LOVER) {
+      history.push(`/propose/${log.id}`);
+    }
   }
 
-  async loadProposes() {
-    this.setState({ loading: true });
-    const { address, setPropose } = this.props;
-    const proposes = (await callView('getProposeByAddress', [address])) || [];
-    const newPropose = await this.addInfoToProposes(proposes);
+  async function loadProposes() {
+    setLoading(true);
+    const resp = (await callView('getProposeByAddress', [address])) || [];
+    const newPropose = await addInfoToProposes(resp);
+
     setPropose(newPropose);
-    this.setState({ loading: false });
+    setLoading(false);
   }
 
-  async addInfoToProposes(proposes) {
-    const { address } = this.props;
-    const clonePro = proposes;
+  async function addInfoToProposes(resp) {
+    const clonePro = resp;
     for (let i = 0; i < clonePro.length; i++) {
       // Get address partner
       let partnerAddress = '';
@@ -224,16 +195,16 @@ class LeftContrainer extends PureComponent {
         const reps = await getTagsInfo(partnerAddress);
         clonePro[i].name = reps['display-name'];
         clonePro[i].avatar = reps.avatar;
+        // eslint-disable-next-line no-await-in-loop
+        const nick = await getAlias(partnerAddress);
+        clonePro[i].nick = `@${nick}`;
       }
-      // eslint-disable-next-line no-await-in-loop
-      const nick = await getAlias(partnerAddress);
-      clonePro[i].nick = `@${nick}`;
     }
     return clonePro;
   }
 
-  renderTag = () => {
-    // const { tag } = this.state;
+  function renderTag() {
+    // const { tag } = state;
     // return tag.map((item, index) => {
     //   return (
     //     <span className="tagName" key={index}>
@@ -241,55 +212,50 @@ class LeftContrainer extends PureComponent {
     //     </span>
     //   );
     // });
-  };
-
-  render() {
-    const { step, loading, index } = this.state;
-    const { propose, address, tag, privateKey } = this.props;
-    return (
-      <React.Fragment>
-        <LeftBox>
-          <ShadowBox>
-            <LinkPro className="btn_add_promise" onClick={this.newPromise}>
-              <Icon type="add" />
-              Add Promise
-            </LinkPro>
-            <div className="title">Accepted promise</div>
-            <div>
-              <LeftProposes loading={loading} flag={1} handlerSelect={this.selectAccepted} />
-            </div>
-            <div className="title">Pending promise</div>
-            <div>
-              <LeftProposes loading={loading} flag={0} handlerSelect={this.selectPending} />
-            </div>
-            <div className="title">Popular Tag</div>
-            <TagBox>{this.renderTag(tag)}</TagBox>
-          </ShadowBox>
-        </LeftBox>
-        {step === 'new' && privateKey && <Promise close={this.closePopup} />}
-        {step === 'pending' && privateKey && (
-          <PromiseAlert
-            index={index}
-            propose={propose}
-            address={address}
-            close={this.closePopup}
-            accept={this.nextToAccept}
-            deny={this.nextToDeny}
-          />
-        )}
-        {step === 'accept' && <PromiseConfirm close={this.closePopup} index={index} />}
-        {step === 'deny' && <PromiseConfirm isDeny close={this.closePopup} index={index} />}
-      </React.Fragment>
-    );
   }
+
+  return (
+    <React.Fragment>
+      <LeftBox>
+        <ShadowBox>
+          <LinkPro className="btn_add_promise" onClick={newPromise}>
+            <Icon type="add" />
+            Add Promise
+          </LinkPro>
+          <div className="title">Accepted promise</div>
+          <div>
+            <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} />
+          </div>
+          <div className="title">Pending promise</div>
+          <div>
+            <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} />
+          </div>
+          <div className="title">Popular Tag</div>
+          <TagBox>{renderTag(tag)}</TagBox>
+        </ShadowBox>
+      </LeftBox>
+      {step === 'new' && privateKey && <Promise close={closePopup} />}
+      {step === 'pending' && privateKey && (
+        <PromiseAlert
+          index={index}
+          propose={proposes}
+          address={address}
+          close={closePopup}
+          accept={nextToAccept}
+          deny={nextToDeny}
+        />
+      )}
+      {step === 'accept' && <PromiseConfirm close={closePopup} index={index} />}
+      {step === 'deny' && <PromiseConfirm isDeny close={closePopup} index={index} />}
+    </React.Fragment>
+  );
 }
 
 const mapStateToProps = state => {
-  const { loveinfo, account } = state;
   return {
-    propose: loveinfo.propose,
-    address: account.address,
-    privateKey: account.privateKey,
+    proposes: state.loveinfo.propose,
+    address: state.account.address,
+    privateKey: state.account.privateKey,
   };
 };
 
@@ -297,6 +263,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setPropose: value => {
       dispatch(actions.setPropose(value));
+    },
+    addPropose: value => {
+      dispatch(actions.addPropose(value));
     },
     setNeedAuth: value => {
       dispatch(actions.setNeedAuth(value));

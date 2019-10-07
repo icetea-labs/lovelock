@@ -4,20 +4,19 @@ import { makeStyles } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Grid from '@material-ui/core/Grid';
 import DateFnsUtils from '@date-io/date-fns';
-import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
 const Container = styled.div``;
-const ImgList = styled.div`
-  width: 100%;
-  img {
-    width: 100px;
-    height: 100px;
-  }
-`;
+// const ImgList = styled.div`
+//   width: 100%;
+//   img {
+//     width: 100px;
+//     height: 100px;
+//   }
+// `;
 const InfoBox = styled.div`
   min-height: 55px;
   /* margin-top: 10px; */
@@ -198,7 +197,7 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.light,
   },
   titleBar: {
-    background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+    background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
   },
   icon: {
     color: 'white',
@@ -219,49 +218,69 @@ export default function AddInfoMessage(props) {
   // const [date, setDate] = useState(new Date());
   const { files, date } = props;
   const [pictures, setPictures] = useState([]);
+  const [picPreview, setPicPreview] = useState([]);
 
   function captureUploadFile(event) {
     const imgFile = event.target.files;
-    onChangeMedia(imgFile);
+    if (files) {
+      setPictures(pictures.concat(imgFile[0]));
+    } else {
+      // reset image when post new memory
+      setPictures([imgFile[0]]);
+    }
+    // onChangeMedia([...pictures, imgFile[0]]);
+    // onChangeMedia(imgFile);
+    showPreview(imgFile);
+  }
 
+  function showPreview(imgFile) {
     const file = imgFile[0];
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPictures(pictures.concat({ img: reader.result }));
-      // setPictures([{ img: reader.result }]);
+    reader.onloadend = loadedEvent => {
+      const arrayBuffer = loadedEvent.target.result;
+      const blobUrl = URL.createObjectURL(new Blob([arrayBuffer]));
+      if (files) {
+        setPicPreview(picPreview.concat({ img: blobUrl }));
+      } else {
+        // reset preview when post new memory
+        setPicPreview([{ img: blobUrl }]);
+      }
+      onChangeMedia([...files, { img: arrayBuffer }]);
     };
-    if (file) {
-      reader.readAsDataURL(file);
-    } else {
-      // preview.src = '';
-    }
+    if (file) reader.readAsArrayBuffer(file);
   }
+
   function handleDateChange(value) {
     onChangeDate(value);
   }
-  const classes = useStyles();
 
+  const classes = useStyles();
   return (
     <Container>
-      {pictures.length > 0 && files && (
+      {files.length > 0 && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
               <div className="scrollContent">
-                {pictures.map((tile, index) => (
+                {picPreview.map((tile, index) => (
                   <div key={index} className="imgContent">
-                    <GridListTile key={tile.img} className={classes.img}>
-                      <img src={tile.img} alt="" />
+                    <GridListTile className={classes.img}>
+                      <img src={tile.img} alt="" onLoad={() => URL.revokeObjectURL(tile.img)} />
                       <GridListTileBar
                         className={classes.titleBar}
                         titlePosition="top"
                         actionIcon={
                           <IconButton
                             onClick={() => {
-                              const filtered = pictures.filter((value, id) => {
+                              const filtered = picPreview.filter((value, id) => {
                                 return id !== index;
                               });
-                              setPictures(filtered);
+                              setPicPreview(filtered);
+
+                              const filesFiltered = files.filter((value, id) => {
+                                return id !== index;
+                              });
+                              onChangeMedia(filesFiltered);
                             }}
                           >
                             <CloseIcon className={classes.icon} />
@@ -273,7 +292,7 @@ export default function AddInfoMessage(props) {
                 ))}
                 <AddMoreImg>
                   <div className="addImgBox">
-                    <a className="btAddImg" rel="ignore">
+                    <div className="btAddImg" rel="ignore">
                       <div className="wrapperInput">
                         <input
                           accept="video/*,  video/x-m4v, video/webm, video/x-ms-wmv, video/x-msvideo, video/3gpp, video/flv, video/x-flv, video/mp4, video/quicktime, video/mpeg, video/ogv, .ts, .mkv, image/*, image/heic, image/heif"
@@ -284,7 +303,7 @@ export default function AddInfoMessage(props) {
                           onChange={captureUploadFile}
                         />
                       </div>
-                    </a>
+                    </div>
                   </div>
                 </AddMoreImg>
               </div>
@@ -312,7 +331,6 @@ export default function AddInfoMessage(props) {
           <Grid item>
             <ImgUpLoad>
               <div className="icon-upload">
-                {files ? <i className="material-icons">done</i> : <i className="material-icons">insert_photo</i>}
                 <div>Photo/Video</div>
               </div>
               <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} accept="image/*" />

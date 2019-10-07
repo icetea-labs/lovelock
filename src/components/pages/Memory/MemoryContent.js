@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, CardMedia, IconButton, Typography } from '@material-ui/core';
+import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
+// import Gallery from 'react-grid-gallery';
+import Gallery from 'react-photo-gallery';
+import Carousel, { Modal, ModalGateway } from 'react-images';
 
-import { TimeWithFormat, decodeWithPublicKey } from '../../../helper';
+import { TimeWithFormat, decodeWithPublicKey, getJsonFromIpfs } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
@@ -31,6 +34,17 @@ const useStylesFacebook = makeStyles({
 });
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+  },
+  gridList: {
+    width: 500,
+    height: 450,
+  },
   button: {
     color: 'rgba(0, 0, 0, 0.54)',
     width: '100%',
@@ -86,6 +100,7 @@ export default function MemoryContent(props) {
     if (memoryDecrypted.isPrivate) {
       decodePrivateMemory();
     }
+
     // create the store
     // console.log('db', db);
   }, [privateKey, proIndex]);
@@ -93,6 +108,17 @@ export default function MemoryContent(props) {
   useEffect(() => {
     setMemoryDecrypted(memory);
   }, [memory]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     for (let j = 0; j < memory.info.hash.length; j++) {
+  //       // eslint-disable-next-line no-await-in-loop
+  //       memory.info.hash[j] = await getJsonFromIpfs(memory.info.hash[j]);
+  //     }
+  //     setMemoryDecrypted(memory);
+  //   };
+  //   fetchData();
+  // }, []);
 
   function FacebookProgress(propsFb) {
     const classes = useStylesFacebook();
@@ -169,7 +195,7 @@ export default function MemoryContent(props) {
     try {
       let content = JSON.parse(memoryDecrypted.content);
       if (content) {
-        console.log(content);
+        // console.log(content);
         return content.blocks.map((line, i) => {
           if (i <= 3) {
             return (
@@ -184,85 +210,106 @@ export default function MemoryContent(props) {
     } catch (e) {}
     return memoryDecrypted.content;
   }
+  const [currentImage, setCurrentImage] = useState(0);
+  const [viewerIsOpen, setViewerIsOpen] = useState(false);
 
+  const openLightbox = useCallback((event, { index }) => {
+    setCurrentImage(index);
+    setViewerIsOpen(true);
+  }, []);
+  const closeLightbox = () => {
+    setCurrentImage(0);
+    setViewerIsOpen(false);
+  };
   const classes = useStyles();
-
   return (
-    <Card key={memoryDecrypted.index} className={classes.card}>
-      <CardHeader
-        avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
-        title={memoryDecrypted.name}
-        subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-      />
-      <CardContent>
+    <React.Fragment>
+      <Card key={memoryDecrypted.index} className={classes.card}>
+        <CardHeader
+          avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
+          title={memoryDecrypted.name}
+          subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+          action={
+            <IconButton aria-label="settings">
+              <MoreVertIcon />
+            </IconButton>
+          }
+        />
+        <CardContent>
+          {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
+            <React.Fragment>
+              {decoding ? (
+                <span>
+                  <FacebookProgress /> Unlock...
+                </span>
+              ) : (
+                <IconButton aria-label="settings">
+                  <LockIcon />
+                </IconButton>
+              )}
+            </React.Fragment>
+          ) : (
+            <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+              {previewEditorMemory()}
+            </Typography>
+          )}
+          {decodeEditorMemory() && (
+            <>
+              <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>
+                See more...
+              </Link>
+              <SimpleModal
+                open={isOpenModal}
+                handleClose={() => setOpenModal(false)}
+                closeText="Close"
+                title={`${memoryDecrypted.name} > ${propose[0].name}`}
+                subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+              >
+                <Editor initContent={decodeEditorMemory()} read_only={true} />
+              </SimpleModal>
+            </>
+          )}
+        </CardContent>
+        <React.Fragment>
+          {memoryDecrypted.info.hash && (
+            <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
+              <Gallery
+                // targetRowHeight={300}
+                // containerWidth={600}
+                photos={memoryDecrypted.info.hash.slice(0, 5)}
+                onClick={openLightbox}
+              />
+            </div>
+          )}
+        </React.Fragment>
         {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-          <React.Fragment>
-            {decoding ? (
-              <span>
-                <FacebookProgress /> Unlock...
-              </span>
-            ) : (
-              <IconButton aria-label="settings">
-                <LockIcon />
-              </IconButton>
-            )}
-          </React.Fragment>
+          ''
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-            {previewEditorMemory()}
-          </Typography>
-        )}
-        {decodeEditorMemory() && (
-          <>
-            <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>
-              See more...
-            </Link>
-            <SimpleModal
-              open={isOpenModal}
-              handleClose={() => setOpenModal(false)}
-              closeText="Close"
-              title={`${memoryDecrypted.name} > ${propose[0] ? propose[0].name : ''}`}
-              subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-            >
-              <Editor initContent={decodeEditorMemory()} read_only={true} />
-            </SimpleModal>
-          </>
-        )}
-      </CardContent>
-      <React.Fragment>
-        {memoryDecrypted.info.hash && (
-          <CardMedia
-            className={classes.media}
-            image={process.env.REACT_APP_IPFS + memoryDecrypted.info.hash}
-            title="img"
+          <MemoryActionButton
+            handerShowComment={handerShowComment}
+            likes={memory.likes}
+            memoryIndex={memory.id}
+            numComment={numComment}
           />
         )}
-        {/* <ImageGridList
-              imgs={[
-                { img: 'https://ipfs.io/ipfs/' + memory.info.hash, clos: 2 },
-                { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
-                { img: 'https://ipfs.io/ipfs/' + memory.info.hash },
-              ]}
-            /> */}
-      </React.Fragment>
-      {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-        ''
-      ) : (
-        <MemoryActionButton
-          handerShowComment={handerShowComment}
-          likes={memory.likes}
-          memoryIndex={memory.id}
-          numComment={numComment}
-        />
-      )}
-      {showComment && (
-        <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
-      )}
-    </Card>
+        {showComment && (
+          <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+        )}
+      </Card>
+      <ModalGateway>
+        {viewerIsOpen ? (
+          <Modal onClose={closeLightbox} style={{ zIndex: 3 }}>
+            <Carousel
+              currentIndex={currentImage}
+              views={memoryDecrypted.info.hash.map(x => ({
+                ...x,
+                srcset: x.srcSet,
+                caption: x.title,
+              }))}
+            />
+          </Modal>
+        ) : null}
+      </ModalGateway>
+    </React.Fragment>
   );
 }

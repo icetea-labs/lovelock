@@ -6,7 +6,7 @@ import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { makeStyles, withstyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 import { Grid, TextField } from '@material-ui/core';
-import AvatarPro from '../../../elements/AvatarPro';
+import { AvatarPro } from '../../../elements';
 
 import tweb3 from '../../../../service/tweb3';
 import { wallet, decode, getTagsInfo } from '../../../../helper';
@@ -37,8 +37,10 @@ function ByPassWord(props) {
     const { address } = props;
     if (address) {
       const reps = await getTagsInfo(address);
-      setUsername(reps['display-name'] || '');
-      setAvatar(reps.avatar);
+      if (reps) {
+        setUsername(reps['display-name'] || '');
+        setAvatar(reps.avatar);
+      }
     } else {
       setUsername('undefined');
     }
@@ -73,7 +75,6 @@ function ByPassWord(props) {
 
   function handlePassword(event) {
     const { value } = event.currentTarget;
-    console.log('value', value);
     setPassword(value);
   }
 
