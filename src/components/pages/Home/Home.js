@@ -44,34 +44,33 @@ function Home(props) {
 
   function closePopup() {
     setOpenPromise(false);
-    if (homePropose.length > 0) {
-      const index = homePropose[homePropose.length - 1].id;
-      history.push(`/propose/${index}`);
-    }
+    loadAcceptPropose();
   }
 
   return (
     address && (
       <FlexBox wrap="wrap">
         <FlexWidthBox width="30%">{/* <LeftContrainer /> */}</FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightBox>
-            <div>
-              <span>
-                You have no relationship yet.
-                <LinkPro className="btn_add_promise" onClick={openPopup}>
-                  Create one
-                </LinkPro>
-                or
-                <LinkPro className="btn_add_promise" onClick={openExplore}>
-                  explorer
-                </LinkPro>
-                others.
-              </span>
-            </div>
-          </RightBox>
-          {openPromise && privateKey && <Promise close={closePopup} />}
-        </FlexWidthBox>
+        {homePropose.length < 1 && (
+          <FlexWidthBox width="70%">
+            <RightBox>
+              <div>
+                <span>
+                  You have no relationship yet.
+                  <LinkPro className="btn_add_promise" onClick={openPopup}>
+                    Create one
+                  </LinkPro>
+                  or
+                  <LinkPro className="btn_add_promise" onClick={openExplore}>
+                    explorer
+                  </LinkPro>
+                  others.
+                </span>
+              </div>
+            </RightBox>
+            {openPromise && privateKey && <Promise close={closePopup} />}
+          </FlexWidthBox>
+        )}
       </FlexBox>
     )
   );

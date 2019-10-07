@@ -155,6 +155,23 @@ export function TimeWithFormat(props) {
   return <span>{moment(value).format(formatValue)}</span>;
 }
 
+export function summaryDayCal(value) {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const acceptDay = value.split('T')[0];
+  const acceptTime = value.split('T')[1];
+  const slugDay = acceptDay.split('-');
+  const slugTime = acceptTime.split('Z')[0].split(':');
+
+  const convertAccDay = new Date(slugDay[0], slugDay[1] - 1, slugDay[2], slugTime[0], slugTime[1], slugTime[2]);
+  const today = new Date();
+  const summaryDay = Math.round(Math.abs(convertAccDay - today) / oneDay);
+  return summaryDay;
+}
+
+export function holidayCal(){
+  
+} 
+
 export function diffTime(time) {
   // Set new thresholds
   // moment.relativeTimeThreshold("s", 10);

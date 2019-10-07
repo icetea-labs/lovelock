@@ -5,10 +5,9 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
-import Button from '@material-ui/core/Button';
+import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
-import { useSnackbar } from 'notistack';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
@@ -86,8 +85,8 @@ const useStyles = makeStyles(theme => ({
     marginTop: 5,
     marginLeft: -50,
     outline: 'none',
-    cursor: 'pointer'
-  }
+    cursor: 'pointer',
+  },
 }));
 
 const BootstrapInput = withStyles(theme => ({
@@ -201,7 +200,7 @@ export default function CreateMemory(props) {
       return;
     }
 
-    let content = advancedMemory || memoryContent;
+    const content = advancedMemory || memoryContent;
 
     if (!privateKey) {
       setNeedAuth(true);
@@ -224,13 +223,13 @@ export default function CreateMemory(props) {
         params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction(method, params);
-      console.log('result', result);
+      // console.log('result', result);
       if (result) {
         reLoadMemory(proIndex);
       }
       setGLoading(false);
       setGrayLayout(false);
-      setFilePath('');
+      setFilePath(null);
       setDate(new Date());
       setMemoryContent('');
       setPrivacy(0);
@@ -287,7 +286,9 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>Write blog...</button>
+                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
+                  Write blog...
+                </button>
                 <SimpleModal
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}

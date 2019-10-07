@@ -178,7 +178,7 @@ class Promise extends React.Component {
 
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
-    const address = this.props;
+    const { props } = this;
 
     if (escapedValue.length <= 3) {
       this.setState({ suggestions: [] });
@@ -205,7 +205,7 @@ class Promise extends React.Component {
       console.log(tryStringifyJson(err));
     }
 
-    people = people.filter(person => person.address !== address);
+    people = people.filter(person => person.address !== props.address);
     people = people.filter(person => regex.test(this.getSuggestionValue(person)));
     people = people.slice(0, 10);
     for (let i = 0; i < people.length; i++) {
@@ -215,7 +215,6 @@ class Promise extends React.Component {
     for (let i = 0; i < people.length; i++) {
       Object.assign(people[i], { avatar: peopleAva[i] });
     }
-
     this.setState({
       suggestions: people,
     });
