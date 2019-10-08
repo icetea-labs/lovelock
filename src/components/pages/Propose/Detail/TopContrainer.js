@@ -4,11 +4,14 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { CardMedia, IconButton } from '@material-ui/core';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
 import { callView, getTagsInfo, summaryDayCal, HolidayEvent, TimeWithFormat } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { AvatarPro } from '../../../elements';
+import ImageCrop from '../../../elements/ImageCrop';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -20,6 +23,20 @@ const TopContainerBox = styled.div`
     img {
       width: 100%;
       height: 100%;
+    }
+    input[type='file'] {
+      font-size: 100px;
+      position: absolute;
+      left: 10;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .MuiSvgIcon-root {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      cursor: pointer;
     }
   }
   .summaryCard {
@@ -126,6 +143,22 @@ const useStyles = makeStyles({
     height: 58,
     borderRadius: 10,
   },
+  media: {
+    height: 450,
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundSize: 'cover',
+    '&:hover': {
+      '& $icon': {
+        display: 'block',
+      },
+    },
+  },
+  icon: {
+    fontSize: '14px',
+    color: 'white',
+    display: 'none',
+  },
 });
 
 export default function TopContrainer(props) {
@@ -151,7 +184,7 @@ export default function TopContrainer(props) {
         } else {
           const resp = (await callView('getProposeByIndex', [proIndex])) || [];
           const newPropose = await addInfoToProposes(resp[0]);
-          // console.log('newPropose', newPropose);
+          console.log('newPropose', newPropose);
           setTopInfo(newPropose || []);
         }
       } catch (e) {
@@ -204,6 +237,32 @@ export default function TopContrainer(props) {
   }
 
   const classes = useStyles();
+  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [originFile, setOriginFile] = useState([]);
+  const [cropFile, setCropFile] = useState('');
+  const [coverImg, setCoverImg] = useState('');
+
+  function handleImageChange(event) {
+    event.preventDefault();
+    const orFiles = event.target.files;
+
+    if (orFiles.length > 0) {
+      setOriginFile(orFiles);
+      setIsOpenCrop(true);
+    } else {
+      setIsOpenCrop(false);
+    }
+  }
+
+  function closeCrop() {
+    setIsOpenCrop(false);
+  }
+
+  function acceptCrop(e) {
+    closeCrop();
+    setCropFile(e.cropFile);
+    setCoverImg(e.avaPreview);
+  }
 
   if (loading) {
     return (
@@ -236,7 +295,17 @@ export default function TopContrainer(props) {
   return (
     <TopContainerBox>
       <div className="top__coverimg">
-        <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />
+        <CardMedia
+          className={classes.media}
+          image={process.env.REACT_APP_IPFS + topInfo.coverimg}
+          title="propose image"
+        >
+          <IconButton className={classes.icon}>
+            <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+            <PhotoCameraIcon />
+            <span>&nbsp;Change propose image</span>
+          </IconButton>
+        </CardMedia>
       </div>
       <div className="summaryCard">
         <img src="/static/img/hourglass.svg" alt="hourGlass" />
@@ -281,6 +350,7 @@ export default function TopContrainer(props) {
           </FlexWidthBox>
         )}
       </WarrperChatBox>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
     </TopContainerBox>
   );
 }
