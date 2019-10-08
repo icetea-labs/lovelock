@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import tweb3 from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, getAlias } from '../../../../helper';
@@ -63,10 +63,11 @@ const TagBox = styled.div`
 `;
 
 function LeftContrainer(props) {
-  const { proposes, setPropose, addPropose, address, tag, privateKey, enqueueSnackbar, setNeedAuth, history } = props;
+  const { proposes, setPropose, addPropose, confirmPropose, address, tag, privateKey, setNeedAuth, history } = props;
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     loadProposes();
@@ -83,7 +84,7 @@ function LeftContrainer(props) {
         const data = result.data.value.TxResult.events[0];
         const eventData = data && data.eventData;
         if (eventData && eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
-          // console.log('eventData', eventData);
+          console.log('eventData', eventData);
           switch (data.eventName) {
             case 'createPropose':
               await eventCreatePropose(eventData);
@@ -139,30 +140,25 @@ function LeftContrainer(props) {
   }
 
   function eventConfirmPropose(data) {
-    // console.log('data', data);
-    // const newArray = proposes.slice() || [];
-    // const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-    // newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-
-    // if (address === data.log.sender) {
-    //   const message = 'Your propose has been approved.';
-    //   enqueueSnackbar(message, { variant: 'info' });
-    // }
-    // console.log('data', newArray);
-    // addPropose(newArray);
+    confirmPropose(data.log);
+    if (address === data.log.sender) {
+      const message = 'Your propose has been approved.';
+      enqueueSnackbar(message, { variant: 'info' });
+    }
   }
 
   async function eventCreatePropose(data) {
     const log = await addInfoToProposes([data.log]);
     addPropose(log[0]);
 
-    if (address !== log.sender) {
+    if (address !== log[0].sender) {
       const message = 'You have a new propose.';
       enqueueSnackbar(message, { variant: 'info' });
     }
+    console.log('log', log);
     // goto propose detail when sent to bot.
-    if (log.receiver === process.env.REACT_APP_BOT_LOVER) {
-      history.push(`/propose/${log.id}`);
+    if (log[0].receiver === process.env.REACT_APP_BOT_LOVER) {
+      history.push(`/propose/${log[0].id}`);
     }
   }
 
@@ -267,6 +263,9 @@ const mapDispatchToProps = dispatch => {
     addPropose: value => {
       dispatch(actions.addPropose(value));
     },
+    confirmPropose: value => {
+      dispatch(actions.confirmPropose(value));
+    },
     setNeedAuth: value => {
       dispatch(actions.setNeedAuth(value));
     },
@@ -277,5 +276,5 @@ export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withSnackbar(LeftContrainer))
+  )(LeftContrainer)
 );

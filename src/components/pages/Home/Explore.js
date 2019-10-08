@@ -11,8 +11,8 @@ const RightBox = styled.div`
 `;
 
 function Explore(props) {
-  const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  const [memoByRange, setMemoByRange] = useState([]);
   const { address } = props;
 
   useEffect(() => {
@@ -20,26 +20,9 @@ function Explore(props) {
   }, []);
 
   async function loadMemory() {
-    const allMemory = await callView('getMemoriesByRange', [0, 100]);
-
-    let newMemoryList = [];
-    if (allMemory && allMemory.length) {
-      for (let i = 0; i < allMemory.length; i++) {
-        const obj = allMemory[i];
-        if (obj) {
-          const send = obj.sender;
-          // obj.info = JSON.parse(obj.info);
-          const reps = await getTagsInfo(send);
-          obj.name = reps['display-name'];
-          obj.avatar = reps.avatar;
-          newMemoryList.push(obj);
-        }
-      }
-      newMemoryList = newMemoryList.reverse();
-      newMemoryList = newMemoryList.slice(0, 10);
-      setMemoryList(newMemoryList);
-    }
-    setLoading(false);
+    const result = await callView('getMemoriesByRange', [0, 10]);
+    // console.log('memoByRange', result);
+    setMemoByRange(result);
   }
 
   return (
@@ -50,7 +33,7 @@ function Explore(props) {
         </FlexWidthBox>
         <FlexWidthBox width="70%">
           <RightBox>
-            <MemoryContainer loading={loading} memoryList={memoryList} />
+            <MemoryContainer memorydata={memoByRange} />
           </RightBox>
         </FlexWidthBox>
       </FlexBox>

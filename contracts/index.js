@@ -13,6 +13,7 @@ class LoveLock {
   //   status: 0,
   //   memoryIndex: [],
   // },
+  @view @state botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
   @view @state proposes = [];
   @view @state add2p = {}; //1:n { 'address':[1,2,3...] }
 
@@ -50,7 +51,7 @@ class LoveLock {
 
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn') {
+    if (receiver === botAddress) {
       pendingPropose = { ...defaultPropose, status: 1 };
     } else {
       pendingPropose = { ...defaultPropose, status: 0 };
@@ -76,6 +77,7 @@ class LoveLock {
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
     this._confirmPropose(proIndex, r_content, 1);
+    this.addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1);
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
@@ -134,13 +136,15 @@ class LoveLock {
     return res;
   }
   // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info) {
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0) {
     let pro = getDataByIndex(this.proposes, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
-
+    let menory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
     //new memories
-    const menory = { isPrivate, sender, proIndex, content, info, likes: {}, comments: [] };
+    if (type === 1) {
+      menory = Object.assign({}, menory, { receiver: pro.sender });
+    }
     const x = this.memories;
     const index = x.push(menory) - 1;
     this.memories = x;
