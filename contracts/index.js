@@ -1,6 +1,7 @@
 const { expect } = require(';');
 const { isOwnerPropose, getDataByIndex } = require('./helper.js');
-@contract class LoveLock {
+@contract
+class LoveLock {
   // {
   //   isPrivate: false,
   //   sender: '',
@@ -32,6 +33,7 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
     const sender = msg.sender;
     const isPrivate = false;
     const defaultPropose = {
+      coverImg: s_info.hash[0] ? s_info.hash[0] : '',
       isPrivate,
       sender,
       s_content,
@@ -216,5 +218,18 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
     //emit Event
     const log = Object.assign({}, pro, { id: index });
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
+  }
+
+  @transaction changeCoverImg(index: number, coverImg: string) {
+    let pro = getDataByIndex(this.proposes, index);
+    const sender = msg.sender;
+    expect(sender === pro.receiver || sender === pro.sender, 'Permission deny. Can not change.');
+
+    pro = Object.assign({}, pro, { coverImg });
+    this.proposes[index] = pro;
+
+    //emit Event
+    const log = Object.assign({}, pro, { id: index });
+    this.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
   }
 }
