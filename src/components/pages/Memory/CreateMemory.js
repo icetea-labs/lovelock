@@ -9,11 +9,17 @@ import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 
-import { ButtonPro } from '../../elements/Button';
-import AddInfoMessage from '../../elements/AddInfoMessage';
-import * as actions from '../../../store/actions';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
-import { AvatarPro } from '../../elements';
+import { ButtonPro } from "../../elements/Button";
+import AddInfoMessage from "../../elements/AddInfoMessage";
+import * as actions from "../../../store/actions";
+import {
+  saveFileToIpfs,
+  saveBufferToIpfs,
+  sendTransaction,
+  encodeWithPublicKey
+} from "../../../helper";
+import { AvatarPro } from "../../elements";
+import MemoryTitle from './MemoryTitle';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -123,7 +129,8 @@ export default function CreateMemory(props) {
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
-  const avatar = useSelector(state => state.account.avatar);
+  const account = useSelector(state => state.account);
+  const propose = useSelector(state => state.loveinfo.propose);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -257,7 +264,11 @@ export default function CreateMemory(props) {
             <Grid item>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
-                  <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
+                  <AvatarPro
+                    alt="img"
+                    hash={account.avatar}
+                    className={classes.avatar}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <BootstrapTextField
@@ -304,7 +315,7 @@ export default function CreateMemory(props) {
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}
                   handleSumit={onSubmitEditor}
-                  title="Create your note"
+                  title={<MemoryTitle sender={account.displayName} receiver={propose[0].name}/>}
                 >
                   <Editor onChange={value => onChangeEditor(value)} />
                 </SimpleModal>
