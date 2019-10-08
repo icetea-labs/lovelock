@@ -19,6 +19,7 @@ import {
   encodeWithPublicKey
 } from "../../../helper";
 import { AvatarPro } from "../../elements";
+import MemoryTitle from './MemoryTitle';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && "rgba(0, 0, 0, 0.5)"};
@@ -128,7 +129,8 @@ export default function CreateMemory(props) {
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
-  const avatar = useSelector(state => state.account.avatar);
+  const account = useSelector(state => state.account);
+  const propose = useSelector(state => state.loveinfo.propose);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
 
@@ -262,7 +264,7 @@ export default function CreateMemory(props) {
                 <Grid item>
                   <AvatarPro
                     alt="img"
-                    hash={avatar}
+                    hash={account.avatar}
                     className={classes.avatar}
                   />
                 </Grid>
@@ -316,7 +318,7 @@ export default function CreateMemory(props) {
                   open={isOpenModal}
                   handleClose={() => setOpenModal(false)}
                   handleSumit={onSubmitEditor}
-                  title="Create your note"
+                  title={<MemoryTitle sender={account.displayName} receiver={propose[0].name}/>}
                 >
                   <Editor onChange={value => onChangeEditor(value)} />
                 </SimpleModal>
