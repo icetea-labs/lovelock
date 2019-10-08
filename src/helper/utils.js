@@ -196,6 +196,15 @@ export function HolidayEvent(props) {
   if (day > 0 && day % 100 === 0) {
     return <span>{`Your relationship reached ${day} days.`}</span>;
   }
+  if (day > 0 && day % 100 === 97) {
+    return <span>{`There are 3 days left until the ${day + 3} day anniversary.`}</span>;
+  }
+  if (day > 0 && day % 100 === 98) {
+    return <span>{`There are 2 days left until the ${day + 2} day anniversary.`}</span>;
+  }
+  if (day > 0 && day % 100 === 99) {
+    return <span>{`There are 1 days left until the ${day + 1} day anniversary.`}</span>;
+  }
   return <span>Have a nice day!</span>;
 }
 
