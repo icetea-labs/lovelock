@@ -280,7 +280,7 @@ export default function MemoryContent(props) {
                 </Typography>
               ) : (
                 <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-                  previewEditorMemory()
+                  {previewEditorMemory()}
                 </Typography>
               )}
             </React.Fragment>

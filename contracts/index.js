@@ -51,7 +51,7 @@ class LoveLock {
 
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === botAddress) {
+    if (receiver === this.botAddress) {
       pendingPropose = { ...defaultPropose, status: 1 };
     } else {
       pendingPropose = { ...defaultPropose, status: 0 };
