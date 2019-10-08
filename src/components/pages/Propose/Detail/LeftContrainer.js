@@ -94,7 +94,7 @@ function LeftContrainer(props) {
         const data = result.data.value.TxResult.events[0];
         const eventData = data && data.eventData;
         if (eventData && eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
-          // console.log('eventData', eventData);
+          console.log('eventData', eventData);
           switch (data.eventName) {
             case 'createPropose':
               await eventCreatePropose(eventData);
@@ -151,16 +151,10 @@ function LeftContrainer(props) {
 
   function eventConfirmPropose(data) {
     confirmPropose(data.log);
-    // const newArray = proposes.slice() || [];
-    // const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
-    // newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
-
-    // if (address === data.log.sender) {
-    //   const message = 'Your propose has been approved.';
-    //   enqueueSnackbar(message, { variant: 'info' });
-    // }
-    // console.log('data', newArray);
-    // addPropose(newArray);
+    if (address === data.log.sender) {
+      const message = 'Your propose has been approved.';
+      enqueueSnackbar(message, { variant: 'info' });
+    }
   }
 
   async function eventCreatePropose(data) {
