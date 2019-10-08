@@ -40,7 +40,6 @@ function RightContrainer(props) {
         let tags = [];
         for (let i = 0; i < respMemories.length; i++) {
           const reps = getTagsInfo(respMemories[i].sender);
-
           tags.push(reps);
         }
         tags = await Promise.all(tags);
@@ -50,6 +49,11 @@ function RightContrainer(props) {
           obj.name = tags[i]['display-name'];
           obj.pubkey = tags[i]['pub-key'];
           obj.avatar = tags[i].avatar;
+          if (obj.receiver) {
+            // eslint-disable-next-line no-await-in-loop
+            const receiverTags = await getTagsInfo(obj.receiver);
+            obj.r_name = receiverTags['display-name'];
+          }
           for (let j = 0; j < obj.info.hash.length; j++) {
             // eslint-disable-next-line no-await-in-loop
             obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);

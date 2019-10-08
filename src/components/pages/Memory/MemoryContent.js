@@ -10,6 +10,7 @@ import { useSnackbar } from 'notistack';
 // import Gallery from 'react-grid-gallery';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 import { TimeWithFormat, decodeWithPublicKey, getJsonFromIpfs } from '../../../helper';
 import { AvatarPro } from '../../elements';
@@ -59,6 +60,16 @@ const useStyles = makeStyles(theme => ({
     cursor: 'pointer',
     marginTop: 10,
     display: 'inline-block',
+  },
+  relationship: {
+    // color: theme.color.primary,
+    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 2,
+  },
+  relationshipName: {
+    textTransform: 'capitalize',
+    color: '#8250c8',
   },
   card: {
     // maxWidth: 345,
@@ -249,9 +260,30 @@ export default function MemoryContent(props) {
               )}
             </React.Fragment>
           ) : (
-            <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-              {previewEditorMemory()}
-            </Typography>
+            <React.Fragment>
+              {memoryDecrypted.type === 1 ? (
+                <Typography
+                  variant="body2"
+                  className={classes.relationship}
+                  style={{ whiteSpace: 'pre-line' }}
+                  component="div"
+                >
+                  <div>
+                    <FavoriteIcon color="primary" fontSize="large" />
+                  </div>
+                  <span>
+                    <span>In a Relationship with </span>
+                    <Typography component="span" className={classes.relationshipName}>
+                      {memoryDecrypted.r_name}
+                    </Typography>
+                  </span>
+                </Typography>
+              ) : (
+                <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+                  previewEditorMemory()
+                </Typography>
+              )}
+            </React.Fragment>
           )}
           {decodeEditorMemory() && (
             <>

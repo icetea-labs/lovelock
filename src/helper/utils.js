@@ -178,6 +178,7 @@ export function TimeWithFormat(props) {
 }
 
 export function summaryDayCal(value) {
+  if (!value) return '';
   const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
   const acceptDay = value.split('T')[0];
   const acceptTime = value.split('T')[1];
