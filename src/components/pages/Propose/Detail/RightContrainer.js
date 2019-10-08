@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { useSnackbar } from 'notistack';
+// import { useSnackbar } from 'notistack';
 
 import { rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, getJsonFromIpfs } from '../../../../helper';
+import { callView } from '../../../../helper';
 import MemoryContainer from '../../Memory/MemoryContainer';
 import CreateMemory from '../../Memory/CreateMemory';
 import * as actions from '../../../../store/actions';
@@ -14,10 +14,9 @@ const RightBox = styled.div`
 `;
 
 function RightContrainer(props) {
-  const { proIndex, privateKey, setMemory, setNeedAuth } = props;
-  const [loading, setLoading] = useState(true);
-  // const [memoryList, setMemoryList] = useState([]);
-  const { enqueueSnackbar } = useSnackbar();
+  const { proIndex } = props;
+  const [memoByProIndex, setMemoByProIndex] = useState([]);
+  // const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     loadMemory(proIndex);
@@ -25,53 +24,57 @@ function RightContrainer(props) {
 
   async function loadMemory(index) {
     const respMemories = await callView('getMemoriesByProIndex', [index]);
-    let newMemoryList = [];
-    setLoading(true);
-    setTimeout(async () => {
-      try {
-        for (let i = 0; i < respMemories.length; i++) {
-          const obj = respMemories[i];
-          if (obj.isPrivate && !privateKey) {
-            setNeedAuth(true);
-            break;
-          }
-        }
+    setMemoByProIndex(respMemories);
+    // let newMemoryList = [];
+    // setLoading(true);
+    // setTimeout(async () => {
+    //   try {
+    //     for (let i = 0; i < respMemories.length; i++) {
+    //       const obj = respMemories[i];
+    //       if (obj.isPrivate && !privateKey) {
+    //         setNeedAuth(true);
+    //         break;
+    //       }
+    //     }
 
-        let tags = [];
-        for (let i = 0; i < respMemories.length; i++) {
-          const reps = getTagsInfo(respMemories[i].sender);
+    //     let tags = [];
+    //     for (let i = 0; i < respMemories.length; i++) {
+    //       const reps = getTagsInfo(respMemories[i].sender);
+    //       tags.push(reps);
+    //     }
+    //     tags = await Promise.all(tags);
 
-          tags.push(reps);
-        }
-        tags = await Promise.all(tags);
+    //     for (let i = 0; i < respMemories.length; i++) {
+    //       const obj = respMemories[i];
+    //       obj.name = tags[i]['display-name'];
+    //       obj.pubkey = tags[i]['pub-key'];
+    //       obj.avatar = tags[i].avatar;
+    //       if (obj.receiver) {
+    //         // eslint-disable-next-line no-await-in-loop
+    //         const receiverTags = await getTagsInfo(obj.receiver);
+    //         obj.r_name = receiverTags['display-name'];
+    //       }
+    //       for (let j = 0; j < obj.info.hash.length; j++) {
+    //         // eslint-disable-next-line no-await-in-loop
+    //         obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+    //       }
+    //       newMemoryList.push(obj);
+    //     }
 
-        for (let i = 0; i < respMemories.length; i++) {
-          const obj = respMemories[i];
-          obj.name = tags[i]['display-name'];
-          obj.pubkey = tags[i]['pub-key'];
-          obj.avatar = tags[i].avatar;
-          for (let j = 0; j < obj.info.hash.length; j++) {
-            // eslint-disable-next-line no-await-in-loop
-            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j]);
-          }
-          newMemoryList.push(obj);
-        }
-
-        newMemoryList = newMemoryList.reverse();
-        // setMemoryList(newMemoryList);
-        setMemory(newMemoryList);
-        setLoading(false);
-      } catch (e) {
-        const message = 'Load memory error!';
-        enqueueSnackbar(message, { variant: 'error' });
-      }
-    }, 100);
+    //     newMemoryList = newMemoryList.reverse();
+    //     setMemory(newMemoryList);
+    //     setLoading(false);
+    //   } catch (e) {
+    //     const message = 'Load memory error!';
+    //     enqueueSnackbar(message, { variant: 'error' });
+    //   }
+    // }, 100);
   }
 
   return (
     <RightBox>
       <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} />
-      <MemoryContainer proIndex={proIndex} loading={loading} />
+      <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} />
     </RightBox>
   );
 }

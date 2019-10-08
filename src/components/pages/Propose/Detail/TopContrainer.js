@@ -4,11 +4,22 @@ import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { CardMedia, Button, Typography } from '@material-ui/core';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 
-import { callView, getTagsInfo, summaryDayCal, HolidayEvent, TimeWithFormat } from '../../../../helper';
+import {
+  callView,
+  getTagsInfo,
+  summaryDayCal,
+  HolidayEvent,
+  TimeWithFormat,
+  saveFileToIpfs,
+  sendTransaction,
+} from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { AvatarPro } from '../../../elements';
+import ImageCrop from '../../../elements/ImageCrop';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -20,6 +31,19 @@ const TopContainerBox = styled.div`
     img {
       width: 100%;
       height: 100%;
+    }
+    input[type='file'] {
+      font-size: 100px;
+      position: absolute;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .MuiSvgIcon-root {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      cursor: pointer;
     }
   }
   .summaryCard {
@@ -117,7 +141,7 @@ const WarrperChatBox = styled(FlexBox)`
   }
 `;
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   card: {
     width: '100%',
   },
@@ -126,13 +150,50 @@ const useStyles = makeStyles({
     height: 58,
     borderRadius: 10,
   },
-});
+  media: {
+    height: 450,
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundSize: 'cover',
+    '&:hover': {
+      '& $icon': {
+        display: 'flex',
+        alignItem: 'center',
+      },
+    },
+  },
+  icon: {
+    margin: theme.spacing(1),
+    fontSize: '12px',
+    color: 'white',
+    display: 'none',
+  },
+  photoCameraIcon: {
+    marginRight: theme.spacing(1),
+    marginTop: theme.spacing(0.5),
+  },
+  button: {
+    margin: theme.spacing(1),
+  },
+  title: {
+    display: 'none',
+    color: '#fff',
+    [theme.breakpoints.up('sm')]: {
+      display: 'block',
+      minWidth: 50,
+      // margin: theme.spacing(0, 3, 0, 0),
+      textTransform: 'capitalize',
+    },
+  },
+}));
 
 export default function TopContrainer(props) {
   const { proIndex } = props;
   const dispatch = useDispatch();
   const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
+  const privateKey = useSelector(state => state.account.privateKey);
   const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -159,6 +220,14 @@ export default function TopContrainer(props) {
       }
       setLoading(false);
     }, 10);
+  }
+
+  function setNeedAuth(value) {
+    dispatch(actions.setNeedAuth(value));
+  }
+
+  function setGLoading(value) {
+    dispatch(actions.setLoading(value));
   }
 
   async function addInfoToProposes(respPro) {
@@ -188,7 +257,12 @@ export default function TopContrainer(props) {
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
 
     const info = proposes.s_info;
-    proposes.coverimg = info.hash.length > 0 ? info.hash[0] : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+    if (proposes.coverImg) {
+      proposes.coverimg = proposes.coverImg;
+    } else {
+      proposes.coverimg = info.hash.length > 0 ? info.hash[0] : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+    }
+
     proposes.s_date = info.date;
     proposes.r_date = info.date;
 
@@ -204,6 +278,61 @@ export default function TopContrainer(props) {
   }
 
   const classes = useStyles();
+  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [originFile, setOriginFile] = useState([]);
+  const [cropFile, setCropFile] = useState('');
+  const [cropImg, setCropImg] = useState('');
+
+  function handleImageChange(event) {
+    event.preventDefault();
+    const orFiles = event.target.files;
+
+    if (orFiles.length > 0) {
+      setOriginFile(orFiles);
+      setIsOpenCrop(true);
+    } else {
+      setIsOpenCrop(false);
+    }
+  }
+
+  function closeCrop() {
+    setIsOpenCrop(false);
+  }
+
+  function acceptCrop(e) {
+    closeCrop();
+    setCropFile(e.cropFile);
+    setCropImg(e.avaPreview);
+  }
+
+  function cancelCoverImg() {
+    setCropFile('');
+    setCropImg('');
+  }
+
+  function acceptCoverImg() {
+    if (!privateKey) {
+      setNeedAuth(true);
+      return;
+    }
+    setGLoading(true);
+    setTimeout(async () => {
+      if (cropFile) {
+        const hash = await saveFileToIpfs(cropFile);
+        const method = 'changeCoverImg';
+        const params = [proIndex, hash];
+        const result = await sendTransaction(method, params);
+        if (result) {
+          setGLoading(false);
+          setCropFile('');
+          setCropImg('');
+          const resp = (await callView('getProposeByIndex', [proIndex])) || [];
+          const newPropose = await addInfoToProposes(resp[0]);
+          setTopInfo(newPropose || []);
+        }
+      }
+    }, 100);
+  }
 
   if (loading) {
     return (
@@ -236,7 +365,37 @@ export default function TopContrainer(props) {
   return (
     <TopContainerBox>
       <div className="top__coverimg">
-        <img src={process.env.REACT_APP_IPFS + topInfo.coverimg} alt="itea-scan" />
+        {cropFile ? (
+          <CardMedia className={classes.media} image={cropImg} title="propose image">
+            <Button className={classes.icon}>
+              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <PhotoCameraIcon className={classes.photoCameraIcon} />
+              <Typography className={classes.title} noWrap>
+                Change propose image
+              </Typography>
+            </Button>
+            <Button variant="outlined" color="primary" className={classes.button} onClick={cancelCoverImg}>
+              Cancel
+            </Button>
+            <Button variant="outlined" color="primary" className={classes.button} onClick={acceptCoverImg}>
+              OK
+            </Button>
+          </CardMedia>
+        ) : (
+          <CardMedia
+            className={classes.media}
+            image={process.env.REACT_APP_IPFS + topInfo.coverimg}
+            title="propose image"
+          >
+            <Button className={classes.icon}>
+              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <PhotoCameraIcon className={classes.photoCameraIcon} />
+              <Typography className={classes.title} noWrap>
+                Change propose image
+              </Typography>
+            </Button>
+          </CardMedia>
+        )}
       </div>
       <div className="summaryCard">
         <img src="/static/img/hourglass.svg" alt="hourGlass" />
@@ -281,6 +440,7 @@ export default function TopContrainer(props) {
           </FlexWidthBox>
         )}
       </WarrperChatBox>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
     </TopContainerBox>
   );
 }

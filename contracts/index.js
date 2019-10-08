@@ -1,6 +1,7 @@
 const { expect } = require(';');
 const { isOwnerPropose, getDataByIndex } = require('./helper.js');
-@contract class LoveLock {
+@contract
+class LoveLock {
   // {
   //   isPrivate: false,
   //   sender: '',
@@ -12,6 +13,7 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
   //   status: 0,
   //   memoryIndex: [],
   // },
+  @view @state botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
   @view @state proposes = [];
   @view @state add2p = {}; //1:n { 'address':[1,2,3...] }
 
@@ -32,6 +34,7 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
     const sender = msg.sender;
     const isPrivate = false;
     const defaultPropose = {
+      coverImg: s_info.hash[0] ? s_info.hash[0] : '',
       isPrivate,
       sender,
       s_content,
@@ -48,7 +51,7 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
 
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn') {
+    if (receiver === this.botAddress) {
       pendingPropose = { ...defaultPropose, status: 1 };
     } else {
       pendingPropose = { ...defaultPropose, status: 0 };
@@ -74,6 +77,7 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
     this._confirmPropose(proIndex, r_content, 1);
+    this.addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1);
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
@@ -132,13 +136,15 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
     return res;
   }
   // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info) {
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0) {
     let pro = getDataByIndex(this.proposes, proIndex);
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
-
+    let menory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
     //new memories
-    const menory = { isPrivate, sender, proIndex, content, info, likes: {}, comments: [] };
+    if (type === 1) {
+      menory = Object.assign({}, menory, { receiver: pro.sender });
+    }
     const x = this.memories;
     const index = x.push(menory) - 1;
     this.memories = x;
@@ -216,5 +222,18 @@ const { isOwnerPropose, getDataByIndex } = require('./helper.js');
     //emit Event
     const log = Object.assign({}, pro, { id: index });
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
+  }
+
+  @transaction changeCoverImg(index: number, coverImg: string) {
+    let pro = getDataByIndex(this.proposes, index);
+    const sender = msg.sender;
+    expect(sender === pro.receiver || sender === pro.sender, 'Permission deny. Can not change.');
+
+    pro = Object.assign({}, pro, { coverImg });
+    this.proposes[index] = pro;
+
+    //emit Event
+    const log = Object.assign({}, pro, { id: index });
+    this.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
   }
 }

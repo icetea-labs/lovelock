@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import QueueAnim from 'rc-queue-anim';
 
-import { ButtonPro, LinkPro } from '../../elements/Button';
 import { ValidatorForm } from 'react-material-ui-form-validator';
 import IconButton from '@material-ui/core/IconButton';
+import { ButtonPro, LinkPro } from '../../elements/Button';
 
 const PuLayout = styled.div`
   position: fixed;
@@ -105,9 +105,7 @@ const Action = styled.div`
 class CommonDialog extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      smt: '',
-    };
+    this.state = {};
   }
 
   render() {
