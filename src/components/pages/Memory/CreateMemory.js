@@ -196,6 +196,7 @@ export default function CreateMemory(props) {
       }
     }
     handleShareMemory(JSON.stringify({ ...editorContent }));
+    setGrayLayout(false)
   }
 
   function onChangeEditor(value) {
@@ -316,7 +317,7 @@ export default function CreateMemory(props) {
                 </button>
                 <SimpleModal
                   open={isOpenModal}
-                  handleClose={() => setOpenModal(false)}
+                  handleClose={() => {setOpenModal(false); setGrayLayout(false)}}
                   handleSumit={onSubmitEditor}
                   title={<MemoryTitle sender={account.displayName} receiver={propose[0].name}/>}
                 >
