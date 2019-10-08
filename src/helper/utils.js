@@ -44,10 +44,7 @@ async function callReadOrPure(funcName, params, method) {
 }
 
 export async function sendTransaction(funcName, params) {
-  // const { address } = this.props;
-  // console.log('params', params);
   try {
-    console.log('contract', contract);
     console.log('params', params);
     const ct = tweb3.contract(contract);
     const result = await ct.methods[funcName](...(params || [])).sendCommit();
@@ -110,6 +107,7 @@ async function saveToIpfs(files) {
   if (!files) return '';
   // simple upload
   let ipfsId = [];
+  console.log('saveToIpfs', files);
   try {
     const results = await ipfs.add([...files]);
     ipfsId = results.map(el => {
@@ -120,11 +118,6 @@ async function saveToIpfs(files) {
   }
   return ipfsId;
 }
-// upload multiple file
-// export async function saveFilesToIpfs(files) {
-//   const ipfsId = await saveToIpfs(files);
-//   return ipfsId;
-// }
 // upload one file
 export async function saveFileToIpfs(files) {
   const ipfsId = await saveToIpfs(files);
@@ -136,50 +129,32 @@ export async function saveFileToIpfs(files) {
  * @return: ipfsId: array
  */
 export async function saveBufferToIpfs(files) {
-  // simple upload
   let ipfsId = [];
   try {
-    console.log('files', files);
-    const content = files.map(el => {
-      return Buffer.from(el.img);
-    });
-    console.log('content', content);
-    ipfsId = await saveToIpfs(content);
+    if (files && files.length > 0) {
+      const content = files.map(el => {
+        return Buffer.from(el);
+      });
+      ipfsId = await saveToIpfs(content);
+    }
   } catch (e) {
     console.error(e);
   }
   return ipfsId;
 }
+
 // upload one file
-export async function getJsonFromIpfs(cid) {
+export async function getJsonFromIpfs(cid, key) {
   const result = {};
   try {
-    const files = await ipfs.get(cid);
-    const json = `data:image/*;charset=utf-8;base64,${files[0].content.toString('base64')}`;
-    // console.log('json', json);
-    const dimensions = await getImageDimensions(json);
-    console.log('dimensions', dimensions);
-    result.src = json;
-    // const isWithLager = dimensions.w > dimensions.h;
-    // const rate = dimensions.w / dimensions.h;
+    const url = process.env.REACT_APP_IPFS + cid;
+    // const files = await ipfs.get(cid);
+    // const json = `data:image/*;charset=utf-8;base64,${files[0].content.toString('base64')}`;
+    const dimensions = await getImageDimensions(url);
+    result.src = url;
     result.width = dimensions.w;
     result.height = dimensions.h;
-    // if (rate <= 0.5) {
-    //   result.width = 2;
-    //   result.height = 4;
-    // } else if (rate <= 0.8) {
-    //   result.width = 3;
-    //   result.height = 4;
-    // } else if (rate <= 1.2) {
-    //   result.width = 1;
-    //   result.height = 1;
-    // } else if (rate <= 1.8) {
-    //   result.width = 4;
-    //   result.height = 3;
-    // } else {
-    //   result.width = 4;
-    //   result.height = 2;
-    // }
+    result.key = `Key-${key}`;
   } catch (e) {
     console.error(e);
   }

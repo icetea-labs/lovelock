@@ -52,13 +52,12 @@ function RightContrainer(props) {
           obj.avatar = tags[i].avatar;
           for (let j = 0; j < obj.info.hash.length; j++) {
             // eslint-disable-next-line no-await-in-loop
-            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j]);
+            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
           }
           newMemoryList.push(obj);
         }
 
         newMemoryList = newMemoryList.reverse();
-        // setMemoryList(newMemoryList);
         setMemory(newMemoryList);
         setLoading(false);
       } catch (e) {

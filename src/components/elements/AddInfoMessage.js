@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
@@ -52,9 +52,12 @@ const ImgUpLoad = styled.div`
     color: #8250c8;
   }
   .icon-upload {
+    i {
+      margin-right: 10px;
+    }
     display: flex;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 20px;
   }
 `;
 const DateBox = styled.div`
@@ -113,9 +116,21 @@ const ImgUploadPreview = styled.div`
     display: inline-block;
     vertical-align: top;
     margin-right: 5px;
+    &:hover {
+      opacity: 0.7 !important;
+    }
     img {
+      animation: fade 0.6s ease-in;
       width: 100px;
       height: 100px;
+    }
+    @keyframes fade {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
     }
   }
 `;
@@ -172,18 +187,6 @@ const AddMoreImg = styled.span`
 `;
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
-    backgroundColor: theme.palette.background.paper,
-  },
-  gridList: {
-    flexWrap: 'nowrap',
-    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-    transform: 'translateZ(0)',
-  },
   img: {
     display: 'block',
     height: 100,
@@ -214,40 +217,52 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { grayLayout = true, onChangeMedia, onChangeDate } = props;
-  // const [date, setDate] = useState(new Date());
   const { files, date } = props;
-  const [pictures, setPictures] = useState([]);
+  const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
 
-  function captureUploadFile(event) {
-    const imgFile = event.target.files;
-    if (files) {
-      setPictures(pictures.concat(imgFile[0]));
+  useEffect(() => {
+    if (files.length === 0) {
+      setPicPreview([]);
     } else {
-      // reset image when post new memory
-      setPictures([imgFile[0]]);
+      const arrFiles = files;
+      const urlFiles = arrFiles.map(file => {
+        const src = window.URL.createObjectURL(new Blob([file]));
+        return { file, src };
+      });
+      setPicPreview(urlFiles);
     }
-    // onChangeMedia([...pictures, imgFile[0]]);
-    // onChangeMedia(imgFile);
-    showPreview(imgFile);
+  }, [files]);
+
+  function readFileAsync(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
   }
 
-  function showPreview(imgFile) {
-    const file = imgFile[0];
-    const reader = new FileReader();
-    reader.onloadend = loadedEvent => {
-      const arrayBuffer = loadedEvent.target.result;
-      const blobUrl = URL.createObjectURL(new Blob([arrayBuffer]));
-      if (files) {
-        setPicPreview(picPreview.concat({ img: blobUrl }));
-      } else {
-        // reset preview when post new memory
-        setPicPreview([{ img: blobUrl }]);
+  async function captureUploadFile(event) {
+    const imgFiles = event.target.files;
+    if (imgFiles.length) {
+      const arrFiles = Array.from(imgFiles);
+      let contentBuffer = [];
+      for (let i = 0; i < arrFiles.length; i++) {
+        contentBuffer.push(readFileAsync(arrFiles[i]));
       }
-      onChangeMedia([...files, { img: arrayBuffer }]);
-    };
-    if (file) reader.readAsArrayBuffer(file);
+      contentBuffer = await Promise.all(contentBuffer);
+      onChangeMedia([...files, ...contentBuffer]);
+    }
+  }
+
+  function removeFile(index) {
+    const bufferFiltered = files.filter((value, id) => {
+      return id !== index;
+    });
+    onChangeMedia(bufferFiltered);
   }
 
   function handleDateChange(value) {
@@ -255,34 +270,23 @@ export default function AddInfoMessage(props) {
   }
 
   const classes = useStyles();
+
   return (
     <Container>
-      {files.length > 0 && (
+      {picPreview.length > 0 && (
         <ImgUploadPreview>
           <div className="scrollWrap">
             <div className="scrollBody">
               <div className="scrollContent">
-                {picPreview.map((tile, index) => (
+                {picPreview.map(({ src }, index) => (
                   <div key={index} className="imgContent">
                     <GridListTile className={classes.img}>
-                      <img src={tile.img} alt="" onLoad={() => URL.revokeObjectURL(tile.img)} />
+                      <img src={src} alt="" onLoad={() => URL.revokeObjectURL(src)} />
                       <GridListTileBar
                         className={classes.titleBar}
                         titlePosition="top"
                         actionIcon={
-                          <IconButton
-                            onClick={() => {
-                              const filtered = picPreview.filter((value, id) => {
-                                return id !== index;
-                              });
-                              setPicPreview(filtered);
-
-                              const filesFiltered = files.filter((value, id) => {
-                                return id !== index;
-                              });
-                              onChangeMedia(filesFiltered);
-                            }}
-                          >
+                          <IconButton onClick={() => removeFile(index)}>
                             <CloseIcon className={classes.icon} />
                           </IconButton>
                         }
@@ -295,12 +299,15 @@ export default function AddInfoMessage(props) {
                     <div className="btAddImg" rel="ignore">
                       <div className="wrapperInput">
                         <input
-                          accept="video/*,  video/x-m4v, video/webm, video/x-ms-wmv, video/x-msvideo, video/3gpp, video/flv, video/x-flv, video/mp4, video/quicktime, video/mpeg, video/ogv, .ts, .mkv, image/*, image/heic, image/heif"
+                          accept="image/*"
                           title="Choose a file to upload"
                           display="inline-block"
                           type="file"
+                          role="button"
+                          multiple
                           className="btInput"
                           onChange={captureUploadFile}
+                          value=""
                         />
                       </div>
                     </div>
@@ -331,9 +338,19 @@ export default function AddInfoMessage(props) {
           <Grid item>
             <ImgUpLoad>
               <div className="icon-upload">
-                <div>Photo/Video</div>
+                <i className="material-icons">insert_photo</i>
+                <div>Photo</div>
               </div>
-              <input id="fileInput" type="file" className="fileInput" onChange={captureUploadFile} accept="image/*" />
+              <input
+                accept="image/*"
+                title="Choose a file to upload"
+                className="fileInput"
+                role="button"
+                multiple
+                type="file"
+                value=""
+                onChange={captureUploadFile}
+              />
             </ImgUpLoad>
           </Grid>
         </Grid>

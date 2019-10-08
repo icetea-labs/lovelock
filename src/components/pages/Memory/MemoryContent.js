@@ -262,7 +262,7 @@ export default function MemoryContent(props) {
                 open={isOpenModal}
                 handleClose={() => setOpenModal(false)}
                 closeText="Close"
-                title={`${memoryDecrypted.name} > ${propose[0].name}`}
+                // title={`${memoryDecrypted.name} > ${propose[0].name}`}
                 subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
               >
                 <Editor initContent={decodeEditorMemory()} read_only={true} />
