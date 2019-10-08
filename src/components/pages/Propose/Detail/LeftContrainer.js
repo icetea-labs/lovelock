@@ -63,7 +63,18 @@ const TagBox = styled.div`
 `;
 
 function LeftContrainer(props) {
-  const { proposes, setPropose, addPropose, address, tag, privateKey, enqueueSnackbar, setNeedAuth, history } = props;
+  const {
+    proposes,
+    setPropose,
+    addPropose,
+    confirmPropose,
+    address,
+    tag,
+    privateKey,
+    enqueueSnackbar,
+    setNeedAuth,
+    history,
+  } = props;
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
@@ -139,7 +150,7 @@ function LeftContrainer(props) {
   }
 
   function eventConfirmPropose(data) {
-    // console.log('data', data);
+    confirmPropose(data.log);
     // const newArray = proposes.slice() || [];
     // const objIndex = newArray.findIndex(obj => obj.id === data.log.id);
     // newArray[objIndex] = Object.assign({}, newArray[objIndex], data.log);
@@ -266,6 +277,9 @@ const mapDispatchToProps = dispatch => {
     },
     addPropose: value => {
       dispatch(actions.addPropose(value));
+    },
+    confirmPropose: value => {
+      dispatch(actions.confirmPropose(value));
     },
     setNeedAuth: value => {
       dispatch(actions.setNeedAuth(value));
