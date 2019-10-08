@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import tweb3 from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, getAlias } from '../../../../helper';
@@ -63,21 +63,11 @@ const TagBox = styled.div`
 `;
 
 function LeftContrainer(props) {
-  const {
-    proposes,
-    setPropose,
-    addPropose,
-    confirmPropose,
-    address,
-    tag,
-    privateKey,
-    enqueueSnackbar,
-    setNeedAuth,
-    history,
-  } = props;
+  const { proposes, setPropose, addPropose, confirmPropose, address, tag, privateKey, setNeedAuth, history } = props;
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     loadProposes();
@@ -161,13 +151,14 @@ function LeftContrainer(props) {
     const log = await addInfoToProposes([data.log]);
     addPropose(log[0]);
 
-    if (address !== log.sender) {
+    if (address !== log[0].sender) {
       const message = 'You have a new propose.';
       enqueueSnackbar(message, { variant: 'info' });
     }
+    console.log('log', log);
     // goto propose detail when sent to bot.
-    if (log.receiver === process.env.REACT_APP_BOT_LOVER) {
-      history.push(`/propose/${log.id}`);
+    if (log[0].receiver === process.env.REACT_APP_BOT_LOVER) {
+      history.push(`/propose/${log[0].id}`);
     }
   }
 
@@ -285,5 +276,5 @@ export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(withSnackbar(LeftContrainer))
+  )(LeftContrainer)
 );
