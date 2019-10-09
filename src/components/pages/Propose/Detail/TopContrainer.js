@@ -175,6 +175,10 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     margin: theme.spacing(1),
+    background: 'rgba(254,141,195,0.5)',
+    '&:hover': {
+      background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+    },
   },
   title: {
     display: 'none',
@@ -374,10 +378,10 @@ export default function TopContrainer(props) {
                 Change propose image
               </Typography>
             </Button>
-            <Button variant="outlined" color="primary" className={classes.button} onClick={cancelCoverImg}>
+            <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
               Cancel
             </Button>
-            <Button variant="outlined" color="primary" className={classes.button} onClick={acceptCoverImg}>
+            <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
               OK
             </Button>
           </CardMedia>
