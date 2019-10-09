@@ -458,7 +458,7 @@ function TopContrainer(props) {
           </div>
         </div>
         <div className="proLike">
-          <Button className={classes.button} onClick={handerLike}>
+          <Button onClick={handerLike}>
             {isMyLike ? (
               <React.Fragment>
                 <FavoriteIcon color="primary" className={classes.rightIcon} />
@@ -528,6 +528,9 @@ const mapDispatchToProps = dispatch => {
     },
     setNeedAuth(value) {
       dispatch(actions.setNeedAuth(value));
+    },
+    setGLoading(value) {
+      dispatch(actions.setLoading(value));
     },
   };
 };
