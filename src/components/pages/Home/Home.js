@@ -8,7 +8,21 @@ import * as actions from '../../../store/actions';
 import Promise from '../Propose/Promise';
 
 const RightBox = styled.div`
-  padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
+  padding: 0 ${rem(45)} ${rem(45)} ${rem(45)};
+  justify-content: center;
+  position: absolute;
+  img {
+    width: 200px;
+    height: 200px;
+  }
+  h1,
+  h2 {
+    text-align: center;
+  }
+`;
+
+const ActionForm = styled.div`
+  margin: 30px auto;
 `;
 
 function Home(props) {
@@ -49,23 +63,28 @@ function Home(props) {
 
   return (
     address && (
-      <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">{/* <LeftContrainer /> */}</FlexWidthBox>
+      <FlexBox wrap="wrap" align="center" justify="space-between">
+        {/* <FlexWidthBox width="30%"><LeftContrainer /></FlexWidthBox> */}
         {homePropose.length < 1 && (
-          <FlexWidthBox width="70%">
+          <FlexWidthBox>
             <RightBox>
               <div>
-                <span>
-                  You have no lock yet.
+                <img src="/static/img/logo.svg" alt="logo" />
+                <div>
+                  <h1 className="emptyTitle">You have no locks yet.</h1>
+                </div>
+                <div>
+                  <h2 className="emptySubTitle">Locks are the way you connect and</h2>
+                  <h2 className="emptySubTitle">share memories with your loved ones.</h2>
+                </div>
+                <ActionForm>
                   <LinkPro className="btn_add_promise" onClick={openPopup}>
-                    Create one
+                    Create first lock
                   </LinkPro>
-                  or
                   <LinkPro className="btn_add_promise" onClick={openExplore}>
-                    explorer
+                    or explore others.
                   </LinkPro>
-                  others.
-                </span>
+                </ActionForm>
               </div>
             </RightBox>
             {openPromise && privateKey && <Promise close={closePopup} />}
