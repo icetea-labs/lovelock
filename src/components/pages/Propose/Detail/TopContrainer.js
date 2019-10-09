@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, connect } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { CardMedia, Button, Typography } from '@material-ui/core';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 
 import {
   callView,
@@ -44,18 +46,6 @@ const TopContainerBox = styled.div`
       overflow: hidden;
       display: inline-block;
       cursor: pointer;
-    }
-  }
-  .summaryCard {
-    display: flex;
-    margin-top: 15px;
-    img {
-      width: 22px;
-      height: 24px;
-      object-fit: contain;
-    }
-    .summaryDay {
-      margin: 7px;
     }
   }
   .top__title {
@@ -141,6 +131,27 @@ const WarrperChatBox = styled(FlexBox)`
   }
 `;
 
+const SummaryCard = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  .dayago {
+    align-items: center;
+    display: flex;
+    img {
+      width: 22px;
+      height: 24px;
+      object-fit: contain;
+    }
+    .summaryDay {
+      margin: 7px;
+    }
+  }
+  .proLike {
+    display: flex;
+  }
+`;
+
 const useStyles = makeStyles(theme => ({
   card: {
     width: '100%',
@@ -186,16 +197,21 @@ const useStyles = makeStyles(theme => ({
       textTransform: 'capitalize',
     },
   },
+  rightIcon: {
+    marginRight: theme.spacing(1),
+  },
 }));
 
-export default function TopContrainer(props) {
-  const { proIndex } = props;
+function TopContrainer(props) {
+  const { proIndex, setNeedAuth, setGLoading } = props;
   const dispatch = useDispatch();
   const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
   const privateKey = useSelector(state => state.account.privateKey);
   const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isMyLike, setIsMyLike] = useState(false);
+  const [numLike, setNumLike] = useState(1222);
 
   useEffect(() => {
     loadProposes();
@@ -206,15 +222,13 @@ export default function TopContrainer(props) {
     setLoading(true);
     setTimeout(async () => {
       try {
-        const infoCache = propose.filter(item => item.id === proIndex)[0] || [];
-        if (typeof infoCache !== 'undefined' && infoCache.length > 0) {
-          setTopInfo(infoCache);
-        } else {
+        let proInfo = propose.filter(item => item.id === proIndex)[0] || [];
+        if (typeof proInfo === 'undefined' || proInfo.length <= 0) {
           const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-          const newPropose = await addInfoToProposes(resp[0]);
-          // console.log('newPropose', newPropose);
-          setTopInfo(newPropose || []);
+          proInfo = (await addInfoToProposes(resp[0])) || [];
         }
+        setTopInfo(proInfo);
+        getNumLikes(proInfo.memoryRelationIndex);
       } catch (e) {
         console.log('loadProposes', e);
       }
@@ -222,12 +236,27 @@ export default function TopContrainer(props) {
     }, 10);
   }
 
-  function setNeedAuth(value) {
-    dispatch(actions.setNeedAuth(value));
+  async function getNumLikes(index) {
+    const data = await callView('getLikeByMemoIndex', [index]);
+    const num = Object.keys(data).length;
+    if (data[address]) {
+      setIsMyLike(true);
+    } else {
+      setIsMyLike(false);
+    }
+    setNumLike(num);
   }
-
-  function setGLoading(value) {
-    dispatch(actions.setLoading(value));
+  async function handerLike() {
+    if (!privateKey) {
+      dispatch(actions.setNeedAuth(true));
+      return;
+    }
+    const method = 'addLike';
+    const params = [topInfo.memoryRelationIndex, 1];
+    const result = await sendTransaction(method, params);
+    if (result) {
+      getNumLikes(topInfo.memoryRelationIndex);
+    }
   }
 
   async function addInfoToProposes(respPro) {
@@ -397,15 +426,36 @@ export default function TopContrainer(props) {
           </CardMedia>
         )}
       </div>
-      <div className="summaryCard">
-        <img src="/static/img/hourglass.svg" alt="hourGlass" />
-        <div className="summaryDay">
-          <span>{summaryDayCal(topInfo.r_date)} days</span>
+      <SummaryCard>
+        <div className="dayago">
+          <img src="/static/img/hourglass.svg" alt="hourGlass" />
+          <div className="summaryDay">
+            <span>{summaryDayCal(topInfo.r_date)} days</span>
+          </div>
+          <div className="summaryDay">
+            <HolidayEvent day={summaryDayCal(topInfo.r_date)} />
+          </div>
         </div>
-        <div className="summaryDay">
-          <HolidayEvent day={summaryDayCal(topInfo.r_date)} />
+        <div className="proLike">
+          <Button className={classes.button} onClick={handerLike}>
+            {isMyLike ? (
+              <React.Fragment>
+                <FavoriteIcon color="primary" className={classes.rightIcon} />
+                <Typography component="span" variant="body2" color="primary">
+                  {numLike > 0 && `${numLike}`}
+                </Typography>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <FavoriteBorderIcon className={classes.rightIcon} />
+                <Typography component="span" variant="body2">
+                  {numLike > 0 && `${numLike}`}
+                </Typography>
+              </React.Fragment>
+            )}
+          </Button>
         </div>
-      </div>
+      </SummaryCard>
       <WarrperChatBox>
         {topInfo.s_content && (
           <FlexWidthBox width="50%" className="proposeMes">
@@ -444,3 +494,24 @@ export default function TopContrainer(props) {
     </TopContainerBox>
   );
 }
+const mapStateToProps = state => {
+  return {
+    memoryList: state.loveinfo.memory,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+    setNeedAuth(value) {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TopContrainer);

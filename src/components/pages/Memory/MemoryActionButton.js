@@ -58,7 +58,7 @@ export default function MemoryActionButton(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const address = useSelector(state => state.account.address);
   const [numLike, setNumLike] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isMyLike, setIsMyLike] = useState(false);
   // const [numComment, setNumComment] = useState(0);
 
   useEffect(() => {
@@ -69,9 +69,9 @@ export default function MemoryActionButton(props) {
     const data = await callView('getLikeByMemoIndex', [index]);
     const num = Object.keys(data).length;
     if (data[address]) {
-      setIsLiked(true);
+      setIsMyLike(true);
     } else {
-      setIsLiked(false);
+      setIsMyLike(false);
     }
     setNumLike(num);
   }
@@ -93,7 +93,7 @@ export default function MemoryActionButton(props) {
   return (
     <StyledCardActions className={classes.acctionsBt}>
       <Button className={classes.button} onClick={handerLike}>
-        {isLiked ? (
+        {isMyLike ? (
           <React.Fragment>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
             <Typography component="span" variant="body2" color="primary">

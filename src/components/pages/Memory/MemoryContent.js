@@ -272,7 +272,7 @@ export default function MemoryContent(props) {
                     <FavoriteIcon color="primary" fontSize="large" />
                   </div>
                   <span>
-                    <span>In a Relationship with </span>
+                    <span>Locked with </span>
                     <Typography component="span" className={classes.relationshipName}>
                       {memoryDecrypted.r_name}
                     </Typography>
