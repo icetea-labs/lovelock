@@ -88,7 +88,7 @@ export default function MemoryActionButton(props) {
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async (error, result) => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
       if (error) {
         const message = 'Watch addlike error';
         enqueueSnackbar(message, { variant: 'error' });

@@ -227,9 +227,10 @@ function TopContrainer(props) {
   }, [proIndex]);
 
   useEffect(() => {
+    if (memoryRelationIndex !== -1) getNumLikes();
     const returnValue = watchAddlike();
     return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
+      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe && unsubscribe());
     };
   }, [memoryRelationIndex]);
 
@@ -253,9 +254,11 @@ function TopContrainer(props) {
         let proInfo = propose.filter(item => item.id === proIndex)[0] || [];
         if (typeof proInfo === 'undefined' || proInfo.length <= 0) {
           const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-          proInfo = (await addInfoToProposes(resp[0])) || [];
+          proInfo = resp[0] || [];
         }
-        setTopInfo(proInfo);
+        const moreProInfo = await addInfoToProposes(proInfo);
+        // console.log('moreProInfo', moreProInfo);
+        setTopInfo(moreProInfo);
         setMemoryRelationIndex(proInfo.memoryRelationIndex);
       } catch (e) {
         console.log('loadProposes', e);

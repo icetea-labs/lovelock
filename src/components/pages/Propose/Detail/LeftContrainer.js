@@ -73,7 +73,6 @@ function LeftContrainer(props) {
     loadProposes();
     watchCreatePropose();
     watchConfirmPropose();
-    console.log('watchCreatePropose');
   }, []);
 
   function watchCreatePropose() {
