@@ -199,7 +199,7 @@ export default function MemoryContent(props) {
       if (content) {
         return content;
       }
-    } catch (e) {}
+    } catch (e) { }
     return false;
   }
 
@@ -219,7 +219,7 @@ export default function MemoryContent(props) {
           }
         });
       }
-    } catch (e) {}
+    } catch (e) { }
     return memoryDecrypted.content;
   }
   const [currentImage, setCurrentImage] = useState(0);
@@ -255,10 +255,10 @@ export default function MemoryContent(props) {
                   <FacebookProgress /> Unlock...
                 </span>
               ) : (
-                <IconButton aria-label="settings">
-                  <LockIcon />
-                </IconButton>
-              )}
+                  <IconButton aria-label="settings">
+                    <LockIcon />
+                  </IconButton>
+                )}
             </React.Fragment>
           ) : (
             <React.Fragment>
@@ -294,11 +294,36 @@ export default function MemoryContent(props) {
               <SimpleModal
                 open={isOpenModal}
                 handleClose={() => setOpenModal(false)}
-                closeText="Close"
-                title={<MemoryTitle sender={memoryDecrypted.name} receiver={propose[0].name}/>}
+                title={<MemoryTitle sender={memoryDecrypted.name} receiver={propose[0].name} />}
                 subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
               >
                 <Editor initContent={decodeEditorMemory()} read_only={true} />
+
+                <React.Fragment>
+                  {memoryDecrypted.info.hash && (
+                    <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
+                      <Gallery
+                        // targetRowHeight={300}
+                        // containerWidth={600}
+                        photos={memoryDecrypted.info.hash.slice(0, 5)}
+                        onClick={openLightbox}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
+                {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
+                  ''
+                ) : (
+                    <MemoryActionButton
+                      handerShowComment={handerShowComment}
+                      likes={memory.likes}
+                      memoryIndex={memory.id}
+                      numComment={numComment}
+                    />
+                  )}
+                {showComment && (
+                  <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+                )}
               </SimpleModal>
             </>
           )}
@@ -318,13 +343,13 @@ export default function MemoryContent(props) {
         {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
           ''
         ) : (
-          <MemoryActionButton
-            handerShowComment={handerShowComment}
-            likes={memory.likes}
-            memoryIndex={memory.id}
-            numComment={numComment}
-          />
-        )}
+            <MemoryActionButton
+              handerShowComment={handerShowComment}
+              likes={memory.likes}
+              memoryIndex={memory.id}
+              numComment={numComment}
+            />
+          )}
         {showComment && (
           <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
         )}
