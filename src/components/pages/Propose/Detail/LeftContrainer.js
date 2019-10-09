@@ -71,32 +71,30 @@ function LeftContrainer(props) {
 
   useEffect(() => {
     loadProposes();
-    watchPropose();
+    watchCreatePropose();
+    watchConfirmPropose();
+    console.log('watchCreatePropose');
   }, []);
 
-  function watchPropose() {
+  function watchCreatePropose() {
     const filter = {};
-    return tweb3.subscribe('Tx', filter, async (error, result) => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.createPropose(filter, async (error, result) => {
       if (error) {
-        const message = 'WatchPropose Error';
+        const message = 'Watch createPropose error';
         enqueueSnackbar(message, { variant: 'error' });
       } else {
-        const data = result.data.value.TxResult.events[0];
-        const eventData = data && data.eventData;
-        if (eventData && eventData.log && (address === eventData.log.receiver || address === eventData.log.sender)) {
-          console.log('eventData', eventData);
-          switch (data.eventName) {
-            case 'createPropose':
-              await eventCreatePropose(eventData);
-              break;
-            case 'confirmPropose':
-              eventConfirmPropose(eventData);
-              break;
-            default:
-              break;
-          }
-        }
-        // console.log('not me');
+        eventCreatePropose(result);
+      }
+    });
+  }
+  function watchConfirmPropose() {
+    const filter = {};
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.confirmPropose(filter, async (error, result) => {
+      if (error) {
+        const message = 'Watch confirmPropose error';
+        enqueueSnackbar(message, { variant: 'error' });
+      } else {
+        eventConfirmPropose(result);
       }
     });
   }

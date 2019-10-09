@@ -6,9 +6,11 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import ShareIcon from '@material-ui/icons/Share';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
 
 import * as actions from '../../../store/actions';
 import { sendTransaction, callView } from '../../../helper';
+import tweb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -58,22 +60,43 @@ export default function MemoryActionButton(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const address = useSelector(state => state.account.address);
   const [numLike, setNumLike] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isMyLike, setIsMyLike] = useState(false);
   // const [numComment, setNumComment] = useState(0);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    getNumLikes(memoryIndex);
+    getNumLikes();
   }, [memoryIndex]);
 
-  async function getNumLikes(index) {
-    const data = await callView('getLikeByMemoIndex', [index]);
+  async function getNumLikes() {
+    const data = await callView('getLikeByMemoIndex', [memoryIndex]);
     const num = Object.keys(data).length;
     if (data[address]) {
-      setIsLiked(true);
+      setIsMyLike(true);
     } else {
-      setIsLiked(false);
+      setIsMyLike(false);
     }
     setNumLike(num);
+  }
+
+  useEffect(() => {
+    const returnValue = watchAddlike();
+    return () => {
+      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
+    };
+  }, [memoryIndex]);
+
+  function watchAddlike() {
+    const filter = {};
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async (error, result) => {
+      if (error) {
+        const message = 'Watch addlike error';
+        enqueueSnackbar(message, { variant: 'error' });
+      } else {
+        // console.log('watchAddlike', result);
+        getNumLikes();
+      }
+    });
   }
 
   async function handerLike() {
@@ -83,17 +106,14 @@ export default function MemoryActionButton(props) {
     }
     const method = 'addLike';
     const params = [memoryIndex, 1];
-    const result = await sendTransaction(method, params);
-    if (result) {
-      getNumLikes(memoryIndex);
-    }
+    await sendTransaction(method, params);
   }
 
   const classes = useStyles();
   return (
     <StyledCardActions className={classes.acctionsBt}>
       <Button className={classes.button} onClick={handerLike}>
-        {isLiked ? (
+        {isMyLike ? (
           <React.Fragment>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
             <Typography component="span" variant="body2" color="primary">

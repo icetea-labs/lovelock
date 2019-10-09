@@ -12,7 +12,9 @@ const userInfo = (state = initialState, action) => {
         propose: action.data,
       });
     case actionTypes.ADD_PROPOSE:
-      return Object.assign({}, state, { propose: [...state.propose, action.data] });
+      // eslint-disable-next-line no-case-declarations
+      const isAdd = state.propose.filter(item => item.id === action.data.id);
+      return isAdd.length > 0 ? state : Object.assign({}, state, { propose: [...state.propose, action.data] });
     case actionTypes.CONFIRM_PROPOSE:
       // eslint-disable-next-line no-case-declarations
       const newProposes = state.propose.map(el => {

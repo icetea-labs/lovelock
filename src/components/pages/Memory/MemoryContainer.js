@@ -25,9 +25,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { proIndex, memorydata, setNeedAuth, privateKey } = props;
+  const { proIndex, memorydata, memoryList, setNeedAuth, setMemory, privateKey } = props;
   const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
+  // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
   const { enqueueSnackbar } = useSnackbar();
 
@@ -75,7 +75,7 @@ function MemoryContainer(props) {
         }
 
         newMemoryList = newMemoryList.reverse();
-        setMemoryList(newMemoryList);
+        setMemory(newMemoryList);
       } catch (e) {
         const message = 'Load memory error!';
         enqueueSnackbar(message, { variant: 'error' });
@@ -117,7 +117,7 @@ function MemoryContainer(props) {
 
 const mapStateToProps = state => {
   return {
-    // memoryList: state.loveinfo.memory,
+    memoryList: state.loveinfo.memory,
     privateKey: state.account.privateKey,
   };
 };

@@ -45,6 +45,7 @@ class LoveLock {
       status: 0,
       memoryIndex: [],
       bot_info,
+      memoryRelationIndex: '',
     };
 
     //expect(sender !== receiver, "Can't create owner propose.");
@@ -73,11 +74,30 @@ class LoveLock {
     //emit Event
     const log = Object.assign({}, pendingPropose, { id: index });
     this.emitEvent('createPropose', { by: sender, log }, ['by']);
+    return index;
   }
-
+  // create like for memory: type -> 0:unlike, 1:like, 2:love
+  @transaction addLikePropose(proIndex: number, type: number) {
+    const sender = msg.sender;
+    let obj = getDataByIndex(this.proposes, proIndex);
+    if (obj.likes[sender]) {
+      delete obj.likes[sender];
+    } else {
+      obj.likes[sender] = {};
+      obj.likes[sender].type = type;
+    }
+    this.proposes[memoIndex] = obj;
+    // const log = Object.assign({}, like, { index });
+    // this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
+  }
+  @view getLikeByProIndex(proIndex: number) {
+    const obj = getDataByIndex(this.proposes, proIndex);
+    return obj.likes;
+  }
   @transaction acceptPropose(proIndex: number, r_content: string) {
     this._confirmPropose(proIndex, r_content, 1);
-    this.addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1);
+    const obj = getDataByIndex(this.proposes, proIndex);
+    obj.memoryRelationIndex = this.addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1);
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
@@ -166,6 +186,7 @@ class LoveLock {
     //emit Event
     const log = Object.assign({}, menory, { id: index });
     this.emitEvent('addMemory', { by: msg.sender, log }, ['by']);
+    return index;
   }
 
   // create like for memory: type -> 0:unlike, 1:like, 2:love
@@ -179,8 +200,8 @@ class LoveLock {
       obj.likes[sender].type = type;
     }
     this.memories[memoIndex] = obj;
-    // const log = Object.assign({}, like, { index });
-    // this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
+    const log = { memoIndex };
+    this.emitEvent('addLike', { by: msg.sender, memoIndex, log }, ['by', 'memoIndex']);
   }
 
   @view getLikeByMemoIndex(memoIndex: number) {
