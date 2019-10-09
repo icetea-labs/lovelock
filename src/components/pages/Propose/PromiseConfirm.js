@@ -57,7 +57,7 @@ class PromiseConfirm extends React.Component {
       const result = await sendTransaction(name, params);
       // console.log('View result', result);
       if (result) {
-        const errMessage = 'Your propose has been confirmed.';
+        const errMessage = 'Your lock has been confirmed.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
@@ -75,7 +75,7 @@ class PromiseConfirm extends React.Component {
       // console.log('View result', result);
       if (result) {
         // window.alert('Success');
-        const errMessage = 'Your propose has been rejected.';
+        const errMessage = 'Your lock has been rejected.';
         enqueueSnackbar(errMessage, { variant: 'info' });
         close();
       }
@@ -89,7 +89,7 @@ class PromiseConfirm extends React.Component {
     const { messageAccept, messageDeny } = this.state;
     return (
       <CommonDialog
-        title="Promise alert"
+        title="Lock alert"
         okText="Send"
         cancelText="Cancel"
         close={close}
@@ -119,7 +119,7 @@ class PromiseConfirm extends React.Component {
           <div>
             <TextFieldMultiLine
               id="outlined-multiline-static"
-              placeholder="Like your promise"
+              placeholder="Like your lock"
               multiline
               fullWidth
               rows="5"
@@ -127,9 +127,9 @@ class PromiseConfirm extends React.Component {
               variant="outlined"
               onChange={this.messageAcceptChange}
             />
-            <IconView>
+            {/* <IconView>
               <i className="material-icons">insert_photo</i>
-            </IconView>
+            </IconView> */}
           </div>
         )}
       </CommonDialog>
