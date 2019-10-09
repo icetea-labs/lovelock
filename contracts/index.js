@@ -200,8 +200,8 @@ class LoveLock {
       obj.likes[sender].type = type;
     }
     this.memories[memoIndex] = obj;
-    // const log = Object.assign({}, like, { index });
-    // this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
+    const log = { memoIndex };
+    this.emitEvent('addLike', { by: msg.sender, memoIndex, log }, ['by', 'memoIndex']);
   }
 
   @view getLikeByMemoIndex(memoIndex: number) {

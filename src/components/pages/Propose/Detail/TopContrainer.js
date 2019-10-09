@@ -8,6 +8,9 @@ import { CardMedia, Button, Typography } from '@material-ui/core';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import { useSnackbar } from 'notistack';
+
+import tweb3 from '../../../../service/tweb3';
 
 import {
   callView,
@@ -211,11 +214,32 @@ function TopContrainer(props) {
   const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
   const [isMyLike, setIsMyLike] = useState(false);
-  const [numLike, setNumLike] = useState(1222);
+  const [numLike, setNumLike] = useState(0);
+  const [memoryRelationIndex, setMemoryRelationIndex] = useState(-1);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     loadProposes();
   }, [proIndex]);
+
+  useEffect(() => {
+    const returnValue = watchAddlike();
+    return () => {
+      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
+    };
+  }, [memoryRelationIndex]);
+
+  function watchAddlike() {
+    const filter = {};
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
+      if (error) {
+        const message = 'Watch addlike error';
+        enqueueSnackbar(message, { variant: 'error' });
+      } else {
+        getNumLikes();
+      }
+    });
+  }
 
   function loadProposes() {
     window.scrollTo(0, 0);
@@ -228,7 +252,7 @@ function TopContrainer(props) {
           proInfo = (await addInfoToProposes(resp[0])) || [];
         }
         setTopInfo(proInfo);
-        getNumLikes(proInfo.memoryRelationIndex);
+        setMemoryRelationIndex(proInfo.memoryRelationIndex);
       } catch (e) {
         console.log('loadProposes', e);
       }
@@ -236,8 +260,9 @@ function TopContrainer(props) {
     }, 10);
   }
 
-  async function getNumLikes(index) {
-    const data = await callView('getLikeByMemoIndex', [index]);
+  async function getNumLikes() {
+    // console.log('getNumLikes', memoryRelationIndex);
+    const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
     const num = Object.keys(data).length;
     if (data[address]) {
       setIsMyLike(true);
@@ -255,7 +280,7 @@ function TopContrainer(props) {
     const params = [topInfo.memoryRelationIndex, 1];
     const result = await sendTransaction(method, params);
     if (result) {
-      getNumLikes(topInfo.memoryRelationIndex);
+      getNumLikes();
     }
   }
 
