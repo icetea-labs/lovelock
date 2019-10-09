@@ -357,7 +357,20 @@ class Promise extends React.Component {
   };
 
   createJournal = () => {
-    this.setState({ isJournal: false });
+    const { propose, enqueueSnackbar } = this.props;
+    let message = '';
+    for (let i = 0; i < propose.length; i++) {
+      if (propose[i].sender === propose[i].receiver) {
+        message = 'You had a journal, can not create more.';
+        enqueueSnackbar(message, { variant: 'error' });
+      }
+    }
+
+    if (message) {
+      this.closeJournal();
+    } else {
+      this.setState({ isJournal: false });
+    }
   };
 
   async createPropose(partner, promiseStm, date, file) {
