@@ -25,9 +25,9 @@ const useStyles = makeStyles(theme => ({
 		overflow: 'auto',
 		zIndex: '1000',
 		position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
+		top: 0,
+		left: 0,
+		right: 0,
 		bottom: 0,
 	},
 	footer: {
@@ -57,9 +57,9 @@ const useStyles = makeStyles(theme => ({
 export default function SimpleModal(props) {
 	const classes = useStyles();
 
-	if(props.open){
+	if (props.open) {
 		document.body.style.overflow = 'hidden'
-	}else{
+	} else {
 		document.body.style.overflow = 'auto'
 		return null
 	}
@@ -82,9 +82,11 @@ export default function SimpleModal(props) {
 							Publish
             </Button>
 					}
-					<Button variant="contained" className={classes.closeBtn} onClick={props.handleClose}>
-						{props.closeText || 'Cancel'}
-					</Button>
+					{props.closeText &&
+						<Button variant="contained" className={classes.closeBtn} onClick={props.handleClose}>
+							{props.closeText}
+						</Button>
+					}
 				</div>
 			</div>
 		</div>
