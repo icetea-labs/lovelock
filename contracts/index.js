@@ -48,11 +48,11 @@ class LoveLock {
       memoryRelationIndex: '',
     };
 
-    expect(sender !== receiver, "Can't create owner propose.");
+    //expect(sender !== receiver, "Can't create owner propose.");
 
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === this.botAddress) {
+    if (receiver === this.botAddress || sender === receiver) {
       pendingPropose = { ...defaultPropose, status: 1 };
     } else {
       pendingPropose = { ...defaultPropose, status: 0 };
