@@ -160,6 +160,7 @@ class Promise extends React.Component {
       isOpenCrop: false,
       avatar: '/static/img/no-avatar.jpg',
       originFile: '',
+      isJournal: false,
     };
   }
 
@@ -205,7 +206,7 @@ class Promise extends React.Component {
       console.log(tryStringifyJson(err));
     }
 
-    people = people.filter(person => person.address !== props.address);
+    // people = people.filter(person => person.address !== props.address);
     people = people.filter(person => regex.test(this.getSuggestionValue(person)));
     people = people.slice(0, 10);
     for (let i = 0; i < people.length; i++) {
@@ -229,7 +230,7 @@ class Promise extends React.Component {
     this.setState({
       partner: val,
     });
-    // console.log("view partnerChange", value);
+    // console.log("view partnerChange", val);
   };
 
   promiseStmChange = e => {
@@ -268,11 +269,7 @@ class Promise extends React.Component {
 
   onPartnerChange = (event, { newValue }) => {
     const name = newValue.substring(1);
-    if (newValue !== '@bot-lover') {
-      this.setState({ checked: false });
-    } else {
-      this.setState({ checked: true });
-    }
+    const { address } = this.props;
     const { suggestions } = this.state;
     let add = '';
     if (suggestions) {
@@ -280,6 +277,11 @@ class Promise extends React.Component {
       if (seletedItem && seletedItem.length > 0) {
         add = seletedItem[0].address;
       }
+    }
+    if (add === address) {
+      this.setState({
+        isJournal: true,
+      });
     }
     this.setState({
       value: newValue,
@@ -307,17 +309,12 @@ class Promise extends React.Component {
         checked: check,
         partner: process.env.REACT_APP_BOT_LOVER,
       });
-      // document.addEventListener('DOMContentLoaded', function(event) {
-      //   document.getElementById('suggestPartner').disabled = true;
-      // });
     } else {
       this.setState({
         checked: false,
         value: '',
+        partner: '',
       });
-      // document.addEventListener('DOMContentLoaded', function(event) {
-      //   document.getElementById('suggestPartner').disabled = false;
-      // });
     }
   };
 
@@ -353,6 +350,14 @@ class Promise extends React.Component {
   acceptCrop = e => {
     this.closeCrop();
     this.setState({ cropFile: e.cropFile, avatar: e.avaPreview });
+  };
+
+  closeJournal = () => {
+    this.setState({ isJournal: false, value: '', partner: '' });
+  };
+
+  createJournal = () => {
+    this.setState({ isJournal: false });
   };
 
   async createPropose(partner, promiseStm, date, file) {
@@ -445,7 +450,19 @@ class Promise extends React.Component {
 
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar, originFile } = this.state;
+    const {
+      partner,
+      promiseStm,
+      date,
+      file,
+      suggestions,
+      value,
+      checked,
+      isOpenCrop,
+      avatar,
+      originFile,
+      isJournal,
+    } = this.state;
     // console.log('state CK', this.state);
 
     const inputProps = {
@@ -529,6 +546,21 @@ class Promise extends React.Component {
         />
         <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
         {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
+        {isJournal && (
+          <CommonDialog
+            title="Lock alert"
+            okText="Yes, let's create"
+            cancelText="Cancel"
+            close={this.closeJournal}
+            cancel={this.closeJournal}
+            confirm={this.createJournal}
+            isCancel
+          >
+            <TagTitle>
+              <span>By create a lock with yourself, you will create a Journal instead</span>
+            </TagTitle>
+          </CommonDialog>
+        )}
       </CommonDialog>
     );
   }
