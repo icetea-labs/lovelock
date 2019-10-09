@@ -27,7 +27,7 @@ function Home(props) {
     setHomePropose(proposes);
     if (proposes.length > 0) {
       const index = proposes[0].id;
-      history.push(`/propose/${index}`);
+      history.push(`/lock/${index}`);
     }
   }
 
@@ -56,7 +56,7 @@ function Home(props) {
             <RightBox>
               <div>
                 <span>
-                  You have no relationship yet.
+                  You have no lock yet.
                   <LinkPro className="btn_add_promise" onClick={openPopup}>
                     Create one
                   </LinkPro>

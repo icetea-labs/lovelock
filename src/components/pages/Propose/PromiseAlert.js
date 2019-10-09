@@ -33,7 +33,7 @@ const useStyles = makeStyles(() => ({
 function CardMediaCus(props) {
   const classes = useStyles();
   return <CardMedia className={classes.media} {...props} />;
-} 
+}
 
 function PromiseAlert(props) {
   const { deny, close, accept, address, index, propose, enqueueSnackbar } = props;
@@ -79,25 +79,25 @@ function PromiseAlert(props) {
     <div>
       {address === sender ? (
         <CommonDialog
-          title="Promise alert"
-          okText="Cancel Promise"
+          title="Lock alert"
+          okText="Cancel Lock"
           close={close}
           confirm={() => {
             cancelPromise(index);
           }}
         >
           <TagTitle>
-            <span>You sent promise to </span>
+            <span>You sent lock to </span>
             <span className="highlight">{name}</span>
           </TagTitle>
           <ImgView>
-            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="promiseImg" />}
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="lockImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
       ) : (
         <CommonDialog
-          title="Promise alert"
+          title="Lock alert"
           okText="Accept"
           cancelText="Deny"
           close={close}
@@ -107,10 +107,10 @@ function PromiseAlert(props) {
         >
           <TagTitle>
             <span className="highlight">{name}</span>
-            <span> sent a promise to you</span>
+            <span> sent a lock to you</span>
           </TagTitle>
           <ImgView>
-            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="promiseImg" />}
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="lockImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>

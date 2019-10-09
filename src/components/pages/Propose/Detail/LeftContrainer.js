@@ -114,7 +114,7 @@ function LeftContrainer(props) {
   }
 
   function selectAccepted(proIndex) {
-    history.push(`/propose/${proIndex}`);
+    history.push(`/lock/${proIndex}`);
   }
   // const newPromise = useCallback(() => {
   //   if (!privateKey) {
@@ -142,7 +142,7 @@ function LeftContrainer(props) {
   function eventConfirmPropose(data) {
     confirmPropose(data.log);
     if (address === data.log.sender) {
-      const message = 'Your propose has been approved.';
+      const message = 'Your lock has been approved.';
       enqueueSnackbar(message, { variant: 'info' });
     }
   }
@@ -152,13 +152,13 @@ function LeftContrainer(props) {
     addPropose(log[0]);
 
     if (address !== log[0].sender) {
-      const message = 'You have a new propose.';
+      const message = 'You have a new lock.';
       enqueueSnackbar(message, { variant: 'info' });
     }
     console.log('log', log);
     // goto propose detail when sent to bot.
     if (log[0].receiver === process.env.REACT_APP_BOT_LOVER) {
-      history.push(`/propose/${log[0].id}`);
+      history.push(`/lock/${log[0].id}`);
     }
   }
 
@@ -216,13 +216,13 @@ function LeftContrainer(props) {
         <ShadowBox>
           <LinkPro className="btn_add_promise" onClick={newPromise}>
             <Icon type="add" />
-            Add Promise
+            New Lock
           </LinkPro>
-          <div className="title">Accepted promise</div>
+          <div className="title">Accepted lock</div>
           <div>
             <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} />
           </div>
-          <div className="title">Pending promise</div>
+          <div className="title">Pending lock</div>
           <div>
             <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} />
           </div>

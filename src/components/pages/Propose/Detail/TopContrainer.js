@@ -175,6 +175,10 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     margin: theme.spacing(1),
+    background: 'rgba(254,141,195,0.5)',
+    '&:hover': {
+      background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+    },
   },
   title: {
     display: 'none',
@@ -257,12 +261,8 @@ export default function TopContrainer(props) {
     proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
 
     const info = proposes.s_info;
-    if (proposes.coverImg) {
-      proposes.coverimg = proposes.coverImg;
-    } else {
-      proposes.coverimg = info.hash.length > 0 ? info.hash[0] : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
-    }
 
+    proposes.coverimg = proposes.coverImg ? proposes.coverImg : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
     proposes.s_date = info.date;
     proposes.r_date = info.date;
 
@@ -366,32 +366,28 @@ export default function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
-          <CardMedia className={classes.media} image={cropImg} title="propose image">
+          <CardMedia className={classes.media} image={cropImg} title="lock image">
             <Button className={classes.icon}>
               <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
               <PhotoCameraIcon className={classes.photoCameraIcon} />
               <Typography className={classes.title} noWrap>
-                Change propose image
+                Change lock image
               </Typography>
             </Button>
-            <Button variant="outlined" color="primary" className={classes.button} onClick={cancelCoverImg}>
+            <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
               Cancel
             </Button>
-            <Button variant="outlined" color="primary" className={classes.button} onClick={acceptCoverImg}>
+            <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
               OK
             </Button>
           </CardMedia>
         ) : (
-          <CardMedia
-            className={classes.media}
-            image={process.env.REACT_APP_IPFS + topInfo.coverimg}
-            title="propose image"
-          >
+          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverimg} title="lock image">
             <Button className={classes.icon}>
               <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
               <PhotoCameraIcon className={classes.photoCameraIcon} />
               <Typography className={classes.title} noWrap>
-                Change propose image
+                Change lock image
               </Typography>
             </Button>
           </CardMedia>

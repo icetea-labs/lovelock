@@ -194,7 +194,7 @@ export function summaryDayCal(value) {
 export function HolidayEvent(props) {
   const { day } = props;
   if (day > 0 && day % 100 === 0) {
-    return <span>{`Your relationship reached ${day} days.`}</span>;
+    return <span>{`Your lock reached ${day} days.`}</span>;
   }
   if (day > 0 && day % 100 === 97) {
     return <span>{`There are 3 days left until the ${day + 3} day anniversary.`}</span>;

@@ -29,7 +29,7 @@ function App(props) {
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
           <RouteWithLayout layout={address ? HomeLayout : LandingLayout} exact path="/" component={Home} />
           <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
-          <RouteWithLayout layout={HomeLayout} exact path="/propose/:index" component={DetailPropose} />;
+          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailPropose} />;
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
           <Route component={NotFound} />
         </Switch>

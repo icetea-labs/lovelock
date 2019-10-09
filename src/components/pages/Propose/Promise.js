@@ -384,7 +384,7 @@ class Promise extends React.Component {
           return;
         }
         if (!promiseStm) {
-          message = 'Please input your promise.';
+          message = 'Please input your lock.';
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
           return;
@@ -430,7 +430,7 @@ class Promise extends React.Component {
 
         this.timeoutHanle2 = setTimeout(() => {
           if (result) {
-            message = 'Your propose sent successfully.';
+            message = 'Your lock sent successfully.';
             enqueueSnackbar(message, { variant: 'success' });
             setLoading(false);
             close();
@@ -456,7 +456,7 @@ class Promise extends React.Component {
 
     return (
       <CommonDialog
-        title="Promise"
+        title="Lock"
         okText="Send"
         close={close}
         confirm={() => {
@@ -465,7 +465,7 @@ class Promise extends React.Component {
       >
         {!checked && (
           <div>
-            <TagTitle>Tag your partner you promise</TagTitle>
+            <TagTitle>Tag your partner you lock</TagTitle>
             <Autosuggest
               id="suggestPartner"
               suggestions={suggestions}
@@ -507,7 +507,7 @@ class Promise extends React.Component {
                 // margin="normal"
               />
               <TextFieldPlaceholder
-                label="Crush's response to your promise"
+                label="Crush's response to your lock"
                 fullWidth
                 onChange={this.handleUsername}
                 name="botReply"
@@ -517,10 +517,10 @@ class Promise extends React.Component {
           </FlexBox>
         )}
         <DividerCus />
-        <TagTitle className="prmContent">Promise content</TagTitle>
+        <TagTitle className="prmContent">Lock content</TagTitle>
         <TextFieldMultiLine
           id="outlined-multiline-static"
-          placeholder="promise content ..."
+          placeholder="lock content ..."
           multiline
           fullWidth
           rows="4"
