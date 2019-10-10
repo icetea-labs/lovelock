@@ -4,7 +4,7 @@ import { withSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
 import CommonDialog from './CommonDialog';
-import { TagTitle } from './Promise';
+import { TagTitle } from './PuNewLock';
 import { getAlias, sendTransaction } from '../../../helper';
 
 const ImgView = styled.div`

@@ -80,10 +80,10 @@ export default function MemoryActionButton(props) {
   }
 
   useEffect(() => {
-    const returnValue = watchAddlike();
-    return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
-    };
+    // const returnValue = watchAddlike();
+    // return () => {
+    //   Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
+    // };
   }, [memoryIndex]);
 
   function watchAddlike() {
@@ -92,6 +92,7 @@ export default function MemoryActionButton(props) {
       if (error) {
         const message = 'Watch addlike error';
         enqueueSnackbar(message, { variant: 'error' });
+        console.log('watchAddlike', error);
       } else {
         // console.log('watchAddlike', result);
         getNumLikes();

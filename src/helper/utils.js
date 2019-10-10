@@ -44,15 +44,14 @@ async function callReadOrPure(funcName, params, method) {
   }
 }
 
-export async function sendTransaction(funcName, params) {
-  try {
-    console.log('params', params);
-    const ct = tweb3.contract(contract);
-    const result = await ct.methods[funcName](...(params || [])).sendCommit();
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+export async function sendTransaction(funcName, params, opts = {}) {
+  // console.log('params', params);
+  const ct = tweb3.contract(contract);
+  const result = await ct.methods[funcName](...(params || [])).sendCommit({
+    from: opts.address,
+    signers: opts.tokenAddress,
+  });
+  return result;
 }
 
 export function tryStringifyJson(p, replacer = undefined, space = 2) {

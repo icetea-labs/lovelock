@@ -133,8 +133,8 @@ function ChangeProfile(props) {
           const message = 'Change profile success!';
           enqueueSnackbar(message, { variant: 'success' });
           history.push('/');
-        } catch (e) {
-          console.log('Error', e);
+        } catch (error) {
+          console.log('error', error);
           const message = `An error occurred, please try again later`;
           enqueueSnackbar(message, { variant: 'error' });
         }

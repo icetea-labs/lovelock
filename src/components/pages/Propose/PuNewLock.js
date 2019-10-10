@@ -145,7 +145,7 @@ const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
 
-class Promise extends React.Component {
+class PuNewLock extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -179,7 +179,6 @@ class Promise extends React.Component {
 
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
-    const { props } = this;
 
     if (escapedValue.length <= 3) {
       this.setState({ suggestions: [] });
@@ -210,6 +209,7 @@ class Promise extends React.Component {
     people = people.filter(person => regex.test(this.getSuggestionValue(person)));
     people = people.slice(0, 10);
     for (let i = 0; i < people.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
       const resp = await getTagsInfo(people[i].address);
       peopleAva.push(resp.avatar);
     }
@@ -374,7 +374,7 @@ class Promise extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, close } = this.props;
+    const { setLoading, enqueueSnackbar, close, address, tokenAddress } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva = '';
     let hash = [];
@@ -444,7 +444,7 @@ class Promise extends React.Component {
 
         const params = [promiseStm, partner, info, botInfo];
         // const params = [promiseStm, partner, info];
-        const result = await sendTransaction(name, params);
+        const result = await sendTransaction(name, params, { address, tokenAddress });
 
         this.timeoutHanle2 = setTimeout(() => {
           if (result) {
@@ -585,13 +585,10 @@ Promise.defaultProps = {
 };
 
 const mapStateToProps = state => {
-  const { loveinfo, account } = state;
   return {
-    propose: loveinfo.propose,
-    currentIndex: loveinfo.currentProIndex,
-    memory: loveinfo.memory,
-    address: account.address,
-    privateKey: account.privateKey,
+    propose: state.loveinfo.propose,
+    address: state.account.address,
+    tokenAddress: state.account.tokenAddress,
   };
 };
 
@@ -606,4 +603,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withSnackbar(Promise));
+)(withSnackbar(PuNewLock));

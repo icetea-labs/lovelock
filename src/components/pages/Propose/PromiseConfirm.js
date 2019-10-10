@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
 import CommonDialog from './CommonDialog';
-import { TagTitle } from './Promise';
+import { TagTitle } from './PuNewLock';
 import { sendTransaction } from '../../../helper/index';
 
 const useStyles = makeStyles(theme => ({
@@ -49,12 +49,12 @@ class PromiseConfirm extends React.Component {
   };
 
   async messageAccept(message) {
-    const { index, enqueueSnackbar, close } = this.props;
+    const { index, enqueueSnackbar, close, address, tokenAddress } = this.props;
     // console.log('view confirm props', this.props);
     try {
       const name = 'acceptPropose';
       const params = [index, message];
-      const result = await sendTransaction(name, params);
+      const result = await sendTransaction(name, params, { address, tokenAddress });
       // console.log('View result', result);
       if (result) {
         const errMessage = 'Your lock has been confirmed.';
@@ -67,11 +67,11 @@ class PromiseConfirm extends React.Component {
   }
 
   async messageDeny(message) {
-    const { index, enqueueSnackbar, close } = this.props;
+    const { index, enqueueSnackbar, close, address, tokenAddress } = this.props;
     try {
       const name = 'cancelPropose';
       const params = [index, message];
-      const result = await sendTransaction(name, params);
+      const result = await sendTransaction(name, params, { address, tokenAddress });
       // console.log('View result', result);
       if (result) {
         // window.alert('Success');
@@ -145,13 +145,10 @@ PromiseConfirm.defaultProps = {
 };
 
 const mapStateToProps = state => {
-  const { loveinfo, account } = state;
   return {
-    propose: loveinfo.propose,
-    currentIndex: loveinfo.currentProIndex,
-    memory: loveinfo.memory,
-    address: account.address,
-    privateKey: account.privateKey,
+    address: state.account.address,
+    tokenAddress: state.account.tokenAddress,
+    tokenKey: state.account.tokenKey,
   };
 };
 

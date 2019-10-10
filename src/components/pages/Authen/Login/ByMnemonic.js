@@ -92,9 +92,9 @@ function ByMnemonic(props) {
             setLoading(false);
             history.push('/');
           });
-      } catch (err) {
+      } catch (error) {
+        console.log('error', error);
         const message = `An error occurred, please try again later`;
-        console.log('err', err);
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
       }
