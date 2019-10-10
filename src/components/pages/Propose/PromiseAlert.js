@@ -4,7 +4,7 @@ import { withSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
 import CommonDialog from './CommonDialog';
-import { TagTitle } from './Promise';
+import { TagTitle } from './PuNewLock';
 import { getAlias, sendTransaction } from '../../../helper';
 
 const ImgView = styled.div`
@@ -36,13 +36,13 @@ function CardMediaCus(props) {
 }
 
 function PromiseAlert(props) {
-  const { deny, close, accept, address, index, propose, enqueueSnackbar } = props;
+  const { deny, close, accept, address, tokenAddress, index, propose, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
   const [info, setInfo] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const hash = (info && info.hash) || [];
-  console.log('hash', hash);
+
   useEffect(() => {
     loaddata();
   }, []);
@@ -63,7 +63,7 @@ function PromiseAlert(props) {
     try {
       const funcName = 'cancelPropose';
       const params = [ind, 'no'];
-      const result = await sendTransaction(funcName, params);
+      const result = await sendTransaction(funcName, params, { address, tokenAddress });
       // console.log('View result', result);
       if (result) {
         const message = 'Your propose has been removed.';

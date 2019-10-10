@@ -5,7 +5,7 @@ import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
 import { callView } from '../../../helper';
 import * as actions from '../../../store/actions';
-import Promise from '../Propose/Promise';
+import PuNewLock from '../Propose/PuNewLock';
 
 const RightBox = styled.div`
   text-align: center;
@@ -106,7 +106,7 @@ function Home(props) {
                 </div>
               </RightBox>
             </ShadowBox>
-            {openPromise && privateKey && <Promise close={closePopup} />}
+            {openPromise && privateKey && <PuNewLock close={closePopup} />}
           </FlexWidthBox>
         )}
       </FlexBox>

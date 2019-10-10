@@ -1,5 +1,6 @@
 import React from 'react';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
@@ -43,15 +44,14 @@ async function callReadOrPure(funcName, params, method) {
   }
 }
 
-export async function sendTransaction(funcName, params) {
-  try {
-    console.log('params', params);
-    const ct = tweb3.contract(contract);
-    const result = await ct.methods[funcName](...(params || [])).sendCommit();
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+export async function sendTransaction(funcName, params, opts) {
+  // console.log('params', params);
+  const ct = tweb3.contract(contract);
+  const result = await ct.methods[funcName](...(params || [])).sendCommit({
+    from: opts.address,
+    signers: opts.tokenAddress,
+  });
+  return result;
 }
 
 export function tryStringifyJson(p, replacer = undefined, space = 2) {
@@ -73,34 +73,20 @@ export async function getAccountInfo(address) {
     throw err;
   }
 }
-export async function setTagsInfo(address, name, value) {
+export async function setTagsInfo(key, value, opts) {
   const resp = await tweb3
     .contract('system.did')
-    .methods.setTag(address, name, value)
-    .sendCommit({ from: address });
-  if (resp) {
-    const { tags } = resp;
-    return tags;
-  } else {
-    return {};
-  }
+    .methods.setTag(opts.address, key, value)
+    .sendCommit({ from: opts.address, signers: opts.tokenAddress });
+  return resp && resp.tags;
 }
 
-// let cacheTags = {};
 export async function getTagsInfo(address) {
-  let tags = {};
-  try {
-    if (address) {
-      const resp = await tweb3
-        .contract('system.did')
-        .methods.query(address)
-        .call();
-      tags = resp && resp.tags;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return tags;
+  const resp = await tweb3
+    .contract('system.did')
+    .methods.query(address)
+    .call();
+  return resp && resp.tags;
 }
 
 async function saveToIpfs(files) {
@@ -357,11 +343,11 @@ export async function getAlias(address) {
   return cacheAlias[address];
 }
 export async function registerAlias(username, address) {
-  const info = await tweb3
+  const resp = await tweb3
     .contract('system.alias')
     .methods.register(username, address)
     .sendCommit({ from: address });
-  return info;
+  return resp;
 }
 export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');

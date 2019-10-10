@@ -13,6 +13,8 @@ export default function GetKeyToAuthen() {
   const dispatch = useDispatch();
   const encryptedData = useSelector(state => state.account.encryptedData);
   const needAuth = useSelector(state => state.account.needAuth);
+  const address = useSelector(state => state.account.address);
+
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -62,11 +64,11 @@ export default function GetKeyToAuthen() {
         try {
           let privateKey = '';
           privateKey = codec.toString(decode(password, encryptedData).privateKey);
-          const address = wallet.getAddressFromPrivateKey(privateKey);
-          const account = { address, privateKey, cipher: password };
+          // const address = wallet.getAddressFromPrivateKey(privateKey);
+          const account = { privateKey, cipher: password };
           // console.log('view account', account);
           tweb3.wallet.importAccount(privateKey);
-          tweb3.wallet.defaultAccount = address;
+          // tweb3.wallet.defaultAccount = address;
           setAccount(account);
           // console.log('view result', result);
           setTimeout(() => {

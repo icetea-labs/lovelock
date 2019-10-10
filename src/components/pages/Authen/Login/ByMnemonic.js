@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { codec } from '@iceteachain/common';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
@@ -31,7 +32,7 @@ function ByMnemonic(props) {
   const { setLoading, setAccount, setStep, history } = props;
   const [isPrivateKey, setIsPrivateKey] = useState(false);
   const [password, setPassword] = useState('');
-  const [mnemonic, setMnemonic] = useState('');
+  const [valueInput, setValueInput] = useState('');
   const [rePassErr] = useState('');
 
   const { enqueueSnackbar } = useSnackbar();
@@ -54,25 +55,51 @@ function ByMnemonic(props) {
       try {
         let privateKey = '';
         if (isPrivateKey) {
-          privateKey = mnemonic;
+          privateKey = valueInput;
         } else {
-          privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
+          privateKey = wallet.getPrivateKeyFromMnemonic(valueInput);
         }
-
+        // console.log('getAddressFromPrivateKey', privateKey);
         const address = wallet.getAddressFromPrivateKey(privateKey);
-        const account = { address, privateKey, cipher: password };
-        setAccount(account);
         tweb3.wallet.importAccount(privateKey);
-        tweb3.wallet.defaultAccount = address;
+        // tweb3.wallet.defaultAccount = address;
 
-        const keyObject = encode(privateKey, password);
-        savetoLocalStorage(address, keyObject);
-        history.push('/');
-      } catch (err) {
-        const message = `An error has occured. Please try again.`;
+        const rememberMe = true;
+        const token = tweb3.wallet.createRegularAccount();
+        const ms = tweb3.contract('system.did').methods;
+        const expire = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
+
+        ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, expire)
+          .sendCommit({ from: address })
+          .then(({ returnValue }) => {
+            tweb3.wallet.importAccount(token.privateKey);
+            const keyObject = encode(privateKey, password);
+            const storage = rememberMe ? localStorage : sessionStorage;
+            // save token account
+            storage.sessionData = codec
+              .encode({ tokenAddress: token.address, tokenKey: token.privateKey, expireAfter: returnValue })
+              .toString('base64');
+            // save main account
+            savetoLocalStorage(address, keyObject);
+            const account = {
+              address,
+              privateKey,
+              tokenAddress: token.address,
+              tokenKey: token.privateKey,
+              cipher: password,
+              encryptedData: keyObject,
+            };
+            setAccount(account);
+            setLoading(false);
+            history.push('/');
+          });
+      } catch (error) {
+        console.log('error', error);
+        const message = `An error occurred, please try again later`;
         enqueueSnackbar(message, { variant: 'error' });
+        setLoading(false);
       }
-      setLoading(false);
+      // setLoading(false);
     }, 100);
   }
 
@@ -86,7 +113,7 @@ function ByMnemonic(props) {
     if (value.indexOf(' ') < 0) {
       setIsPrivateKey(true);
     }
-    setMnemonic(value);
+    setValueInput(value);
   }
 
   function loginWithPrivatekey() {

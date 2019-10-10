@@ -10,7 +10,7 @@ import Icon from '../../../elements/Icon';
 import { LinkPro } from '../../../elements/Button';
 import LeftProposes from './LeftProposes';
 import * as actions from '../../../../store/actions';
-import Promise from '../Promise';
+import PuNewLock from '../PuNewLock';
 import PromiseAlert from '../PromiseAlert';
 import PromiseConfirm from '../PromiseConfirm';
 
@@ -63,7 +63,18 @@ const TagBox = styled.div`
 `;
 
 function LeftContrainer(props) {
-  const { proposes, setPropose, addPropose, confirmPropose, address, tag, privateKey, setNeedAuth, history } = props;
+  const {
+    proposes,
+    setPropose,
+    addPropose,
+    confirmPropose,
+    address,
+    tokenAddress,
+    tag,
+    tokenKey,
+    setNeedAuth,
+    history,
+  } = props;
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
@@ -73,7 +84,6 @@ function LeftContrainer(props) {
     loadProposes();
     watchCreatePropose();
     watchConfirmPropose();
-    console.log('watchCreatePropose');
   }, []);
 
   function watchCreatePropose() {
@@ -114,22 +124,16 @@ function LeftContrainer(props) {
   function selectAccepted(proIndex) {
     history.push(`/lock/${proIndex}`);
   }
-  // const newPromise = useCallback(() => {
-  //   if (!privateKey) {
-  //     setNeedAuth(true);
-  //   }
-  //   setStep('new');
-  // }, [proposes]);
 
-  function newPromise() {
-    if (!privateKey) {
+  function newLock() {
+    if (!tokenKey) {
       setNeedAuth(true);
     }
     setStep('new');
   }
 
   function selectPending(proIndex) {
-    if (!privateKey) {
+    if (!tokenKey) {
       setNeedAuth(true);
     }
     setStep('pending');
@@ -153,7 +157,6 @@ function LeftContrainer(props) {
       const message = 'You have a new lock.';
       enqueueSnackbar(message, { variant: 'info' });
     }
-    console.log('log', log);
     // goto propose detail when sent to bot.
     if (log[0].receiver === process.env.REACT_APP_BOT_LOVER) {
       history.push(`/lock/${log[0].id}`);
@@ -212,7 +215,7 @@ function LeftContrainer(props) {
     <React.Fragment>
       <LeftBox>
         <ShadowBox>
-          <LinkPro className="btn_add_promise" onClick={newPromise}>
+          <LinkPro className="btn_add_promise" onClick={newLock}>
             <Icon type="add" />
             New Lock
           </LinkPro>
@@ -228,12 +231,13 @@ function LeftContrainer(props) {
           <TagBox>{renderTag(tag)}</TagBox>
         </ShadowBox>
       </LeftBox>
-      {step === 'new' && privateKey && <Promise close={closePopup} />}
-      {step === 'pending' && privateKey && (
+      {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}
+      {step === 'pending' && tokenKey && (
         <PromiseAlert
           index={index}
           propose={proposes}
           address={address}
+          tokenAddress={tokenAddress}
           close={closePopup}
           accept={nextToAccept}
           deny={nextToDeny}
@@ -249,7 +253,8 @@ const mapStateToProps = state => {
   return {
     proposes: state.loveinfo.propose,
     address: state.account.address,
-    privateKey: state.account.privateKey,
+    tokenAddress: state.account.tokenAddress,
+    tokenKey: state.account.tokenKey,
   };
 };
 
