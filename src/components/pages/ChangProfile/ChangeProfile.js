@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { useSnackbar } from 'notistack';
 
 import { getTagsInfo, setTagsInfo, saveFileToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
@@ -15,7 +16,7 @@ import { HeaderAuthen } from '../../elements/Common';
 import { AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   avatar: {
     width: 120,
     height: 120,
@@ -81,13 +82,14 @@ const RightProfile = styled.div`
 `;
 
 function ChangeProfile(props) {
-  const { setLoading, setAccount, history, address, privateKey, setNeedAuth } = props;
+  const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth } = props;
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [avatar, setAvatar] = useState('');
   const [cropFile, setCropFile] = useState('');
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     getData();
@@ -103,33 +105,41 @@ function ChangeProfile(props) {
   }
 
   async function saveChange() {
-    if (!privateKey) {
+    if (!tokenKey) {
       setNeedAuth(true);
     } else {
       setLoading(true);
       setTimeout(async () => {
-        const displayName = `${firstname} ${lastname}`;
+        try {
+          const listSetTags = [];
+          const displayName = `${firstname} ${lastname}`;
+          const accountInfo = { displayName };
+          listSetTags.push(setTagsInfo(address, 'display-name', displayName, tokenAddress));
+          listSetTags.push(setTagsInfo(address, 'firstname', firstname, tokenAddress));
+          listSetTags.push(setTagsInfo(address, 'lastname', lastname, tokenAddress));
 
-        let respAvatar;
-        const respTagName = await setTagsInfo(address, 'display-name', displayName);
-        const respTagFirst = await setTagsInfo(address, 'firstname', firstname);
-        const respTagLast = await setTagsInfo(address, 'lastname', lastname);
-        if (cropFile) {
-          const hash = await saveFileToIpfs(cropFile);
-          respAvatar = await setTagsInfo(address, 'avatar', hash);
-          setAccount({ displayName, avatar: hash });
-        } else {
-          respAvatar = await setTagsInfo(address, 'avatar', avatar);
-          setAccount({ displayName, avatar });
-        }
-
-        if (respTagName && respAvatar && respTagFirst && respTagLast) {
+          if (cropFile) {
+            const hash = await saveFileToIpfs(cropFile);
+            listSetTags.push(setTagsInfo(address, 'avatar', hash, tokenAddress));
+            accountInfo.avatar = hash;
+          } else {
+            // respAvatar = await setTagsInfo(address, 'avatar', avatar);
+            // accountInfo = { displayName };
+          }
+          await Promise.all(listSetTags);
+          // Set to redux
+          setAccount(accountInfo);
+          // Show message infor
+          const message = 'Change profile success!';
+          enqueueSnackbar(message, { variant: 'success' });
           history.push('/');
-        } else {
-          // notifi.info('Error registerAlias');
+        } catch (e) {
+          console.log('Error', e);
+          const message = `An error occurred, please try again later`;
+          enqueueSnackbar(message, { variant: 'error' });
         }
         setLoading(false);
-      }, 500);
+      }, 100);
     }
   }
 
@@ -213,12 +223,11 @@ function ChangeProfile(props) {
 }
 
 const mapStateToProps = state => {
-  const e = state.create;
-  const { account } = state;
   return {
-    password: e.password,
-    address: account.address,
-    privateKey: account.privateKey,
+    address: state.account.address,
+    privateKey: state.account.privateKey,
+    tokenKey: state.account.tokenKey,
+    tokenAddress: state.account.tokenAddress,
   };
 };
 

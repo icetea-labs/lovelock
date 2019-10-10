@@ -1,5 +1,6 @@
 import React from 'react';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
@@ -73,34 +74,20 @@ export async function getAccountInfo(address) {
     throw err;
   }
 }
-export async function setTagsInfo(address, name, value) {
+export async function setTagsInfo(address, name, value, tokenAddress = '') {
   const resp = await tweb3
     .contract('system.did')
     .methods.setTag(address, name, value)
-    .sendCommit({ from: address });
-  if (resp) {
-    const { tags } = resp;
-    return tags;
-  } else {
-    return {};
-  }
+    .sendCommit({ from: address, signers: tokenAddress });
+  return resp && resp.tags;
 }
 
-// let cacheTags = {};
 export async function getTagsInfo(address) {
-  let tags = {};
-  try {
-    if (address) {
-      const resp = await tweb3
-        .contract('system.did')
-        .methods.query(address)
-        .call();
-      tags = resp && resp.tags;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return tags;
+  const resp = await tweb3
+    .contract('system.did')
+    .methods.query(address)
+    .call();
+  return resp && resp.tags;
 }
 
 async function saveToIpfs(files) {

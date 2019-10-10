@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { codec } from '@iceteachain/common';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
@@ -31,7 +32,7 @@ function ByMnemonic(props) {
   const { setLoading, setAccount, setStep, history } = props;
   const [isPrivateKey, setIsPrivateKey] = useState(false);
   const [password, setPassword] = useState('');
-  const [mnemonic, setMnemonic] = useState('');
+  const [valueInput, setValueInput] = useState('');
   const [rePassErr] = useState('');
 
   const { enqueueSnackbar } = useSnackbar();
@@ -52,27 +53,52 @@ function ByMnemonic(props) {
     setLoading(true);
     setTimeout(async () => {
       try {
-        let privateKey = '';
+        let privatekey = '';
         if (isPrivateKey) {
-          privateKey = mnemonic;
+          privatekey = valueInput;
         } else {
-          privateKey = wallet.getPrivateKeyFromMnemonic(mnemonic);
+          privatekey = wallet.getPrivateKeyFromMnemonic(valueInput);
         }
-
-        const address = wallet.getAddressFromPrivateKey(privateKey);
-        const account = { address, privateKey, cipher: password };
-        setAccount(account);
-        tweb3.wallet.importAccount(privateKey);
+        // console.log('getAddressFromPrivateKey', privatekey);
+        const address = wallet.getAddressFromPrivateKey(privatekey);
+        tweb3.wallet.importAccount(privatekey);
         tweb3.wallet.defaultAccount = address;
 
-        const keyObject = encode(privateKey, password);
-        savetoLocalStorage(address, keyObject);
-        history.push('/');
+        const rememberMe = true;
+        const token = tweb3.wallet.createRegularAccount();
+        const ms = tweb3.contract('system.did').methods;
+        const expire = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
+
+        ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, expire)
+          .sendCommit({ from: address })
+          .then(({ returnValue }) => {
+            const keyObject = encode(privatekey, password);
+            const storage = rememberMe ? localStorage : sessionStorage;
+            // save token account
+            storage.sessionData = codec
+              .encode({ tokenAddress: token.address, tokenKey: token.privateKey, expireAfter: returnValue })
+              .toString('base64');
+            // save main account
+            savetoLocalStorage(address, keyObject);
+            const account = {
+              address,
+              privatekey,
+              tokenAddress: token.address,
+              tokenKey: token.privateKey,
+              cipher: password,
+              encryptedData: keyObject,
+            };
+            setAccount(account);
+            setLoading(false);
+            history.push('/');
+          });
       } catch (err) {
-        const message = `An error has occured. Please try again.`;
+        const message = `An error occurred, please try again later`;
+        console.log('err', err);
         enqueueSnackbar(message, { variant: 'error' });
+        setLoading(false);
       }
-      setLoading(false);
+      // setLoading(false);
     }, 100);
   }
 
@@ -86,7 +112,7 @@ function ByMnemonic(props) {
     if (value.indexOf(' ') < 0) {
       setIsPrivateKey(true);
     }
-    setMnemonic(value);
+    setValueInput(value);
   }
 
   function loginWithPrivatekey() {
