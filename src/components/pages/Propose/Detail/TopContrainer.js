@@ -159,6 +159,20 @@ const SummaryCard = styled.div`
     .summaryDay {
       margin: 7px;
     }
+    .summaryCongrat {
+      text-align: center;
+      margin: 7px;
+      width: 249px;
+      height: 36px;
+      border-radius: 18px;
+      background-color: #fdf0f6;
+      font-size: 12px;
+      font-weight: 500;
+      color: #87198d;
+      .congratContent {
+        padding: 12px;
+      }
+    }
   }
   .proLike {
     display: flex;
@@ -461,11 +475,13 @@ function TopContrainer(props) {
         <div className="dayago">
           <img src="/static/img/happy-copy.svg" alt="together" />
           <div className="summaryDay">
-            <span>{summaryDayCal(topInfo.r_date)} days</span>
+            <span>{summaryDayCal(topInfo.s_date)} days</span>
           </div>
-          <div className="summaryDay">
-            <HolidayEvent day={summaryDayCal(topInfo.r_date)} />
-          </div>
+          {/* <div className="summaryCongrat">
+            <div className="congratContent"> */}
+          <HolidayEvent day={topInfo.s_date} />
+          {/* </div>
+          </div> */}
         </div>
         <div className="proLike">
           <Button onClick={handerLike}>
