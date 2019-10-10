@@ -205,7 +205,7 @@ export function HolidayEvent(props) {
   if (day > 0 && day % 100 === 99) {
     return <span>{`There are 1 days left until the ${day + 1} day anniversary.`}</span>;
   }
-  return <span>Have a nice day!</span>;
+  return <span />;
 }
 
 export function diffTime(time) {

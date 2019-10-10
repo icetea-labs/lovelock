@@ -71,7 +71,7 @@ const TopContainerBox = styled.div`
   }
 `;
 const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(35)};
+  margin-top: ${rem(25)};
   /* & > div:first-child {
     padding-right: ${rem(15)};
   } */
@@ -109,6 +109,10 @@ const WarrperChatBox = styled(FlexBox)`
     width: calc(100% - 58px - 15px);
     padding: 0 ${rem(10)};
   }
+  .sinceDate {
+    color: #8f8f8f;
+    margin: 0 5px 0 5px;
+  }
   .fl {
     float: left;
   }
@@ -120,6 +124,12 @@ const WarrperChatBox = styled(FlexBox)`
     clear: both;
     content: "";
   }
+  .contentPage {
+    margin-top: 23px;
+  }
+  .rightContent {
+      text-align: right;
+    }
   p {
     display: block;
     padding: ${rem(11)} ${rem(14)};
@@ -449,7 +459,7 @@ function TopContrainer(props) {
       </div>
       <SummaryCard>
         <div className="dayago">
-          <img src="/static/img/happy-copy.svg" alt="couple face" />
+          <img src="/static/img/happy-copy.svg" alt="together" />
           <div className="summaryDay">
             <span>{summaryDayCal(topInfo.r_date)} days</span>
           </div>
@@ -486,8 +496,9 @@ function TopContrainer(props) {
             <div className="content_detail fl clearfix">
               <div className="name_time">
                 <span className="user_name color-violet">{topInfo.s_name}</span>
-                <span className="time fr color-gray">
-                  <TimeWithFormat value={topInfo.s_date} />
+                <span className="sinceDate">・</span>
+                <span className="time color-gray">
+                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
                 </span>
               </div>
               <p>{topInfo.s_content}</p>
@@ -497,13 +508,12 @@ function TopContrainer(props) {
         {topInfo.r_content && (
           <FlexWidthBox width="50%" className="proposeMes">
             <div className="content_detail fl clearfix">
-              <div className="name_time">
+              <div className="name_time fr">
                 <span className="user_name color-violet">{topInfo.r_name}</span>
-                <span className="time fr color-gray">
-                  <TimeWithFormat value={topInfo.r_date} />
-                </span>
               </div>
-              <p>{topInfo.r_content}</p>
+              <div className="contentPage">
+                <p className="rightContent">{topInfo.r_content}</p>
+              </div>
             </div>
             <div className="user_photo fr">
               <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
