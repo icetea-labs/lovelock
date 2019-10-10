@@ -166,32 +166,122 @@ export function TimeWithFormat(props) {
 export function summaryDayCal(value) {
   if (!value) return '';
   const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
-  const acceptDay = value.split('T')[0];
-  const acceptTime = value.split('T')[1];
-  const slugDay = acceptDay.split('-');
-  const slugTime = acceptTime.split('Z')[0].split(':');
-
-  const convertAccDay = new Date(slugDay[0], slugDay[1] - 1, slugDay[2], slugTime[0], slugTime[1], slugTime[2]);
+  const convertAccDay = new Date(value);
   const today = new Date();
   const summaryDay = Math.round(Math.abs(convertAccDay - today) / oneDay);
   return summaryDay;
 }
 
+function summaryYearCal(value) {
+  let diffYear = '';
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const date = today.getDate();
+
+  const congratDay = new Date(value);
+  const congratYear = congratDay.getFullYear();
+  const congratMonth = congratDay.getMonth();
+  const congratDate = congratDay.getDate();
+
+  if (congratYear < year && congratMonth === month && congratDate === date) {
+    diffYear = Math.abs(year - congratYear);
+  }
+  return diffYear;
+}
+
+function summaryMonthCal(value) {
+  let diffMonth = '';
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const date = today.getDate();
+
+  const congratDay = new Date(value);
+  const congratYear = congratDay.getFullYear();
+  const congratMonth = congratDay.getMonth();
+  const congratDate = congratDay.getDate();
+
+  // Months between years.
+  diffMonth = (year - congratYear) * 12;
+
+  // Months between... months.
+  if (congratMonth < month && congratDate === date) {
+    diffMonth += month - congratMonth;
+  }
+  return diffMonth;
+}
+
 export function HolidayEvent(props) {
   const { day } = props;
-  if (day > 0 && day % 100 === 0) {
-    return <span>{`Your lock reached ${day} days.`}</span>;
+  const diffDate = summaryDayCal(day);
+  const diffYear = summaryYearCal(day);
+  const diffMonth = summaryMonthCal(day);
+  if (diffYear) {
+    return (
+      <div className="summaryCongrat">
+        <div className="congratContent">
+          {diffYear === 1 ? (
+            <span>{`You have been together for ${diffYear} year.`}</span>
+          ) : (
+            <span>{`You have been together for ${diffYear} years.`}</span>
+          )}
+        </div>
+      </div>
+    );
   }
-  if (day > 0 && day % 100 === 97) {
-    return <span>{`There are 3 days left until the ${day + 3} day anniversary.`}</span>;
+
+  if (diffMonth) {
+    return (
+      <div className="summaryCongrat">
+        <div className="congratContent">
+          {diffMonth === 1 ? (
+            <span>{`You have been together for ${diffMonth} month.`}</span>
+          ) : (
+            <span>{`You have been together for ${diffMonth} months.`}</span>
+          )}
+        </div>
+      </div>
+    );
   }
-  if (day > 0 && day % 100 === 98) {
-    return <span>{`There are 2 days left until the ${day + 2} day anniversary.`}</span>;
+
+  if (diffDate > 0 && diffDate % 100 === 0) {
+    return (
+      <div className="summaryCongrat">
+        <div className="congratContent">
+          <span>{`Congratulations for ${diffDate} days together!.`}</span>
+        </div>
+      </div>
+    );
   }
-  if (day > 0 && day % 100 === 99) {
-    return <span>{`There are 1 days left until the ${day + 1} day anniversary.`}</span>;
+  if (diffDate > 0 && diffDate % 100 === 97) {
+    return (
+      <div className="summaryCongrat">
+        <div className="congratContent">
+          <span>{`3 days left to ${diffDate + 3} day anniversary.`}</span>
+        </div>
+      </div>
+    );
   }
-  return <span>Have a nice day!</span>;
+  if (diffDate > 0 && diffDate % 100 === 98) {
+    return (
+      <div className="summaryCongrat">
+        <div className="congratContent">
+          <span>{`2 days left to ${diffDate + 2} day anniversary.`}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diffDate > 0 && diffDate % 100 === 99) {
+    return (
+      <div className="summaryCongrat">
+        <div className="congratContent">
+          <span>{`1 days left to ${diffDate + 1} day anniversary.`}</span>
+        </div>
+      </div>
+    );
+  }
+  return <span />;
 }
 
 export function diffTime(time) {

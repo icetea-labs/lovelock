@@ -172,6 +172,7 @@ export const FlexBox = styled.div`
   margin-bottom: ${props => props.marginBottom};
   margin-left: ${props => props.marginLeft};
   margin-right: ${props => props.marginRight};
+  text-align: ${props => props.textAlign};
 `;
 export const FlexWidthBox = styled.div`
   width: ${props => props.width};

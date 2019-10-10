@@ -25,6 +25,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
@@ -537,6 +538,7 @@ function Header(props) {
                   <Typography className={classes.title} noWrap>
                     {displayName}
                   </Typography>
+                  <ExpandMoreIcon className={classes.expandMore} />
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeExplore}>
                   <Typography className={classes.title} noWrap>
