@@ -91,6 +91,7 @@ export default function MemoryContent(props) {
   const propose = useSelector(state => state.loveinfo.propose);
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
+  const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
@@ -108,6 +109,7 @@ export default function MemoryContent(props) {
 
   useEffect(() => {
     setMemoryDecrypted(memory);
+    getMemoryContent()
   }, [memory]);
 
   // useEffect(() => {
@@ -184,7 +186,9 @@ export default function MemoryContent(props) {
 
   function decodeEditorMemory() {
     try {
-      let content = JSON.parse(memoryDecrypted.content);
+      let content = JSON.parse(memoryContent);
+      console.log(content)
+
       if (content) {
         return content;
       }
@@ -192,9 +196,25 @@ export default function MemoryContent(props) {
     return false;
   }
 
+  async function getMemoryContent() {
+    try {
+      let memoryContent = JSON.parse(memoryDecrypted.content);
+      if (memoryContent.ipfsHash) {
+        let ipfsHash = memoryContent.ipfsHash
+        let data = await fetch(process.env.REACT_APP_IPFS + ipfsHash)
+        let content = await data.json()
+        setMemoryContent(JSON.stringify(content))
+      } else {
+        setMemoryContent(memoryDecrypted.content)
+      }
+    } catch (e) {
+      setMemoryContent(memoryDecrypted.content)
+    }
+  }
+
   function previewEditorMemory() {
     try {
-      let content = JSON.parse(memoryDecrypted.content);
+      let content = JSON.parse(memoryContent)
       if (content) {
         // console.log(content);
         return content.blocks.map((line, i) => {
@@ -209,8 +229,9 @@ export default function MemoryContent(props) {
         });
       }
     } catch (e) { }
-    return memoryDecrypted.content;
+    return memoryContent
   }
+
   const [currentImage, setCurrentImage] = useState(0);
   const [viewerIsOpen, setViewerIsOpen] = useState(false);
 
@@ -266,19 +287,6 @@ export default function MemoryContent(props) {
                 subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
               >
                 <Editor initContent={decodeEditorMemory()} read_only={true} />
-
-                <React.Fragment>
-                  {memoryDecrypted.info.hash && (
-                    <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
-                      <Gallery
-                        // targetRowHeight={300}
-                        // containerWidth={600}
-                        photos={memoryDecrypted.info.hash.slice(0, 5)}
-                        onClick={openLightbox}
-                      />
-                    </div>
-                  )}
-                </React.Fragment>
                 {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
                   ''
                 ) : (

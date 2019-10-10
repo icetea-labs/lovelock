@@ -65,10 +65,7 @@ export default function SimpleModal(props) {
 	}
 
 	return (
-		<div
-			onClose={props.handleClose}
-			className={classes.wrapper}
-		>
+		<div className={classes.wrapper}>
 			<div className={classes.paper}>
 				<div className={classes.title}>{props.title}</div>
 				{props.subtitle &&

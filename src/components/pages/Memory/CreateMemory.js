@@ -195,7 +195,9 @@ export default function CreateMemory(props) {
         blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
       }
     }
-    handleShareMemory(JSON.stringify({ ...editorContent }));
+    let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
+    let submitContent = await saveFileToIpfs([buffer])
+    handleShareMemory(JSON.stringify({ipfsHash: submitContent}));
   }
 
   function onChangeEditor(value) {
