@@ -57,8 +57,12 @@ const StyledCardActions = withStyles(theme => ({
 export default function MemoryActionButton(props) {
   const { memoryIndex, handerShowComment, numComment } = props;
   const dispatch = useDispatch();
-  const privateKey = useSelector(state => state.account.privateKey);
+
+  // const privateKey = useSelector(state => state.account.privateKey);
   const address = useSelector(state => state.account.address);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+
   const [numLike, setNumLike] = useState(0);
   const [isMyLike, setIsMyLike] = useState(false);
   // const [numComment, setNumComment] = useState(0);
@@ -101,13 +105,13 @@ export default function MemoryActionButton(props) {
   }
 
   async function handerLike() {
-    if (!privateKey) {
+    if (!tokenKey) {
       dispatch(actions.setNeedAuth(true));
       return;
     }
     const method = 'addLike';
     const params = [memoryIndex, 1];
-    await sendTransaction(method, params);
+    await sendTransaction(method, params, { tokenAddress, address });
   }
 
   const classes = useStyles();

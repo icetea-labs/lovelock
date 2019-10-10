@@ -63,7 +63,18 @@ const TagBox = styled.div`
 `;
 
 function LeftContrainer(props) {
-  const { proposes, setPropose, addPropose, confirmPropose, address, tag, tokenKey, setNeedAuth, history } = props;
+  const {
+    proposes,
+    setPropose,
+    addPropose,
+    confirmPropose,
+    address,
+    tokenAddress,
+    tag,
+    tokenKey,
+    setNeedAuth,
+    history,
+  } = props;
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
@@ -226,6 +237,7 @@ function LeftContrainer(props) {
           index={index}
           propose={proposes}
           address={address}
+          tokenAddress={tokenAddress}
           close={closePopup}
           accept={nextToAccept}
           deny={nextToDeny}
@@ -241,6 +253,7 @@ const mapStateToProps = state => {
   return {
     proposes: state.loveinfo.propose,
     address: state.account.address,
+    tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,
   };
 };

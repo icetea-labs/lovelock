@@ -93,7 +93,12 @@ const numComment = 4;
 export default function MemoryContent(props) {
   const { handerNumberComment, memoryIndex } = props;
   const dispatch = useDispatch();
-  const privateKey = useSelector(state => state.account.privateKey);
+
+  // const privateKey = useSelector(state => state.account.privateKey);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+  const address = useSelector(state => state.account.address);
+
   const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -135,14 +140,14 @@ export default function MemoryContent(props) {
 
   async function newComment() {
     if (!comment) return;
-    if (!privateKey) {
+    if (!tokenKey) {
       dispatch(actions.setNeedAuth(true));
       return;
     }
     const method = 'addComment';
     const params = [memoryIndex, comment, ''];
     // console.log('memoryIndex', memoryIndex);
-    const result = await sendTransaction(method, params);
+    const result = await sendTransaction(method, params, { address, tokenAddress });
     if (result) {
       loaddata(memoryIndex);
     }

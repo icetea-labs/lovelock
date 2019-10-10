@@ -212,9 +212,12 @@ const useStyles = makeStyles(theme => ({
 function TopContrainer(props) {
   const { proIndex, setNeedAuth, setGLoading } = props;
   const dispatch = useDispatch();
-  const address = useSelector(state => state.account.address);
   const propose = useSelector(state => state.loveinfo.propose);
-  const privateKey = useSelector(state => state.account.privateKey);
+  // const privateKey = useSelector(state => state.account.privateKey);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+  const address = useSelector(state => state.account.address);
+
   const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
   const [isMyLike, setIsMyLike] = useState(false);
@@ -279,13 +282,13 @@ function TopContrainer(props) {
     setNumLike(num);
   }
   async function handerLike() {
-    if (!privateKey) {
+    if (!tokenKey) {
       dispatch(actions.setNeedAuth(true));
       return;
     }
     const method = 'addLike';
     const params = [topInfo.memoryRelationIndex, 1];
-    const result = await sendTransaction(method, params);
+    const result = await sendTransaction(method, params, { address, tokenAddress });
     if (result) {
       getNumLikes();
     }
@@ -368,7 +371,7 @@ function TopContrainer(props) {
   }
 
   function acceptCoverImg() {
-    if (!privateKey) {
+    if (!tokenKey) {
       setNeedAuth(true);
       return;
     }
@@ -378,7 +381,7 @@ function TopContrainer(props) {
         const hash = await saveFileToIpfs(cropFile);
         const method = 'changeCoverImg';
         const params = [proIndex, hash];
-        const result = await sendTransaction(method, params);
+        const result = await sendTransaction(method, params, { address, tokenAddress });
         if (result) {
           setGLoading(false);
           setCropFile('');

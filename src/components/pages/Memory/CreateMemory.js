@@ -126,6 +126,9 @@ export default function CreateMemory(props) {
   const avatar = useSelector(state => state.account.avatar);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+  const address = useSelector(state => state.account.address);
 
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
@@ -208,7 +211,7 @@ export default function CreateMemory(props) {
 
     const content = advancedMemory || memoryContent;
 
-    if (!privateKey) {
+    if (!tokenKey) {
       setNeedAuth(true);
       return;
     }
@@ -227,7 +230,7 @@ export default function CreateMemory(props) {
         params = [proIndex, !!privacy, content, info];
       }
       const method = 'addMemory';
-      const result = await sendTransaction(method, params);
+      const result = await sendTransaction(method, params, { tokenAddress, address });
       if (result) {
         reLoadMemory(proIndex);
       }
