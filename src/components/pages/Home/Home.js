@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
-import { LinkPro } from '../../elements/Button';
+import { LinkPro, ButtonPro } from '../../elements/Button';
 import { callView } from '../../../helper';
 import * as actions from '../../../store/actions';
 import Promise from '../Propose/Promise';
 
 const RightBox = styled.div`
-  padding: 0 ${rem(45)} ${rem(45)} ${rem(45)};
-  justify-content: center;
-  position: absolute;
+  text-align: center;
+  padding: ${rem(30)};
   img {
     width: 200px;
     height: 200px;
@@ -19,10 +18,29 @@ const RightBox = styled.div`
   h2 {
     text-align: center;
   }
+  .emptyTitle {
+    margin: 16px auto;
+    font-size: 25px;
+    line-height: 32px;
+    font-weight: 60px;
+  }
+  .emptySubTitle {
+    color: #506175;
+    font-size: 18px;
+    line-height: 24px;
+    margin: 16px auto;
+  }
 `;
 
 const ActionForm = styled.div`
-  margin: 30px auto;
+  margin-top: 20px;
+`;
+
+const ShadowBox = styled.div`
+  padding: ${rem(30)};
+  border-radius: 10px;
+  background: #f5f5f8;
+  box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
 
 function Home(props) {
@@ -63,30 +81,31 @@ function Home(props) {
 
   return (
     address && (
-      <FlexBox wrap="wrap" align="center" justify="space-between">
+      <FlexBox wrap="wrap" justify="center">
         {/* <FlexWidthBox width="30%"><LeftContrainer /></FlexWidthBox> */}
         {homePropose.length < 1 && (
           <FlexWidthBox>
-            <RightBox>
-              <div>
-                <img src="/static/img/logo.svg" alt="logo" />
+            <ShadowBox>
+              <RightBox>
                 <div>
-                  <h1 className="emptyTitle">You have no locks yet.</h1>
-                </div>
-                <div>
-                  <h2 className="emptySubTitle">Locks are the way you connect and</h2>
-                  <h2 className="emptySubTitle">share memories with your loved ones.</h2>
-                </div>
-                <ActionForm>
-                  <LinkPro className="btn_add_promise" onClick={openPopup}>
-                    Create first lock
-                  </LinkPro>
+                  <img src="/static/img/plant.svg" alt="plant" />
+                  <div className="emptyTitle">
+                    <h1>You have no locks yet.</h1>
+                  </div>
+                  <div className="emptySubTitle">
+                    <h2>Locks are the way you connect and share memories with your loved ones.</h2>
+                  </div>
+                  <ActionForm>
+                    <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                      Create first lock
+                    </ButtonPro>
+                  </ActionForm>
                   <LinkPro className="btn_add_promise" onClick={openExplore}>
-                    or explore others.
+                    or explore others'
                   </LinkPro>
-                </ActionForm>
-              </div>
-            </RightBox>
+                </div>
+              </RightBox>
+            </ShadowBox>
             {openPromise && privateKey && <Promise close={closePopup} />}
           </FlexWidthBox>
         )}

@@ -142,8 +142,8 @@ const SummaryCard = styled.div`
     align-items: center;
     display: flex;
     img {
-      width: 22px;
-      height: 24px;
+      width: 50px;
+      height: 50px;
       object-fit: contain;
     }
     .summaryDay {
@@ -449,7 +449,7 @@ function TopContrainer(props) {
       </div>
       <SummaryCard>
         <div className="dayago">
-          <img src="/static/img/hourglass.svg" alt="hourGlass" />
+          <img src="/static/img/happy-copy.svg" alt="couple face" />
           <div className="summaryDay">
             <span>{summaryDayCal(topInfo.r_date)} days</span>
           </div>
