@@ -44,7 +44,7 @@ async function callReadOrPure(funcName, params, method) {
   }
 }
 
-export async function sendTransaction(funcName, params, opts = {}) {
+export async function sendTransaction(funcName, params, opts) {
   // console.log('params', params);
   const ct = tweb3.contract(contract);
   const result = await ct.methods[funcName](...(params || [])).sendCommit({
@@ -73,11 +73,11 @@ export async function getAccountInfo(address) {
     throw err;
   }
 }
-export async function setTagsInfo(address, name, value, tokenAddress = '') {
+export async function setTagsInfo(key, value, opts) {
   const resp = await tweb3
     .contract('system.did')
-    .methods.setTag(address, name, value)
-    .sendCommit({ from: address, signers: tokenAddress });
+    .methods.setTag(opts.address, key, value)
+    .sendCommit({ from: opts.address, signers: opts.tokenAddress });
   return resp && resp.tags;
 }
 
@@ -253,11 +253,11 @@ export async function getAlias(address) {
   return cacheAlias[address];
 }
 export async function registerAlias(username, address) {
-  const info = await tweb3
+  const resp = await tweb3
     .contract('system.alias')
     .methods.register(username, address)
     .sendCommit({ from: address });
-  return info;
+  return resp;
 }
 export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');

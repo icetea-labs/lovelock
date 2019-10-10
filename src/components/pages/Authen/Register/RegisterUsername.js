@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
+import { codec } from '@iceteachain/common';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
@@ -8,7 +9,15 @@ import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
 
 import tweb3 from '../../../../service/tweb3';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
+import {
+  isAliasRegisted,
+  wallet,
+  savetoLocalStorage,
+  registerAlias,
+  setTagsInfo,
+  saveFileToIpfs,
+} from '../../../../helper';
+import { encode } from '../../../../helper/encode';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
@@ -87,31 +96,77 @@ function RegisterUsername(props) {
           const { privateKey, address, publicKey, mnemonic } = account;
           const displayname = `${firstname} ${lastname}`;
 
-          setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
+          // setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
           tweb3.wallet.importAccount(privateKey);
-          tweb3.wallet.defaultAccount = address;
+          // tweb3.wallet.defaultAccount = address;
 
-          const resp = await registerAlias(username, address);
-          const respTagName = await setTagsInfo(address, 'display-name', displayname);
-          const respTagFristname = await setTagsInfo(address, 'firstname', firstname);
-          const respTagLastname = await setTagsInfo(address, 'lastname', lastname);
-          const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
-          if (avatarData) {
-            const hash = await saveFileToIpfs(avatarData);
-            await setTagsInfo(address, 'avatar', hash);
-          }
+          // const resp = await registerAlias(username, { address, tokenAddress });
+          // const respTagName = await setTagsInfo(address, 'display-name', displayname);
+          // const respTagFristname = await setTagsInfo(address, 'firstname', firstname);
+          // const respTagLastname = await setTagsInfo(address, 'lastname', lastname);
+          // const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
 
-          if (resp && respTagName && respTagPublicKey && respTagFristname && respTagLastname) {
-            setStep('two');
-          } else {
-            const message = 'An error has occured. Please try again.';
-            enqueueSnackbar(message, { variant: 'error' });
-          }
-        } catch (e) {
-          const message = `An error has occured. Detail:${e}`;
+          // if (avatarData) {
+          //   const hash = await saveFileToIpfs(avatarData);
+          //   await setTagsInfo(address, 'avatar', hash);
+          // }
+
+          // if (resp && respTagName && respTagPublicKey && respTagFristname && respTagLastname) {
+          //   setStep('two');
+          // } else {
+          //   const message = 'An error has occured. Please try again.';
+          //   enqueueSnackbar(message, { variant: 'error' });
+          // }
+
+          const rememberMe = true;
+          const token = tweb3.wallet.createRegularAccount();
+          const ms = tweb3.contract('system.did').methods;
+          const expire = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
+
+          ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, expire)
+            .sendCommit({ from: address })
+            .then(async ({ returnValue }) => {
+              tweb3.wallet.importAccount(token.privateKey);
+              const keyObject = encode(privateKey, password);
+              const storage = rememberMe ? localStorage : sessionStorage;
+              // save token account
+              storage.sessionData = codec
+                .encode({ tokenAddress: token.address, tokenKey: token.privateKey, expireAfter: returnValue })
+                .toString('base64');
+              // save main account
+              savetoLocalStorage(address, keyObject);
+              const registerInfo = [];
+              registerInfo.push(registerAlias(username, address));
+              registerInfo.push(setTagsInfo('display-name', displayname, { address, tokenAddress: token.address }));
+              registerInfo.push(setTagsInfo('firstname', firstname, { address, tokenAddress: token.address }));
+              registerInfo.push(setTagsInfo('lastname', lastname, { address, tokenAddress: token.address }));
+              registerInfo.push(setTagsInfo('pub-key', publicKey, { address, tokenAddress: token.address }));
+              if (avatarData) {
+                const hash = await saveFileToIpfs(avatarData);
+                registerInfo.push(setTagsInfo('avatar', hash, { address, tokenAddress: token.address }));
+              }
+              await Promise.all(registerInfo);
+
+              const newAccount = {
+                address,
+                privateKey,
+                tokenAddress: token.address,
+                tokenKey: token.privateKey,
+                cipher: password,
+                encryptedData: keyObject,
+                publicKey,
+                mnemonic,
+              };
+              setAccount(newAccount);
+              setLoading(false);
+              setStep('two');
+            });
+        } catch (error) {
+          console.log('error', error);
+          const message = `An error has occured. Detail:${error}`;
           enqueueSnackbar(message, { variant: 'error' });
+          setLoading(false);
         }
-        setLoading(false);
       }, 100);
     }
   }

@@ -53,16 +53,16 @@ function ByMnemonic(props) {
     setLoading(true);
     setTimeout(async () => {
       try {
-        let privatekey = '';
+        let privateKey = '';
         if (isPrivateKey) {
-          privatekey = valueInput;
+          privateKey = valueInput;
         } else {
-          privatekey = wallet.getPrivateKeyFromMnemonic(valueInput);
+          privateKey = wallet.getPrivateKeyFromMnemonic(valueInput);
         }
-        // console.log('getAddressFromPrivateKey', privatekey);
-        const address = wallet.getAddressFromPrivateKey(privatekey);
-        tweb3.wallet.importAccount(privatekey);
-        tweb3.wallet.defaultAccount = address;
+        // console.log('getAddressFromPrivateKey', privateKey);
+        const address = wallet.getAddressFromPrivateKey(privateKey);
+        tweb3.wallet.importAccount(privateKey);
+        // tweb3.wallet.defaultAccount = address;
 
         const rememberMe = true;
         const token = tweb3.wallet.createRegularAccount();
@@ -72,7 +72,8 @@ function ByMnemonic(props) {
         ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, expire)
           .sendCommit({ from: address })
           .then(({ returnValue }) => {
-            const keyObject = encode(privatekey, password);
+            tweb3.wallet.importAccount(token.privateKey);
+            const keyObject = encode(privateKey, password);
             const storage = rememberMe ? localStorage : sessionStorage;
             // save token account
             storage.sessionData = codec
@@ -82,7 +83,7 @@ function ByMnemonic(props) {
             savetoLocalStorage(address, keyObject);
             const account = {
               address,
-              privatekey,
+              privateKey,
               tokenAddress: token.address,
               tokenKey: token.privateKey,
               cipher: password,

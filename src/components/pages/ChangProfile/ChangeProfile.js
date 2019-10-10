@@ -114,13 +114,13 @@ function ChangeProfile(props) {
           const listSetTags = [];
           const displayName = `${firstname} ${lastname}`;
           const accountInfo = { displayName };
-          listSetTags.push(setTagsInfo(address, 'display-name', displayName, tokenAddress));
-          listSetTags.push(setTagsInfo(address, 'firstname', firstname, tokenAddress));
-          listSetTags.push(setTagsInfo(address, 'lastname', lastname, tokenAddress));
+          listSetTags.push(setTagsInfo('display-name', displayName, { address, tokenAddress }));
+          listSetTags.push(setTagsInfo('firstname', firstname, { address, tokenAddress }));
+          listSetTags.push(setTagsInfo('lastname', lastname, { address, tokenAddress }));
 
           if (cropFile) {
             const hash = await saveFileToIpfs(cropFile);
-            listSetTags.push(setTagsInfo(address, 'avatar', hash, tokenAddress));
+            listSetTags.push(setTagsInfo('avatar', hash, { address, tokenAddress }));
             accountInfo.avatar = hash;
           } else {
             // respAvatar = await setTagsInfo(address, 'avatar', avatar);

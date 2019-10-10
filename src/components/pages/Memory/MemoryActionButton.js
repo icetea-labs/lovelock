@@ -84,10 +84,10 @@ export default function MemoryActionButton(props) {
   }
 
   useEffect(() => {
-    // const returnValue = watchAddlike();
-    // return () => {
-    //   Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
-    // };
+    const returnValue = watchAddlike();
+    return () => {
+      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
+    };
   }, [memoryIndex]);
 
   function watchAddlike() {
