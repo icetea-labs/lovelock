@@ -5,6 +5,7 @@ import QueueAnim from 'rc-queue-anim';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
+import CameraAltIcon from '@material-ui/icons/CameraAlt';
 
 import { getTagsInfo, setTagsInfo, saveFileToIpfs } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
@@ -34,31 +35,44 @@ const PreviewContainter = styled.div`
   padding: 20px 0 0 0;
   font-size: 14px;
   cursor: pointer;
-  /* .upload_img input[type='file'] {
-      font-size: 100px;
-      position: absolute;
-      left: 10;
-      top: 0;
-      opacity: 0;
-      cursor: pointer;
-  } */
+  .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
   .upload_img {
     position: relative;
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+    &:hover .changeImg {
+      display: block;
+    }
   }
-  /* .createBtnWrapper {
-    padding: 10px 0 0 0;
-    cursor: pointer;
-  } */
 
-  /* .createBtn {
-    margin: 0 10px 0 10px;
-  } */
+  .changeImg {
+    cursor: pointer;
+    position: absolute;
+    display: none;
+    height: 60px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 80%;
+    line-height: 2;
+    overflow: hidden;
+    border-bottom-left-radius: 600px;
+    border-bottom-right-radius: 600px;
+  }
   .fileInput {
-    width: 100%;
-    height: 25px;
+    width: 100px;
+    height: 50px;
     padding: 2px;
     margin: 10px;
     cursor: pointer;
@@ -182,8 +196,9 @@ function ChangeProfile(props) {
                     ) : (
                       <AvatarPro hash={avatar} className={classes.avatar} />
                     )}
-                    <div className="createBtnWrapper">
+                    <div className="changeImg">
                       <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
+                      <CameraAltIcon />
                     </div>
                   </div>
                 </PreviewContainter>
