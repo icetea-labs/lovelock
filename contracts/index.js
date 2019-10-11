@@ -54,7 +54,7 @@ class LoveLock {
   // mapping: memory to propose
   // 1:1  { 'memoryindex':'proindex' }
   @view getM2p = () => this.getState('m2p', {})
-  setM2p = value => this.setState('m2p')
+  setM2p = value => this.setState('m2p', value)
 
   @transaction createPropose(s_content: string, receiver: address, s_info, bot_info) {
     const sender = msg.sender;
@@ -162,7 +162,7 @@ class LoveLock {
   @view getMemoriesByProIndex(proIndex: number) {
     const memoryPro = this.getP2m()[proIndex] || [];
     const memories = this.getMemories()
-    return memoryPro.reduce((index, res) => {
+    return memoryPro.reduce((res, index) => {
       const mem = getDataByIndex(memories, index);
       res.push({ ...mem, id: index });
       return res;
@@ -236,9 +236,9 @@ class LoveLock {
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const sender = msg.sender;
-    const [memo, memories] = this.getMemories(memoIndex)
+    const [memo, memories] = this.getMemory(memoIndex)
     if (memo.likes[sender]) {
-      delete obj.likes[sender];
+      delete memo.likes[sender];
     } else {
       memo.likes[sender] = { type };
     }
