@@ -295,7 +295,7 @@ export default function CreateMemory(props) {
                   input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                 >
                   <option value={0}>Public</option>
-                  <option value={1}>Private</option>
+                  {/* <option value={1}>Private</option> */}
                 </Select>
                 <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
                   Write blog...

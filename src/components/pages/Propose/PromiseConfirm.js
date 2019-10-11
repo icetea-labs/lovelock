@@ -55,7 +55,6 @@ class PromiseConfirm extends React.Component {
       const name = 'acceptPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params, { address, tokenAddress });
-      // console.log('View result', result);
       if (result) {
         const errMessage = 'Your lock has been confirmed.';
         enqueueSnackbar(errMessage, { variant: 'success' });

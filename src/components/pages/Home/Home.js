@@ -45,7 +45,7 @@ const ShadowBox = styled.div`
 
 function Home(props) {
   const [openPromise, setOpenPromise] = useState(false);
-  const { address, history, setNeedAuth, privateKey } = props;
+  const { address, history, setNeedAuth, tokenKey } = props;
   const [homePropose, setHomePropose] = useState([]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ function Home(props) {
   }
 
   function openPopup() {
-    if (!privateKey) {
+    if (!tokenKey) {
       setNeedAuth(true);
     }
     setOpenPromise(true);
@@ -79,42 +79,45 @@ function Home(props) {
     loadAcceptPropose();
   }
 
-  return address && homePropose.length < 1 ? (
-    <FlexBox wrap="wrap" justify="center">
-      {/* <FlexWidthBox width="30%"><LeftContrainer /></FlexWidthBox> */}
-      <FlexWidthBox>
-        <ShadowBox>
-          <RightBox>
-            <div>
-              <img src="/static/img/plant.svg" alt="plant" />
-              <div className="emptyTitle">
-                <h1>You have no locks yet.</h1>
-              </div>
-              <div className="emptySubTitle">
-                <h2>Locks are the way you connect and share memories with your loved ones.</h2>
-              </div>
-              <ActionForm>
-                <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                  Create first lock
-                </ButtonPro>
-              </ActionForm>
-              <LinkPro className="btn_add_promise" onClick={openExplore}>
-                or explore others'
-              </LinkPro>
-            </div>
-          </RightBox>
-        </ShadowBox>
-        {openPromise && privateKey && <PuNewLock close={closePopup} />}
-      </FlexWidthBox>
-    </FlexBox>
-  ) : null;
+  return (
+    address && (
+      <FlexBox wrap="wrap" justify="center">
+        {/* <FlexWidthBox width="30%"><LeftContrainer /></FlexWidthBox> */}
+        {homePropose.length < 1 && (
+          <FlexWidthBox>
+            <ShadowBox>
+              <RightBox>
+                <div>
+                  <img src="/static/img/plant.svg" alt="plant" />
+                  <div className="emptyTitle">
+                    <h1>You have no locks yet.</h1>
+                  </div>
+                  <div className="emptySubTitle">
+                    <h2>Locks are the way you connect and share memories with your loved ones.</h2>
+                  </div>
+                  <ActionForm>
+                    <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                      Create first lock
+                    </ButtonPro>
+                  </ActionForm>
+                  <LinkPro className="btn_add_promise" onClick={openExplore}>
+                    or explore others'
+                  </LinkPro>
+                </div>
+              </RightBox>
+            </ShadowBox>
+            {openPromise && tokenKey && <PuNewLock close={closePopup} />}
+          </FlexWidthBox>
+        )}
+      </FlexBox>
+    )
+  );
 }
 
 const mapStateToProps = state => {
   return {
-    propose: state.loveinfo.propose,
     address: state.account.address,
-    privateKey: state.account.privateKey,
+    tokenKey: state.account.tokenKey,
   };
 };
 
