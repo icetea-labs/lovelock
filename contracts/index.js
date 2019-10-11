@@ -85,23 +85,24 @@ class LoveLock {
     }
 
     //new pending propose
-    const x = this.getProposes()
-    const index = x.push(pendingPropose) - 1;
-    this.setProposes(x)
+    const proposes = this.getProposes()
+    const index = proposes.push(pendingPropose) - 1;
+    this.setProposes(proposes)
 
     // map address to propose
-    const y = this.getA2p()
-    if (!y[sender]) y[sender] = [];
-    y[sender].push(index);
-    if (!y[receiver]) y[receiver] = [];
-    y[receiver].push(index);
-    this.setA2p(y)
+    const a2p = this.getA2p()
+    if (!a2p[sender]) a2p[sender] = [];
+    a2p[sender].push(index);
+    if (!a2p[receiver]) a2p[receiver] = [];
+    a2p[receiver].push(index);
+    this.setA2p(a2p)
 
     //emit Event
-    const log = Object.assign({}, pendingPropose, { id: index });
+    const log = { ...pendingPropose, id: index };
     this.emitEvent('createPropose', { by: sender, log }, ['by']);
     return index;
   }
+
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLikePropose(proIndex: number, type: number) {
     const sender = msg.sender;
@@ -112,7 +113,6 @@ class LoveLock {
     } else {
       pro.likes[sender] = { type };
     }
-    proposes[proIndex] = obj;
 
     // save proposes
     this.setProposes(proposes)
@@ -121,7 +121,7 @@ class LoveLock {
     // this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
   }
 
-  @view getLikeByProIndex = (index: number) => this.getProposeByIndex(index).likes
+  @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
     
@@ -207,7 +207,7 @@ class LoveLock {
     // map index propose to index memory
     const p2m = this.getP2m();
     if (!p2m[proIndex]) p2m[proIndex] = [];
-    y[proIndex].push(memIndex);
+    p2m[proIndex].push(memIndex);
     this.setP2m(p2m);
 
     //map index memory to index propose
@@ -243,7 +243,7 @@ class LoveLock {
     this.emitEvent('addLike', { by: msg.sender, memoIndex }, ['by', 'memoIndex']);
   }
 
-  @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(index)[0].likes
+  @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes
 
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
@@ -258,7 +258,7 @@ class LoveLock {
     this.setMemories(memories);
   }
 
-  @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(index)[0].comments;
+  @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
 
   //private function
   _confirmPropose(index: number, r_content: string, status: number, saveFlag: boolean) {
