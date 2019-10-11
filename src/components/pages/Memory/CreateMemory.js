@@ -243,7 +243,7 @@ export default function CreateMemory(props) {
       }
       setGLoading(false);
       setGrayLayout(false);
-      setFilePath(null);
+      setFilePath([]);
       setDate(new Date());
       setMemoryContent("");
       setPrivacy(0);
