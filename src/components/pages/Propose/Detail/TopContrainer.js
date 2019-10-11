@@ -162,7 +162,6 @@ const SummaryCard = styled.div`
     .summaryCongrat {
       text-align: center;
       margin: 7px;
-      width: 249px;
       height: 36px;
       border-radius: 18px;
       background-color: #fdf0f6;
@@ -248,6 +247,7 @@ function TopContrainer(props) {
   const [numLike, setNumLike] = useState(0);
   const [memoryRelationIndex, setMemoryRelationIndex] = useState(-1);
   const { enqueueSnackbar } = useSnackbar();
+  const diffDate = summaryDayCal(topInfo.s_date);
 
   useEffect(() => {
     loadProposes();
@@ -481,7 +481,7 @@ function TopContrainer(props) {
         <div className="dayago">
           <img src="/static/img/happy-copy.svg" alt="together" />
           <div className="summaryDay">
-            <span>{summaryDayCal(topInfo.s_date)} days</span>
+            {topInfo.type === 1 ? 'JOURNAL' : <span>{diffDate === 0 ? 'First day' : `${diffDate} days`}</span>}
           </div>
           {/* <div className="summaryCongrat">
             <div className="congratContent"> */}

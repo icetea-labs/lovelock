@@ -146,15 +146,11 @@ class LoveLock {
     let resp = [];
     const proposes = this.getProposes()
     arrPro.forEach(index => {
-      let pro = getDataByIndex(proposes, index);
-      pro = { ...pro, id: index }
-      if (pro.isPrivate && (msg.sender === pro.sender || msg.sender === pro.receiver)) {
-        resp.push(pro);
-      } else {
-        resp.push(pro);
-      }
+      let pro = getDataByIndex(this.proposes, index);
+      pro = Object.assign({}, pro, { id: index });
+      resp.push(pro);
     });
-
+    resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse)
     return resp;
   }
 

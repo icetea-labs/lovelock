@@ -68,8 +68,8 @@ export default function LeftProposes(props) {
           <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
         }
         avatar={<AvatarPro alt="" hash={item.avatar} />}
-        title={item.name}
-        subheader={item.receiver === process.env.REACT_APP_BOT_LOVER ? '' : item.nick}
+        title={item.type === 1 ? 'My Journal' : item.name}
+        subheader={item.type === (1 || 2) ? '' : item.nick}
       />
     );
   });
