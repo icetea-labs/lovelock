@@ -120,19 +120,21 @@ function RegisterSuccess(props) {
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
           <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
-          <FormControlLabel
-            control={
-              <Checkbox
-                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                checkedIcon={<CheckBoxIcon fontSize="small" />}
-                value={isRemember}
-                checked={isRemember}
-                color="primary"
-                onChange={() => setIsRemember(!isRemember)}
-              />
-            }
-            label="Remember me for 30 days"
-          />
+          <div>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  checkedIcon={<CheckBoxIcon fontSize="small" />}
+                  value={isRemember}
+                  checked={isRemember}
+                  color="primary"
+                  onChange={() => setIsRemember(!isRemember)}
+                />
+              }
+              label="Remember me for 30 days"
+            />
+          </div>
         </Desc>
 
         <FoolterBtn>
