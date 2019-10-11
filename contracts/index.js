@@ -27,7 +27,7 @@ class LoveLock {
 
   // mapping: address to propose
   // 1:n { 'address':[1,2,3...] }
-  @view useA2p = () => this.getState('a2p', {})
+  @view getA2p = () => this.getState('a2p', {})
   setA2p = value => this.setState('a2p', value)
   
   // {
@@ -54,7 +54,7 @@ class LoveLock {
   // mapping: memory to propose
   // 1:1  { 'memoryindex':'proindex' }
   @view getM2p = () => this.getState('m2p', {})
-  setM2p = value => this.setState('m2p')
+  setM2p = value => this.setState('m2p', value)
 
   @transaction createPropose(s_content: string, receiver: address, s_info, bot_info) {
     const sender = msg.sender;
@@ -127,13 +127,8 @@ class LoveLock {
   @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
-    
-    this._confirmPropose(proIndex, r_content, 1);
-
-    const [pro] = this.getPropose(proIndex);
-    pro.memoryRelationIndex = this.addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1);
-
-    // proposes was already saved inside addMemory, so no need to save here
+    const ret = this._confirmPropose(proIndex, r_content, 1);
+    this._addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1, [true, ...ret]);
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
@@ -146,7 +141,7 @@ class LoveLock {
     let resp = [];
     const proposes = this.getProposes()
     arrPro.forEach(index => {
-      let pro = getDataByIndex(this.proposes, index);
+      let pro = getDataByIndex(proposes, index);
       pro = Object.assign({}, pro, { id: index });
       resp.push(pro);
     });
@@ -166,8 +161,9 @@ class LoveLock {
 
   @view getMemoriesByProIndex(proIndex: number) {
     const memoryPro = this.getP2m()[proIndex] || [];
-    return memoryPro.reduce((index, res) => {
-      const mem = getDataByIndex(this.memories, index);
+    const memories = this.getMemories()
+    return memoryPro.reduce((res, index) => {
+      const mem = getDataByIndex(memories, index);
       res.push({ ...mem, id: index });
       return res;
     }, []);
@@ -185,10 +181,12 @@ class LoveLock {
     }
     return res;
   }
-  // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0) {
 
-    const [pro, proposes] = this.getPropose(proIndex);
+  _addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0, [isFirstMemory, pro, proposes ] = []) {
+
+    if (!pro || !proposes) {
+      [pro, proposes] = this.getPropose(proIndex);
+    }
 
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
@@ -217,6 +215,10 @@ class LoveLock {
     // Add index into promise (duplicate => waste of gas, should not use!!)
     pro.memoryIndex.push(memIndex);
 
+    if (isFirstMemory) {
+      pro.memoryRelationIndex = memIndex
+    }
+
     // save the proposes
     this.setProposes(proposes)
 
@@ -226,12 +228,17 @@ class LoveLock {
     return memIndex;
   }
 
+  // info { img:Array, location:string, date:string }
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0) {
+    return this._addMemory(proIndex, isPrivate, content, info, type)
+  }
+
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const sender = msg.sender;
-    const [memo, memories] = this.getMemories(memoIndex)
+    const [memo, memories] = this.getMemory(memoIndex)
     if (memo.likes[sender]) {
-      delete obj.likes[sender];
+      delete memo.likes[sender];
     } else {
       memo.likes[sender] = { type };
     }
@@ -281,6 +288,8 @@ class LoveLock {
     //emit Event
     const log = { ...pro, d: index };
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
+
+    return [pro, proposes]
   }
 
   @transaction changeCoverImg(index: number, coverImg: string) {
