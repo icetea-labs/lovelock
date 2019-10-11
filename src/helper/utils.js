@@ -202,11 +202,10 @@ function summaryMonthCal(value) {
   const congratMonth = congratDay.getMonth();
   const congratDate = congratDay.getDate();
 
-  // Months between years.
-  diffMonth = (year - congratYear) * 12;
-
-  // Months between... months.
   if (congratMonth < month && congratDate === date) {
+    // Months between years.
+    diffMonth = (year - congratYear) * 12;
+    // Months between... months.
     diffMonth += month - congratMonth;
   }
   return diffMonth;
