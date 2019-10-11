@@ -27,7 +27,7 @@ class LoveLock {
 
   // mapping: address to propose
   // 1:n { 'address':[1,2,3...] }
-  @view useA2p = () => this.getState('a2p', {})
+  @view getA2p = () => this.getState('a2p', {})
   setA2p = value => this.setState('a2p', value)
   
   // {
