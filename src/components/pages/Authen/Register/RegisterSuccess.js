@@ -44,6 +44,13 @@ const Desc = styled.ul`
   span {
     line-height: 18px;
   }
+  h1 {
+    font-weight: bold;
+    margin: 10px;
+  }
+  .note {
+    display: flex;
+  }
 `;
 const MnemonixText = styled.div`
   text-align: center;
@@ -119,7 +126,10 @@ function RegisterSuccess(props) {
           <MnemonixText>
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
-          <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
+          <div className="note">
+            <h1>NOTE</h1>
+            <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
+          </div>
           <div>
             <FormControlLabel
               control={
