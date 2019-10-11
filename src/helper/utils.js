@@ -74,10 +74,13 @@ export async function getAccountInfo(address) {
   }
 }
 export async function setTagsInfo(key, value, opts) {
+  const options = { from: opts.address };
+  if (opts.tokenAddress) options.signers = opts.tokenAddress;
+
   const resp = await tweb3
     .contract('system.did')
     .methods.setTag(opts.address, key, value)
-    .sendCommit({ from: opts.address, signers: opts.tokenAddress });
+    .sendCommit(options);
   return resp && resp.tags;
 }
 
@@ -202,11 +205,10 @@ function summaryMonthCal(value) {
   const congratMonth = congratDay.getMonth();
   const congratDate = congratDay.getDate();
 
-  // Months between years.
-  diffMonth = (year - congratYear) * 12;
-
-  // Months between... months.
   if (congratMonth < month && congratDate === date) {
+    // Months between years.
+    diffMonth = (year - congratYear) * 12;
+    // Months between... months.
     diffMonth += month - congratMonth;
   }
   return diffMonth;
