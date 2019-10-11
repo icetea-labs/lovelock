@@ -60,7 +60,7 @@ class LoveLock {
     const sender = msg.sender;
     const isPrivate = false;
     const defaultPropose = {
-      coverImg: s_info.hash[0] ? s_info.hash[0] : '',
+      coverImg: s_info.hash[0] || '',
       isPrivate,
       sender,
       s_content,
@@ -72,16 +72,19 @@ class LoveLock {
       memoryIndex: [],
       bot_info,
       memoryRelationIndex: '',
+      type: 0,
     };
 
     //expect(sender !== receiver, "Can't create owner propose.");
 
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === this.botAddress || sender === receiver) {
-      pendingPropose = { ...defaultPropose, status: 1 };
+    if (receiver === this.botAddress) {
+      pendingPropose = { ...defaultPropose, status: 1, type: 2 };
+    } else if (sender === receiver) {
+      pendingPropose = { ...defaultPropose, status: 1, type: 1 };
     } else {
-      pendingPropose = { ...defaultPropose, status: 0 };
+      pendingPropose = { ...defaultPropose, status: 0, type: 0 };
     }
 
     //new pending propose

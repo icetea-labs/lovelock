@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import { codec } from '@iceteachain/common';
+
+import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import { encode } from '../../../../helper/encode';
 import { savetoLocalStorage } from '../../../../helper';
+import tweb3 from '../../../../service/tweb3';
 
 const WrapperImg = styled.div`
   margin-top: 20px;
@@ -61,17 +69,44 @@ const FoolterBtn = styled.div`
 `;
 
 function RegisterSuccess(props) {
-  const { address, privateKey, setLoading, setStep, history, password, mnemonic } = props;
+  const { address, privateKey, setLoading, setStep, history, password, mnemonic, setAccount } = props;
+  const [isRemember, setIsRemember] = useState(true);
 
   function gotoHome() {
     setLoading(true);
     setTimeout(async () => {
-      const keyObject = encode(privateKey, password);
-      savetoLocalStorage(address, keyObject);
-      setStep('one');
-      setLoading(false);
-      history.push('/');
-    }, 500);
+      const token = tweb3.wallet.createRegularAccount();
+      const ms = tweb3.contract('system.did').methods;
+      const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+
+      ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, parseInt(expire, 10))
+        .sendCommit({ from: address })
+        .then(async ({ returnValue }) => {
+          tweb3.wallet.importAccount(token.privateKey);
+          const keyObject = encode(privateKey, password);
+          const storage = isRemember ? localStorage : sessionStorage;
+          // save token account
+          storage.sessionData = codec
+            .encode({
+              contract: process.env.REACT_APP_CONTRACT,
+              tokenAddress: token.address,
+              tokenKey: token.privateKey,
+              expireAfter: returnValue,
+            })
+            .toString('base64');
+          // save main account
+          savetoLocalStorage(address, keyObject);
+          const account = {
+            tokenAddress: token.address,
+            tokenKey: token.privateKey,
+            encryptedData: keyObject,
+          };
+          setAccount(account);
+          setStep('one');
+          setLoading(false);
+          history.push('/');
+        });
+    }, 100);
   }
 
   return (
@@ -85,7 +120,21 @@ function RegisterSuccess(props) {
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
           <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
+          <FormControlLabel
+            control={
+              <Checkbox
+                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                value={isRemember}
+                checked={isRemember}
+                color="primary"
+                onChange={() => setIsRemember(!isRemember)}
+              />
+            }
+            label="Remember me for 30 days"
+          />
         </Desc>
+
         <FoolterBtn>
           <Button variant="contained" size="large" color="primary" onClick={gotoHome}>
             I&apos;ve saved the recovery phrase
@@ -109,6 +158,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setStep: step => {
       dispatch(actionCreate.setStep(step));
+    },
+    setAccount: value => {
+      dispatch(actionAccount.setAccount(value));
     },
     setLoading: value => {
       dispatch(actionGlobal.setLoading(value));

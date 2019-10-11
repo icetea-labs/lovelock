@@ -3,18 +3,23 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { codec } from '@iceteachain/common';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import { makeStyles, withstyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 import { Grid, TextField } from '@material-ui/core';
-import { AvatarPro } from '../../../elements';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
+import { AvatarPro } from '../../../elements';
 import tweb3 from '../../../../service/tweb3';
-import { wallet, decode, getTagsInfo } from '../../../../helper';
+import { wallet, decode, getTagsInfo, savetoLocalStorage } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
+import { encode } from '../../../../helper/encode';
 
 const useStyles = makeStyles(theme => ({
   avatar: {
@@ -24,9 +29,12 @@ const useStyles = makeStyles(theme => ({
 
 function ByPassWord(props) {
   const { setLoading, setAccount, setStep, history, encryptedData } = props;
+  const [state, setState] = React.useState({
+    username: '',
+    avatar: '',
+  });
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [avatar, setAvatar] = useState('');
+  const [isRemember, setIsRemember] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -38,11 +46,15 @@ function ByPassWord(props) {
     if (address) {
       const reps = await getTagsInfo(address);
       if (reps) {
-        setUsername(reps['display-name'] || '');
-        setAvatar(reps.avatar);
+        // setUsername();
+        setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
+        // setAvatar(reps.avatar);
       }
     } else {
-      setUsername('undefined');
+      // setUsername('');
+      setState({ ...state, username: 'undefined' });
+      const message = 'Your information is empty, Please use [Forgot Password] or [Register]';
+      enqueueSnackbar(message, { variant: 'error' });
     }
   }
 
@@ -54,18 +66,55 @@ function ByPassWord(props) {
         try {
           const privateKey = codec.toString(decode(password, encryptedData).privateKey);
           const address = wallet.getAddressFromPrivateKey(privateKey);
-          const account = { address, privateKey, cipher: password };
+          // const account = { address, privateKey, cipher: password };
           tweb3.wallet.importAccount(privateKey);
-          tweb3.wallet.defaultAccount = address;
-          setAccount(account);
-          history.push('/');
-        } catch (err) {
-          console.log('e1', err);
+          // tweb3.wallet.defaultAccount = address;
+          const token = tweb3.wallet.createRegularAccount();
+          const ms = tweb3.contract('system.did').methods;
+          const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+          // console.log('expire', expire);
+          ms.grantAccessToken(
+            address,
+            [process.env.REACT_APP_CONTRACT, 'system.did'],
+            token.address,
+            parseInt(expire, 10)
+          )
+            .sendCommit({ from: address })
+            .then(({ returnValue }) => {
+              tweb3.wallet.importAccount(token.privateKey);
+              const keyObject = encode(privateKey, password);
+              const storage = isRemember ? localStorage : sessionStorage;
+              // save token account
+              storage.sessionData = codec
+                .encode({
+                  contract: process.env.REACT_APP_CONTRACT,
+                  tokenAddress: token.address,
+                  tokenKey: token.privateKey,
+                  expireAfter: returnValue,
+                })
+                .toString('base64');
+              // re-save main account
+              savetoLocalStorage(address, keyObject);
+              const account = {
+                address,
+                privateKey,
+                tokenAddress: token.address,
+                tokenKey: token.privateKey,
+                cipher: password,
+                encryptedData: keyObject,
+              };
+              setAccount(account);
+              setLoading(false);
+              setTimeout(() => {
+                history.push('/');
+              }, 1);
+            });
+        } catch (error) {
+          console.log('error', error);
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
+          setLoading(false);
         }
-
-        setLoading(false);
       }, 100);
     } else {
       const message = `An error has occured. Please try using forgot password.`;
@@ -81,16 +130,16 @@ function ByPassWord(props) {
   function loginWithSeed() {
     setStep('two');
   }
-  const classes = useStyles();
 
+  const classes = useStyles();
   return (
     <React.Fragment>
       <Grid className={classes.avatar} container spacing={2} alignItems="flex-end">
         <Grid item>
-          <AvatarPro hash={avatar} />
+          <AvatarPro hash={state.avatar} />
         </Grid>
         <Grid item>
-          <TextField label="Username" value={username} disabled />
+          <TextField label="Username" value={state.username} disabled />
         </Grid>
       </Grid>
       <ValidatorForm onSubmit={gotoLogin}>
@@ -104,6 +153,19 @@ function ByPassWord(props) {
           errorMessages={['This field is required']}
           margin="normal"
           value={password}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              checkedIcon={<CheckBoxIcon fontSize="small" />}
+              value={isRemember}
+              checked={isRemember}
+              color="primary"
+              onChange={() => setIsRemember(!isRemember)}
+            />
+          }
+          label="Remember me for 30 days"
         />
         <DivControlBtnKeystore>
           <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>

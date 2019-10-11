@@ -26,12 +26,12 @@ const initialState = Object.assign(
 
     if (sessionData) {
       const token = codec.decode(Buffer.from(sessionData, 'base64'));
-      const isExpired = token.expireAfter - Date.now() < 60 * 1000;
+      const isExpired = process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
       if (!isExpired) {
-        resp.tokenAddress = token.tokenAddress;
         resp.tokenKey = codec.toString(token.tokenKey);
         tweb3.wallet.importAccount(resp.tokenKey);
       }
+      resp.tokenAddress = token.tokenAddress;
       resp.expireAfter = token.expireAfter;
     }
 
