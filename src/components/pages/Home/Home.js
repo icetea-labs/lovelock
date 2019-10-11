@@ -45,7 +45,7 @@ const ShadowBox = styled.div`
 
 function Home(props) {
   const [openPromise, setOpenPromise] = useState(false);
-  const { address, history, setNeedAuth, privateKey } = props;
+  const { address, history, setNeedAuth, tokenKey } = props;
   const [homePropose, setHomePropose] = useState([]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ function Home(props) {
   }
 
   function openPopup() {
-    if (!privateKey) {
+    if (!tokenKey) {
       setNeedAuth(true);
     }
     setOpenPromise(true);
@@ -106,7 +106,7 @@ function Home(props) {
                 </div>
               </RightBox>
             </ShadowBox>
-            {openPromise && privateKey && <PuNewLock close={closePopup} />}
+            {openPromise && tokenKey && <PuNewLock close={closePopup} />}
           </FlexWidthBox>
         )}
       </FlexBox>
@@ -115,11 +115,9 @@ function Home(props) {
 }
 
 const mapStateToProps = state => {
-  const { loveinfo, account } = state;
   return {
-    propose: loveinfo.propose,
-    address: account.address,
-    privateKey: account.privateKey,
+    address: state.account.address,
+    tokenKey: state.account.tokenKey,
   };
 };
 

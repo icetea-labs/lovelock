@@ -67,9 +67,14 @@ function ByMnemonic(props) {
         const rememberMe = true;
         const token = tweb3.wallet.createRegularAccount();
         const ms = tweb3.contract('system.did').methods;
-        const expire = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
+        const expire = rememberMe ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
 
-        ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, expire)
+        ms.grantAccessToken(
+          address,
+          [process.env.REACT_APP_CONTRACT, 'system.did'],
+          token.address,
+          parseInt(expire, 10)
+        )
           .sendCommit({ from: address })
           .then(({ returnValue }) => {
             tweb3.wallet.importAccount(token.privateKey);
@@ -77,7 +82,12 @@ function ByMnemonic(props) {
             const storage = rememberMe ? localStorage : sessionStorage;
             // save token account
             storage.sessionData = codec
-              .encode({ tokenAddress: token.address, tokenKey: token.privateKey, expireAfter: returnValue })
+              .encode({
+                contract: process.env.REACT_APP_CONTRACT,
+                tokenAddress: token.address,
+                tokenKey: token.privateKey,
+                expireAfter: returnValue,
+              })
               .toString('base64');
             // save main account
             savetoLocalStorage(address, keyObject);
