@@ -10,6 +10,7 @@ import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
+import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { tryStringifyJson, getTagsInfo } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
@@ -41,12 +42,10 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     width: 100,
     height: 100,
-    margin: theme.spacing(0, 1, 1, 0),
   },
   avatarSug: {
     width: 30,
     height: 30,
-    // margin: theme.spacing(0, 1, 1, 0),
   },
 }));
 
@@ -108,17 +107,46 @@ const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
   -webkit-box-pack: justify;
+  padding: 30px 0 0 0;
   font-size: 14px;
   cursor: pointer;
+  .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
   .upload_img {
     position: relative;
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+    &:hover .changeImg {
+      display: block;
+    }
+  }
+  .changeImg {
+    cursor: pointer;
+    position: absolute;
+    display: none;
+    height: 50px;
+    top: 50px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 80%;
+    line-height: 2;
+    overflow: hidden;
+    border-bottom-left-radius: 600px;
+    border-bottom-right-radius: 600px;
   }
   .fileInput {
     width: 120px;
-    height: 20px;
+    height: 50px;
     padding: 2px;
     cursor: pointer;
   }
@@ -518,7 +546,10 @@ class PuNewLock extends React.Component {
             <PreviewContainter>
               <div className="upload_img">
                 <AvatarProCus src={avatar} />
-                <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                <div className="changeImg">
+                  <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                  <CameraAltIcon />
+                </div>
               </div>
             </PreviewContainter>
             <RightBotInfo>
