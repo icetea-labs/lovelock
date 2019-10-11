@@ -1,7 +1,19 @@
 const { expect } = require(';');
-const { isOwnerPropose, getDataByIndex } = require('./helper.js');
+const { isOwnerPropose, getDataByIndex } = require('./helper.js')
+
 @contract
 class LoveLock {
+
+  // crush bot
+  botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
+
+  useState = (name, defaultValue) => {
+    return [
+      () => this.getState(name, defaultValue),
+      v => this.setState(name, v)
+    ]
+  }
+
   // {
   //   isPrivate: false,
   //   sender: '',
@@ -13,10 +25,12 @@ class LoveLock {
   //   status: 0,
   //   memoryIndex: [],
   // },
-  @view @state botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
-  @view @state proposes = [];
-  @view @state add2p = {}; //1:n { 'address':[1,2,3...] }
+  useProposes = () => this.useState('proposes', [])
 
+  // mapping: address to propose
+  // 1:n { 'address':[1,2,3...] }
+  useA2p = () => this.useState('a2p', {})
+  
   // {
   //   isPrivate: false,
   //   sender: '',
@@ -26,11 +40,17 @@ class LoveLock {
   //   likes: [{ sender: {type} }],
   //   comments: [{ sender: '', content: '', info: '' }],
   // },
-  @view @state memories = [];
-  @view @state p2m = {}; //1:n  { 'proindex':[1,2,3...] }
-  @view @state m2p = {}; //1:1  { 'memoryindex':'proindex' }
+  useMemories = () => this.useState('memories', [])
 
-  @transaction createPropose(s_content: string, receiver: string, s_info, bot_info) {
+  // mapping: propose to memory
+  // 1:n  { 'proindex':[1,2,3...] }
+  useP2m = () => this.useState('p2m', {})
+
+  // mapping: memory to propose
+  // 1:1  { 'memoryindex':'proindex' }
+  useM2p = () => this.useState('m2p', {})
+
+  @transaction createPropose(s_content: string, receiver: address, s_info, bot_info) {
     const sender = msg.sender;
     const isPrivate = false;
     const defaultPropose = {
@@ -59,17 +79,19 @@ class LoveLock {
     }
 
     //new pending propose
-    const x = this.proposes;
+    const [getProposes, setProposes] = this.useProposes()
+    const x = getProposes()
     const index = x.push(pendingPropose) - 1;
-    this.proposes = x;
+    setProposes(x)
 
-    //map address to propose
-    const y = this.add2p;
+    // map address to propose
+    const [getA2p, setA2p] = this.useA2p()
+    const y = getA2p()
     if (!y[sender]) y[sender] = [];
     y[sender].push(index);
     if (!y[receiver]) y[receiver] = [];
     y[receiver].push(index);
-    this.add2p = y;
+    setA2p(y)
 
     //emit Event
     const log = Object.assign({}, pendingPropose, { id: index });
@@ -79,21 +101,30 @@ class LoveLock {
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLikePropose(proIndex: number, type: number) {
     const sender = msg.sender;
-    let obj = getDataByIndex(this.proposes, proIndex);
+
+    const [getProposes, setProposes] = this.useProposes()
+    const proposes = getProposes()
+
+    let obj = getDataByIndex(proposes, proIndex);
     if (obj.likes[sender]) {
       delete obj.likes[sender];
     } else {
       obj.likes[sender] = {};
       obj.likes[sender].type = type;
     }
-    this.proposes[memoIndex] = obj;
+    proposes[memoIndex] = obj;
+
+    setProposes(proposes)
+
     // const log = Object.assign({}, like, { index });
     // this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
   }
+
   @view getLikeByProIndex(proIndex: number) {
     const obj = getDataByIndex(this.proposes, proIndex);
     return obj.likes;
   }
+
   @transaction acceptPropose(proIndex: number, r_content: string) {
     this._confirmPropose(proIndex, r_content, 1);
     const obj = getDataByIndex(this.proposes, proIndex);
@@ -237,11 +268,10 @@ class LoveLock {
         isOwnerPropose(pro, "You can't cancel propose.", msg.sender);
         break;
     }
-    pro = Object.assign({}, pro, { r_content, status });
-    this.proposes[index] = pro;
+    Object.assign(pro, { r_content, status });
 
     //emit Event
-    const log = Object.assign({}, pro, { id: index });
+    const log = Object.assign({}, this.proposes[index], { id: index });
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
   }
 
