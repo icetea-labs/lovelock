@@ -128,7 +128,7 @@ function RegisterUsername(props) {
   async function gotoNext() {
     const isUsernameRegisted = await isAliasRegisted(username);
     if (isUsernameRegisted) {
-      const message = 'Username already exists! Please choose another.';
+      const message = 'This username is already taken.';
       enqueueSnackbar(message, { variant: 'error' });
     } else {
       setLoading(true);
@@ -225,9 +225,9 @@ function RegisterUsername(props) {
           name="username"
           validators={['required', 'specialCharacter', 'isAliasRegisted']}
           errorMessages={[
-            'This field is required',
-            'Username cannot contain spaces and special character',
-            'Username already exists! Please choose another',
+            'This field is required.',
+            'Username cannot contain spaces and special character.',
+            'This username is already taken.',
           ]}
           margin="dense"
           value={username}
@@ -303,7 +303,10 @@ function RegisterUsername(props) {
         </Box>
 
         <DivControlBtnKeystore>
-          <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
+          <div>
+            <span>Already had an account?</span>
+            <LinkPro onClick={gotoLogin}>Login</LinkPro>
+          </div>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>

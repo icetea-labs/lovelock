@@ -295,6 +295,7 @@ function TopContrainer(props) {
   }
 
   async function getNumLikes() {
+    if (!memoryRelationIndex || memoryRelationIndex === -1) return;
     // console.log('getNumLikes', memoryRelationIndex);
     const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
     const num = Object.keys(data).length;
