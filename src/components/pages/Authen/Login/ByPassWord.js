@@ -109,8 +109,8 @@ function ByPassWord(props) {
                 history.push('/');
               }, 1);
             });
-        } catch (err) {
-          console.log('e1', err);
+        } catch (error) {
+          console.log('error', error);
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
@@ -130,9 +130,7 @@ function ByPassWord(props) {
   function loginWithSeed() {
     setStep('two');
   }
-  function handleChangeCheckbox() {
-    setIsRemember(!isRemember);
-  }
+
   const classes = useStyles();
   return (
     <React.Fragment>
