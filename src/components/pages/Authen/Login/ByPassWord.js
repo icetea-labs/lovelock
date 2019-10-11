@@ -6,8 +6,12 @@ import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 import { Grid, TextField } from '@material-ui/core';
-import { AvatarPro } from '../../../elements';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
+import { AvatarPro } from '../../../elements';
 import tweb3 from '../../../../service/tweb3';
 import { wallet, decode, getTagsInfo, savetoLocalStorage } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
@@ -25,9 +29,12 @@ const useStyles = makeStyles(theme => ({
 
 function ByPassWord(props) {
   const { setLoading, setAccount, setStep, history, encryptedData } = props;
+  const [state, setState] = React.useState({
+    username: '',
+    avatar: '',
+  });
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [avatar, setAvatar] = useState('');
+  const [isRemember, setIsRemember] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -39,11 +46,15 @@ function ByPassWord(props) {
     if (address) {
       const reps = await getTagsInfo(address);
       if (reps) {
-        setUsername(reps['display-name'] || '');
-        setAvatar(reps.avatar);
+        // setUsername();
+        setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
+        // setAvatar(reps.avatar);
       }
     } else {
-      setUsername('undefined');
+      // setUsername('');
+      setState({ ...state, username: 'undefined' });
+      const message = 'Your information is empty, Please use [Forgot Password] or [Register]';
+      enqueueSnackbar(message, { variant: 'error' });
     }
   }
 
@@ -58,10 +69,9 @@ function ByPassWord(props) {
           // const account = { address, privateKey, cipher: password };
           tweb3.wallet.importAccount(privateKey);
           // tweb3.wallet.defaultAccount = address;
-          const rememberMe = true;
           const token = tweb3.wallet.createRegularAccount();
           const ms = tweb3.contract('system.did').methods;
-          const expire = rememberMe ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+          const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
           // console.log('expire', expire);
           ms.grantAccessToken(
             address,
@@ -73,7 +83,7 @@ function ByPassWord(props) {
             .then(({ returnValue }) => {
               tweb3.wallet.importAccount(token.privateKey);
               const keyObject = encode(privateKey, password);
-              const storage = rememberMe ? localStorage : sessionStorage;
+              const storage = isRemember ? localStorage : sessionStorage;
               // save token account
               storage.sessionData = codec
                 .encode({
@@ -120,16 +130,18 @@ function ByPassWord(props) {
   function loginWithSeed() {
     setStep('two');
   }
+  function handleChangeCheckbox() {
+    setIsRemember(!isRemember);
+  }
   const classes = useStyles();
-
   return (
     <React.Fragment>
       <Grid className={classes.avatar} container spacing={2} alignItems="flex-end">
         <Grid item>
-          <AvatarPro hash={avatar} />
+          <AvatarPro hash={state.avatar} />
         </Grid>
         <Grid item>
-          <TextField label="Username" value={username} disabled />
+          <TextField label="Username" value={state.username} disabled />
         </Grid>
       </Grid>
       <ValidatorForm onSubmit={gotoLogin}>
@@ -143,6 +155,19 @@ function ByPassWord(props) {
           errorMessages={['This field is required']}
           margin="normal"
           value={password}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              checkedIcon={<CheckBoxIcon fontSize="small" />}
+              value={isRemember}
+              checked={isRemember}
+              color="primary"
+              onChange={() => setIsRemember(!isRemember)}
+            />
+          }
+          label="Remember me for 30 days"
         />
         <DivControlBtnKeystore>
           <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>

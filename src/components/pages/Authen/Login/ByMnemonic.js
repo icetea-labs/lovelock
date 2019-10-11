@@ -5,6 +5,10 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import { wallet, savetoLocalStorage } from '../../../../helper';
 import { ButtonPro } from '../../../elements/Button';
@@ -34,6 +38,7 @@ function ByMnemonic(props) {
   const [password, setPassword] = useState('');
   const [valueInput, setValueInput] = useState('');
   const [rePassErr] = useState('');
+  const [isRemember, setIsRemember] = useState(true);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -64,10 +69,9 @@ function ByMnemonic(props) {
         tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
 
-        const rememberMe = true;
         const token = tweb3.wallet.createRegularAccount();
         const ms = tweb3.contract('system.did').methods;
-        const expire = rememberMe ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+        const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
 
         ms.grantAccessToken(
           address,
@@ -79,7 +83,7 @@ function ByMnemonic(props) {
           .then(({ returnValue }) => {
             tweb3.wallet.importAccount(token.privateKey);
             const keyObject = encode(privateKey, password);
-            const storage = rememberMe ? localStorage : sessionStorage;
+            const storage = isRemember ? localStorage : sessionStorage;
             // save token account
             storage.sessionData = codec
               .encode({
@@ -155,6 +159,19 @@ function ByMnemonic(props) {
         margin="normal"
         onChange={handlePassword}
         type="password"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+            checkedIcon={<CheckBoxIcon fontSize="small" />}
+            value={isRemember}
+            checked={isRemember}
+            color="primary"
+            onChange={() => setIsRemember(!isRemember)}
+          />
+        }
+        label="Remember me for 30 days"
       />
       <DivControlBtnKeystore>
         <ButtonPro color="primary" onClick={loginWithPrivatekey}>

@@ -3,6 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import { codec } from '@iceteachain/common';
 import TextField from '@material-ui/core/TextField';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import tweb3 from '../../service/tweb3';
 import * as actions from '../../store/actions';
@@ -16,6 +20,7 @@ export default function GetKeyToAuthen() {
   const encryptedData = useSelector(state => state.account.encryptedData);
   const needAuth = useSelector(state => state.account.needAuth);
   // const address = useSelector(state => state.account.address);
+  const [isRemember, setIsRemember] = useState(true);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -67,11 +72,10 @@ export default function GetKeyToAuthen() {
           const address = wallet.getAddressFromPrivateKey(privateKey);
           tweb3.wallet.importAccount(privateKey);
 
-          const rememberMe = true;
           const token = tweb3.wallet.createRegularAccount();
           const ms = tweb3.contract('system.did').methods;
-          const expire = rememberMe ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          console.log('expire', expire);
+          const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+          // console.log('expire', expire);
           ms.grantAccessToken(
             address,
             [process.env.REACT_APP_CONTRACT, 'system.did'],
@@ -82,7 +86,7 @@ export default function GetKeyToAuthen() {
             .then(({ returnValue }) => {
               tweb3.wallet.importAccount(token.privateKey);
               const keyObject = encode(privateKey, password);
-              const storage = rememberMe ? localStorage : sessionStorage;
+              const storage = isRemember ? localStorage : sessionStorage;
               // save token account
               storage.sessionData = codec
                 .encode({
@@ -129,6 +133,19 @@ export default function GetKeyToAuthen() {
         margin="normal"
         onChange={passwordChange}
         type="password"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+            checkedIcon={<CheckBoxIcon fontSize="small" />}
+            value={isRemember}
+            checked={isRemember}
+            color="primary"
+            onChange={() => setIsRemember(!isRemember)}
+          />
+        }
+        label="Remember me for 30 days"
       />
     </CommonDialog>
   ) : null;
