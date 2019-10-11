@@ -61,6 +61,17 @@ const useStyles = makeStyles(theme => ({
     cursor: 'pointer',
     marginTop: 10,
     display: 'inline-block',
+    backgroundColor: '#fe8dc3',
+    color: '#fff',
+    padding: '5px 10px',
+    borderRadius: 2,
+    fontSize: 11,
+    boxShadow: '0px 1px 4px 1px #d0d0d0',
+  },
+  blogTitle: {
+    fontSize: 16,
+    marginBottom: 16,
+    display: 'block',
   },
   relationship: {
     // color: theme.color.primary,
@@ -227,17 +238,31 @@ export default function MemoryContent(props) {
     try {
       let content = JSON.parse(memoryContent)
       if (content) {
-        // console.log(content);
-        return content.blocks.map((line, i) => {
-          if (i <= 3) {
-            return (
-              <span key={i}>
-                <span>{line.text}</span>
-                <br />
-              </span>
-            );
+        console.log(content);
+        let blocks = content.blocks
+        let firstImg = null;
+        let firstLine = null;
+        for (let i in blocks) {
+          console.log(blocks[i]);
+          if (!firstImg && blocks[i].type === 'image') {
+            firstImg = blocks[i].data.url
           }
-        });
+          if (!firstLine && blocks[i].type !== 'image') {
+            firstLine = blocks[i].text
+            if (firstLine.length > 200) {
+              firstLine = firstLine.slice(0, 200) + '...'
+            }
+          }
+          if (firstImg && firstLine) break
+        }
+        console.log(firstImg, firstLine)
+        return (
+          <>
+            <span className={classes.blogTitle}>Blog</span>
+            {firstImg && <img src={firstImg} />}
+            {firstLine && <span>{firstLine}</span>}
+          </>
+        )
       }
     } catch (e) { }
     return memoryContent
@@ -310,7 +335,7 @@ export default function MemoryContent(props) {
           {decodeEditorMemory() && (
             <>
               <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>
-                See more...
+                View
               </Link>
               <SimpleModal
                 open={isOpenModal}
