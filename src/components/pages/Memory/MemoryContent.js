@@ -95,7 +95,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function MemoryContent(props) {
-  const { memory, proIndex } = props;
+  const { memory, proIndex, topInfo } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -113,9 +113,6 @@ export default function MemoryContent(props) {
     if (memoryDecrypted.isPrivate) {
       decodePrivateMemory();
     }
-
-    // create the store
-    // console.log('db', db);
   }, [privateKey, proIndex]);
 
   useEffect(() => {
@@ -123,16 +120,13 @@ export default function MemoryContent(props) {
     getMemoryContent()
   }, [memory]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     for (let j = 0; j < memory.info.hash.length; j++) {
-  //       // eslint-disable-next-line no-await-in-loop
-  //       memory.info.hash[j] = await getJsonFromIpfs(memory.info.hash[j]);
-  //     }
-  //     setMemoryDecrypted(memory);
-  //   };
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    if (window.location.search !== '') {
+      let url_string = window.location.href
+      let url = new URL(url_string)
+      if(memory.id == url.searchParams.get("memory")) setOpenModal(true)
+    }
+  });
 
   function FacebookProgress(propsFb) {
     const classes = useStylesFacebook();
@@ -252,6 +246,16 @@ export default function MemoryContent(props) {
     return memoryContent
   }
 
+  function openMemory(memoryId) {
+    setOpenModal(true)
+    window.history.pushState({}, '', `?memory=${memoryId}`)
+  }
+
+  function closeMemory() {
+    setOpenModal(false)
+    window.history.pushState({}, '', window.location.pathname)
+  }
+
   const [currentImage, setCurrentImage] = useState(0);
   const [viewerIsOpen, setViewerIsOpen] = useState(false);
 
@@ -297,13 +301,13 @@ export default function MemoryContent(props) {
             )}
           {decodeEditorMemory() && (
             <>
-              <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>
+              <Link onClick={() => openMemory(memory.id)} className={classes.seeMore}>
                 View
               </Link>
               <SimpleModal
                 open={isOpenModal}
-                handleClose={() => setOpenModal(false)}
-                title={<MemoryTitle sender={memoryDecrypted.name} receiver={propose[0].name} />}
+                handleClose={closeMemory}
+                title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} />}
                 subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
               >
                 <Editor initContent={decodeEditorMemory()} read_only={true} />

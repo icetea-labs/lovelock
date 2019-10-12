@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { loading, memoryList, proIndex } = props;
+  const { loading, memoryList, proIndex, topInfo } = props;
   const arrayLoadin = [{}, {}, {}, {}];
   const classes = useStyles();
 
@@ -54,7 +54,7 @@ function MemoryContainer(props) {
   }
   // console.log('memoryList', memoryList);
   return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={proIndex} memory={memory} />;
+    return <MemoryContent key={index} proIndex={proIndex} memory={memory} topInfo={topInfo} />;
   });
 }
 

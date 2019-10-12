@@ -153,6 +153,7 @@ export default function TopContrainer(props) {
           const newPropose = await addInfoToProposes(resp[0]);
           // console.log('newPropose', newPropose);
           setTopInfo(newPropose || []);
+          props.getTopInfo(newPropose || []);
         }
       } catch (e) {
         console.log('loadProposes', e);
