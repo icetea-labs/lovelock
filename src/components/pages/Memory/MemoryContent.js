@@ -198,8 +198,6 @@ export default function MemoryContent(props) {
   function decodeEditorMemory() {
     try {
       let content = JSON.parse(memoryContent);
-      console.log(content)
-
       if (content) {
         return content;
       }
@@ -227,12 +225,10 @@ export default function MemoryContent(props) {
     try {
       let content = JSON.parse(memoryContent)
       if (content) {
-        console.log(content);
         let blocks = content.blocks
         let firstImg = null;
         let firstLine = null;
         for (let i in blocks) {
-          console.log(blocks[i]);
           if (!firstImg && blocks[i].type === 'image') {
             firstImg = blocks[i].data.url
           }
@@ -244,7 +240,6 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break
         }
-        console.log(firstImg, firstLine)
         return (
           <>
             <span className={classes.blogTitle}>Blog</span>
@@ -352,7 +347,7 @@ export default function MemoryContent(props) {
             />
           )}
         {showComment && (
-          <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+          <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} numComment={numComment} />
         )}
       </Card>
       <ModalGateway>

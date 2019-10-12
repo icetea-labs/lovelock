@@ -91,7 +91,7 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 const numComment = 4;
 export default function MemoryContent(props) {
-  const { handerNumberComment, memoryIndex } = props;
+  const { handerNumberComment, memoryIndex, numComment } = props;
   const dispatch = useDispatch();
   const privateKey = useSelector(state => state.account.privateKey);
   const avatar = useSelector(state => state.account.avatar);
@@ -103,7 +103,7 @@ export default function MemoryContent(props) {
 
   useEffect(() => {
     loaddata(memoryIndex);
-  }, [memoryIndex]);
+  }, [numComment]);
 
   function loaddata(index) {
     setTimeout(async () => {
