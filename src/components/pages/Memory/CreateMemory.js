@@ -124,7 +124,7 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { reLoadMemory, proIndex } = props;
+  const { reLoadMemory, proIndex, topInfo } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -204,7 +204,7 @@ export default function CreateMemory(props) {
     }
     let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
     let submitContent = await saveFileToIpfs([buffer])
-    handleShareMemory(JSON.stringify({ipfsHash: submitContent}));
+    handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
   }
 
   function onChangeEditor(value) {
@@ -255,6 +255,7 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
+    setOpenModal(false);
   }
 
   return (
@@ -313,15 +314,6 @@ export default function CreateMemory(props) {
                 <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
                   Write blog...
                 </button>
-                <SimpleModal
-                  open={isOpenModal}
-                  handleClose={() => { setOpenModal(false); setGrayLayout(false) }}
-                  handleSumit={onSubmitEditor}
-                  closeText="Cancel"
-                  title={<MemoryTitle sender={account.displayName} receiver={propose[0].name} />}
-                >
-                  <Editor onChange={value => onChangeEditor(value)} />
-                </SimpleModal>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
@@ -334,6 +326,15 @@ export default function CreateMemory(props) {
                 </ButtonPro>
               </Grid>
             )}
+            <SimpleModal
+              open={isOpenModal}
+              handleClose={() => { setOpenModal(false); setGrayLayout(false) }}
+              handleSumit={onSubmitEditor}
+              closeText="Cancel"
+              title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} />}
+            >
+              <Editor onChange={value => onChangeEditor(value)} />
+            </SimpleModal>
           </Grid>
         </ShadowBox>
       </CreatePost>

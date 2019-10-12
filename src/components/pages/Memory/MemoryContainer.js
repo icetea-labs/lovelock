@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { proIndex, memorydata, memoryList, setNeedAuth, setMemory, privateKey } = props;
+  const { proIndex, memorydata, memoryList, setNeedAuth, setMemory, privateKey, topInfo } = props;
   const [loading, setLoading] = useState(true);
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
@@ -111,7 +111,7 @@ function MemoryContainer(props) {
   }
   // console.log('memoryList', memoryList);
   return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={proIndex} memory={memory} />;
+    return <MemoryContent key={index} proIndex={proIndex} memory={memory} topInfo={topInfo} />;
   });
 }
 
