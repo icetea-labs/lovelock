@@ -7,12 +7,12 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
-// import Gallery from 'react-grid-gallery';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 
-import { TimeWithFormat, decodeWithPublicKey, getJsonFromIpfs } from '../../../helper';
+import { TimeWithFormat, decodeWithPublicKey, callView, getTagsInfo } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
@@ -61,16 +61,36 @@ const useStyles = makeStyles(theme => ({
     cursor: 'pointer',
     marginTop: 10,
     display: 'inline-block',
-    backgroundColor: '#fe8dc3',
-    color: '#fff',
+    color: '#828282',
     padding: '5px 10px',
     borderRadius: 2,
     fontSize: 11,
     boxShadow: '0px 1px 4px 1px #d0d0d0',
   },
+  icon: {
+    fontSize: 18,
+    verticalAlign: 'middle',
+  },
   blogTitle: {
-    fontSize: 16,
+    color: '#707070',
     marginBottom: 16,
+    display: 'block',
+  },
+  blogImgWrp: {
+    position: 'relative',
+    display: 'block',
+  },
+  blogTitleImg: {
+    position: 'absolute',
+    bottom: 15,
+    backgroundColor: '#2c2c2c',
+    color: '#fff',
+    padding: '2px 7px',
+    borderTopRightRadius: 2,
+    borderBottomRightRadius: 2,
+  },
+  blogFirstLine: {
+    marginBottom: 10,
     display: 'block',
   },
   relationship: {
@@ -106,7 +126,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function MemoryContent(props) {
-  const { memory, proIndex, topInfo } = props;
+  const { memory, proIndex } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -119,6 +139,7 @@ export default function MemoryContent(props) {
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
+  const [proposeInfo, setproposeInfo] = useState({});
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -138,6 +159,35 @@ export default function MemoryContent(props) {
       if(memory.id == url.searchParams.get("memory")) setOpenModal(true)
     }
   });
+
+
+  useEffect( () => {
+    (async () => {
+      let proposes = await callView('getProposeByIndex', [proIndex])
+      let propose = proposes[0]
+      const { sender, receiver } = propose;
+
+      const senderTags = await getTagsInfo(sender);
+      propose.s_name = senderTags['display-name'];
+      propose.s_publicKey = senderTags['pub-key'] || '';
+      propose.s_avatar = senderTags.avatar;
+
+      const botInfo = propose.bot_info;
+      if (receiver === process.env.REACT_APP_BOT_LOVER) {
+        propose.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
+        propose.r_publicKey = senderTags['pub-key'] || '';
+        propose.r_avatar = botInfo.botAva;
+        propose.r_content = botInfo.botReply;
+      } else {
+        let receiverTags = await getTagsInfo(receiver);
+        propose.r_name = receiverTags['display-name'];
+        propose.r_publicKey = receiverTags['pub-key'] || '';
+        propose.r_avatar = receiverTags.avatar;
+        propose.r_content = propose.r_content;
+      }
+      setproposeInfo(propose)
+    })()
+  }, [proIndex]);
 
   function FacebookProgress(propsFb) {
     const classes = useStylesFacebook();
@@ -247,9 +297,14 @@ export default function MemoryContent(props) {
         }
         return (
           <>
-            <span className={classes.blogTitle}>Blog</span>
-            {firstImg && <img src={firstImg} />}
-            {firstLine && <span>{firstLine}</span>}
+            {!firstImg && <span className={classes.blogTitle}>Blog</span>}
+            {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
+            {firstImg && 
+              <span className={classes.blogImgWrp}>
+                <span className={classes.blogTitleImg}>Blog</span>
+                <img src={firstImg} />
+              </span>
+            }
           </>
         )
       }
@@ -334,12 +389,12 @@ export default function MemoryContent(props) {
           {decodeEditorMemory() && (
             <>
               <Link onClick={() => openMemory(memory.id)} className={classes.seeMore}>
-                View
+                <FlashOnIcon className={classes.icon} /> View
               </Link>
               <SimpleModal
                 open={isOpenModal}
                 handleClose={closeMemory}
-                title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} />}
+                title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} />}
                 subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
               >
                 <Editor initContent={decodeEditorMemory()} read_only={true} />

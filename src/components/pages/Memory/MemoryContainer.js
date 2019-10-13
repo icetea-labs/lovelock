@@ -109,9 +109,8 @@ function MemoryContainer(props) {
       );
     });
   }
-  // console.log('memoryList', memoryList);
   return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={proIndex} memory={memory} topInfo={topInfo} />;
+    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} />;
   });
 }
 
