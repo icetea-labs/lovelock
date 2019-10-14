@@ -9,11 +9,17 @@ import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 
-import { ButtonPro } from '../../elements/Button';
-import AddInfoMessage from '../../elements/AddInfoMessage';
-import * as actions from '../../../store/actions';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
-import { AvatarPro } from '../../elements';
+import { ButtonPro } from "../../elements/Button";
+import AddInfoMessage from "../../elements/AddInfoMessage";
+import * as actions from "../../../store/actions";
+import {
+  saveFileToIpfs,
+  saveBufferToIpfs,
+  sendTransaction,
+  encodeWithPublicKey
+} from "../../../helper";
+import { AvatarPro } from "../../elements";
+import MemoryTitle from './MemoryTitle';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -118,12 +124,13 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { reLoadMemory, proIndex } = props;
+  const { reLoadMemory, proIndex, topInfo } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
-  const avatar = useSelector(state => state.account.avatar);
+  const account = useSelector(state => state.account);
+  const propose = useSelector(state => state.loveinfo.propose);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -195,7 +202,9 @@ export default function CreateMemory(props) {
         blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
       }
     }
-    handleShareMemory(JSON.stringify({ ...editorContent }));
+    let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
+    let submitContent = await saveFileToIpfs([buffer])
+    handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
   }
 
   function onChangeEditor(value) {
@@ -246,6 +255,7 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
+    setOpenModal(false);
   }
 
   return (
@@ -257,7 +267,11 @@ export default function CreateMemory(props) {
             <Grid item>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
-                  <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
+                  <AvatarPro
+                    alt="img"
+                    hash={account.avatar}
+                    className={classes.avatar}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <BootstrapTextField
@@ -300,14 +314,6 @@ export default function CreateMemory(props) {
                 <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
                   Write blog...
                 </button>
-                <SimpleModal
-                  open={isOpenModal}
-                  handleClose={() => setOpenModal(false)}
-                  handleSumit={onSubmitEditor}
-                  title="Create your note"
-                >
-                  <Editor onChange={value => onChangeEditor(value)} />
-                </SimpleModal>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
@@ -320,6 +326,15 @@ export default function CreateMemory(props) {
                 </ButtonPro>
               </Grid>
             )}
+            <SimpleModal
+              open={isOpenModal}
+              handleClose={() => { setOpenModal(false); setGrayLayout(false) }}
+              handleSumit={onSubmitEditor}
+              closeText="Cancel"
+              title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} />}
+            >
+              <Editor onChange={value => onChangeEditor(value)} />
+            </SimpleModal>
           </Grid>
         </ShadowBox>
       </CreatePost>

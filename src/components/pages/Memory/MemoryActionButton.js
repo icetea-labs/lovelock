@@ -71,7 +71,7 @@ export default function MemoryActionButton(props) {
 
   useEffect(() => {
     getNumLikes();
-  }, [memoryIndex]);
+  });
 
   async function getNumLikes() {
     const data = await callView('getLikeByMemoIndex', [memoryIndex]);
