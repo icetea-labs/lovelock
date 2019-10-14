@@ -14,7 +14,7 @@ const RightBox = styled.div`
 `;
 
 function RightContrainer(props) {
-  const { proIndex } = props;
+  const { proIndex, topInfo } = props;
   const [memoByProIndex, setMemoByProIndex] = useState([]);
   // const { enqueueSnackbar } = useSnackbar();
 
@@ -73,8 +73,8 @@ function RightContrainer(props) {
 
   return (
     <RightBox>
-      <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} />
-      <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} />
+      <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />
+      <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />
     </RightBox>
   );
 }

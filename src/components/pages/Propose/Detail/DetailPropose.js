@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
@@ -19,12 +19,17 @@ const ShadowBox = styled.div`
 export default function DetailPropose(props) {
   const { match } = props;
   const proIndex = parseInt(match.params.index, 10);
+  const [topInfo, setTopInfo] = useState({});
+
+  function getTopInfo(data){
+    setTopInfo(data)
+  }
 
   return (
     <React.Fragment>
       <BannerContainer>
         <ShadowBox>
-          <TopContrainer proIndex={proIndex} />
+          <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
         </ShadowBox>
       </BannerContainer>
 
@@ -33,7 +38,7 @@ export default function DetailPropose(props) {
           <LeftContrainer />
         </FlexWidthBox>
         <FlexWidthBox width="70%">
-          <RightContrainer proIndex={proIndex} />
+          <RightContrainer proIndex={proIndex} topInfo={topInfo} />
         </FlexWidthBox>
       </FlexBox>
     </React.Fragment>

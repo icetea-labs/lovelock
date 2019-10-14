@@ -286,6 +286,7 @@ function TopContrainer(props) {
         const moreProInfo = await addInfoToProposes(proInfo);
         // console.log('moreProInfo', moreProInfo);
         setTopInfo(moreProInfo);
+        props.getTopInfo(moreProInfo);
         setMemoryRelationIndex(proInfo.memoryRelationIndex);
       } catch (e) {
         console.log('loadProposes', e);
