@@ -79,10 +79,13 @@ class LoveLock {
     let pendingPropose = {};
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     if (receiver === this.botAddress) {
+      // type = 2 : send to bot
       pendingPropose = { ...defaultPropose, status: 1, type: 2 };
     } else if (sender === receiver) {
+      // type = 1 : send to myself
       pendingPropose = { ...defaultPropose, status: 1, type: 1 };
     } else {
+      // type = 0: send to partner
       pendingPropose = { ...defaultPropose, status: 0, type: 0 };
     }
 
@@ -90,6 +93,7 @@ class LoveLock {
     const proposes = this.getProposes();
     const index = proposes.push(pendingPropose) - 1;
     this.setProposes(proposes);
+
     if (receiver === this.botAddress || sender === receiver) {
       this._addMemory(index, false, '', { hash: [], date: Date.now() }, 1, [true]);
     }
@@ -294,7 +298,7 @@ class LoveLock {
     }
 
     //emit Event
-    const log = { ...pro, d: index };
+    const log = { ...pro, id: index };
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
 
     return [pro, proposes];
