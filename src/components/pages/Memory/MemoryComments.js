@@ -90,8 +90,8 @@ const StyledCardActions = withStyles(theme => ({
   },
 }))(CardActions);
 const numComment = 4;
-export default function MemoryContent(props) {
-  const { handerNumberComment, memoryIndex, numComment } = props;
+export default function MemoryComments(props) {
+  const { handerNumberComment, memoryIndex } = props;
   const dispatch = useDispatch();
 
   // const privateKey = useSelector(state => state.account.privateKey);
@@ -108,7 +108,7 @@ export default function MemoryContent(props) {
 
   useEffect(() => {
     loaddata(memoryIndex);
-  }, [numComment]);
+  }, []);
 
   function loaddata(index) {
     setTimeout(async () => {
@@ -125,9 +125,11 @@ export default function MemoryContent(props) {
         respComment[i].avatar = respTags[i].avatar;
       }
 
+      // console.log('respComment.length', respComment.length);
+      // console.log('numComment', numComment);
+
       if (respComment.length > numComment) {
         const numMore = respComment.length - numComment;
-        // console.log('numMore', numMore);
         setNumHidencmt(numMore);
         setShowComments(respComment.slice(numMore));
       } else {
