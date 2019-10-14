@@ -456,7 +456,7 @@ function TopContrainer(props) {
               <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
               <PhotoCameraIcon className={classes.photoCameraIcon} />
               <Typography className={classes.title} noWrap>
-                Change lock image
+                Change
               </Typography>
             </Button>
             <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
