@@ -86,6 +86,17 @@ const PreviewContainter = styled.div`
   }
 `;
 
+const WarningPass = styled.div`
+  color: #f44336;
+  width: 300px;
+  margin-top: 4px;
+  min-height: 1em;
+  text-align: left;
+  font-weight: 400;
+  line-height: 1em;
+  font-size: 10px;
+`;
+
 function RegisterUsername(props) {
   const { setStep, setLoading, setAccount } = props;
   const [username, setUsername] = useState('');
@@ -272,6 +283,12 @@ function RegisterUsername(props) {
           margin="dense"
           value={password}
         />
+        <WarningPass>
+          <p>
+            Please use a password manager to keep your password. Lovelock won't be able to reset password if you forgot
+            it.
+          </p>
+        </WarningPass>
         <TextValidator
           label="Repeat password"
           fullWidth
