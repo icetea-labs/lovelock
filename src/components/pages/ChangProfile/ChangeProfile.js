@@ -225,7 +225,7 @@ function ChangeProfile(props) {
                   />
                 </RightProfile>
               </FlexBox>
-              <DivControlBtnKeystore>
+              <DivControlBtnKeystore justify="center">
                 <ButtonPro type="submit">Save change</ButtonPro>
               </DivControlBtnKeystore>
             </ValidatorForm>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
@@ -31,9 +33,69 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     width: 100,
     height: 100,
-    margin: theme.spacing(0, 1, 1, 0),
   },
 }));
+
+const PreviewContainter = styled.div`
+  padding: 10px 0 0 0;
+  display: flex;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  font-size: 14px;
+  cursor: pointer;
+  .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .upload_img {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+    &:hover .changeImg {
+      display: block;
+    }
+  }
+  .changeImg {
+    cursor: pointer;
+    position: absolute;
+    display: none;
+    width: 100px;
+    height: 50px;
+    top: 50px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 80%;
+    line-height: 2;
+    overflow: hidden;
+    border-bottom-left-radius: 600px;
+    border-bottom-right-radius: 600px;
+  }
+  .fileInput {
+    width: 120px;
+    height: 50px;
+    padding: 2px;
+    cursor: pointer;
+  }
+`;
+
+const WarningPass = styled.div`
+  color: #f44336;
+  width: 300px;
+  margin-top: 4px;
+  min-height: 1em;
+  text-align: left;
+  font-weight: 400;
+  line-height: 1em;
+  font-size: 10px;
+`;
 
 function RegisterUsername(props) {
   const { setStep, setLoading, setAccount } = props;
@@ -77,7 +139,7 @@ function RegisterUsername(props) {
   async function gotoNext() {
     const isUsernameRegisted = await isAliasRegisted(username);
     if (isUsernameRegisted) {
-      const message = 'Username already exists! Please choose another.';
+      const message = 'This username is already taken.';
       enqueueSnackbar(message, { variant: 'error' });
     } else {
       setLoading(true);
@@ -174,9 +236,9 @@ function RegisterUsername(props) {
           name="username"
           validators={['required', 'specialCharacter', 'isAliasRegisted']}
           errorMessages={[
-            'This field is required',
-            'Username cannot contain spaces and special character',
-            'Username already exists! Please choose another',
+            'This field is required.',
+            'Username cannot contain spaces and special character.',
+            'This username is already taken.',
           ]}
           margin="dense"
           value={username}
@@ -221,6 +283,12 @@ function RegisterUsername(props) {
           margin="dense"
           value={password}
         />
+        <WarningPass>
+          <p>
+            Please use a password manager to keep your password. Lovelock won't be able to reset password if you forgot
+            it.
+          </p>
+        </WarningPass>
         <TextValidator
           label="Repeat password"
           fullWidth
@@ -236,14 +304,26 @@ function RegisterUsername(props) {
         />
         <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
-          <div>
+          {/* <div>
             <AvatarPro src={avatar} className={classes.avatar} />
             <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
-          </div>
+          </div> */}
+          <PreviewContainter>
+            <div className="upload_img">
+              <AvatarPro src={avatar} className={classes.avatar} />
+              <div className="changeImg">
+                <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
+                <CameraAltIcon />
+              </div>
+            </div>
+          </PreviewContainter>
         </Box>
 
         <DivControlBtnKeystore>
-          <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
+          <div>
+            <span>Already had an account?</span>
+            <LinkPro onClick={gotoLogin}>Login</LinkPro>
+          </div>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>

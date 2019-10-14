@@ -15,6 +15,7 @@ import tweb3 from '../../../service/tweb3';
 const useStyles = makeStyles(theme => ({
   button: {
     color: 'rgba(0, 0, 0, 0.54)',
+    // minWidth: theme.spacing(12),
     width: '100%',
   },
   rightIcon: {
@@ -44,7 +45,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
   },
   acctionsBt: {
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
 }));
 const StyledCardActions = withStyles(theme => ({
@@ -122,27 +123,28 @@ export default function MemoryActionButton(props) {
           <React.Fragment>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
             <Typography component="span" variant="body2" color="primary">
-              Congrats {numLike > 0 && `( ${numLike} )`}
+              {numLike > 0 && ` ${numLike}`}
             </Typography>
           </React.Fragment>
         ) : (
           <React.Fragment>
             <FavoriteBorderIcon fontSize="small" className={classes.rightIcon} />
             <Typography component="span" variant="body2">
-              Congrats {numLike > 0 && `( ${numLike} )`}
+              {numLike > 0 && ` ${numLike}`}
             </Typography>
           </React.Fragment>
         )}
       </Button>
 
       <Button className={classes.button} onClick={handerShowComment}>
-        <CommentIcon fontSize="small" className={classes.rightIcon} />
-        Comment {numComment > 0 && `( ${numComment} )`}
+        {/* <CommentIcon fontSize="small" className={classes.rightIcon} /> */}
+        {numComment > 0 && (numComment === 1 ? `${numComment} Comment` : `${numComment} Comments`)}
+        {numComment === 0 && 'Comment'}
       </Button>
-      <Button className={classes.button}>
+      {/* <Button className={classes.button}>
         <ShareIcon fontSize="small" className={classes.rightIcon} />
         Share
-      </Button>
+      </Button> */}
     </StyledCardActions>
   );
 }
