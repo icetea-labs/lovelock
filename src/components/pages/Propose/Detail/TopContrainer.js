@@ -263,14 +263,16 @@ function TopContrainer(props) {
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
-      if (error) {
-        const message = 'Watch addlike error';
-        enqueueSnackbar(message, { variant: 'error' });
-      } else {
-        getNumLikes();
-      }
-    });
+    return tweb3
+      .contract(process.env.REACT_APP_CONTRACT)
+      .events[`addLike_${memoryRelationIndex}`](filter, async error => {
+        if (error) {
+          const message = 'Watch addlike error';
+          enqueueSnackbar(message, { variant: 'error' });
+        } else {
+          getNumLikes();
+        }
+      });
   }
 
   function loadProposes() {
