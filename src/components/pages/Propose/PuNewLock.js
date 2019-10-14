@@ -603,7 +603,7 @@ class PuNewLock extends React.Component {
             isCancel
           >
             <TagTitle>
-              <span>By create a lock with yourself, you will create a Journal instead</span>
+              <span>By create a lock with yourself, you will create a Journal instead.</span>
             </TagTitle>
           </CommonDialog>
         )}
