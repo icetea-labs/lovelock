@@ -139,7 +139,7 @@ export default function MemoryContent(props) {
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
-  const [proposeInfo, setproposeInfo] = useState({});
+  const [proposeInfo, setProposeInfo] = useState({});
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -185,7 +185,7 @@ export default function MemoryContent(props) {
         propose.r_avatar = receiverTags.avatar;
         propose.r_content = propose.r_content;
       }
-      setproposeInfo(propose)
+      setProposeInfo(propose)
     })()
   }, [proIndex]);
 
