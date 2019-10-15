@@ -45,6 +45,10 @@ const useStyles = makeStyles(theme => ({
 		top: 24,
 		cursor: 'pointer',
 		fontSize: 40,
+		opacity: 0.6,
+		'&:hover': {
+			opacity: 1,
+		}
 	},
 	subtitle: {
 		marginTop: -15,
