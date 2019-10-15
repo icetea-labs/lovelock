@@ -51,7 +51,8 @@
     "eject": "react-scripts eject",
     "deploy": "node script/deploy.js",
     "deploy:all": "node script/deploy.js && node script/deploy.js prod",
-    "deploy:prod": "node script/deploy.js prod"
+    "deploy:prod": "node script/deploy.js prod",
+    "seed": "node script/seed.js"
   },
   "eslintConfig": {
     "extends": "react-app",
