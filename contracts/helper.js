@@ -1,6 +1,6 @@
 //private function
 exports.expectProposeOwners = (propose, message) => {
-  const errmsg = message + ' You must be owner propose.';
+  const errmsg = message + ': You must be owner of the lock.';
   expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg);
 };
 //private function

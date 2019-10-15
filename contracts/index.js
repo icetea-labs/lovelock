@@ -2,6 +2,14 @@ const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
 const { expectProposeOwners, getDataByIndex } = require('./helper.js');
 
+const LOCK_STATUS_PENDING = 0;
+const LOCK_STATUS_ACCEPTED = 1;
+const LOCK_STATUS_DENIED = 2;
+
+const LOCK_TYPE_COUPLE = 0;
+const LOCK_TYPE_JOURNAL = 1;
+const LOCK_TYPE_CRUSH = 2;
+
 @contract
 class LoveLock {
   // crush bot
@@ -56,11 +64,17 @@ class LoveLock {
   @view getM2p = () => this.getState('m2p', {});
   setM2p = value => this.setState('m2p', value);
 
-  @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info) {
+  @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
+
+    // cache some variables
+    const sender = msg.sender;
+    const isPrivate = false;
+    const isJournal = sender === receiver
+    const isCrush = receiver === this.botAddress
 
     // validate data
     
-    if (receiver !== this.botAddress) {
+    if (!isCrush) {
       expect(bot_info == null, 'bot_info must be null for a regular lock.');
     } else {
       bot_info = validate(bot_info, Joi.object({
@@ -77,18 +91,13 @@ class LoveLock {
     }));
     s_info.date = s_info.date ?? block.timestamp;
 
-    // cache some variables
-    const sender = msg.sender;
-    const isPrivate = false;
-
     let pendingPropose = {};
-    // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === this.botAddress) {
-      pendingPropose = { status: 1, type: 2 };
-    } else if (sender === receiver) {
-      pendingPropose = { status: 1, type: 1 };
+    if (isCrush) {
+      pendingPropose = { status: LOCK_STATUS_ACCEPTED, type: LOCK_TYPE_CRUSH };
+    } else if (isJournal) {
+      pendingPropose = { status: LOCK_STATUS_ACCEPTED, type: LOCK_TYPE_JOURNAL };
     } else {
-      pendingPropose = { status: 0, type: 0 };
+      pendingPropose = { status: LOCK_STATUS_PENDING, type: LOCK_TYPE_COUPLE };
     }
 
     pendingPropose = {
@@ -111,7 +120,8 @@ class LoveLock {
     const index = proposes.push(pendingPropose) - 1;
     this.setProposes(proposes);
 
-    if (receiver === this.botAddress || sender === receiver) {
+    // create the first memory for auto-accepted lock
+    if (pendingPropose.status === LOCK_STATUS_ACCEPTED) {
       this._addMemory(index, false, '', { hash: [], date: Date.now() }, 1, [true]);
     }
 
@@ -217,7 +227,7 @@ class LoveLock {
       [pro, proposes] = this.getPropose(proIndex);
     }
 
-    expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
+    expectProposeOwners(pro, 'Cannot add memory')
     const sender = msg.sender;
     const memory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
 

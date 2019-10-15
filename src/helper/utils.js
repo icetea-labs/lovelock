@@ -1,6 +1,5 @@
 import React from 'react';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
@@ -397,7 +396,7 @@ export const wallet = {
       publicKey,
     };
   },
-  recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.BANK_ACCOUNT }) {
+  recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.REGULAR_ACCOUNT }) {
     const typeTMP =
       options.type === AccountType.REGULAR_ACCOUNT ? AccountType.REGULAR_ACCOUNT : AccountType.BANK_ACCOUNT;
     let privateKey = '';
