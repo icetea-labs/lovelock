@@ -7,7 +7,6 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -300,18 +299,15 @@ export default function MemoryContent(props) {
           <>
             {firstImg &&
               <Palette src={firstImg}>
-                {({ data, loading, error }) => {
-                  console.log(data)
-                  return (
-                    <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkMuted }} onClick={() => openMemory(memory.id)}>
-                      <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}> 
-                        BLOG
+                {({ data }) => (
+                  <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkMuted }} onClick={() => openMemory(memory.id)}>
+                    <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
+                      BLOG
                       </span>
-                      <img src={firstImg} />
-                      {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
-                    </span>
-                  )
-                }}
+                    <img src={firstImg} />
+                    {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
+                  </span>
+                )}
               </Palette>
             }
           </>
@@ -390,37 +386,36 @@ export default function MemoryContent(props) {
                   </Typography>
                 ) : (
                     <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-                      {decodeEditorMemory() && (
-                        <>
-                          <SimpleModal
-                            open={isOpenModal}
-                            handleClose={closeMemory}
-                            title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
-                            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-                          >
-                            <Editor initContent={decodeEditorMemory()} read_only={true} />
-                            <div className={classes.editorComment}>
-                              {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-                                ''
-                              ) : (
-                                  <MemoryActionButton
-                                    handerShowComment={handerShowComment}
-                                    likes={memory.likes}
-                                    memoryIndex={memory.id}
-                                    numComment={numComment}
-                                  />
-                                )}
-                              {showComment && (
-                                <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
-                              )}
-                            </div>
-                          </SimpleModal>
-                          {previewEditorMemory()}
-
-                        </>
-                      )}
+                      {previewEditorMemory()}
                     </Typography>
                   )}
+
+                {decodeEditorMemory() && (
+                  <SimpleModal
+                    open={isOpenModal}
+                    handleClose={closeMemory}
+                    title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
+                    subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+                  >
+                    <Editor initContent={decodeEditorMemory()} read_only={true} />
+                    <div className={classes.editorComment}>
+                      {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
+                        ''
+                      ) : (
+                          <MemoryActionButton
+                            handerShowComment={handerShowComment}
+                            likes={memory.likes}
+                            memoryIndex={memory.id}
+                            numComment={numComment}
+                          />
+                        )}
+                      {showComment && (
+                        <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+                      )}
+                    </div>
+                  </SimpleModal>
+
+                )}
               </React.Fragment>
             )}
         </CardContent>
