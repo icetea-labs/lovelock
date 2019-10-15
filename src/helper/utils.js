@@ -10,7 +10,7 @@ import tweb3 from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
-const paths = 'm’/44’/60’/0’/0';
+const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 

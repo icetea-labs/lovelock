@@ -140,6 +140,9 @@ export default function MemoryContent(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
   const [proposeInfo, setProposeInfo] = useState({});
+  const [autoFc, setAutoFc] = useState(false);
+
+  console.log('auto', autoFc);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -149,22 +152,21 @@ export default function MemoryContent(props) {
 
   useEffect(() => {
     setMemoryDecrypted(memory);
-    getMemoryContent()
+    getMemoryContent();
   }, [memory]);
 
   useEffect(() => {
     if (window.location.search !== '') {
-      let url_string = window.location.href
-      let url = new URL(url_string)
-      if(memory.id == url.searchParams.get("memory")) setOpenModal(true)
+      let url_string = window.location.href;
+      let url = new URL(url_string);
+      if (memory.id == url.searchParams.get('memory')) setOpenModal(true);
     }
   });
 
-
-  useEffect( () => {
+  useEffect(() => {
     (async () => {
-      let proposes = await callView('getProposeByIndex', [proIndex])
-      let propose = proposes[0]
+      let proposes = await callView('getProposeByIndex', [proIndex]);
+      let propose = proposes[0];
       const { sender, receiver } = propose;
 
       const senderTags = await getTagsInfo(sender);
@@ -185,8 +187,8 @@ export default function MemoryContent(props) {
         propose.r_avatar = receiverTags.avatar;
         propose.r_content = propose.r_content;
       }
-      setProposeInfo(propose)
-    })()
+      setProposeInfo(propose);
+    })();
   }, [proIndex]);
 
   function FacebookProgress(propsFb) {
@@ -248,6 +250,7 @@ export default function MemoryContent(props) {
   }
   function handerShowComment() {
     setShowComment(true);
+    setAutoFc(true);
   }
 
   function decodeEditorMemory() {
@@ -256,7 +259,7 @@ export default function MemoryContent(props) {
       if (content) {
         return content;
       }
-    } catch (e) { }
+    } catch (e) {}
     return false;
   }
 
@@ -264,62 +267,62 @@ export default function MemoryContent(props) {
     try {
       let memoryContent = JSON.parse(memoryDecrypted.content);
       if (memoryContent.ipfsHash) {
-        let ipfsHash = memoryContent.ipfsHash
-        let data = await fetch(process.env.REACT_APP_IPFS + ipfsHash)
-        let content = await data.json()
-        setMemoryContent(JSON.stringify(content))
+        let ipfsHash = memoryContent.ipfsHash;
+        let data = await fetch(process.env.REACT_APP_IPFS + ipfsHash);
+        let content = await data.json();
+        setMemoryContent(JSON.stringify(content));
       } else {
-        setMemoryContent(memoryDecrypted.content)
+        setMemoryContent(memoryDecrypted.content);
       }
     } catch (e) {
-      setMemoryContent(memoryDecrypted.content)
+      setMemoryContent(memoryDecrypted.content);
     }
   }
 
   function previewEditorMemory() {
     try {
-      let content = JSON.parse(memoryContent)
+      let content = JSON.parse(memoryContent);
       if (content) {
-        let blocks = content.blocks
+        let blocks = content.blocks;
         let firstImg = null;
         let firstLine = null;
         for (let i in blocks) {
           if (!firstImg && blocks[i].type === 'image') {
-            firstImg = blocks[i].data.url
+            firstImg = blocks[i].data.url;
           }
           if (!firstLine && blocks[i].type !== 'image') {
-            firstLine = blocks[i].text
+            firstLine = blocks[i].text;
             if (firstLine.length > 200) {
-              firstLine = firstLine.slice(0, 200) + '...'
+              firstLine = firstLine.slice(0, 200) + '...';
             }
           }
-          if (firstImg && firstLine) break
+          if (firstImg && firstLine) break;
         }
         return (
           <>
             {!firstImg && <span className={classes.blogTitle}>Blog</span>}
             {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
-            {firstImg && 
+            {firstImg && (
               <span className={classes.blogImgWrp}>
                 <span className={classes.blogTitleImg}>Blog</span>
                 <img src={firstImg} />
               </span>
-            }
+            )}
           </>
-        )
+        );
       }
-    } catch (e) { }
-    return memoryContent
+    } catch (e) {}
+    return memoryContent;
   }
 
   function openMemory(memoryId) {
-    setOpenModal(true)
-    window.history.pushState({}, '', `?memory=${memoryId}`)
+    setOpenModal(true);
+    window.history.pushState({}, '', `?memory=${memoryId}`);
   }
 
   function closeMemory() {
-    setOpenModal(false)
-    window.history.pushState({}, '', window.location.pathname)
+    setOpenModal(false);
+    window.history.pushState({}, '', window.location.pathname);
   }
 
   const [currentImage, setCurrentImage] = useState(0);
@@ -355,10 +358,10 @@ export default function MemoryContent(props) {
                   <FacebookProgress /> Unlock...
                 </span>
               ) : (
-                  <IconButton aria-label="settings">
-                    <LockIcon />
-                  </IconButton>
-                )}
+                <IconButton aria-label="settings">
+                  <LockIcon />
+                </IconButton>
+              )}
             </React.Fragment>
           ) : (
             <React.Fragment>
@@ -401,16 +404,19 @@ export default function MemoryContent(props) {
                 {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
                   ''
                 ) : (
-                    <MemoryActionButton
-                      handerShowComment={handerShowComment}
-                      likes={memory.likes}
-                      memoryIndex={memory.id}
-                      numComment={numComment}
-                    />
-                  )}
-                {showComment && (
-                  <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+                  <MemoryActionButton
+                    handerShowComment={handerShowComment}
+                    likes={memory.likes}
+                    memoryIndex={memory.id}
+                    numComment={numComment}
+                  />
                 )}
+                <MemoryComments
+                  handerNumberComment={handerNumberComment}
+                  memoryIndex={memory.id}
+                  memory={memory}
+                  autoFc={autoFc}
+                />
               </SimpleModal>
             </>
           )}
@@ -430,16 +436,20 @@ export default function MemoryContent(props) {
         {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
           ''
         ) : (
-            <MemoryActionButton
-              handerShowComment={handerShowComment}
-              likes={memory.likes}
-              memoryIndex={memory.id}
-              numComment={numComment}
-            />
-          )}
-        {showComment && (
-          <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} numComment={numComment} />
+          <MemoryActionButton
+            handerShowComment={handerShowComment}
+            likes={memory.likes}
+            memoryIndex={memory.id}
+            numComment={numComment}
+          />
         )}
+        <MemoryComments
+          handerNumberComment={handerNumberComment}
+          memoryIndex={memory.id}
+          memory={memory}
+          numComment={numComment}
+          autoFc={autoFc}
+        />
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
