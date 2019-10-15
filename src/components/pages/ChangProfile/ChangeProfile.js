@@ -6,8 +6,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
+import { Grid, TextField } from '@material-ui/core';
 
-import { getTagsInfo, setTagsInfo, saveFileToIpfs } from '../../../helper';
+import { getTagsInfo, setTagsInfo, saveFileToIpfs, isAliasRegisted, registerAlias } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
@@ -16,6 +17,7 @@ import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthe
 import { HeaderAuthen } from '../../elements/Common';
 import { AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
+import { getAlias } from '../../../helper/utils';
 
 const useStyles = makeStyles(() => ({
   avatar: {
@@ -59,6 +61,7 @@ const PreviewContainter = styled.div`
     display: none;
     height: 60px;
     bottom: 0;
+    top: 60px;
     left: 0;
     right: 0;
     text-align: center;
@@ -77,30 +80,21 @@ const PreviewContainter = styled.div`
     margin: 10px;
     cursor: pointer;
   }
-  .imgPreview {
-    text-align: center;
-    height: 200px;
-    width: 200px;
-    border: 1px solid #eddada8f;
-    cursor: pointer;
-    img {
-      width: 200px;
-      height: 200px;
-      cursor: pointer;
-    }
-  }
 `;
 
 const RightProfile = styled.div`
-  margin-left: 8px;
+  padding: 10px;
+  margin: 5px;
 `;
 
 function ChangeProfile(props) {
-  const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth } = props;
+  const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth, privateKey } = props;
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [avatar, setAvatar] = useState('');
   const [cropFile, setCropFile] = useState('');
+  const [username, setUsername] = useState('');
+  const [hasUsname, setHasUsname] = useState('');
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
@@ -111,6 +105,10 @@ function ChangeProfile(props) {
 
   async function getData() {
     const reps = await getTagsInfo(address);
+    const getUsername = await getAlias(address);
+    if (getUsername) {
+      setHasUsname(getUsername || '');
+    }
     if (reps) {
       setFirstname(reps.firstname || '');
       setLastname(reps.lastname || '');
@@ -140,13 +138,23 @@ function ChangeProfile(props) {
             // respAvatar = await setTagsInfo(address, 'avatar', avatar);
             // accountInfo = { displayName };
           }
-          await Promise.all(listSetTags);
-          // Set to redux
-          setAccount(accountInfo);
-          // Show message infor
-          const message = 'Change profile success!';
-          enqueueSnackbar(message, { variant: 'success' });
-          history.push('/');
+
+          if (username) {
+            if (!privateKey) {
+              const message = 'Please login or Input recovery phrase';
+              enqueueSnackbar(message, { variant: 'error' });
+              history.push('/login');
+            } else listSetTags.push(registerAlias(username, address));
+          }
+          const change = await Promise.all(listSetTags);
+          if (change) {
+            // Set to redux
+            setAccount(accountInfo);
+            // Show message infor
+            const message = 'Change profile success!';
+            enqueueSnackbar(message, { variant: 'success' });
+            history.push('/');
+          }
         } catch (error) {
           console.log('error', error);
           const message = `An error occurred, please try again later`;
@@ -179,6 +187,17 @@ function ChangeProfile(props) {
     setAvatar(e.avaPreview);
   }
 
+  async function onChangeUserName(event) {
+    const nameValue = event.currentTarget.value;
+    const resp = await isAliasRegisted(nameValue);
+    if (!resp) {
+      setUsername(nameValue);
+    } else {
+      const message = `This username is already taken.`;
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  }
+
   const classes = useStyles();
 
   return (
@@ -203,6 +222,23 @@ function ChangeProfile(props) {
                   </div>
                 </PreviewContainter>
                 <RightProfile>
+                  {hasUsname ? (
+                    <Grid item>
+                      <TextField label="Username" value={hasUsname} disabled />
+                    </Grid>
+                  ) : (
+                    <TextValidator
+                      label="User Name"
+                      fullWidth
+                      onChange={onChangeUserName}
+                      name="username"
+                      validators={['required']}
+                      errorMessages={['This field is required']}
+                      margin="normal"
+                      value={username}
+                    />
+                  )}
+
                   <TextValidator
                     label="First Name"
                     fullWidth
