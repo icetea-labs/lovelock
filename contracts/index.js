@@ -1,4 +1,5 @@
-const { expect } = require(';');
+const { expect, validate } = require(';');
+const Joi = require('@hapi/joi')
 const { expectProposeOwners, getDataByIndex } = require('./helper.js')
 
 @contract
@@ -56,11 +57,43 @@ class LoveLock {
   @view getM2p = () => this.getState('m2p', {})
   setM2p = value => this.setState('m2p', value)
 
-  @transaction createPropose(s_content: string, receiver: address, s_info, bot_info) {
+  @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info) {
+
+    // validate data
+    
+    if (receiver !== this.botAddress) {
+      expect(bot_info == null, 'bot_info must be null for a regular lock.')
+    } else {
+      bot_info = validate(bot_info, Joi.object({
+        firstname: Joi.string(),
+        lastname: Joi.string(),
+        botAva: Joi.string(),
+        botReply: Joi.string().required()
+      }).label('bot_info').required().or('firstname', 'lastname'))
+    }
+
+    s_info = validate(s_info, Joi.object({
+      hash: Joi.array().min(0).max(1).items(Joi.string()),
+      date: Joi.date().timestamp().raw()
+    }))
+    s_info.date = s_info.date ?? block.timestamp
+
+    // cache some variables
     const sender = msg.sender;
     const isPrivate = false;
-    const defaultPropose = {
-      coverImg: s_info.hash[0] || '',
+
+    let pendingPropose = {};
+    // status: pending: 0, accept_propose: 1, cancel_propose: 2
+    if (receiver === this.botAddress) {
+      pendingPropose = { status: 1, type: 2 };
+    } else if (sender === receiver) {
+      pendingPropose = { status: 1, type: 1 };
+    } else {
+      pendingPropose = { status: 0, type: 0 };
+    }
+
+    pendingPropose = {
+      coverImg: s_info?.hash?.[0] ?? '',
       isPrivate,
       sender,
       s_content,
@@ -68,24 +101,11 @@ class LoveLock {
       receiver,
       r_content: '',
       r_info: '',
-      status: 0,
       memoryIndex: [],
       bot_info,
       memoryRelationIndex: '',
-      type: 0,
+      ...pendingPropose
     };
-
-    //expect(sender !== receiver, "Can't create owner propose.");
-
-    let pendingPropose = {};
-    // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === this.botAddress) {
-      pendingPropose = { ...defaultPropose, status: 1, type: 2 };
-    } else if (sender === receiver) {
-      pendingPropose = { ...defaultPropose, status: 1, type: 1 };
-    } else {
-      pendingPropose = { ...defaultPropose, status: 0, type: 0 };
-    }
 
     //new pending propose
     const proposes = this.getProposes()
