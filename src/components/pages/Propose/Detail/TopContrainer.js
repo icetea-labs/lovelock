@@ -46,7 +46,7 @@ const TopContainerBox = styled.div`
     }
     .fileInput {
       width: 100px;
-      height: 50px;
+      height: 30px;
       padding: 2px;
       margin: 10px;
       cursor: pointer;
@@ -78,7 +78,7 @@ const TopContainerBox = styled.div`
   }
 `;
 const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(25)};
+  margin-top: ${rem(15)};
   /* & > div:first-child {
     padding-right: ${rem(15)};
   } */
@@ -161,6 +161,7 @@ const SummaryCard = styled.div`
     img {
       width: 50px;
       height: 50px;
+      margin-bottom: 12px;
       object-fit: contain;
     }
     .summaryDay {
@@ -491,7 +492,7 @@ function TopContrainer(props) {
       </div>
       <SummaryCard>
         <div className="dayago">
-          <img src="/static/img/happy-copy.svg" alt="together" />
+          {topInfo.type !== 1 && <img src="/static/img/happy-copy.svg" alt="together" />}
           <div className="summaryDay">
             {topInfo.type === 1 ? 'JOURNAL' : <span>{diffDate === 0 ? 'First day' : `${diffDate} days`}</span>}
           </div>
