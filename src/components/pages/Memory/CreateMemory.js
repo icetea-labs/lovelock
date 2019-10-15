@@ -192,23 +192,45 @@ export default function CreateMemory(props) {
     setFilesBuffer(value);
   }
 
-  async function onSubmitEditor(e) {
+  async function onSubmitEditor() {
+    let blocks = editorContent.blocks;
+    if (validateEditorContent()) {
+      for (let i in blocks) {
+        if (blocks[i].type == 'image') {
+          let blob = await fetch(blocks[i].data.url).then(r => r.blob());
+          let file = new File([blob], 'name');
+          let hash = await saveFileToIpfs([file]);
+          blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
+        }
+      }
+      let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
+      let submitContent = await saveFileToIpfs([buffer])
+      handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
+    }else{
+      let message = 'Please enter memory content or add a photo.'
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  }
+
+  function validateEditorContent() {
     let blocks = editorContent.blocks;
     for (let i in blocks) {
       if (blocks[i].type == 'image') {
-        let blob = await fetch(blocks[i].data.url).then(r => r.blob());
-        let file = new File([blob], 'name');
-        let hash = await saveFileToIpfs([file]);
-        blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
+        return true
+      } else if (blocks[i].text.trim() != '') {
+        return true
       }
     }
-    let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
-    let submitContent = await saveFileToIpfs([buffer])
-    handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
+    return false
   }
 
   function onChangeEditor(value) {
     setEditorContent(value);
+  }
+
+  function closeEditorModal() {
+    setOpenModal(false)
+    setGrayLayout(false)
   }
 
   async function handleShareMemory(advancedMemory) {
@@ -328,10 +350,10 @@ export default function CreateMemory(props) {
             )}
             <SimpleModal
               open={isOpenModal}
-              handleClose={() => { setOpenModal(false); setGrayLayout(false) }}
+              handleClose={closeEditorModal}
               handleSumit={onSubmitEditor}
               closeText="Cancel"
-              title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} />}
+              title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} handleClose={closeEditorModal} />}
             >
               <Editor onChange={value => onChangeEditor(value)} />
             </SimpleModal>
