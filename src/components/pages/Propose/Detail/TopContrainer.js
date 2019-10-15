@@ -44,6 +44,13 @@ const TopContainerBox = styled.div`
       opacity: 0;
       cursor: pointer;
     }
+    .fileInput {
+      width: 100px;
+      height: 50px;
+      padding: 2px;
+      margin: 10px;
+      cursor: pointer;
+    }
     .MuiSvgIcon-root {
       position: relative;
       overflow: hidden;
@@ -217,6 +224,9 @@ const useStyles = makeStyles(theme => ({
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
     },
   },
+  changeCoverTitle: {
+    marginTop: '4px',
+  },
   title: {
     display: 'none',
     color: '#fff',
@@ -288,6 +298,7 @@ function TopContrainer(props) {
         const moreProInfo = await addInfoToProposes(proInfo);
         // console.log('moreProInfo', moreProInfo);
         setTopInfo(moreProInfo);
+        props.getTopInfo(moreProInfo);
         setMemoryRelationIndex(proInfo.memoryRelationIndex);
       } catch (e) {
         console.log('loadProposes', e);
@@ -297,6 +308,7 @@ function TopContrainer(props) {
   }
 
   async function getNumLikes() {
+    if (!memoryRelationIndex || memoryRelationIndex === -1) return;
     // console.log('getNumLikes', memoryRelationIndex);
     const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
     const num = Object.keys(data).length;
@@ -454,10 +466,10 @@ function TopContrainer(props) {
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg} title="lock image">
             <Button className={classes.icon}>
-              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
               <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <Typography className={classes.title} noWrap>
-                Change lock image
+              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <Typography className={classes.changeCoverTitle} noWrap>
+                Change
               </Typography>
             </Button>
             <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
@@ -470,10 +482,10 @@ function TopContrainer(props) {
         ) : (
           <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverimg} title="lock image">
             <Button className={classes.icon}>
-              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
               <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <Typography className={classes.title} noWrap>
-                Change lock image
+              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <Typography className={classes.changeCoverTitle} noWrap>
+                Change
               </Typography>
             </Button>
           </CardMedia>

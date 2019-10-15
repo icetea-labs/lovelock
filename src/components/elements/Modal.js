@@ -1,6 +1,5 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
 import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
@@ -20,48 +19,56 @@ const useStyles = makeStyles(theme => ({
 	title: {
 		fontSize: 22,
 		marginBottom: 30,
+		color: '#616161',
 	},
 	wrapper: {
 		overflow: 'auto',
-		zIndex: '1000!important'
+		zIndex: '1000',
+		position: 'fixed',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
 	},
 	footer: {
 		textAlign: 'right',
 		position: 'absolute',
-    bottom: 30,
-    right: 100,
+		bottom: 30,
+		right: 100,
 	},
 	closeBtn: {
 		marginLeft: 10,
 	},
 	closeIcon: {
 		position: 'absolute',
-    right: '7%',
-    top: 24,
-    cursor: 'pointer',
-    fontSize: 40,
+		right: '7%',
+		top: 24,
+		cursor: 'pointer',
+		fontSize: 40,
 	},
 	subtitle: {
 		marginTop: -15,
-    marginBottom: 50,
-    fontSize: '0.8em',
-    opacity: 0.5,
+		marginBottom: 50,
+		fontSize: '0.8em',
+		opacity: 0.5,
 	}
 }));
 
 export default function SimpleModal(props) {
 	const classes = useStyles();
+
+	if (props.open) {
+		document.body.style.overflow = 'hidden'
+	} else {
+		document.body.style.overflow = 'auto'
+		return null
+	}
+
 	return (
-		<Modal
-			aria-labelledby="simple-modal-title"
-			aria-describedby="simple-modal-description"
-			open={props.open}
-			onClose={props.handleClose}
-			className={classes.wrapper}
-		>
+		<div className={classes.wrapper}>
 			<div className={classes.paper}>
 				<div className={classes.title}>{props.title}</div>
-				{props.subtitle && 
+				{props.subtitle &&
 					<div className={classes.subtitle}>{props.subtitle}</div>
 				}
 				<div className={classes.closeIcon} onClick={props.handleClose}>&times;</div>
@@ -72,11 +79,13 @@ export default function SimpleModal(props) {
 							Publish
             </Button>
 					}
-					<Button variant="contained" className={classes.closeBtn} onClick={props.handleClose}>
-						{props.closeText || 'Cancel'}
-          </Button>
+					{props.closeText &&
+						<Button variant="contained" className={classes.closeBtn} onClick={props.handleClose}>
+							{props.closeText}
+						</Button>
+					}
 				</div>
 			</div>
-		</Modal>
+		</div>
 	);
 }

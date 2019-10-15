@@ -25,15 +25,15 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { proIndex, memorydata, memoryList, setNeedAuth, setMemory, privateKey } = props;
-  const [loading, setLoading] = useState(true);
+  const { memorydata, memoryList, setNeedAuth, setMemory, privateKey } = props;
+  const [loading, setLoading] = useState(false);
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
   const { enqueueSnackbar } = useSnackbar();
 
   const classes = useStyles();
   useEffect(() => {
-    prepareMemory();
+    if (memorydata.length > 0) prepareMemory();
   }, [memorydata]);
 
   function prepareMemory() {
@@ -109,9 +109,8 @@ function MemoryContainer(props) {
       );
     });
   }
-  // console.log('memoryList', memoryList);
   return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={proIndex} memory={memory} />;
+    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} />;
   });
 }
 
