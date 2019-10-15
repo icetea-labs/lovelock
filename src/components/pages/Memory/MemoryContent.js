@@ -70,21 +70,23 @@ const useStyles = makeStyles(theme => ({
   blogImgWrp: {
     position: 'relative',
     display: 'block',
-    padding: '20px',
+    padding: '0 0 20px',
     cursor: 'pointer',
   },
   blogTitleImg: {
     position: 'absolute',
-    top: 33,
-    left: 33,
-    padding: '2px 7px',
-    color: '#fff',
+    top: 12,
+    left: 12,
+    padding: '3px 10px',
+    color: '#f8f8f8',
   },
   blogFirstLine: {
     display: 'block',
     textAlign: 'center',
     marginTop: 20,
     color: '#fff',
+    fontSize: 18,
+    textTransform: 'uppercase'
   },
   relationship: {
     // color: theme.color.primary,
@@ -303,7 +305,7 @@ export default function MemoryContent(props) {
                   return (
                     <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkMuted }} onClick={() => openMemory(memory.id)}>
                       <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}> 
-                        <FlashOnIcon className={classes.icon} /> BLOG
+                        BLOG
                       </span>
                       <img src={firstImg} />
                       {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
