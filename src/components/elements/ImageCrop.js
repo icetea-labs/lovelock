@@ -154,7 +154,7 @@ export default function ImageCrop(props) {
         <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
           <Container key={2} isCoverImg={isCoverImg}>
             <PuTitle>
-              <span className="title">Create Image</span>
+              <span className="title">Crop Image</span>
               <IconButton onClick={close}>
                 <i className="material-icons">close</i>
               </IconButton>
@@ -191,7 +191,7 @@ export default function ImageCrop(props) {
                   </ValidatorForm>
                   <ValidatorForm onSubmit={acceptCrop}>
                     <ButtonPro className="send" type="submit">
-                      Accept
+                      Crop
                     </ButtonPro>
                   </ValidatorForm>
                 </div>
