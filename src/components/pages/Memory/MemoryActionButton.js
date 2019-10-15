@@ -139,7 +139,7 @@ export default function MemoryActionButton(props) {
       <Button className={classes.button} onClick={handerShowComment}>
         {/* <CommentIcon fontSize="small" className={classes.rightIcon} /> */}
         {numComment > 0 && (numComment === 1 ? `${numComment} Comment` : `${numComment} Comments`)}
-        {numComment === 0 && 'Comment'}
+        {numComment === 0 && '0 Comment'}
       </Button>
       {/* <Button className={classes.button}>
         <ShareIcon fontSize="small" className={classes.rightIcon} />

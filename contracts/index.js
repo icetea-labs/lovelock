@@ -1,10 +1,9 @@
 const { expect, validate } = require(';');
-const Joi = require('@hapi/joi')
-const { expectProposeOwners, getDataByIndex } = require('./helper.js')
+const Joi = require('@hapi/joi');
+const { expectProposeOwners, getDataByIndex } = require('./helper.js');
 
 @contract
 class LoveLock {
-
   // crush bot
   @view botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
 
@@ -19,18 +18,18 @@ class LoveLock {
   //   status: 0,
   //   memoryIndex: [],
   // },
-  @view getProposes = () => this.getState('proposes', [])
-  setProposes = value => this.setState('proposes', value)
+  @view getProposes = () => this.getState('proposes', []);
+  setProposes = value => this.setState('proposes', value);
   getPropose = index => {
-    const proposes = this.getProposes()
-    return [getDataByIndex(proposes, index), proposes]
-  }
+    const proposes = this.getProposes();
+    return [getDataByIndex(proposes, index), proposes];
+  };
 
   // mapping: address to propose
   // 1:n { 'address':[1,2,3...] }
-  @view getA2p = () => this.getState('a2p', {})
-  setA2p = value => this.setState('a2p', value)
-  
+  @view getA2p = () => this.getState('a2p', {});
+  setA2p = value => this.setState('a2p', value);
+
   // {
   //   isPrivate: false,
   //   sender: '',
@@ -40,43 +39,43 @@ class LoveLock {
   //   likes: [{ sender: {type} }],
   //   comments: [{ sender: '', content: '', info: '' }],
   // },
-  @view getMemories = () => this.getState('memories', [])
-  setMemories = value => this.setState('memories', value)
+  @view getMemories = () => this.getState('memories', []);
+  setMemories = value => this.setState('memories', value);
   getMemory = index => {
-    const memories = this.getMemories()
-    return [getDataByIndex(memories, index), memories]
-  }
+    const memories = this.getMemories();
+    return [getDataByIndex(memories, index), memories];
+  };
 
   // mapping: propose to memory
   // 1:n  { 'proindex':[1,2,3...] }
-  @view getP2m = () => this.getState('p2m', {})
-  setP2m = value => this.setState('p2m', value)
+  @view getP2m = () => this.getState('p2m', {});
+  setP2m = value => this.setState('p2m', value);
 
   // mapping: memory to propose
   // 1:1  { 'memoryindex':'proindex' }
-  @view getM2p = () => this.getState('m2p', {})
-  setM2p = value => this.setState('m2p', value)
+  @view getM2p = () => this.getState('m2p', {});
+  setM2p = value => this.setState('m2p', value);
 
   @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info) {
 
     // validate data
     
     if (receiver !== this.botAddress) {
-      expect(bot_info == null, 'bot_info must be null for a regular lock.')
+      expect(bot_info == null, 'bot_info must be null for a regular lock.');
     } else {
       bot_info = validate(bot_info, Joi.object({
         firstname: Joi.string(),
         lastname: Joi.string(),
         botAva: Joi.string(),
         botReply: Joi.string().required()
-      }).label('bot_info').required().or('firstname', 'lastname'))
+      }).label('bot_info').required().or('firstname', 'lastname'));
     }
 
     s_info = validate(s_info, Joi.object({
       hash: Joi.array().min(0).max(1).items(Joi.string()),
       date: Joi.date().timestamp().raw()
-    }))
-    s_info.date = s_info.date ?? block.timestamp
+    }));
+    s_info.date = s_info.date ?? block.timestamp;
 
     // cache some variables
     const sender = msg.sender;
@@ -93,11 +92,11 @@ class LoveLock {
     }
 
     pendingPropose = {
-      coverImg: s_info?.hash?.[0] ?? '',
+      coverImg: s_info.hash?.[0] ?? '',
       isPrivate,
       sender,
       s_content,
-      s_info,
+      s_info: { date: s_info.date }, // no need hash
       receiver,
       r_content: '',
       r_info: '',
@@ -108,17 +107,21 @@ class LoveLock {
     };
 
     //new pending propose
-    const proposes = this.getProposes()
+    const proposes = this.getProposes();
     const index = proposes.push(pendingPropose) - 1;
-    this.setProposes(proposes)
+    this.setProposes(proposes);
+
+    if (receiver === this.botAddress || sender === receiver) {
+      this._addMemory(index, false, '', { hash: [], date: Date.now() }, 1, [true]);
+    }
 
     // map address to propose
-    const a2p = this.getA2p()
+    const a2p = this.getA2p();
     if (!a2p[sender]) a2p[sender] = [];
     a2p[sender].push(index);
     if (!a2p[receiver]) a2p[receiver] = [];
     a2p[receiver].push(index);
-    this.setA2p(a2p)
+    this.setA2p(a2p);
 
     //emit Event
     const log = { ...pendingPropose, id: index };
@@ -138,13 +141,13 @@ class LoveLock {
     }
 
     // save proposes
-    this.setProposes(proposes)
+    this.setProposes(proposes);
 
     // const log = Object.assign({}, like, { index });
     // this.emitEvent('addLike', { by: msg.sender, log }, ['by']);
   }
 
-  @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes
+  @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
     const ret = this._confirmPropose(proIndex, r_content, 1);
@@ -159,18 +162,18 @@ class LoveLock {
     if (!address) address = msg.sender;
     const arrPro = this.getA2p()[address] || [];
     let resp = [];
-    const proposes = this.getProposes()
+    const proposes = this.getProposes();
     arrPro.forEach(index => {
       let pro = getDataByIndex(proposes, index);
       pro = Object.assign({}, pro, { id: index });
       resp.push(pro);
     });
-    resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse)
+    resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
     return resp;
   }
 
   @view getProposeByIndex(index: number) {
-    const [pro] = this.getPropose(index)
+    const [pro] = this.getPropose(index);
     let resp = [];
     if (pro && pro.isPrivate) {
       expectProposeOwners(pro, "Can't get propose.");
@@ -181,7 +184,7 @@ class LoveLock {
 
   @view getMemoriesByProIndex(proIndex: number) {
     const memoryPro = this.getP2m()[proIndex] || [];
-    const memories = this.getMemories()
+    const memories = this.getMemories();
     return memoryPro.reduce((res, index) => {
       const mem = getDataByIndex(memories, index);
       res.push({ ...mem, id: index });
@@ -202,8 +205,14 @@ class LoveLock {
     return res;
   }
 
-  _addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0, [isFirstMemory, pro, proposes ] = []) {
-
+  _addMemory(
+    proIndex: number,
+    isPrivate: boolean,
+    content: string,
+    info,
+    type = 0,
+    [isFirstMemory, pro, proposes] = []
+  ) {
     if (!pro || !proposes) {
       [pro, proposes] = this.getPropose(proIndex);
     }
@@ -211,7 +220,7 @@ class LoveLock {
     expect(msg.sender === pro.receiver || msg.sender === pro.sender, "Can't add memory. You must be owner propose.");
     const sender = msg.sender;
     const memory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
-    
+
     //new memories
     if (type === 1) {
       memory.receiver = pro.sender;
@@ -219,7 +228,7 @@ class LoveLock {
 
     const memories = this.getMemories();
     const memIndex = memories.push(memory) - 1;
-    this.setMemories(memories)
+    this.setMemories(memories);
 
     // map index propose to index memory
     const p2m = this.getP2m();
@@ -236,11 +245,11 @@ class LoveLock {
     pro.memoryIndex.push(memIndex);
 
     if (isFirstMemory) {
-      pro.memoryRelationIndex = memIndex
+      pro.memoryRelationIndex = memIndex;
     }
 
     // save the proposes
-    this.setProposes(proposes)
+    this.setProposes(proposes);
 
     //emit Event
     const log = { ...memory, id: memIndex };
@@ -250,13 +259,13 @@ class LoveLock {
 
   // info { img:Array, location:string, date:string }
   @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0) {
-    return this._addMemory(proIndex, isPrivate, content, info, type)
+    return this._addMemory(proIndex, isPrivate, content, info, type);
   }
 
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const sender = msg.sender;
-    const [memo, memories] = this.getMemory(memoIndex)
+    const [memo, memories] = this.getMemory(memoIndex);
     if (memo.likes[sender]) {
       delete memo.likes[sender];
     } else {
@@ -269,7 +278,7 @@ class LoveLock {
     this.emitEvent('addLike', { by: msg.sender, memoIndex }, ['by', 'memoIndex']);
   }
 
-  @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes
+  @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
 
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
@@ -289,7 +298,7 @@ class LoveLock {
   //private function
   _confirmPropose(index: number, r_content: string, status: number, saveFlag: boolean) {
     const sender = msg.sender;
-    const [pro, proposes] = this.getPropose(index)
+    const [pro, proposes] = this.getPropose(index);
     // status: pending: 0, accept_propose: 1, cancel_propose: 2
     switch (status) {
       case 1:
@@ -302,28 +311,28 @@ class LoveLock {
     Object.assign(pro, { r_content, status });
 
     if (saveFlag) {
-      this.setProposes(proposes)
+      this.setProposes(proposes);
     }
 
     //emit Event
-    const log = { ...pro, d: index };
+    const log = { ...pro, id: index };
     this.emitEvent('confirmPropose', { by: sender, log }, ['by']);
 
-    return [pro, proposes]
+    return [pro, proposes];
   }
 
   @transaction changeCoverImg(index: number, coverImg: string) {
-    const [pro, proposes] = this.getPropose(index)
+    const [pro, proposes] = this.getPropose(index);
     const sender = msg.sender;
     expect(sender === pro.receiver || sender === pro.sender, 'Permission deny. Can not change.');
 
-    pro.coverImg = coverImg
-    
+    pro.coverImg = coverImg;
+
     // save proposes
-    this.setProposes(proposes)
+    this.setProposes(proposes);
 
     //emit Event
-    const log = { ...pro, id: index }
+    const log = { ...pro, id: index };
     this.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
   }
 }
