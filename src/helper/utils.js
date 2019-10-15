@@ -398,7 +398,7 @@ export const wallet = {
   },
   recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.REGULAR_ACCOUNT }) {
     const typeTMP =
-      options.type === AccountType.REGULAR_ACCOUNT ? AccountType.REGULAR_ACCOUNT : AccountType.BANK_ACCOUNT;
+      options.type === AccountType.BANK_ACCOUNT ? AccountType.BANK_ACCOUNT : AccountType.REGULAR_ACCOUNT;
     let privateKey = '';
     let address = '';
     let indexBase = '';
