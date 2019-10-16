@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-import TopContrainer from './TopContrainer';
+import TopContrainer from './TopContainer';
 import LeftContrainer from './LeftContainer';
-import RightContrainer from './RightContrainer';
+import RightContrainer from './RightContainer';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};

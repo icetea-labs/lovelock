@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Dante from 'Dante2';
 import { makeStyles } from '@material-ui/core/styles';
+import mediumZoom from 'medium-zoom';
 
 const useStyles = makeStyles(theme => ({
 	wrapper: {
@@ -19,18 +20,40 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function Editor(props) {
+	const readonly = !!props.read_only
 	const classes = useStyles();
 
 	useEffect(() => {
-		let [input] = document.getElementsByClassName('public-DraftEditor-content')
-		if (input) input.focus()
+		if (readonly) {
+			setTimeout(() => {
+				const images = document.querySelectorAll('.graf-image')
+				if (images.length) {
+					mediumZoom(images)
+				}
+			}, 500)
+		} else {
+			let [input] = document.getElementsByClassName('public-DraftEditor-content')
+			if (input) input.focus()
+		}
 	});
+
+	const configWidgets = () => {
+
+		const ws = [...Dante.defaultProps.widgets]
+		const imgBlock = ws[0]
+
+		// remove the border when item is selected in view mode
+		imgBlock.selected_class = readonly ? 'is-selected' : 'is-selected is-mediaFocused'
+
+		return ws
+	}
 
 	return (
 		<div className={classes.wrapper}>
 			<Dante
-				content={props.initContent ? props.initContent : false}
-				read_only={props.read_only ? true : false}
+				content={props.initContent ? props.initContent : null}
+				read_only={readonly}
+				widgets={configWidgets()}
 				onChange={(Editor) => {
 					Editor.relocateTooltips()
 					if (props.onChange) {
