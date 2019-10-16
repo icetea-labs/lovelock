@@ -286,13 +286,13 @@ export default function MemoryContent(props) {
       let content = JSON.parse(memoryContent)
       if (content) {
         let blocks = content.blocks
-        let firstImg = null;
-        let firstLine = null;
+        let firstImg = null
+        let firstLine = null
         for (let i in blocks) {
           if (!firstImg && blocks[i].type === 'image') {
             firstImg = blocks[i].data.url
           }
-          if (!firstLine && blocks[i].type !== 'image') {
+          if (!firstLine) {
             firstLine = blocks[i].text
             if (firstLine.length > 200) {
               firstLine = firstLine.slice(0, 200) + '…'
@@ -300,23 +300,19 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break
         }
-
+        firstImg = firstImg ? firstImg : '/static/img/memory-default.png'
         return (
-          <>
-            {firstImg &&
-              <Palette src={firstImg}>
-                {({ data }) => (
-                  <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkVibrant }} onClick={() => openMemory(memory.id)}>
-                    <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
-                      BLOG
-                      </span>
-                    <img src={firstImg} className={classes.blogImgTimeline} />
-                    {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
-                  </span>
-                )}
-              </Palette>
-            }
-          </>
+          <Palette src={firstImg}>
+            {({ data }) => (
+              <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkVibrant }} onClick={() => openMemory(memory.id)}>
+                <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
+                  BLOG
+                </span>
+                <img src={firstImg} className={classes.blogImgTimeline} />
+                {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
+              </span>
+            )}
+          </Palette>
         )
       }
     } catch (e) { }
