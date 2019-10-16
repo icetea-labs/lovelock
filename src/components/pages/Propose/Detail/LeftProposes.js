@@ -47,12 +47,43 @@ export default function LeftProposes(props) {
       <CardHeader
         avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
         title={loading ? <Skeleton height={6} width="80%" /> : ''}
-        subheader={loading ? <Skeleton height={6} width="80%" /> : 'Not yet'}
+        subheader={loading ? <Skeleton height={6} width="80%" /> : 'None'}
       />
     );
   }
-  return proposes.map(item => {
+  const getInfo = item => {
+    switch (item.type) {
+      case 1:
+        return {
+          name: 'My Journal',
+          nick: 'journal',
+          icon: 'waves'
+        }
+      case 2:
+        return {
+          name: item.name,
+          nick: 'crush',
+          icon: 'done'
+        }
+      default:
+        return {
+          name: item.name,
+          nick: item.nick,
+          icon: 'done_all'
+        }
+    }
+  }
+  // display on following order
+  // journal -> crush -> lock
+  // if same type, bigger ID display first
+  const compare = (p1, p2) => {
+    const v1 = Number(String(p1.type || 0) + p1.id)
+    const v2 = Number(String(p2.type || 0) + p1.id)
+    return v2 - v1
+  }
+  return proposes.sort(compare).map(item => {
     // console.log('item', item);
+    const info = getInfo(item)
     return (
       <CardHeader
         key={item.id}
@@ -65,11 +96,11 @@ export default function LeftProposes(props) {
           props.handlerSelect(item.id);
         }}
         action={
-          <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
+          <BoxAction><Icon type={info.icon} /></BoxAction>
         }
-        avatar={<AvatarPro alt="" hash={item.avatar} />}
-        title={item.type === 1 ? 'My Journal' : item.name}
-        subheader={item.type === (1 || 2) ? '' : item.nick}
+        avatar={<AvatarPro alt={info.name} hash={item.avatar} />}
+        title={info.name}
+        subheader={info.nick}
       />
     );
   });

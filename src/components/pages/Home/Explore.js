@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
-import LeftContrainer from '../Propose/Detail/LeftContrainer';
+import LeftContrainer from '../Propose/Detail/LeftContainer';
 import { callView, getTagsInfo } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import TopContrainer from './TopContrainer';
-import LeftContrainer from './LeftContrainer';
+import LeftContrainer from './LeftContainer';
 import RightContrainer from './RightContrainer';
 
 const BannerContainer = styled.div`
