@@ -48,19 +48,19 @@ const ShadowBox = styled.div`
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
-const TagBox = styled.div`
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  .tagName {
-    color: #8250c8;
-    margin-right: ${rem(7)};
-    font-size: ${rem(12)};
-    :hover {
-      cursor: pointer;
-    }
-  }
-`;
+// const TagBox = styled.div`
+//   width: 100%;
+//   display: flex;
+//   flex-wrap: wrap;
+//   .tagName {
+//     color: #8250c8;
+//     margin-right: ${rem(7)};
+//     font-size: ${rem(12)};
+//     :hover {
+//       cursor: pointer;
+//     }
+//   }
+// `;
 
 function LeftContainer(props) {
   const {
@@ -144,7 +144,7 @@ function LeftContainer(props) {
   function eventConfirmPropose(data) {
     confirmPropose(data.log);
     if (address === data.log.sender) {
-      const message = 'Your lock has been approved.';
+      const message = 'Your lock request has been accepted.';
       enqueueSnackbar(message, { variant: 'info' });
     }
   }
@@ -200,7 +200,7 @@ function LeftContainer(props) {
     return clonePro;
   }
 
-  function renderTag() {
+  //function renderTag() {
     // const { tag } = state;
     // return tag.map((item, index) => {
     //   return (
@@ -209,7 +209,7 @@ function LeftContainer(props) {
     //     </span>
     //   );
     // });
-  }
+  //}
 
   return (
     <React.Fragment>
@@ -219,7 +219,7 @@ function LeftContainer(props) {
             <Icon type="add" />
             New Lock
           </LinkPro>
-          <div className="title">Accepted lock</div>
+          <div className="title">My lock</div>
           <div>
             <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} />
           </div>
@@ -227,8 +227,6 @@ function LeftContainer(props) {
           <div>
             <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} />
           </div>
-          <div className="title">Popular Tag</div>
-          <TagBox>{renderTag(tag)}</TagBox>
         </ShadowBox>
       </LeftBox>
       {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}

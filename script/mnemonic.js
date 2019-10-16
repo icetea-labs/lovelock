@@ -17,7 +17,7 @@ exports.toPkey = mnemonic => {
             throw new Error('Too many tries deriving regular account from seed.')
         }
         pkey = hdkey.deriveChild(i)
-        const { address } = ecc.toPubKeyAndAddress(privateKey)
+        const { address } = ecc.toPubKeyAndAddress(pkey)
         found = codec.isRegularAddress(address)
     }
 

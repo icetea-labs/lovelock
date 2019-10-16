@@ -7,8 +7,8 @@ const LOCK_STATUS_ACCEPTED = 1;
 const LOCK_STATUS_DENIED = 2;
 
 const LOCK_TYPE_COUPLE = 0;
-const LOCK_TYPE_JOURNAL = 1;
-const LOCK_TYPE_CRUSH = 2;
+const LOCK_TYPE_CRUSH = 1;
+const LOCK_TYPE_JOURNAL = 2;
 
 @contract
 class LoveLock {
