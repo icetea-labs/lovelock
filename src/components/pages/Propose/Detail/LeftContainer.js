@@ -62,7 +62,7 @@ const TagBox = styled.div`
   }
 `;
 
-function LeftContrainer(props) {
+function LeftContainer(props) {
   const {
     proposes,
     setPropose,
@@ -279,5 +279,5 @@ export default withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-  )(LeftContrainer)
+  )(LeftContainer)
 );

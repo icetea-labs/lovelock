@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-const { expect } = require(';');
-const { expectProposeOwners, getDataByIndex } = require('./helper.js');
-=======
 const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
 const { expectProposeOwners, getDataByIndex } = require('./helper.js');
@@ -13,7 +9,6 @@ const LOCK_STATUS_DENIED = 2;
 const LOCK_TYPE_COUPLE = 0;
 const LOCK_TYPE_JOURNAL = 1;
 const LOCK_TYPE_CRUSH = 2;
->>>>>>> 868d95e79b60bc4cd1b9f150f01db8c603d31ec4
 
 @contract
 class LoveLock {
@@ -70,30 +65,43 @@ class LoveLock {
   setM2p = value => this.setState('m2p', value);
 
   @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
-
     // cache some variables
     const sender = msg.sender;
     const isPrivate = false;
-    const isJournal = sender === receiver
-    const isCrush = receiver === this.botAddress
+    const isJournal = sender === receiver;
+    const isCrush = receiver === this.botAddress;
 
     // validate data
-    
+
     if (!isCrush) {
       expect(bot_info == null, 'bot_info must be null for a regular lock.');
     } else {
-      bot_info = validate(bot_info, Joi.object({
-        firstname: Joi.string(),
-        lastname: Joi.string(),
-        botAva: Joi.string(),
-        botReply: Joi.string().required()
-      }).label('bot_info').required().or('firstname', 'lastname'));
+      bot_info = validate(
+        bot_info,
+        Joi.object({
+          firstname: Joi.string(),
+          lastname: Joi.string(),
+          botAva: Joi.string(),
+          botReply: Joi.string().required(),
+        })
+          .label('bot_info')
+          .required()
+          .or('firstname', 'lastname')
+      );
     }
 
-    s_info = validate(s_info, Joi.object({
-      hash: Joi.array().min(0).max(1).items(Joi.string()),
-      date: Joi.date().timestamp().raw()
-    }));
+    s_info = validate(
+      s_info,
+      Joi.object({
+        hash: Joi.array()
+          .min(0)
+          .max(1)
+          .items(Joi.string()),
+        date: Joi.date()
+          .timestamp()
+          .raw(),
+      })
+    );
     s_info.date = s_info.date ?? block.timestamp;
 
     let pendingPropose = {};
@@ -117,38 +125,16 @@ class LoveLock {
       memoryIndex: [],
       bot_info,
       memoryRelationIndex: '',
-      ...pendingPropose
+      ...pendingPropose,
     };
 
-<<<<<<< HEAD
-    //expect(sender !== receiver, "Can't create owner propose.");
-
-    let pendingPropose = {};
-    // status: pending: 0, accept_propose: 1, cancel_propose: 2
-    if (receiver === this.botAddress) {
-      // type = 2: 
-      pendingPropose = { ...defaultPropose, status: 1, type: 2 };
-    } else if (sender === receiver) {
-      // type = 1
-      pendingPropose = { ...defaultPropose, status: 1, type: 1 };
-    } else {
-      // type = 0
-      pendingPropose = { ...defaultPropose, status: 0, type: 0 };
-    }
-
-=======
->>>>>>> 868d95e79b60bc4cd1b9f150f01db8c603d31ec4
     //new pending propose
     const proposes = this.getProposes();
     const index = proposes.push(pendingPropose) - 1;
     this.setProposes(proposes);
 
-<<<<<<< HEAD
-    if (receiver === this.botAddress || sender === receiver) {
-=======
     // create the first memory for auto-accepted lock
     if (pendingPropose.status === LOCK_STATUS_ACCEPTED) {
->>>>>>> 868d95e79b60bc4cd1b9f150f01db8c603d31ec4
       this._addMemory(index, false, '', { hash: [], date: Date.now() }, 1, [true]);
     }
 
@@ -254,7 +240,7 @@ class LoveLock {
       [pro, proposes] = this.getPropose(proIndex);
     }
 
-    expectProposeOwners(pro, 'Cannot add memory')
+    expectProposeOwners(pro, 'Cannot add memory');
     const sender = msg.sender;
     const memory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
 

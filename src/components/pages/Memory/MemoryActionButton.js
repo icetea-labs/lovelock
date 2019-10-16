@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CardActions, Button, Typography } from '@material-ui/core';
-import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import ShareIcon from '@material-ui/icons/Share';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 
@@ -95,9 +93,9 @@ export default function MemoryActionButton(props) {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
       if (error) {
-        const message = 'Watch addlike error';
+        console.error('watchAddlike', error);
+        const message = 'Watch new like error';
         enqueueSnackbar(message, { variant: 'error' });
-        console.log('watchAddlike', error);
       } else {
         // console.log('watchAddlike', result);
         getNumLikes();

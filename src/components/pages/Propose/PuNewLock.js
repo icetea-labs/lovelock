@@ -230,7 +230,7 @@ class PuNewLock extends React.Component {
         return { nick, address: result[key].address };
       });
     } catch (err) {
-      console.log(tryStringifyJson(err));
+      console.error(tryStringifyJson(err));
     }
 
     // people = people.filter(person => person.address !== props.address);
@@ -418,10 +418,7 @@ class PuNewLock extends React.Component {
         if (cropFile) {
           botAva = await saveFileToIpfs(cropFile);
         }
-        const info = {
-          date,
-          hash,
-        };
+        const info = { date, hash };
         const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
@@ -436,7 +433,7 @@ class PuNewLock extends React.Component {
           return;
         }
 
-        let botInfo = {};
+        let botInfo = null;
         if (checked) {
           if (!firstname) {
             message = 'Please enter your crush first name.';
@@ -462,12 +459,7 @@ class PuNewLock extends React.Component {
             setLoading(false);
             return;
           }
-          botInfo = {
-            firstname,
-            lastname,
-            botAva,
-            botReply,
-          };
+          botInfo = { firstname, lastname, botAva, botReply };
         }
 
         const params = [promiseStm, partner, info, botInfo];
@@ -483,8 +475,8 @@ class PuNewLock extends React.Component {
           }
         }, 50);
       } catch (err) {
-        console.log(err);
-        message = 'an error occurred while sending, please check the inner exception for details';
+        console.error(err);
+        message = 'An error occurred while sending, please check the inner exception for details';
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
       }

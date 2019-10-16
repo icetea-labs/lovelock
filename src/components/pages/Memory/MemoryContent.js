@@ -2,16 +2,17 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
-import Link from '@material-ui/core/Link';
+// import Link from '@material-ui/core/Link';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+// import FlashOnIcon from '@material-ui/icons/FlashOn';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 
+import { Palette } from 'react-palette';
 import { TimeWithFormat, decodeWithPublicKey, callView, getTagsInfo } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -19,7 +20,6 @@ import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
-import { Palette } from 'react-palette';
 
 const useStylesFacebook = makeStyles({
   root: {

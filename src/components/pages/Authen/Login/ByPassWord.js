@@ -110,7 +110,7 @@ function ByPassWord(props) {
               }, 1);
             });
         } catch (error) {
-          console.log('error', error);
+          console.error('error', error);
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
