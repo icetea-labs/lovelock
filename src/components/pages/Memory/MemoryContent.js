@@ -69,22 +69,28 @@ const useStyles = makeStyles(theme => ({
   blogImgWrp: {
     position: 'relative',
     display: 'block',
-    padding: '0 0 20px',
+    padding: '0 0 16px',
     cursor: 'pointer',
+    '&:hover $blogTitleImg, &:hover $blogFirstLine': {
+      color: '#fff'
+    }
   },
   blogTitleImg: {
     position: 'absolute',
     top: 12,
     left: 12,
     padding: '3px 10px',
-    color: '#f8f8f8',
+    color: '#f5f5f5',
+  },
+  blogImgTimeline: {
+    width: '100%',
   },
   blogFirstLine: {
     display: 'block',
     textAlign: 'center',
-    marginTop: 20,
-    color: '#fff',
-    fontSize: 18,
+    marginTop: 16,
+    color: '#f5f5f5',
+    fontSize: 16,
     textTransform: 'uppercase'
   },
   relationship: {
@@ -289,7 +295,7 @@ export default function MemoryContent(props) {
           if (!firstLine && blocks[i].type !== 'image') {
             firstLine = blocks[i].text
             if (firstLine.length > 200) {
-              firstLine = firstLine.slice(0, 200) + '...'
+              firstLine = firstLine.slice(0, 200) + '…'
             }
           }
           if (firstImg && firstLine) break
@@ -300,11 +306,11 @@ export default function MemoryContent(props) {
             {firstImg &&
               <Palette src={firstImg}>
                 {({ data }) => (
-                  <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkMuted }} onClick={() => openMemory(memory.id)}>
+                  <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkVibrant }} onClick={() => openMemory(memory.id)}>
                     <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
                       BLOG
                       </span>
-                    <img src={firstImg} />
+                    <img src={firstImg} className={classes.blogImgTimeline} />
                     {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
                   </span>
                 )}
