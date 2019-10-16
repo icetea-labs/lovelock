@@ -354,16 +354,17 @@ export async function savetoLocalStorage(address, keyObject) {
 }
 let cachesharekey = {};
 export async function generateSharedKey(privateKeyA, publicKeyB) {
+  let key = '';
   // console.log('a-b', privateKeyA, '-', publicKeyB);
   const objkey = privateKeyA + publicKeyB;
   if (cachesharekey[objkey]) {
-    // console.log('cachesharekey', cachesharekey[objkey]);
-    return cachesharekey[objkey];
+    key = cachesharekey[objkey];
+  } else {
+    const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
+    key = codec.toString(sharekey);
+    cachesharekey = { [objkey]: key };
   }
-  const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
-  const result = codec.toString(sharekey);
-  cachesharekey = { [objkey]: result };
-  return result;
+  return key;
 }
 export async function encodeWithSharedKey(data, sharekey) {
   const encodeData = encodeTx(data, sharekey, { noAddress: true });

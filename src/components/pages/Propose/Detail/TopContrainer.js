@@ -308,7 +308,7 @@ function TopContrainer(props) {
   }
 
   async function getNumLikes() {
-    if (memoryRelationIndex == null || memoryRelationIndex < 0) return;
+    if (memoryRelationIndex === '' || memoryRelationIndex == null || memoryRelationIndex < 0) return;
     const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
     const num = Object.keys(data).length;
     if (data[address]) {
