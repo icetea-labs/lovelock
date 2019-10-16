@@ -1,37 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Dante from 'Dante2';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
 	wrapper: {
 		margin: '0 auto',
-		maxWidth: 740
+		maxWidth: 740,
+		'@media screen and (max-width: 1200px)': {
+			width: '52%'
+		},
+		'@media screen and (max-width: 850px)': {
+			width: '43%'
+		},
+		'@media screen and (max-width: 700px)': {
+			width: '100%'
+		}
 	}
-});
+}))
 
-class Editor extends React.Component {
+export default function Editor(props) {
+	const classes = useStyles();
 
-	componentDidMount() {
+	useEffect(() => {
 		let [input] = document.getElementsByClassName('public-DraftEditor-content')
 		if (input) input.focus()
-	}
+	});
 
-	render() {
-		const { classes } = this.props;
-		return (
-			<div className={classes.wrapper}>
-				<Dante
-					content={this.props.initContent ? this.props.initContent : false}
-					read_only={this.props.read_only ? true : false}
-					onChange={(Editor) => {
-						if (this.props.onChange) {
-							this.props.onChange(Editor.save.editorContent)
-						}
-					}}
-				/>
-			</div>
-		);
-	}
+	return (
+		<div className={classes.wrapper}>
+			<Dante
+				content={props.initContent ? props.initContent : false}
+				read_only={props.read_only ? true : false}
+				onChange={(Editor) => {
+					Editor.relocateTooltips()
+					if (props.onChange) {
+						props.onChange(Editor.save.editorContent)
+					}
+				}}
+			/>
+		</div>
+	)
 }
-
-export default withStyles(styles)(Editor);
