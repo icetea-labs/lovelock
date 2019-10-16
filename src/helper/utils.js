@@ -1,6 +1,5 @@
 import React from 'react';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import { ecc, codec, AccountType } from '@iceteachain/common';
@@ -10,7 +9,7 @@ import tweb3 from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
-const paths = 'm’/44’/60’/0’/0';
+const paths = 'm’/44’/349’/0’/0/';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 
@@ -33,15 +32,13 @@ export async function callView(funcName, params) {
 }
 
 async function callReadOrPure(funcName, params, method) {
-  const address = contract;
-
-  try {
-    const result = await tweb3[method](address, funcName, params || []);
-    return tryStringifyJson(result || `${result}`);
-  } catch (error) {
-    console.log('funcName', funcName);
-    console.log(tryStringifyJson(error, true));
-  }
+  // try {
+  const result = await tweb3[method](contract, funcName, params || []);
+  return tryStringifyJson(result || `${result}`);
+  // } catch (error) {
+  // console.log('funcName', funcName);
+  // console.log(tryStringifyJson(error, true));
+  // }
 }
 
 export async function sendTransaction(funcName, params, opts) {
@@ -151,7 +148,7 @@ export async function getJsonFromIpfs(cid, key) {
 }
 
 function getImageDimensions(file) {
-  return new Promise((resolved, rejected) => {
+  return new Promise(resolved => {
     const i = new Image();
     i.onload = () => {
       resolved({ w: i.width, h: i.height });
@@ -317,17 +314,17 @@ export function diffTime(time) {
 }
 
 export async function isAliasRegisted(username) {
-  try {
-    const alias = 'account.'.concat(username);
-    const info = await tweb3
-      .contract('system.alias')
-      .methods.resolve(alias)
-      .call();
-    return info;
-  } catch (err) {
-    console.log(tryStringifyJson(err));
-    throw err;
-  }
+  // try {
+  const alias = 'account.'.concat(username);
+  const info = await tweb3
+    .contract('system.alias')
+    .methods.resolve(alias)
+    .call();
+  return info;
+  // } catch (err) {
+  // console.log(tryStringifyJson(err));
+  // throw err;
+  // }
 }
 const cacheAlias = {};
 export async function getAlias(address) {
@@ -385,38 +382,41 @@ export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
   return decodeWithSharedKey(data, sharekey);
 }
 export const wallet = {
-  createAccountWithMneomnic(mnemonic, index = 0) {
+  createAccountWithMneomnic(nemon, index = 0) {
+    let mnemonic = nemon;
     if (!mnemonic) mnemonic = bip39.generateMnemonic();
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
     const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
 
-    return {
-      mnemonic,
-      privateKey,
-      address,
-      publicKey,
-    };
+    return { mnemonic, privateKey, address, publicKey };
   },
-  recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.BANK_ACCOUNT }) {
-    const typeTMP =
-      options.type === AccountType.REGULAR_ACCOUNT ? AccountType.REGULAR_ACCOUNT : AccountType.BANK_ACCOUNT;
+  recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.REGULAR_ACCOUNT }) {
+    const typeTMP = options.type === AccountType.BANK_ACCOUNT ? AccountType.BANK_ACCOUNT : AccountType.REGULAR_ACCOUNT;
+    let { index } = options;
     let privateKey = '';
     let address = '';
-    let indexBase = '';
+    let indexKey = '';
+
+    if (!bip39.validateMnemonic(mnemonic)) {
+      throw new Error('wrong mnemonic format');
+    }
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    const hdkey = HDKey.fromMasterSeed(seed);
 
     do {
-      indexBase = options.index;
-      privateKey = this.getPrivateKeyFromMnemonic(mnemonic, options.index);
+      indexKey = index;
+      privateKey = this.getPrivateKeyFromHdKey(hdkey, indexKey);
       ({ address } = ecc.toPubKeyAndAddress(privateKey));
-      options.index += 1;
+      index += 1;
       // console.log('index', options.index);
-    } while (options.index < 100 && !codec.isAddressType(address, typeTMP));
+    } while (index < 100 && !codec.isAddressType(address, typeTMP));
 
-    return {
-      privateKey,
-      address,
-      index: indexBase,
-    };
+    return { privateKey, address, index: indexKey };
+  },
+
+  getPrivateKeyFromHdKey(hdkey, index = 0) {
+    const childkey = hdkey.derive(paths + index);
+    return codec.toKeyString(childkey.privateKey);
   },
 
   getPrivateKeyFromMnemonic(mnemonic, index = 0) {

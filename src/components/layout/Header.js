@@ -334,6 +334,7 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
+  const privateKey = useSelector(state => state.account.privateKey);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
   const avatarRedux = useSelector(state => state.account.avatar);
@@ -343,14 +344,15 @@ function Header(props) {
       try {
         if (address) {
           const reps = await getTagsInfo(address);
-          dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
+          const name = reps['display-name'] || '';
+          dispatch(actions.setAccount({ displayName: name, avatar: reps.avatar }));
         }
       } catch (e) {
         console.log(e);
       }
     }
     fetchData();
-  }, []);
+  }, [address]);
 
   const renderMenu = (
     <StyledMenu

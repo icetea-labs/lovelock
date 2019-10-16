@@ -19,6 +19,7 @@ import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
+import { Palette } from 'react-palette';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -57,16 +58,6 @@ const useStyles = makeStyles(theme => ({
   margin: {
     margin: theme.spacing(1),
   },
-  seeMore: {
-    cursor: 'pointer',
-    marginTop: 10,
-    display: 'inline-block',
-    color: '#828282',
-    padding: '5px 10px',
-    borderRadius: 2,
-    fontSize: 11,
-    boxShadow: '0px 1px 4px 1px #d0d0d0',
-  },
   icon: {
     fontSize: 18,
     verticalAlign: 'middle',
@@ -79,19 +70,23 @@ const useStyles = makeStyles(theme => ({
   blogImgWrp: {
     position: 'relative',
     display: 'block',
+    padding: '0 0 20px',
+    cursor: 'pointer',
   },
   blogTitleImg: {
     position: 'absolute',
-    bottom: 15,
-    backgroundColor: '#2c2c2c',
-    color: '#fff',
-    padding: '2px 7px',
-    borderTopRightRadius: 2,
-    borderBottomRightRadius: 2,
+    top: 12,
+    left: 12,
+    padding: '3px 10px',
+    color: '#f8f8f8',
   },
   blogFirstLine: {
-    marginBottom: 10,
     display: 'block',
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#fff',
+    fontSize: 18,
+    textTransform: 'uppercase'
   },
   relationship: {
     // color: theme.color.primary,
@@ -123,6 +118,11 @@ const useStyles = makeStyles(theme => ({
   acctionsBt: {
     justifyContent: 'space-around',
   },
+  editorComment: {
+    width: 800,
+    maxWidth: '100%',
+    margin: '0 auto'
+  }
 }));
 
 export default function MemoryContent(props) {
@@ -156,12 +156,12 @@ export default function MemoryContent(props) {
     if (window.location.search !== '') {
       let url_string = window.location.href
       let url = new URL(url_string)
-      if(memory.id == url.searchParams.get("memory")) setOpenModal(true)
+      if (memory.id == url.searchParams.get("memory")) setOpenModal(true)
     }
   });
 
 
-  useEffect( () => {
+  useEffect(() => {
     (async () => {
       let proposes = await callView('getProposeByIndex', [proIndex])
       let propose = proposes[0]
@@ -295,15 +295,24 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break
         }
+
         return (
           <>
-            {!firstImg && <span className={classes.blogTitle}>Blog</span>}
-            {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
-            {firstImg && 
-              <span className={classes.blogImgWrp}>
-                <span className={classes.blogTitleImg}>Blog</span>
-                <img src={firstImg} />
-              </span>
+            {firstImg &&
+              <Palette src={firstImg}>
+                {({ data, loading, error }) => {
+                  console.log(data)
+                  return (
+                    <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkMuted }} onClick={() => openMemory(memory.id)}>
+                      <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}> 
+                        BLOG
+                      </span>
+                      <img src={firstImg} />
+                      {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
+                    </span>
+                  )
+                }}
+              </Palette>
             }
           </>
         )
@@ -361,59 +370,59 @@ export default function MemoryContent(props) {
                 )}
             </React.Fragment>
           ) : (
-            <React.Fragment>
-              {memoryDecrypted.type === 1 ? (
-                <Typography
-                  variant="body2"
-                  className={classes.relationship}
-                  style={{ whiteSpace: 'pre-line' }}
-                  component="div"
-                >
-                  <div>
-                    <FavoriteIcon color="primary" fontSize="large" />
-                  </div>
-                  <span>
-                    <span>Locked with </span>
-                    <Typography component="span" className={classes.relationshipName}>
-                      {memoryDecrypted.r_name}
-                    </Typography>
-                  </span>
-                </Typography>
-              ) : (
-                <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-                  {previewEditorMemory()}
-                </Typography>
-              )}
-            </React.Fragment>
-          )}
-          {decodeEditorMemory() && (
-            <>
-              <Link onClick={() => openMemory(memory.id)} className={classes.seeMore}>
-                <FlashOnIcon className={classes.icon} /> View
-              </Link>
-              <SimpleModal
-                open={isOpenModal}
-                handleClose={closeMemory}
-                title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} />}
-                subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-              >
-                <Editor initContent={decodeEditorMemory()} read_only={true} />
-                {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-                  ''
+              <React.Fragment>
+                {memoryDecrypted.type === 1 ? (
+                  <Typography
+                    variant="body2"
+                    className={classes.relationship}
+                    style={{ whiteSpace: 'pre-line' }}
+                    component="div"
+                  >
+                    <div>
+                      <FavoriteIcon color="primary" fontSize="large" />
+                    </div>
+                    <span>
+                      <span>Locked with </span>
+                      <Typography component="span" className={classes.relationshipName}>
+                        {memoryDecrypted.r_name}
+                      </Typography>
+                    </span>
+                  </Typography>
                 ) : (
-                    <MemoryActionButton
-                      handerShowComment={handerShowComment}
-                      likes={memory.likes}
-                      memoryIndex={memory.id}
-                      numComment={numComment}
-                    />
+                    <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+                      {decodeEditorMemory() && (
+                        <>
+                          <SimpleModal
+                            open={isOpenModal}
+                            handleClose={closeMemory}
+                            title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
+                            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+                          >
+                            <Editor initContent={decodeEditorMemory()} read_only={true} />
+                            <div className={classes.editorComment}>
+                              {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
+                                ''
+                              ) : (
+                                  <MemoryActionButton
+                                    handerShowComment={handerShowComment}
+                                    likes={memory.likes}
+                                    memoryIndex={memory.id}
+                                    numComment={numComment}
+                                  />
+                                )}
+                              {showComment && (
+                                <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+                              )}
+                            </div>
+                          </SimpleModal>
+                          {previewEditorMemory()}
+
+                        </>
+                      )}
+                    </Typography>
                   )}
-                {showComment && (
-                  <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
-                )}
-              </SimpleModal>
-            </>
-          )}
+              </React.Fragment>
+            )}
         </CardContent>
         <React.Fragment>
           {memoryDecrypted.info.hash && (
