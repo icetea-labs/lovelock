@@ -156,16 +156,16 @@ const SummaryCard = styled.div`
   justify-content: space-between;
   margin-top: 15px;
   .dayago {
-    align-items: center;
     display: flex;
+    align-items: flex-end;
     img {
       width: 50px;
       height: 50px;
-      margin-bottom: 12px;
       object-fit: contain;
     }
     .summaryDay {
-      margin: 7px;
+      margin-left: 7px;
+      margin-bottom: 12px;
     }
     .summaryCongrat {
       text-align: center;
@@ -302,15 +302,14 @@ function TopContrainer(props) {
         props.getTopInfo(moreProInfo);
         setMemoryRelationIndex(proInfo.memoryRelationIndex);
       } catch (e) {
-        console.log('loadProposes', e);
+        console.error(e);
       }
       setLoading(false);
     }, 10);
   }
 
   async function getNumLikes() {
-    if (!memoryRelationIndex || memoryRelationIndex === -1) return;
-    // console.log('getNumLikes', memoryRelationIndex);
+    if (memoryRelationIndex == null || memoryRelationIndex < 0) return;
     const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
     const num = Object.keys(data).length;
     if (data[address]) {
@@ -321,15 +320,21 @@ function TopContrainer(props) {
     setNumLike(num);
   }
   async function handerLike() {
-    if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
-      return;
-    }
-    const method = 'addLike';
-    const params = [topInfo.memoryRelationIndex, 1];
-    const result = await sendTransaction(method, params, { address, tokenAddress });
-    if (result) {
-      getNumLikes();
+    try {
+      if (!tokenKey) {
+        dispatch(actions.setNeedAuth(true));
+        return;
+      }
+      const params = [topInfo.memoryRelationIndex, 1];
+      await sendTransaction('addLike', params, { address, tokenAddress });
+      // console.log('result', result);
+      // if (result) {
+      //   getNumLikes();
+      // }
+    } catch (e) {
+      console.error(e);
+      const message = `An error occurred, please try again later`;
+      enqueueSnackbar(message, { variant: 'error' });
     }
   }
 
