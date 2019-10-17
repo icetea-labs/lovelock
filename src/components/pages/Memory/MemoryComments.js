@@ -91,7 +91,7 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 const numComment = 4;
 export default function MemoryComments(props) {
-  const { handerNumberComment, memoryIndex, autoFc } = props;
+  const { handerNumberComment, memoryIndex, textInput } = props;
   const dispatch = useDispatch();
 
   // const privateKey = useSelector(state => state.account.privateKey);
@@ -238,7 +238,7 @@ export default function MemoryComments(props) {
                     notchedOutline: classes.notchedOutline,
                   },
                 }}
-                autoFocus={autoFc}
+                inputRef={textInput}
               />
             </Grid>
           </Grid>
