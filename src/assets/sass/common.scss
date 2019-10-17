@@ -35,3 +35,17 @@ input:focus {
 .medium-zoom-image--opened {
   z-index: 10000;
 }
+
+.effect {
+  transition: 0.2s;
+  transform: scale(0.8);
+  opacity: 0;
+}
+.effect.effect-scale-entering {
+  // transform: scale(0);
+  // opacity: 0;
+}
+.effect.effect-scale-entered {
+  transform: scale(1);
+  opacity: 1;
+}
