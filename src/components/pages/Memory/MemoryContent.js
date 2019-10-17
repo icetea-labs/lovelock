@@ -7,10 +7,10 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import { Palette } from 'react-palette';
 
 import { TimeWithFormat, decodeWithPublicKey, callView, getTagsInfo } from '../../../helper';
 import { AvatarPro } from '../../elements';
@@ -19,6 +19,7 @@ import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
+
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -57,16 +58,6 @@ const useStyles = makeStyles(theme => ({
   margin: {
     margin: theme.spacing(1),
   },
-  seeMore: {
-    cursor: 'pointer',
-    marginTop: 10,
-    display: 'inline-block',
-    color: '#828282',
-    padding: '5px 10px',
-    borderRadius: 2,
-    fontSize: 11,
-    boxShadow: '0px 1px 4px 1px #d0d0d0',
-  },
   icon: {
     fontSize: 18,
     verticalAlign: 'middle',
@@ -79,19 +70,29 @@ const useStyles = makeStyles(theme => ({
   blogImgWrp: {
     position: 'relative',
     display: 'block',
+    padding: '0 0 16px',
+    cursor: 'pointer',
+    '&:hover $blogTitleImg, &:hover $blogFirstLine': {
+      color: '#fff',
+    },
   },
   blogTitleImg: {
     position: 'absolute',
-    bottom: 15,
-    backgroundColor: '#2c2c2c',
-    color: '#fff',
-    padding: '2px 7px',
-    borderTopRightRadius: 2,
-    borderBottomRightRadius: 2,
+    top: 12,
+    left: 12,
+    padding: '3px 10px',
+    color: '#f5f5f5',
+  },
+  blogImgTimeline: {
+    width: '100%',
   },
   blogFirstLine: {
-    marginBottom: 10,
     display: 'block',
+    textAlign: 'center',
+    marginTop: 16,
+    color: '#f5f5f5',
+    fontSize: 16,
+    textTransform: 'uppercase',
   },
   relationship: {
     // color: theme.color.primary,
@@ -123,6 +124,11 @@ const useStyles = makeStyles(theme => ({
   acctionsBt: {
     justifyContent: 'space-around',
   },
+  editorComment: {
+    width: 800,
+    maxWidth: '100%',
+    margin: '0 auto',
+  },
 }));
 
 export default function MemoryContent(props) {
@@ -141,8 +147,6 @@ export default function MemoryContent(props) {
   const [isOpenModal, setOpenModal] = useState(false);
   const [proposeInfo, setProposeInfo] = useState({});
   const [autoFc, setAutoFc] = useState(false);
-
-  console.log('auto', autoFc);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -293,20 +297,30 @@ export default function MemoryContent(props) {
           if (!firstLine && blocks[i].type !== 'image') {
             firstLine = blocks[i].text;
             if (firstLine.length > 200) {
-              firstLine = firstLine.slice(0, 200) + '...';
+              firstLine = firstLine.slice(0, 200) + '…';
             }
           }
           if (firstImg && firstLine) break;
         }
+
         return (
           <>
-            {!firstImg && <span className={classes.blogTitle}>Blog</span>}
-            {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
             {firstImg && (
-              <span className={classes.blogImgWrp}>
-                <span className={classes.blogTitleImg}>Blog</span>
-                <img src={firstImg} />
-              </span>
+              <Palette src={firstImg}>
+                {({ data }) => (
+                  <span
+                    className={classes.blogImgWrp}
+                    style={{ backgroundColor: data.darkVibrant }}
+                    onClick={() => openMemory(memory.id)}
+                  >
+                    <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
+                      BLOG
+                    </span>
+                    <img src={firstImg} className={classes.blogImgTimeline} />
+                    {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
+                  </span>
+                )}
+              </Palette>
             )}
           </>
         );
@@ -387,38 +401,40 @@ export default function MemoryContent(props) {
                   {previewEditorMemory()}
                 </Typography>
               )}
+
+              {decodeEditorMemory() && (
+                <SimpleModal
+                  open={isOpenModal}
+                  handleClose={closeMemory}
+                  title={
+                    <MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />
+                  }
+                  subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+                >
+                  <Editor initContent={decodeEditorMemory()} read_only={true} />
+                  <div className={classes.editorComment}>
+                    {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
+                      ''
+                    ) : (
+                      <MemoryActionButton
+                        handerShowComment={handerShowComment}
+                        likes={memory.likes}
+                        memoryIndex={memory.id}
+                        numComment={numComment}
+                      />
+                    )}
+                    {showComment && (
+                      <MemoryComments
+                        handerNumberComment={handerNumberComment}
+                        memoryIndex={memory.id}
+                        memory={memory}
+                        autoFc={autoFc}
+                      />
+                    )}
+                  </div>
+                </SimpleModal>
+              )}
             </React.Fragment>
-          )}
-          {decodeEditorMemory() && (
-            <>
-              <Link onClick={() => openMemory(memory.id)} className={classes.seeMore}>
-                <FlashOnIcon className={classes.icon} /> View
-              </Link>
-              <SimpleModal
-                open={isOpenModal}
-                handleClose={closeMemory}
-                title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} />}
-                subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-              >
-                <Editor initContent={decodeEditorMemory()} read_only={true} />
-                {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-                  ''
-                ) : (
-                  <MemoryActionButton
-                    handerShowComment={handerShowComment}
-                    likes={memory.likes}
-                    memoryIndex={memory.id}
-                    numComment={numComment}
-                  />
-                )}
-                <MemoryComments
-                  handerNumberComment={handerNumberComment}
-                  memoryIndex={memory.id}
-                  memory={memory}
-                  autoFc={autoFc}
-                />
-              </SimpleModal>
-            </>
           )}
         </CardContent>
         <React.Fragment>

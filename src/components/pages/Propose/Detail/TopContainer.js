@@ -154,7 +154,6 @@ const WarrperChatBox = styled(FlexBox)`
 const SummaryCard = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 15px;
   .dayago {
     align-items: center;
     display: flex;

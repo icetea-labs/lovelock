@@ -87,7 +87,7 @@ export default function MemoryActionButton(props) {
   useEffect(() => {
     const returnValue = watchAddlike();
     return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe());
+      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => (unsubscribe && unsubscribe()));
     };
   }, [memoryIndex]);
 

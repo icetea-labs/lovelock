@@ -134,7 +134,7 @@ class CommonDialog extends React.Component {
                     )}
                     <ValidatorForm onSubmit={confirm}>
                       <ButtonPro className="send" type="submit">
-                        {okText}
+                        {typeof okText !== 'function' ? okText : okText()}
                       </ButtonPro>
                     </ValidatorForm>
                   </div>

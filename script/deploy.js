@@ -3,10 +3,7 @@ const fs = require('fs')
 const { transpile } = require('@iceteachain/sunseed')
 const { IceteaWeb3 } = require('@iceteachain/web3')
 
-// process arguments
-const args = process.argv.slice(2)
-let mode = args.length ? args[0] : ''
-mode = mode.trim().toLocaleLowerCase()
+const { mode, envPath } = require('./mode')
 
 if (['-h', '--help'].includes(mode)) {
   console.log('Purpose: Deploy contract then update .env file.')
@@ -18,22 +15,8 @@ if (['-h', '--help'].includes(mode)) {
   return
 }
 
-// determine path to .env file
-let envPath
-if (mode) {
-  if (mode === 'prod') {
-    envPath = '.env.production'
-  } else if (mode === 'dev') {
-    envPath = '.env.development'
-  } else {
-    envPath = mode
-  }
-} else {
-  envPath = '.env'
-}
-console.log(`Load RPC endpoint from ${envPath}`)
-
 // load config
+console.log(`Load RPC endpoint from ${envPath}`)
 const config = envfile.parseFileSync(envPath)
 const endpoint = config.REACT_APP_RPC
 

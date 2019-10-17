@@ -335,11 +335,13 @@ class PuNewLock extends React.Component {
     if (check) {
       this.setState({
         checked: check,
+        okText: 'Create',
         partner: process.env.REACT_APP_BOT_LOVER,
       });
     } else {
       this.setState({
         checked: false,
+        okText: 'Send',
         value: '',
         partner: '',
       });
@@ -389,7 +391,7 @@ class PuNewLock extends React.Component {
     let message = '';
     for (let i = 0; i < propose.length; i++) {
       if (propose[i].sender === propose[i].receiver) {
-        message = 'You had a journal, can not create more.';
+        message = 'You already had a journal and cannot create one more.';
         enqueueSnackbar(message, { variant: 'error' });
       }
     }
@@ -436,7 +438,7 @@ class PuNewLock extends React.Component {
           return;
         }
 
-        let botInfo = {};
+        let botInfo;
         if (checked) {
           if (!firstname) {
             message = 'Please enter your crush first name.';
@@ -516,8 +518,8 @@ class PuNewLock extends React.Component {
 
     return (
       <CommonDialog
-        title="Lock"
-        okText="Send"
+        title="New Lock"
+        okText={() => this.state.okText || 'Send'}
         close={close}
         confirm={() => {
           this.createPropose(partner, promiseStm, date, file);
@@ -525,7 +527,7 @@ class PuNewLock extends React.Component {
       >
         {!checked && (
           <div>
-            <TagTitle>Tag your partner you lock</TagTitle>
+            <TagTitle>Tag your partner</TagTitle>
             <Autosuggest
               id="suggestPartner"
               suggestions={suggestions}
@@ -539,7 +541,7 @@ class PuNewLock extends React.Component {
         )}
         <FormControlLabel
           control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
-          label="or create a secret crush"
+          label="or create your own crush"
         />
         {checked && (
           <FlexBox>
@@ -594,7 +596,7 @@ class PuNewLock extends React.Component {
         {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
         {isJournal && (
           <CommonDialog
-            title="Lock alert"
+            title="Journal"
             okText="Yes, let's create"
             cancelText="Cancel"
             close={this.closeJournal}
