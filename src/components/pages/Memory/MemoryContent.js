@@ -20,7 +20,6 @@ import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 
-
 const useStylesFacebook = makeStyles({
   root: {
     position: 'relative',
@@ -459,13 +458,15 @@ export default function MemoryContent(props) {
             numComment={numComment}
           />
         )}
-        <MemoryComments
-          handerNumberComment={handerNumberComment}
-          memoryIndex={memory.id}
-          memory={memory}
-          numComment={numComment}
-          autoFc={autoFc}
-        />
+        {showComment && (
+          <MemoryComments
+            handerNumberComment={handerNumberComment}
+            memoryIndex={memory.id}
+            memory={memory}
+            numComment={numComment}
+            autoFc={autoFc}
+          />
+        )}
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
