@@ -493,7 +493,14 @@ function TopContrainer(props) {
         <div className="dayago">
           {topInfo.type !== 1 && <img src="/static/img/happy-copy.svg" alt="together" />}
           <div className="summaryDay">
-            {topInfo.type === 1 ? 'JOURNAL' : <span>{diffDate === 0 ? 'First day' : `${diffDate} days`}</span>}
+            {topInfo.type === 1 ? (
+              'JOURNAL'
+            ) : (
+              <span>
+                {diffDate === 0 && 'First day'}
+                {diffDate > 0 && (diffDate === 1 ? `${diffDate} day` : `${diffDate} days`)}
+              </span>
+            )}
           </div>
           {/* <div className="summaryCongrat">
             <div className="congratContent"> */}
