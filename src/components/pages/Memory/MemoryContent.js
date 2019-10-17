@@ -10,7 +10,6 @@ import { useSnackbar } from 'notistack';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
-import { Palette } from 'react-palette';
 
 import { TimeWithFormat, decodeWithPublicKey, callView, getTagsInfo } from '../../../helper';
 import { AvatarPro } from '../../elements';
@@ -19,6 +18,8 @@ import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
+
+import BlogShowcase from './BlogShowcase'
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -302,19 +303,14 @@ export default function MemoryContent(props) {
           if (firstImg && firstLine) break;
         }
         firstImg = firstImg ? firstImg : '/static/img/memory-default.png'
-        return (
-          <Palette src={firstImg}>
-            {({ data }) => (
-              <span className={classes.blogImgWrp} style={{ backgroundColor: data.darkVibrant }} onClick={() => openMemory(memory.id)}>
-                <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
-                  BLOG
-                </span>
-                <img src={firstImg} className={classes.blogImgTimeline} />
-                {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
-              </span>
-            )}
-          </Palette>
-        )
+        const defaultColors = {
+          frameBackColor: '#333',
+          titleColor: '#f5f5f5',
+          labelBackColor: '#666',
+          labelTextColor: '#f5f5f5'
+        }
+        return <BlogShowcase colors={defaultColors} classes={classes} firstImg={firstImg} firstLine={firstLine}
+          onClick={() => openMemory(memory.id)} />
       }
     } catch (e) {}
     return memoryContent;
