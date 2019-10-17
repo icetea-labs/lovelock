@@ -70,6 +70,7 @@ const useStyles = makeStyles(theme => ({
   blogImgWrp: {
     position: 'relative',
     display: 'block',
+    backgroundColor: '#333',
     padding: '0 0 16px',
     cursor: 'pointer',
     '&:hover $blogTitleImg, &:hover $blogFirstLine': {
@@ -78,6 +79,7 @@ const useStyles = makeStyles(theme => ({
   },
   blogTitleImg: {
     position: 'absolute',
+    backgroundColor: '#666',
     top: 12,
     left: 12,
     padding: '3px 10px',
@@ -306,14 +308,9 @@ export default function MemoryContent(props) {
           if (firstImg && firstLine) break;
         }
         firstImg = firstImg ? firstImg : '/static/img/memory-default.png'
-        const defaultColors = {
-          frameBackColor: '#333',
-          titleColor: '#f5f5f5',
-          labelBackColor: '#666',
-          labelTextColor: '#f5f5f5'
-        }
-        return <BlogShowcase colors={defaultColors} classes={classes} firstImg={firstImg} firstLine={firstLine}
-          onClick={() => openMemory(memory.id)} />
+
+        return <BlogShowcase classes={classes} firstImg={firstImg} firstLine={firstLine}
+          openHandler={() => openMemory(memory.id)} />
       }
     } catch (e) {}
     return memoryContent;
