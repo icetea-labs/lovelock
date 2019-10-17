@@ -61,7 +61,7 @@ class PromiseConfirm extends React.Component {
         close();
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -79,7 +79,7 @@ class PromiseConfirm extends React.Component {
         close();
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 

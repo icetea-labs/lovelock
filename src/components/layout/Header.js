@@ -348,7 +348,7 @@ function Header(props) {
           dispatch(actions.setAccount({ displayName: name, avatar: reps.avatar }));
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
     fetchData();

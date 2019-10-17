@@ -485,7 +485,7 @@ class PuNewLock extends React.Component {
           }
         }, 50);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         message = 'an error occurred while sending, please check the inner exception for details';
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
