@@ -299,7 +299,7 @@ function TopContrainer(props) {
         props.getTopInfo(moreProInfo);
         setMemoryRelationIndex(proInfo.memoryRelationIndex);
       } catch (e) {
-        console.log('loadProposes', e);
+        console.error(e);
       }
       setLoading(false);
     }, 10);
