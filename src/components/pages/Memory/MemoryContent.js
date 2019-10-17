@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
@@ -146,7 +146,6 @@ export default function MemoryContent(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
   const [proposeInfo, setProposeInfo] = useState({});
-  const [autoFc, setAutoFc] = useState(false);
 
   useEffect(() => {
     if (memoryDecrypted.isPrivate) {
@@ -252,9 +251,13 @@ export default function MemoryContent(props) {
   function handerNumberComment(number) {
     setNumComment(number);
   }
+
+  const textInput = useRef(null);
   function handerShowComment() {
     setShowComment(true);
-    setAutoFc(true);
+    setTimeout(() => {
+      textInput.current.focus();
+    }, 100);
   }
 
   function decodeEditorMemory() {
@@ -415,7 +418,7 @@ export default function MemoryContent(props) {
                         handerNumberComment={handerNumberComment}
                         memoryIndex={memory.id}
                         memory={memory}
-                        autoFc={autoFc}
+                        textInput={textInput}
                       />
                     )}
                   </div>
@@ -452,7 +455,7 @@ export default function MemoryContent(props) {
             memoryIndex={memory.id}
             memory={memory}
             numComment={numComment}
-            autoFc={autoFc}
+            textInput={textInput}
           />
         )}
       </Card>

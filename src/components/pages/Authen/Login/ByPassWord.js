@@ -53,8 +53,9 @@ function ByPassWord(props) {
     } else {
       // setUsername('');
       setState({ ...state, username: 'undefined' });
-      const message = 'Your information is empty, Please use [Forgot Password] or [Register]';
+      const message = 'Your information is empty, Please use [recovery phrase] or [Register]';
       enqueueSnackbar(message, { variant: 'error' });
+      setStep('two');
     }
   }
 
@@ -110,7 +111,7 @@ function ByPassWord(props) {
               }, 1);
             });
         } catch (error) {
-          console.log('error', error);
+          console.error(error);
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);

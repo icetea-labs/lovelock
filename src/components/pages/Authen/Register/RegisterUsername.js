@@ -176,7 +176,7 @@ function RegisterUsername(props) {
           setLoading(false);
           setStep('two');
         } catch (error) {
-          console.log('error', error);
+          console.error(error);
           const message = `An error has occured. Detail:${error}`;
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
