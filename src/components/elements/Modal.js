@@ -66,11 +66,10 @@ export default function SimpleModal(props) {
     document.body.style.overflow = 'hidden';
   } else {
     document.body.style.overflow = 'auto';
-    return null;
 	}
 
   return (
-    <Transition in={props.open} timeout={0} appear >
+    <Transition in={props.open} timeout={{exit: 200}} appear unmountOnExit >
       {state => (
         <div className={classes.wrapper + ` effect effect-scale-${state}`}>
           <div className={classes.paper}>
