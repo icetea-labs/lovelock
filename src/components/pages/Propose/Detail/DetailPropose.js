@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
+import { callView } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContrainer from './LeftContainer';
 import RightContrainer from './RightContainer';
@@ -20,12 +22,27 @@ export default function DetailPropose(props) {
   const { match } = props;
   const proIndex = parseInt(match.params.index, 10);
   const [topInfo, setTopInfo] = useState({});
+  const address = useSelector(state => state.account.address);
+  const [proposeInfo, setProposeInfo] = useState({});
+  const isLoginisSender = address === proposeInfo.sender || address === proposeInfo.receiver;
+  const isAcceptisPublic = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
+  console.log('isLoginisSender', isLoginisSender);
+  console.log('isAcceptisPublic', isAcceptisPublic);
 
-  function getTopInfo(data){
-    setTopInfo(data)
+  useEffect(() => {
+    (async () => {
+      const proposes = await callView('getProposeByIndex', [proIndex]);
+      const propose = proposes[0];
+      console.log('propose', propose);
+      setProposeInfo(propose);
+    })();
+  }, [proIndex]);
+
+  function getTopInfo(data) {
+    setTopInfo(data);
   }
 
-  return (
+  return isLoginisSender ? (
     <React.Fragment>
       <BannerContainer>
         <ShadowBox>
@@ -42,5 +59,9 @@ export default function DetailPropose(props) {
         </FlexWidthBox>
       </FlexBox>
     </React.Fragment>
+  ) : (
+    <div>
+      <span>Oops! We couldn't find what you're looking for.</span>
+    </div>
   );
 }

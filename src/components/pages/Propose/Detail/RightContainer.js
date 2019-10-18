@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 // import { useSnackbar } from 'notistack';
 
@@ -14,7 +15,7 @@ const RightBox = styled.div`
 `;
 
 function RightContrainer(props) {
-  const { proIndex, topInfo } = props;
+  const { proIndex, topInfo, address } = props;
   const [memoByProIndex, setMemoByProIndex] = useState([]);
   // const { enqueueSnackbar } = useSnackbar();
 
@@ -71,10 +72,17 @@ function RightContrainer(props) {
     // }, 100);
   }
 
-  return (
+  const isLoginisSender = address === topInfo.sender || address === topInfo.receiver;
+  const isAcceptisPublic = topInfo.status === 1 && topInfo.isPrivate === false;
+
+  return isLoginisSender ? (
     <RightBox>
       <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />
       <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />
+    </RightBox>
+  ) : (
+    <RightBox>
+      {isAcceptisPublic && <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />}
     </RightBox>
   );
 }
@@ -82,6 +90,7 @@ function RightContrainer(props) {
 const mapStateToProps = state => {
   return {
     privateKey: state.account.privateKey,
+    address: state.account.address,
   };
 };
 
@@ -99,4 +108,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(RightContrainer);
+)(withRouter(RightContrainer));
