@@ -38,6 +38,7 @@
     "react-dom": "^16.9.0",
     "react-grid-gallery": "^0.5.5",
     "react-images": "^1.0.0",
+    "react-lazyload": "^2.6.2",
     "react-material-ui-form-validator": "^2.0.9",
     "react-mentions": "^3.1.1",
     "react-photo-gallery": "^8.0.0",

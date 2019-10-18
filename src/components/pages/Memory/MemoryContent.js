@@ -73,6 +73,7 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#333',
     padding: '0 0 16px',
     cursor: 'pointer',
+    transition: 'background-color 1000ms linear',
     '&:hover $blogTitleImg, &:hover $blogFirstLine': {
       color: '#fff',
     },
@@ -80,6 +81,7 @@ const useStyles = makeStyles(theme => ({
   blogTitleImg: {
     position: 'absolute',
     backgroundColor: '#666',
+    transition: 'background-color 1000ms linear',
     top: 12,
     left: 12,
     padding: '3px 10px',
@@ -297,7 +299,7 @@ export default function MemoryContent(props) {
         let firstLine = null;
         for (let i in blocks) {
           if (!firstImg && blocks[i].type === 'image') {
-            firstImg = blocks[i].data.url;
+            firstImg = blocks[i].data;
           }
           if (!firstLine) {
             firstLine = blocks[i].text;
@@ -307,7 +309,7 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break;
         }
-        firstImg = firstImg ? firstImg : '/static/img/memory-default.png'
+        firstImg = firstImg || { url: '/static/img/memory-default.png' }
 
         return <BlogShowcase classes={classes} firstImg={firstImg} firstLine={firstLine}
           openHandler={() => openMemory(memory.id)} />
@@ -384,7 +386,7 @@ export default function MemoryContent(props) {
                   </span>
                 </Typography>
               ) : (
-                <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+                <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
                   {previewEditorMemory()}
                 </Typography>
               )}

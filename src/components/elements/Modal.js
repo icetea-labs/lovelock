@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import { Transition } from 'react-transition-group';
+import { CSSTransition } from 'react-transition-group';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -18,9 +21,8 @@ const useStyles = makeStyles(theme => ({
     outline: 'none',
   },
   title: {
-    fontSize: 22,
-    marginBottom: 30,
-    color: '#616161',
+    flexGrow: 1,
+    color: '#666'
   },
   wrapper: {
     overflow: 'auto',
@@ -31,25 +33,21 @@ const useStyles = makeStyles(theme => ({
     right: 0,
     bottom: 0,
   },
-  footer: {
-    textAlign: 'right',
-    position: 'absolute',
-    bottom: 30,
-    right: 100,
+  topbar: {
+    flexGrow: 1,
   },
-  closeBtn: {
-    marginLeft: 10,
+  appbar: {
+    backgroundColor: 'rgba(255,255,255,.7)',
+    boxShadow: 'none',
   },
-  closeIcon: {
-    position: 'absolute',
-    right: '7%',
-    top: 24,
-    cursor: 'pointer',
-    fontSize: 40,
-    opacity: 0.6,
-    '&:hover': {
-      opacity: 1,
-    },
+  toolbar: {
+    maxWidth: 1200,
+    minHeight: 48,
+    width: '100%',
+    margin: '0 auto'
+  },
+  postBody: {
+    marginTop: 72,
   },
   subtitle: {
     marginTop: -15,
@@ -57,44 +55,46 @@ const useStyles = makeStyles(theme => ({
     fontSize: '0.8em',
     opacity: 0.5,
   },
+  back: {
+    margin: theme.spacing(1),
+    marginRight: theme.spacing(4)
+  },
 }));
 
 export default function SimpleModal(props) {
-  const classes = useStyles();
-
   if (props.open) {
     document.body.style.overflow = 'hidden';
   } else {
     document.body.style.overflow = 'auto';
-    return null;
-	}
+  }
+  
+  const classes = useStyles();
 
   return (
-    <Transition in={props.open} timeout={0} appear >
-      {state => (
-        <div className={classes.wrapper + ` effect effect-scale-${state}`}>
+      <CSSTransition in={props.open} timeout={{ enter: 1100, exit: 440 }} classNames='memory-modal' unmountOnExit>
+        <div className={classes.wrapper}>
           <div className={classes.paper}>
-            <div className={classes.title}>{props.title}</div>
-            {props.subtitle && <div className={classes.subtitle}>{props.subtitle}</div>}
-            <div className={classes.closeIcon} onClick={props.handleClose}>
-              &times;
-            </div>
-            {props.children}
-            <div className={classes.footer}>
+            <div className={classes.topbar}>
+            <AppBar className={classes.appbar}>
+            <Toolbar  className={classes.toolbar}>
+              <Typography variant="h5" className={classes.title}>{props.title}</Typography>
+
               {props.handleSumit && (
-                <Button variant="contained" color="primary" onClick={props.handleSumit}>
-                  Publish
+                  <Button variant="contained" color='primary' onClick={props.handleSumit}>
+                    Publish
+                  </Button>
+                )}
+                <Button variant="outlined" className={classes.back} onClick={props.handleClose}>
+                  {props.closeText || 'Back'}
                 </Button>
-              )}
-              {props.closeText && (
-                <Button variant="contained" className={classes.closeBtn} onClick={props.handleClose}>
-                  {props.closeText}
-                </Button>
-              )}
+            </Toolbar>
+            </AppBar>
+            </div>
+            <div className={classes.postBody}>
+              {props.children}
             </div>
           </div>
         </div>
-      )}
-    </Transition>
+      </CSSTransition>
   );
 }

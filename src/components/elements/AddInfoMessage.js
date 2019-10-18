@@ -283,7 +283,7 @@ export default function AddInfoMessage(props) {
                 {picPreview.map(({ src }, index) => (
                   <div key={index} className="imgContent">
                     <GridListTile className={classes.img}>
-                      <ZoomImage src={src} alt="photo" onLoad={() => URL.revokeObjectURL(src)} />
+                      <ZoomImage src={src} alt="photo" adjust onLoad={() => URL.revokeObjectURL(src)} />
                       <GridListTileBar
                         className={classes.titleBar}
                         style={{background: 'none'}}

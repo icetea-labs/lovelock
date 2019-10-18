@@ -206,7 +206,7 @@ export default function CreateMemory(props) {
       let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
       let submitContent = await saveFileToIpfs([buffer])
       handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
-    }else{
+    } else {
       let message = 'Please enter memory content.'
       enqueueSnackbar(message, { variant: 'error' });
     }

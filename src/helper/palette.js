@@ -32,11 +32,5 @@ export function getPalette(img, opts) {
         })
         .catch(error => {
             console.error('An error occured while getting palette from image.', src, error)
-            return {
-                frameBackColor: '#333',
-                titleColor: '#f5f5f5',
-                labelBackColor: '#666',
-                labelTextColor: '#f5f5f5'
-            }
         })
 }
