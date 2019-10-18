@@ -9,16 +9,11 @@ import { useSnackbar } from 'notistack';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 
-import { ButtonPro } from "../../elements/Button";
-import AddInfoMessage from "../../elements/AddInfoMessage";
-import * as actions from "../../../store/actions";
-import {
-  saveFileToIpfs,
-  saveBufferToIpfs,
-  sendTransaction,
-  encodeWithPublicKey
-} from "../../../helper";
-import { AvatarPro } from "../../elements";
+import { ButtonPro } from '../../elements/Button';
+import AddInfoMessage from '../../elements/AddInfoMessage';
+import * as actions from '../../../store/actions';
+import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 
 const GrayLayout = styled.div`
@@ -130,7 +125,7 @@ export default function CreateMemory(props) {
   const layoutRef = React.createRef();
 
   const account = useSelector(state => state.account);
-  const propose = useSelector(state => state.loveinfo.propose);
+  // const propose = useSelector(state => state.loveinfo.propose);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -140,7 +135,7 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
@@ -179,7 +174,7 @@ export default function CreateMemory(props) {
     setPrivacy(event.target.value);
   }
   function onChangeDate(value) {
-    setDate(value);
+    setMemoDate(value);
   }
 
   function onChangeMedia(value) {
@@ -203,8 +198,8 @@ export default function CreateMemory(props) {
           blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
         }
       }
-      let buffer = Buffer.from(JSON.stringify({ ...editorContent }))
-      let submitContent = await saveFileToIpfs([buffer])
+      let buffer = Buffer.from(JSON.stringify({ ...editorContent }));
+      let submitContent = await saveFileToIpfs([buffer]);
       handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
     }else{
       let message = 'Please enter memory content.'
@@ -219,7 +214,7 @@ export default function CreateMemory(props) {
         return true
       }
     }
-    return false
+    return false;
   }
 
   function onChangeEditor(value) {
@@ -227,8 +222,8 @@ export default function CreateMemory(props) {
   }
 
   function closeEditorModal() {
-    setOpenModal(false)
-    setGrayLayout(false)
+    setOpenModal(false);
+    setGrayLayout(false);
   }
 
   async function handleShareMemory(advancedMemory) {
@@ -240,7 +235,7 @@ export default function CreateMemory(props) {
 
     const content = advancedMemory || memoryContent;
 
-    if (!tokenKey) {
+    if (privacy ? !privateKey : !tokenKey) {
       setNeedAuth(true);
       return;
     }
@@ -248,18 +243,21 @@ export default function CreateMemory(props) {
     setGLoading(true);
     setTimeout(async () => {
       // const hash = await saveFilesToIpfs(filesBuffer);
-      const hash = await saveBufferToIpfs(filesBuffer);
-      const info = { date, hash };
+      // const hash = await saveBufferToIpfs(filesBuffer);
+      // const info = { date, hash };
       let params = [];
 
       if (privacy) {
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
+        const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
+        const newinfo = { date: memoDate, hash };
+        params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
       } else {
+        const hash = await saveBufferToIpfs(filesBuffer);
+        const info = { date: memoDate, hash };
         params = [proIndex, !!privacy, content, info];
       }
-      const method = 'addMemory';
-      const result = await sendTransaction(method, params, { tokenAddress, address });
+      const result = await sendTransaction('addMemory', params, { address, tokenAddress });
       if (result) {
         reLoadMemory(proIndex);
       }
@@ -270,7 +268,7 @@ export default function CreateMemory(props) {
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
-    setDate(new Date());
+    setMemoDate(new Date());
     setGLoading(false);
     setGrayLayout(false);
     setFilesBuffer([]);
@@ -287,11 +285,7 @@ export default function CreateMemory(props) {
             <Grid item>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
-                  <AvatarPro
-                    alt="img"
-                    hash={account.avatar}
-                    className={classes.avatar}
-                  />
+                  <AvatarPro alt="img" hash={account.avatar} className={classes.avatar} />
                 </Grid>
                 <Grid item xs={12}>
                   <BootstrapTextField
@@ -310,7 +304,7 @@ export default function CreateMemory(props) {
             <Grid item>
               <AddInfoMessage
                 files={filesBuffer}
-                date={date}
+                date={memoDate}
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
@@ -329,7 +323,7 @@ export default function CreateMemory(props) {
                   input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                 >
                   <option value={0}>Public</option>
-                  {/* <option value={1}>Private</option> */}
+                  <option value={1}>Private</option>
                 </Select>
                 <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
                   Write blog...

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import TopContrainer from './TopContainer';
-import LeftContrainer from './LeftContainer';
+import LeftContainer from './LeftContainer';
 import RightContrainer from './RightContainer';
 
 const BannerContainer = styled.div`
@@ -21,8 +21,8 @@ export default function DetailPropose(props) {
   const proIndex = parseInt(match.params.index, 10);
   const [topInfo, setTopInfo] = useState({});
 
-  function getTopInfo(data){
-    setTopInfo(data)
+  function getTopInfo(data) {
+    setTopInfo(data);
   }
 
   return (
@@ -35,7 +35,7 @@ export default function DetailPropose(props) {
 
       <FlexBox wrap="wrap" minHeight="100vh">
         <FlexWidthBox width="30%">
-          <LeftContrainer />
+          <LeftContainer />
         </FlexWidthBox>
         <FlexWidthBox width="70%">
           <RightContrainer proIndex={proIndex} topInfo={topInfo} />

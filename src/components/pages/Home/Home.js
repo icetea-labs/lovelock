@@ -82,7 +82,7 @@ function Home(props) {
   return (
     address && (
       <FlexBox wrap="wrap" justify="center">
-        {/* <FlexWidthBox width="30%"><LeftContrainer /></FlexWidthBox> */}
+        {/* <FlexWidthBox width="30%"><LeftContainer /></FlexWidthBox> */}
         {homePropose.length < 1 && (
           <FlexWidthBox>
             <ShadowBox>

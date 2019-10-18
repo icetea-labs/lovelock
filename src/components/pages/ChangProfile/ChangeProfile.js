@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
+import { ecc } from '@iceteachain/common';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
-import { Grid, TextField } from '@material-ui/core';
 
 import { getTagsInfo, setTagsInfo, saveFileToIpfs, isAliasRegisted, registerAlias } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
@@ -89,62 +89,89 @@ const RightProfile = styled.div`
 
 function ChangeProfile(props) {
   const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth, privateKey } = props;
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
+  const [firstname, setFirstname] = useState({ old: '', new: '' });
+  const [lastname, setLastname] = useState({ old: '', new: '' });
   const [avatar, setAvatar] = useState('');
   const [cropFile, setCropFile] = useState('');
   const [username, setUsername] = useState('');
-  const [hasUsname, setHasUsname] = useState('');
+  const [isRegistered, setIsRegistered] = useState(true);
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     getData();
+    // Fix issue #148
+    ValidatorForm.addValidationRule('specialCharacter', async name => {
+      // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      return regex.test(name);
+    });
+
+    ValidatorForm.addValidationRule('isAliasRegisted', async name => {
+      const resp = await isAliasRegisted(name);
+      return !resp;
+    });
+
+    return () => {
+      ValidatorForm.removeValidationRule('isPasswordMatch');
+      ValidatorForm.removeValidationRule('isAliasRegisted');
+    };
   }, []);
 
   async function getData() {
     const reps = await getTagsInfo(address);
-    const getUsername = await getAlias(address);
-    if (getUsername) {
-      setHasUsname(getUsername || '');
+    const respName = await getAlias(address);
+    if (respName) {
+      setIsRegistered(true);
+      setUsername(respName);
+    } else {
+      setIsRegistered(false);
     }
+
     if (reps) {
-      setFirstname(reps.firstname || '');
-      setLastname(reps.lastname || '');
+      setFirstname({ old: reps.firstname || '', new: reps.firstname || '' });
+      setLastname({ old: reps.lastname || '', new: reps.lastname || '' });
       setAvatar(reps.avatar);
     }
   }
 
   async function saveChange() {
-    if (!tokenKey) {
+    if (isRegistered ? !tokenKey : !privateKey) {
       setNeedAuth(true);
     } else {
       setLoading(true);
       setTimeout(async () => {
         try {
           const listSetTags = [];
-          const displayName = `${firstname} ${lastname}`;
-          const accountInfo = { displayName };
-          listSetTags.push(setTagsInfo('display-name', displayName, { address, tokenAddress }));
-          listSetTags.push(setTagsInfo('firstname', firstname, { address, tokenAddress }));
-          listSetTags.push(setTagsInfo('lastname', lastname, { address, tokenAddress }));
+          if (firstname.old !== firstname.new)
+            listSetTags.push(setTagsInfo('firstname', firstname.new, { address, tokenAddress }));
+          if (lastname.old !== lastname.new)
+            listSetTags.push(setTagsInfo('lastname', lastname.new, { address, tokenAddress }));
 
+          const displayName = `${firstname.new} ${lastname.new}`;
+          if (firstname.old !== firstname.new || lastname.old !== lastname.new)
+            listSetTags.push(setTagsInfo('display-name', displayName, { address, tokenAddress }));
+
+          const accountInfo = { displayName };
           if (cropFile) {
             const hash = await saveFileToIpfs(cropFile);
-            listSetTags.push(setTagsInfo('avatar', hash, { address, tokenAddress }));
             accountInfo.avatar = hash;
-          } else {
-            // respAvatar = await setTagsInfo(address, 'avatar', avatar);
-            // accountInfo = { displayName };
+            if (avatar !== hash) {
+              listSetTags.push(setTagsInfo('avatar', hash, { address, tokenAddress }));
+            }
           }
 
-          if (username) {
-            if (!privateKey) {
+          if (!isRegistered) {
+            if (privateKey) {
+              const { publicKey } = ecc.toPubKeyAndAddress(privateKey);
+              listSetTags.push(setTagsInfo('pub-key', publicKey, { address }));
+              listSetTags.push(registerAlias(username, address));
+            } else {
               const message = 'Please login or Input recovery phrase';
               enqueueSnackbar(message, { variant: 'error' });
               history.push('/login');
-            } else listSetTags.push(registerAlias(username, address));
+            }
           }
           const change = await Promise.all(listSetTags);
           if (change) {
@@ -187,17 +214,6 @@ function ChangeProfile(props) {
     setAvatar(e.avaPreview);
   }
 
-  async function onChangeUserName(event) {
-    const nameValue = event.currentTarget.value;
-    const resp = await isAliasRegisted(nameValue);
-    if (!resp) {
-      setUsername(nameValue);
-    } else {
-      const message = `This username is already taken.`;
-      enqueueSnackbar(message, { variant: 'error' });
-    }
-  }
-
   const classes = useStyles();
 
   return (
@@ -222,42 +238,47 @@ function ChangeProfile(props) {
                   </div>
                 </PreviewContainter>
                 <RightProfile>
-                  {hasUsname ? (
-                    <Grid item>
-                      <TextField label="Username" value={hasUsname} disabled />
-                    </Grid>
-                  ) : (
-                    <TextValidator
-                      label="User Name"
-                      fullWidth
-                      onChange={onChangeUserName}
-                      name="username"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      margin="normal"
-                      value={username}
-                    />
-                  )}
-
+                  <TextValidator
+                    label="Username"
+                    fullWidth
+                    onChange={event => {
+                      // Fix issue #148
+                      setUsername(event.currentTarget.value.toLowerCase());
+                    }}
+                    name="username"
+                    validators={
+                      isRegistered
+                        ? ['required', 'specialCharacter']
+                        : ['required', 'specialCharacter', 'isAliasRegisted']
+                    }
+                    errorMessages={[
+                      'This field is required.',
+                      'Username cannot contain spaces and special character.',
+                      'This username is already taken.',
+                    ]}
+                    margin="dense"
+                    value={username}
+                    disabled={isRegistered}
+                  />
                   <TextValidator
                     label="First Name"
                     fullWidth
-                    onChange={event => setFirstname(event.currentTarget.value)}
+                    onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
                     name="firstname"
                     validators={['required']}
                     errorMessages={['This field is required']}
                     margin="normal"
-                    value={firstname}
+                    value={firstname.new}
                   />
                   <TextValidator
                     label="Last Name"
                     fullWidth
-                    onChange={event => setLastname(event.currentTarget.value)}
+                    onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
                     name="lastname"
                     validators={['required']}
                     errorMessages={['This field is required']}
                     margin="normal"
-                    value={lastname}
+                    value={lastname.new}
                   />
                 </RightProfile>
               </FlexBox>

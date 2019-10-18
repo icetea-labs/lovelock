@@ -230,7 +230,7 @@ class PuNewLock extends React.Component {
         return { nick, address: result[key].address };
       });
     } catch (err) {
-      console.log(tryStringifyJson(err));
+      console.error(tryStringifyJson(err));
     }
 
     // people = people.filter(person => person.address !== props.address);
@@ -420,10 +420,7 @@ class PuNewLock extends React.Component {
         if (cropFile) {
           botAva = await saveFileToIpfs(cropFile);
         }
-        const info = {
-          date,
-          hash,
-        };
+        const info = { date, hash };
         const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
@@ -464,12 +461,7 @@ class PuNewLock extends React.Component {
             setLoading(false);
             return;
           }
-          botInfo = {
-            firstname,
-            lastname,
-            botAva,
-            botReply,
-          };
+          botInfo = { firstname, lastname, botAva, botReply };
         }
 
         const params = [promiseStm, partner, info, botInfo];

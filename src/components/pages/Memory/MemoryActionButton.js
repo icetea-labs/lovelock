@@ -4,7 +4,6 @@ import { CardActions, Button, Typography } from '@material-ui/core';
 import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import ShareIcon from '@material-ui/icons/Share';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 
@@ -87,7 +86,7 @@ export default function MemoryActionButton(props) {
   useEffect(() => {
     const returnValue = watchAddlike();
     return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => (unsubscribe && unsubscribe()));
+      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
     };
   }, [memoryIndex]);
 

@@ -155,16 +155,16 @@ const SummaryCard = styled.div`
   display: flex;
   justify-content: space-between;
   .dayago {
-    align-items: center;
     display: flex;
+    align-items: flex-end;
     img {
       width: 50px;
       height: 50px;
-      margin-bottom: 12px;
       object-fit: contain;
     }
     .summaryDay {
-      margin: 7px;
+      margin-left: 7px;
+      margin-bottom: 12px;
     }
     .summaryCongrat {
       text-align: center;
@@ -273,9 +273,10 @@ function TopContrainer(props) {
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryRelationIndex}`](filter, error => {
       if (error) {
-        const message = 'Watch addlike error';
+        console.error('watchAddlike', error);
+        const message = 'Watch new like propose error';
         enqueueSnackbar(message, { variant: 'error' });
       } else {
         getNumLikes();
@@ -306,8 +307,7 @@ function TopContrainer(props) {
   }
 
   async function getNumLikes() {
-    if (!memoryRelationIndex || memoryRelationIndex === -1) return;
-    // console.log('getNumLikes', memoryRelationIndex);
+    if (memoryRelationIndex === '' || memoryRelationIndex == null || memoryRelationIndex < 0) return;
     const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
     const num = Object.keys(data).length;
     if (data[address]) {
@@ -318,15 +318,21 @@ function TopContrainer(props) {
     setNumLike(num);
   }
   async function handerLike() {
-    if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
-      return;
-    }
-    const method = 'addLike';
-    const params = [topInfo.memoryRelationIndex, 1];
-    const result = await sendTransaction(method, params, { address, tokenAddress });
-    if (result) {
-      getNumLikes();
+    try {
+      if (!tokenKey) {
+        dispatch(actions.setNeedAuth(true));
+        return;
+      }
+      const params = [topInfo.memoryRelationIndex, 1];
+      await sendTransaction('addLike', params, { address, tokenAddress });
+      // console.log('result', result);
+      // if (result) {
+      //   getNumLikes();
+      // }
+    } catch (e) {
+      console.error(e);
+      const message = `An error occurred, please try again later`;
+      enqueueSnackbar(message, { variant: 'error' });
     }
   }
 

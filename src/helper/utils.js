@@ -1,8 +1,8 @@
 import React from 'react';
+import { ecc, codec, AccountType } from '@iceteachain/common';
 import moment from 'moment';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
-import { ecc, codec, AccountType } from '@iceteachain/common';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
 import tweb3 from '../service/tweb3';
@@ -32,19 +32,17 @@ export async function callView(funcName, params) {
 }
 
 async function callReadOrPure(funcName, params, method) {
-  const address = contract;
-
-  try {
-    const result = await tweb3[method](address, funcName, params || []);
-    return tryStringifyJson(result || `${result}`);
-  } catch (error) {
-    console.log('funcName', funcName);
-    console.log(tryStringifyJson(error, true));
-  }
+  // try {
+  const result = await tweb3[method](contract, funcName, params || []);
+  return tryStringifyJson(result || `${result}`);
+  // } catch (error) {
+  // console.log('funcName', funcName);
+  // console.log(tryStringifyJson(error, true));
+  // }
 }
 
 export async function sendTransaction(funcName, params, opts) {
-  // console.log('params', params);
+  console.log('sendTransaction', params);
   const ct = tweb3.contract(contract);
   const result = await ct.methods[funcName](...(params || [])).sendCommit({
     from: opts.address,
@@ -116,47 +114,102 @@ export async function saveFileToIpfs(files) {
  * @param: files: array
  * @return: ipfsId: array
  */
-export async function saveBufferToIpfs(files) {
+export async function saveBufferToIpfs(files, opts = {}) {
   let ipfsId = [];
   try {
     if (files && files.length > 0) {
       const content = files.map(el => {
         return Buffer.from(el);
       });
-      ipfsId = await saveToIpfs(content);
+      if (opts.privateKey && opts.publicKey) {
+        let encodeJsonData = [];
+        for (let i = 0; i < content.length; i++) {
+          encodeJsonData.push(encodeWithPublicKey(content[i], opts.privateKey, opts.publicKey));
+        }
+        encodeJsonData = await Promise.all(encodeJsonData);
+        const encodeBufferData = encodeJsonData.map(el => {
+          return Buffer.from(JSON.stringify(el));
+        });
+        ipfsId = await saveToIpfs(encodeBufferData);
+      } else {
+        ipfsId = await saveToIpfs(content);
+      }
+      console.log('ipfsId', ipfsId);
     }
   } catch (e) {
     console.error(e);
   }
   return ipfsId;
 }
-
+// Return buffer
+export async function decodeImg(cid, privateKey, partnerKey) {
+  const buff = await ipfs.get(cid);
+  const fileJsonData = JSON.parse(buff[0].content.toString());
+  const data = await decodeWithPublicKey(fileJsonData, privateKey, partnerKey, 'img');
+  return data;
+}
 // upload one file
 export async function getJsonFromIpfs(cid, key) {
   const result = {};
-  try {
-    const url = process.env.REACT_APP_IPFS + cid;
-    // const files = await ipfs.get(cid);
-    // const json = `data:image/*;charset=utf-8;base64,${files[0].content.toString('base64')}`;
-    const dimensions = await getImageDimensions(url);
-    result.src = url;
-    result.width = dimensions.w;
-    result.height = dimensions.h;
-    result.key = `Key-${key}`;
-  } catch (e) {
-    console.error(e);
+  let url;
+  // console.log('Buffer.isBuffer(cid)', Buffer.isBuffer(cid), '--', cid);
+  if (Buffer.isBuffer(cid)) {
+    const blob = new Blob([cid], { type: 'image/jpeg' });
+    url = URL.createObjectURL(blob);
+  } else {
+    url = process.env.REACT_APP_IPFS + cid;
   }
+  const dimensions = await getImageDimensions(url);
+  result.src = url;
+  result.width = dimensions.w;
+  result.height = dimensions.h;
+  result.key = `Key-${key}`;
+
   return result;
 }
 
 function getImageDimensions(file) {
-  return new Promise((resolved, rejected) => {
+  return new Promise(resolved => {
     const i = new Image();
     i.onload = () => {
       resolved({ w: i.width, h: i.height });
     };
     i.src = file;
   });
+}
+
+export function saveMemCacheAPI(memoryContent, id) {
+  if (!('caches' in window.self)) {
+    // eslint-disable-next-line no-alert
+    alert('Cache API is not supported.');
+  } else {
+    const cacheName = 'lovelock-private';
+    caches.open(cacheName).then(cache => {
+      if (!memoryContent) {
+        // eslint-disable-next-line no-alert
+        alert('Please select a file first!');
+        return;
+      }
+      const response = new Response(JSON.stringify(memoryContent));
+      cache.put(`memo/${id}`, response).then(() => {
+        // alert('Saved!');
+      });
+    });
+  }
+}
+
+export async function loadMemCacheAPI(id) {
+  let json;
+  if (!('caches' in window.self)) {
+    alert('Cache API is not supported.');
+  } else {
+    const cacheName = 'lovelock-private';
+    const cache = await caches.open(cacheName);
+    const response = await cache.match(`memo/${id}`);
+    json = response && (await response.json());
+  }
+  // console.log('response', json);
+  return json;
 }
 
 export function TimeWithFormat(props) {
@@ -316,17 +369,17 @@ export function diffTime(time) {
 }
 
 export async function isAliasRegisted(username) {
-  try {
-    const alias = 'account.'.concat(username);
-    const info = await tweb3
-      .contract('system.alias')
-      .methods.resolve(alias)
-      .call();
-    return info;
-  } catch (err) {
-    console.log(tryStringifyJson(err));
-    throw err;
-  }
+  // try {
+  const alias = 'account.'.concat(username);
+  const info = await tweb3
+    .contract('system.alias')
+    .methods.resolve(alias)
+    .call();
+  return info;
+  // } catch (err) {
+  // console.log(tryStringifyJson(err));
+  // throw err;
+  // }
 }
 const cacheAlias = {};
 export async function getAlias(address) {
@@ -356,80 +409,77 @@ export async function savetoLocalStorage(address, keyObject) {
 }
 let cachesharekey = {};
 export async function generateSharedKey(privateKeyA, publicKeyB) {
+  let key = '';
   // console.log('a-b', privateKeyA, '-', publicKeyB);
   const objkey = privateKeyA + publicKeyB;
   if (cachesharekey[objkey]) {
-    // console.log('cachesharekey', cachesharekey[objkey]);
-    return cachesharekey[objkey];
+    key = cachesharekey[objkey];
+  } else {
+    const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
+    key = codec.toString(sharekey);
+    cachesharekey = { [objkey]: key };
   }
-  const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
-  const result = codec.toString(sharekey);
-  cachesharekey = { [objkey]: result };
-  return result;
+  return key;
 }
 export async function encodeWithSharedKey(data, sharekey) {
-  const encodeData = encodeTx(data, sharekey, { noAddress: true });
-  return encodeData;
+  const encodeJsonData = encodeTx(data, sharekey, { noAddress: true });
+  return encodeJsonData;
 }
-export async function decodeWithSharedKey(data, sharekey) {
-  const decodeData = decodeTx(sharekey, data);
-  return decodeData;
+export async function decodeWithSharedKey(data, sharekey, encode) {
+  return decodeTx(sharekey, data, encode);
 }
 export async function encodeWithPublicKey(data, privateKeyA, publicKeyB) {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
   return encodeWithSharedKey(data, sharekey);
 }
-export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
+export async function decodeWithPublicKey(data, privateKeyA, publicKeyB, encode = '') {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
-  return decodeWithSharedKey(data, sharekey);
+  return decodeWithSharedKey(data, sharekey, encode);
 }
+
 export const wallet = {
-  createAccountWithMneomnic(mnemonic, index = 0) {
+  createAccountWithMneomnic(nemon, index = 0) {
+    let mnemonic = nemon;
     if (!mnemonic) mnemonic = bip39.generateMnemonic();
+
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
     const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
 
-    return {
-      mnemonic,
-      privateKey,
-      address,
-      publicKey,
-    };
+    return { mnemonic, privateKey, publicKey, address };
   },
-  recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.REGULAR_ACCOUNT }) {
-    const typeTMP =
-      options.type === AccountType.BANK_ACCOUNT ? AccountType.BANK_ACCOUNT : AccountType.REGULAR_ACCOUNT;
-    let privateKey = '';
-    let address = '';
-    let indexBase = '';
-
-    do {
-      indexBase = options.index;
-      privateKey = this.getPrivateKeyFromMnemonic(mnemonic, options.index);
-      ({ address } = ecc.toPubKeyAndAddress(privateKey));
-      options.index += 1;
-      // console.log('index', options.index);
-    } while (options.index < 100 && !codec.isAddressType(address, typeTMP));
-
-    return {
-      privateKey,
-      address,
-      index: indexBase,
-    };
+  // default regular account.
+  getAccountFromMneomnic(nemon, type = AccountType.REGULAR_ACCOUNT) {
+    let pkey;
+    let found;
+    let resp;
+    let mnemonic = nemon;
+    if (!mnemonic) mnemonic = bip39.generateMnemonic();
+    const hdkey = this.getHdKeyFromMnemonic(mnemonic);
+    for (let i = 0; !found; i++) {
+      if (i > 100) {
+        // there must be something wrong, because the ratio of regular account is 50%
+        throw new Error('Too many tries deriving regular account from seed.');
+      }
+      pkey = codec.toKeyString(hdkey.deriveChild(i).privateKey);
+      const { address, publicKey } = ecc.toPubKeyAndAddress(pkey);
+      found = codec.isAddressType(address, type);
+      resp = { mnemonic, privateKey: pkey, publicKey, address };
+    }
+    return resp;
   },
-
   getPrivateKeyFromMnemonic(mnemonic, index = 0) {
+    const hdkey = this.getHdKeyFromMnemonic(mnemonic);
+    const privateKey = hdkey.deriveChild(index);
+    return codec.toKeyString(privateKey);
+  },
+  getHdKeyFromMnemonic(mnemonic) {
     if (!bip39.validateMnemonic(mnemonic)) {
       throw new Error('wrong mnemonic format');
     }
-
     const seed = bip39.mnemonicToSeedSync(mnemonic);
-    const hdkey = HDKey.fromMasterSeed(seed);
-    const childkey = hdkey.derive(paths + index);
-
-    return codec.toKeyString(childkey.privateKey);
+    const hdkey = HDKey.fromMasterSeed(seed).derive(paths);
+    return hdkey;
   },
-
   recoverAccountFromPrivateKey(keyStore, password, address) {
     const privateKey = this.getPrivateKeyFromKeyStore(keyStore, password);
     if (this.getAddressFromPrivateKey(privateKey) !== address) {
@@ -437,39 +487,15 @@ export const wallet = {
     }
     return privateKey;
   },
-
   getPrivateKeyFromKeyStore(keyStore, password) {
     const account = decode(password, keyStore);
     const privateKey = codec.toString(account.privateKey);
     return privateKey;
   },
-
   getAddressFromPrivateKey(privateKey) {
     const { address } = ecc.toPubKeyAndAddressBuffer(privateKey);
     return address;
   },
-
-  // encryptMnemonic(mnemonic, password) {
-  //   const options = {
-  //     kdf: 'pbkdf2',
-  //     cipher: 'aes-128-ctr',
-  //     kdfparams: {
-  //       c: 262144,
-  //       dklen: 32,
-  //       prf: 'hmac-sha256',
-  //     },
-  //     noAddress: true,
-  //   };
-
-  //   const dk = keythereum.create();
-  //   return keythereum.dump(password, mnemonic, dk.salt, dk.iv, options);
-  // },
-
-  // decryptMnemonic(mnemonicObj, password) {
-  //   // type uint8array
-  //   const mnemonic = keythereum.recover(password, mnemonicObj);
-  //   return new TextDecoder('utf-8').decode(mnemonic).replace(/%20/g, ' ');
-  // },
 };
 
 export const checkDevice = {
