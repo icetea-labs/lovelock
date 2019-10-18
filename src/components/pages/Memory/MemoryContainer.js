@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { useSnackbar } from 'notistack';
 
-import { getTagsInfo, getJsonFromIpfs } from '../../../helper';
+import { getTagsInfo, getJsonFromIpfs, IsJsonString } from '../../../helper';
 import MemoryContent from './MemoryContent';
 import * as actions from '../../../store/actions';
 
@@ -66,7 +66,13 @@ function MemoryContainer(props) {
             // obj.info.hash = [];
             obj.isUnlock = false;
           }
-
+          obj.isBlog = false;
+          if (IsJsonString(obj.content)) {
+            const content = JSON.parse(obj.content);
+            if (content.ipfsHash) {
+              obj.isBlog = true;
+            }
+          }
           newMemoryList.push(obj);
         }
         newMemoryList = newMemoryList.reverse();

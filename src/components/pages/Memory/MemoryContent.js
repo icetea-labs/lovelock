@@ -174,6 +174,7 @@ function MemoryContent(props) {
   useEffect(() => {
     serialMemory();
   }, []);
+
   async function serialMemory() {
     let mem = memory;
     if (memory.isPrivate) {
@@ -433,7 +434,7 @@ function MemoryContent(props) {
           </Typography>
         ) : (
           <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-            {isBlog ? previewEditorMemory() : memoryDecrypted.content}
+            {memoryDecrypted.isBlog ? previewEditorMemory() : memoryDecrypted.content}
           </Typography>
         )}
         {decodeEditorMemory() && (
