@@ -10,7 +10,6 @@ import { useSnackbar } from 'notistack';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
-import { Palette } from 'react-palette';
 
 import { TimeWithFormat, decodeWithPublicKey, callView, getTagsInfo } from '../../../helper';
 import { AvatarPro } from '../../elements';
@@ -19,6 +18,8 @@ import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
+
+import BlogShowcase from './BlogShowcase'
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -69,6 +70,7 @@ const useStyles = makeStyles(theme => ({
   blogImgWrp: {
     position: 'relative',
     display: 'block',
+    backgroundColor: '#333',
     padding: '0 0 16px',
     cursor: 'pointer',
     '&:hover $blogTitleImg, &:hover $blogFirstLine': {
@@ -77,6 +79,7 @@ const useStyles = makeStyles(theme => ({
   },
   blogTitleImg: {
     position: 'absolute',
+    backgroundColor: '#666',
     top: 12,
     left: 12,
     padding: '3px 10px',
@@ -296,7 +299,7 @@ export default function MemoryContent(props) {
           if (!firstImg && blocks[i].type === 'image') {
             firstImg = blocks[i].data.url;
           }
-          if (!firstLine && blocks[i].type !== 'image') {
+          if (!firstLine) {
             firstLine = blocks[i].text;
             if (firstLine.length > 200) {
               firstLine = firstLine.slice(0, 200) + '…';
@@ -304,28 +307,10 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break;
         }
+        firstImg = firstImg ? firstImg : '/static/img/memory-default.png'
 
-        return (
-          <>
-            {firstImg && (
-              <Palette src={firstImg}>
-                {({ data }) => (
-                  <span
-                    className={classes.blogImgWrp}
-                    style={{ backgroundColor: data.darkVibrant }}
-                    onClick={() => openMemory(memory.id)}
-                  >
-                    <span className={classes.blogTitleImg} style={{ backgroundColor: data.vibrant }}>
-                      BLOG
-                    </span>
-                    <img src={firstImg} className={classes.blogImgTimeline} />
-                    {firstLine && <span className={classes.blogFirstLine}>{firstLine}</span>}
-                  </span>
-                )}
-              </Palette>
-            )}
-          </>
-        );
+        return <BlogShowcase classes={classes} firstImg={firstImg} firstLine={firstLine}
+          openHandler={() => openMemory(memory.id)} />
       }
     } catch (e) {}
     return memoryContent;

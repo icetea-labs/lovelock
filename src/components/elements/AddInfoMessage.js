@@ -8,6 +8,7 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import ZoomImage from './AutoZoomImage'
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -121,8 +122,9 @@ const ImgUploadPreview = styled.div`
     }
     img {
       animation: fade 0.6s ease-in;
-      width: 100px;
-      height: 100px;
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
     }
     @keyframes fade {
       0% {
@@ -138,7 +140,7 @@ const AddMoreImg = styled.span`
   display: inline-block;
   margin-left: 5px;
   vertical-align: top;
-  height: 112px;
+  height: 172px;
   /* width: 100%; */
   .addImgBox {
     position: relative;
@@ -155,9 +157,9 @@ const AddMoreImg = styled.span`
     border-radius: 2px;
     box-sizing: border-box;
     display: inline-block;
-    height: 100px;
+    height: 160px;
     margin-right: 5px;
-    min-width: 100px;
+    min-width: 160px;
     position: relative;
     width: auto;
 
@@ -189,7 +191,7 @@ const AddMoreImg = styled.span`
 const useStyles = makeStyles(theme => ({
   img: {
     display: 'block',
-    height: 100,
+    height: 160,
     '&:hover': {
       '& $icon': {
         display: 'block',
@@ -281,9 +283,10 @@ export default function AddInfoMessage(props) {
                 {picPreview.map(({ src }, index) => (
                   <div key={index} className="imgContent">
                     <GridListTile className={classes.img}>
-                      <img src={src} alt="" onLoad={() => URL.revokeObjectURL(src)} />
+                      <ZoomImage src={src} alt="photo" onLoad={() => URL.revokeObjectURL(src)} />
                       <GridListTileBar
                         className={classes.titleBar}
+                        style={{background: 'none'}}
                         titlePosition="top"
                         actionIcon={
                           <IconButton onClick={() => removeFile(index)}>
