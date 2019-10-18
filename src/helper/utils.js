@@ -178,6 +178,15 @@ function getImageDimensions(file) {
   });
 }
 
+export function IsJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
 export function saveMemCacheAPI(memoryContent, id) {
   if (!('caches' in window.self)) {
     // eslint-disable-next-line no-alert
