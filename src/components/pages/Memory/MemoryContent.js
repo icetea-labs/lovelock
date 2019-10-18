@@ -19,7 +19,7 @@ import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 
-import BlogShowcase from './BlogShowcase'
+import BlogShowcase from './BlogShowcase';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -254,11 +254,13 @@ export default function MemoryContent(props) {
     setNumComment(number);
   }
 
-  const textInput = useRef(null);
+  const textInput = useRef('');
   function handerShowComment() {
     setShowComment(true);
     setTimeout(() => {
-      textInput.current.focus();
+      if (textInput.current) {
+        textInput.current.focus();
+      }
     }, 100);
   }
 
@@ -307,10 +309,16 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break;
         }
-        firstImg = firstImg ? firstImg : '/static/img/memory-default.png'
+        firstImg = firstImg ? firstImg : '/static/img/memory-default.png';
 
-        return <BlogShowcase classes={classes} firstImg={firstImg} firstLine={firstLine}
-          openHandler={() => openMemory(memory.id)} />
+        return (
+          <BlogShowcase
+            classes={classes}
+            firstImg={firstImg}
+            firstLine={firstLine}
+            openHandler={() => openMemory(memory.id)}
+          />
+        );
       }
     } catch (e) {}
     return memoryContent;
