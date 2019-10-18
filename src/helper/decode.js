@@ -6,9 +6,11 @@ function decode(password, keyObject) {
   const account = getAccount(privateKey);
   return account;
 }
-function decodeTx(password, keyObject) {
-  const data = keythereum.recover(password, keyObject);
-  return new TextDecoder('utf-8').decode(data).replace(/%20/g, ' ');
+function decodeTx(password, keyObject, encode) {
+  let data = keythereum.recover(password, keyObject);
+  if (!encode) data = new TextDecoder('utf-8').decode(data).replace(/%20/g, ' ');
+  return data;
 }
+
 export { decodeTx, decode };
 export default decode;

@@ -25,7 +25,7 @@ function encodeTx(data, password, ops) {
     kdf: 'pbkdf2',
     cipher: 'aes-128-ctr',
     kdfparams: {
-      c: 262144,
+      c: 1,
       dklen: 32,
       prf: 'hmac-sha256',
     },

@@ -65,30 +65,43 @@ class LoveLock {
   setM2p = value => this.setState('m2p', value);
 
   @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
-
     // cache some variables
     const sender = msg.sender;
     const isPrivate = false;
-    const isJournal = sender === receiver
-    const isCrush = receiver === this.botAddress
+    const isJournal = sender === receiver;
+    const isCrush = receiver === this.botAddress;
 
     // validate data
-    
+
     if (!isCrush) {
       expect(bot_info == null, 'bot_info must be null for a regular lock.');
     } else {
-      bot_info = validate(bot_info, Joi.object({
-        firstname: Joi.string(),
-        lastname: Joi.string(),
-        botAva: Joi.string(),
-        botReply: Joi.string().required()
-      }).label('bot_info').required().or('firstname', 'lastname'));
+      bot_info = validate(
+        bot_info,
+        Joi.object({
+          firstname: Joi.string(),
+          lastname: Joi.string(),
+          botAva: Joi.string(),
+          botReply: Joi.string().required(),
+        })
+          .label('bot_info')
+          .required()
+          .or('firstname', 'lastname')
+      );
     }
 
-    s_info = validate(s_info, Joi.object({
-      hash: Joi.array().min(0).max(1).items(Joi.string()),
-      date: Joi.date().timestamp().raw()
-    }));
+    s_info = validate(
+      s_info,
+      Joi.object({
+        hash: Joi.array()
+          .min(0)
+          .max(1)
+          .items(Joi.string()),
+        date: Joi.date()
+          .timestamp()
+          .raw(),
+      })
+    );
     s_info.date = s_info.date ?? block.timestamp;
 
     let pendingPropose = {};
@@ -112,7 +125,7 @@ class LoveLock {
       memoryIndex: [],
       bot_info,
       memoryRelationIndex: '',
-      ...pendingPropose
+      ...pendingPropose,
     };
 
     //new pending propose
@@ -227,7 +240,7 @@ class LoveLock {
       [pro, proposes] = this.getPropose(proIndex);
     }
 
-    expectProposeOwners(pro, 'Cannot add memory')
+    expectProposeOwners(pro, 'Cannot add memory');
     const sender = msg.sender;
     const memory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
 
@@ -284,8 +297,8 @@ class LoveLock {
 
     // save the memeory
     this.setMemories(memories);
-
-    this.emitEvent('addLike', { by: msg.sender, memoIndex }, ['by', 'memoIndex']);
+    const eventName = 'addLike_' + memoIndex;
+    this.emitEvent(eventName, { by: msg.sender, memoIndex }, ['by', 'memoIndex']);
   }
 
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
