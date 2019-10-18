@@ -176,7 +176,7 @@ function RegisterUsername(props) {
           setLoading(false);
           setStep('two');
         } catch (error) {
-          console.log('error', error);
+          console.error(error);
           const message = `An error has occured. Detail:${error}`;
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
@@ -186,13 +186,8 @@ function RegisterUsername(props) {
   }
 
   function createAccountWithMneomnic() {
-    const resp = wallet.createAccountWithMneomnic();
-    return {
-      privateKey: resp.privateKey,
-      address: resp.address,
-      mnemonic: resp.mnemonic,
-      publicKey: resp.publicKey,
-    };
+    const { mnemonic, privateKey, publicKey, address } = wallet.getAccountFromMneomnic();
+    return { mnemonic, privateKey, publicKey, address };
   }
 
   function gotoLogin() {
@@ -285,8 +280,8 @@ function RegisterUsername(props) {
         />
         <WarningPass>
           <p>
-            Please use a password manager to keep your password. Lovelock won't be able to reset password if you forgot
-            it.
+            Please use a password manager to keep your password. Lovelock won&lsquo;t be able to reset password if you
+            forgot it.
           </p>
         </WarningPass>
         <TextValidator

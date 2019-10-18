@@ -1,15 +1,15 @@
 import React from 'react';
+import { ecc, codec, AccountType } from '@iceteachain/common';
 import moment from 'moment';
 import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
-import { ecc, codec, AccountType } from '@iceteachain/common';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
 import tweb3 from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
-const paths = 'm’/44’/349’/0’/0/';
+const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 
@@ -42,7 +42,7 @@ async function callReadOrPure(funcName, params, method) {
 }
 
 export async function sendTransaction(funcName, params, opts) {
-  // console.log('params', params);
+  console.log('sendTransaction', params);
   const ct = tweb3.contract(contract);
   const result = await ct.methods[funcName](...(params || [])).sendCommit({
     from: opts.address,
@@ -114,36 +114,57 @@ export async function saveFileToIpfs(files) {
  * @param: files: array
  * @return: ipfsId: array
  */
-export async function saveBufferToIpfs(files) {
+export async function saveBufferToIpfs(files, opts = {}) {
   let ipfsId = [];
   try {
     if (files && files.length > 0) {
       const content = files.map(el => {
         return Buffer.from(el);
       });
-      ipfsId = await saveToIpfs(content);
+      if (opts.privateKey && opts.publicKey) {
+        let encodeJsonData = [];
+        for (let i = 0; i < content.length; i++) {
+          encodeJsonData.push(encodeWithPublicKey(content[i], opts.privateKey, opts.publicKey));
+        }
+        encodeJsonData = await Promise.all(encodeJsonData);
+        const encodeBufferData = encodeJsonData.map(el => {
+          return Buffer.from(JSON.stringify(el));
+        });
+        ipfsId = await saveToIpfs(encodeBufferData);
+      } else {
+        ipfsId = await saveToIpfs(content);
+      }
+      console.log('ipfsId', ipfsId);
     }
   } catch (e) {
     console.error(e);
   }
   return ipfsId;
 }
-
+// Return buffer
+export async function decodeImg(cid, privateKey, partnerKey) {
+  const buff = await ipfs.get(cid);
+  const fileJsonData = JSON.parse(buff[0].content.toString());
+  const data = await decodeWithPublicKey(fileJsonData, privateKey, partnerKey, 'img');
+  return data;
+}
 // upload one file
 export async function getJsonFromIpfs(cid, key) {
   const result = {};
-  try {
-    const url = process.env.REACT_APP_IPFS + cid;
-    // const files = await ipfs.get(cid);
-    // const json = `data:image/*;charset=utf-8;base64,${files[0].content.toString('base64')}`;
-    const dimensions = await getImageDimensions(url);
-    result.src = url;
-    result.width = dimensions.w;
-    result.height = dimensions.h;
-    result.key = `Key-${key}`;
-  } catch (e) {
-    console.error(e);
+  let url;
+  // console.log('Buffer.isBuffer(cid)', Buffer.isBuffer(cid), '--', cid);
+  if (Buffer.isBuffer(cid)) {
+    const blob = new Blob([cid], { type: 'image/jpeg' });
+    url = URL.createObjectURL(blob);
+  } else {
+    url = process.env.REACT_APP_IPFS + cid;
   }
+  const dimensions = await getImageDimensions(url);
+  result.src = url;
+  result.width = dimensions.w;
+  result.height = dimensions.h;
+  result.key = `Key-${key}`;
+
   return result;
 }
 
@@ -367,71 +388,64 @@ export async function generateSharedKey(privateKeyA, publicKeyB) {
   return key;
 }
 export async function encodeWithSharedKey(data, sharekey) {
-  const encodeData = encodeTx(data, sharekey, { noAddress: true });
-  return encodeData;
+  const encodeJsonData = encodeTx(data, sharekey, { noAddress: true });
+  return encodeJsonData;
 }
-export async function decodeWithSharedKey(data, sharekey) {
-  const decodeData = decodeTx(sharekey, data);
-  return decodeData;
+export async function decodeWithSharedKey(data, sharekey, encode) {
+  return decodeTx(sharekey, data, encode);
 }
 export async function encodeWithPublicKey(data, privateKeyA, publicKeyB) {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
   return encodeWithSharedKey(data, sharekey);
 }
-export async function decodeWithPublicKey(data, privateKeyA, publicKeyB) {
+export async function decodeWithPublicKey(data, privateKeyA, publicKeyB, encode = '') {
   const sharekey = await generateSharedKey(privateKeyA, publicKeyB);
-  return decodeWithSharedKey(data, sharekey);
+  return decodeWithSharedKey(data, sharekey, encode);
 }
+
 export const wallet = {
   createAccountWithMneomnic(nemon, index = 0) {
     let mnemonic = nemon;
     if (!mnemonic) mnemonic = bip39.generateMnemonic();
+
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
     const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
 
-    return { mnemonic, privateKey, address, publicKey };
+    return { mnemonic, privateKey, publicKey, address };
   },
-  recoverAccountFromMneomnic(mnemonic, options = { index: 0, type: AccountType.REGULAR_ACCOUNT }) {
-    const typeTMP = options.type === AccountType.BANK_ACCOUNT ? AccountType.BANK_ACCOUNT : AccountType.REGULAR_ACCOUNT;
-    let { index } = options;
-    let privateKey = '';
-    let address = '';
-    let indexKey = '';
-
-    if (!bip39.validateMnemonic(mnemonic)) {
-      throw new Error('wrong mnemonic format');
+  // default regular account.
+  getAccountFromMneomnic(nemon, type = AccountType.REGULAR_ACCOUNT) {
+    let pkey;
+    let found;
+    let resp;
+    let mnemonic = nemon;
+    if (!mnemonic) mnemonic = bip39.generateMnemonic();
+    const hdkey = this.getHdKeyFromMnemonic(mnemonic);
+    for (let i = 0; !found; i++) {
+      if (i > 100) {
+        // there must be something wrong, because the ratio of regular account is 50%
+        throw new Error('Too many tries deriving regular account from seed.');
+      }
+      pkey = codec.toKeyString(hdkey.deriveChild(i).privateKey);
+      const { address, publicKey } = ecc.toPubKeyAndAddress(pkey);
+      found = codec.isAddressType(address, type);
+      resp = { mnemonic, privateKey: pkey, publicKey, address };
     }
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
-    const hdkey = HDKey.fromMasterSeed(seed);
-
-    do {
-      indexKey = index;
-      privateKey = this.getPrivateKeyFromHdKey(hdkey, indexKey);
-      ({ address } = ecc.toPubKeyAndAddress(privateKey));
-      index += 1;
-      // console.log('index', options.index);
-    } while (index < 100 && !codec.isAddressType(address, typeTMP));
-
-    return { privateKey, address, index: indexKey };
+    return resp;
   },
-
-  getPrivateKeyFromHdKey(hdkey, index = 0) {
-    const childkey = hdkey.derive(paths + index);
-    return codec.toKeyString(childkey.privateKey);
-  },
-
   getPrivateKeyFromMnemonic(mnemonic, index = 0) {
+    const hdkey = this.getHdKeyFromMnemonic(mnemonic);
+    const privateKey = hdkey.deriveChild(index);
+    return codec.toKeyString(privateKey);
+  },
+  getHdKeyFromMnemonic(mnemonic) {
     if (!bip39.validateMnemonic(mnemonic)) {
       throw new Error('wrong mnemonic format');
     }
-
     const seed = bip39.mnemonicToSeedSync(mnemonic);
-    const hdkey = HDKey.fromMasterSeed(seed);
-    const childkey = hdkey.derive(paths + index);
-
-    return codec.toKeyString(childkey.privateKey);
+    const hdkey = HDKey.fromMasterSeed(seed).derive(paths);
+    return hdkey;
   },
-
   recoverAccountFromPrivateKey(keyStore, password, address) {
     const privateKey = this.getPrivateKeyFromKeyStore(keyStore, password);
     if (this.getAddressFromPrivateKey(privateKey) !== address) {
@@ -439,37 +453,13 @@ export const wallet = {
     }
     return privateKey;
   },
-
   getPrivateKeyFromKeyStore(keyStore, password) {
     const account = decode(password, keyStore);
     const privateKey = codec.toString(account.privateKey);
     return privateKey;
   },
-
   getAddressFromPrivateKey(privateKey) {
     const { address } = ecc.toPubKeyAndAddressBuffer(privateKey);
     return address;
   },
-
-  // encryptMnemonic(mnemonic, password) {
-  //   const options = {
-  //     kdf: 'pbkdf2',
-  //     cipher: 'aes-128-ctr',
-  //     kdfparams: {
-  //       c: 262144,
-  //       dklen: 32,
-  //       prf: 'hmac-sha256',
-  //     },
-  //     noAddress: true,
-  //   };
-
-  //   const dk = keythereum.create();
-  //   return keythereum.dump(password, mnemonic, dk.salt, dk.iv, options);
-  // },
-
-  // decryptMnemonic(mnemonicObj, password) {
-  //   // type uint8array
-  //   const mnemonic = keythereum.recover(password, mnemonicObj);
-  //   return new TextDecoder('utf-8').decode(mnemonic).replace(/%20/g, ' ');
-  // },
 };

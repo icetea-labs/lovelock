@@ -42,21 +42,10 @@ function MemoryContainer(props) {
     // console.log('memorydata', memorydata);
     setTimeout(async () => {
       try {
-        for (let i = 0; i < memorydata.length; i++) {
-          const obj = memorydata[i];
-          if (obj.isPrivate && !privateKey) {
-            setNeedAuth(true);
-            break;
-          }
-        }
-
-        let tags = [];
-        for (let i = 0; i < memorydata.length; i++) {
-          const reps = getTagsInfo(memorydata[i].sender);
-          tags.push(reps);
-        }
+        let tags = memorydata.map(mem => {
+          return getTagsInfo(mem.sender);
+        });
         tags = await Promise.all(tags);
-
         for (let i = 0; i < memorydata.length; i++) {
           const obj = memorydata[i];
           obj.name = tags[i]['display-name'];
@@ -67,16 +56,23 @@ function MemoryContainer(props) {
             const receiverTags = await getTagsInfo(obj.receiver);
             obj.r_name = receiverTags['display-name'];
           }
-          for (let j = 0; j < obj.info.hash.length; j++) {
-            // eslint-disable-next-line no-await-in-loop
-            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+          if (!obj.isPrivate) {
+            obj.isLocked = false;
+            for (let j = 0; j < obj.info.hash.length; j++) {
+              // eslint-disable-next-line no-await-in-loop
+              obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+            }
+          } else {
+            // obj.info.hash = [];
+            obj.isLocked = true;
           }
+
           newMemoryList.push(obj);
         }
-
         newMemoryList = newMemoryList.reverse();
         setMemory(newMemoryList);
-      } catch (e) {
+      } catch (error) {
+        console.error(error);
         const message = 'Load memory error!';
         enqueueSnackbar(message, { variant: 'error' });
       }

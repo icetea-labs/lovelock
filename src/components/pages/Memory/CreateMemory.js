@@ -125,7 +125,7 @@ export default function CreateMemory(props) {
   const layoutRef = React.createRef();
 
   const account = useSelector(state => state.account);
-  const propose = useSelector(state => state.loveinfo.propose);
+  // const propose = useSelector(state => state.loveinfo.propose);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -251,7 +251,7 @@ export default function CreateMemory(props) {
 
       if (privacy) {
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        const hash = await saveBufferToIpfs(filesBuffer);
+        const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
         const newinfo = { date: memoDate, hash };
         params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
       } else {
