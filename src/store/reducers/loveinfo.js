@@ -2,7 +2,6 @@ import { actionTypes } from '../actions/loveinfo';
 
 const initialState = {
   propose: [],
-  currentProIndex: 0,
   memory: [],
 };
 const userInfo = (state = initialState, action) => {
@@ -24,10 +23,6 @@ const userInfo = (state = initialState, action) => {
         return el;
       });
       return Object.assign({}, state, { propose: [...newProposes] });
-    case actionTypes.SET_CURRENTIDX:
-      return Object.assign({}, state, {
-        currentProIndex: action.data,
-      });
     case actionTypes.SET_MEMORY:
       return Object.assign({}, state, {
         memory: action.data,

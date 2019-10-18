@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { memorydata, memoryList, setNeedAuth, setMemory, privateKey } = props;
+  const { memorydata, memoryList, setMemory } = props;
   const [loading, setLoading] = useState(false);
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
@@ -57,14 +57,14 @@ function MemoryContainer(props) {
             obj.r_name = receiverTags['display-name'];
           }
           if (!obj.isPrivate) {
-            obj.isLocked = false;
+            obj.isUnlock = true;
             for (let j = 0; j < obj.info.hash.length; j++) {
               // eslint-disable-next-line no-await-in-loop
               obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
             }
           } else {
             // obj.info.hash = [];
-            obj.isLocked = true;
+            obj.isUnlock = false;
           }
 
           newMemoryList.push(obj);

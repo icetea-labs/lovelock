@@ -66,8 +66,15 @@ function ByMnemonic(props) {
         }
         // console.log('getAddressFromPrivateKey', privateKey);
         const address = wallet.getAddressFromPrivateKey(privateKey);
-        tweb3.wallet.importAccount(privateKey);
+        const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
+
+        // check if account is a regular address
+        if (!tweb3.utils.isRegularAccount(acc.address)) {
+          throw new Error(
+            'The recovery phrase is for a bank account. LoveLock only accepts regular (non-bank) account.'
+          );
+        }
 
         const token = tweb3.wallet.createRegularAccount();
         const ms = tweb3.contract('system.did').methods;
@@ -108,7 +115,7 @@ function ByMnemonic(props) {
             history.push('/');
           });
       } catch (error) {
-        console.error('error', error);
+        console.error(error);
         const message = `An error occurred, please try again later`;
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);

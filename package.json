@@ -26,6 +26,7 @@
     "medium-zoom": "^1.0.4",
     "moment": "^2.24.0",
     "node-sass": "^4.12.0",
+    "node-vibrant": "^3.1.4",
     "notistack": "^0.9.0",
     "prismjs": "^1.17.1",
     "rc-notification": "^3.3.1",
@@ -39,11 +40,11 @@
     "react-images": "^1.0.0",
     "react-material-ui-form-validator": "^2.0.9",
     "react-mentions": "^3.1.1",
-    "react-palette": "^1.0.1",
     "react-photo-gallery": "^8.0.0",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1",
+    "react-transition-group": "^4.3.0",
     "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",
     "redux-persist": "^6.0.0",
@@ -89,6 +90,6 @@
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.11.0",
     "prettier": "^1.17.1",
-    "react-scripts": "^2.1.8"
+    "react-scripts": "^3.2.0"
   }
 }

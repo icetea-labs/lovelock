@@ -201,8 +201,8 @@ export default function CreateMemory(props) {
       let buffer = Buffer.from(JSON.stringify({ ...editorContent }));
       let submitContent = await saveFileToIpfs([buffer]);
       handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
-    } else {
-      let message = 'Please enter memory content or add a photo.';
+    }else{
+      let message = 'Please enter memory content.'
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
@@ -210,10 +210,8 @@ export default function CreateMemory(props) {
   function validateEditorContent() {
     let blocks = editorContent.blocks;
     for (let i in blocks) {
-      if (blocks[i].type == 'image') {
-        return true;
-      } else if (blocks[i].text.trim() != '') {
-        return true;
+      if (blocks[i].text.trim() != '') {
+        return true
       }
     }
     return false;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CardActions, Button, Typography } from '@material-ui/core';
+import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
@@ -85,17 +86,17 @@ export default function MemoryActionButton(props) {
   useEffect(() => {
     const returnValue = watchAddlike();
     return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => (unsubscribe && unsubscribe()));
+      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
     };
   }, [memoryIndex]);
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
       if (error) {
-        console.error('watchAddlike', error);
-        const message = 'Watch new like error';
+        const message = 'Watch addlike error';
         enqueueSnackbar(message, { variant: 'error' });
+        console.log('watchAddlike', error);
       } else {
         // console.log('watchAddlike', result);
         getNumLikes();
@@ -135,9 +136,12 @@ export default function MemoryActionButton(props) {
       </Button>
 
       <Button className={classes.button} onClick={handerShowComment}>
-        {/* <CommentIcon fontSize="small" className={classes.rightIcon} /> */}
-        {numComment > 0 && (numComment === 1 ? `${numComment} Comment` : `${numComment} Comments`)}
-        {numComment === 0 && '0 Comment'}
+        <CommentIcon fontSize="small" className={classes.rightIcon} />
+        <Typography component="span" variant="body2">
+          {numComment}
+        </Typography>
+        {/* {numComment > 0 && (numComment === 1 ? `${numComment} Comment` : `${numComment} Comments`)}
+        {numComment === 0 && '0 Comment'} */}
       </Button>
       {/* <Button className={classes.button}>
         <ShareIcon fontSize="small" className={classes.rightIcon} />

@@ -49,7 +49,7 @@ function LoadPromise(props) {
         setBotInfo(lastBotInfo);
         setSendInfo(lastSendInfo);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
   }
