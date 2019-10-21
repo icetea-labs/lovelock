@@ -212,7 +212,7 @@ export default function CreateMemory(props) {
       memoryContent = null
       delDraft()
     } else {
-      let message = 'Please enter memory content.'
+      let message = 'Please enter memory content.';
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
@@ -221,7 +221,7 @@ export default function CreateMemory(props) {
     let blocks = editorContent.blocks;
     for (let i in blocks) {
       if (blocks[i].text.trim() != '') {
-        return true
+        return true;
       }
     }
     return false;

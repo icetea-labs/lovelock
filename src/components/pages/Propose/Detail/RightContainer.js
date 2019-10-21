@@ -77,7 +77,7 @@ function RightContrainer(props) {
 
   return isLoginisSender ? (
     <RightBox>
-      <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />
+      {address && <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />}
       <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />
     </RightBox>
   ) : (

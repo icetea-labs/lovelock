@@ -152,7 +152,7 @@ function MemoryContent(props) {
   // const propose = useSelector(state => state.loveinfo.propose);
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
-  const [memoryContent, setMemoryContent] = useState('');
+  // const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
@@ -167,10 +167,10 @@ function MemoryContent(props) {
   //   }
   // }, [privateKey, proIndex]);
 
-  useEffect(() => {
-    // setMemoryDecrypted(memory);
-    getMemoryContent();
-  }, [memory]);
+  // useEffect(() => {
+  //   // setMemoryDecrypted(memory);
+  //   getMemoryContent();
+  // }, [memory]);
 
   useEffect(() => {
     serialMemory();
@@ -178,7 +178,12 @@ function MemoryContent(props) {
 
   async function serialMemory() {
     let mem = memory;
-    if (memory.isPrivate) {
+    if (memory.isBlog) {
+      const contentBlog = JSON.parse(memory.content);
+      const data = await fetch(process.env.REACT_APP_IPFS + contentBlog.ipfsHash);
+      const content = await data.json();
+      mem.content = JSON.stringify(content);
+    } else if (memory.isPrivate) {
       const memCache = await loadMemCacheAPI(memory.id);
       if (memCache) {
         mem = memCache;
@@ -195,16 +200,16 @@ function MemoryContent(props) {
   }
   useEffect(() => {
     if (window.location.search !== '') {
-      let url_string = window.location.href;
-      let url = new URL(url_string);
+      const url_string = window.location.href;
+      const url = new URL(url_string);
       if (memory.id == url.searchParams.get('memory')) setOpenModal(true);
     }
   });
 
   useEffect(() => {
     (async () => {
-      let proposes = await callView('getProposeByIndex', [proIndex]);
-      let propose = proposes[0];
+      const proposes = await callView('getProposeByIndex', [proIndex]);
+      const propose = proposes[0];
       const { sender, receiver } = propose;
 
       const senderTags = await getTagsInfo(sender);
@@ -219,7 +224,7 @@ function MemoryContent(props) {
         propose.r_avatar = botInfo.botAva;
         propose.r_content = botInfo.botReply;
       } else {
-        let receiverTags = await getTagsInfo(receiver);
+        const receiverTags = await getTagsInfo(receiver);
         propose.r_name = receiverTags['display-name'];
         propose.r_publicKey = receiverTags['pub-key'] || '';
         propose.r_avatar = receiverTags.avatar;
@@ -308,8 +313,9 @@ function MemoryContent(props) {
   }
 
   function decodeEditorMemory() {
+    console.log(memoryDecrypted.content);
     try {
-      let content = JSON.parse(memoryContent);
+      const content = JSON.parse(memoryDecrypted.content);
       if (content) {
         return content;
       }
@@ -317,54 +323,57 @@ function MemoryContent(props) {
     return false;
   }
 
-  async function getMemoryContent() {
-    try {
-      let memoryContent = JSON.parse(memoryDecrypted.content);
-      if (memoryContent.ipfsHash) {
-        let ipfsHash = memoryContent.ipfsHash;
-        let data = await fetch(process.env.REACT_APP_IPFS + ipfsHash);
-        let content = await data.json();
-        setMemoryContent(JSON.stringify(content));
-      } else {
-        setMemoryContent(memoryDecrypted.content);
-      }
-    } catch (e) {
-      setMemoryContent(memoryDecrypted.content);
-    }
-  }
+  // async function getMemoryContent() {
+  //   try {
+  //     let memoryContent = JSON.parse(memoryDecrypted.content);
+  //     console.log('aaa', memoryContent);
+  //     if (memoryContent.ipfsHash) {
+  //       let ipfsHash = memoryContent.ipfsHash;
+  //       let data = await fetch(process.env.REACT_APP_IPFS + ipfsHash);
+  //       let content = await data.json();
+  //       setMemoryContent(JSON.stringify(content));
+  //     } else {
+  //       setMemoryContent(memoryDecrypted.content);
+  //     }
+  //   } catch (e) {
+  //     setMemoryContent(memoryDecrypted.content);
+  //   }
+  // }
 
-  function previewEditorMemory() {
+  function previewEditorMemoryBlog() {
+    let firstImg;
+    let firstLine;
+
     try {
-      let content = JSON.parse(memoryContent);
-      if (content) {
-        let blocks = content.blocks;
-        let firstImg = null;
-        let firstLine = null;
-        for (let i in blocks) {
-          if (!firstImg && blocks[i].type === 'image') {
-            firstImg = blocks[i].data;
-          }
-          if (!firstLine) {
-            firstLine = blocks[i].text;
-            if (firstLine.length > 200) {
-              firstLine = firstLine.slice(0, 200) + '…';
-            }
-          }
-          if (firstImg && firstLine) break;
+      const content = JSON.parse(memoryDecrypted.content);
+      const { blocks } = content;
+
+      for (const i in blocks) {
+        if (!firstImg && blocks[i].type === 'image') {
+          firstImg = blocks[i].data;
         }
-        firstImg = firstImg || { url: '/static/img/memory-default.png' }
-
-        return (
-          <BlogShowcase
-            classes={classes}
-            firstImg={firstImg}
-            firstLine={firstLine}
-            openHandler={() => openMemory(memory.id)}
-          />
-        );
+        if (!firstLine) {
+          firstLine = blocks[i].text;
+          if (firstLine.length > 200) {
+            firstLine = `${firstLine.slice(0, 200)}…`;
+          }
+        }
+        if (firstImg && firstLine) break;
       }
-    } catch (e) {}
-    return memoryContent;
+
+      firstImg = firstImg || { url: '/static/img/memory-default.png' };
+    } catch (error) {
+      console.error(error);
+    }
+
+    return (
+      <BlogShowcase
+        classes={classes}
+        firstImg={firstImg}
+        firstLine={firstLine}
+        openHandler={() => openMemory(memory.id)}
+      />
+    );
   }
 
   function openMemory(memoryId) {
@@ -437,7 +446,7 @@ function MemoryContent(props) {
           </Typography>
         ) : (
           <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
-            {memoryDecrypted.isBlog ? previewEditorMemory() : memoryDecrypted.content}
+            {memoryDecrypted.isBlog ? previewEditorMemoryBlog() : memoryDecrypted.content}
           </Typography>
         )}
         {decodeEditorMemory() && (
@@ -447,7 +456,7 @@ function MemoryContent(props) {
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
             subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
           >
-            <Editor initContent={decodeEditorMemory()} read_only={true} />
+            <Editor initContent={decodeEditorMemory()} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
