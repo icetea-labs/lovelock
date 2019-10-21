@@ -4,6 +4,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Switch from '@material-ui/core/Switch';
 import { CSSTransition } from 'react-transition-group';
 
 const useStyles = makeStyles(theme => ({
@@ -60,7 +61,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function SimpleModal(props) {
+export default function BlogModal(props) {
   if (props.open) {
     document.body.style.overflow = 'hidden';
   } else {
@@ -77,7 +78,13 @@ export default function SimpleModal(props) {
             <AppBar className={classes.appbar}>
             <Toolbar  className={classes.toolbar}>
               <Typography variant="h5" className={classes.title}>{props.title}</Typography>
-
+              {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+              {props.previewText && (
+                <Switch
+                  value={props.previewText}
+                  color="primary"
+                />
+              )}
               {props.handleSumit && (
                   <Button variant="contained" color='primary' onClick={props.handleSumit}>
                     Publish

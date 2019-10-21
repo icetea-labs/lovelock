@@ -25,7 +25,7 @@ import {
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
-import SimpleModal from '../../elements/Modal';
+import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
@@ -450,7 +450,7 @@ function MemoryContent(props) {
           </Typography>
         )}
         {decodeEditorMemory() && (
-          <SimpleModal
+          <BlogModal
             open={isOpenModal}
             handleClose={closeMemory}
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
@@ -475,7 +475,7 @@ function MemoryContent(props) {
                 />
               )}
             </div>
-          </SimpleModal>
+          </BlogModal>
         )}
       </React.Fragment>
     );

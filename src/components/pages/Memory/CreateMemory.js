@@ -7,7 +7,7 @@ import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
 import Editor from './Editor';
-import SimpleModal from '../../elements/Modal';
+import BlogModal from '../../elements/BlogModal';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
@@ -371,7 +371,7 @@ export default function CreateMemory(props) {
                 </ButtonPro>
               </Grid>
             )}
-            <SimpleModal
+            <BlogModal
               open={isOpenModal}
               handleClose={closeEditorModal}
               handleSumit={onSubmitEditor}
@@ -385,7 +385,7 @@ export default function CreateMemory(props) {
                   save_handler: saveDraft
                 }}
                 onChange={onChangeEditor} />
-            </SimpleModal>
+            </BlogModal>
           </Grid>
         </ShadowBox>
       </CreatePost>
