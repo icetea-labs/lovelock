@@ -32,6 +32,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 20,
     background: '#f5f6f7',
     fontSize: 12,
+    width: 554,
   },
   notchedOutline: {
     // borderWidth: '1px',
@@ -225,6 +226,7 @@ export default function MemoryComments(props) {
             <Grid item classes={{ root: classes.btBox }}>
               <TextField
                 fullWidth
+                id="myId"
                 multiline
                 className={classes.postComment}
                 placeholder="Write a comment..."

@@ -297,11 +297,13 @@ function MemoryContent(props) {
     setNumComment(number);
   }
 
-  const textInput = useRef(null);
+  const textInput = useRef('');
   function handerShowComment() {
     setShowComment(true);
     setTimeout(() => {
-      textInput.current.focus();
+      if (textInput.current) {
+        textInput.current.focus();
+      }
     }, 100);
   }
 
