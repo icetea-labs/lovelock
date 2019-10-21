@@ -512,14 +512,14 @@ function Header(props) {
 
   return (
     <div>
-      {address ? (
-        <div className={classes.grow}>
-          <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
-            <StyledToolbar>
-              <StyledLogo to="/">
-                <img src="/static/img/logo.svg" alt="itea-scan" />
-                <span>LoveLock</span>
-              </StyledLogo>
+      <div className={classes.grow}>
+        <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
+          <StyledToolbar>
+            <StyledLogo to="/">
+              <img src="/static/img/logo.svg" alt="itea-scan" />
+              <span>LoveLock</span>
+            </StyledLogo>
+            {address && (
               <React.Fragment>
                 <div className={classes.search}>
                   <div className={classes.searchIcon}>
@@ -585,12 +585,10 @@ function Header(props) {
                   </IconButton>
                 </div>
               </React.Fragment>
-            </StyledToolbar>
-          </StyledAppBar>
-        </div>
-      ) : (
-        <LandingPage />
-      )}
+            )}
+          </StyledToolbar>
+        </StyledAppBar>
+      </div>
       {renderMobileMenu}
       {renderMenu}
       {friReqMenu}

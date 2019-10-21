@@ -54,12 +54,14 @@ function Home(props) {
 
   async function loadAcceptPropose() {
     let proposes;
-    proposes = (await callView('getProposeByAddress', [address])) || [];
-    proposes = proposes.filter(item => item.status === 1);
-    setHomePropose(proposes);
-    if (proposes.length > 0) {
-      const index = proposes[0].id;
-      history.push(`/lock/${index}`);
+    if (address) {
+      proposes = (await callView('getProposeByAddress', [address])) || [];
+      proposes = proposes.filter(item => item.status === 1);
+      setHomePropose(proposes);
+      if (proposes.length > 0) {
+        const index = proposes[0].id;
+        history.push(`/lock/${index}`);
+      }
     }
   }
 
