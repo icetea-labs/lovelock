@@ -313,7 +313,6 @@ function MemoryContent(props) {
   }
 
   function decodeEditorMemory() {
-    console.log(memoryDecrypted.content);
     try {
       const content = JSON.parse(memoryDecrypted.content);
       if (content) {
