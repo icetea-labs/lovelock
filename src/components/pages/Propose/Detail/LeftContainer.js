@@ -218,10 +218,12 @@ function LeftContainer(props) {
     <React.Fragment>
       <LeftBox>
         <ShadowBox>
-          <LinkPro className="btn_add_promise" onClick={newLock}>
-            <Icon type="add" />
-            New Lock
-          </LinkPro>
+          {address && (
+            <LinkPro className="btn_add_promise" onClick={newLock}>
+              <Icon type="add" />
+              New Lock
+            </LinkPro>
+          )}
           <div className="title">My lock</div>
           <div>
             <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} />

@@ -33,7 +33,7 @@ import { AvatarPro } from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
-import LandingPage from './LandingPage';
+// import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
   font-size: ${rem(20)};

@@ -6,6 +6,7 @@ import { LinkPro, ButtonPro } from '../../elements/Button';
 import { callView } from '../../../helper';
 import * as actions from '../../../store/actions';
 import PuNewLock from '../Propose/PuNewLock';
+import LandingPage from '../../layout/LandingPage';
 
 const RightBox = styled.div`
   text-align: center;
@@ -81,38 +82,38 @@ function Home(props) {
     loadAcceptPropose();
   }
 
-  return (
-    address && (
-      <FlexBox wrap="wrap" justify="center">
-        {/* <FlexWidthBox width="30%"><LeftContainer /></FlexWidthBox> */}
-        {homePropose.length < 1 && (
-          <FlexWidthBox>
-            <ShadowBox>
-              <RightBox>
-                <div>
-                  <img src="/static/img/plant.svg" alt="plant" />
-                  <div className="emptyTitle">
-                    <h1>You have no locks yet.</h1>
-                  </div>
-                  <div className="emptySubTitle">
-                    <h2>Locks are the way you connect and share memories with your loved ones.</h2>
-                  </div>
-                  <ActionForm>
-                    <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                      Create first lock
-                    </ButtonPro>
-                  </ActionForm>
-                  <LinkPro className="btn_add_promise" onClick={openExplore}>
-                    or explore others'
-                  </LinkPro>
+  return address ? (
+    <FlexBox wrap="wrap" justify="center">
+      {/* <FlexWidthBox width="30%"><LeftContainer /></FlexWidthBox> */}
+      {homePropose.length < 1 && (
+        <FlexWidthBox>
+          <ShadowBox>
+            <RightBox>
+              <div>
+                <img src="/static/img/plant.svg" alt="plant" />
+                <div className="emptyTitle">
+                  <h1>You have no locks yet.</h1>
                 </div>
-              </RightBox>
-            </ShadowBox>
-            {openPromise && tokenKey && <PuNewLock close={closePopup} />}
-          </FlexWidthBox>
-        )}
-      </FlexBox>
-    )
+                <div className="emptySubTitle">
+                  <h2>Locks are the way you connect and share memories with your loved ones.</h2>
+                </div>
+                <ActionForm>
+                  <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                    Create first lock
+                  </ButtonPro>
+                </ActionForm>
+                <LinkPro className="btn_add_promise" onClick={openExplore}>
+                  or explore others'
+                </LinkPro>
+              </div>
+            </RightBox>
+          </ShadowBox>
+          {openPromise && tokenKey && <PuNewLock close={closePopup} />}
+        </FlexWidthBox>
+      )}
+    </FlexBox>
+  ) : (
+    <LandingPage />
   );
 }
 
