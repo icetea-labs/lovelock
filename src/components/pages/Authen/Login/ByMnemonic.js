@@ -75,7 +75,6 @@ function ByMnemonic(props) {
             'The recovery phrase is for a bank account. LoveLock only accepts regular (non-bank) account.'
           );
         }
-
         const token = tweb3.wallet.createRegularAccount();
         const ms = tweb3.contract('system.did').methods;
         const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
