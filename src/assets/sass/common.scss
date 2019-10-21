@@ -60,3 +60,17 @@ input:focus {
   opacity: 1;
   transition: opacity 1000ms;
 }
+
+#dante-menu.dante-sticky-menu {
+  /* change some style to avoid confict with the appbar */
+
+  /* the appbar z-index is 1100 */
+  z-index: 1200;
+  /* height of appbar is 49px */
+  top: 220px!important;
+  text-align: center;
+}
+
+input.dante-menu-input {
+  background-color: transparent!important;
+}

@@ -165,7 +165,10 @@ function LeftContainer(props) {
 
   async function loadProposes() {
     setLoading(true);
-    const resp = (await callView('getProposeByAddress', [address])) || [];
+    let resp = [];
+    if (address) {
+      resp = (await callView('getProposeByAddress', [address])) || [];
+    }
     const newPropose = await addInfoToProposes(resp);
 
     setPropose(newPropose);
@@ -201,24 +204,26 @@ function LeftContainer(props) {
   }
 
   //function renderTag() {
-    // const { tag } = state;
-    // return tag.map((item, index) => {
-    //   return (
-    //     <span className="tagName" key={index}>
-    //       #{item}
-    //     </span>
-    //   );
-    // });
+  // const { tag } = state;
+  // return tag.map((item, index) => {
+  //   return (
+  //     <span className="tagName" key={index}>
+  //       #{item}
+  //     </span>
+  //   );
+  // });
   //}
 
   return (
     <React.Fragment>
       <LeftBox>
         <ShadowBox>
-          <LinkPro className="btn_add_promise" onClick={newLock}>
-            <Icon type="add" />
-            New Lock
-          </LinkPro>
+          {address && (
+            <LinkPro className="btn_add_promise" onClick={newLock}>
+              <Icon type="add" />
+              New Lock
+            </LinkPro>
+          )}
           <div className="title">My lock</div>
           <div>
             <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} />

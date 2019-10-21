@@ -12,9 +12,12 @@ import SimpleModal from '../../elements/Modal';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
+import { getDraft, setDraft, delDraft } from '../../../helper/utils'
+
+let editorContent
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -139,7 +142,6 @@ export default function CreateMemory(props) {
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
-  const [editorContent, setEditorContent] = useState(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -169,6 +171,7 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setMemoryContent(value);
+    //setInitialBlogContent(makeDefaultBlogContent(value))
   }
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
@@ -183,26 +186,33 @@ export default function CreateMemory(props) {
     } else {
       setDisableShare(true);
     }
-    console.log('value', value);
     setFilesBuffer(value);
   }
 
   async function onSubmitEditor() {
     let blocks = editorContent.blocks;
     if (validateEditorContent()) {
-      for (let i in blocks) {
-        if (blocks[i].type == 'image') {
-          let blob = await fetch(blocks[i].data.url).then(r => r.blob());
-          let file = new File([blob], 'name');
-          let hash = await saveFileToIpfs([file]);
-          blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
+
+      const images = blocks.reduce((collector, b, i) => {
+        if (b.type === 'image' && b.data.url) {
+          collector[i] = fetch(b.data.url).then(r => r.arrayBuffer()).then(Buffer.from)
         }
-      }
-      let buffer = Buffer.from(JSON.stringify({ ...editorContent }));
+        return collector
+      }, {})
+
+      const bufs = await Promise.all(Object.values(images))
+      const hashes = await saveToIpfs(bufs)
+      Object.keys(images).forEach((blockIndex, index) => {
+        blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index]
+      })
+
+      let buffer = Buffer.from(JSON.stringify(editorContent));
       let submitContent = await saveFileToIpfs([buffer]);
-      handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
+      await handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
+      memoryContent = null
+      delDraft()
     } else {
-      let message = 'Please enter memory content.'
+      let message = 'Please enter memory content.';
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
@@ -211,14 +221,14 @@ export default function CreateMemory(props) {
     let blocks = editorContent.blocks;
     for (let i in blocks) {
       if (blocks[i].text.trim() != '') {
-        return true
+        return true;
       }
     }
     return false;
   }
 
   function onChangeEditor(value) {
-    setEditorContent(value);
+    editorContent = value
   }
 
   function closeEditorModal() {
@@ -276,6 +286,27 @@ export default function CreateMemory(props) {
     setOpenModal(false);
   }
 
+  function makeDefaultBlogContent(text) {
+    return {
+      blocks: [{
+        data: {},
+        depth: 0,
+        entityRanges: [],
+        inlineStyleRanges: [],
+        key: 'blok2',
+        text: text,
+        type: 'unstyled'
+      }],
+      entityMap: {}
+    }
+  }
+
+  function saveDraft(context, content) {
+    if (content.blocks.length > 1 || content.blocks[0].text) {
+      setDraft(content)
+    }
+  }
+
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
@@ -325,7 +356,7 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
+                <button onClick={() => { setOpenModal(true) }} className={classes.blogBtn}>
                   Write blog...
                 </button>
                 <ButtonPro
@@ -347,7 +378,13 @@ export default function CreateMemory(props) {
               closeText="Cancel"
               title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} handleClose={closeEditorModal} />}
             >
-              <Editor onChange={value => onChangeEditor(value)} />
+              <Editor 
+                initContent={makeDefaultBlogContent(memoryContent)}
+                saveOptions={{
+                  interval: 5000, // save draft every 5 seconds
+                  save_handler: saveDraft
+                }}
+                onChange={onChangeEditor} />
             </SimpleModal>
           </Grid>
         </ShadowBox>
