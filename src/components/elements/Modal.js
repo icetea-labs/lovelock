@@ -22,7 +22,6 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
-    color: '#666'
   },
   wrapper: {
     overflow: 'auto',

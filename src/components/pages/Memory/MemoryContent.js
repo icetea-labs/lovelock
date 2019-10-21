@@ -151,7 +151,6 @@ function MemoryContent(props) {
   const address = useSelector(state => state.account.address);
   // const propose = useSelector(state => state.loveinfo.propose);
 
-  const [isBlog, setIsBlog] = useState(false);
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
@@ -428,14 +427,14 @@ function MemoryContent(props) {
               <FavoriteIcon color="primary" fontSize="large" />
             </div>
             <span>
-              <span>In a Relationship with </span>
+              <span>Locked with </span>
               <Typography component="span" className={classes.relationshipName}>
                 {memoryDecrypted.r_name}
               </Typography>
             </span>
           </Typography>
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
             {memoryDecrypted.isBlog ? previewEditorMemory() : memoryDecrypted.content}
           </Typography>
         )}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Dante from 'Dante2';
 import { withStyles } from '@material-ui/core/styles';
 import mediumZoom from 'medium-zoom';
@@ -10,6 +10,7 @@ const styles = {
 		margin: '0 auto',
 		maxWidth: 740,
 		width: '100%',
+		padding: '0 5%',
 	},
 	titleText: {
 		fontFamily: font,
@@ -30,9 +31,12 @@ const styles = {
 class Editor extends React.Component {
 	readonly = !!this.props.read_only
 	state = {
-		title: '',
-		subtitle: ''
+		title: this.props.title || '',
+		subtitle: this.props.subtitle || ''
 	}
+	titleText = React.createRef()
+	subtitleText = React.createRef()
+	dante = React.createRef()
 
 	componentDidMount() {
 		if (this.readonly) {
@@ -43,18 +47,14 @@ class Editor extends React.Component {
 				}
 			}, 500)
 		} else {
-			const title = document.getElementById('danteEditorTitle')
-			if (title) {
-				// for some reason, could not set this through react
-				title.style.letterSpacing = '-2.592px'
-				title.focus()
-			}
-			const subtitle = document.getElementById('danteEditorSubtitle')
-			if (subtitle) {
-				// for some reason, could not set this through react
-				subtitle.style.letterSpacing = '-0.54px'
-			}
+			const titleInput = this.titleText.current.querySelector('input')
+			// for some reason, could not set this through react
+			titleInput.style.letterSpacing = '-2.592px'
+			titleInput.focus()
 
+			const subtitleText = this.subtitleText.current.querySelector('input')
+			// for some reason, could not set this through react
+			subtitleText.style.letterSpacing = '-0.54px'
 		}
 	}
 
@@ -70,8 +70,11 @@ class Editor extends React.Component {
 
 	configTooltips = () => {
 		const tips = Dante.defaultProps.tooltips
+
 		// remove the H1 item on format toolbar
-		tips[3].widget_options.block_types = tips[3].widget_options.block_types.filter(e => e.type !== 'header-one')
+		const toolbar = tips[3]
+		toolbar.widget_options.block_types = toolbar.widget_options.block_types.filter(e => e.label !== 'h2')
+		toolbar.sticky = document.documentElement.clientWidth < 1175
 		return tips
 	}
 
@@ -82,7 +85,7 @@ class Editor extends React.Component {
 			depth: 0,
 			entityRanges: [],
 			inlineStyleRanges: [],
-			key: 'lock0',
+			key: 'blok0',
 			text: title,
 			type: 'header-one'
 		}
@@ -92,7 +95,7 @@ class Editor extends React.Component {
 			depth: 0,
 			entityRanges: [],
 			inlineStyleRanges: [],
-			key: 'lock1',
+			key: 'blok1',
 			text: subtitle,
 			type: 'header-three'
 		}
@@ -108,37 +111,41 @@ class Editor extends React.Component {
 	}
 
 	render() {
-		const { classes } = this.props;
+		const { classes, saveOptions } = this.props;
+		const draftStorage = saveOptions ? {
+			data_storage: saveOptions
+		} : {}
 		return (
 			<div className={classes.wrapper}>
 				{!this.readonly && (
 					<>
 					<Input
 	                    className={classes.titleText}
-	                    id="danteEditorTitle"
-						placeholder="Input title"
+						ref={this.titleText}
+						placeholder="Title"
 						value={this.state.title}
-						onChange={e => this.setState({ title: e.target.value })}
+						onChange={e => this.setState({title: e.target.value})}
 	                    fullWidth
 		            />
 					<Input
 	                    className={classes.subtitleText}
-	                    id="danteEditorSubtitle"
+	                    ref={this.subtitleText}
 						placeholder="Subtitle (optional)"
 						value={this.state.subtitle}
-						onChange={e => this.setState({ subtitle: e.target.value })}
+						onChange={e => this.setState({subtitle: e.target.value})}
 	                    fullWidth
 		            />
 					</>
 				)}
 				<Dante
+					ref={this.dante}
 					content={this.props.initContent ? this.props.initContent : null}
 					read_only={this.readonly}
-					body_placeholder="Input content here"
+					body_placeholder="Write content, paste or drag & drop photos..."
 					widgets={this.configWidgets()}
 					tooltips={this.configTooltips()}
+					{ ... draftStorage }
 					onChange={(editor) => {
-						editor.relocateTooltips()
 						if (this.props.onChange) {
 							this.props.onChange(this.combineContent(editor.save.editorContent))
 						}

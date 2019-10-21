@@ -9,6 +9,14 @@ import tweb3 from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
+// indexdb (async alternative to localStorage, can store object, not only string)
+import { get as getIdb, set as setIdb, del as delIdb } from 'idb-keyval'
+const BLOG_DRAFT_KEY = 'blogdraft'
+
+export const getDraft = () => getIdb(BLOG_DRAFT_KEY).catch(console.warn)
+export const setDraft = content => setIdb(BLOG_DRAFT_KEY, content).catch(console.warn)
+export const delDraft = () => delIdb(BLOG_DRAFT_KEY).catch(console.error)
+
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
@@ -89,7 +97,7 @@ export async function getTagsInfo(address) {
   return resp && resp.tags;
 }
 
-async function saveToIpfs(files) {
+export async function saveToIpfs(files) {
   if (!files) return '';
   // simple upload
   let ipfsId = [];
