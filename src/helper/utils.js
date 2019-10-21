@@ -486,7 +486,7 @@ export const wallet = {
   },
   getPrivateKeyFromMnemonic(mnemonic, index = 0) {
     const hdkey = this.getHdKeyFromMnemonic(mnemonic);
-    const privateKey = hdkey.deriveChild(index);
+    const { privateKey } = hdkey.deriveChild(index);
     return codec.toKeyString(privateKey);
   },
   getHdKeyFromMnemonic(mnemonic) {

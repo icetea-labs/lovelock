@@ -54,7 +54,7 @@ function ByPassWord(props) {
       // setUsername('');
       setState({ ...state, username: 'undefined' });
       const message = 'Your information is empty, Please use [recovery phrase] or [Register]';
-      enqueueSnackbar(message, { variant: 'error' });
+      enqueueSnackbar(message, { variant: 'info' });
       setStep('two');
     }
   }

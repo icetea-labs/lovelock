@@ -121,6 +121,7 @@ const FooterWapper = styled.div`
   padding: 8px 0;
   position: fixed;
   bottom: 0;
+  left: 0;
   z-index: 1;
   @media (max-width: 768px) {
     justify-content: flex-start;

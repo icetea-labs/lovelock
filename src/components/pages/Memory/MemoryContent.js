@@ -286,7 +286,8 @@ function MemoryContent(props) {
             saveMemCacheAPI(obj, obj.id);
           } catch (error) {
             console.error(error);
-            const message = JSON.stringify(error);
+            // const message = JSON.stringify(error);
+            const message = 'Unlock error, you can not view detail';
             enqueueSnackbar(message, { variant: 'error' });
             setDecoding(false);
           }
@@ -313,7 +314,7 @@ function MemoryContent(props) {
   }
 
   function decodeEditorMemory() {
-    console.log(memoryDecrypted.content);
+    // console.log(memoryDecrypted.content);
     try {
       const content = JSON.parse(memoryDecrypted.content);
       if (content) {
@@ -505,7 +506,12 @@ function MemoryContent(props) {
   );
 
   const renderComments = (
-    <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+    <MemoryComments
+      handerNumberComment={handerNumberComment}
+      memoryIndex={memory.id}
+      memory={memory}
+      textInput={textInput}
+    />
   );
 
   const { isUnlock } = memoryDecrypted;

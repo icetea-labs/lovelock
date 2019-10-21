@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { createMuiTheme } from '@material-ui/core/styles';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+// import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
 import { PersistGate } from 'redux-persist/lib/integration/react';
 
