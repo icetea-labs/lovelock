@@ -302,11 +302,13 @@ function MemoryContent(props) {
     setNumComment(number);
   }
 
-  const textInput = useRef(null);
+  const textInput = useRef('');
   function handerShowComment() {
     setShowComment(true);
     setTimeout(() => {
-      textInput.current.focus();
+      if (textInput.current) {
+        textInput.current.focus();
+      }
     }, 100);
   }
 
@@ -436,7 +438,7 @@ function MemoryContent(props) {
               <FavoriteIcon color="primary" fontSize="large" />
             </div>
             <span>
-              <span>In a Relationship with </span>
+              <span>Locked with </span>
               <Typography component="span" className={classes.relationshipName}>
                 {memoryDecrypted.r_name}
               </Typography>

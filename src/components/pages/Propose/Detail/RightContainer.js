@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 // import { useSnackbar } from 'notistack';
 
@@ -71,10 +72,17 @@ function RightContrainer(props) {
     // }, 100);
   }
 
-  return (
+  const isLoginisSender = address === topInfo.sender || address === topInfo.receiver;
+  const isAcceptisPublic = topInfo.status === 1 && topInfo.isPrivate === false;
+
+  return isLoginisSender ? (
     <RightBox>
       {address && <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />}
       <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />
+    </RightBox>
+  ) : (
+    <RightBox>
+      {isAcceptisPublic && <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />}
     </RightBox>
   );
 }
@@ -100,4 +108,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(RightContrainer);
+)(withRouter(RightContrainer));

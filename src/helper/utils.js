@@ -9,6 +9,14 @@ import tweb3 from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
+// indexdb (async alternative to localStorage, can store object, not only string)
+import { get as getIdb, set as setIdb, del as delIdb } from 'idb-keyval'
+const BLOG_DRAFT_KEY = 'blogdraft'
+
+export const getDraft = () => getIdb(BLOG_DRAFT_KEY).catch(console.warn)
+export const setDraft = content => setIdb(BLOG_DRAFT_KEY, content).catch(console.warn)
+export const delDraft = () => delIdb(BLOG_DRAFT_KEY).catch(console.error)
+
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
@@ -89,7 +97,7 @@ export async function getTagsInfo(address) {
   return resp && resp.tags;
 }
 
-async function saveToIpfs(files) {
+export async function saveToIpfs(files) {
   if (!files) return '';
   // simple upload
   let ipfsId = [];
@@ -508,7 +516,33 @@ export const wallet = {
 };
 
 export const checkDevice = {
-  isOldBrowser(e) {},
+  get_browser() {
+    const ua = navigator.userAgent;
+    let tem = [];
+    let M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    if (/trident/i.test(M[1])) {
+      tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+      return `IE ${tem[1] || ''}`;
+    }
+    if (M[1] === 'Chrome') {
+      tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
+      if (tem != null)
+        return tem
+          .slice(1)
+          .join(' ')
+          .replace('OPR', 'Opera');
+    }
+    M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+    tem = ua.match(/version\/(\d+)/i);
+    if (tem !== null) M.splice(1, 1, tem[1]);
+    const strTemp = M.join(' ');
+    const name = strTemp.split(' ')[0];
+    const version = strTemp.split(' ')[1];
+    return {
+      name,
+      version,
+    };
+  },
   isMobile() {
     let check = false;
     (a => {
