@@ -437,7 +437,7 @@ function MemoryContent(props) {
             </span>
           </Typography>
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
             {memoryDecrypted.isBlog ? previewEditorMemory() : memoryDecrypted.content}
           </Typography>
         )}
