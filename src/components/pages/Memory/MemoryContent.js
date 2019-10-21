@@ -282,7 +282,8 @@ function MemoryContent(props) {
             saveMemCacheAPI(obj, obj.id);
           } catch (error) {
             console.error(error);
-            const message = JSON.stringify(error);
+            // const message = JSON.stringify(error);
+            const message = 'Unlock error, you can not view detail';
             enqueueSnackbar(message, { variant: 'error' });
             setDecoding(false);
           }
