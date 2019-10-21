@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
-import Link from '@material-ui/core/Link';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
@@ -11,14 +11,23 @@ import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 
-import { TimeWithFormat, decodeWithPublicKey, callView, getTagsInfo } from '../../../helper';
+import * as actions from '../../../store/actions';
+import {
+  TimeWithFormat,
+  decodeWithPublicKey,
+  callView,
+  getTagsInfo,
+  saveMemCacheAPI,
+  loadMemCacheAPI,
+  decodeImg,
+  getJsonFromIpfs,
+} from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
 import SimpleModal from '../../elements/Modal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
-
 import BlogShowcase from './BlogShowcase';
 
 const useStylesFacebook = makeStyles({
@@ -73,6 +82,7 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#333',
     padding: '0 0 16px',
     cursor: 'pointer',
+    transition: 'background-color 1000ms linear',
     '&:hover $blogTitleImg, &:hover $blogFirstLine': {
       color: '#fff',
     },
@@ -80,6 +90,7 @@ const useStyles = makeStyles(theme => ({
   blogTitleImg: {
     position: 'absolute',
     backgroundColor: '#666',
+    transition: 'background-color 1000ms linear',
     top: 12,
     left: 12,
     padding: '3px 10px',
@@ -133,13 +144,14 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function MemoryContent(props) {
-  const { memory, proIndex } = props;
+function MemoryContent(props) {
+  const { memory, proIndex, setNeedAuth } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
-  const propose = useSelector(state => state.loveinfo.propose);
+  // const propose = useSelector(state => state.loveinfo.propose);
 
+  const [isBlog, setIsBlog] = useState(false);
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
@@ -148,18 +160,40 @@ export default function MemoryContent(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
   const [proposeInfo, setProposeInfo] = useState({});
+  const classes = useStyles();
+
+  // useEffect(() => {
+  //   if (memoryDecrypted.isPrivate) {
+  //     decodePrivateMemory();
+  //   }
+  // }, [privateKey, proIndex]);
 
   useEffect(() => {
-    if (memoryDecrypted.isPrivate) {
-      decodePrivateMemory();
-    }
-  }, [privateKey, proIndex]);
-
-  useEffect(() => {
-    setMemoryDecrypted(memory);
+    // setMemoryDecrypted(memory);
     getMemoryContent();
   }, [memory]);
 
+  useEffect(() => {
+    serialMemory();
+  }, []);
+
+  async function serialMemory() {
+    let mem = memory;
+    if (memory.isPrivate) {
+      const memCache = await loadMemCacheAPI(memory.id);
+      if (memCache) {
+        mem = memCache;
+        for (let i = 0; i < mem.info.hash.length; i++) {
+          const newBuffer = Buffer.from(mem.info.buffer[i]);
+          // mem.info.hash[i] = await getJsonFromIpfs(newBuffer, i);
+          const blob = new Blob([newBuffer], { type: 'image/jpeg' });
+          mem.info.hash[i].src = URL.createObjectURL(blob);
+        }
+      }
+      // console.log('mem', mem, 'id=', memory.id);
+    }
+    setMemoryDecrypted(mem);
+  }
   useEffect(() => {
     if (window.location.search !== '') {
       let url_string = window.location.href;
@@ -197,14 +231,14 @@ export default function MemoryContent(props) {
   }, [proIndex]);
 
   function FacebookProgress(propsFb) {
-    const classes = useStylesFacebook();
+    const classesFb = useStylesFacebook();
 
     return (
-      <div className={classes.root}>
+      <div className={classesFb.root}>
         <CircularProgress
           variant="determinate"
           value={100}
-          className={classes.top}
+          className={classesFb.top}
           size={24}
           thickness={4}
           {...propsFb}
@@ -224,30 +258,40 @@ export default function MemoryContent(props) {
   function decodePrivateMemory() {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
-      if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
+      // console.log(privateKey, '-', publicKey, obj.pubkey, !obj.isUnlock);
+      if (!obj.isUnlock && privateKey && publicKey && obj.pubkey) {
         setDecoding(true);
         setTimeout(async () => {
           try {
+            // loadMemCacheAPI(obj.id);
             let partnerKey = obj.pubkey;
             if (address === obj.sender) {
               partnerKey = publicKey;
             }
             obj.content = await decodeWithPublicKey(JSON.parse(obj.content || '{}'), privateKey, partnerKey);
-            obj.info = await decodeWithPublicKey(obj.info, privateKey, partnerKey);
-            obj.info = JSON.parse(obj.info);
+            for (let i = 0; i < obj.info.hash.length; i++) {
+              // eslint-disable-next-line no-await-in-loop
+              const decodeBufferData = await decodeImg(obj.info.hash[i], privateKey, partnerKey);
+              // eslint-disable-next-line no-await-in-loop
+              obj.info.hash[i] = await getJsonFromIpfs(decodeBufferData, i);
+              if (!obj.info.buffer) obj.info.buffer = [];
+              obj.info.buffer[i] = decodeBufferData;
+            }
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
-          } catch (e) {
-            const message = JSON.stringify(e);
+            saveMemCacheAPI(obj, obj.id);
+          } catch (error) {
+            console.error(error);
+            const message = JSON.stringify(error);
             enqueueSnackbar(message, { variant: 'error' });
             setDecoding(false);
           }
         }, 100);
       } else {
-        // const message = 'Request sharekey';
-        // enqueueSnackbar(message, { variant: 'error' });
+        const message = `An error occurred, please try again later`;
+        enqueueSnackbar(message, { variant: 'error' });
       }
-    }, 500);
+    }, 100);
   }
 
   function handerNumberComment(number) {
@@ -299,7 +343,7 @@ export default function MemoryContent(props) {
         let firstLine = null;
         for (let i in blocks) {
           if (!firstImg && blocks[i].type === 'image') {
-            firstImg = blocks[i].data.url;
+            firstImg = blocks[i].data;
           }
           if (!firstLine) {
             firstLine = blocks[i].text;
@@ -309,7 +353,7 @@ export default function MemoryContent(props) {
           }
           if (firstImg && firstLine) break;
         }
-        firstImg = firstImg ? firstImg : '/static/img/memory-default.png';
+        firstImg = firstImg || { url: '/static/img/memory-default.png' }
 
         return (
           <BlogShowcase
@@ -345,7 +389,118 @@ export default function MemoryContent(props) {
     setCurrentImage(0);
     setViewerIsOpen(false);
   };
-  const classes = useStyles();
+
+  function unlockMemory() {
+    if (privateKey) {
+      decodePrivateMemory();
+    } else {
+      setNeedAuth(true);
+    }
+  }
+
+  const renderContentLocked = () => {
+    return (
+      <React.Fragment>
+        {decoding ? (
+          <span>
+            <FacebookProgress /> Unlock...
+          </span>
+        ) : (
+          <Tooltip title="Click to view item">
+            <IconButton aria-label="settings" onClick={unlockMemory}>
+              <LockIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </React.Fragment>
+    );
+  };
+
+  const renderContentUnlock = () => {
+    return (
+      <React.Fragment>
+        {memoryDecrypted.type === 1 ? (
+          <Typography
+            variant="body2"
+            className={classes.relationship}
+            style={{ whiteSpace: 'pre-line' }}
+            component="div"
+          >
+            <div>
+              <FavoriteIcon color="primary" fontSize="large" />
+            </div>
+            <span>
+              <span>In a Relationship with </span>
+              <Typography component="span" className={classes.relationshipName}>
+                {memoryDecrypted.r_name}
+              </Typography>
+            </span>
+          </Typography>
+        ) : (
+          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
+            {memoryDecrypted.isBlog ? previewEditorMemory() : memoryDecrypted.content}
+          </Typography>
+        )}
+        {decodeEditorMemory() && (
+          <SimpleModal
+            open={isOpenModal}
+            handleClose={closeMemory}
+            title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
+            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+          >
+            <Editor initContent={decodeEditorMemory()} read_only={true} />
+            <div className={classes.editorComment}>
+              {memoryDecrypted.isUnlock && (
+                <MemoryActionButton
+                  handerShowComment={handerShowComment}
+                  likes={memory.likes}
+                  memoryIndex={memory.id}
+                  numComment={numComment}
+                />
+              )}
+              {showComment && (
+                <MemoryComments
+                  handerNumberComment={handerNumberComment}
+                  memoryIndex={memory.id}
+                  memory={memory}
+                  textInput={textInput}
+                />
+              )}
+            </div>
+          </SimpleModal>
+        )}
+      </React.Fragment>
+    );
+  };
+  const renderImgUnlock = () => {
+    return (
+      <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
+        {memoryDecrypted.info.hash && (
+          <Gallery
+            // targetRowHeight={300}
+            // containerWidth={600}
+            photos={memoryDecrypted.info.hash.slice(0, 5)}
+            onClick={openLightbox}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const renderActionBt = (
+    <MemoryActionButton
+      handerShowComment={handerShowComment}
+      likes={memory.likes}
+      memoryIndex={memory.id}
+      numComment={numComment}
+    />
+  );
+
+  const renderComments = (
+    <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+  );
+
+  const { isUnlock } = memoryDecrypted;
   return (
     <React.Fragment>
       <Card key={memoryDecrypted.index} className={classes.card}>
@@ -359,110 +514,10 @@ export default function MemoryContent(props) {
             </IconButton>
           }
         />
-        <CardContent>
-          {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-            <React.Fragment>
-              {decoding ? (
-                <span>
-                  <FacebookProgress /> Unlock...
-                </span>
-              ) : (
-                <IconButton aria-label="settings">
-                  <LockIcon />
-                </IconButton>
-              )}
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              {memoryDecrypted.type === 1 ? (
-                <Typography
-                  variant="body2"
-                  className={classes.relationship}
-                  style={{ whiteSpace: 'pre-line' }}
-                  component="div"
-                >
-                  <div>
-                    <FavoriteIcon color="primary" fontSize="large" />
-                  </div>
-                  <span>
-                    <span>Locked with </span>
-                    <Typography component="span" className={classes.relationshipName}>
-                      {memoryDecrypted.r_name}
-                    </Typography>
-                  </span>
-                </Typography>
-              ) : (
-                <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-                  {previewEditorMemory()}
-                </Typography>
-              )}
-
-              {decodeEditorMemory() && (
-                <SimpleModal
-                  open={isOpenModal}
-                  handleClose={closeMemory}
-                  title={
-                    <MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />
-                  }
-                  subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-                >
-                  <Editor initContent={decodeEditorMemory()} read_only={true} />
-                  <div className={classes.editorComment}>
-                    {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-                      ''
-                    ) : (
-                      <MemoryActionButton
-                        handerShowComment={handerShowComment}
-                        likes={memory.likes}
-                        memoryIndex={memory.id}
-                        numComment={numComment}
-                      />
-                    )}
-                    {showComment && (
-                      <MemoryComments
-                        handerNumberComment={handerNumberComment}
-                        memoryIndex={memory.id}
-                        memory={memory}
-                        textInput={textInput}
-                      />
-                    )}
-                  </div>
-                </SimpleModal>
-              )}
-            </React.Fragment>
-          )}
-        </CardContent>
-        <React.Fragment>
-          {memoryDecrypted.info.hash && (
-            <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
-              <Gallery
-                // targetRowHeight={300}
-                // containerWidth={600}
-                photos={memoryDecrypted.info.hash.slice(0, 5)}
-                onClick={openLightbox}
-              />
-            </div>
-          )}
-        </React.Fragment>
-        {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-          ''
-        ) : (
-          <MemoryActionButton
-            handerShowComment={handerShowComment}
-            likes={memory.likes}
-            memoryIndex={memory.id}
-            numComment={numComment}
-          />
-        )}
-        {showComment && (
-          <MemoryComments
-            handerNumberComment={handerNumberComment}
-            memoryIndex={memory.id}
-            memory={memory}
-            numComment={numComment}
-            textInput={textInput}
-          />
-        )}
+        <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
+        {isUnlock && renderImgUnlock()}
+        {isUnlock && renderActionBt}
+        {showComment && renderComments}
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
@@ -481,3 +536,24 @@ export default function MemoryContent(props) {
     </React.Fragment>
   );
 }
+// const mapStateToProps = state => {
+//   return {
+//     privateKey: state.account.privateKey,
+//   };
+// };
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+    setNeedAuth(value) {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(MemoryContent);

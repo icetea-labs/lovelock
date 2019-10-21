@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { callView } from '../../../../helper';
 import TopContrainer from './TopContainer';
-import LeftContrainer from './LeftContainer';
+import LeftContainer from './LeftContainer';
 import RightContrainer from './RightContainer';
 
 const BannerContainer = styled.div`
@@ -26,14 +26,14 @@ export default function DetailPropose(props) {
   const [proposeInfo, setProposeInfo] = useState({});
   const isLoginisSender = address === proposeInfo.sender || address === proposeInfo.receiver;
   const isAcceptisPublic = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
-  console.log('isLoginisSender', isLoginisSender);
-  console.log('isAcceptisPublic', isAcceptisPublic);
+  // console.log('isLoginisSender', isLoginisSender);
+  // console.log('isAcceptisPublic', isAcceptisPublic);
 
   useEffect(() => {
     (async () => {
       const proposes = await callView('getProposeByIndex', [proIndex]);
       const propose = proposes[0];
-      console.log('propose', propose);
+      // console.log('propose', propose);
       setProposeInfo(propose);
     })();
   }, [proIndex]);
@@ -42,24 +42,74 @@ export default function DetailPropose(props) {
     setTopInfo(data);
   }
 
-  return isLoginisSender ? (
-    <React.Fragment>
-      <BannerContainer>
-        <ShadowBox>
-          <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
-        </ShadowBox>
-      </BannerContainer>
+  if (address) {
+    if (isLoginisSender) {
+      return (
+        <React.Fragment>
+          <BannerContainer>
+            <ShadowBox>
+              <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
+            </ShadowBox>
+          </BannerContainer>
 
-      <FlexBox wrap="wrap" minHeight="100vh">
-        <FlexWidthBox width="30%">
-          <LeftContrainer />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightContrainer proIndex={proIndex} topInfo={topInfo} />
-        </FlexWidthBox>
-      </FlexBox>
-    </React.Fragment>
-  ) : (
+          <FlexBox wrap="wrap" minHeight="100vh">
+            <FlexWidthBox width="30%">
+              <LeftContainer />
+            </FlexWidthBox>
+            <FlexWidthBox width="70%">
+              <RightContrainer proIndex={proIndex} topInfo={topInfo} />
+            </FlexWidthBox>
+          </FlexBox>
+        </React.Fragment>
+      );
+    }
+    if (isAcceptisPublic) {
+      return (
+        <React.Fragment>
+          <BannerContainer>
+            <ShadowBox>
+              <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
+            </ShadowBox>
+          </BannerContainer>
+
+          <FlexBox wrap="wrap" minHeight="100vh">
+            <FlexWidthBox width="30%">
+              <LeftContainer />
+            </FlexWidthBox>
+            <FlexWidthBox width="70%">
+              <RightContrainer proIndex={proIndex} topInfo={topInfo} />
+            </FlexWidthBox>
+          </FlexBox>
+        </React.Fragment>
+      );
+    }
+    return (
+      <div>
+        <span>Oops! We couldn't find what you're looking for.</span>
+      </div>
+    );
+  }
+  if (isAcceptisPublic) {
+    return (
+      <React.Fragment>
+        <BannerContainer>
+          <ShadowBox>
+            <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
+          </ShadowBox>
+        </BannerContainer>
+
+        <FlexBox wrap="wrap" minHeight="100vh">
+          <FlexWidthBox width="30%">
+            <LeftContainer />
+          </FlexWidthBox>
+          <FlexWidthBox width="70%">
+            <RightContrainer proIndex={proIndex} topInfo={topInfo} />
+          </FlexWidthBox>
+        </FlexBox>
+      </React.Fragment>
+    );
+  }
+  return (
     <div>
       <span>Oops! We couldn't find what you're looking for.</span>
     </div>

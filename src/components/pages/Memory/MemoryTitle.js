@@ -31,7 +31,6 @@ export default function MemoryTitle(props) {
           )}
 
       </span>
-      <span> / Blog</span>
     </>
   )
 }
