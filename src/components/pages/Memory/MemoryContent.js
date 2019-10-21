@@ -353,7 +353,7 @@ function MemoryContent(props) {
           }
           if (firstImg && firstLine) break;
         }
-        firstImg = firstImg || { url: '/static/img/memory-default.png' }
+        firstImg = firstImg || { url: '/static/img/memory-default.png' };
 
         return (
           <BlogShowcase
@@ -497,7 +497,12 @@ function MemoryContent(props) {
   );
 
   const renderComments = (
-    <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+    <MemoryComments
+      handerNumberComment={handerNumberComment}
+      memoryIndex={memory.id}
+      memory={memory}
+      textInput={textInput}
+    />
   );
 
   const { isUnlock } = memoryDecrypted;
