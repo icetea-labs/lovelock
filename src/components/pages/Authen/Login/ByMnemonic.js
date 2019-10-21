@@ -55,6 +55,12 @@ function ByMnemonic(props) {
   }, []);
 
   async function gotoLogin() {
+    let message = '';
+    if (!valueInput) {
+      message = `Please input recovery phrase or key.`;
+      enqueueSnackbar(message, { variant: 'error' });
+      return;
+    }
     setLoading(true);
     setTimeout(async () => {
       try {
@@ -115,7 +121,7 @@ function ByMnemonic(props) {
           });
       } catch (error) {
         console.error(error);
-        const message = `An error occurred, please try again later`;
+        message = `An error occurred, please try again later`;
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
       }
@@ -137,7 +143,12 @@ function ByMnemonic(props) {
   }
 
   function loginWithPrivatekey() {
-    setStep('one');
+    let user = localStorage.getItem('user') || sessionStorage.getItem('user');
+    user = (user && JSON.parse(user)) || {};
+    const addr = user.address;
+    if (addr) {
+      setStep('one');
+    } else history.goBack();
   }
 
   return (
@@ -154,6 +165,7 @@ function ByMnemonic(props) {
         fullWidth
         helperText={rePassErr}
         error={rePassErr !== ''}
+        autoFocus
       />
       <TextField
         id="rePassword"
