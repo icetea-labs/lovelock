@@ -54,15 +54,15 @@ export default function LeftProposes(props) {
     switch (item.type) {
       case 1:
         return {
-          name: 'My Journal',
-          nick: 'journal',
-          icon: 'waves',
-        };
-      case 2:
-        return {
           name: item.name,
           nick: 'crush',
           icon: 'done',
+        };
+      case 2:
+        return {
+          name: 'My Journal',
+          nick: 'journal',
+          icon: 'waves',
         };
       default:
         return {

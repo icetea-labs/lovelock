@@ -96,12 +96,23 @@ function LeftContainer(props) {
         const repsNew = result.filter(({ eventName }) => {
           return eventName === 'createPropose';
         });
-        if (repsNew.length > 0) eventCreatePropose(repsNew[0].eventData);
+
+        if (
+          repsNew.length > 0 &&
+          (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
+        ) {
+          eventCreatePropose(repsNew[0].eventData);
+        }
 
         const respConfirm = result.filter(({ eventName }) => {
           return eventName === 'confirmPropose';
         });
-        if (respConfirm.length > 0) eventConfirmPropose(respConfirm[0].eventData);
+        if (
+          respConfirm.length > 0 &&
+          (respConfirm[0].eventData.log.sender === address || respConfirm[0].eventData.log.receiver === address)
+        ) {
+          eventConfirmPropose(respConfirm[0].eventData);
+        }
       }
     });
   }
@@ -162,7 +173,6 @@ function LeftContainer(props) {
   }
 
   async function eventCreatePropose(data) {
-    console.log(data);
     const log = await addInfoToProposes([data.log]);
     addPropose(log[0]);
 

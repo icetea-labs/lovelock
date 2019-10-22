@@ -25,7 +25,7 @@ import {
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
-import SimpleModal from '../../elements/Modal';
+import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
@@ -286,7 +286,8 @@ function MemoryContent(props) {
             saveMemCacheAPI(obj, obj.id);
           } catch (error) {
             console.error(error);
-            const message = JSON.stringify(error);
+            // const message = JSON.stringify(error);
+            const message = 'Unlock error, you can not view detail';
             enqueueSnackbar(message, { variant: 'error' });
             setDecoding(false);
           }
@@ -313,6 +314,7 @@ function MemoryContent(props) {
   }
 
   function decodeEditorMemory() {
+    // console.log(memoryDecrypted.content);
     try {
       const content = JSON.parse(memoryDecrypted.content);
       if (content) {
@@ -449,7 +451,7 @@ function MemoryContent(props) {
           </Typography>
         )}
         {decodeEditorMemory() && (
-          <SimpleModal
+          <BlogModal
             open={isOpenModal}
             handleClose={closeMemory}
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
@@ -474,7 +476,7 @@ function MemoryContent(props) {
                 />
               )}
             </div>
-          </SimpleModal>
+          </BlogModal>
         )}
       </React.Fragment>
     );
@@ -504,7 +506,12 @@ function MemoryContent(props) {
   );
 
   const renderComments = (
-    <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
+    <MemoryComments
+      handerNumberComment={handerNumberComment}
+      memoryIndex={memory.id}
+      memory={memory}
+      textInput={textInput}
+    />
   );
 
   const { isUnlock } = memoryDecrypted;

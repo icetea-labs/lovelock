@@ -7,7 +7,7 @@ import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
 import Editor from './Editor';
-import SimpleModal from '../../elements/Modal';
+import BlogModal from '../../elements/BlogModal';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
@@ -257,7 +257,6 @@ export default function CreateMemory(props) {
       // const hash = await saveBufferToIpfs(filesBuffer);
       // const info = { date, hash };
       let params = [];
-
       if (privacy) {
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
@@ -379,7 +378,7 @@ export default function CreateMemory(props) {
                 </ButtonPro>
               </Grid>
             )}
-            <SimpleModal
+            <BlogModal
               open={isOpenModal}
               handleClose={closeEditorModal}
               handleSumit={onSubmitEditor}
@@ -394,7 +393,7 @@ export default function CreateMemory(props) {
                 }}
                 onChange={onChangeEditor}
               />
-            </SimpleModal>
+            </BlogModal>
           </Grid>
         </ShadowBox>
       </CreatePost>
