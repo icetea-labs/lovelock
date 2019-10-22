@@ -84,15 +84,15 @@ export default function MemoryActionButton(props) {
   }
 
   useEffect(() => {
-    // const returnValue = watchAddlike();
-    // return () => {
-    //   Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
-    // };
+    const returnValue = watchAddlike();
+    return () => {
+      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
+    };
   }, [memoryIndex]);
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
       if (error) {
         console.error('watchAddlike', error);
         const message = 'Watch addlike error';

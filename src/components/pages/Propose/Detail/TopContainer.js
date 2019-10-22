@@ -238,7 +238,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   rightIcon: {
-    marginRight: theme.spacing(1),
+    margin: theme.spacing(0, 1),
   },
 }));
 
@@ -265,10 +265,10 @@ function TopContrainer(props) {
 
   useEffect(() => {
     if (memoryRelationIndex !== -1) getNumLikes();
-    // const returnValue = watchAddlike();
-    // return () => {
-    //   Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe && unsubscribe());
-    // };
+    const returnValue = watchAddlike();
+    return () => {
+      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe && unsubscribe());
+    };
   }, [memoryRelationIndex]);
 
   function watchAddlike() {
