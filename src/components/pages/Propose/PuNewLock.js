@@ -179,7 +179,7 @@ class PuNewLock extends React.Component {
     this.state = {
       partner: '',
       promiseStm: '',
-      date: new Date(),
+      date: Date.parse(new Date()),
       file: '',
       value: '',
       suggestions: [],

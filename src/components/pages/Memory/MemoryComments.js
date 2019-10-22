@@ -226,7 +226,6 @@ export default function MemoryComments(props) {
             <Grid item classes={{ root: classes.btBox }}>
               <TextField
                 fullWidth
-                id="myId"
                 multiline
                 className={classes.postComment}
                 placeholder="Write a comment..."

@@ -8,7 +8,7 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import ZoomImage from './AutoZoomImage'
+import ZoomImage from './AutoZoomImage';
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -268,7 +268,7 @@ export default function AddInfoMessage(props) {
   }
 
   function handleDateChange(value) {
-    onChangeDate(value);
+    onChangeDate(Date.parse(value));
   }
 
   const classes = useStyles();
@@ -286,7 +286,7 @@ export default function AddInfoMessage(props) {
                       <ZoomImage src={src} alt="photo" adjust onLoad={() => URL.revokeObjectURL(src)} />
                       <GridListTileBar
                         className={classes.titleBar}
-                        style={{background: 'none'}}
+                        style={{ background: 'none' }}
                         titlePosition="top"
                         actionIcon={
                           <IconButton onClick={() => removeFile(index)}>
