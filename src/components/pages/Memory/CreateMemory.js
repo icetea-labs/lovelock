@@ -16,6 +16,7 @@ import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWi
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 import { getDraft, setDraft, delDraft } from '../../../helper/utils'
+import cloneDeep from 'lodash/cloneDeep'
 
 let blogBody = null;
 
@@ -199,7 +200,8 @@ export default function CreateMemory(props) {
     if (validateEditorContent()) {
 
       const images = blocks.reduce((collector, b, i) => {
-        if (b.type === 'image' && b.data.url) {
+        if (b.type === 'image' && b.data.url && 
+          (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)) {
           collector[i] = fetch(b.data.url).then(r => r.arrayBuffer()).then(Buffer.from)
         }
         return collector
@@ -239,10 +241,8 @@ export default function CreateMemory(props) {
   }
 
   function onChangeEditorBody(editor) {
-    // There is a Dante2 bug that it calls intial onChange
-    // with blank text instead of initial content
-    // Temporary hack is to check and ignore that blank data
-    // Waiting for Dante2 to fix
+    // check first empty block as a temporary workaround for
+    // https://github.com/michelson/dante2/issues/185
     const body = editor.save.editorContent
     if (body && body.blocks && (body.blocks.length !== 1 || body.blocks[0].text)) {
       blogBody = body
@@ -364,9 +364,51 @@ export default function CreateMemory(props) {
     }
   }
 
-  function saveDraft(context, content) {
-    if (content.blocks.length > 1 || content.blocks[0].text) {
-      setDraft(content)
+  function urlToBase64(url) {
+    return fetch(url).then(r => r.blob()).then(blob => {
+      return new Promise((resolve, reject) => {
+        const reader  = new FileReader();
+        reader.addEventListener('load', () => {
+          resolve(reader.result)
+        });
+        reader.addEventListener('error', reject)
+        reader.readAsDataURL(blob);
+      })
+    })
+  }
+
+  async function saveDraft(context, content) {
+
+    // check first empty block as a temporary workaround for
+    // https://github.com/michelson/dante2/issues/185
+    if (content.blocks.length !== 1 || content.blocks[0].text) {
+
+      // we need to change image from blob:// to base64
+
+      // cloneDeep raises warning in console
+      // should write own clone logic
+      const body = cloneDeep(content)
+      const blocks = body.blocks
+      
+      const images = blocks.reduce((collector, b, i) => {
+        if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
+          collector[i] = urlToBase64(b.data.url)
+        }
+        return collector
+      }, {})
+
+      if (Object.keys(images).length) {
+        const base64Array = await Promise.all(Object.values(images))
+        Object.keys(images).forEach((blockIndex, index) => {
+          blocks[blockIndex].data.url = base64Array[index]
+        })
+      }
+
+      setDraft({
+        body,
+        title: blogTitle,
+        subtitle: blogSubtitle
+      })
     }
   }
 
@@ -449,7 +491,7 @@ export default function CreateMemory(props) {
                   subtitle={blogSubtitle}
                   onSubtitleChange={setBlogSubtitle}
                   saveOptions={{
-                    interval: 5000, // save draft every 5 seconds
+                    interval: 1500, // save draft everytime user stop typing for 1.5 seconds
                     save_handler: saveDraft
                   }}
                   onChange={onChangeEditorBody} />}

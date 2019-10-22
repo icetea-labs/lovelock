@@ -72,8 +72,6 @@ export default function BlogModal(props) {
   
   const classes = useStyles();
 
-  const chidren = props.children
-
   return (
       <CSSTransition in={props.open} timeout={{ enter: 1100, exit: 440 }} classNames='memory-modal' unmountOnExit>
         <div className={classes.wrapper}>
