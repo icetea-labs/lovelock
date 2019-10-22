@@ -5,6 +5,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Box from '@material-ui/core/Box';
 import { CSSTransition } from 'react-transition-group';
 
 const useStyles = makeStyles(theme => ({
@@ -70,6 +72,8 @@ export default function BlogModal(props) {
   
   const classes = useStyles();
 
+  const chidren = props.children
+
   return (
       <CSSTransition in={props.open} timeout={{ enter: 1100, exit: 440 }} classNames='memory-modal' unmountOnExit>
         <div className={classes.wrapper}>
@@ -79,10 +83,14 @@ export default function BlogModal(props) {
             <Toolbar  className={classes.toolbar}>
               <Typography variant="h5" className={classes.title}>{props.title}</Typography>
               {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
-              {props.previewText && (
-                <Switch
-                  value={props.previewText}
-                  color="primary"
+              {props.handlePreview && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      onChange={e => props.handlePreview(e.target.checked)}
+                    />
+                  }
+                  label={<Typography component="div"><Box color="primary.main">{props.previewText || 'Preview'}</Box></Typography>}
                 />
               )}
               {props.handleSumit && (

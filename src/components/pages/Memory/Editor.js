@@ -30,17 +30,12 @@ const styles = {
 };
 
 class Editor extends React.Component {
-  readonly = !!this.props.read_only;
-  state = {
-    title: this.props.title || '',
-    subtitle: this.props.subtitle || '',
-  };
+
   titleText = React.createRef();
   subtitleText = React.createRef();
-  dante = React.createRef();
 
   componentDidMount() {
-    if (this.readonly) {
+    if (this.props.read_only) {
       setTimeout(() => {
         const images = document.querySelectorAll('.graf-image');
         if (images.length) {
@@ -48,12 +43,12 @@ class Editor extends React.Component {
         }
       }, 500);
     } else {
-      const titleInput = this.titleText.current.querySelector('input');
+      const titleInput = this.titleText.current;
       // for some reason, could not set this through react
       titleInput.style.letterSpacing = '-2.592px';
       titleInput.focus();
 
-      const subtitleText = this.subtitleText.current.querySelector('input');
+      const subtitleText = this.subtitleText.current;
       // for some reason, could not set this through react
       subtitleText.style.letterSpacing = '-0.54px';
     }
@@ -64,7 +59,7 @@ class Editor extends React.Component {
     const imgBlock = widgets[0];
 
     // remove the border when item is selected in view mode
-    imgBlock.selected_class = this.readonly ? 'is-selected' : 'is-selected is-mediaFocused';
+    imgBlock.selected_class = this.props.read_only ? 'is-selected' : 'is-selected is-mediaFocused';
 
     return widgets;
   };
@@ -79,38 +74,6 @@ class Editor extends React.Component {
     return tips;
   };
 
-  combineContent = content => {
-    const title = this.state.title;
-    const h1 = title && {
-      data: {},
-      depth: 0,
-      entityRanges: [],
-      inlineStyleRanges: [],
-      key: 'blok0',
-      text: title,
-      type: 'header-one',
-    };
-    const subtitle = this.state.subtitle;
-    const h3 = subtitle && {
-      data: {},
-      depth: 0,
-      entityRanges: [],
-      inlineStyleRanges: [],
-      key: 'blok1',
-      text: subtitle,
-      type: 'header-three',
-    };
-
-    if (!h1 && !h3) return content; // nothing to merge
-
-    const combined = { ...content };
-    combined.blocks = [...combined.blocks];
-    if (h3) combined.blocks.unshift(h3);
-    if (h1) combined.blocks.unshift(h1);
-
-    return combined;
-  };
-
   render() {
     const { classes, saveOptions } = this.props;
     const draftStorage = saveOptions
@@ -118,41 +81,37 @@ class Editor extends React.Component {
           data_storage: saveOptions,
         }
       : {};
+
     return (
       <div className={classes.wrapper}>
-        {!this.readonly && (
+        {!this.props.read_only && (
           <>
             <Input
               className={classes.titleText}
-              ref={this.titleText}
+              inputRef={this.titleText}
               placeholder="Title"
-              value={this.state.title}
-              onChange={e => this.setState({ title: e.target.value })}
+              value={this.props.title}
+              onChange={e => this.props.onTitleChange(e.target.value)}
               fullWidth
             />
             <Input
               className={classes.subtitleText}
-              ref={this.subtitleText}
+              inputRef={this.subtitleText}
               placeholder="Subtitle (optional)"
-              value={this.state.subtitle}
-              onChange={e => this.setState({ subtitle: e.target.value })}
+              value={this.props.subtitle}
+              onChange={e => this.props.onSubtitleChange(e.target.value)}
               fullWidth
             />
           </>
         )}
         <Dante
-          ref={this.dante}
           content={this.props.initContent ? this.props.initContent : null}
-          read_only={this.readonly}
+          read_only={!!this.props.read_only}
           body_placeholder="Write content, paste or drag & drop photos..."
           widgets={this.configWidgets()}
           tooltips={this.configTooltips()}
           {...draftStorage}
-          onChange={editor => {
-            if (this.props.onChange) {
-              this.props.onChange(this.combineContent(editor.save.editorContent));
-            }
-          }}
+          onChange={this.props.onChange}
         />
       </div>
     );
