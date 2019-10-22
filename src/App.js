@@ -21,54 +21,27 @@ function RouteWithLayout({ layout, component, ...rest }) {
 
 function App(props) {
   const { isLoading } = props;
-  const checkBrowser = checkDevice.get_browser();
+  // const checkBrowser = checkDevice.get_browser();
   // console.log('Br', checkBrowser);
   const message =
-    'This application is currently not supported on mobile browsers. Please open the app in a desktop browsers.';
+    'This application is currently not supported on mobile and tablet. Please open the application in a desktop browsers.';
   const oldBrowser =
-    'This application requires modern browsers. Please install a recent version of Chrome, FireFox, Safari, or Microsoft Edge.';
-  if (checkDevice.isMobile()) {
+    'This application requires modern browsers. Please install a recent version of Chrome or FireFox.';
+  if (window.screen.width < 966 || checkDevice.isMobile()) {
     return (
       <div>
         <span>{message}</span>
       </div>
     );
   }
-  if (checkBrowser.name === 'Chrome' && checkBrowser.version < 77) {
+  if (!('caches' in window)) {
     return (
       <div>
         <span>{oldBrowser}</span>
       </div>
     );
   }
-  if (checkBrowser.name === 'Safari' && checkBrowser.version < 12) {
-    return (
-      <div>
-        <span>{oldBrowser}</span>
-      </div>
-    );
-  }
-  if (checkBrowser.name === 'Opera' && checkBrowser.version < 63) {
-    return (
-      <div>
-        <span>{oldBrowser}</span>
-      </div>
-    );
-  }
-  if (checkBrowser.name === 'Edge' && checkBrowser.version < 18) {
-    return (
-      <div>
-        <span>{oldBrowser}</span>
-      </div>
-    );
-  }
-  if (checkBrowser.name === 'Firefox' && checkBrowser.version < 69) {
-    return (
-      <div>
-        <span>{oldBrowser}</span>
-      </div>
-    );
-  }
+  
   return (
     <div className="App">
       <Router>

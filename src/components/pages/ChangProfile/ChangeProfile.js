@@ -104,7 +104,7 @@ function ChangeProfile(props) {
     // Fix issue #148
     ValidatorForm.addValidationRule('specialCharacter', async name => {
       // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
-      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+[a-z0-9]$');
       return regex.test(name);
     });
 

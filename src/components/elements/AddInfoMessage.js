@@ -315,7 +315,7 @@ export default function AddInfoMessage(props) {
   }
 
   function handleDateChange(value) {
-    onChangeDate(value);
+    onChangeDate(Date.parse(value));
   }
 
   const classes = useStyles();

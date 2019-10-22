@@ -196,7 +196,6 @@ const useStyles = makeStyles(theme => ({
   },
   media: {
     height: 450,
-    cursor: 'pointer',
     position: 'relative',
     overflow: 'hidden',
     backgroundSize: 'cover',
@@ -219,9 +218,10 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     margin: theme.spacing(1),
-    background: 'rgba(254,141,195,0.5)',
+    opacity: 0.8,
     '&:hover': {
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+      opacity: 1
     },
   },
   changeCoverTitle: {
@@ -238,7 +238,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   rightIcon: {
-    marginRight: theme.spacing(1),
+    margin: theme.spacing(0, 1),
   },
 }));
 
@@ -468,7 +468,7 @@ function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
-          <CardMedia className={classes.media} image={cropImg} title="lock image">
+          <CardMedia className={classes.media} image={cropImg} title="Change lock image">
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
               <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
@@ -484,7 +484,7 @@ function TopContrainer(props) {
             </Button>
           </CardMedia>
         ) : (
-          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverimg} title="lock image">
+          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverimg} title="Change lock image">
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
               <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />

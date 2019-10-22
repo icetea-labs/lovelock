@@ -40,7 +40,6 @@ export default function LeftProposes(props) {
   const propose = useSelector(state => state.loveinfo.propose);
   const address = useSelector(state => state.account.address);
   const proposes = propose.filter(item => item.status === props.flag);
-
   const classes = useStyles();
   if (proposes.length <= 0) {
     return (

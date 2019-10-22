@@ -19,6 +19,10 @@ import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
 
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import WarningIcon from '@material-ui/icons/Warning';
+
 const useStyles = makeStyles(theme => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
@@ -87,15 +91,26 @@ const PreviewContainter = styled.div`
 `;
 
 const WarningPass = styled.div`
-  color: #f44336;
-  width: 300px;
-  margin-top: 4px;
-  min-height: 1em;
-  text-align: left;
-  font-weight: 400;
-  line-height: 1em;
-  font-size: 10px;
-`;
+  .warningSnackbar {
+    background-color: #fe7;
+    box-shadow: none;
+    margin-top: 24px;
+    max-width: 400px;
+  }
+  .warningMessage {
+    display: flex;
+    alignItems: center;
+  }
+  .warningIcon {
+    margin-right: 16px;
+    color: #d90;
+  }
+  .warningText {
+    color: #333;
+    font-style: italic;
+    font-size: 1.1em;
+  }
+`
 
 function RegisterUsername(props) {
   const { setStep, setLoading, setAccount } = props;
@@ -278,12 +293,6 @@ function RegisterUsername(props) {
           margin="dense"
           value={password}
         />
-        <WarningPass>
-          <p>
-            Please use a password manager to keep your password. Lovelock won&lsquo;t be able to reset password if you
-            forgot it.
-          </p>
-        </WarningPass>
         <TextValidator
           label="Repeat password"
           fullWidth
@@ -313,6 +322,19 @@ function RegisterUsername(props) {
             </div>
           </PreviewContainter>
         </Box>
+
+        <WarningPass>
+          <SnackbarContent className='warningSnackbar'
+              message={
+                <span className="warningMessage">
+                  <WarningIcon className="warningIcon" />
+                  <span className='warningText'>
+                    It is recommended that you let the browser or a password manager to keep your password. LoveLock cannot recover forgotten passwords.
+                  </span>
+                </span>
+              }
+            />
+        </WarningPass>
 
         <DivControlBtnKeystore>
           <div>

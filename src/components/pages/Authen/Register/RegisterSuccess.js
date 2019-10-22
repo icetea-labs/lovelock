@@ -50,6 +50,13 @@ const Desc = styled.ul`
   }
   .note {
     display: flex;
+    padding: 12px 6px 12px 20px;
+    background-color: #fe7;
+    line-height: 1.4;
+    h5 {
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
   }
 `;
 const MnemonixText = styled.div`
@@ -78,6 +85,7 @@ const FoolterBtn = styled.div`
 function RegisterSuccess(props) {
   const { address, privateKey, setLoading, setStep, history, password, mnemonic, setAccount } = props;
   const [isRemember, setIsRemember] = useState(true);
+  const [savedPhrase, setSavedPhrase] = useState(false);
 
   function gotoHome() {
     setLoading(true);
@@ -120,15 +128,14 @@ function RegisterSuccess(props) {
     <div>
       <WrapperImg>
         <img src="/static/img/success.svg" alt="" />
-        <Title>Wow, you have registered successfuly!</Title>
+        <Title>Wow, you created an account!</Title>
         <Desc>
-          <span>Here is your account&apos;s recovery phrase:</span>
+          <span>Save your recovery phrase bellow:</span>
           <MnemonixText>
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
           <div className="note">
-            <h1>NOTE</h1>
-            <span>In case you forget your password, use this recovery phrase to gain access to your account.</span>
+            <span><h5>NOTE</h5> In case you forget your password, this recovery phrase is <u>the only way</u> to gain access to your account. Keep it secret.</span>
           </div>
           <div>
             <FormControlLabel
@@ -148,8 +155,23 @@ function RegisterSuccess(props) {
         </Desc>
 
         <FoolterBtn>
-          <Button variant="contained" size="large" color="primary" onClick={gotoHome}>
-            I&apos;ve saved the recovery phrase
+          <div>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                    checkedIcon={<CheckBoxIcon fontSize="small" />}
+                    color="primary"
+                    value={savedPhrase}
+                    checked={savedPhrase}
+                    onChange={() => setSavedPhrase(!savedPhrase)}
+                  />
+                }
+                label="I've save my recovery phrase"
+              />
+            </div>
+          <Button disabled={!savedPhrase} variant="contained" size="large" color="primary" onClick={gotoHome}>
+            Continue
           </Button>
         </FoolterBtn>
       </WrapperImg>
