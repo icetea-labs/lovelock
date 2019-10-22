@@ -16,8 +16,9 @@ import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWi
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 import { getDraft, setDraft, delDraft } from '../../../helper/utils';
+import cloneDeep from 'lodash/cloneDeep';
 
-let editorContent;
+let blogBody = null;
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -143,6 +144,10 @@ export default function CreateMemory(props) {
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
 
+  const [blogSubtitle, setBlogSubtitle] = useState('');
+  const [blogTitle, setBlogTitle] = useState('');
+  const [previewOn, setPreviewOn] = useState(false);
+
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -190,10 +195,15 @@ export default function CreateMemory(props) {
   }
 
   async function onSubmitEditor() {
-    let blocks = editorContent.blocks;
+    const combined = combineContent();
+    const blocks = combined.blocks;
     if (validateEditorContent()) {
       const images = blocks.reduce((collector, b, i) => {
-        if (b.type === 'image' && b.data.url) {
+        if (
+          b.type === 'image' &&
+          b.data.url &&
+          (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
+        ) {
           collector[i] = fetch(b.data.url)
             .then(r => r.arrayBuffer())
             .then(Buffer.from);
@@ -201,16 +211,22 @@ export default function CreateMemory(props) {
         return collector;
       }, {});
 
-      const bufs = await Promise.all(Object.values(images));
-      const hashes = await saveToIpfs(bufs);
-      Object.keys(images).forEach((blockIndex, index) => {
-        blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index];
-      });
+      if (Object.keys(images).length) {
+        const bufs = await Promise.all(Object.values(images));
+        const hashes = await saveToIpfs(bufs);
+        Object.keys(images).forEach((blockIndex, index) => {
+          blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index];
+        });
+      }
 
-      let buffer = Buffer.from(JSON.stringify(editorContent));
+      let buffer = Buffer.from(JSON.stringify(combined));
       let submitContent = await saveFileToIpfs([buffer]);
       await handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
-      memoryContent = null;
+
+      // Clean up
+      blogBody = null;
+      setBlogTitle('');
+      setBlogSubtitle('');
       delDraft();
     } else {
       let message = 'Please enter memory content.';
@@ -219,7 +235,7 @@ export default function CreateMemory(props) {
   }
 
   function validateEditorContent() {
-    let blocks = editorContent.blocks;
+    let blocks = combineContent().blocks;
     for (let i in blocks) {
       if (blocks[i].text.trim() != '') {
         return true;
@@ -228,13 +244,63 @@ export default function CreateMemory(props) {
     return false;
   }
 
-  function onChangeEditor(value) {
-    editorContent = value;
+  function onChangeEditorBody(editor) {
+    // check first empty block as a temporary workaround for
+    // https://github.com/michelson/dante2/issues/185
+    const body = editor.save.editorContent;
+    if (body && body.blocks && (body.blocks.length !== 1 || body.blocks[0].text)) {
+      blogBody = body;
+    }
+  }
+
+  function onPreviewSwitched(checked) {
+    setPreviewOn(checked);
+  }
+
+  function combineContent() {
+    if (!blogBody) {
+      // generate a empty body
+      blogBody = makeDefaultBlogContent('');
+    }
+    const body = blogBody;
+
+    const title = blogTitle;
+    const h1 = title && {
+      data: {},
+      depth: 0,
+      entityRanges: [],
+      inlineStyleRanges: [],
+      key: 'blok0',
+      text: title,
+      type: 'header-one',
+    };
+    const subtitle = blogSubtitle;
+    const h3 = subtitle && {
+      data: {},
+      depth: 0,
+      entityRanges: [],
+      inlineStyleRanges: [],
+      key: 'blok1',
+      text: subtitle,
+      type: 'header-three',
+    };
+
+    if (!h1 && !h3) return body; // nothing to merge
+
+    const combined = { ...body };
+    combined.blocks = [...combined.blocks];
+    if (h3) combined.blocks.unshift(h3);
+    if (h1) combined.blocks.unshift(h1);
+
+    return combined;
   }
 
   function closeEditorModal() {
     setOpenModal(false);
     setGrayLayout(false);
+
+    // ensure next time open in edit mode
+    setPreviewOn(false);
   }
 
   async function handleShareMemory(advancedMemory) {
@@ -303,9 +369,51 @@ export default function CreateMemory(props) {
     };
   }
 
-  function saveDraft(context, content) {
-    if (content.blocks.length > 1 || content.blocks[0].text) {
-      setDraft(content);
+  function urlToBase64(url) {
+    return fetch(url)
+      .then(r => r.blob())
+      .then(blob => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener('error', reject);
+          reader.readAsDataURL(blob);
+        });
+      });
+  }
+
+  async function saveDraft(context, content) {
+    // check first empty block as a temporary workaround for
+    // https://github.com/michelson/dante2/issues/185
+    if (content.blocks.length !== 1 || content.blocks[0].text) {
+      // we need to change image from blob:// to base64
+
+      // cloneDeep raises warning in console
+      // should write own clone logic
+      const body = cloneDeep(content);
+      const blocks = body.blocks;
+
+      const images = blocks.reduce((collector, b, i) => {
+        if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
+          collector[i] = urlToBase64(b.data.url);
+        }
+        return collector;
+      }, {});
+
+      if (Object.keys(images).length) {
+        const base64Array = await Promise.all(Object.values(images));
+        Object.keys(images).forEach((blockIndex, index) => {
+          blocks[blockIndex].data.url = base64Array[index];
+        });
+      }
+
+      setDraft({
+        body,
+        title: blogTitle,
+        subtitle: blogSubtitle,
+      });
     }
   }
 
@@ -382,17 +490,25 @@ export default function CreateMemory(props) {
               open={isOpenModal}
               handleClose={closeEditorModal}
               handleSumit={onSubmitEditor}
+              handlePreview={onPreviewSwitched}
               closeText="Cancel"
               title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} handleClose={closeEditorModal} />}
             >
-              <Editor
-                initContent={makeDefaultBlogContent(memoryContent)}
-                saveOptions={{
-                  interval: 5000, // save draft every 5 seconds
-                  save_handler: saveDraft,
-                }}
-                onChange={onChangeEditor}
-              />
+              {!previewOn && (
+                <Editor
+                  initContent={blogBody || makeDefaultBlogContent(memoryContent)}
+                  title={blogTitle}
+                  onTitleChange={setBlogTitle}
+                  subtitle={blogSubtitle}
+                  onSubtitleChange={setBlogSubtitle}
+                  saveOptions={{
+                    interval: 1500, // save draft everytime user stop typing for 1.5 seconds
+                    save_handler: saveDraft,
+                  }}
+                  onChange={onChangeEditorBody}
+                />
+              )}
+              {previewOn && <Editor initContent={combineContent()} read_only />}
             </BlogModal>
           </Grid>
         </ShadowBox>
