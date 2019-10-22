@@ -53,13 +53,13 @@ export default function LeftProposes(props) {
   }
   const getInfo = item => {
     switch (item.type) {
-      case 1:
+      case 2:
         return {
           name: 'My Journal',
           nick: 'journal',
           icon: 'waves',
         };
-      case 2:
+      case 1:
         return {
           name: item.name,
           nick: 'crush',
@@ -75,10 +75,11 @@ export default function LeftProposes(props) {
   };
   // display on following order
   // journal -> crush -> lock
-  // if same type, bigger ID display first
+  // if same type, current address = sender display first
   const compare = (p1, p2) => {
     const v1 = Number(String(p1.type || 0) + p1.id);
     const v2 = Number(String(p2.type || 0) + p1.id);
+    if (address === p1.sender) return -1;
     return v2 - v1;
   };
   return proposes.sort(compare).map(item => {
