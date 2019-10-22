@@ -358,7 +358,6 @@ class PuNewLock extends React.Component {
   handleImageChange = event => {
     event.preventDefault();
     const orFiles = event.target.files;
-
     if (orFiles.length > 0) {
       this.setState({
         originFile: orFiles,
@@ -584,7 +583,13 @@ class PuNewLock extends React.Component {
           variant="outlined"
           onChange={this.promiseStmChange}
         />
-        <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
+        <AddInfoMessage
+          files={file}
+          date={date}
+          onChangeDate={this.onChangeDate}
+          onChangeMedia={this.onChangeMedia}
+          isCreatePro
+        />
         {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
         {isJournal && (
           <CommonDialog
