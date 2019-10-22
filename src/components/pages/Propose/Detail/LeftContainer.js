@@ -83,31 +83,43 @@ function LeftContainer(props) {
   useEffect(() => {
     loadProposes();
     watchCreatePropose();
-    watchConfirmPropose();
+    // watchConfirmPropose();
   }, []);
 
   function watchCreatePropose() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.createPropose(filter, async (error, result) => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
       if (error) {
         const message = 'Watch createPropose error';
         enqueueSnackbar(message, { variant: 'error' });
       } else {
-        eventCreatePropose(result);
+        const repsNew = result.filter(({ eventName }) => {
+          return eventName === 'createPropose';
+        });
+        if (repsNew.length > 0) eventCreatePropose(repsNew[0].eventData);
+
+        const respConfirm = result.filter(({ eventName }) => {
+          return eventName === 'confirmPropose';
+        });
+        if (respConfirm.length > 0) eventConfirmPropose(respConfirm[0].eventData);
       }
     });
   }
-  function watchConfirmPropose() {
-    const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.confirmPropose(filter, async (error, result) => {
-      if (error) {
-        const message = 'Watch confirmPropose error';
-        enqueueSnackbar(message, { variant: 'error' });
-      } else {
-        eventConfirmPropose(result);
-      }
-    });
-  }
+  // function watchConfirmPropose() {
+  //   const filter = {};
+  //   return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
+  //     if (error) {
+  //       const message = 'Watch confirmPropose error';
+  //       enqueueSnackbar(message, { variant: 'error' });
+  //     } else {
+  //       // eventConfirmPropose(result);
+  //       const resp = result.filter(({ eventName }) => {
+  //         return eventName === 'confirmPropose';
+  //       });
+  //       if (resp.length > 0) eventConfirmPropose(resp[0].eventData);
+  //     }
+  //   });
+  // }
 
   function closePopup() {
     setStep('');
@@ -150,6 +162,7 @@ function LeftContainer(props) {
   }
 
   async function eventCreatePropose(data) {
+    console.log(data);
     const log = await addInfoToProposes([data.log]);
     addPropose(log[0]);
 

@@ -265,10 +265,10 @@ function TopContrainer(props) {
 
   useEffect(() => {
     if (memoryRelationIndex !== -1) getNumLikes();
-    const returnValue = watchAddlike();
-    return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe && unsubscribe());
-    };
+    // const returnValue = watchAddlike();
+    // return () => {
+    //   Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe && unsubscribe());
+    // };
   }, [memoryRelationIndex]);
 
   function watchAddlike() {
