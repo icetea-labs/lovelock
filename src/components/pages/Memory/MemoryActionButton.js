@@ -67,7 +67,7 @@ export default function MemoryActionButton(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    serialData();
+    serialLikeData();
   }, [likes]);
 
   useEffect(() => {
@@ -75,7 +75,10 @@ export default function MemoryActionButton(props) {
     if (memoryType === 1) returnValue = watchAddlike();
 
     return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
+      if (memoryType === 1)
+        Promise.resolve(returnValue).then(result => {
+          if (result && result.result) result.unsubscribe();
+        });
     };
   }, []);
 
@@ -93,7 +96,7 @@ export default function MemoryActionButton(props) {
     });
   }
 
-  function serialData() {
+  function serialLikeData() {
     const num = Object.keys(likes).length;
     if (likes[address]) {
       setIsMyLike(true);
