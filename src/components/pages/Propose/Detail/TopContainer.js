@@ -221,7 +221,7 @@ const useStyles = makeStyles(theme => ({
     opacity: 0.8,
     '&:hover': {
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
-      opacity: 1
+      opacity: 1,
     },
   },
   changeCoverTitle: {
@@ -253,6 +253,7 @@ function TopContrainer(props) {
 
   const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
+  const [likes, setLikes] = useState({});
   const [isMyLike, setIsMyLike] = useState(false);
   const [numLike, setNumLike] = useState(0);
   const [memoryRelationIndex, setMemoryRelationIndex] = useState(-1);
@@ -264,10 +265,30 @@ function TopContrainer(props) {
   }, [proIndex]);
 
   useEffect(() => {
-    if (memoryRelationIndex !== -1) getNumLikes();
-    const returnValue = watchAddlike();
+    serialLikeData();
+  }, [likes]);
+
+  function serialLikeData() {
+    const num = Object.keys(likes).length;
+    if (likes[address]) {
+      setIsMyLike(true);
+    } else {
+      setIsMyLike(false);
+    }
+    setNumLike(num);
+  }
+
+  useEffect(() => {
+    let returnValue;
+    if (memoryRelationIndex !== -1) {
+      getNumLikes();
+      returnValue = watchAddlike();
+    }
     return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe }) => unsubscribe && unsubscribe());
+      if (memoryRelationIndex !== -1)
+        Promise.resolve(returnValue).then(result => {
+          if (result && result.result) result.unsubscribe();
+        });
     };
   }, [memoryRelationIndex]);
 
@@ -308,27 +329,28 @@ function TopContrainer(props) {
 
   async function getNumLikes() {
     if (memoryRelationIndex === '' || memoryRelationIndex == null || memoryRelationIndex < 0) return;
-    const data = await callView('getLikeByMemoIndex', [memoryRelationIndex]);
-    const num = Object.keys(data).length;
-    if (data[address]) {
-      setIsMyLike(true);
-    } else {
-      setIsMyLike(false);
-    }
-    setNumLike(num);
+    callView('getLikeByMemoIndex', [memoryRelationIndex]).then(data => {
+      setLikes(data);
+    });
   }
-  async function handerLike() {
+
+  function handerLike() {
     try {
       if (!tokenKey) {
         dispatch(actions.setNeedAuth(true));
         return;
       }
       const params = [topInfo.memoryRelationIndex, 1];
-      await sendTransaction('addLike', params, { address, tokenAddress });
-      // console.log('result', result);
-      // if (result) {
-      //   getNumLikes();
-      // }
+      sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
+        getNumLikes();
+      });
+
+      if (isMyLike) {
+        setNumLike(numLike - 1);
+      } else {
+        setNumLike(numLike + 1);
+      }
+      setIsMyLike(!isMyLike);
     } catch (e) {
       console.error(e);
       const message = `An error occurred, please try again later`;
@@ -484,7 +506,11 @@ function TopContrainer(props) {
             </Button>
           </CardMedia>
         ) : (
-          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverimg} title="Change lock image">
+          <CardMedia
+            className={classes.media}
+            image={process.env.REACT_APP_IPFS + topInfo.coverimg}
+            title="Change lock image"
+          >
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
               <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
