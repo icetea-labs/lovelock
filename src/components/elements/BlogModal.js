@@ -9,7 +9,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Box from '@material-ui/core/Box';
 import { CSSTransition } from 'react-transition-group';
 
-const useStyles = makeStyles(theme => {({
+const useStyles = makeStyles(theme => ({
   paper: {
     position: 'absolute',
     maxWidth: '100%',
@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => {({
     margin: theme.spacing(1),
     marginRight: theme.spacing(4)
   },
-})};
+}));
 
 export default function BlogModal(props) {
   if (props.open) {
