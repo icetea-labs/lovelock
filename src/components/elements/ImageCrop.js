@@ -34,7 +34,7 @@ const Container = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   .cropper-view-box {
-    border-radius: ${props => props.isCoverImg && '0'};
+    border-radius: ${props => (props.isCoverImg || props.isAddInfo) && '0'};
   }
 `;
 
@@ -103,7 +103,7 @@ const Action = styled.div`
 export default function ImageCrop(props) {
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
   const [avaPreview, setAvaPreview] = useState('');
-  const { close, accept, originFile, isCoverImg } = props;
+  const { close, accept, originFile, isCoverImg, isAddInfo } = props;
 
   useEffect(() => {
     const reader = new FileReader();
@@ -148,11 +148,17 @@ export default function ImageCrop(props) {
     }, 500);
   }
 
+  let expectRatio = 0;
+  if (isCoverImg || isAddInfo) {
+    expectRatio = 16 / 9;
+  } else expectRatio = 1;
+
   return (
     <QueueAnim animConfig={{ opacity: [1, 0] }}>
+      isCoverImg
       <PuLayout key={1}>
         <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
-          <Container key={2} isCoverImg={isCoverImg}>
+          <Container key={2} isCoverImg={isCoverImg} isAddInfo={isAddInfo}>
             <PuTitle>
               <span className="title">Crop Image</span>
               <IconButton onClick={close}>
@@ -168,7 +174,7 @@ export default function ImageCrop(props) {
                   src={imgPreviewUrl}
                   style={{ width: '100%', padding: '20px 0', background: '#f2f2f2' }}
                   // Cropper.js options
-                  aspectRatio={isCoverImg ? 16 / 9 : 1}
+                  aspectRatio={expectRatio}
                   guides={false}
                   crop={() => {
                     crop();

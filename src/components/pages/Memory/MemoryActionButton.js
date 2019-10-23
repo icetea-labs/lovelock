@@ -92,11 +92,11 @@ export default function MemoryActionButton(props) {
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.addLike(filter, async error => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
       if (error) {
+        console.error('watchAddlike', error);
         const message = 'Watch addlike error';
         enqueueSnackbar(message, { variant: 'error' });
-        console.log('watchAddlike', error);
       } else {
         // console.log('watchAddlike', result);
         getNumLikes();

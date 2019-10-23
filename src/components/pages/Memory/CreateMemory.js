@@ -15,8 +15,8 @@ import * as actions from '../../../store/actions';
 import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
-import { getDraft, setDraft, delDraft } from '../../../helper/utils'
-import cloneDeep from 'lodash/cloneDeep'
+import { getDraft, setDraft, delDraft } from '../../../helper/utils';
+import cloneDeep from 'lodash/cloneDeep';
 
 let blogBody = null;
 
@@ -139,13 +139,13 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
-  const [memoDate, setMemoDate] = useState(new Date());
+  const [memoDate, setMemoDate] = useState(Date.parse(new Date()));
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
 
-  const [blogSubtitle, setBlogSubtitle] = useState('')
-  const [blogTitle, setBlogTitle] = useState('')
+  const [blogSubtitle, setBlogSubtitle] = useState('');
+  const [blogTitle, setBlogTitle] = useState('');
   const [previewOn, setPreviewOn] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -195,24 +195,28 @@ export default function CreateMemory(props) {
   }
 
   async function onSubmitEditor() {
-    const combined = combineContent()
+    const combined = combineContent();
     const blocks = combined.blocks;
     if (validateEditorContent()) {
-
       const images = blocks.reduce((collector, b, i) => {
-        if (b.type === 'image' && b.data.url && 
-          (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)) {
-          collector[i] = fetch(b.data.url).then(r => r.arrayBuffer()).then(Buffer.from)
+        if (
+          b.type === 'image' &&
+          b.data.url &&
+          (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
+        ) {
+          collector[i] = fetch(b.data.url)
+            .then(r => r.arrayBuffer())
+            .then(Buffer.from);
         }
-        return collector
-      }, {})
+        return collector;
+      }, {});
 
       if (Object.keys(images).length) {
-        const bufs = await Promise.all(Object.values(images))
-        const hashes = await saveToIpfs(bufs)
+        const bufs = await Promise.all(Object.values(images));
+        const hashes = await saveToIpfs(bufs);
         Object.keys(images).forEach((blockIndex, index) => {
-          blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index]
-        })
+          blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index];
+        });
       }
 
       let buffer = Buffer.from(JSON.stringify(combined));
@@ -220,10 +224,10 @@ export default function CreateMemory(props) {
       await handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
 
       // Clean up
-      blogBody = null
-      setBlogTitle('')
-      setBlogSubtitle('')
-      delDraft()
+      blogBody = null;
+      setBlogTitle('');
+      setBlogSubtitle('');
+      delDraft();
     } else {
       let message = 'Please enter memory content.';
       enqueueSnackbar(message, { variant: 'error' });
@@ -243,22 +247,22 @@ export default function CreateMemory(props) {
   function onChangeEditorBody(editor) {
     // check first empty block as a temporary workaround for
     // https://github.com/michelson/dante2/issues/185
-    const body = editor.save.editorContent
+    const body = editor.save.editorContent;
     if (body && body.blocks && (body.blocks.length !== 1 || body.blocks[0].text)) {
-      blogBody = body
+      blogBody = body;
     }
   }
 
   function onPreviewSwitched(checked) {
-    setPreviewOn(checked)
+    setPreviewOn(checked);
   }
 
   function combineContent() {
     if (!blogBody) {
       // generate a empty body
-      blogBody = makeDefaultBlogContent('')
+      blogBody = makeDefaultBlogContent('');
     }
-    const body = blogBody
+    const body = blogBody;
 
     const title = blogTitle;
     const h1 = title && {
@@ -270,7 +274,7 @@ export default function CreateMemory(props) {
       text: title,
       type: 'header-one',
     };
-    const subtitle = blogSubtitle
+    const subtitle = blogSubtitle;
     const h3 = subtitle && {
       data: {},
       depth: 0,
@@ -289,14 +293,14 @@ export default function CreateMemory(props) {
     if (h1) combined.blocks.unshift(h1);
 
     return combined;
-  };
+  }
 
   function closeEditorModal() {
     setOpenModal(false);
     setGrayLayout(false);
 
     // ensure next time open in edit mode
-    setPreviewOn(false)
+    setPreviewOn(false);
   }
 
   async function handleShareMemory(advancedMemory) {
@@ -319,7 +323,6 @@ export default function CreateMemory(props) {
       // const hash = await saveBufferToIpfs(filesBuffer);
       // const info = { date, hash };
       let params = [];
-
       if (privacy) {
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
@@ -351,64 +354,66 @@ export default function CreateMemory(props) {
 
   function makeDefaultBlogContent(text) {
     return {
-      blocks: [{
-        data: {},
-        depth: 0,
-        entityRanges: [],
-        inlineStyleRanges: [],
-        key: 'blok2',
-        text: text,
-        type: 'unstyled'
-      }],
-      entityMap: {}
-    }
+      blocks: [
+        {
+          data: {},
+          depth: 0,
+          entityRanges: [],
+          inlineStyleRanges: [],
+          key: 'blok2',
+          text: text,
+          type: 'unstyled',
+        },
+      ],
+      entityMap: {},
+    };
   }
 
   function urlToBase64(url) {
-    return fetch(url).then(r => r.blob()).then(blob => {
-      return new Promise((resolve, reject) => {
-        const reader  = new FileReader();
-        reader.addEventListener('load', () => {
-          resolve(reader.result)
+    return fetch(url)
+      .then(r => r.blob())
+      .then(blob => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener('error', reject);
+          reader.readAsDataURL(blob);
         });
-        reader.addEventListener('error', reject)
-        reader.readAsDataURL(blob);
-      })
-    })
+      });
   }
 
   async function saveDraft(context, content) {
-
     // check first empty block as a temporary workaround for
     // https://github.com/michelson/dante2/issues/185
     if (content.blocks.length !== 1 || content.blocks[0].text) {
-
       // we need to change image from blob:// to base64
 
       // cloneDeep raises warning in console
       // should write own clone logic
-      const body = cloneDeep(content)
-      const blocks = body.blocks
-      
+      const body = cloneDeep(content);
+      const blocks = body.blocks;
+
       const images = blocks.reduce((collector, b, i) => {
         if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
-          collector[i] = urlToBase64(b.data.url)
+          collector[i] = urlToBase64(b.data.url);
         }
-        return collector
-      }, {})
+        return collector;
+      }, {});
 
       if (Object.keys(images).length) {
-        const base64Array = await Promise.all(Object.values(images))
+        const base64Array = await Promise.all(Object.values(images));
         Object.keys(images).forEach((blockIndex, index) => {
-          blocks[blockIndex].data.url = base64Array[index]
-        })
+          blocks[blockIndex].data.url = base64Array[index];
+        });
       }
 
       setDraft({
         body,
         title: blogTitle,
-        subtitle: blogSubtitle
-      })
+        subtitle: blogSubtitle,
+      });
     }
   }
 
@@ -461,7 +466,12 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button onClick={() => { setOpenModal(true) }} className={classes.blogBtn}>
+                <button
+                  onClick={() => {
+                    setOpenModal(true);
+                  }}
+                  className={classes.blogBtn}
+                >
                   Write blog...
                 </button>
                 <ButtonPro
@@ -484,7 +494,8 @@ export default function CreateMemory(props) {
               closeText="Cancel"
               title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} handleClose={closeEditorModal} />}
             >
-              {!previewOn && <Editor 
+              {!previewOn && (
+                <Editor
                   initContent={blogBody || makeDefaultBlogContent(memoryContent)}
                   title={blogTitle}
                   onTitleChange={setBlogTitle}
@@ -492,9 +503,11 @@ export default function CreateMemory(props) {
                   onSubtitleChange={setBlogSubtitle}
                   saveOptions={{
                     interval: 1500, // save draft everytime user stop typing for 1.5 seconds
-                    save_handler: saveDraft
+                    save_handler: saveDraft,
                   }}
-                  onChange={onChangeEditorBody} />}
+                  onChange={onChangeEditorBody}
+                />
+              )}
               {previewOn && <Editor initContent={combineContent()} read_only />}
             </BlogModal>
           </Grid>

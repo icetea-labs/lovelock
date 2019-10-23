@@ -40,7 +40,6 @@ export default function LeftProposes(props) {
   const propose = useSelector(state => state.loveinfo.propose);
   const address = useSelector(state => state.account.address);
   const proposes = propose.filter(item => item.status === props.flag);
-
   const classes = useStyles();
   if (proposes.length <= 0) {
     return (
@@ -53,37 +52,38 @@ export default function LeftProposes(props) {
   }
   const getInfo = item => {
     switch (item.type) {
-      case 1:
+      case 2:
         return {
           name: 'My Journal',
           nick: 'journal',
-          icon: 'waves'
-        }
-      case 2:
+          icon: 'waves',
+        };
+      case 1:
         return {
           name: item.name,
           nick: 'crush',
-          icon: 'done'
-        }
+          icon: 'done',
+        };
       default:
         return {
           name: item.name,
           nick: item.nick,
-          icon: 'done_all'
-        }
+          icon: 'done_all',
+        };
     }
-  }
+  };
   // display on following order
   // journal -> crush -> lock
-  // if same type, bigger ID display first
+  // if same type, current address = sender display first
   const compare = (p1, p2) => {
-    const v1 = Number(String(p1.type || 0) + p1.id)
-    const v2 = Number(String(p2.type || 0) + p1.id)
-    return v2 - v1
-  }
+    const v1 = Number(String(p1.type || 0) + p1.id);
+    const v2 = Number(String(p2.type || 0) + p1.id);
+    if (address === p1.sender) return -1;
+    return v2 - v1;
+  };
   return proposes.sort(compare).map(item => {
     // console.log('item', item);
-    const info = getInfo(item)
+    const info = getInfo(item);
     return (
       <CardHeader
         key={item.id}
@@ -96,7 +96,13 @@ export default function LeftProposes(props) {
           props.handlerSelect(item.id);
         }}
         action={
-          <BoxAction><Icon type={info.icon} /></BoxAction>
+          props.flag === 0 ? (
+            <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
+          ) : (
+            <BoxAction>
+              <Icon type={info.icon} />
+            </BoxAction>
+          )
         }
         avatar={<AvatarPro alt={info.name} hash={item.avatar} />}
         title={info.name}
