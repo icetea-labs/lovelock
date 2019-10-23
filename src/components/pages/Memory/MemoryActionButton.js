@@ -55,46 +55,35 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 export default function MemoryActionButton(props) {
-  const { memoryIndex, handerShowComment, numComment } = props;
+  const { memoryType, memoryIndex, handerShowComment, numComment } = props;
   const dispatch = useDispatch();
-
-  // const privateKey = useSelector(state => state.account.privateKey);
   const address = useSelector(state => state.account.address);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
 
+  const [likes, setLikes] = useState(props.memoryLikes);
   const [numLike, setNumLike] = useState(0);
   const [isMyLike, setIsMyLike] = useState(false);
-  // const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    getNumLikes();
-  });
-
-  async function getNumLikes() {
-    const data = await callView('getLikeByMemoIndex', [memoryIndex]);
-    const num = Object.keys(data).length;
-    if (data[address]) {
-      setIsMyLike(true);
-    } else {
-      setIsMyLike(false);
-    }
-    setNumLike(num);
-  }
+    serialData();
+  }, [likes]);
 
   useEffect(() => {
-    const returnValue = watchAddlike();
+    let returnValue;
+    if (memoryType === 1) returnValue = watchAddlike();
+
     return () => {
       Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
     };
-  }, [memoryIndex]);
+  }, []);
 
   function watchAddlike() {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
       if (error) {
-        console.error('watchAddlike', error);
+        console.error('watchlike', error);
         const message = 'Watch addlike error';
         enqueueSnackbar(message, { variant: 'error' });
       } else {
@@ -104,14 +93,38 @@ export default function MemoryActionButton(props) {
     });
   }
 
-  async function handerLike() {
+  function serialData() {
+    const num = Object.keys(likes).length;
+    if (likes[address]) {
+      setIsMyLike(true);
+    } else {
+      setIsMyLike(false);
+    }
+    setNumLike(num);
+  }
+
+  async function getNumLikes() {
+    callView('getLikeByMemoIndex', [memoryIndex]).then(data => {
+      setLikes(data);
+    });
+  }
+
+  function handerLike() {
     if (!tokenKey) {
       dispatch(actions.setNeedAuth(true));
       return;
     }
-    const method = 'addLike';
     const params = [memoryIndex, 1];
-    await sendTransaction(method, params, { tokenAddress, address });
+    sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
+      getNumLikes();
+    });
+
+    if (isMyLike) {
+      setNumLike(numLike - 1);
+    } else {
+      setNumLike(numLike + 1);
+    }
+    setIsMyLike(!isMyLike);
   }
 
   const classes = useStyles();
