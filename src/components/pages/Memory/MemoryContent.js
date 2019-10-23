@@ -462,8 +462,9 @@ function MemoryContent(props) {
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
                   handerShowComment={handerShowComment}
-                  likes={memory.likes}
+                  memoryLikes={memory.likes}
                   memoryIndex={memory.id}
+                  memoryType={memory.type}
                   numComment={numComment}
                 />
               )}
@@ -499,8 +500,9 @@ function MemoryContent(props) {
   const renderActionBt = (
     <MemoryActionButton
       handerShowComment={handerShowComment}
-      likes={memory.likes}
+      memoryLikes={memory.likes}
       memoryIndex={memory.id}
+      memoryType={memory.type}
       numComment={numComment}
     />
   );
