@@ -234,7 +234,6 @@ export default function AddInfoMessage(props) {
   const [picPreview, setPicPreview] = useState([]);
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState('');
-  console.log('files', files);
 
   useEffect(() => {
     if (files.length === 0) {

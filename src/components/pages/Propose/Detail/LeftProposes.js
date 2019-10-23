@@ -73,7 +73,7 @@ export default function LeftProposes(props) {
     }
   };
   // display on following order
-  // journal -> crush -> lock
+  // crush -> journal -> lock
   // if same type, current address = sender display first
   const compare = (p1, p2) => {
     const v1 = Number(String(p1.type || 0) + p1.id);
