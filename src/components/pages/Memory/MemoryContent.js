@@ -456,7 +456,7 @@ function MemoryContent(props) {
             open={isOpenModal}
             handleClose={closeMemory}
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
-            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
             <Editor initContent={decodeEditorMemory()} read_only />
             <div className={classes.editorComment}>
