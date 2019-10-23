@@ -7,6 +7,7 @@ import { callView } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContrainer from './RightContainer';
+import { NotFound } from '../../NotFound/NotFound';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -52,11 +53,7 @@ export default function DetailPropose(props) {
     </React.Fragment>
   );
 
-  const renderNotFound = (
-    <div>
-      <span>Oops! We couldn't find what you're looking for.</span>
-    </div>
-  );
+  const renderNotFound = <NotFound />;
 
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;

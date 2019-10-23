@@ -4,9 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles(theme => ({
   wrapper: {
     cursor: 'pointer',
-    color: '#888',
+    color: theme.palette.text.secondary,
     '&:hover': {
-      color: '#000'
+      color: theme.palette.text.primary
     }
   },
   icon: {

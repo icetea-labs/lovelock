@@ -52,10 +52,8 @@ const useStyles = makeStyles(theme => ({
     marginTop: 72,
   },
   subtitle: {
-    marginTop: -15,
-    marginBottom: 50,
     fontSize: '0.8em',
-    opacity: 0.5,
+    color: theme.palette.text.hint
   },
   back: {
     margin: theme.spacing(1),
@@ -79,8 +77,10 @@ export default function BlogModal(props) {
             <div className={classes.topbar}>
             <AppBar className={classes.appbar}>
             <Toolbar  className={classes.toolbar}>
-              <Typography variant="h5" className={classes.title}>{props.title}</Typography>
-              {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+              <div className={classes.title}>
+                <Typography variant="h5">{props.title}</Typography>
+                {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+              </div>
               {props.handlePreview && (
                 <FormControlLabel
                   control={

@@ -508,7 +508,7 @@ function TopContrainer(props) {
           <CardMedia className={classes.media} image={cropImg} title="Change lock image">
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <input className="fileInput" type="file" accept="image/jpeg,image/png" onChange={handleImageChange} />
               <Typography className={classes.changeCoverTitle} noWrap>
                 Change
               </Typography>
@@ -528,7 +528,7 @@ function TopContrainer(props) {
           >
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <input className="fileInput" type="file" accept="image/jpeg,image/png" onChange={handleImageChange} />
               <Typography className={classes.changeCoverTitle} noWrap>
                 Change
               </Typography>

@@ -540,7 +540,12 @@ class PuNewLock extends React.Component {
               <div className="upload_img">
                 <AvatarProCus src={avatar} />
                 <div className="changeImg">
-                  <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                  <input
+                    className="fileInput"
+                    type="file"
+                    onChange={this.handleImageChange}
+                    accept="image/jpeg,image/png"
+                  />
                   <CameraAltIcon />
                 </div>
               </div>
