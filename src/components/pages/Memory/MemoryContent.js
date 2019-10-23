@@ -80,7 +80,7 @@ const useStyles = makeStyles(theme => ({
     position: 'relative',
     display: 'block',
     backgroundColor: '#333',
-    padding: '0 0 16px',
+    paddingBottom: 16,
     cursor: 'pointer',
     transition: 'background-color 1000ms linear',
     '&:hover $blogTitleImg, &:hover $blogFirstLine': {
@@ -106,6 +106,8 @@ const useStyles = makeStyles(theme => ({
     color: '#f5f5f5',
     fontSize: 16,
     textTransform: 'uppercase',
+    paddingLeft: 28,
+    paddingRight: 28
   },
   relationship: {
     // color: theme.color.primary,
@@ -355,14 +357,13 @@ function MemoryContent(props) {
         }
         if (!firstLine) {
           firstLine = blocks[i].text;
-          if (firstLine.length > 200) {
-            firstLine = `${firstLine.slice(0, 200)}…`;
+          if (firstLine.length > 100) {
+            firstLine = `${firstLine.slice(0, 100)}…`;
           }
         }
         if (firstImg && firstLine) break;
       }
 
-      firstImg = firstImg || { url: '/static/img/memory-default.png' };
     } catch (error) {
       console.error(error);
     }
