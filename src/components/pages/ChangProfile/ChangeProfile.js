@@ -232,7 +232,12 @@ function ChangeProfile(props) {
                       <AvatarPro hash={avatar} className={classes.avatar} />
                     )}
                     <div className="changeImg">
-                      <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
+                      <input
+                        className="fileInput"
+                        type="file"
+                        onChange={handleImageChange}
+                        accept="image/jpeg,image/png"
+                      />
                       <CameraAltIcon />
                     </div>
                   </div>

@@ -7,6 +7,7 @@ import { callView } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContrainer from './RightContainer';
+import { NotFound } from '../../NotFound/NotFound';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -42,51 +43,24 @@ export default function DetailPropose(props) {
     setTopInfo(data);
   }
 
-  if (address) {
-    if (isLoginisSender) {
-      return (
-        <React.Fragment>
-          <BannerContainer>
-            <ShadowBox>
-              <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
-            </ShadowBox>
-          </BannerContainer>
-
-          <FlexBox wrap="wrap" minHeight="100vh">
-            <FlexWidthBox width="30%">
-              <LeftContainer />
-            </FlexWidthBox>
-            <FlexWidthBox width="70%">
-              <RightContrainer proIndex={proIndex} topInfo={topInfo} />
-            </FlexWidthBox>
-          </FlexBox>
-        </React.Fragment>
-      );
-    }
-    if (isAcceptisPublic) {
-      return (
-        <React.Fragment>
-          <BannerContainer>
-            <ShadowBox>
-              <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
-            </ShadowBox>
-          </BannerContainer>
-
-          <FlexBox wrap="wrap" minHeight="100vh">
-            <FlexWidthBox width="30%">
-              <LeftContainer />
-            </FlexWidthBox>
-            <FlexWidthBox width="70%">
-              <RightContrainer proIndex={proIndex} topInfo={topInfo} />
-            </FlexWidthBox>
-          </FlexBox>
-        </React.Fragment>
-      );
-    }
+  if (isLoginisSender) {
     return (
-      <div>
-        <span>Oops! We couldn't find what you're looking for.</span>
-      </div>
+      <React.Fragment>
+        <BannerContainer>
+          <ShadowBox>
+            <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
+          </ShadowBox>
+        </BannerContainer>
+
+        <FlexBox wrap="wrap" minHeight="100vh">
+          <FlexWidthBox width="30%">
+            <LeftContainer />
+          </FlexWidthBox>
+          <FlexWidthBox width="70%">
+            <RightContrainer proIndex={proIndex} topInfo={topInfo} />
+          </FlexWidthBox>
+        </FlexBox>
+      </React.Fragment>
     );
   }
   if (isAcceptisPublic) {
@@ -109,9 +83,30 @@ export default function DetailPropose(props) {
       </React.Fragment>
     );
   }
-  return (
-    <div>
-      <span>Oops! We couldn't find what you're looking for.</span>
-    </div>
-  );
+  return <NotFound />;
+  // if (isAcceptisPublic) {
+  //   return (
+  //     <React.Fragment>
+  //       <BannerContainer>
+  //         <ShadowBox>
+  //           <TopContrainer proIndex={proIndex} getTopInfo={getTopInfo} />
+  //         </ShadowBox>
+  //       </BannerContainer>
+
+  //       <FlexBox wrap="wrap" minHeight="100vh">
+  //         <FlexWidthBox width="30%">
+  //           <LeftContainer />
+  //         </FlexWidthBox>
+  //         <FlexWidthBox width="70%">
+  //           <RightContrainer proIndex={proIndex} topInfo={topInfo} />
+  //         </FlexWidthBox>
+  //       </FlexBox>
+  //     </React.Fragment>
+  //   );
+  // }
+  // return (
+  //   <div>
+  //     <span>Oops! We couldn't find what you're looking for.</span>
+  //   </div>
+  // );
 }
