@@ -1,16 +1,12 @@
 import React from 'react';
 import './NotFound.scss';
-import gif from '../../../assets/img/loadingtrada.gif';
+import notFoundImg from '../../../assets/img/404notFound.png';
 
 function NotFound() {
   return (
     <div>
-      <div className="not-found">
-        <h3>Not found</h3>
-        <p>Sorry! The page you’re looking for cannot be found.</p>
-      </div>
       <div className="not-found_img">
-        <img src={gif} alt="tradatech" />
+        <img src={notFoundImg} alt="tradatech" />
       </div>
     </div>
   );
