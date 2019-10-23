@@ -23,66 +23,18 @@ function RightContrainer(props) {
     loadMemory(proIndex);
   }, [proIndex]);
 
-  async function loadMemory(index) {
-    const respMemories = await callView('getMemoriesByProIndex', [index]);
-    setMemoByProIndex(respMemories);
-    // let newMemoryList = [];
-    // setLoading(true);
-    // setTimeout(async () => {
-    //   try {
-    //     for (let i = 0; i < respMemories.length; i++) {
-    //       const obj = respMemories[i];
-    //       if (obj.isPrivate && !privateKey) {
-    //         setNeedAuth(true);
-    //         break;
-    //       }
-    //     }
-
-    //     let tags = [];
-    //     for (let i = 0; i < respMemories.length; i++) {
-    //       const reps = getTagsInfo(respMemories[i].sender);
-    //       tags.push(reps);
-    //     }
-    //     tags = await Promise.all(tags);
-
-    //     for (let i = 0; i < respMemories.length; i++) {
-    //       const obj = respMemories[i];
-    //       obj.name = tags[i]['display-name'];
-    //       obj.pubkey = tags[i]['pub-key'];
-    //       obj.avatar = tags[i].avatar;
-    //       if (obj.receiver) {
-    //         // eslint-disable-next-line no-await-in-loop
-    //         const receiverTags = await getTagsInfo(obj.receiver);
-    //         obj.r_name = receiverTags['display-name'];
-    //       }
-    //       for (let j = 0; j < obj.info.hash.length; j++) {
-    //         // eslint-disable-next-line no-await-in-loop
-    //         obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
-    //       }
-    //       newMemoryList.push(obj);
-    //     }
-
-    //     newMemoryList = newMemoryList.reverse();
-    //     setMemory(newMemoryList);
-    //     setLoading(false);
-    //   } catch (e) {
-    //     const message = 'Load memory error!';
-    //     enqueueSnackbar(message, { variant: 'error' });
-    //   }
-    // }, 100);
+  function loadMemory(index) {
+    callView('getMemoriesByProIndex', [index]).then(memories => {
+      setMemoByProIndex(memories);
+    });
   }
 
-  const isLoginisSender = address === topInfo.sender || address === topInfo.receiver;
-  const isAcceptisPublic = topInfo.status === 1 && topInfo.isPrivate === false;
+  const isOwner = address === topInfo.sender || address === topInfo.receiver;
 
-  return isLoginisSender ? (
+  return (
     <RightBox>
-      {address && <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />}
+      {address && isOwner && <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} topInfo={topInfo} />}
       <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />
-    </RightBox>
-  ) : (
-    <RightBox>
-      {isAcceptisPublic && <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} topInfo={topInfo} />}
     </RightBox>
   );
 }
@@ -91,6 +43,7 @@ const mapStateToProps = state => {
   return {
     privateKey: state.account.privateKey,
     address: state.account.address,
+    topInfo: state.loveinfo.topInfo,
   };
 };
 

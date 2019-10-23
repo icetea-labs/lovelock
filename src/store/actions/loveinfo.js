@@ -2,6 +2,8 @@
  * action types
  */
 export const actionTypes = {
+  SET_TOPINFO: 'SET_TOPINFO',
+  SET_LIKE_TOPINFO: 'SET_LIKE_TOPINFO',
   SET_PROPOSE: 'SET_PROPOSE',
   ADD_PROPOSE: 'ADD_PROPOSE',
   CONFIRM_PROPOSE: 'CONFIRM_PROPOSE',
@@ -11,6 +13,8 @@ export const actionTypes = {
 /*
  * action creators
  */
+export const setLikeTopInfo = data => ({ type: actionTypes.SET_LIKE_TOPINFO, data });
+export const setTopInfo = data => ({ type: actionTypes.SET_TOPINFO, data });
 export const setPropose = data => ({ type: actionTypes.SET_PROPOSE, data });
 export const addPropose = data => ({ type: actionTypes.ADD_PROPOSE, data });
 export const confirmPropose = data => ({ type: actionTypes.CONFIRM_PROPOSE, data });

@@ -47,24 +47,29 @@ const ShadowBox = styled.div`
 function Home(props) {
   const [openPromise, setOpenPromise] = useState(false);
   const { address, history, setNeedAuth, tokenKey } = props;
-  const [homePropose, setHomePropose] = useState([]);
+  const [homePropose, setHomePropose] = useState(null);
 
   useEffect(() => {
     loadAcceptPropose();
   }, []);
 
-  async function loadAcceptPropose() {
-    let proposes;
+  function loadAcceptPropose() {
     if (address) {
-      proposes = (await callView('getProposeByAddress', [address])) || [];
-      proposes = proposes.filter(item => item.status === 1);
-      setHomePropose(proposes);
-      if (proposes.length > 0) {
-        const index = proposes[0].id;
+      callView('getProposeByAddress', [address]).then(proposes => {
+        setHomePropose(proposes || []);
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (homePropose) {
+      const pro = homePropose.filter(item => item.status === 1);
+      if (pro.length > 0) {
+        const index = pro[0].id;
         history.push(`/lock/${index}`);
       }
     }
-  }
+  }, [homePropose]);
 
   function openPopup() {
     if (!tokenKey) {
@@ -82,35 +87,36 @@ function Home(props) {
     loadAcceptPropose();
   }
 
+  const renderHomeEmptyPropose = (
+    <FlexWidthBox>
+      <ShadowBox>
+        <RightBox>
+          <div>
+            <img src="/static/img/plant.svg" alt="plant" />
+            <div className="emptyTitle">
+              <h1>You have no locks yet.</h1>
+            </div>
+            <div className="emptySubTitle">
+              <h2>Locks are the way you connect and share memories with your loved ones.</h2>
+            </div>
+            <ActionForm>
+              <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                Create first lock
+              </ButtonPro>
+            </ActionForm>
+            <LinkPro className="btn_add_promise" onClick={openExplore}>
+              or explore others&apos;
+            </LinkPro>
+          </div>
+        </RightBox>
+      </ShadowBox>
+      {openPromise && tokenKey && <PuNewLock close={closePopup} />}
+    </FlexWidthBox>
+  );
+
   return address ? (
     <FlexBox wrap="wrap" justify="center">
-      {/* <FlexWidthBox width="30%"><LeftContainer /></FlexWidthBox> */}
-      {homePropose.length < 1 && (
-        <FlexWidthBox>
-          <ShadowBox>
-            <RightBox>
-              <div>
-                <img src="/static/img/plant.svg" alt="plant" />
-                <div className="emptyTitle">
-                  <h1>You have no locks yet.</h1>
-                </div>
-                <div className="emptySubTitle">
-                  <h2>Locks are the way you connect and share memories with your loved ones.</h2>
-                </div>
-                <ActionForm>
-                  <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                    Create first lock
-                  </ButtonPro>
-                </ActionForm>
-                <LinkPro className="btn_add_promise" onClick={openExplore}>
-                  or explore others'
-                </LinkPro>
-              </div>
-            </RightBox>
-          </ShadowBox>
-          {openPromise && tokenKey && <PuNewLock close={closePopup} />}
-        </FlexWidthBox>
-      )}
+      {homePropose && homePropose.length < 1 && renderHomeEmptyPropose}
     </FlexBox>
   ) : (
     <LandingPage />

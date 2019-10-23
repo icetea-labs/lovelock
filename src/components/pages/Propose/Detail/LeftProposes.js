@@ -37,11 +37,11 @@ const BoxAction = styled.div`
 export default function LeftProposes(props) {
   const { loading = false } = props;
 
-  const propose = useSelector(state => state.loveinfo.propose);
+  const proposes = useSelector(state => state.loveinfo.proposes);
   const address = useSelector(state => state.account.address);
-  const proposes = propose.filter(item => item.status === props.flag);
+  const proFilted = proposes.filter(item => item.status === props.flag);
   const classes = useStyles();
-  if (proposes.length <= 0) {
+  if (proFilted.length <= 0) {
     return (
       <CardHeader
         avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
@@ -81,7 +81,7 @@ export default function LeftProposes(props) {
     if (address === p1.sender) return -1;
     return v2 - v1;
   };
-  return proposes.sort(compare).map(item => {
+  return proFilted.sort(compare).map(item => {
     // console.log('item', item);
     const info = getInfo(item);
     return (

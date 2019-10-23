@@ -10,7 +10,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { useSnackbar } from 'notistack';
 
-import tweb3 from '../../../../service/tweb3';
+// import tweb3 from '../../../../service/tweb3';
 
 import {
   callView,
@@ -243,20 +243,20 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, setNeedAuth, setGLoading } = props;
+  const { proIndex, setNeedAuth, topInfo, setTopInfo, setGLoading } = props;
   const dispatch = useDispatch();
-  const propose = useSelector(state => state.loveinfo.propose);
+  const proposes = useSelector(state => state.loveinfo.proposes);
   // const privateKey = useSelector(state => state.account.privateKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  const [topInfo, setTopInfo] = useState({});
+  // console.log('topInfo', topInfo);
+  // const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
-  const [likes, setLikes] = useState({});
-  const [isMyLike, setIsMyLike] = useState(false);
-  const [numLike, setNumLike] = useState(0);
-  const [memoryRelationIndex, setMemoryRelationIndex] = useState(-1);
+  // const [likes, setLikes] = useState({});
+  // const [isMyLike, setIsMyLike] = useState(false);
+  // const [numLike, setNumLike] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
@@ -264,73 +264,85 @@ function TopContrainer(props) {
     loadProposes();
   }, [proIndex]);
 
-  useEffect(() => {
-    serialLikeData();
-  }, [likes]);
+  // useEffect(() => {
+  //   serialLikeData();
+  // }, [likes]);
 
-  function serialLikeData() {
+  function serialLikeData(likes) {
+    let isMyLike = false;
     const num = Object.keys(likes).length;
     if (likes[address]) {
-      setIsMyLike(true);
-    } else {
-      setIsMyLike(false);
+      isMyLike = true;
     }
-    setNumLike(num);
+    // console.log('serialLikeData');
+    return { numLike: num, isMyLike };
   }
 
-  useEffect(() => {
-    let returnValue;
-    if (memoryRelationIndex !== -1) {
-      getNumLikes();
-      returnValue = watchAddlike();
-    }
-    return () => {
-      if (memoryRelationIndex !== -1)
-        Promise.resolve(returnValue).then(result => {
-          if (result && result.result) result.unsubscribe();
-        });
-    };
-  }, [memoryRelationIndex]);
+  // useEffect(() => {
+  //   let returnValue;
+  //   if (topInfo.memoryRelationIndex !== -1) {
+  //     getNumLikes();
+  //     returnValue = watchAddlike();
+  //   }
+  //   return () => {
+  //     if (topInfo.memoryRelationIndex !== -1)
+  //       Promise.resolve(returnValue).then(result => {
+  //         if (result && result.result) result.unsubscribe();
+  //       });
+  //   };
+  // }, [topInfo]);
 
-  function watchAddlike() {
-    const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryRelationIndex}`](filter, error => {
-      if (error) {
-        console.error('watchAddlikeTop', error);
-        const message = 'Watch new like propose error';
-        enqueueSnackbar(message, { variant: 'error' });
-      } else {
-        getNumLikes();
-      }
-    });
-  }
+  // function watchAddlike() {
+  //   const filter = {};
+  //   return tweb3
+  //     .contract(process.env.REACT_APP_CONTRACT)
+  //     .events[`addLike_${topInfo.memoryRelationIndex}`](filter, error => {
+  //       if (error) {
+  //         console.error('watchAddlikeTop', error);
+  //         const message = 'Watch new like proposes error';
+  //         enqueueSnackbar(message, { variant: 'error' });
+  //       } else {
+  //         getNumLikes();
+  //       }
+  //     });
+  // }
 
   function loadProposes() {
+    // console.log('loadProposes');
     window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
       try {
-        let proInfo = propose.filter(item => item.id === proIndex)[0] || [];
+        let proInfo = proposes.filter(item => item.id === proIndex)[0] || [];
         if (typeof proInfo === 'undefined' || proInfo.length <= 0) {
           const resp = (await callView('getProposeByIndex', [proIndex])) || [];
           proInfo = resp[0] || [];
         }
         const moreProInfo = await addInfoToProposes(proInfo);
+
+        const likes = await callView('getLikeByMemoIndex', [moreProInfo.memoryRelationIndex]);
+        const { numLike, isMyLike } = serialLikeData(likes);
+        moreProInfo.numLike = numLike;
+        moreProInfo.isMyLike = isMyLike;
         // console.log('moreProInfo', moreProInfo);
         setTopInfo(moreProInfo);
-        props.getTopInfo(moreProInfo);
-        setMemoryRelationIndex(proInfo.memoryRelationIndex);
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
       setLoading(false);
-    }, 10);
+    }, 100);
   }
 
   async function getNumLikes() {
-    if (memoryRelationIndex === '' || memoryRelationIndex == null || memoryRelationIndex < 0) return;
-    callView('getLikeByMemoIndex', [memoryRelationIndex]).then(data => {
-      setLikes(data);
+    if (topInfo.memoryRelationIndex === '' || topInfo.memoryRelationIndex == null || topInfo.memoryRelationIndex < 0)
+      return;
+    callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
+      const { numLike, isMyLike } = serialLikeData(data);
+      if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
+        const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+        setTopInfo(newTopInfo);
+        // console.log('getNumLikes11');
+      }
     });
   }
 
@@ -345,60 +357,63 @@ function TopContrainer(props) {
         getNumLikes();
       });
 
+      let { isMyLike, numLike } = topInfo;
       if (isMyLike) {
-        setNumLike(numLike - 1);
+        numLike -= 1;
       } else {
-        setNumLike(numLike + 1);
+        numLike += 1;
       }
-      setIsMyLike(!isMyLike);
-    } catch (e) {
-      console.error(e);
+      isMyLike = !isMyLike;
+      const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+      setTopInfo(newTopInfo);
+    } catch (error) {
+      console.error(error);
       const message = `An error occurred, please try again later`;
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
 
   async function addInfoToProposes(respPro) {
-    const proposes = respPro;
-    const { sender, receiver } = proposes;
+    const pro = respPro;
+    const { sender, receiver } = pro;
 
     const senderTags = await getTagsInfo(sender);
-    proposes.s_name = senderTags['display-name'];
-    proposes.s_publicKey = senderTags['pub-key'] || '';
-    proposes.s_avatar = senderTags.avatar;
+    pro.s_name = senderTags['display-name'];
+    pro.s_publicKey = senderTags['pub-key'] || '';
+    pro.s_avatar = senderTags.avatar;
 
-    const botInfo = proposes.bot_info;
+    const botInfo = pro.bot_info;
     // console.log('botInfo', botInfo);
 
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
-      proposes.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
-      proposes.r_publicKey = senderTags['pub-key'] || '';
-      proposes.r_avatar = botInfo.botAva;
-      proposes.r_content = botInfo.botReply;
+      pro.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
+      pro.r_publicKey = senderTags['pub-key'] || '';
+      pro.r_avatar = botInfo.botAva;
+      pro.r_content = botInfo.botReply;
     } else {
       const receiverTags = await getTagsInfo(receiver);
-      proposes.r_name = receiverTags['display-name'];
-      proposes.r_publicKey = receiverTags['pub-key'] || '';
-      proposes.r_avatar = receiverTags.avatar;
-      proposes.r_content = proposes.r_content;
+      pro.r_name = receiverTags['display-name'];
+      pro.r_publicKey = receiverTags['pub-key'] || '';
+      pro.r_avatar = receiverTags.avatar;
+      pro.r_content = pro.r_content;
     }
-    proposes.publicKey = sender === address ? proposes.r_publicKey : proposes.s_publicKey;
+    pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
 
-    const info = proposes.s_info;
+    const info = pro.s_info;
 
-    proposes.coverimg = proposes.coverImg ? proposes.coverImg : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
-    proposes.s_date = info.date;
-    proposes.r_date = info.date;
+    pro.coverimg = pro.coverImg ? pro.coverImg : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+    pro.s_date = info.date;
+    pro.r_date = info.date;
 
     const accountInfo = {
-      s_publicKey: proposes.s_publicKey,
-      s_address: proposes.sender,
-      r_publicKey: proposes.r_publicKey,
-      r_address: proposes.receiver,
-      publicKey: proposes.publicKey,
+      s_publicKey: pro.s_publicKey,
+      s_address: pro.sender,
+      r_publicKey: pro.r_publicKey,
+      r_address: pro.receiver,
+      publicKey: pro.publicKey,
     };
     dispatch(actions.setAccount(accountInfo));
-    return proposes;
+    return pro;
   }
 
   const classes = useStyles();
@@ -542,18 +557,18 @@ function TopContrainer(props) {
         </div>
         <div className="proLike">
           <Button onClick={handerLike}>
-            {isMyLike ? (
+            {topInfo.isMyLike ? (
               <React.Fragment>
                 <FavoriteIcon color="primary" className={classes.rightIcon} />
                 <Typography component="span" variant="body2" color="primary">
-                  {numLike > 0 && `${numLike}`}
+                  {topInfo.numLike > 0 && `${topInfo.numLike}`}
                 </Typography>
               </React.Fragment>
             ) : (
               <React.Fragment>
                 <FavoriteBorderIcon className={classes.rightIcon} />
                 <Typography component="span" variant="body2">
-                  {numLike > 0 && `${numLike}`}
+                  {topInfo.numLike > 0 && `${topInfo.numLike}`}
                 </Typography>
               </React.Fragment>
             )}
@@ -600,12 +615,15 @@ function TopContrainer(props) {
 }
 const mapStateToProps = state => {
   return {
-    memoryList: state.loveinfo.memory,
+    topInfo: state.loveinfo.topInfo,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
+    setTopInfo: value => {
+      dispatch(actions.setTopInfo(value));
+    },
     setMemory: value => {
       dispatch(actions.setMemory(value));
     },
