@@ -83,12 +83,12 @@ export default function MemoryActionButton(props) {
     setNumLike(num);
   }
 
-  useEffect(() => {
-    const returnValue = watchAddlike();
-    return () => {
-      Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
-    };
-  }, [memoryIndex]);
+  // useEffect(() => {
+  //   const returnValue = watchAddlike();
+  //   return () => {
+  //     Promise.resolve(returnValue).then(({ unsubscribe } = {}) => unsubscribe && unsubscribe());
+  //   };
+  // }, [memoryIndex]);
 
   function watchAddlike() {
     const filter = {};

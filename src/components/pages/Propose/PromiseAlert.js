@@ -38,10 +38,10 @@ function CardMediaCus(props) {
 function PromiseAlert(props) {
   const { deny, close, accept, address, tokenAddress, index, propose, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
-  const [info, setInfo] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
-  const hash = (info && info.hash) || [];
+  const [promiseImg, setPromiseImg] = useState('');
+  const hash = promiseImg;
 
   useEffect(() => {
     loaddata();
@@ -49,12 +49,13 @@ function PromiseAlert(props) {
 
   async function loaddata() {
     const obj = propose.filter(item => item.id === index)[0];
+
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       const alias = await getAlias(addr);
       setSender(obj.sender);
-      setInfo(obj.s_info);
       setContent(obj.s_content);
+      setPromiseImg(obj.coverImg);
       setName(alias);
     }
   }
@@ -91,7 +92,7 @@ function PromiseAlert(props) {
             <span className="highlight">{name}</span>
           </TagTitle>
           <ImgView>
-            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="lockImg" />}
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
@@ -110,7 +111,7 @@ function PromiseAlert(props) {
             <span> sent a lock to you</span>
           </TagTitle>
           <ImgView>
-            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="lockImg" />}
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
