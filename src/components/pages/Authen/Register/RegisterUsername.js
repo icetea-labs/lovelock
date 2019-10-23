@@ -99,7 +99,7 @@ const WarningPass = styled.div`
   }
   .warningMessage {
     display: flex;
-    alignItems: center;
+    alignitems: center;
   }
   .warningIcon {
     margin-right: 16px;
@@ -110,7 +110,7 @@ const WarningPass = styled.div`
     font-style: italic;
     font-size: 1.1em;
   }
-`
+`;
 
 function RegisterUsername(props) {
   const { setStep, setLoading, setAccount } = props;
@@ -316,7 +316,7 @@ function RegisterUsername(props) {
             <div className="upload_img">
               <AvatarPro src={avatar} className={classes.avatar} />
               <div className="changeImg">
-                <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
+                <input className="fileInput" type="file" onChange={handleImageChange} accept="image/jpeg,image/png" />
                 <CameraAltIcon />
               </div>
             </div>
@@ -324,16 +324,18 @@ function RegisterUsername(props) {
         </Box>
 
         <WarningPass>
-          <SnackbarContent className='warningSnackbar'
-              message={
-                <span className="warningMessage">
-                  <WarningIcon className="warningIcon" />
-                  <span className='warningText'>
-                    It is recommended that you let the browser or a password manager to keep your password. LoveLock cannot recover forgotten passwords.
-                  </span>
+          <SnackbarContent
+            className="warningSnackbar"
+            message={
+              <span className="warningMessage">
+                <WarningIcon className="warningIcon" />
+                <span className="warningText">
+                  It is recommended that you let the browser or a password manager to keep your password. LoveLock
+                  cannot recover forgotten passwords.
                 </span>
-              }
-            />
+              </span>
+            }
+          />
         </WarningPass>
 
         <DivControlBtnKeystore>

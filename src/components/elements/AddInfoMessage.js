@@ -349,7 +349,7 @@ export default function AddInfoMessage(props) {
                       <div className="btAddImg" rel="ignore">
                         <div className="wrapperInput">
                           <input
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/gif"
                             title="Choose a file to upload"
                             display="inline-block"
                             type="file"
@@ -393,7 +393,7 @@ export default function AddInfoMessage(props) {
                 <div>Photo</div>
               </div>
               <input
-                accept="image/*"
+                accept={isCreatePro ? 'image/jpeg,image/png' : 'image/jpeg,image/png,image/gif'}
                 title="Choose a file to upload"
                 className="fileInput"
                 role="button"

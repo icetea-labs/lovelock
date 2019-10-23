@@ -221,7 +221,7 @@ const useStyles = makeStyles(theme => ({
     opacity: 0.8,
     '&:hover': {
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
-      opacity: 1
+      opacity: 1,
     },
   },
   changeCoverTitle: {
@@ -471,7 +471,7 @@ function TopContrainer(props) {
           <CardMedia className={classes.media} image={cropImg} title="Change lock image">
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <input className="fileInput" type="file" accept="image/jpeg,image/png" onChange={handleImageChange} />
               <Typography className={classes.changeCoverTitle} noWrap>
                 Change
               </Typography>
@@ -484,10 +484,14 @@ function TopContrainer(props) {
             </Button>
           </CardMedia>
         ) : (
-          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverimg} title="Change lock image">
+          <CardMedia
+            className={classes.media}
+            image={process.env.REACT_APP_IPFS + topInfo.coverimg}
+            title="Change lock image"
+          >
             <Button className={classes.icon}>
               <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <input className="fileInput" type="file" accept="image/*" onChange={handleImageChange} />
+              <input className="fileInput" type="file" accept="image/jpeg,image/png" onChange={handleImageChange} />
               <Typography className={classes.changeCoverTitle} noWrap>
                 Change
               </Typography>
