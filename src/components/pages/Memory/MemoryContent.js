@@ -175,7 +175,13 @@ function MemoryContent(props) {
   // }, [memory]);
 
   useEffect(() => {
-    serialMemory();
+    serialMemory().then(() => {
+      if (window.location.search !== '') {
+        const url_string = window.location.href;
+        const url = new URL(url_string);
+        if (memory.id == url.searchParams.get('memory')) setOpenModal(true);
+      }
+    })
   }, []);
 
   async function serialMemory() {
@@ -200,13 +206,6 @@ function MemoryContent(props) {
     }
     setMemoryDecrypted(mem);
   }
-  useEffect(() => {
-    if (window.location.search !== '') {
-      const url_string = window.location.href;
-      const url = new URL(url_string);
-      if (memory.id == url.searchParams.get('memory')) setOpenModal(true);
-    }
-  });
 
   useEffect(() => {
     (async () => {
@@ -427,6 +426,7 @@ function MemoryContent(props) {
   };
 
   const renderContentUnlock = () => {
+    const blogContent = decodeEditorMemory()
     return (
       <React.Fragment>
         {memoryDecrypted.type === 1 ? (
@@ -451,14 +451,14 @@ function MemoryContent(props) {
             {memoryDecrypted.isBlog ? previewEditorMemoryBlog() : memoryDecrypted.content}
           </Typography>
         )}
-        {decodeEditorMemory() && (
+        {blogContent && (
           <BlogModal
             open={isOpenModal}
             handleClose={closeMemory}
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
             subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
-            <Editor initContent={decodeEditorMemory()} read_only />
+            <Editor initContent={blogContent} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
