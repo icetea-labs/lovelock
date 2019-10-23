@@ -275,7 +275,7 @@ function TopContrainer(props) {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryRelationIndex}`](filter, error => {
       if (error) {
-        console.error('watchAddlike', error);
+        console.error('watchAddlikeTop', error);
         const message = 'Watch new like propose error';
         enqueueSnackbar(message, { variant: 'error' });
       } else {

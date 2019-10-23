@@ -1,11 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="732" height="800" viewBox="0 0 732 800">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="720" height="800" viewBox="0 0 720 800">
     <defs>
         <path id="a" d="M0 0h720v800H0z"/>
-        <filter id="b" width="105.6%" height="105%" x="-2.8%" y="-2%" filterUnits="objectBoundingBox">
-            <feOffset dy="4" in="SourceAlpha" result="shadowOffsetOuter1"/>
-            <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="6"/>
-            <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0478091033 0"/>
-        </filter>
         <linearGradient id="c" x1="100%" x2="0%" y1="191.939%" y2="-21.738%">
             <stop offset="0%" stop-color="#B276FF"/>
             <stop offset="100%" stop-color="#FE8DC3"/>
