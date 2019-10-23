@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, connect } from 'react-redux';
 import { CardActions, Button, Typography } from '@material-ui/core';
 import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -54,9 +54,8 @@ const StyledCardActions = withStyles(theme => ({
   },
 }))(CardActions);
 
-export default function MemoryActionButton(props) {
-  const { memoryType, memoryIndex, handerShowComment, numComment } = props;
-  const dispatch = useDispatch();
+function MemoryActionButton(props) {
+  const { memoryType, memoryIndex, handerShowComment, numComment, setLikeTopInfo, setNeedAuth } = props;
   const address = useSelector(state => state.account.address);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
@@ -87,7 +86,7 @@ export default function MemoryActionButton(props) {
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
       if (error) {
         console.error('watchlike', error);
-        const message = 'Watch addlike error';
+        const message = 'Watch like error';
         enqueueSnackbar(message, { variant: 'error' });
       } else {
         // console.log('watchAddlike', result);
@@ -98,12 +97,9 @@ export default function MemoryActionButton(props) {
 
   function serialLikeData() {
     const num = Object.keys(likes).length;
-    if (likes[address]) {
-      setIsMyLike(true);
-    } else {
-      setIsMyLike(false);
-    }
+    setIsMyLike(!!likes[address]);
     setNumLike(num);
+    if (memoryType === 1) setLikeTopInfo({ numLike: num, isMyLike: !!likes[address] });
   }
 
   async function getNumLikes() {
@@ -114,7 +110,7 @@ export default function MemoryActionButton(props) {
 
   function handerLike() {
     if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
+      setNeedAuth(true);
       return;
     }
     const params = [memoryIndex, 1];
@@ -166,3 +162,18 @@ export default function MemoryActionButton(props) {
     </StyledCardActions>
   );
 }
+const mapDispatchToProps = dispatch => {
+  return {
+    setLikeTopInfo: value => {
+      dispatch(actions.setLikeTopInfo(value));
+    },
+    setNeedAuth(value) {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(MemoryActionButton);

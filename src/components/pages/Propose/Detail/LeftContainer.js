@@ -261,7 +261,7 @@ function LeftContainer(props) {
       {step === 'pending' && tokenKey && (
         <PromiseAlert
           index={index}
-          propose={proposes}
+          proposes={proposes}
           address={address}
           tokenAddress={tokenAddress}
           close={closePopup}
@@ -277,7 +277,7 @@ function LeftContainer(props) {
 
 const mapStateToProps = state => {
   return {
-    proposes: state.loveinfo.propose,
+    proposes: state.loveinfo.proposes,
     address: state.account.address,
     tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,
