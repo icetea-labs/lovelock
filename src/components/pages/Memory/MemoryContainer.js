@@ -118,7 +118,7 @@ function MemoryContainer(props) {
 
 const mapStateToProps = state => {
   return {
-    memoryList: state.loveinfo.memory,
+    memoryList: state.loveinfo.memories,
     privateKey: state.account.privateKey,
   };
 };

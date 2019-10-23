@@ -36,7 +36,7 @@ function CardMediaCus(props) {
 }
 
 function PromiseAlert(props) {
-  const { deny, close, accept, address, tokenAddress, index, propose, enqueueSnackbar } = props;
+  const { deny, close, accept, address, tokenAddress, index, proposes, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
@@ -48,7 +48,7 @@ function PromiseAlert(props) {
   }, []);
 
   async function loaddata() {
-    const obj = propose.filter(item => item.id === index)[0];
+    const obj = proposes.filter(item => item.id === index)[0];
 
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
@@ -67,7 +67,7 @@ function PromiseAlert(props) {
       const result = await sendTransaction(funcName, params, { address, tokenAddress });
       // console.log('View result', result);
       if (result) {
-        const message = 'Your propose has been removed.';
+        const message = 'Your proposes has been removed.';
         enqueueSnackbar(message, { variant: 'info' });
         close();
       }

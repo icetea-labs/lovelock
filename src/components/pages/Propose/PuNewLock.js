@@ -386,10 +386,10 @@ class PuNewLock extends React.Component {
   };
 
   createJournal = () => {
-    const { propose, enqueueSnackbar } = this.props;
+    const { proposes, enqueueSnackbar } = this.props;
     let message = '';
-    for (let i = 0; i < propose.length; i++) {
-      if (propose[i].sender === propose[i].receiver) {
+    for (let i = 0; i < proposes.length; i++) {
+      if (proposes[i].sender === proposes[i].receiver) {
         message = 'You already had a journal and cannot create one more.';
         enqueueSnackbar(message, { variant: 'error' });
       }
@@ -618,7 +618,7 @@ Promise.defaultProps = {
 
 const mapStateToProps = state => {
   return {
-    propose: state.loveinfo.propose,
+    proposes: state.loveinfo.proposes,
     address: state.account.address,
     tokenAddress: state.account.tokenAddress,
   };
