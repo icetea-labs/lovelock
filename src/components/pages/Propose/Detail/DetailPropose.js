@@ -9,6 +9,8 @@ import LeftContainer from './LeftContainer';
 import RightContrainer from './RightContainer';
 import { NotFound } from '../../NotFound/NotFound';
 
+import { Helmet } from "react-helmet";
+
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
 `;
@@ -43,6 +45,30 @@ export default function DetailPropose(props) {
     setTopInfo(data);
   }
 
+  function makeHelmet() {
+    const isJournal = proposeInfo.sender === proposeInfo.receiver
+    // TODO: get sender & receiver's display name
+    const title = isJournal ? `${proposeInfo.sender}'s Journal` : `Lovelock - ${proposeInfo.sender} & ${proposeInfo.receiver}`
+    const desc = proposeInfo.s_content
+    const coverImg = proposeInfo.coverImg ? 
+      process.env.REACT_APP_IPFS + proposeInfo.coverImg : process.env.PUBLIC_URL + '/static/img/share.jpg'
+    return (
+      <Helmet>
+        <title>{title}</title>
+        <meta property="og:title" content={title} />
+        <meta property="og:type" content="website" />
+        <meta name="description" content={desc} />
+        <meta property="og:image" content={coverImg} />
+        <meta property="og:description" content={desc} />
+      </Helmet>
+    )
+  }
+
+  if (!proposeInfo.sender) {
+    // loading propose from contract, please wait
+    return <div />
+  }
+
   if (isLoginisSender) {
     return (
       <React.Fragment>
@@ -60,6 +86,8 @@ export default function DetailPropose(props) {
             <RightContrainer proIndex={proIndex} topInfo={topInfo} />
           </FlexWidthBox>
         </FlexBox>
+
+        {makeHelmet()}
       </React.Fragment>
     );
   }
@@ -80,10 +108,14 @@ export default function DetailPropose(props) {
             <RightContrainer proIndex={proIndex} topInfo={topInfo} />
           </FlexWidthBox>
         </FlexBox>
+
+        {makeHelmet()}
       </React.Fragment>
     );
   }
+
   return <NotFound />;
+
   // if (isAcceptisPublic) {
   //   return (
   //     <React.Fragment>

@@ -10,6 +10,7 @@ import { useSnackbar } from 'notistack';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import { Helmet } from "react-helmet";
 
 import * as actions from '../../../store/actions';
 import {
@@ -187,10 +188,10 @@ function MemoryContent(props) {
   async function serialMemory() {
     let mem = memory;
     if (memory.isBlog) {
-      const contentBlog = JSON.parse(memory.content);
-      const data = await fetch(process.env.REACT_APP_IPFS + contentBlog.ipfsHash);
-      const content = await data.json();
-      mem.content = JSON.stringify(content);
+      if (typeof memory.content === 'string') {
+        const contentBlog = JSON.parse(memory.content);
+        mem.content = await fetch(process.env.REACT_APP_IPFS + contentBlog.ipfsHash).then(d => d.json())
+      }
     } else if (memory.isPrivate) {
       const memCache = await loadMemCacheAPI(memory.id);
       if (memCache) {
@@ -314,17 +315,6 @@ function MemoryContent(props) {
     }, 100);
   }
 
-  function decodeEditorMemory() {
-    // console.log(memoryDecrypted.content);
-    try {
-      const content = JSON.parse(memoryDecrypted.content);
-      if (content) {
-        return content;
-      }
-    } catch (e) {}
-    return false;
-  }
-
   // async function getMemoryContent() {
   //   try {
   //     let memoryContent = JSON.parse(memoryDecrypted.content);
@@ -342,39 +332,30 @@ function MemoryContent(props) {
   //   }
   // }
 
-  function previewEditorMemoryBlog() {
+  function extractBlogInfo(content) {
+
     let firstImg;
     let firstLine;
 
-    try {
-      const content = JSON.parse(memoryDecrypted.content);
-      const { blocks } = content;
+    const { blocks } = content;
 
-      for (const i in blocks) {
-        if (!firstImg && blocks[i].type === 'image') {
-          firstImg = blocks[i].data;
-        }
-        if (!firstLine) {
-          firstLine = blocks[i].text;
-          if (firstLine.length > 100) {
-            firstLine = `${firstLine.slice(0, 100)}…`;
-          }
-        }
-        if (firstImg && firstLine) break;
+    for (const i in blocks) {
+      if (!firstImg && blocks[i].type === 'image') {
+        firstImg = blocks[i].data;
       }
-
-    } catch (error) {
-      console.error(error);
+      if (!firstLine) {
+        firstLine = blocks[i].text;
+        if (firstLine.length > 100) {
+          firstLine = `${firstLine.slice(0, 100)}…`;
+        }
+      }
+      if (firstImg && firstLine) break;
     }
 
-    return (
-      <BlogShowcase
-        classes={classes}
-        firstImg={firstImg}
-        firstLine={firstLine}
-        openHandler={() => openMemory(memory.id)}
-      />
-    );
+    return {
+      title: firstLine,
+      coverPhoto: firstImg
+    }
   }
 
   function openMemory(memoryId) {
@@ -426,7 +407,8 @@ function MemoryContent(props) {
   };
 
   const renderContentUnlock = () => {
-    const blogContent = decodeEditorMemory()
+    const isBlog = memoryDecrypted.isBlog
+    const blogInfo = isBlog ? extractBlogInfo(memoryDecrypted.content) : null
     return (
       <React.Fragment>
         {memoryDecrypted.type === 1 ? (
@@ -448,17 +430,35 @@ function MemoryContent(props) {
           </Typography>
         ) : (
           <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
-            {memoryDecrypted.isBlog ? previewEditorMemoryBlog() : memoryDecrypted.content}
+            {!isBlog && memoryDecrypted.content}
+            {isBlog  && blogInfo.title && (
+              <BlogShowcase
+                classes={classes}
+                title={blogInfo.title}
+                photo={blogInfo.coverPhoto}
+                openHandler={() => openMemory(memory.id)}
+              />
+            )}
           </Typography>
         )}
-        {blogContent && (
+        {isOpenModal && blogInfo && blogInfo.title && (
+          <Helmet>
+            <title>{blogInfo.title}</title>
+            <meta property="og:title" content={blogInfo.title} />
+            <meta property="og:type" content="article" />
+            <meta name="description" content="A story on Lovelock" />
+            <meta property="og:image" content={blogInfo.coverPhoto || `${process.env.PUBLIC_URL}/static/img/share.jpg`} />
+            <meta property="og:description" content="A story on Lovelock" />
+          </Helmet>
+        )}
+        {isBlog && (
           <BlogModal
             open={isOpenModal}
             handleClose={closeMemory}
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
             subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
-            <Editor initContent={blogContent} read_only />
+            <Editor initContent={memoryDecrypted.content} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
