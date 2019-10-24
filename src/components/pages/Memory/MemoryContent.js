@@ -190,6 +190,7 @@ function MemoryContent(props) {
     let mem = memory;
     if (memory.info.blog) {
       const blogData = JSON.parse(memory.content);
+      mem = { ... memory }
       mem.meta = blogData.meta;
       mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash).then(d => d.json());
     } else if (memory.isPrivate) {

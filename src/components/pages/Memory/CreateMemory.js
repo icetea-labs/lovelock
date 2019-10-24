@@ -371,7 +371,7 @@ export default function CreateMemory(props) {
         const newinfo = { date: memoDate, hash };
         params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
       } else {
-        const hash = blogData && await saveBufferToIpfs(filesBuffer);
+        const hash = !blogData && await saveBufferToIpfs(filesBuffer);
         const info = { date: memoDate };
         info.hash = hash || []
         if (blogData) info.blog = true
