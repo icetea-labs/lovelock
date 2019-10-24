@@ -167,7 +167,7 @@ function RegisterSuccess(props) {
                     onChange={() => setSavedPhrase(!savedPhrase)}
                   />
                 }
-                label="I've save my recovery phrase"
+                label="I've saved my recovery phrase"
               />
             </div>
           <Button disabled={!savedPhrase} variant="contained" size="large" color="primary" onClick={gotoHome}>

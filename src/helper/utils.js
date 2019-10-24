@@ -9,14 +9,6 @@ import tweb3 from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
-// indexdb (async alternative to localStorage, can store object, not only string)
-import { get as getIdb, set as setIdb, del as delIdb } from 'idb-keyval'
-const BLOG_DRAFT_KEY = 'blogdraft'
-
-export const getDraft = () => getIdb(BLOG_DRAFT_KEY).catch(console.warn)
-export const setDraft = content => setIdb(BLOG_DRAFT_KEY, content).catch(console.warn)
-export const delDraft = () => delIdb(BLOG_DRAFT_KEY).catch(console.error)
-
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
@@ -77,24 +69,6 @@ export async function getAccountInfo(address) {
   } catch (err) {
     throw err;
   }
-}
-export async function setTagsInfo(key, value, opts) {
-  const options = { from: opts.address };
-  if (opts.tokenAddress) options.signers = opts.tokenAddress;
-
-  const resp = await tweb3
-    .contract('system.did')
-    .methods.setTag(opts.address, key, value)
-    .sendCommit(options);
-  return resp && resp.tags;
-}
-
-export async function getTagsInfo(address) {
-  const resp = await tweb3
-    .contract('system.did')
-    .methods.query(address)
-    .call();
-  return resp && resp.tags;
 }
 
 export async function saveToIpfs(files) {
@@ -385,41 +359,6 @@ export function diffTime(time) {
   return moment(time).fromNow();
 }
 
-export async function isAliasRegisted(username) {
-  // try {
-  const alias = 'account.'.concat(username);
-  const info = await tweb3
-    .contract('system.alias')
-    .methods.resolve(alias)
-    .call();
-  return info;
-  // } catch (err) {
-  // console.log(tryStringifyJson(err));
-  // throw err;
-  // }
-}
-const cacheAlias = {};
-export async function getAlias(address) {
-  if (!cacheAlias[address]) {
-    const listAlias = await tweb3
-      .contract('system.alias')
-      .methods.byAddress(address)
-      .call();
-    if (listAlias && Array.isArray(listAlias) && listAlias[0]) {
-      cacheAlias[address] = listAlias[0].replace('account.', '');
-    } else {
-      cacheAlias[address] = '';
-    }
-  }
-  return cacheAlias[address];
-}
-export async function registerAlias(username, address) {
-  const resp = await tweb3
-    .contract('system.alias')
-    .methods.register(username, address)
-    .sendCommit({ from: address });
-  return resp;
-}
 export async function savetoLocalStorage(address, keyObject) {
   localStorage.removeItem('user');
   localStorage.setItem('user', JSON.stringify({ address, keyObject }));
@@ -465,11 +404,10 @@ export const wallet = {
     return { mnemonic, privateKey, publicKey, address };
   },
   // default regular account.
-  getAccountFromMneomnic(nemon, type = AccountType.REGULAR_ACCOUNT) {
+  getAccountFromMneomnic(mnemonic, type = AccountType.REGULAR_ACCOUNT) {
     let pkey;
     let found;
     let resp;
-    let mnemonic = nemon;
     if (!mnemonic) mnemonic = bip39.generateMnemonic();
     const hdkey = this.getHdKeyFromMnemonic(mnemonic);
     for (let i = 0; !found; i++) {

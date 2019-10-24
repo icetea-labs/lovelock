@@ -8,7 +8,7 @@ import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 
-import { getTagsInfo, setTagsInfo, saveFileToIpfs, isAliasRegisted, registerAlias } from '../../../helper';
+import { getTagsInfo, setTagsInfo, saveFileToIpfs, getAlias, isAliasRegistered, registerAlias } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
@@ -17,7 +17,6 @@ import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthe
 import { HeaderAuthen } from '../../elements/Common';
 import { AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
-import { getAlias } from '../../../helper/utils';
 
 const useStyles = makeStyles(() => ({
   avatar: {
@@ -108,14 +107,14 @@ function ChangeProfile(props) {
       return regex.test(name);
     });
 
-    ValidatorForm.addValidationRule('isAliasRegisted', async name => {
-      const resp = await isAliasRegisted(name);
+    ValidatorForm.addValidationRule('isAliasRegistered', async name => {
+      const resp = await isAliasRegistered(name);
       return !resp;
     });
 
     return () => {
       ValidatorForm.removeValidationRule('isPasswordMatch');
-      ValidatorForm.removeValidationRule('isAliasRegisted');
+      ValidatorForm.removeValidationRule('isAliasRegistered');
     };
   }, []);
 
@@ -143,29 +142,36 @@ function ChangeProfile(props) {
       setLoading(true);
       setTimeout(async () => {
         try {
-          const listSetTags = [];
-          if (firstname.old !== firstname.new)
-            listSetTags.push(setTagsInfo('firstname', firstname.new, { address, tokenAddress }));
-          if (lastname.old !== lastname.new)
-            listSetTags.push(setTagsInfo('lastname', lastname.new, { address, tokenAddress }));
+          const tags = {}
+          if (firstname.old !== firstname.new) {
+            tags.firstname = firstname.new
+          }
+
+          if (lastname.old !== lastname.new) {
+            tags.lastname = lastname.new
+          }
 
           const displayName = `${firstname.new} ${lastname.new}`;
-          if (firstname.old !== firstname.new || lastname.old !== lastname.new)
-            listSetTags.push(setTagsInfo('display-name', displayName, { address, tokenAddress }));
+          if (firstname.old !== firstname.new || lastname.old !== lastname.new) {
+            tags['display-name'] = displayName
+          }
 
+          const listSetTags = [];
           const accountInfo = { displayName };
           if (cropFile) {
-            const hash = await saveFileToIpfs(cropFile);
-            accountInfo.avatar = hash;
-            if (avatar !== hash) {
-              listSetTags.push(setTagsInfo('avatar', hash, { address, tokenAddress }));
-            }
+            const saveAvatar = saveFileToIpfs(cropFile).then(hash => {
+              accountInfo.avatar = hash;
+              if (avatar !== hash) {
+                return setTagsInfo({avatar: hash}, { address, tokenAddress })
+              }
+            })
+            listSetTags.push(saveAvatar)
           }
 
           if (!isRegistered) {
             if (privateKey) {
               const { publicKey } = ecc.toPubKeyAndAddress(privateKey);
-              listSetTags.push(setTagsInfo('pub-key', publicKey, { address }));
+              tags['pub-key'] = publicKey
               listSetTags.push(registerAlias(username, address));
             } else {
               const message = 'Please login or Input recovery phrase';
@@ -173,6 +179,8 @@ function ChangeProfile(props) {
               history.push('/login');
             }
           }
+
+          listSetTags.push(setTagsInfo(tags, { address, tokenAddress }))
           const change = await Promise.all(listSetTags);
           if (change) {
             // Set to redux
@@ -254,7 +262,7 @@ function ChangeProfile(props) {
                     validators={
                       isRegistered
                         ? ['required', 'specialCharacter']
-                        : ['required', 'specialCharacter', 'isAliasRegisted']
+                        : ['required', 'specialCharacter', 'isAliasRegistered']
                     }
                     errorMessages={[
                       'This field is required.',

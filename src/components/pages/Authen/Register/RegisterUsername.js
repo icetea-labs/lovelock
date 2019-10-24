@@ -10,7 +10,7 @@ import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
 
 import tweb3 from '../../../../service/tweb3';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
+import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
@@ -140,19 +140,19 @@ function RegisterUsername(props) {
       return regex.test(name);
     });
 
-    ValidatorForm.addValidationRule('isAliasRegisted', async name => {
-      const resp = await isAliasRegisted(name);
+    ValidatorForm.addValidationRule('isAliasRegistered', async name => {
+      const resp = await isAliasRegistered(name);
       return !resp;
     });
 
     return () => {
       ValidatorForm.removeValidationRule('isPasswordMatch');
-      ValidatorForm.removeValidationRule('isAliasRegisted');
+      ValidatorForm.removeValidationRule('isAliasRegistered');
     };
   }, [password]);
 
   async function gotoNext() {
-    const isUsernameRegisted = await isAliasRegisted(username);
+    const isUsernameRegisted = await isAliasRegistered(username);
     if (isUsernameRegisted) {
       const message = 'This username is already taken.';
       enqueueSnackbar(message, { variant: 'error' });
@@ -169,14 +169,17 @@ function RegisterUsername(props) {
           tweb3.wallet.defaultAccount = address;
 
           const registerInfo = [];
+          const opts = { address }
           registerInfo.push(registerAlias(username, address));
-          registerInfo.push(setTagsInfo('display-name', displayname, { address }));
-          registerInfo.push(setTagsInfo('firstname', firstname, { address }));
-          registerInfo.push(setTagsInfo('lastname', lastname, { address }));
-          registerInfo.push(setTagsInfo('pub-key', publicKey, { address }));
+          registerInfo.push(setTagsInfo({
+            'display-name': displayname,
+            'firstname': firstname,
+            'lastname': lastname,
+            'pub-key': publicKey
+          }, opts))
           if (avatarData) {
-            const hash = await saveFileToIpfs(avatarData);
-            registerInfo.push(setTagsInfo('avatar', hash, { address }));
+            const setAvatar = saveFileToIpfs(avatarData).then(hash => setTagsInfo({'avatar': hash}, opts))
+            registerInfo.push(setAvatar);
           }
           await Promise.all(registerInfo);
 
@@ -244,7 +247,7 @@ function RegisterUsername(props) {
             setUsername(event.currentTarget.value.toLowerCase());
           }}
           name="username"
-          validators={['required', 'specialCharacter', 'isAliasRegisted']}
+          validators={['required', 'specialCharacter', 'isAliasRegistered']}
           errorMessages={[
             'This field is required.',
             'Username cannot contain spaces and special character.',

@@ -15,7 +15,7 @@ import * as actions from '../../../store/actions';
 import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
-import { getDraft, setDraft, delDraft } from '../../../helper/utils';
+import { getDraft, setDraft, delDraft } from '../../../helper/draft';
 import cloneDeep from 'lodash/cloneDeep';
 
 let blogBody = null;
