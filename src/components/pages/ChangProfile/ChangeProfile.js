@@ -8,7 +8,7 @@ import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 
-import { getTagsInfo, setTagsInfo, saveFileToIpfs, getAlias, isAliasRegistered, registerAlias } from '../../../helper';
+import { getAliasAndTags, setTagsInfo, saveFileToIpfs, isAliasRegistered, registerAlias } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
@@ -119,19 +119,18 @@ function ChangeProfile(props) {
   }, []);
 
   async function getData() {
-    const reps = await getTagsInfo(address);
-    const respName = await getAlias(address);
-    if (respName) {
+    const [alias, tags] = await getAliasAndTags(address);
+    if (alias) {
       setIsRegistered(true);
-      setUsername(respName);
+      setUsername(alias);
     } else {
       setIsRegistered(false);
     }
 
-    if (reps) {
-      setFirstname({ old: reps.firstname || '', new: reps.firstname || '' });
-      setLastname({ old: reps.lastname || '', new: reps.lastname || '' });
-      setAvatar(reps.avatar);
+    if (tags) {
+      setFirstname({ old: tags.firstname || '', new: tags.firstname || '' });
+      setLastname({ old: tags.lastname || '', new: tags.lastname || '' });
+      setAvatar(tags.avatar);
     }
   }
 

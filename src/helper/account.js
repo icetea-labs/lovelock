@@ -59,3 +59,7 @@ export async function getTagsInfo(address) {
             }
         })
 }
+
+export function getAliasAndTags(address) {
+    return Promise.all([getAlias(address), getTagsInfo(address)])
+}

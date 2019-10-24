@@ -70,7 +70,6 @@ function LeftContainer(props) {
     confirmPropose,
     address,
     tokenAddress,
-    tag,
     tokenKey,
     setNeedAuth,
     history,
@@ -216,7 +215,6 @@ function LeftContainer(props) {
         // Get info tags partner. case on receiver is bot address -> get tags info of sender address
         // eslint-disable-next-line no-await-in-loop
         const reps = await getTagsInfo(partnerAddress);
-        // console.log(partnerAddress, reps)
         clonePro[i].name = reps['display-name'];
         clonePro[i].avatar = reps.avatar;
         // eslint-disable-next-line no-await-in-loop

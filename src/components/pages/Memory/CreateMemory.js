@@ -195,6 +195,32 @@ export default function CreateMemory(props) {
     setFilesBuffer(value);
   }
 
+  function extractBlogInfo(content) {
+
+    let firstImg;
+    let firstLine;
+
+    const { blocks } = content;
+
+    for (const i in blocks) {
+      if (!firstImg && blocks[i].type === 'image') {
+        firstImg = blocks[i].data;
+      }
+      if (!firstLine) {
+        firstLine = blocks[i].text || '';
+        if (firstLine.length > 100) {
+          firstLine = `${firstLine.slice(0, 100)}…`;
+        }
+      }
+      if (firstImg && firstLine) break;
+    }
+
+    return {
+      title: firstLine,
+      coverPhoto: firstImg
+    }
+  }
+
   async function onSubmitEditor() {
     const combined = combineContent();
     const blocks = combined.blocks;
@@ -222,7 +248,13 @@ export default function CreateMemory(props) {
 
       let buffer = Buffer.from(JSON.stringify(combined));
       let submitContent = await saveFileToIpfs([buffer]);
-      await handleShareMemory(JSON.stringify({ ipfsHash: submitContent }));
+
+      const meta = extractBlogInfo(combined)
+      const blogData = JSON.stringify({
+        meta,
+        blogHash: submitContent
+      })
+      await handleShareMemory(blogData);
 
       // Clean up
       blogBody = null;
@@ -245,13 +277,22 @@ export default function CreateMemory(props) {
     return false;
   }
 
+  function isNonemptyBlog(body) {
+    if (!body || !body.blocks || !body.blocks.length) return false
+    if (body.blocks.length > 1) return true
+    const b = body.blocks[0]
+    if (b.text ||
+      b.type === 'image' ||
+      b.type === 'video' ||
+      b.type === 'embed') {
+        return true
+      }
+
+    return false
+  }
+
   function onChangeEditorBody(editor) {
-    // check first empty block as a temporary workaround for
-    // https://github.com/michelson/dante2/issues/185
-    const body = editor.save.editorContent;
-    if (body && body.blocks && (body.blocks.length !== 1 || body.blocks[0].text)) {
-      blogBody = body;
-    }
+    blogBody = editor.emitSerializedOutput()
   }
 
   function onPreviewSwitched(checked) {
@@ -304,14 +345,14 @@ export default function CreateMemory(props) {
     setPreviewOn(false);
   }
 
-  async function handleShareMemory(advancedMemory) {
-    if (!advancedMemory && !memoryContent && !filesBuffer) {
+  async function handleShareMemory(blogData) {
+    if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }
 
-    const content = advancedMemory || memoryContent;
+    const content = blogData || memoryContent;
 
     if (privacy ? !privateKey : !tokenKey) {
       setNeedAuth(true);
@@ -324,14 +365,16 @@ export default function CreateMemory(props) {
       // const hash = await saveBufferToIpfs(filesBuffer);
       // const info = { date, hash };
       let params = [];
-      if (privacy) {
+      if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
         const newinfo = { date: memoDate, hash };
         params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
       } else {
-        const hash = await saveBufferToIpfs(filesBuffer);
-        const info = { date: memoDate, hash };
+        const hash = blogData && await saveBufferToIpfs(filesBuffer);
+        const info = { date: memoDate };
+        info.hash = hash || []
+        if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction('addMemory', params, { address, tokenAddress });
@@ -385,15 +428,15 @@ export default function CreateMemory(props) {
       });
   }
 
+  function cloneForIdbSave(content) {
+    return JSON.parse(JSON.stringify(content))
+  }
+
   async function saveDraft(context, content) {
-    // check first empty block as a temporary workaround for
-    // https://github.com/michelson/dante2/issues/185
-    if (content.blocks.length !== 1 || content.blocks[0].text) {
+    if (isNonemptyBlog(content)) {
       // we need to change image from blob:// to base64
 
-      // cloneDeep raises warning in console
-      // should write own clone logic
-      const body = cloneDeep(content);
+      const body = cloneForIdbSave(content);
       const blocks = body.blocks;
 
       const images = blocks.reduce((collector, b, i) => {
