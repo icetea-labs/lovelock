@@ -264,7 +264,7 @@ function TopContrainer(props) {
   // }, [proIndex]);
 
   useEffect(() => {
-    console.log('initTopInfo');
+    // console.log('initTopInfo');
     initTopInfo();
   }, []);
 
@@ -392,7 +392,7 @@ function TopContrainer(props) {
       setGLoading(false);
     }, 1);
   }
-  console.log('render topcomtainer', loading);
+  // console.log('render topcomtainer', loading);
   if (loading) {
     return (
       <TopContainerBox>

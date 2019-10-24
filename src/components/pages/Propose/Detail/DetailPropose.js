@@ -33,7 +33,7 @@ export default function DetailPropose(props) {
 
   useEffect(() => {
     callView('getProposeByIndex', [proIndex]).then(async propose => {
-      console.log('--------Detail propose loaded ------');
+      // console.log('--------Detail propose loaded ------');
       const proInfo = propose[0] || {};
       const moreProInfo = await addInfoToProposes(proInfo);
       dispatch(actions.setTopInfo(moreProInfo));

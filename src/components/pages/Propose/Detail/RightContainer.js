@@ -25,7 +25,7 @@ export default function RightContrainer(props) {
       setMemoByProIndex(memories);
     });
   }
-  console.log('isOwner', isOwner);
+  // console.log('isOwner', isOwner);
   return (
     <RightBox>
       {address && isOwner && <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} />}
