@@ -408,7 +408,6 @@ function MemoryContent(props) {
   const renderContentUnlock = () => {
     const isBlog = !!memoryDecrypted.info.blog
     const blogInfo = memoryDecrypted.meta || {}
-    console.log(isBlog, memoryDecrypted, blogInfo)
     const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver
     return (
       <React.Fragment>

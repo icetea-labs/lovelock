@@ -16,7 +16,6 @@ import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWi
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 import { getDraft, setDraft, delDraft } from '../../../helper/draft';
-import cloneDeep from 'lodash/cloneDeep';
 
 let blogBody = null;
 
@@ -276,13 +275,22 @@ export default function CreateMemory(props) {
     return false;
   }
 
+  function isNonemptyBlog(body) {
+    if (!body || !body.blocks || !body.blocks.length) return false
+    if (body.blocks.length > 1) return true
+    const b = body.blocks[0]
+    if (b.text ||
+      b.type === 'image' ||
+      b.type === 'video' ||
+      b.type === 'embed') {
+        return true
+      }
+
+    return false
+  }
+
   function onChangeEditorBody(editor) {
-    // check first empty block as a temporary workaround for
-    // https://github.com/michelson/dante2/issues/185
-    const body = editor.save.editorContent;
-    if (body && body.blocks && (body.blocks.length !== 1 || body.blocks[0].text)) {
-      blogBody = body;
-    }
+    blogBody = editor.emitSerializedOutput()
   }
 
   function onPreviewSwitched(checked) {
@@ -418,15 +426,15 @@ export default function CreateMemory(props) {
       });
   }
 
+  function cloneForIdbSave(content) {
+    return JSON.parse(JSON.stringify(content))
+  }
+
   async function saveDraft(context, content) {
-    // check first empty block as a temporary workaround for
-    // https://github.com/michelson/dante2/issues/185
-    if (content.blocks.length !== 1 || content.blocks[0].text) {
+    if (isNonemptyBlog(content)) {
       // we need to change image from blob:// to base64
 
-      // cloneDeep raises warning in console
-      // should write own clone logic
-      const body = cloneDeep(content);
+      const body = cloneForIdbSave(content);
       const blocks = body.blocks;
 
       const images = blocks.reduce((collector, b, i) => {
