@@ -70,7 +70,6 @@ function LeftContainer(props) {
     confirmPropose,
     address,
     tokenAddress,
-    tag,
     tokenKey,
     setNeedAuth,
     history,

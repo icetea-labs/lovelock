@@ -110,7 +110,7 @@ export default function MemoryComments(props) {
   useEffect(loadAndBindData, []);
 
   function loadAndBindData() {
-    let cancel = false
+    let cancel = false;
 
     loadData(memoryIndex).then(respComment => {
       if (!cancel) {
@@ -124,11 +124,11 @@ export default function MemoryComments(props) {
         setComments(respComment);
         handerNumberComment(respComment.length);
       }
-    })
+    });
 
     return () => {
-      cancel = true
-    }
+      cancel = true;
+    };
   }
 
   async function loadData(index) {
@@ -145,7 +145,7 @@ export default function MemoryComments(props) {
       respComment[i].avatar = respTags[i].avatar;
     }
 
-    return respComment
+    return respComment;
   }
 
   async function newComment() {

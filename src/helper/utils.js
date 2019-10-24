@@ -13,32 +13,14 @@ const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 
-export async function callPure(funcName, params) {
-  const resp = await callReadOrPure(funcName, params, 'callPureContractMethod');
-  if (resp) {
-    return JSON.parse(resp);
-  }
-
-  return [];
+export function callPure(funcName, params) {
+  return callReadOrPure(funcName, params, 'callPureContractMethod');
 }
-export async function callView(funcName, params) {
-  const resp = await callReadOrPure(funcName, params, 'callReadonlyContractMethod');
-  // console.log('resp', funcName, resp);
-  if (resp) {
-    return JSON.parse(resp);
-  }
-
-  return [];
+export function callView(funcName, params) {
+  return callReadOrPure(funcName, params, 'callReadonlyContractMethod');
 }
-
-async function callReadOrPure(funcName, params, method) {
-  // try {
-  const result = await tweb3[method](contract, funcName, params || []);
-  return tryStringifyJson(result || `${result}`);
-  // } catch (error) {
-  // console.log('funcName', funcName);
-  // console.log(tryStringifyJson(error, true));
-  // }
+function callReadOrPure(funcName, params, method) {
+  return tweb3[method](contract, funcName, params || []);
 }
 
 export async function sendTransaction(funcName, params, opts) {

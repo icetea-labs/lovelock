@@ -14,7 +14,6 @@ import { useSnackbar } from 'notistack';
 
 import {
   callView,
-  getTagsInfo,
   summaryDayCal,
   HolidayEvent,
   TimeWithFormat,
@@ -245,7 +244,7 @@ const useStyles = makeStyles(theme => ({
 function TopContrainer(props) {
   const { proIndex, setNeedAuth, topInfo, setTopInfo, setGLoading } = props;
   const dispatch = useDispatch();
-  const proposes = useSelector(state => state.loveinfo.proposes);
+  // const proposes = useSelector(state => state.loveinfo.proposes);
   // const privateKey = useSelector(state => state.account.privateKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
@@ -260,90 +259,31 @@ function TopContrainer(props) {
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
+  // useEffect(() => {
+  //   loadProposes();
+  // }, [proIndex]);
+
   useEffect(() => {
-    loadProposes();
-  }, [proIndex]);
+    // console.log('initTopInfo');
+    initTopInfo();
+  }, []);
 
-  // useEffect(() => {
-  //   serialLikeData();
-  // }, [likes]);
-
-  function serialLikeData(likes) {
-    let isMyLike = false;
-    const num = Object.keys(likes).length;
-    if (likes[address]) {
-      isMyLike = true;
-    }
-    // console.log('serialLikeData');
-    return { numLike: num, isMyLike };
-  }
-
-  // useEffect(() => {
-  //   let returnValue;
-  //   if (topInfo.memoryRelationIndex !== -1) {
-  //     getNumLikes();
-  //     returnValue = watchAddlike();
-  //   }
-  //   return () => {
-  //     if (topInfo.memoryRelationIndex !== -1)
-  //       Promise.resolve(returnValue).then(result => {
-  //         if (result && result.result) result.unsubscribe();
-  //       });
-  //   };
-  // }, [topInfo]);
-
-  // function watchAddlike() {
-  //   const filter = {};
-  //   return tweb3
-  //     .contract(process.env.REACT_APP_CONTRACT)
-  //     .events[`addLike_${topInfo.memoryRelationIndex}`](filter, error => {
-  //       if (error) {
-  //         console.error('watchAddlikeTop', error);
-  //         const message = 'Watch new like proposes error';
-  //         enqueueSnackbar(message, { variant: 'error' });
-  //       } else {
-  //         getNumLikes();
-  //       }
-  //     });
-  // }
-
-  function loadProposes() {
-    // console.log('loadProposes');
+  async function initTopInfo() {
     window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
       try {
-        let proInfo = proposes.filter(item => item.id === proIndex)[0] || [];
-        if (typeof proInfo === 'undefined' || proInfo.length <= 0) {
-          const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-          proInfo = resp[0] || [];
-        }
-        const moreProInfo = await addInfoToProposes(proInfo);
-
-        const likes = await callView('getLikeByMemoIndex', [moreProInfo.memoryRelationIndex]);
+        const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
         const { numLike, isMyLike } = serialLikeData(likes);
-        moreProInfo.numLike = numLike;
-        moreProInfo.isMyLike = isMyLike;
+        topInfo.numLike = numLike;
+        topInfo.isMyLike = isMyLike;
         // console.log('moreProInfo', moreProInfo);
-        setTopInfo(moreProInfo);
+        setTopInfo(topInfo);
       } catch (error) {
         console.error(error);
       }
       setLoading(false);
-    }, 100);
-  }
-
-  async function getNumLikes() {
-    if (topInfo.memoryRelationIndex === '' || topInfo.memoryRelationIndex == null || topInfo.memoryRelationIndex < 0)
-      return;
-    callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
-      const { numLike, isMyLike } = serialLikeData(data);
-      if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
-        const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
-        setTopInfo(newTopInfo);
-        // console.log('getNumLikes11');
-      }
-    });
+    }, 1);
   }
 
   function handerLike() {
@@ -354,7 +294,7 @@ function TopContrainer(props) {
       }
       const params = [topInfo.memoryRelationIndex, 1];
       sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
-        getNumLikes();
+        getNumTopLikes();
       });
 
       let { isMyLike, numLike } = topInfo;
@@ -373,47 +313,26 @@ function TopContrainer(props) {
     }
   }
 
-  async function addInfoToProposes(respPro) {
-    const pro = respPro;
-    const { sender, receiver } = pro;
+  function getNumTopLikes() {
+    if (topInfo.memoryRelationIndex === '' || topInfo.memoryRelationIndex == null || topInfo.memoryRelationIndex < 0)
+      return;
+    callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
+      const { numLike, isMyLike } = serialLikeData(data);
+      if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
+        const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+        setTopInfo(newTopInfo);
+      }
+    });
+  }
 
-    const senderTags = await getTagsInfo(sender);
-    pro.s_name = senderTags['display-name'];
-    pro.s_publicKey = senderTags['pub-key'] || '';
-    pro.s_avatar = senderTags.avatar;
-
-    const botInfo = pro.bot_info;
-    // console.log('botInfo', botInfo);
-
-    if (receiver === process.env.REACT_APP_BOT_LOVER) {
-      pro.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
-      pro.r_publicKey = senderTags['pub-key'] || '';
-      pro.r_avatar = botInfo.botAva;
-      pro.r_content = botInfo.botReply;
-    } else {
-      const receiverTags = await getTagsInfo(receiver);
-      pro.r_name = receiverTags['display-name'];
-      pro.r_publicKey = receiverTags['pub-key'] || '';
-      pro.r_avatar = receiverTags.avatar;
-      pro.r_content = pro.r_content;
+  function serialLikeData(likes) {
+    let isMyLike = false;
+    const num = Object.keys(likes).length;
+    if (likes[address]) {
+      isMyLike = true;
     }
-    pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
-
-    const info = pro.s_info;
-
-    pro.coverimg = pro.coverImg ? pro.coverImg : 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
-    pro.s_date = info.date;
-    pro.r_date = info.date;
-
-    const accountInfo = {
-      s_publicKey: pro.s_publicKey,
-      s_address: pro.sender,
-      r_publicKey: pro.r_publicKey,
-      r_address: pro.receiver,
-      publicKey: pro.publicKey,
-    };
-    dispatch(actions.setAccount(accountInfo));
-    return pro;
+    // console.log('serialLikeData');
+    return { numLike: num, isMyLike };
   }
 
   const classes = useStyles();
@@ -462,17 +381,18 @@ function TopContrainer(props) {
         const params = [proIndex, hash];
         const result = await sendTransaction(method, params, { address, tokenAddress });
         if (result) {
-          setGLoading(false);
           setCropFile('');
           setCropImg('');
-          const resp = (await callView('getProposeByIndex', [proIndex])) || [];
-          const newPropose = await addInfoToProposes(resp[0]);
-          setTopInfo(newPropose || []);
+          callView('getProposeByIndex', [proIndex]).then(propose => {
+            const pro = (propose && propose[0]) || {};
+            setTopInfo(Object.assign({}, topInfo, pro));
+          });
         }
       }
-    }, 100);
+      setGLoading(false);
+    }, 1);
   }
-
+  // console.log('render topcomtainer', loading);
   if (loading) {
     return (
       <TopContainerBox>
@@ -523,7 +443,7 @@ function TopContrainer(props) {
         ) : (
           <CardMedia
             className={classes.media}
-            image={process.env.REACT_APP_IPFS + topInfo.coverimg}
+            image={process.env.REACT_APP_IPFS + topInfo.coverImg}
             title="Change lock image"
           >
             <Button className={classes.icon}>
@@ -538,9 +458,9 @@ function TopContrainer(props) {
       </div>
       <SummaryCard>
         <div className="dayago">
-          {topInfo.type !== 1 && <img src="/static/img/happy-copy.svg" alt="together" />}
+          {topInfo.type !== 2 && <img src="/static/img/happy-copy.svg" alt="together" />}
           <div className="summaryDay">
-            {topInfo.type === 1 ? (
+            {topInfo.type === 2 ? (
               'JOURNAL'
             ) : (
               <span>
@@ -549,11 +469,7 @@ function TopContrainer(props) {
               </span>
             )}
           </div>
-          {/* <div className="summaryCongrat">
-            <div className="congratContent"> */}
           <HolidayEvent day={topInfo.s_date} />
-          {/* </div>
-          </div> */}
         </div>
         <div className="proLike">
           <Button onClick={handerLike}>
