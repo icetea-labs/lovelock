@@ -11,14 +11,12 @@ import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
 
 import * as actions from '../../../store/actions';
 import {
   TimeWithFormat,
   decodeWithPublicKey,
-  callView,
-  getTagsInfo,
   saveMemCacheAPI,
   loadMemCacheAPI,
   decodeImg,
@@ -109,7 +107,7 @@ const useStyles = makeStyles(theme => ({
     fontSize: 16,
     textTransform: 'uppercase',
     paddingLeft: 28,
-    paddingRight: 28
+    paddingRight: 28,
   },
   relationship: {
     // color: theme.color.primary,
@@ -153,6 +151,8 @@ function MemoryContent(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
+  const rName = useSelector(state => state.account.r_name);
+  const sName = useSelector(state => state.account.s_name);
   // const propose = useSelector(state => state.loveinfo.propose);
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
@@ -162,7 +162,7 @@ function MemoryContent(props) {
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
-  const [proposeInfo, setProposeInfo] = useState({});
+  // const [proposeInfo, setProposeInfo] = useState({});
   const classes = useStyles();
 
   // useEffect(() => {
@@ -183,15 +183,15 @@ function MemoryContent(props) {
         const url = new URL(url_string);
         if (String(memory.id) === url.searchParams.get('memory')) setOpenModal(true);
       }
-    })
+    });
   }, []);
 
   async function serialMemory() {
     let mem = memory;
     if (memory.info.blog) {
-      const blogData = JSON.parse(memory.content)
-      mem.meta = blogData.meta
-      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash).then(d => d.json())
+      const blogData = JSON.parse(memory.content);
+      mem.meta = blogData.meta;
+      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash).then(d => d.json());
     } else if (memory.isPrivate) {
       const memCache = await loadMemCacheAPI(memory.id);
       if (memCache) {
@@ -208,33 +208,33 @@ function MemoryContent(props) {
     setMemoryDecrypted(mem);
   }
 
-  useEffect(() => {
-    (async () => {
-      const proposes = await callView('getProposeByIndex', [proIndex]);
-      const propose = proposes[0];
-      const { sender, receiver } = propose;
+  // useEffect(() => {
+  //   (async () => {
+  //     const proposes = await callView('getProposeByIndex', [proIndex]);
+  //     const propose = proposes[0];
+  //     const { sender, receiver } = propose;
 
-      const senderTags = await getTagsInfo(sender);
-      propose.s_name = senderTags['display-name'];
-      propose.s_publicKey = senderTags['pub-key'] || '';
-      propose.s_avatar = senderTags.avatar;
+  //     const senderTags = await getTagsInfo(sender);
+  //     propose.s_name = senderTags['display-name'];
+  //     propose.s_publicKey = senderTags['pub-key'] || '';
+  //     propose.s_avatar = senderTags.avatar;
 
-      const botInfo = propose.bot_info;
-      if (receiver === process.env.REACT_APP_BOT_LOVER) {
-        propose.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
-        propose.r_publicKey = senderTags['pub-key'] || '';
-        propose.r_avatar = botInfo.botAva;
-        propose.r_content = botInfo.botReply;
-      } else {
-        const receiverTags = await getTagsInfo(receiver);
-        propose.r_name = receiverTags['display-name'];
-        propose.r_publicKey = receiverTags['pub-key'] || '';
-        propose.r_avatar = receiverTags.avatar;
-        propose.r_content = propose.r_content;
-      }
-      setProposeInfo(propose);
-    })();
-  }, [proIndex]);
+  //     const botInfo = propose.bot_info;
+  //     if (receiver === process.env.REACT_APP_BOT_LOVER) {
+  //       propose.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
+  //       propose.r_publicKey = senderTags['pub-key'] || '';
+  //       propose.r_avatar = botInfo.botAva;
+  //       propose.r_content = botInfo.botReply;
+  //     } else {
+  //       const receiverTags = await getTagsInfo(receiver);
+  //       propose.r_name = receiverTags['display-name'];
+  //       propose.r_publicKey = receiverTags['pub-key'] || '';
+  //       propose.r_avatar = receiverTags.avatar;
+  //       propose.r_content = propose.r_content;
+  //     }
+  //     setProposeInfo(propose);
+  //   })();
+  // }, [proIndex]);
 
   function FacebookProgress(propsFb) {
     const classesFb = useStylesFacebook();
@@ -365,58 +365,52 @@ function MemoryContent(props) {
 
   const renderLockEventMemory = () => {
     return (
-      <Typography
-            variant="body2"
-            className={classes.relationship}
-            style={{ whiteSpace: 'pre-line' }}
-            component="div"
-          >
-            <div>
-              <FavoriteIcon color="primary" fontSize="large" />
-            </div>
-            <span>
-              <span>Locked with </span>
-              <Typography component="span" className={classes.relationshipName}>
-                {memoryDecrypted.r_name}
-              </Typography>
-            </span>
+      <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
+        <div>
+          <FavoriteIcon color="primary" fontSize="large" />
+        </div>
+        <span>
+          <span>Locked with </span>
+          <Typography component="span" className={classes.relationshipName}>
+            {memoryDecrypted.r_name}
           </Typography>
-    )
-  }
+        </span>
+      </Typography>
+    );
+  };
 
   const renderJournalCreationMemory = () => {
     return (
-      <Typography
-            variant="body2"
-            className={classes.relationship}
-            style={{ whiteSpace: 'pre-line' }}
-            component="div"
-          >
-            <div>
-              <WavesIcon color="primary" fontSize="large" />
-            </div>
-            <span>
-              <Typography component="span" className={classes.relationshipName}>
-                {memoryDecrypted.r_name}
-              </Typography>
-              <span> started the journal.</span>
-            </span>
+      <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
+        <div>
+          <WavesIcon color="primary" fontSize="large" />
+        </div>
+        <span>
+          <Typography component="span" className={classes.relationshipName}>
+            {memoryDecrypted.r_name}
           </Typography>
-    )
-  }
+          <span> started the journal.</span>
+        </span>
+      </Typography>
+    );
+  };
 
   const renderContentUnlock = () => {
-    const isBlog = !!memoryDecrypted.info.blog
-    const blogInfo = memoryDecrypted.meta || {}
-    const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver
+    const isBlog = !!memoryDecrypted.info.blog;
+    const blogInfo = memoryDecrypted.meta || {};
+    const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
     return (
       <React.Fragment>
         {memoryDecrypted.type === 1 ? (
-          isJournal ? renderJournalCreationMemory() : renderLockEventMemory()
+          isJournal ? (
+            renderJournalCreationMemory()
+          ) : (
+            renderLockEventMemory()
+          )
         ) : (
           <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
             {!isBlog && memoryDecrypted.content}
-            {isBlog  && blogInfo.title && (
+            {isBlog && blogInfo.title && (
               <BlogShowcase
                 classes={classes}
                 title={blogInfo.title}
@@ -432,7 +426,10 @@ function MemoryContent(props) {
             <meta property="og:title" content={blogInfo.title} />
             <meta property="og:type" content="article" />
             <meta name="description" content="A story on Lovelock" />
-            <meta property="og:image" content={blogInfo.coverPhoto || `${process.env.PUBLIC_URL}/static/img/share.jpg`} />
+            <meta
+              property="og:image"
+              content={blogInfo.coverPhoto || `${process.env.PUBLIC_URL}/static/img/share.jpg`}
+            />
             <meta property="og:description" content="A story on Lovelock" />
           </Helmet>
         )}
@@ -440,7 +437,7 @@ function MemoryContent(props) {
           <BlogModal
             open={isOpenModal}
             handleClose={closeMemory}
-            title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
+            title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeMemory} />}
             subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
             <Editor initContent={memoryDecrypted.blogContent} read_only />
