@@ -66,13 +66,7 @@ function MemoryContainer(props) {
             // obj.info.hash = [];
             obj.isUnlock = false;
           }
-          obj.isBlog = false;
-          if (IsJsonString(obj.content)) {
-            const content = JSON.parse(obj.content);
-            if (content.ipfsHash) {
-              obj.isBlog = true;
-            }
-          }
+
           newMemoryList.push(obj);
         }
         newMemoryList = newMemoryList.reverse();

@@ -21,10 +21,6 @@ function TextFieldMultiLine(props) {
   return <TextField className={classes.textMulti} {...props} />;
 }
 
-const IconView = styled.div`
-  color: #8250c8;
-`;
-
 class PromiseConfirm extends React.Component {
   constructor(props) {
     super(props);

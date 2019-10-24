@@ -107,38 +107,45 @@ export default function MemoryComments(props) {
   const [showComments, setShowComments] = useState([]);
   let myFormRef = React.createRef();
 
-  useEffect(() => {
-    loaddata(memoryIndex);
-  }, []);
+  useEffect(loadAndBindData, []);
 
-  function loaddata(index) {
-    setTimeout(async () => {
-      const respComment = await callView('getCommentsByMemoIndex', [index]);
-      let respTags = [];
-      for (let i = 0; i < respComment.length; i++) {
-        const resp = getTagsInfo(respComment[i].sender);
-        respTags.push(resp);
-      }
-      respTags = await Promise.all(respTags);
-      // console.log('respTags', respTags);
-      for (let i = 0; i < respComment.length; i++) {
-        respComment[i].nick = respTags[i]['display-name'];
-        respComment[i].avatar = respTags[i].avatar;
-      }
+  function loadAndBindData() {
+    let cancel = false
 
-      // console.log('respComment.length', respComment.length);
-      // console.log('numComment', numComment);
-
-      if (respComment.length > numComment) {
-        const numMore = respComment.length - numComment;
-        setNumHidencmt(numMore);
-        setShowComments(respComment.slice(numMore));
-      } else {
-        setShowComments(respComment);
+    loadData(memoryIndex).then(respComment => {
+      if (!cancel) {
+        if (respComment.length > numComment) {
+          const numMore = respComment.length - numComment;
+          setNumHidencmt(numMore);
+          setShowComments(respComment.slice(numMore));
+        } else {
+          setShowComments(respComment);
+        }
+        setComments(respComment);
+        handerNumberComment(respComment.length);
       }
-      setComments(respComment);
-      handerNumberComment(respComment.length);
-    }, 100);
+    })
+
+    return () => {
+      cancel = true
+    }
+  }
+
+  async function loadData(index) {
+    const respComment = await callView('getCommentsByMemoIndex', [index]);
+    let respTags = [];
+    for (let i = 0; i < respComment.length; i++) {
+      const resp = getTagsInfo(respComment[i].sender);
+      respTags.push(resp);
+    }
+    respTags = await Promise.all(respTags);
+    // console.log('respTags', respTags);
+    for (let i = 0; i < respComment.length; i++) {
+      respComment[i].nick = respTags[i]['display-name'];
+      respComment[i].avatar = respTags[i].avatar;
+    }
+
+    return respComment
   }
 
   async function newComment() {
@@ -152,7 +159,7 @@ export default function MemoryComments(props) {
     // console.log('memoryIndex', memoryIndex);
     const result = await sendTransaction(method, params, { address, tokenAddress });
     if (result) {
-      loaddata(memoryIndex);
+      loadAndBindData(memoryIndex);
     }
     myFormRef.reset();
     setComment('');

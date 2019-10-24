@@ -19,7 +19,7 @@ export default function MemoryTitle(props) {
   return (
     <>
       <span className={classes.wrapper} onClick={props.handleClose}>
-        {props.sender == props.receiver ? (
+        {props.sender === props.receiver ? (
           <>
             {props.sender && <span>{`${props.sender} 's Journal`}</span>}
           </>

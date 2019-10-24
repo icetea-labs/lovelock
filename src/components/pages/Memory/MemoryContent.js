@@ -10,6 +10,7 @@ import { useSnackbar } from 'notistack';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import WavesIcon from '@material-ui/icons/Waves';
 import { Helmet } from "react-helmet";
 
 import * as actions from '../../../store/actions';
@@ -180,18 +181,17 @@ function MemoryContent(props) {
       if (window.location.search !== '') {
         const url_string = window.location.href;
         const url = new URL(url_string);
-        if (memory.id == url.searchParams.get('memory')) setOpenModal(true);
+        if (String(memory.id) === url.searchParams.get('memory')) setOpenModal(true);
       }
     })
   }, []);
 
   async function serialMemory() {
     let mem = memory;
-    if (memory.isBlog) {
-      if (typeof memory.content === 'string') {
-        const contentBlog = JSON.parse(memory.content);
-        mem.content = await fetch(process.env.REACT_APP_IPFS + contentBlog.ipfsHash).then(d => d.json())
-      }
+    if (memory.info.blog) {
+      const blogData = JSON.parse(memory.content)
+      mem.meta = blogData.meta
+      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash).then(d => d.json())
     } else if (memory.isPrivate) {
       const memCache = await loadMemCacheAPI(memory.id);
       if (memCache) {
@@ -315,49 +315,6 @@ function MemoryContent(props) {
     }, 100);
   }
 
-  // async function getMemoryContent() {
-  //   try {
-  //     let memoryContent = JSON.parse(memoryDecrypted.content);
-  //     console.log('aaa', memoryContent);
-  //     if (memoryContent.ipfsHash) {
-  //       let ipfsHash = memoryContent.ipfsHash;
-  //       let data = await fetch(process.env.REACT_APP_IPFS + ipfsHash);
-  //       let content = await data.json();
-  //       setMemoryContent(JSON.stringify(content));
-  //     } else {
-  //       setMemoryContent(memoryDecrypted.content);
-  //     }
-  //   } catch (e) {
-  //     setMemoryContent(memoryDecrypted.content);
-  //   }
-  // }
-
-  function extractBlogInfo(content) {
-
-    let firstImg;
-    let firstLine;
-
-    const { blocks } = content;
-
-    for (const i in blocks) {
-      if (!firstImg && blocks[i].type === 'image') {
-        firstImg = blocks[i].data;
-      }
-      if (!firstLine) {
-        firstLine = blocks[i].text;
-        if (firstLine.length > 100) {
-          firstLine = `${firstLine.slice(0, 100)}…`;
-        }
-      }
-      if (firstImg && firstLine) break;
-    }
-
-    return {
-      title: firstLine,
-      coverPhoto: firstImg
-    }
-  }
-
   function openMemory(memoryId) {
     setOpenModal(true);
     window.history.pushState({}, '', `?memory=${memoryId}`);
@@ -406,13 +363,9 @@ function MemoryContent(props) {
     );
   };
 
-  const renderContentUnlock = () => {
-    const isBlog = memoryDecrypted.isBlog
-    const blogInfo = isBlog ? extractBlogInfo(memoryDecrypted.content) : null
+  const renderLockEventMemory = () => {
     return (
-      <React.Fragment>
-        {memoryDecrypted.type === 1 ? (
-          <Typography
+      <Typography
             variant="body2"
             className={classes.relationship}
             style={{ whiteSpace: 'pre-line' }}
@@ -428,6 +381,39 @@ function MemoryContent(props) {
               </Typography>
             </span>
           </Typography>
+    )
+  }
+
+  const renderJournalCreationMemory = () => {
+    return (
+      <Typography
+            variant="body2"
+            className={classes.relationship}
+            style={{ whiteSpace: 'pre-line' }}
+            component="div"
+          >
+            <div>
+              <WavesIcon color="primary" fontSize="large" />
+            </div>
+            <span>
+              <Typography component="span" className={classes.relationshipName}>
+                {memoryDecrypted.r_name}
+              </Typography>
+              <span> started the journal.</span>
+            </span>
+          </Typography>
+    )
+  }
+
+  const renderContentUnlock = () => {
+    const isBlog = !!memoryDecrypted.info.blog
+    const blogInfo = memoryDecrypted.meta || {}
+    console.log(isBlog, memoryDecrypted, blogInfo)
+    const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver
+    return (
+      <React.Fragment>
+        {memoryDecrypted.type === 1 ? (
+          isJournal ? renderJournalCreationMemory() : renderLockEventMemory()
         ) : (
           <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
             {!isBlog && memoryDecrypted.content}
@@ -458,7 +444,7 @@ function MemoryContent(props) {
             title={<MemoryTitle sender={proposeInfo.s_name} receiver={proposeInfo.r_name} handleClose={closeMemory} />}
             subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
-            <Editor initContent={memoryDecrypted.content} read_only />
+            <Editor initContent={memoryDecrypted.blogContent} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
@@ -498,7 +484,7 @@ function MemoryContent(props) {
     );
   };
 
-  const renderActionBt = (
+  const renderActionBt = () => (
     <MemoryActionButton
       handerShowComment={handerShowComment}
       memoryLikes={memory.likes}
@@ -508,7 +494,7 @@ function MemoryContent(props) {
     />
   );
 
-  const renderComments = (
+  const renderComments = () => (
     <MemoryComments
       handerNumberComment={handerNumberComment}
       memoryIndex={memory.id}
@@ -533,8 +519,8 @@ function MemoryContent(props) {
         />
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
-        {isUnlock && renderActionBt}
-        {showComment && renderComments}
+        {isUnlock && renderActionBt()}
+        {showComment && renderComments()}
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
