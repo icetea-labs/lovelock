@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { useSnackbar } from 'notistack';
 
-import { getTagsInfo, getJsonFromIpfs, IsJsonString } from '../../../helper';
+import { getTagsInfo, getJsonFromIpfs } from '../../../helper';
 import MemoryContent from './MemoryContent';
 import * as actions from '../../../store/actions';
 
