@@ -119,7 +119,7 @@ function ChangeProfile(props) {
   }, []);
 
   async function getData() {
-    const [alias, tags] = await getAliasAndTags(address)
+    const [alias, tags] = await getAliasAndTags(address);
     if (alias) {
       setIsRegistered(true);
       setUsername(alias);
@@ -141,18 +141,18 @@ function ChangeProfile(props) {
       setLoading(true);
       setTimeout(async () => {
         try {
-          const tags = {}
+          const tags = {};
           if (firstname.old !== firstname.new) {
-            tags.firstname = firstname.new
+            tags.firstname = firstname.new;
           }
 
           if (lastname.old !== lastname.new) {
-            tags.lastname = lastname.new
+            tags.lastname = lastname.new;
           }
 
           const displayName = `${firstname.new} ${lastname.new}`;
           if (firstname.old !== firstname.new || lastname.old !== lastname.new) {
-            tags['display-name'] = displayName
+            tags['display-name'] = displayName;
           }
 
           const listSetTags = [];
@@ -161,16 +161,16 @@ function ChangeProfile(props) {
             const saveAvatar = saveFileToIpfs(cropFile).then(hash => {
               accountInfo.avatar = hash;
               if (avatar !== hash) {
-                return setTagsInfo({avatar: hash}, { address, tokenAddress })
+                return setTagsInfo({ avatar: hash }, { address, tokenAddress });
               }
-            })
-            listSetTags.push(saveAvatar)
+            });
+            listSetTags.push(saveAvatar);
           }
 
           if (!isRegistered) {
             if (privateKey) {
               const { publicKey } = ecc.toPubKeyAndAddress(privateKey);
-              tags['pub-key'] = publicKey
+              tags['pub-key'] = publicKey;
               listSetTags.push(registerAlias(username, address));
             } else {
               const message = 'Please login or Input recovery phrase';
@@ -179,7 +179,7 @@ function ChangeProfile(props) {
             }
           }
 
-          listSetTags.push(setTagsInfo(tags, { address, tokenAddress }))
+          listSetTags.push(setTagsInfo(tags, { address, tokenAddress }));
           const change = await Promise.all(listSetTags);
           if (change) {
             // Set to redux
@@ -298,10 +298,10 @@ function ChangeProfile(props) {
                 <ButtonPro type="submit">Save change</ButtonPro>
               </DivControlBtnKeystore>
             </ValidatorForm>
-            {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
           </ShadowBoxAuthen>
         </BoxAuthenCus>
       </LayoutAuthen>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
     </QueueAnim>
   );
 }
