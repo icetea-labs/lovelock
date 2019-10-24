@@ -155,7 +155,6 @@ export default function ImageCrop(props) {
 
   return (
     <QueueAnim animConfig={{ opacity: [1, 0] }}>
-      isCoverImg
       <PuLayout key={1}>
         <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
           <Container key={2} isCoverImg={isCoverImg} isAddInfo={isAddInfo}>
