@@ -365,6 +365,7 @@ function Header(props) {
       <StyledMenuItem
         onClick={() => {
           props.history.push('/profile');
+          handleMenuClose();
         }}
       >
         <ListItemIcon>
@@ -375,6 +376,7 @@ function Header(props) {
       <StyledMenuItem
         onClick={() => {
           props.history.push('/register');
+          handleMenuClose();
         }}
       >
         <ListItemIcon>
@@ -386,6 +388,7 @@ function Header(props) {
       <StyledMenuItem
         onClick={() => {
           props.history.push('/login');
+          handleMenuClose();
         }}
       >
         <ListItemIcon>
