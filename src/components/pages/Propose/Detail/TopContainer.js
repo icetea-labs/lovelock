@@ -252,7 +252,7 @@ function TopContrainer(props) {
 
   // console.log('topInfo', topInfo);
   // const [topInfo, setTopInfo] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   // const [likes, setLikes] = useState({});
   // const [isMyLike, setIsMyLike] = useState(false);
   // const [numLike, setNumLike] = useState(0);
@@ -268,7 +268,7 @@ function TopContrainer(props) {
     initTopInfo();
   }, []);
 
-  function initTopInfo() {
+  async function initTopInfo() {
     window.scrollTo(0, 0);
     setLoading(true);
     setTimeout(async () => {
@@ -392,7 +392,7 @@ function TopContrainer(props) {
       setGLoading(false);
     }, 1);
   }
-
+  console.log('render topcomtainer', loading);
   if (loading) {
     return (
       <TopContainerBox>
@@ -458,9 +458,9 @@ function TopContrainer(props) {
       </div>
       <SummaryCard>
         <div className="dayago">
-          {topInfo.type !== 1 && <img src="/static/img/happy-copy.svg" alt="together" />}
+          {topInfo.type !== 2 && <img src="/static/img/happy-copy.svg" alt="together" />}
           <div className="summaryDay">
-            {topInfo.type === 1 ? (
+            {topInfo.type === 2 ? (
               'JOURNAL'
             ) : (
               <span>

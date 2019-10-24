@@ -6,6 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
+import cloneDeep from 'lodash/cloneDeep';
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
 
@@ -16,7 +17,6 @@ import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWi
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 import { getDraft, setDraft, delDraft } from '../../../helper/draft';
-import cloneDeep from 'lodash/cloneDeep';
 
 let blogBody = null;
 
@@ -123,13 +123,14 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { reLoadMemory, proIndex, topInfo } = props;
+  const { reLoadMemory, proIndex } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
-  const account = useSelector(state => state.account);
-  // const propose = useSelector(state => state.loveinfo.propose);
+  const avatar = useSelector(state => state.account.avatar);
+  const rName = useSelector(state => state.account.r_name);
+  const sName = useSelector(state => state.account.s_name);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -416,7 +417,6 @@ export default function CreateMemory(props) {
       });
     }
   }
-
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
@@ -426,7 +426,7 @@ export default function CreateMemory(props) {
             <Grid item>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
-                  <AvatarPro alt="img" hash={account.avatar} className={classes.avatar} />
+                  <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
                 </Grid>
                 <Grid item xs={12}>
                   <BootstrapTextField
@@ -492,7 +492,7 @@ export default function CreateMemory(props) {
               handleSumit={onSubmitEditor}
               handlePreview={onPreviewSwitched}
               closeText="Cancel"
-              title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} handleClose={closeEditorModal} />}
+              title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeEditorModal} />}
             >
               {!previewOn && (
                 <Editor

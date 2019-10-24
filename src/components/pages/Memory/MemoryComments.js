@@ -111,34 +111,29 @@ export default function MemoryComments(props) {
     loaddata(memoryIndex);
   }, []);
 
-  function loaddata(index) {
-    setTimeout(async () => {
-      const respComment = await callView('getCommentsByMemoIndex', [index]);
-      let respTags = [];
-      for (let i = 0; i < respComment.length; i++) {
-        const resp = getTagsInfo(respComment[i].sender);
-        respTags.push(resp);
-      }
-      respTags = await Promise.all(respTags);
-      // console.log('respTags', respTags);
-      for (let i = 0; i < respComment.length; i++) {
-        respComment[i].nick = respTags[i]['display-name'];
-        respComment[i].avatar = respTags[i].avatar;
-      }
+  async function loaddata(index) {
+    const respComment = await callView('getCommentsByMemoIndex', [index]);
+    let respTags = [];
+    for (let i = 0; i < respComment.length; i++) {
+      const resp = getTagsInfo(respComment[i].sender);
+      respTags.push(resp);
+    }
+    respTags = await Promise.all(respTags);
+    // console.log('respTags', respTags);
+    for (let i = 0; i < respComment.length; i++) {
+      respComment[i].nick = respTags[i]['display-name'];
+      respComment[i].avatar = respTags[i].avatar;
+    }
 
-      // console.log('respComment.length', respComment.length);
-      // console.log('numComment', numComment);
-
-      if (respComment.length > numComment) {
-        const numMore = respComment.length - numComment;
-        setNumHidencmt(numMore);
-        setShowComments(respComment.slice(numMore));
-      } else {
-        setShowComments(respComment);
-      }
-      setComments(respComment);
-      handerNumberComment(respComment.length);
-    }, 100);
+    if (respComment.length > numComment) {
+      const numMore = respComment.length - numComment;
+      setNumHidencmt(numMore);
+      setShowComments(respComment.slice(numMore));
+    } else {
+      setShowComments(respComment);
+    }
+    setComments(respComment);
+    handerNumberComment(respComment.length);
   }
 
   async function newComment() {

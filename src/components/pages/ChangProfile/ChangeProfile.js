@@ -142,18 +142,18 @@ function ChangeProfile(props) {
       setLoading(true);
       setTimeout(async () => {
         try {
-          const tags = {}
+          const tags = {};
           if (firstname.old !== firstname.new) {
-            tags.firstname = firstname.new
+            tags.firstname = firstname.new;
           }
 
           if (lastname.old !== lastname.new) {
-            tags.lastname = lastname.new
+            tags.lastname = lastname.new;
           }
 
           const displayName = `${firstname.new} ${lastname.new}`;
           if (firstname.old !== firstname.new || lastname.old !== lastname.new) {
-            tags['display-name'] = displayName
+            tags['display-name'] = displayName;
           }
 
           const listSetTags = [];
@@ -162,16 +162,16 @@ function ChangeProfile(props) {
             const saveAvatar = saveFileToIpfs(cropFile).then(hash => {
               accountInfo.avatar = hash;
               if (avatar !== hash) {
-                return setTagsInfo({avatar: hash}, { address, tokenAddress })
+                return setTagsInfo({ avatar: hash }, { address, tokenAddress });
               }
-            })
-            listSetTags.push(saveAvatar)
+            });
+            listSetTags.push(saveAvatar);
           }
 
           if (!isRegistered) {
             if (privateKey) {
               const { publicKey } = ecc.toPubKeyAndAddress(privateKey);
-              tags['pub-key'] = publicKey
+              tags['pub-key'] = publicKey;
               listSetTags.push(registerAlias(username, address));
             } else {
               const message = 'Please login or Input recovery phrase';
@@ -180,7 +180,7 @@ function ChangeProfile(props) {
             }
           }
 
-          listSetTags.push(setTagsInfo(tags, { address, tokenAddress }))
+          listSetTags.push(setTagsInfo(tags, { address, tokenAddress }));
           const change = await Promise.all(listSetTags);
           if (change) {
             // Set to redux
@@ -225,85 +225,87 @@ function ChangeProfile(props) {
   const classes = useStyles();
 
   return (
-    <QueueAnim delay={200} type={['top', 'bottom']}>
-      <LayoutAuthen key={1}>
-        <BoxAuthenCus>
-          <ShadowBoxAuthen>
-            <HeaderAuthen title="Change Profile" />
-            <ValidatorForm onSubmit={saveChange}>
-              <FlexBox>
-                <PreviewContainter>
-                  <div className="upload_img">
-                    {cropFile ? (
-                      <AvatarPro src={avatar} className={classes.avatar} />
-                    ) : (
-                      <AvatarPro hash={avatar} className={classes.avatar} />
-                    )}
-                    <div className="changeImg">
-                      <input
-                        className="fileInput"
-                        type="file"
-                        onChange={handleImageChange}
-                        accept="image/jpeg,image/png"
-                      />
-                      <CameraAltIcon />
+    <React.Fragment>
+      <QueueAnim delay={200} type={['top', 'bottom']}>
+        <LayoutAuthen key={1}>
+          <BoxAuthenCus>
+            <ShadowBoxAuthen>
+              <HeaderAuthen title="Change Profile" />
+              <ValidatorForm onSubmit={saveChange}>
+                <FlexBox>
+                  <PreviewContainter>
+                    <div className="upload_img">
+                      {cropFile ? (
+                        <AvatarPro src={avatar} className={classes.avatar} />
+                      ) : (
+                        <AvatarPro hash={avatar} className={classes.avatar} />
+                      )}
+                      <div className="changeImg">
+                        <input
+                          className="fileInput"
+                          type="file"
+                          onChange={handleImageChange}
+                          accept="image/jpeg,image/png"
+                        />
+                        <CameraAltIcon />
+                      </div>
                     </div>
-                  </div>
-                </PreviewContainter>
-                <RightProfile>
-                  <TextValidator
-                    label="Username"
-                    fullWidth
-                    onChange={event => {
-                      // Fix issue #148
-                      setUsername(event.currentTarget.value.toLowerCase());
-                    }}
-                    name="username"
-                    validators={
-                      isRegistered
-                        ? ['required', 'specialCharacter']
-                        : ['required', 'specialCharacter', 'isAliasRegistered']
-                    }
-                    errorMessages={[
-                      'This field is required.',
-                      'Username cannot contain spaces and special character.',
-                      'This username is already taken.',
-                    ]}
-                    margin="dense"
-                    value={username}
-                    disabled={isRegistered}
-                  />
-                  <TextValidator
-                    label="First Name"
-                    fullWidth
-                    onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
-                    name="firstname"
-                    validators={['required']}
-                    errorMessages={['This field is required']}
-                    margin="normal"
-                    value={firstname.new}
-                  />
-                  <TextValidator
-                    label="Last Name"
-                    fullWidth
-                    onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
-                    name="lastname"
-                    validators={['required']}
-                    errorMessages={['This field is required']}
-                    margin="normal"
-                    value={lastname.new}
-                  />
-                </RightProfile>
-              </FlexBox>
-              <DivControlBtnKeystore justify="center">
-                <ButtonPro type="submit">Save change</ButtonPro>
-              </DivControlBtnKeystore>
-            </ValidatorForm>
-            {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
-          </ShadowBoxAuthen>
-        </BoxAuthenCus>
-      </LayoutAuthen>
-    </QueueAnim>
+                  </PreviewContainter>
+                  <RightProfile>
+                    <TextValidator
+                      label="Username"
+                      fullWidth
+                      onChange={event => {
+                        // Fix issue #148
+                        setUsername(event.currentTarget.value.toLowerCase());
+                      }}
+                      name="username"
+                      validators={
+                        isRegistered
+                          ? ['required', 'specialCharacter']
+                          : ['required', 'specialCharacter', 'isAliasRegistered']
+                      }
+                      errorMessages={[
+                        'This field is required.',
+                        'Username cannot contain spaces and special character.',
+                        'This username is already taken.',
+                      ]}
+                      margin="dense"
+                      value={username}
+                      disabled={isRegistered}
+                    />
+                    <TextValidator
+                      label="First Name"
+                      fullWidth
+                      onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
+                      name="firstname"
+                      validators={['required']}
+                      errorMessages={['This field is required']}
+                      margin="normal"
+                      value={firstname.new}
+                    />
+                    <TextValidator
+                      label="Last Name"
+                      fullWidth
+                      onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
+                      name="lastname"
+                      validators={['required']}
+                      errorMessages={['This field is required']}
+                      margin="normal"
+                      value={lastname.new}
+                    />
+                  </RightProfile>
+                </FlexBox>
+                <DivControlBtnKeystore justify="center">
+                  <ButtonPro type="submit">Save change</ButtonPro>
+                </DivControlBtnKeystore>
+              </ValidatorForm>
+            </ShadowBoxAuthen>
+          </BoxAuthenCus>
+        </LayoutAuthen>
+      </QueueAnim>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
+    </React.Fragment>
   );
 }
 

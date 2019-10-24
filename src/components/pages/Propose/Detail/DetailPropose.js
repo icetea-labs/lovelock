@@ -33,7 +33,7 @@ export default function DetailPropose(props) {
 
   useEffect(() => {
     callView('getProposeByIndex', [proIndex]).then(async propose => {
-      console.log('getProposeByIndex done');
+      console.log('--------Detail propose loaded ------');
       const proInfo = propose[0] || {};
       const moreProInfo = await addInfoToProposes(proInfo);
       dispatch(actions.setTopInfo(moreProInfo));
@@ -96,12 +96,19 @@ export default function DetailPropose(props) {
     const accountInfo = {
       s_publicKey: pro.s_publicKey,
       s_address: pro.sender,
+      s_name: pro.s_name,
       r_publicKey: pro.r_publicKey,
       r_address: pro.receiver,
+      r_name: pro.r_name,
       publicKey: pro.publicKey,
     };
     dispatch(actions.setAccount(accountInfo));
     return pro;
+  }
+
+  if (proposeInfo) {
+    isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
+    isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
   }
 
   const renderDetailPropose = () => (
@@ -117,7 +124,7 @@ export default function DetailPropose(props) {
           <LeftContainer />
         </FlexWidthBox>
         <FlexWidthBox width="70%">
-          <RightContrainer proIndex={proIndex} />
+          <RightContrainer proIndex={proIndex} isOwner={isOwner} />
         </FlexWidthBox>
       </FlexBox>
 
@@ -126,11 +133,6 @@ export default function DetailPropose(props) {
   );
 
   const renderNotFound = () => <NotFound />;
-
-  if (proposeInfo) {
-    isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
-    isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
-  }
 
   return (
     <React.Fragment>

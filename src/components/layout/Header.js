@@ -334,7 +334,7 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
-  const privateKey = useSelector(state => state.account.privateKey);
+  // const privateKey = useSelector(state => state.account.privateKey);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
   const avatarRedux = useSelector(state => state.account.avatar);

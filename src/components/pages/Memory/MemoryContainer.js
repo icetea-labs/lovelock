@@ -83,7 +83,7 @@ function MemoryContainer(props) {
         enqueueSnackbar(message, { variant: 'error' });
       }
       setLoading(false);
-    }, 100);
+    }, 1);
   }
 
   if (memoryList.length <= 0 || loading) {
