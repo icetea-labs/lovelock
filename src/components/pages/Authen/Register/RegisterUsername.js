@@ -8,6 +8,12 @@ import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import WarningIcon from '@material-ui/icons/Warning';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import tweb3 from '../../../../service/tweb3';
 import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
@@ -18,9 +24,6 @@ import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
-
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import WarningIcon from '@material-ui/icons/Warning';
 
 const useStyles = makeStyles(theme => ({
   rightIcon: {
@@ -112,7 +115,7 @@ const WarningPass = styled.div`
 `;
 
 function RegisterUsername(props) {
-  const { setStep, setLoading, setAccount } = props;
+  const { setStep, setLoading, setAccount, setIsRemember } = props;
   const [username, setUsername] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -123,6 +126,7 @@ function RegisterUsername(props) {
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [originFile, setOriginFile] = useState([]);
+  const [isRememberState, setIsRememberState] = useState(true);
 
   useEffect(() => {
     ValidatorForm.addValidationRule('isPasswordMatch', value => {
@@ -168,17 +172,22 @@ function RegisterUsername(props) {
           tweb3.wallet.defaultAccount = address;
 
           const registerInfo = [];
-          const opts = { address }
+          const opts = { address };
           registerInfo.push(registerAlias(username, address));
-          registerInfo.push(setTagsInfo({
-            'display-name': displayname,
-            'firstname': firstname,
-            'lastname': lastname,
-            'pub-key': publicKey
-          }, opts))
+          registerInfo.push(
+            setTagsInfo(
+              {
+                'display-name': displayname,
+                firstname,
+                lastname,
+                'pub-key': publicKey,
+              },
+              opts
+            )
+          );
           if (avatarData) {
-            const setAvatar = saveFileToIpfs(avatarData).then(hash => setTagsInfo({'avatar': hash}, opts))
-            registerInfo.push(setAvatar);
+            const setAva = saveFileToIpfs(avatarData).then(hash => setTagsInfo({ avatar: hash }, opts));
+            registerInfo.push(setAva);
           }
           await Promise.all(registerInfo);
 
@@ -192,6 +201,7 @@ function RegisterUsername(props) {
           setAccount(newAccount);
           setLoading(false);
           setStep('two');
+          setIsRemember(isRememberState);
         } catch (error) {
           console.error(error);
           const message = `An error has occured. Detail:${error}`;
@@ -324,7 +334,21 @@ function RegisterUsername(props) {
             </div>
           </PreviewContainter>
         </Box>
-
+        <div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                value={isRememberState}
+                checked={isRememberState}
+                color="primary"
+                onChange={() => setIsRememberState(!isRememberState)}
+              />
+            }
+            label="Remember me for 30 days"
+          />
+        </div>
         <WarningPass>
           <SnackbarContent
             className="warningSnackbar"
@@ -356,11 +380,11 @@ function RegisterUsername(props) {
   );
 }
 
-// const mapStateToProps = state => {
-//   const e = state.create;
-//   return {
-//   };
-// };
+const mapStateToProps = state => {
+  return {
+    isRemember: state.create.isRemember,
+  };
+};
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -373,12 +397,15 @@ const mapDispatchToProps = dispatch => {
     setLoading: value => {
       dispatch(actionGlobal.setLoading(value));
     },
+    setIsRemember: value => {
+      dispatch(actionCreate.setIsRemember(value));
+    },
   };
 };
 
 export default withRouter(
   connect(
-    null,
+    mapStateToProps,
     mapDispatchToProps
   )(RegisterUsername)
 );
