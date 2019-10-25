@@ -14,27 +14,32 @@ const RightBox = styled.div`
 export default function RightContainer(props) {
   const { proIndex, isOwner } = props;
   const [memoByProIndex, setMemoByProIndex] = useState([]);
+  const [changed, setChanged] = useState(false)
   const address = useSelector(state => state.account.address);
 
   useEffect(() => {
     let cancel = false
 
-    loadMemory(proIndex).then(memories => {
+    loadMemories(proIndex).then(memories => {
       if (cancel) return
       setMemoByProIndex(memories)
     })
 
     return () => cancel = true
-  }, [proIndex]);
+  }, [proIndex, changed]);
 
-  function loadMemory(index) {
+  function loadMemories(index) {
     return callView('getMemoriesByProIndex', [index])
+  }
+
+  function refresh() {
+    setChanged(c => !c)
   }
 
   // console.log('isOwner', isOwner);
   return (
     <RightBox>
-      {address && isOwner && <CreateMemory proIndex={proIndex} reLoadMemory={loadMemory} />}
+      {address && isOwner && <CreateMemory proIndex={proIndex} onMemoryAdded={refresh} />}
       <MemoryContainer proIndex={proIndex} memorydata={memoByProIndex} />
     </RightBox>
   );
