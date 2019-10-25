@@ -7,6 +7,7 @@ export const actionTypes = {
   SET_ISREMEMBER: 'createAccount/SET_ISREMEMBER',
   SET_SHOW_PRIVATEKEY: 'createAccount/SET_SHOW_PRIVATEKEY',
   SET_CONFIRM_MNEMONIC: 'createAccount/SET_CONFIRM_MNEMONIC',
+  SET_PATH_NAME: 'createAccount/SET_PATH_NAME',
 };
 // ET_SHOW_KEYSTORE_TEXT = 'createAccount/SET_SHOW_KEYSTORE_TEXT';
 /*
@@ -30,5 +31,9 @@ export const setShowPrivateKey = data => ({
 });
 export const setConfirmMnemonic = data => ({
   type: actionTypes.SET_CONFIRM_MNEMONIC,
+  data,
+});
+export const setPathName = data => ({
+  type: actionTypes.SET_PATH_NAME,
   data,
 });

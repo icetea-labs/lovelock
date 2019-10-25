@@ -83,7 +83,19 @@ const FoolterBtn = styled.div`
 `;
 
 function RegisterSuccess(props) {
-  const { address, privateKey, setLoading, setStep, history, password, mnemonic, setAccount, isRemember } = props;
+  const {
+    address,
+    privateKey,
+    setLoading,
+    setStep,
+    history,
+    password,
+    mnemonic,
+    setAccount,
+    isRemember,
+    pathName,
+    setPathName,
+  } = props;
 
   const [savedPhrase, setSavedPhrase] = useState(false);
 
@@ -119,9 +131,12 @@ function RegisterSuccess(props) {
           setAccount(account);
           setStep('one');
           setLoading(false);
-          history.push('/');
+          if (pathName) {
+            history.push(pathName);
+          } else history.push('/');
         });
     }, 100);
+    setPathName('');
   }
 
   return (
@@ -174,6 +189,7 @@ const mapStateToProps = state => {
     privateKey: state.account.privateKey,
     password: state.account.cipher,
     isRemember: state.create.isRemember,
+    pathName: state.create.pathName,
   };
 };
 
@@ -187,6 +203,9 @@ const mapDispatchToProps = dispatch => {
     },
     setLoading: value => {
       dispatch(actionGlobal.setLoading(value));
+    },
+    setPathName: value => {
+      dispatch(actionCreate.setPathName(value));
     },
   };
 };
