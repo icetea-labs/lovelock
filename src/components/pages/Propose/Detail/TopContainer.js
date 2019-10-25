@@ -264,26 +264,20 @@ function TopContrainer(props) {
   // }, [proIndex]);
 
   useEffect(() => {
-    // console.log('initTopInfo');
+    if (topInfo && topInfo.coverImg) {
+      setLoading(false)
+    }
     initTopInfo();
-  }, []);
+  }, [topInfo]);
 
   async function initTopInfo() {
-    window.scrollTo(0, 0);
-    setLoading(true);
-    setTimeout(async () => {
-      try {
-        const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
-        const { numLike, isMyLike } = serialLikeData(likes);
-        topInfo.numLike = numLike;
-        topInfo.isMyLike = isMyLike;
-        // console.log('moreProInfo', moreProInfo);
-        setTopInfo(topInfo);
-      } catch (error) {
-        console.error(error);
-      }
-      setLoading(false);
-    }, 1);
+    if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
+      const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
+      const { numLike, isMyLike } = serialLikeData(likes);
+      topInfo.numLike = numLike;
+      topInfo.isMyLike = isMyLike;
+      setTopInfo(topInfo);
+    }
   }
 
   function handerLike() {

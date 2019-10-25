@@ -177,22 +177,41 @@ function MemoryContent(props) {
   // }, [memory]);
 
   useEffect(() => {
-    serialMemory().then(() => {
-      if (window.location.search !== '') {
-        const url_string = window.location.href;
-        const url = new URL(url_string);
-        if (String(memory.id) === url.searchParams.get('memory')) setOpenModal(true);
+    let cancel = false
+    const abort = new AbortController()
+
+    serialMemory(abort.signal).then(mem => {
+      if (cancel || !mem) return
+
+      setMemoryDecrypted(mem)
+
+      const search = window.location.search
+      if (search) {
+        const params = new URLSearchParams(search)
+        if (String(memory.id) === params.get('memory')) {
+          setOpenModal(true);
+        }
       }
     });
+
+    return () => {
+      abort.abort()
+      cancel = true
+    }
   }, []);
 
-  async function serialMemory() {
+  async function serialMemory(signal) {
     let mem = memory;
     if (memory.info.blog) {
       const blogData = JSON.parse(memory.content);
       mem = { ... memory }
       mem.meta = blogData.meta;
-      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash).then(d => d.json());
+      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
+        .then(d => d.json())
+        .catch(err => {
+          if (err.name === 'AbortError') return
+          throw err
+        })
     } else if (memory.isPrivate) {
       const memCache = await loadMemCacheAPI(memory.id);
       if (memCache) {
@@ -206,7 +225,8 @@ function MemoryContent(props) {
       }
       // console.log('mem', mem, 'id=', memory.id);
     }
-    setMemoryDecrypted(mem);
+    
+    return mem
   }
 
   // useEffect(() => {
@@ -429,7 +449,7 @@ function MemoryContent(props) {
             <meta name="description" content="A story on Lovelock" />
             <meta
               property="og:image"
-              content={blogInfo.coverPhoto || `${process.env.PUBLIC_URL}/static/img/share.jpg`}
+              content={(blogInfo.coverPhoto && blogInfo.coverPhoto.url) || `${process.env.PUBLIC_URL}/static/img/share.jpg`}
             />
             <meta property="og:description" content="A story on Lovelock" />
           </Helmet>

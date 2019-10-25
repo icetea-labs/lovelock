@@ -107,28 +107,30 @@ export default function MemoryComments(props) {
   const [showComments, setShowComments] = useState([]);
   let myFormRef = React.createRef();
 
-  useEffect(loadAndBindData, []);
-
-  function loadAndBindData() {
+  useEffect(() => {
     let cancel = false;
 
     loadData(memoryIndex).then(respComment => {
       if (!cancel) {
-        if (respComment.length > numComment) {
-          const numMore = respComment.length - numComment;
-          setNumHidencmt(numMore);
-          setShowComments(respComment.slice(numMore));
-        } else {
-          setShowComments(respComment);
-        }
-        setComments(respComment);
-        handerNumberComment(respComment.length);
+        handleComments(respComment)
       }
     });
 
     return () => {
       cancel = true;
     };
+  }, [comment]);
+
+  function handleComments(respComment) {
+    if (respComment.length > numComment) {
+      const numMore = respComment.length - numComment;
+      setNumHidencmt(numMore);
+      setShowComments(respComment.slice(numMore));
+    } else {
+      setShowComments(respComment);
+    }
+    setComments(respComment);
+    handerNumberComment(respComment.length);
   }
 
   async function loadData(index) {
@@ -157,10 +159,7 @@ export default function MemoryComments(props) {
     const method = 'addComment';
     const params = [memoryIndex, comment, ''];
     // console.log('memoryIndex', memoryIndex);
-    const result = await sendTransaction(method, params, { address, tokenAddress });
-    if (result) {
-      loadAndBindData(memoryIndex);
-    }
+    await sendTransaction(method, params, { address, tokenAddress });
     myFormRef.reset();
     setComment('');
   }

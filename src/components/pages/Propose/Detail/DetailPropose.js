@@ -7,9 +7,11 @@ import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
-import RightContrainer from './RightContainer';
+import RightContainer from './RightContainer';
 import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
+
+window.prerenderReady = false
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -26,27 +28,34 @@ export default function DetailPropose(props) {
   let isOwner = false;
   let isView = false;
   const dispatch = useDispatch();
-  const proIndex = parseInt(match.params.index, 10);
+  const proIndex = parseInt(match.params.index);
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
   const [proposeInfo, setProposeInfo] = useState(null);
 
   useEffect(() => {
+    let cancel = false
+
     callView('getProposeByIndex', [proIndex]).then(async propose => {
       // console.log('--------Detail propose loaded ------');
       const proInfo = propose[0] || {};
-      const moreProInfo = await addInfoToProposes(proInfo);
-      dispatch(actions.setTopInfo(moreProInfo));
+      proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+      await addInfoToPropose(proInfo);
+      
+      if (cancel) return
+
       setProposeInfo(proInfo);
+      dispatch(actions.setTopInfo(proInfo));
     });
+
+    return () => cancel = true
   }, [proIndex]);
 
   const renderHelmet = () => {
     const isJournal = proposeInfo.sender === proposeInfo.receiver;
-    // TODO: get sender & receiver's display name
     const title = isJournal
-      ? `${proposeInfo.sender}'s Journal`
-      : `Lovelock - ${proposeInfo.sender} & ${proposeInfo.receiver}`;
+      ? `${proposeInfo.s_name}'s Journal`
+      : `Lovelock - ${proposeInfo.s_name} & ${proposeInfo.r_name}`;
     const desc = proposeInfo.s_content;
     const coverImg = proposeInfo.coverImg
       ? process.env.REACT_APP_IPFS + proposeInfo.coverImg
@@ -63,8 +72,7 @@ export default function DetailPropose(props) {
     );
   };
 
-  async function addInfoToProposes(respPro) {
-    const pro = respPro;
+  async function addInfoToPropose(pro) {
     const { sender, receiver } = pro;
 
     const senderTags = await getTagsInfo(sender);
@@ -88,8 +96,6 @@ export default function DetailPropose(props) {
     pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
 
     const info = pro.s_info;
-
-    pro.coverImg = pro.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
     pro.s_date = info.date;
     pro.r_date = info.date;
 
@@ -106,11 +112,6 @@ export default function DetailPropose(props) {
     return pro;
   }
 
-  if (proposeInfo) {
-    isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
-    isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
-  }
-
   const renderDetailPropose = () => (
     <React.Fragment>
       <BannerContainer>
@@ -124,15 +125,20 @@ export default function DetailPropose(props) {
           <LeftContainer />
         </FlexWidthBox>
         <FlexWidthBox width="70%">
-          <RightContrainer proIndex={proIndex} isOwner={isOwner} />
+          <RightContainer proIndex={proIndex} isOwner={isOwner} />
         </FlexWidthBox>
       </FlexBox>
 
-      {renderHelmet()}
+      {proposeInfo && renderHelmet()}
     </React.Fragment>
   );
 
   const renderNotFound = () => <NotFound />;
+
+  if (proposeInfo) {
+    isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
+    isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
+  }
 
   return (
     <React.Fragment>

@@ -33,51 +33,54 @@ function MemoryContainer(props) {
 
   const classes = useStyles();
   useEffect(() => {
-    if (memorydata.length > 0) prepareMemory();
+    let signal = {}
+
+    if (memorydata.length > 0) {
+      prepareMemory(signal)
+    }
+
+    return () => signal.cancel = true
   }, [memorydata]);
 
-  function prepareMemory() {
+  async function prepareMemory(signal) {
     let newMemoryList = [];
     setLoading(true);
     // console.log('memorydata', memorydata);
-    setTimeout(async () => {
-      try {
-        let tags = memorydata.map(mem => {
-          return getTagsInfo(mem.sender);
-        });
-        tags = await Promise.all(tags);
-        for (let i = 0; i < memorydata.length; i++) {
-          const obj = memorydata[i];
-          obj.name = tags[i]['display-name'];
-          obj.pubkey = tags[i]['pub-key'];
-          obj.avatar = tags[i].avatar;
-          if (obj.receiver) {
-            // eslint-disable-next-line no-await-in-loop
-            const receiverTags = await getTagsInfo(obj.receiver);
-            obj.r_name = receiverTags['display-name'];
-          }
-          if (!obj.isPrivate) {
-            obj.isUnlock = true;
-            for (let j = 0; j < obj.info.hash.length; j++) {
-              // eslint-disable-next-line no-await-in-loop
-              obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
-            }
-          } else {
-            // obj.info.hash = [];
-            obj.isUnlock = false;
-          }
 
-          newMemoryList.push(obj);
-        }
-        newMemoryList = newMemoryList.reverse();
-        setMemory(newMemoryList);
-      } catch (error) {
-        console.error(error);
-        const message = 'Load memory error!';
-        enqueueSnackbar(message, { variant: 'error' });
+    let tags = memorydata.map(mem => {
+      return getTagsInfo(mem.sender);
+    });
+    tags = await Promise.all(tags);
+    if (signal.cancel) return
+
+    for (let i = 0; i < memorydata.length; i++) {
+      const obj = memorydata[i];
+      obj.name = tags[i]['display-name'];
+      obj.pubkey = tags[i]['pub-key'];
+      obj.avatar = tags[i].avatar;
+      if (obj.receiver) {
+        // eslint-disable-next-line no-await-in-loop
+        const receiverTags = await getTagsInfo(obj.receiver);
+        obj.r_name = receiverTags['display-name'];
       }
-      setLoading(false);
-    }, 1);
+      if (!obj.isPrivate) {
+        obj.isUnlock = true;
+        for (let j = 0; j < obj.info.hash.length; j++) {
+          // eslint-disable-next-line no-await-in-loop
+          obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+          if (signal.cancel) return
+        }
+      } else {
+        // obj.info.hash = [];
+        obj.isUnlock = false;
+      }
+
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    setMemory(newMemoryList);
+
+    setLoading(false);
   }
 
   if (memoryList.length <= 0 || loading) {

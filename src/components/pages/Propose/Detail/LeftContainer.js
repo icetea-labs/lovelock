@@ -80,12 +80,16 @@ function LeftContainer(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    loadProposes();
+    let signal = {}
+
+    loadProposes(signal);
     watchCreatePropose();
     // watchConfirmPropose();
+
+    return () => signal.cancel = true
   }, []);
 
-  function watchCreatePropose() {
+  function watchCreatePropose(signal) {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
       if (error) {
@@ -185,19 +189,20 @@ function LeftContainer(props) {
     }
   }
 
-  async function loadProposes() {
+  async function loadProposes(signal) {
     setLoading(true);
     let resp = [];
     if (address) {
       resp = (await callView('getProposeByAddress', [address])) || [];
     }
-    const newPropose = await addInfoToProposes(resp);
+    const newPropose = await addInfoToProposes(resp, signal);
+    if (signal.cancel) return
 
     setPropose(newPropose);
     setLoading(false);
   }
 
-  async function addInfoToProposes(resp) {
+  async function addInfoToProposes(resp, signal) {
     const clonePro = resp;
     for (let i = 0; i < clonePro.length; i++) {
       // Get address partner
@@ -215,10 +220,12 @@ function LeftContainer(props) {
         // Get info tags partner. case on receiver is bot address -> get tags info of sender address
         // eslint-disable-next-line no-await-in-loop
         const reps = await getTagsInfo(partnerAddress);
+        if (signal.cancel) return
         clonePro[i].name = reps['display-name'];
         clonePro[i].avatar = reps.avatar;
         // eslint-disable-next-line no-await-in-loop
         const nick = await getAlias(partnerAddress);
+        if (signal.cancel) return
         clonePro[i].nick = `@${nick}`;
       }
     }

@@ -137,10 +137,10 @@ ReactDOM.render(
       <title>Lovelock - Cherish Your Intimate Memories</title>
       <meta property="og:title" content="Lovelock - Cherish Your Intimate Memories" />
       <meta property="og:type" content="website" />
-      <meta name="description" content="A safe and peaceful place to store and celebrate your precious memories, keep them to yourself or share to close friends." />
+      <meta name="description" content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends." />
       <meta property="og:image" content={`${process.env.PUBLIC_URL}/static/img/share.jpg`} />
       <meta property="og:description"
-        content="A safe and peaceful place to store and celebrate your precious memories, keep them to yourself or share to close friends." />
+        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends." />
     </Helmet>
   </MuiThemeProvider>,
   document.getElementById('root')
