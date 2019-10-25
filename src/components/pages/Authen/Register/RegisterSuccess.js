@@ -83,8 +83,8 @@ const FoolterBtn = styled.div`
 `;
 
 function RegisterSuccess(props) {
-  const { address, privateKey, setLoading, setStep, history, password, mnemonic, setAccount } = props;
-  const [isRemember, setIsRemember] = useState(true);
+  const { address, privateKey, setLoading, setStep, history, password, mnemonic, setAccount, isRemember } = props;
+
   const [savedPhrase, setSavedPhrase] = useState(false);
 
   function gotoHome() {
@@ -135,41 +135,29 @@ function RegisterSuccess(props) {
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
           <div className="note">
-            <span><h5>NOTE</h5> In case you forget your password, this recovery phrase is <u>the only way</u> to gain access to your account. Keep it secret.</span>
+            <span>
+              <h5>NOTE</h5> In case you forget your password, this recovery phrase is <u>the only way</u> to gain access
+              to your account. Keep it secret.
+            </span>
           </div>
+        </Desc>
+
+        <FoolterBtn>
           <div>
             <FormControlLabel
               control={
                 <Checkbox
                   icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                   checkedIcon={<CheckBoxIcon fontSize="small" />}
-                  value={isRemember}
-                  checked={isRemember}
                   color="primary"
-                  onChange={() => setIsRemember(!isRemember)}
+                  value={savedPhrase}
+                  checked={savedPhrase}
+                  onChange={() => setSavedPhrase(!savedPhrase)}
                 />
               }
-              label="Remember me for 30 days"
+              label="I've saved my recovery phrase"
             />
           </div>
-        </Desc>
-
-        <FoolterBtn>
-          <div>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                    checkedIcon={<CheckBoxIcon fontSize="small" />}
-                    color="primary"
-                    value={savedPhrase}
-                    checked={savedPhrase}
-                    onChange={() => setSavedPhrase(!savedPhrase)}
-                  />
-                }
-                label="I've saved my recovery phrase"
-              />
-            </div>
           <Button disabled={!savedPhrase} variant="contained" size="large" color="primary" onClick={gotoHome}>
             Continue
           </Button>
@@ -185,6 +173,7 @@ const mapStateToProps = state => {
     address: state.account.address,
     privateKey: state.account.privateKey,
     password: state.account.cipher,
+    isRemember: state.create.isRemember,
   };
 };
 
