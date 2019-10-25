@@ -83,6 +83,7 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#333',
     paddingBottom: 16,
     cursor: 'pointer',
+    margin: '-16px -16px -12px',
     transition: 'background-color 1000ms linear',
     '&:hover $blogTitleImg, &:hover $blogFirstLine': {
       color: '#fff',

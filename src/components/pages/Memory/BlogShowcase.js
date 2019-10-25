@@ -8,7 +8,7 @@ export default function BlogShowcase(props) {
   const [colors, setColors] = useState(props.colors || {});
   const { classes, photo, title, openHandler } = props;
   const ratio = photo && photo.aspect_ratio && photo.aspect_ratio.ratio;
-  const height = ratio ? Math.floor(5.95 * ratio) : 160; // current image with on timeline is 595
+  const height = ratio ? Math.floor(6.27 * ratio) : 160; // current image with on timeline is 627
   const frameStyle = colors.frameBackColor ? { backgroundColor: colors.frameBackColor } : {};
   if (!photo) {
     frameStyle.paddingBottom = 0;
