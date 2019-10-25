@@ -32,21 +32,26 @@ export default function DetailPropose(props) {
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
   const [proposeInfo, setProposeInfo] = useState(null);
+  const [pageErr, setPageErr] = useState(false);
 
   useEffect(() => {
     let cancel = false
 
-    callView('getProposeByIndex', [proIndex]).then(async propose => {
-      // console.log('--------Detail propose loaded ------');
-      const proInfo = propose[0] || {};
-      proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
-      await addInfoToPropose(proInfo);
-      
-      if (cancel) return
+    if (isNaN(match.params.index)) {
+      setPageErr(true);
+    } else {
+      callView('getProposeByIndex', [proIndex]).then(async propose => {
+        // console.log('--------Detail propose loaded ------');
+        const proInfo = propose[0] || {};
+        proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+        await addInfoToPropose(proInfo);
+        
+        if (cancel) return
 
-      setProposeInfo(proInfo);
-      dispatch(actions.setTopInfo(proInfo));
-    });
+        setProposeInfo(proInfo);
+        dispatch(actions.setTopInfo(proInfo));
+      });
+    }
 
     return () => cancel = true
   }, [proIndex]);
@@ -143,6 +148,7 @@ export default function DetailPropose(props) {
   return (
     <React.Fragment>
       {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
+      {pageErr && renderNotFound()}
     </React.Fragment>
   );
 }
