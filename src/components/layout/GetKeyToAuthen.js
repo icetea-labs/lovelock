@@ -7,6 +7,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import { withRouter } from 'react-router-dom';
 
 import tweb3 from '../../service/tweb3';
 import * as actions from '../../store/actions';
@@ -14,17 +15,21 @@ import { wallet, decode, savetoLocalStorage } from '../../helper';
 import CommonDialog from '../pages/Propose/CommonDialog';
 import { encode } from '../../helper/encode';
 
-export default function GetKeyToAuthen() {
+function GetKeyToAuthen(props) {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const encryptedData = useSelector(state => state.account.encryptedData);
   const needAuth = useSelector(state => state.account.needAuth);
-  // const address = useSelector(state => state.account.address);
+  const addressRedux = useSelector(state => state.account.address);
   const [isRemember, setIsRemember] = useState(true);
 
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+    if (!addressRedux) {
+      setPathName(window.location.pathname);
+      props.history.push('/register');
+    }
     const handleUserKeyPress = event => {
       if (event.keyCode === 13) {
         confirm();
@@ -54,6 +59,10 @@ export default function GetKeyToAuthen() {
 
   function setNeedAuth(value) {
     dispatch(actions.setNeedAuth(value));
+  }
+
+  function setPathName(value) {
+    dispatch(actions.setPathName(value));
   }
 
   function close() {
@@ -150,3 +159,5 @@ export default function GetKeyToAuthen() {
     </CommonDialog>
   ) : null;
 }
+
+export default withRouter(GetKeyToAuthen);

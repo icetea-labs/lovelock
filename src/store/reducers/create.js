@@ -11,6 +11,7 @@ const initialState = {
   showPrivateKey: false,
   confirmMnemonic: false,
   isRemember: true,
+  pathName: '',
 };
 
 function create(state = initialState, action) {
@@ -26,6 +27,10 @@ function create(state = initialState, action) {
     case actionTypes.SET_ISREMEMBER:
       return Object.assign({}, state, {
         isRemember: action.data,
+      });
+    case actionTypes.SET_PATH_NAME:
+      return Object.assign({}, state, {
+        pathName: action.data,
       });
     // case actionTypes.SET_ACCOUNT:
     //   return Object.assign({}, state, action.data);
