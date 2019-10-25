@@ -30,15 +30,27 @@ export default function DetailPropose(props) {
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
   const [proposeInfo, setProposeInfo] = useState(null);
+  const [pageErr, setPageErr] = useState(false);
 
   useEffect(() => {
-    callView('getProposeByIndex', [proIndex]).then(async propose => {
-      // console.log('--------Detail propose loaded ------');
-      const proInfo = propose[0] || {};
-      const moreProInfo = await addInfoToProposes(proInfo);
-      dispatch(actions.setTopInfo(moreProInfo));
-      setProposeInfo(proInfo);
-    });
+    if (isNaN(match.params.index)) {
+      setPageErr(true);
+    } else {
+      callView('getProposes').then(async allPropose => {
+        const proposeNum = allPropose.length - 1;
+        if (proIndex > proposeNum) {
+          setPageErr(true);
+        } else {
+          callView('getProposeByIndex', [proIndex]).then(async propose => {
+            // console.log('--------Detail propose loaded ------');
+            const proInfo = propose[0] || {};
+            const moreProInfo = await addInfoToProposes(proInfo);
+            dispatch(actions.setTopInfo(moreProInfo));
+            setProposeInfo(proInfo);
+          });
+        }
+      });
+    }
   }, [proIndex]);
 
   const renderHelmet = () => {
@@ -137,6 +149,7 @@ export default function DetailPropose(props) {
   return (
     <React.Fragment>
       {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
+      {pageErr && renderNotFound()}
     </React.Fragment>
   );
 }
