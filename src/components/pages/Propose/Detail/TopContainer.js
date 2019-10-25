@@ -259,10 +259,6 @@ function TopContrainer(props) {
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
-  // useEffect(() => {
-  //   loadProposes();
-  // }, [proIndex]);
-
   useEffect(() => {
     if (topInfo && topInfo.coverImg) {
       setLoading(false)

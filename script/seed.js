@@ -2,32 +2,40 @@ const envfile = require('envfile')
 const fs = require('fs')
 const { toPkey } = require('./mnemonic')
 const { IceteaWeb3 } = require('@iceteachain/web3')
+const { toKeyString } = require('@iceteachain/common').codec
 const { mode, envPath } = require('./mode')
 const { randomBytes } = require('crypto')
+const blogContent = require('./blogcontent.json')
 
 if (['-h', '--help'].includes(mode)) {
-  console.log('Purpose: Seed data.')
-  console.log('---------------')
-  console.log('seed         seed data using .env file')
-  console.log('seed prod    seed data using .env.production file')
-  console.log('seed dev     seed data using .env.development file')
-  console.log('seed [file]  seed data using [file]')
-  return
+    console.log('Purpose: Seed data.')
+    console.log('---------------')
+    console.log('seed         seed data using .env file')
+    console.log('seed prod    seed data using .env.production file')
+    console.log('seed dev     seed data using .env.development file')
+    console.log('seed [file]  seed data using [file]')
+    return
 }
 
 // load config
 console.log(`Load RPC endpoint from ${envPath}`)
-const { 
-    REACT_APP_RPC, 
-    REACT_APP_CONTRACT, 
-    SEED_PKEY, 
+const {
+    REACT_APP_RPC,
+    REACT_APP_CONTRACT,
+    PORT,
+    SEED_PKEY,
     SEED_MNEMONIC,
     MEMORY_COUNT
- } = envfile.parseFileSync(envPath)
+} = envfile.parseFileSync(envPath)
 
 const toHttpRpc = wsUrl => {
     const url = new URL(wsUrl)
     return `http://${url.host}`
+}
+
+const toWebUrl = wsUrl => {
+    const url = new URL(wsUrl)
+    return `http://${url.hostname}:${PORT || 3000}`
 }
 
 const endpoint = toHttpRpc(REACT_APP_RPC)
@@ -38,7 +46,9 @@ const alias = tweb3.contract('system.alias').methods
 const did = tweb3.contract('system.did').methods
 const lovelock = tweb3.contract(REACT_APP_CONTRACT).methods
 
-const makeAliasPair = (sender, receiver) => {
+const registerUsers = (
+    { address: sender, publicKey: spkey },
+    { address: receiver, publicKey: rpkey }) => {
     const bytes = randomBytes(8)
     const senderName = 's_' + bytes.readUInt32BE(0).toString(36)
     const receiverName = 'r_' + bytes.readUInt32BE(4).toString(36)
@@ -46,14 +56,29 @@ const makeAliasPair = (sender, receiver) => {
         .sendCommit({ from })
         .then(({ returnValue }) => returnValue.split('.')[1])
 
-    return Promise.all([register(senderName, sender), register(receiverName, receiver)])
+    const setProfile = (username, pkey, avatar, from) => did.setTag(from, {
+        firstname: username,
+        lastname: '',
+        'display-name': username,
+        avatar,
+        'pub-key': toKeyString(pkey),
+    }).sendCommit({ from })
+
+
+    return Promise.all([
+        register(senderName, sender),
+        register(receiverName, receiver),
+        setProfile(senderName, spkey, sender),
+        setProfile(receiverName, rpkey, receiver)
+    ])
 }
 
-const makeLove = ({ method, from, send = 'sendCommit'}, ...args) => {
-    return lovelock[method](...args)[send]( { from }).then(({ returnValue }) => returnValue)
+const makeLove = ({ method, from, send = 'sendCommit' }, ...args) => {
+    return lovelock[method](...args)[send]({ from }).then(({ returnValue }) => returnValue)
 }
 
 let fromAccount
+let fromAccountObj
 let pkey = SEED_PKEY || process.env.SEED_PKEY
 if (!pkey) {
     const seed = SEED_MNEMONIC || process.env.SEED_MNEMONIC
@@ -61,70 +86,165 @@ if (!pkey) {
         pkey = toPkey(seed)
     }
 }
+let keyGenerated = false
 if (pkey) {
-    fromAccount = tweb3.wallet.importAccount(pkey).address
+    fromAccountObj = tweb3.wallet.importAccount(pkey)
+    fromAccount = fromAccountObj.address
 } else {
-    fromAccount = tweb3.wallet.createRegularAccount().address
+    fromAccountObj = tweb3.wallet.createRegularAccount()
+    fromAccount = fromAccountObj.address
+    pkey = toKeyString(fromAccountObj.privateKey)
+    keyGenerated = true
 }
-const { address: toAccount } = tweb3.wallet.createRegularAccount()
+const toAccountObj = tweb3.wallet.createRegularAccount()
+const toAccount = toAccountObj.address
 
-;(async () => {
+const shuffle = array => {
+    var currentIndex = array.length, temporaryValue, randomIndex;
 
-    const [ sender, receiver ]  = await makeAliasPair(fromAccount, toAccount)
-    console.log('sender: ' + sender)
-    console.log('receiver: ' + receiver)
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
 
-    // create the lock
-    const pIndex = await makeLove({
-        method: 'createPropose', 
-        from: fromAccount
-    }, `Create lock from ${sender} to ${receiver}`, toAccount, {
-        hash: ['QmcPqy322d4hzGKHY7etwm57dx3SWCE2mQRxFZ2LqtKvJc']
-    })
-    console.log('Lock index: ' + pIndex)
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
 
-    // now, accept it
-    await makeLove({ 
-        method: 'acceptPropose', 
-        from: toAccount
-    }, pIndex, `${receiver} accepts ${sender}`)
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
 
-    // then add 100 memories
-    const count = Number(MEMORY_COUNT || process.env.MEMORY_COUNT) || 50
+    return array;
+}
 
-    const promises = []
-    const accounts = [fromAccount, toAccount]
-    for (let i = 0; i < count; i++) {
-        const from = accounts[i % 2]
-        promises.push(makeLove({
-            method: 'addMemory',
-            from,
-            send: 'sendAsync'
-        }, pIndex, false, `Memory ${i} for lock ${pIndex}`, {
-            hash: ['QmeoAAKbzsvL6qvajiiRJcCNpNoKzGmYyPXcSxHcktbJbU'],
-            date: Date.now()
-        }).then(r => {
+const blogParams = [JSON.stringify({
+    "meta": {
+        "title": "Introduce Lovelock",
+        "coverPhoto": {
+            "width": 1200,
+            "height": 630,
+            "url": "https://ipfs.icetea.io/gateway/ipfs/QmfS4c8BJFoURzA83JqQJM6Ax7qP6rBsE81MN66Y6iyoPZ",
+        },
+    },
+    "blogHash": "QmRsnXwcxhDv2iri6Uru87P4o4aLKS4WGYBubyojLLjXTq"
+}),
+{
+    "date": Date.now(),
+    "hash": [],
+    "blog": true
+}]
+
+    ; (async () => {
+
+        const [sender, receiver] = await registerUsers(fromAccountObj, toAccountObj)
+        console.log('sender: ' + sender)
+        console.log('receiver: ' + receiver)
+
+        // create the lock
+        const pIndex = await makeLove({
+            method: 'createPropose',
+            from: fromAccount
+        }, `Create lock from ${sender} to ${receiver}`, toAccount, {
+            hash: ['QmcPqy322d4hzGKHY7etwm57dx3SWCE2mQRxFZ2LqtKvJc']
+        })
+        console.log('Lock index: ' + pIndex)
+
+        // now, accept it
+        await makeLove({
+            method: 'acceptPropose',
+            from: toAccount
+        }, pIndex, `${receiver} accepts ${sender}`)
+
+        // then add 100 memories
+        const count = Number(MEMORY_COUNT || process.env.MEMORY_COUNT) || 10
+
+        const hashes = ['QmaAi38WTTouioSh1yZQ76pJcnVyuxc22p5zyiCZnN3U84', 'QmeoAAKbzsvL6qvajiiRJcCNpNoKzGmYyPXcSxHcktbJbU', 'QmUUgcmsxqEV5Y82HTtusxxDxrrtJ4PWr33ChChW7Sv38U']
+
+        const promises = []
+        const accounts = [fromAccount, toAccount]
+        for (let i = 0; i < count; i++) {
+            const from = accounts[i % 2]
+            const hashCandidates = shuffle(hashes)
+            const hashCount = Math.round(Math.random() * 3)
+            const selectedHashes = hashCandidates.slice(0, hashCount)
+
+            promises.push(makeLove({
+                method: 'addMemory',
+                from,
+                send: 'sendAsync'
+            }, pIndex, false, `Memory ${i} for lock ${pIndex}`, {
+                hash: selectedHashes,
+                date: Date.now()
+            }).then(r => {
                 //console.log(`Created memory ${i} for lock ${pIndex}`)
                 return r
             }))
-    }
+        }
 
-    // this would fail if more than 100 connection
-    await Promise.all(promises)
-    // so we need to slice into chunk
-    // const chunksize = 90
-    // let result = []
-    // for (let i = 0; i < promises.length; i += chunksize) {
-    //     const chunk = promises.slice(i, i + chunksize);
-    //     result = result.concat(await Promise.all(chunk).then(r => {
-    //         console.log(`Memory inserted ${i} ~ ${i + chunk.length}`)
-    //         return r
-    //         //return new Promise((resolve, reject) => setTimeout(() => resolve(r), 0))
-    //     }))
-    // }
+        // add a single block
+        promises.push(makeLove({
+            method: 'addMemory',
+            fromAccount,
+            send: 'sendAsync'
+        }, pIndex, false, ...blogParams)
+            .then(r => {
+                //console.log(`Created memory ${i} for lock ${pIndex}`)
+                return r
+            }))
 
-  
-  })().catch(e => {
-      console.error(e)
-      process.exit(1)
-  })
+        // this would fail if more than 100 connection
+        console.log(`Adding ${promises.length} memories...`)
+        await Promise.all(promises)
+
+        // print the URL
+        console.log(`${toWebUrl(REACT_APP_RPC)}/lock/${pIndex}`)
+
+        // create a pending propose
+        await makeLove({
+            method: 'createPropose',
+            from: fromAccount
+        }, 'I sent, why nobody replies?', toAccount, {
+            hash: ['QmcPqy322d4hzGKHY7etwm57dx3SWCE2mQRxFZ2LqtKvJc']
+        })
+
+        // another
+        await makeLove({
+            method: 'createPropose',
+            from: toAccount
+        }, 'I received this, what the heck?', fromAccount, {
+            hash: ['QmeoAAKbzsvL6qvajiiRJcCNpNoKzGmYyPXcSxHcktbJbU']
+        })
+
+        // a journal
+        await makeLove({
+            method: 'createPropose',
+            from: fromAccount
+        }, 'This is a great blog...', fromAccount, {
+            hash: ['QmUUgcmsxqEV5Y82HTtusxxDxrrtJ4PWr33ChChW7Sv38U']
+        })
+
+        // a crush
+        const crushAccount = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn'
+        await makeLove({
+            method: 'createPropose',
+            from: fromAccount
+        }, 'I love so!', crushAccount, {
+            hash: ['Qmc8bacYd4iNmvo4ojmZaGADH4qWVNNdEppMgt13T8yqsQ']
+        }, {
+            "firstname": "Mark",
+            "lastname": "Jack",
+            "botAva": "QmSrBLu8MB5XdnHpgA4LMyRNNz4w8xbQQLsjAWSZhLq16D",
+            "botReply": "I love you too!"
+        })
+
+        // print out the private key :D
+        if (keyGenerated) {
+            console.log('Import the following privateky to use: ' + pkey)
+        }
+
+
+    })().catch(e => {
+        console.error(e)
+        process.exit(1)
+    })

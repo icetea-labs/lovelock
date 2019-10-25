@@ -217,7 +217,11 @@ export default function CreateMemory(props) {
 
     return {
       title: firstLine,
-      coverPhoto: firstImg
+      coverPhoto: firstImg && {
+        width: firstImg.width,
+        height: firstImg.height,
+        url: firstImg.url
+      }
     }
   }
 

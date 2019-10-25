@@ -39,9 +39,9 @@ export default function LeftProposes(props) {
 
   const proposes = useSelector(state => state.loveinfo.proposes);
   const address = useSelector(state => state.account.address);
-  const proFilted = proposes.filter(item => item.status === props.flag);
+  const proFiltered = proposes.filter(item => item.status === props.flag);
   const classes = useStyles();
-  if (proFilted.length <= 0) {
+  if (proFiltered.length <= 0) {
     return (
       <CardHeader
         avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
@@ -72,16 +72,25 @@ export default function LeftProposes(props) {
         };
     }
   };
+
   // display on following order
-  // crush -> journal -> lock
-  // if same type, current address = sender display first
+  // Accepted (flag === 1): journal -> crush -> lock
+  // Pending: sent -> received
   const compare = (p1, p2) => {
-    const v1 = Number(String(p1.type || 0) + p1.id);
-    const v2 = Number(String(p2.type || 0) + p1.id);
-    if (address === p1.sender) return -1;
-    return v2 - v1;
+    if (props.flag === 1) {
+      const v1 = String(p1.type || 0) + p2.id;
+      const v2 = String(p2.type || 0) + p1.id;
+      return v2.localeCompare(v1)
+    } else {
+      const f1 = address === p1.sender ? '0' : '1'
+      const f2 = address === p2.sender ? '0' : '1'
+      const v1 =f1 + p1.id;
+      const v2 = f2 + p2.id;
+      return v1.localeCompare(v2)
+    }
   };
-  return proFilted.sort(compare).map(item => {
+
+  return proFiltered.sort(compare).map(item => {
     // console.log('item', item);
     const info = getInfo(item);
     return (

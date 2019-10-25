@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch, connect } from 'react-redux';
 import { CardActions, Button, Typography } from '@material-ui/core';
 import CommentIcon from '@material-ui/icons/Comment';
@@ -62,12 +62,32 @@ function MemoryActionButton(props) {
 
   const [likes, setLikes] = useState(props.memoryLikes);
   const [numLike, setNumLike] = useState(0);
+  const [refreshNumLike, setRefreshNumLike] = useState(false)
   const [isMyLike, setIsMyLike] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     serialLikeData();
   }, [likes]);
+
+  const mounted = useRef();
+  useEffect(() => {
+    let cancel = false
+
+    if (!mounted.current) {
+      mounted.current = true;
+    } else {
+      // Only need to refresh like count on componentDidUpdate
+      callView('getLikeByMemoIndex', [memoryIndex]).then(data => {
+        !cancel && setLikes(data);
+      });
+    }
+
+    return () => {
+      cancel = true
+      mounted.current = false
+    }
+  }, [refreshNumLike])
 
   useEffect(() => {
     let returnValue;
@@ -81,6 +101,12 @@ function MemoryActionButton(props) {
     };
   }, []);
 
+  const refrestLikeCount = () => {
+    if (mounted.current) {
+      setRefreshNumLike(c => !c)
+    }
+  }
+
   function watchAddlike() {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
@@ -90,7 +116,7 @@ function MemoryActionButton(props) {
         enqueueSnackbar(message, { variant: 'error' });
       } else {
         // console.log('watchAddlike', result);
-        getNumLikes();
+        refrestLikeCount();
       }
     });
   }
@@ -102,20 +128,14 @@ function MemoryActionButton(props) {
     if (memoryType === 1) setLikeTopInfo({ numLike: num, isMyLike: !!likes[address] });
   }
 
-  async function getNumLikes() {
-    callView('getLikeByMemoIndex', [memoryIndex]).then(data => {
-      setLikes(data);
-    });
-  }
-
-  function handerLike() {
+  function handleLike() {
     if (!tokenKey) {
       setNeedAuth(true);
       return;
     }
     const params = [memoryIndex, 1];
     sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
-      getNumLikes();
+      refrestLikeCount();
     });
 
     if (isMyLike) {
@@ -129,7 +149,7 @@ function MemoryActionButton(props) {
   const classes = useStyles();
   return (
     <StyledCardActions className={classes.acctionsBt}>
-      <Button className={classes.button} onClick={handerLike}>
+      <Button className={classes.button} onClick={handleLike}>
         {isMyLike ? (
           <React.Fragment>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />

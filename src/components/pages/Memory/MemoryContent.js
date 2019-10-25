@@ -351,7 +351,7 @@ function MemoryContent(props) {
         <span>
           <span>Locked with </span>
           <Typography component="span" className={classes.relationshipName}>
-            {memoryDecrypted.r_name}
+            {propose.r_name}
           </Typography>
         </span>
       </Typography>
@@ -366,7 +366,7 @@ function MemoryContent(props) {
         </div>
         <span>
           <Typography component="span" className={classes.relationshipName}>
-            {memoryDecrypted.r_name}
+            {propose.r_name}
           </Typography>
           <span> started the journal.</span>
         </span>
@@ -405,7 +405,7 @@ function MemoryContent(props) {
   const renderContentUnlock = () => {
     const isBlog = !!memoryDecrypted.info.blog;
     const blogInfo = memoryDecrypted.meta || {};
-    const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
+    const isJournal = propose.sender === propose.receiver;
     return (
       <React.Fragment>
         {memoryDecrypted.type === 1 ? (
