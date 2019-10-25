@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { useSnackbar } from 'notistack';
 
-import { getTagsInfo, getJsonFromIpfs } from '../../../helper';
+import { getTagsInfo, getJsonFromIpfs, getQueryParam } from '../../../helper';
 import MemoryContent from './MemoryContent';
 import * as actions from '../../../store/actions';
 
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { memorydata, memoryList, setMemory } = props;
+  const { memorydata, memoryList, setMemory, proposeInfo } = props;
   const [loading, setLoading] = useState(false);
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
@@ -43,6 +43,7 @@ function MemoryContainer(props) {
   }, [memorydata]);
 
   async function prepareMemory(signal) {
+    const showMemoryId = parseInt(getQueryParam('memory'))
     let newMemoryList = [];
     setLoading(true);
     // console.log('memorydata', memorydata);
@@ -53,8 +54,11 @@ function MemoryContainer(props) {
     tags = await Promise.all(tags);
     if (signal.cancel) return
 
+    let hasViewDetail = false
     for (let i = 0; i < memorydata.length; i++) {
       const obj = memorydata[i];
+      obj.showDetail = showMemoryId === obj.id
+      if (obj.info.blog && obj.showDetail) hasViewDetail = true
       obj.name = tags[i]['display-name'];
       obj.pubkey = tags[i]['pub-key'];
       obj.avatar = tags[i].avatar;
@@ -81,6 +85,12 @@ function MemoryContainer(props) {
     setMemory(newMemoryList);
 
     setLoading(false);
+
+    if (!hasViewDetail) {
+      window.setTimeout(() => {
+        window.prerenderReady = true
+      }, 500)
+    }
   }
 
   if (memoryList.length <= 0 || loading) {
@@ -109,12 +119,13 @@ function MemoryContainer(props) {
     });
   }
   return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} />;
+    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
   });
 }
 
 const mapStateToProps = state => {
   return {
+    proposeInfo: state.loveinfo.topInfo,
     memoryList: state.loveinfo.memories,
     privateKey: state.account.privateKey,
   };

@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo } from '../../../../helper';
+import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
@@ -43,7 +43,14 @@ export default function DetailPropose(props) {
       callView('getProposeByIndex', [proIndex]).then(async propose => {
         // console.log('--------Detail propose loaded ------');
         const proInfo = propose[0] || {};
+
+        // add basic extra info
         proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+        proInfo.isJournal = proInfo.sender === proInfo.receiver
+        proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER
+        proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush
+
+        // add more detailed info
         await addInfoToPropose(proInfo);
         
         if (cancel) return
@@ -57,10 +64,7 @@ export default function DetailPropose(props) {
   }, [proIndex]);
 
   const renderHelmet = () => {
-    const isJournal = proposeInfo.sender === proposeInfo.receiver;
-    const title = isJournal
-      ? `${proposeInfo.s_name}'s Journal`
-      : `Lovelock - ${proposeInfo.s_name} & ${proposeInfo.r_name}`;
+    const title = makeProposeName(proposeInfo, 'Lovelock - ')
     const desc = proposeInfo.s_content;
     const coverImg = proposeInfo.coverImg
       ? process.env.REACT_APP_IPFS + proposeInfo.coverImg
@@ -86,6 +90,7 @@ export default function DetailPropose(props) {
     pro.s_avatar = senderTags.avatar;
 
     const botInfo = pro.bot_info;
+
     if (receiver === process.env.REACT_APP_BOT_LOVER) {
       pro.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
       pro.r_publicKey = senderTags['pub-key'] || '';

@@ -13,6 +13,16 @@ const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 
+export function getQueryParam(name) {
+  const search = window.location.search
+  const params = new URLSearchParams(search)
+  return name ? params.get(name) : params
+}
+
+export function makeProposeName(p, prefix = '') {
+  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} ❤️ ${p.r_name}`)
+}
+
 export function callPure(funcName, params) {
   return callReadOrPure(funcName, params, 'callPureContractMethod');
 }

@@ -21,6 +21,7 @@ import {
   loadMemCacheAPI,
   decodeImg,
   getJsonFromIpfs,
+  makeProposeName
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -147,7 +148,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContent(props) {
-  const { memory, proIndex, setNeedAuth } = props;
+  const { memory, setNeedAuth, propose } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -162,19 +163,7 @@ function MemoryContent(props) {
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
-  // const [proposeInfo, setProposeInfo] = useState({});
   const classes = useStyles();
-
-  // useEffect(() => {
-  //   if (memoryDecrypted.isPrivate) {
-  //     decodePrivateMemory();
-  //   }
-  // }, [privateKey, proIndex]);
-
-  // useEffect(() => {
-  //   // setMemoryDecrypted(memory);
-  //   getMemoryContent();
-  // }, [memory]);
 
   useEffect(() => {
     let cancel = false
@@ -185,12 +174,8 @@ function MemoryContent(props) {
 
       setMemoryDecrypted(mem)
 
-      const search = window.location.search
-      if (search) {
-        const params = new URLSearchParams(search)
-        if (String(memory.id) === params.get('memory')) {
-          setOpenModal(true);
-        }
+      if (memory.showDetail && memory.info.blog) {
+        setOpenModal(true);
       }
     });
 
@@ -228,34 +213,6 @@ function MemoryContent(props) {
     
     return mem
   }
-
-  // useEffect(() => {
-  //   (async () => {
-  //     const proposes = await callView('getProposeByIndex', [proIndex]);
-  //     const propose = proposes[0];
-  //     const { sender, receiver } = propose;
-
-  //     const senderTags = await getTagsInfo(sender);
-  //     propose.s_name = senderTags['display-name'];
-  //     propose.s_publicKey = senderTags['pub-key'] || '';
-  //     propose.s_avatar = senderTags.avatar;
-
-  //     const botInfo = propose.bot_info;
-  //     if (receiver === process.env.REACT_APP_BOT_LOVER) {
-  //       propose.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
-  //       propose.r_publicKey = senderTags['pub-key'] || '';
-  //       propose.r_avatar = botInfo.botAva;
-  //       propose.r_content = botInfo.botReply;
-  //     } else {
-  //       const receiverTags = await getTagsInfo(receiver);
-  //       propose.r_name = receiverTags['display-name'];
-  //       propose.r_publicKey = receiverTags['pub-key'] || '';
-  //       propose.r_avatar = receiverTags.avatar;
-  //       propose.r_content = propose.r_content;
-  //     }
-  //     setProposeInfo(propose);
-  //   })();
-  // }, [proIndex]);
 
   function FacebookProgress(propsFb) {
     const classesFb = useStylesFacebook();
@@ -416,6 +373,34 @@ function MemoryContent(props) {
     );
   };
 
+  const renderHelmet = blogInfo => {
+    window.setTimeout(() => {
+      window.prerenderReady = true
+    }, 500)
+
+    const title = `${blogInfo.title} - A story on Lovelock`
+    const desc = makeProposeName(propose)
+    let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url
+    if (!img) {
+      img = propose.coverImg ? 
+        process.env.REACT_APP_IPFS + propose.coverImg :
+        process.env.PUBLIC_URL + '/static/img/share.jpg'
+    }
+    return (
+        <Helmet>
+          <title>{title}</title>
+          <meta property="og:title" content={title} />
+          <meta property="og:type" content="article" />
+          <meta name="description" content={desc} />
+          <meta
+            property="og:image"
+            content={img}
+          />
+          <meta property="og:description" content={desc} />
+        </Helmet>
+      )
+  }
+
   const renderContentUnlock = () => {
     const isBlog = !!memoryDecrypted.info.blog;
     const blogInfo = memoryDecrypted.meta || {};
@@ -441,19 +426,7 @@ function MemoryContent(props) {
             )}
           </Typography>
         )}
-        {isOpenModal && blogInfo && blogInfo.title && (
-          <Helmet>
-            <title>{blogInfo.title}</title>
-            <meta property="og:title" content={blogInfo.title} />
-            <meta property="og:type" content="article" />
-            <meta name="description" content="A story on Lovelock" />
-            <meta
-              property="og:image"
-              content={(blogInfo.coverPhoto && blogInfo.coverPhoto.url) || `${process.env.PUBLIC_URL}/static/img/share.jpg`}
-            />
-            <meta property="og:description" content="A story on Lovelock" />
-          </Helmet>
-        )}
+        {isOpenModal && blogInfo && blogInfo.title && renderHelmet(blogInfo)}
         {isBlog && (
           <BlogModal
             open={isOpenModal}
