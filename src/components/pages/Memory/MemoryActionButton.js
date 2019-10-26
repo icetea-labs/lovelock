@@ -8,7 +8,7 @@ import { withStyles, makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
 
 import * as actions from '../../../store/actions';
-import { sendTransaction, callView } from '../../../helper';
+import { sendTransaction, callView, showSubscriptionError } from '../../../helper';
 import tweb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
@@ -66,6 +66,7 @@ function MemoryActionButton(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   const [needUpdateLike, setNeedUpdateLike] = useState(false)
+  const timeout = useRef()
   const mounted = useRef(false)
 
   useEffect(() => {
@@ -76,10 +77,16 @@ function MemoryActionButton(props) {
     let cancel = false
 
     if (!mounted.current) {
-      mounted.current = true
+      //console.log('First time, use like data passed in props.')
     } else {
+      //console.log('Getting like for ' + memoryIndex)
       callView('getLikeByMemoIndex', [memoryIndex]).then(data => {
-        !cancel && mounted.current && setLikes(data);
+        if (!cancel && mounted.current) {
+          //console.log('Setting like data to state to re-render')
+          setLikes(data);
+        } else {
+          //console.log('LikeData gotton from server but component already unmounted, no need to setState!')
+        }
       });
     }
 
@@ -95,25 +102,30 @@ function MemoryActionButton(props) {
     return () => {
       if (memoryType === 1)
         Promise.resolve(returnValue).then(result => {
-          if (result && result.result) result.unsubscribe();
+          console.log(result)
+          if (result && result.unsubscribe) result.unsubscribe();
         });
     };
   }, []);
 
+  useEffect(() => {
+    mounted.current = true
+  }, [])
+
   const refrestLikeCount = () => {
+    console.log('LikeCount reloading requested.')
     mounted.current && setNeedUpdateLike(c => !c)
   }
 
   function watchAddlike() {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async (error, result) => {
+      //console.log('watchlike event', { error, result });
       if (error) {
-        console.error('watchlike', error);
-        const message = 'Watch like error';
-        enqueueSnackbar(message, { variant: 'error' });
+        showSubscriptionError(error, enqueueSnackbar)
       } else {
-        // console.log('watchAddlike', result);
-        refrestLikeCount();
+        if (timeout.current) window.clearTimeout(timeout.current)
+        timeout.current = window.setTimeout(refrestLikeCount, 1000);
       }
     });
   }

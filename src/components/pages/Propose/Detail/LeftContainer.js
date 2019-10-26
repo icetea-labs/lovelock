@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import tweb3 from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, getAlias } from '../../../../helper';
+import { callView, getTagsInfo, getAlias, showSubscriptionError } from '../../../../helper';
 import Icon from '../../../elements/Icon';
 import { LinkPro } from '../../../elements/Button';
 import LeftProposes from './LeftProposes';
@@ -93,8 +93,7 @@ function LeftContainer(props) {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
       if (error) {
-        const message = 'Watch createPropose error';
-        enqueueSnackbar(message, { variant: 'error' });
+        showSubscriptionError(error, enqueueSnackbar)
       } else {
         const repsNew = result.filter(({ eventName }) => {
           return eventName === 'createPropose';

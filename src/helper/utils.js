@@ -13,6 +13,16 @@ const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 
+export function showSubscriptionError(error, enqueueSnackbar) {
+  const clickToMuch = error.code === -32000
+  const variant = clickToMuch ? 'info' : 'warning';
+  const message = clickToMuch ? 
+    'It appears that you click too quickly.' : 
+    `An warning happened, you may need to reload the page. (${error.code})`
+  console.warn(error)
+  enqueueSnackbar(message, { variant, autoHideDuration: 5000 });
+}
+
 export function getQueryParam(name) {
   const search = window.location.search
   const params = new URLSearchParams(search)
