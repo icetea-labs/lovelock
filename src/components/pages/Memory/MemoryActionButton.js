@@ -102,7 +102,7 @@ function MemoryActionButton(props) {
     return () => {
       if (memoryType === 1)
         Promise.resolve(returnValue).then(result => {
-          console.log(result)
+          //console.log(result)
           if (result && result.unsubscribe) result.unsubscribe();
         });
     };
@@ -113,7 +113,7 @@ function MemoryActionButton(props) {
   }, [])
 
   const refrestLikeCount = () => {
-    console.log('LikeCount reloading requested.')
+    //console.log('LikeCount reloading requested.')
     mounted.current && setNeedUpdateLike(c => !c)
   }
 
