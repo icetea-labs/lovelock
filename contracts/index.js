@@ -298,7 +298,7 @@ class LoveLock {
     // save the memeory
     this.setMemories(memories);
     const eventName = 'addLike_' + memoIndex;
-    this.emitEvent(eventName, { by: msg.sender, memoIndex }, ['by', 'memoIndex']);
+    this.emitEvent(eventName, { by: msg.sender, memoIndex, type }, ['by', 'memoIndex']);
   }
 
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;

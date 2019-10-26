@@ -34,9 +34,10 @@ function callReadOrPure(funcName, params, method) {
 }
 
 export async function sendTransaction(funcName, params, opts) {
-  console.log('sendTransaction', params);
+  console.log('sendTransaction', funcName, params);
   const ct = tweb3.contract(contract);
-  const result = await ct.methods[funcName](...(params || [])).sendCommit({
+  const sendType = opts.sendType || 'sendCommit'
+  const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
     signers: opts.tokenAddress,
   });

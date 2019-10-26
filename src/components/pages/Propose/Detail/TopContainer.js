@@ -259,14 +259,16 @@ function TopContrainer(props) {
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
-  useEffect(() => {
-    if (topInfo && topInfo.coverImg) {
-      setLoading(false)
-    }
-    initTopInfo();
-  }, [topInfo]);
+  const needUpdate = !topInfo || (proIndex !== topInfo.index)
 
-  async function initTopInfo() {
+  useEffect(() => {
+    setLoading(needUpdate)
+    if (!needUpdate) {
+      setProposeLikeInfo();
+    }
+  }, [needUpdate]);
+
+  async function setProposeLikeInfo() {
     if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
       const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
       const { numLike, isMyLike } = serialLikeData(likes);

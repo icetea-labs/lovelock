@@ -62,32 +62,31 @@ function MemoryActionButton(props) {
 
   const [likes, setLikes] = useState(props.memoryLikes);
   const [numLike, setNumLike] = useState(0);
-  const [refreshNumLike, setRefreshNumLike] = useState(false)
   const [isMyLike, setIsMyLike] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
+  const [needUpdateLike, setNeedUpdateLike] = useState(false)
+  const mounted = useRef(false)
 
   useEffect(() => {
     serialLikeData();
   }, [likes]);
 
-  const mounted = useRef();
   useEffect(() => {
     let cancel = false
 
     if (!mounted.current) {
-      mounted.current = true;
+      mounted.current = true
     } else {
-      // Only need to refresh like count on componentDidUpdate
       callView('getLikeByMemoIndex', [memoryIndex]).then(data => {
-        !cancel && setLikes(data);
+        !cancel && mounted.current && setLikes(data);
       });
     }
 
     return () => {
       cancel = true
-      mounted.current = false
     }
-  }, [refreshNumLike])
+  }, [needUpdateLike])
 
   useEffect(() => {
     let returnValue;
@@ -102,14 +101,12 @@ function MemoryActionButton(props) {
   }, []);
 
   const refrestLikeCount = () => {
-    if (mounted.current) {
-      setRefreshNumLike(c => !c)
-    }
+    mounted.current && setNeedUpdateLike(c => !c)
   }
 
   function watchAddlike() {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async error => {
+    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async (error, result) => {
       if (error) {
         console.error('watchlike', error);
         const message = 'Watch like error';
@@ -134,10 +131,14 @@ function MemoryActionButton(props) {
       return;
     }
     const params = [memoryIndex, 1];
-    sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
-      refrestLikeCount();
-    });
+    sendTransaction('addLike', params, { tokenAddress, address, sendType: 'sendAsync' })
+    // No need to refresh as we already watch for like
+    //.then(() => {
+      //refrestLikeCount();
+    //});
 
+    // Change like to make quick feedback
+    // the subscription will update number a couple of seconds later
     if (isMyLike) {
       setNumLike(numLike - 1);
     } else {
