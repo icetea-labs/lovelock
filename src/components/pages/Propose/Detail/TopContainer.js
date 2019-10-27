@@ -375,10 +375,13 @@ function TopContrainer(props) {
         if (result) {
           setCropFile('');
           setCropImg('');
-          callView('getProposeByIndex', [proIndex]).then(propose => {
-            const pro = (propose && propose[0]) || {};
-            setTopInfo(Object.assign({}, topInfo, pro));
-          });
+          topInfo.coverImg = hash
+          setTopInfo(topInfo)
+          // callView('getProposeByIndex', [proIndex]).then(propose => {
+          //   const pro = (propose && propose[0]) || {};
+          //   console.log(topInfo, pro)
+          //   setTopInfo(Object.assign({}, topInfo, pro));
+          // });
         }
       }
       setGLoading(false);

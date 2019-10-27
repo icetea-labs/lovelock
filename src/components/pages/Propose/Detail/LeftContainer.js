@@ -83,8 +83,8 @@ function LeftContainer(props) {
     let signal = {}
 
     loadProposes(signal);
-    watchCreatePropose();
-    // watchConfirmPropose();
+    watchCreatePropose(signal);
+    // watchConfirmPropose(signal);
 
     return () => signal.cancel = true
   }, []);
@@ -103,7 +103,7 @@ function LeftContainer(props) {
           repsNew.length > 0 &&
           (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
         ) {
-          eventCreatePropose(repsNew[0].eventData);
+          eventCreatePropose(repsNew[0].eventData, signal);
         }
 
         const respConfirm = result.filter(({ eventName }) => {
@@ -118,7 +118,7 @@ function LeftContainer(props) {
       }
     });
   }
-  // function watchConfirmPropose() {
+  // function watchConfirmPropose(signal) {
   //   const filter = {};
   //   return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
   //     if (error) {
@@ -129,7 +129,7 @@ function LeftContainer(props) {
   //       const resp = result.filter(({ eventName }) => {
   //         return eventName === 'confirmPropose';
   //       });
-  //       if (resp.length > 0) eventConfirmPropose(resp[0].eventData);
+  //       if (resp.length > 0) eventConfirmPropose(resp[0].eventData, signal);
   //     }
   //   });
   // }
@@ -166,7 +166,7 @@ function LeftContainer(props) {
     // console.log('view pending index', index);
   }
 
-  function eventConfirmPropose(data) {
+  function eventConfirmPropose(data, signal) {
     confirmPropose(data.log);
     if (address === data.log.sender) {
       const message = 'Your lock request has been accepted.';
@@ -174,7 +174,7 @@ function LeftContainer(props) {
     }
   }
 
-  async function eventCreatePropose(data) {
+  async function eventCreatePropose(data, signal) {
     const log = await addInfoToProposes([data.log]);
     addPropose(log[0]);
 
