@@ -24,7 +24,6 @@ function Login(props) {
     setStep('one');
     history.push('/register');
   }
-
   return (
     <div>
       <QueueAnim delay={200} type={['top', 'bottom']}>

@@ -32,6 +32,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 20,
     background: '#f5f6f7',
     fontSize: 12,
+    width: 554,
   },
   notchedOutline: {
     // borderWidth: '1px',
@@ -90,10 +91,15 @@ const StyledCardActions = withStyles(theme => ({
   },
 }))(CardActions);
 const numComment = 4;
-export default function MemoryContent(props) {
-  const { handerNumberComment, memoryIndex } = props;
+export default function MemoryComments(props) {
+  const { handerNumberComment, memoryIndex, textInput } = props;
   const dispatch = useDispatch();
-  const privateKey = useSelector(state => state.account.privateKey);
+
+  // const privateKey = useSelector(state => state.account.privateKey);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+  const address = useSelector(state => state.account.address);
+
   const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -102,50 +108,58 @@ export default function MemoryContent(props) {
   let myFormRef = React.createRef();
 
   useEffect(() => {
-    loaddata(memoryIndex);
-  }, [memoryIndex]);
+    let cancel = false;
 
-  function loaddata(index) {
-    setTimeout(async () => {
-      const respComment = await callView('getCommentsByMemoIndex', [index]);
-      let respTags = [];
-      for (let i = 0; i < respComment.length; i++) {
-        const resp = getTagsInfo(respComment[i].sender);
-        respTags.push(resp);
+    loadData(memoryIndex).then(respComment => {
+      if (!cancel) {
+        handleComments(respComment)
       }
-      respTags = await Promise.all(respTags);
-      // console.log('respTags', respTags);
-      for (let i = 0; i < respComment.length; i++) {
-        respComment[i].nick = respTags[i]['display-name'];
-        respComment[i].avatar = respTags[i].avatar;
-      }
+    });
 
-      if (respComment.length > numComment) {
-        const numMore = respComment.length - numComment;
-        // console.log('numMore', numMore);
-        setNumHidencmt(numMore);
-        setShowComments(respComment.slice(numMore));
-      } else {
-        setShowComments(respComment);
-      }
-      setComments(respComment);
-      handerNumberComment(respComment.length);
-    }, 100);
+    return () => {
+      cancel = true;
+    };
+  }, [comment]);
+
+  function handleComments(respComment) {
+    if (respComment.length > numComment) {
+      const numMore = respComment.length - numComment;
+      setNumHidencmt(numMore);
+      setShowComments(respComment.slice(numMore));
+    } else {
+      setShowComments(respComment);
+    }
+    setComments(respComment);
+    handerNumberComment(respComment.length);
+  }
+
+  async function loadData(index) {
+    const respComment = await callView('getCommentsByMemoIndex', [index]);
+    let respTags = [];
+    for (let i = 0; i < respComment.length; i++) {
+      const resp = getTagsInfo(respComment[i].sender);
+      respTags.push(resp);
+    }
+    respTags = await Promise.all(respTags);
+    // console.log('respTags', respTags);
+    for (let i = 0; i < respComment.length; i++) {
+      respComment[i].nick = respTags[i]['display-name'];
+      respComment[i].avatar = respTags[i].avatar;
+    }
+
+    return respComment;
   }
 
   async function newComment() {
     if (!comment) return;
-    if (!privateKey) {
+    if (!tokenKey) {
       dispatch(actions.setNeedAuth(true));
       return;
     }
     const method = 'addComment';
     const params = [memoryIndex, comment, ''];
     // console.log('memoryIndex', memoryIndex);
-    const result = await sendTransaction(method, params);
-    if (result) {
-      loaddata(memoryIndex);
-    }
+    await sendTransaction(method, params, { address, tokenAddress });
     myFormRef.reset();
     setComment('');
   }
@@ -231,6 +245,7 @@ export default function MemoryContent(props) {
                     notchedOutline: classes.notchedOutline,
                   },
                 }}
+                inputRef={textInput}
               />
             </Grid>
           </Grid>

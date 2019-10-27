@@ -9,10 +9,10 @@
 
 2. Start Icetea Node
 
-- Normal node: `icetea start`
-- Or debug mode: `icetea start -d`
+- Normal mode: `icetea start`
+- Or debug mode (it is slow, use only when you want to debug contracts): `icetea start -d`
 
-To start the Icetea web, run `icetea app`. To reset Icetea state, run `icetea reset`.
+For help, type `icetea -h`.
 
 3. Deploy contracts
 
@@ -20,10 +20,8 @@ To start the Icetea web, run `icetea app`. To reset Icetea state, run `icetea re
 
 To use `.env.production`, run `npm run deploy:prod`. Or `npm run deploy:all` to run both.
 
+Deploying contracts will make the app uses the new contracts, thus all existing data is lost. Only deploying at the first time you install Icetea, when the contracts' sources were changes, or after you reset Icetea Node.
+
 4. Start the app
 
 - `npm start`
-
-5. Production build
-
-- `npm run build`

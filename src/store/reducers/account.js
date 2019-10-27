@@ -1,31 +1,47 @@
+import { codec } from '@iceteachain/common';
 import { actionTypes } from '../actions/account';
+import tweb3 from '../../service/tweb3';
+
 const initialState = Object.assign(
   {
     needAuth: false,
-    address: '',
     publicKey: '',
     r_publicKey: '',
     r_address: '',
     s_publicKey: '',
     s_address: '',
     cipher: '',
+    address: '',
     privateKey: '',
+    tokenAddress: '',
+    tokenKey: '',
+    expireAfter: '',
     mnemonic: '',
     encryptedData: '',
     displayName: '',
   },
   (function getSessionStorage() {
     const resp = {};
-    let user = localStorage.getItem('user') || sessionStorage.getItem('user');
+    const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
 
-    if ((user = (user && JSON.parse(user)) || {}).address) {
-      // console.log('user', user);
-      resp.address = user.address;
-      // resp.privateKey = user.privateKey;
-      resp.encryptedData = user.keyObject;
-      // tweb3.wallet.importAccount(user.privateKey);
-      // tweb3.wallet.defaultAccount = user.address;
+    if (sessionData) {
+      const token = codec.decode(Buffer.from(sessionData, 'base64'));
+      const isExpired = process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
+      if (!isExpired) {
+        resp.tokenKey = codec.toString(token.tokenKey);
+        tweb3.wallet.importAccount(resp.tokenKey);
+      }
+      resp.tokenAddress = token.tokenAddress;
+      resp.expireAfter = token.expireAfter;
     }
+
+    let user = localStorage.getItem('user') || sessionStorage.getItem('user');
+    // eslint-disable-next-line no-cond-assign
+    if ((user = (user && JSON.parse(user)) || {}).address) {
+      resp.address = user.address;
+      resp.encryptedData = user.keyObject;
+    }
+
     return resp;
   })()
 );

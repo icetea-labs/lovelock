@@ -1,23 +1,35 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
-import Link from '@material-ui/core/Link';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
-// import Gallery from 'react-grid-gallery';
 import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import WavesIcon from '@material-ui/icons/Waves';
+import { Helmet } from 'react-helmet';
 
-import { TimeWithFormat, decodeWithPublicKey, getJsonFromIpfs } from '../../../helper';
+import * as actions from '../../../store/actions';
+import {
+  TimeWithFormat,
+  decodeWithPublicKey,
+  saveMemCacheAPI,
+  loadMemCacheAPI,
+  decodeImg,
+  getJsonFromIpfs,
+  makeProposeName
+} from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
-import SimpleModal from '../../elements/Modal';
+import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
+import MemoryTitle from './MemoryTitle';
+import BlogShowcase from './BlogShowcase';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -56,10 +68,48 @@ const useStyles = makeStyles(theme => ({
   margin: {
     margin: theme.spacing(1),
   },
-  seeMore: {
+  icon: {
+    fontSize: 18,
+    verticalAlign: 'middle',
+  },
+  blogTitle: {
+    color: '#707070',
+    marginBottom: 16,
+    display: 'block',
+  },
+  blogImgWrp: {
+    position: 'relative',
+    display: 'block',
+    backgroundColor: '#333',
+    paddingBottom: 16,
     cursor: 'pointer',
-    marginTop: 10,
-    display: 'inline-block',
+    margin: '-16px -16px -12px',
+    transition: 'background-color 1000ms linear',
+    '&:hover $blogTitleImg, &:hover $blogFirstLine': {
+      color: '#fff',
+    },
+  },
+  blogTitleImg: {
+    position: 'absolute',
+    backgroundColor: '#666',
+    transition: 'background-color 1000ms linear',
+    top: 12,
+    left: 12,
+    padding: '3px 10px',
+    color: '#f5f5f5',
+  },
+  blogImgTimeline: {
+    width: '100%',
+  },
+  blogFirstLine: {
+    display: 'block',
+    textAlign: 'center',
+    marginTop: 16,
+    color: '#f5f5f5',
+    fontSize: 16,
+    textTransform: 'uppercase',
+    paddingLeft: 28,
+    paddingRight: 28,
   },
   relationship: {
     // color: theme.color.primary,
@@ -91,55 +141,89 @@ const useStyles = makeStyles(theme => ({
   acctionsBt: {
     justifyContent: 'space-around',
   },
+  editorComment: {
+    width: 800,
+    maxWidth: '100%',
+    margin: '0 auto',
+  },
 }));
 
-export default function MemoryContent(props) {
-  const { memory, proIndex } = props;
+function MemoryContent(props) {
+  const { memory, setNeedAuth, propose } = props;
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
-  const propose = useSelector(state => state.loveinfo.propose);
+  const rName = useSelector(state => state.account.r_name);
+  const sName = useSelector(state => state.account.s_name);
+  // const propose = useSelector(state => state.loveinfo.propose);
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
+  // const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
+  const classes = useStyles();
 
   useEffect(() => {
-    if (memoryDecrypted.isPrivate) {
-      decodePrivateMemory();
+    let cancel = false
+    const abort = new AbortController()
+
+    serialMemory(abort.signal).then(mem => {
+      if (cancel || !mem) return
+
+      setMemoryDecrypted(mem)
+
+      if (memory.showDetail && memory.info.blog) {
+        setOpenModal(true);
+      }
+    });
+
+    return () => {
+      abort.abort()
+      cancel = true
     }
+  }, []);
 
-    // create the store
-    // console.log('db', db);
-  }, [privateKey, proIndex]);
-
-  useEffect(() => {
-    setMemoryDecrypted(memory);
-  }, [memory]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     for (let j = 0; j < memory.info.hash.length; j++) {
-  //       // eslint-disable-next-line no-await-in-loop
-  //       memory.info.hash[j] = await getJsonFromIpfs(memory.info.hash[j]);
-  //     }
-  //     setMemoryDecrypted(memory);
-  //   };
-  //   fetchData();
-  // }, []);
+  async function serialMemory(signal) {
+    let mem = memory;
+    if (memory.info.blog) {
+      const blogData = JSON.parse(memory.content);
+      mem = { ... memory }
+      mem.meta = blogData.meta;
+      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
+        .then(d => d.json())
+        .catch(err => {
+          if (err.name === 'AbortError') return
+          throw err
+        })
+    } else if (memory.isPrivate) {
+      const memCache = await loadMemCacheAPI(memory.id);
+      if (memCache) {
+        mem = memCache;
+        for (let i = 0; i < mem.info.hash.length; i++) {
+          const newBuffer = Buffer.from(mem.info.buffer[i]);
+          // mem.info.hash[i] = await getJsonFromIpfs(newBuffer, i);
+          const blob = new Blob([newBuffer], { type: 'image/jpeg' });
+          mem.info.hash[i].src = URL.createObjectURL(blob);
+        }
+      }
+      // console.log('mem', mem, 'id=', memory.id);
+    }
+    
+    return mem
+  }
 
   function FacebookProgress(propsFb) {
-    const classes = useStylesFacebook();
+    const classesFb = useStylesFacebook();
 
     return (
-      <div className={classes.root}>
+      <div className={classesFb.root}>
         <CircularProgress
           variant="determinate"
           value={100}
-          className={classes.top}
+          className={classesFb.top}
           size={24}
           thickness={4}
           {...propsFb}
@@ -159,68 +243,67 @@ export default function MemoryContent(props) {
   function decodePrivateMemory() {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
-      if (privateKey && publicKey && obj.pubkey && !obj.isUnlock) {
+      // console.log(privateKey, '-', publicKey, obj.pubkey, !obj.isUnlock);
+      if (!obj.isUnlock && privateKey && publicKey && obj.pubkey) {
         setDecoding(true);
         setTimeout(async () => {
           try {
+            // loadMemCacheAPI(obj.id);
             let partnerKey = obj.pubkey;
             if (address === obj.sender) {
               partnerKey = publicKey;
             }
             obj.content = await decodeWithPublicKey(JSON.parse(obj.content || '{}'), privateKey, partnerKey);
-            obj.info = await decodeWithPublicKey(obj.info, privateKey, partnerKey);
-            obj.info = JSON.parse(obj.info);
+            for (let i = 0; i < obj.info.hash.length; i++) {
+              // eslint-disable-next-line no-await-in-loop
+              const decodeBufferData = await decodeImg(obj.info.hash[i], privateKey, partnerKey);
+              // eslint-disable-next-line no-await-in-loop
+              obj.info.hash[i] = await getJsonFromIpfs(decodeBufferData, i);
+              if (!obj.info.buffer) obj.info.buffer = [];
+              obj.info.buffer[i] = decodeBufferData;
+            }
             obj.isUnlock = true;
             setMemoryDecrypted(obj);
-          } catch (e) {
-            const message = JSON.stringify(e);
+            saveMemCacheAPI(obj, obj.id);
+          } catch (error) {
+            console.error(error);
+            // const message = JSON.stringify(error);
+            const message = 'Unlock error, you can not view detail';
             enqueueSnackbar(message, { variant: 'error' });
             setDecoding(false);
           }
         }, 100);
       } else {
-        // const message = 'Request sharekey';
-        // enqueueSnackbar(message, { variant: 'error' });
+        const message = `An error occurred, please try again later`;
+        enqueueSnackbar(message, { variant: 'error' });
       }
-    }, 500);
+    }, 100);
   }
 
   function handerNumberComment(number) {
     setNumComment(number);
   }
+
+  const textInput = useRef('');
   function handerShowComment() {
     setShowComment(true);
+    setTimeout(() => {
+      if (textInput.current) {
+        textInput.current.focus();
+      }
+    }, 100);
   }
 
-  function decodeEditorMemory() {
-    try {
-      let content = JSON.parse(memoryDecrypted.content);
-      if (content) {
-        return content;
-      }
-    } catch (e) {}
-    return false;
+  function openMemory(memoryId) {
+    setOpenModal(true);
+    window.history.pushState({}, '', `?memory=${memoryId}`);
   }
 
-  function previewEditorMemory() {
-    try {
-      let content = JSON.parse(memoryDecrypted.content);
-      if (content) {
-        // console.log(content);
-        return content.blocks.map((line, i) => {
-          if (i <= 3) {
-            return (
-              <span key={i}>
-                <span>{line.text}</span>
-                <br />
-              </span>
-            );
-          }
-        });
-      }
-    } catch (e) {}
-    return memoryDecrypted.content;
+  function closeMemory() {
+    setOpenModal(false);
+    window.history.pushState({}, '', window.location.pathname);
   }
+
   const [currentImage, setCurrentImage] = useState(0);
   const [viewerIsOpen, setViewerIsOpen] = useState(false);
 
@@ -232,7 +315,186 @@ export default function MemoryContent(props) {
     setCurrentImage(0);
     setViewerIsOpen(false);
   };
-  const classes = useStyles();
+
+  function unlockMemory() {
+    if (privateKey) {
+      decodePrivateMemory();
+    } else {
+      setNeedAuth(true);
+    }
+  }
+
+  const renderContentLocked = () => {
+    return (
+      <React.Fragment>
+        {decoding ? (
+          <span>
+            <FacebookProgress /> Unlock...
+          </span>
+        ) : (
+          <Tooltip title="Click to view item">
+            <IconButton aria-label="settings" onClick={unlockMemory}>
+              <LockIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </React.Fragment>
+    );
+  };
+
+  const renderLockEventMemory = () => {
+    return (
+      <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
+        <div>
+          <FavoriteIcon color="primary" fontSize="large" />
+        </div>
+        <span>
+          <span>Locked with </span>
+          <Typography component="span" className={classes.relationshipName}>
+            {propose.r_name}
+          </Typography>
+        </span>
+      </Typography>
+    );
+  };
+
+  const renderJournalCreationMemory = () => {
+    return (
+      <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
+        <div>
+          <WavesIcon color="primary" fontSize="large" />
+        </div>
+        <span>
+          <Typography component="span" className={classes.relationshipName}>
+            {propose.r_name}
+          </Typography>
+          <span> started the journal.</span>
+        </span>
+      </Typography>
+    );
+  };
+
+  const renderHelmet = blogInfo => {
+    window.setTimeout(() => {
+      window.prerenderReady = true
+    }, 500)
+
+    const title = `${blogInfo.title} - A story on Lovelock`
+    const desc = makeProposeName(propose)
+    let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url
+    if (!img) {
+      img = propose.coverImg ? 
+        process.env.REACT_APP_IPFS + propose.coverImg :
+        process.env.PUBLIC_URL + '/static/img/share.jpg'
+    }
+    return (
+        <Helmet>
+          <title>{title}</title>
+          <meta property="og:title" content={title} />
+          <meta property="og:type" content="article" />
+          <meta name="description" content={desc} />
+          <meta
+            property="og:image"
+            content={img}
+          />
+          <meta property="og:description" content={desc} />
+        </Helmet>
+      )
+  }
+
+  const renderContentUnlock = () => {
+    const isBlog = !!memoryDecrypted.info.blog;
+    const blogInfo = memoryDecrypted.meta || {};
+    const isJournal = propose.sender === propose.receiver;
+    return (
+      <React.Fragment>
+        {memoryDecrypted.type === 1 ? (
+          isJournal ? (
+            renderJournalCreationMemory()
+          ) : (
+            renderLockEventMemory()
+          )
+        ) : (
+          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
+            {!isBlog && memoryDecrypted.content}
+            {isBlog && blogInfo.title && (
+              <BlogShowcase
+                classes={classes}
+                title={blogInfo.title}
+                photo={blogInfo.coverPhoto}
+                openHandler={() => openMemory(memory.id)}
+              />
+            )}
+          </Typography>
+        )}
+        {isOpenModal && blogInfo && blogInfo.title && renderHelmet(blogInfo)}
+        {isBlog && (
+          <BlogModal
+            open={isOpenModal}
+            handleClose={closeMemory}
+            title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeMemory} />}
+            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
+          >
+            <Editor initContent={memoryDecrypted.blogContent} read_only />
+            <div className={classes.editorComment}>
+              {memoryDecrypted.isUnlock && (
+                <MemoryActionButton
+                  handerShowComment={handerShowComment}
+                  memoryLikes={memory.likes}
+                  memoryIndex={memory.id}
+                  memoryType={memory.type}
+                  numComment={numComment}
+                />
+              )}
+              {showComment && (
+                <MemoryComments
+                  handerNumberComment={handerNumberComment}
+                  memoryIndex={memory.id}
+                  memory={memory}
+                  textInput={textInput}
+                />
+              )}
+            </div>
+          </BlogModal>
+        )}
+      </React.Fragment>
+    );
+  };
+  const renderImgUnlock = () => {
+    return (
+      <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
+        {memoryDecrypted.info.hash && (
+          <Gallery
+            // targetRowHeight={300}
+            // containerWidth={600}
+            photos={memoryDecrypted.info.hash.slice(0, 5)}
+            onClick={openLightbox}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const renderActionBt = () => (
+    <MemoryActionButton
+      handerShowComment={handerShowComment}
+      memoryLikes={memory.likes}
+      memoryIndex={memory.id}
+      memoryType={memory.type}
+      numComment={numComment}
+    />
+  );
+
+  const renderComments = () => (
+    <MemoryComments
+      handerNumberComment={handerNumberComment}
+      memoryIndex={memory.id}
+      memory={memory}
+      textInput={textInput}
+    />
+  );
+
+  const { isUnlock } = memoryDecrypted;
   return (
     <React.Fragment>
       <Card key={memoryDecrypted.index} className={classes.card}>
@@ -246,87 +508,10 @@ export default function MemoryContent(props) {
             </IconButton>
           }
         />
-        <CardContent>
-          {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-            <React.Fragment>
-              {decoding ? (
-                <span>
-                  <FacebookProgress /> Unlock...
-                </span>
-              ) : (
-                <IconButton aria-label="settings">
-                  <LockIcon />
-                </IconButton>
-              )}
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              {memoryDecrypted.type === 1 ? (
-                <Typography
-                  variant="body2"
-                  className={classes.relationship}
-                  style={{ whiteSpace: 'pre-line' }}
-                  component="div"
-                >
-                  <div>
-                    <FavoriteIcon color="primary" fontSize="large" />
-                  </div>
-                  <span>
-                    <span>In a Relationship with </span>
-                    <Typography component="span" className={classes.relationshipName}>
-                      {memoryDecrypted.r_name}
-                    </Typography>
-                  </span>
-                </Typography>
-              ) : (
-                <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="p">
-                  {previewEditorMemory()}
-                </Typography>
-              )}
-            </React.Fragment>
-          )}
-          {decodeEditorMemory() && (
-            <>
-              <Link onClick={() => setOpenModal(true)} className={classes.seeMore}>
-                See more...
-              </Link>
-              <SimpleModal
-                open={isOpenModal}
-                handleClose={() => setOpenModal(false)}
-                closeText="Close"
-                // title={`${memoryDecrypted.name} > ${propose[0].name}`}
-                subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
-              >
-                <Editor initContent={decodeEditorMemory()} read_only={true} />
-              </SimpleModal>
-            </>
-          )}
-        </CardContent>
-        <React.Fragment>
-          {memoryDecrypted.info.hash && (
-            <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
-              <Gallery
-                // targetRowHeight={300}
-                // containerWidth={600}
-                photos={memoryDecrypted.info.hash.slice(0, 5)}
-                onClick={openLightbox}
-              />
-            </div>
-          )}
-        </React.Fragment>
-        {memoryDecrypted.isPrivate && !memoryDecrypted.isUnlock ? (
-          ''
-        ) : (
-          <MemoryActionButton
-            handerShowComment={handerShowComment}
-            likes={memory.likes}
-            memoryIndex={memory.id}
-            numComment={numComment}
-          />
-        )}
-        {showComment && (
-          <MemoryComments handerNumberComment={handerNumberComment} memoryIndex={memory.id} memory={memory} />
-        )}
+        <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
+        {isUnlock && renderImgUnlock()}
+        {isUnlock && renderActionBt()}
+        {showComment && renderComments()}
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
@@ -345,3 +530,24 @@ export default function MemoryContent(props) {
     </React.Fragment>
   );
 }
+// const mapStateToProps = state => {
+//   return {
+//     privateKey: state.account.privateKey,
+//   };
+// };
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+    setNeedAuth(value) {
+      dispatch(actions.setNeedAuth(value));
+    },
+  };
+};
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(MemoryContent);

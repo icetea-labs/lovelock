@@ -8,6 +8,8 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import ZoomImage from './AutoZoomImage';
+import ImageCrop from './ImageCrop';
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -121,8 +123,9 @@ const ImgUploadPreview = styled.div`
     }
     img {
       animation: fade 0.6s ease-in;
-      width: 100px;
-      height: 100px;
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
     }
     @keyframes fade {
       0% {
@@ -138,7 +141,7 @@ const AddMoreImg = styled.span`
   display: inline-block;
   margin-left: 5px;
   vertical-align: top;
-  height: 112px;
+  height: 172px;
   /* width: 100%; */
   .addImgBox {
     position: relative;
@@ -155,9 +158,9 @@ const AddMoreImg = styled.span`
     border-radius: 2px;
     box-sizing: border-box;
     display: inline-block;
-    height: 100px;
+    height: 160px;
     margin-right: 5px;
-    min-width: 100px;
+    min-width: 160px;
     position: relative;
     width: auto;
 
@@ -189,6 +192,15 @@ const AddMoreImg = styled.span`
 const useStyles = makeStyles(theme => ({
   img: {
     display: 'block',
+    height: 160,
+    '&:hover': {
+      '& $icon': {
+        display: 'block',
+      },
+    },
+  },
+  imgIsCreate: {
+    display: 'block',
     height: 100,
     '&:hover': {
       '& $icon': {
@@ -217,9 +229,11 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { files, date } = props;
+  const { files, date, isCreatePro } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
+  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [originFile, setOriginFile] = useState('');
 
   useEffect(() => {
     if (files.length === 0) {
@@ -247,15 +261,49 @@ export default function AddInfoMessage(props) {
 
   async function captureUploadFile(event) {
     const imgFiles = event.target.files;
+
     if (imgFiles.length) {
       const arrFiles = Array.from(imgFiles);
-      let contentBuffer = [];
-      for (let i = 0; i < arrFiles.length; i++) {
-        contentBuffer.push(readFileAsync(arrFiles[i]));
-      }
-      contentBuffer = await Promise.all(contentBuffer);
-      onChangeMedia([...files, ...contentBuffer]);
+      fromFiletToBuffer(arrFiles);
+      // let contentBuffer = [];
+      // for (let i = 0; i < arrFiles.length; i++) {
+      //   contentBuffer.push(readFileAsync(arrFiles[i]));
+      // }
+      // contentBuffer = await Promise.all(contentBuffer);
+      // onChangeMedia([...files, ...contentBuffer]);
     }
+  }
+
+  async function fromFiletToBuffer(arrFiles) {
+    let contentBuffer = [];
+    for (let i = 0; i < arrFiles.length; i++) {
+      contentBuffer.push(readFileAsync(arrFiles[i]));
+    }
+    contentBuffer = await Promise.all(contentBuffer);
+    onChangeMedia([...files, ...contentBuffer]);
+  }
+
+  function handleImageChange(event) {
+    event.preventDefault();
+    if (files) removeFile(0);
+    const orFiles = event.target.files;
+    const arrFiles = Array.from(orFiles);
+    if (orFiles.length > 0) {
+      setIsOpenCrop(true);
+      setOriginFile(arrFiles);
+    } else {
+      setIsOpenCrop(false);
+    }
+  }
+
+  function closeCrop() {
+    setIsOpenCrop(false);
+  }
+
+  async function acceptCrop(e) {
+    closeCrop();
+    const arrFiles = Array.from(e.cropFile);
+    fromFiletToBuffer(arrFiles);
   }
 
   function removeFile(index) {
@@ -266,7 +314,7 @@ export default function AddInfoMessage(props) {
   }
 
   function handleDateChange(value) {
-    onChangeDate(value);
+    onChangeDate(Date.parse(value));
   }
 
   const classes = useStyles();
@@ -280,10 +328,11 @@ export default function AddInfoMessage(props) {
               <div className="scrollContent">
                 {picPreview.map(({ src }, index) => (
                   <div key={index} className="imgContent">
-                    <GridListTile className={classes.img}>
-                      <img src={src} alt="" onLoad={() => URL.revokeObjectURL(src)} />
+                    <GridListTile className={isCreatePro ? classes.imgIsCreate : classes.img}>
+                      <ZoomImage src={src} alt="photo" adjust onLoad={() => URL.revokeObjectURL(src)} />
                       <GridListTileBar
                         className={classes.titleBar}
+                        style={{ background: 'none' }}
                         titlePosition="top"
                         actionIcon={
                           <IconButton onClick={() => removeFile(index)}>
@@ -294,25 +343,27 @@ export default function AddInfoMessage(props) {
                     </GridListTile>
                   </div>
                 ))}
-                <AddMoreImg>
-                  <div className="addImgBox">
-                    <div className="btAddImg" rel="ignore">
-                      <div className="wrapperInput">
-                        <input
-                          accept="image/*"
-                          title="Choose a file to upload"
-                          display="inline-block"
-                          type="file"
-                          role="button"
-                          multiple
-                          className="btInput"
-                          onChange={captureUploadFile}
-                          value=""
-                        />
+                {!isCreatePro && (
+                  <AddMoreImg>
+                    <div className="addImgBox">
+                      <div className="btAddImg" rel="ignore">
+                        <div className="wrapperInput">
+                          <input
+                            accept="image/jpeg,image/png,image/gif"
+                            title="Choose a file to upload"
+                            display="inline-block"
+                            type="file"
+                            role="button"
+                            multiple
+                            className="btInput"
+                            onChange={captureUploadFile}
+                            value=""
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </AddMoreImg>
+                  </AddMoreImg>
+                )}
               </div>
             </div>
           </div>
@@ -342,19 +393,20 @@ export default function AddInfoMessage(props) {
                 <div>Photo</div>
               </div>
               <input
-                accept="image/*"
+                accept={isCreatePro ? 'image/jpeg,image/png' : 'image/jpeg,image/png,image/gif'}
                 title="Choose a file to upload"
                 className="fileInput"
                 role="button"
-                multiple
+                multiple={!isCreatePro}
                 type="file"
                 value=""
-                onChange={captureUploadFile}
+                onChange={isCreatePro ? handleImageChange : captureUploadFile}
               />
             </ImgUpLoad>
           </Grid>
         </Grid>
       </InfoBox>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isAddInfo />}
     </Container>
   );
 }

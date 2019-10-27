@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { useSnackbar } from 'notistack';
 
-import { getTagsInfo, getJsonFromIpfs } from '../../../helper';
+import { getTagsInfo, getJsonFromIpfs, getQueryParam } from '../../../helper';
 import MemoryContent from './MemoryContent';
 import * as actions from '../../../store/actions';
 
@@ -25,63 +25,72 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { proIndex, memorydata, setNeedAuth, privateKey } = props;
-  const [loading, setLoading] = useState(true);
-  const [memoryList, setMemoryList] = useState([]);
+  const { memorydata, memoryList, setMemory, proposeInfo } = props;
+  const [loading, setLoading] = useState(false);
+  // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
   const { enqueueSnackbar } = useSnackbar();
 
   const classes = useStyles();
   useEffect(() => {
-    prepareMemory();
+    let signal = {}
+
+    if (memorydata.length > 0) {
+      prepareMemory(signal)
+    }
+
+    return () => signal.cancel = true
   }, [memorydata]);
 
-  function prepareMemory() {
+  async function prepareMemory(signal) {
+    const showMemoryId = parseInt(getQueryParam('memory'))
     let newMemoryList = [];
     setLoading(true);
     // console.log('memorydata', memorydata);
-    setTimeout(async () => {
-      try {
-        for (let i = 0; i < memorydata.length; i++) {
-          const obj = memorydata[i];
-          if (obj.isPrivate && !privateKey) {
-            setNeedAuth(true);
-            break;
-          }
-        }
 
-        let tags = [];
-        for (let i = 0; i < memorydata.length; i++) {
-          const reps = getTagsInfo(memorydata[i].sender);
-          tags.push(reps);
-        }
-        tags = await Promise.all(tags);
+    let tags = memorydata.map(mem => {
+      return getTagsInfo(mem.sender);
+    });
+    tags = await Promise.all(tags);
+    if (signal.cancel) return
 
-        for (let i = 0; i < memorydata.length; i++) {
-          const obj = memorydata[i];
-          obj.name = tags[i]['display-name'];
-          obj.pubkey = tags[i]['pub-key'];
-          obj.avatar = tags[i].avatar;
-          if (obj.receiver) {
-            // eslint-disable-next-line no-await-in-loop
-            const receiverTags = await getTagsInfo(obj.receiver);
-            obj.r_name = receiverTags['display-name'];
-          }
-          for (let j = 0; j < obj.info.hash.length; j++) {
-            // eslint-disable-next-line no-await-in-loop
-            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
-          }
-          newMemoryList.push(obj);
-        }
-
-        newMemoryList = newMemoryList.reverse();
-        setMemoryList(newMemoryList);
-      } catch (e) {
-        const message = 'Load memory error!';
-        enqueueSnackbar(message, { variant: 'error' });
+    let hasViewDetail = false
+    for (let i = 0; i < memorydata.length; i++) {
+      const obj = memorydata[i];
+      obj.showDetail = showMemoryId === obj.id
+      if (obj.info.blog && obj.showDetail) hasViewDetail = true
+      obj.name = tags[i]['display-name'];
+      obj.pubkey = tags[i]['pub-key'];
+      obj.avatar = tags[i].avatar;
+      if (obj.receiver) {
+        // eslint-disable-next-line no-await-in-loop
+        const receiverTags = await getTagsInfo(obj.receiver);
+        obj.r_name = receiverTags['display-name'];
       }
-      setLoading(false);
-    }, 100);
+      if (!obj.isPrivate) {
+        obj.isUnlock = true;
+        for (let j = 0; j < obj.info.hash.length; j++) {
+          // eslint-disable-next-line no-await-in-loop
+          obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+          if (signal.cancel) return
+        }
+      } else {
+        // obj.info.hash = [];
+        obj.isUnlock = false;
+      }
+
+      newMemoryList.push(obj);
+    }
+    newMemoryList = newMemoryList.reverse();
+    setMemory(newMemoryList);
+
+    setLoading(false);
+
+    if (!hasViewDetail) {
+      window.setTimeout(() => {
+        window.prerenderReady = true
+      }, 500)
+    }
   }
 
   if (memoryList.length <= 0 || loading) {
@@ -109,15 +118,15 @@ function MemoryContainer(props) {
       );
     });
   }
-  // console.log('memoryList', memoryList);
   return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={proIndex} memory={memory} />;
+    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
   });
 }
 
 const mapStateToProps = state => {
   return {
-    // memoryList: state.loveinfo.memory,
+    proposeInfo: state.loveinfo.topInfo,
+    memoryList: state.loveinfo.memories,
     privateKey: state.account.privateKey,
   };
 };

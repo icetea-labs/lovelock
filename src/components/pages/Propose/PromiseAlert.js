@@ -4,7 +4,7 @@ import { withSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
 import CommonDialog from './CommonDialog';
-import { TagTitle } from './Promise';
+import { TagTitle } from './PuNewLock';
 import { getAlias, sendTransaction } from '../../../helper';
 
 const ImgView = styled.div`
@@ -33,28 +33,29 @@ const useStyles = makeStyles(() => ({
 function CardMediaCus(props) {
   const classes = useStyles();
   return <CardMedia className={classes.media} {...props} />;
-} 
+}
 
 function PromiseAlert(props) {
-  const { deny, close, accept, address, index, propose, enqueueSnackbar } = props;
+  const { deny, close, accept, address, tokenAddress, index, proposes, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
-  const [info, setInfo] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
-  const hash = (info && info.hash) || [];
-  console.log('hash', hash);
+  const [promiseImg, setPromiseImg] = useState('');
+  const hash = promiseImg;
+
   useEffect(() => {
     loaddata();
   }, []);
 
   async function loaddata() {
-    const obj = propose.filter(item => item.id === index)[0];
+    const obj = proposes.filter(item => item.id === index)[0];
+
     if (obj.status === 0) {
       const addr = address === obj.sender ? obj.receiver : obj.sender;
       const alias = await getAlias(addr);
       setSender(obj.sender);
-      setInfo(obj.s_info);
       setContent(obj.s_content);
+      setPromiseImg(obj.coverImg);
       setName(alias);
     }
   }
@@ -63,15 +64,15 @@ function PromiseAlert(props) {
     try {
       const funcName = 'cancelPropose';
       const params = [ind, 'no'];
-      const result = await sendTransaction(funcName, params);
+      const result = await sendTransaction(funcName, params, { address, tokenAddress });
       // console.log('View result', result);
       if (result) {
-        const message = 'Your propose has been removed.';
+        const message = 'Your proposes has been removed.';
         enqueueSnackbar(message, { variant: 'info' });
         close();
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -79,25 +80,25 @@ function PromiseAlert(props) {
     <div>
       {address === sender ? (
         <CommonDialog
-          title="Promise alert"
-          okText="Cancel Promise"
+          title="Lock alert"
+          okText="Cancel Lock"
           close={close}
           confirm={() => {
             cancelPromise(index);
           }}
         >
           <TagTitle>
-            <span>You sent promise to </span>
+            <span>You sent lock to </span>
             <span className="highlight">{name}</span>
           </TagTitle>
           <ImgView>
-            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="promiseImg" />}
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>
       ) : (
         <CommonDialog
-          title="Promise alert"
+          title="Lock alert"
           okText="Accept"
           cancelText="Deny"
           close={close}
@@ -107,10 +108,10 @@ function PromiseAlert(props) {
         >
           <TagTitle>
             <span className="highlight">{name}</span>
-            <span> sent a promise to you</span>
+            <span> sent a lock to you</span>
           </TagTitle>
           <ImgView>
-            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash[0]} title="promiseImg" />}
+            {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
           </ImgView>
           <PageView>{content}</PageView>
         </CommonDialog>

@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { createMuiTheme } from '@material-ui/core/styles';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+// import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
 import { PersistGate } from 'redux-persist/lib/integration/react';
 
@@ -11,27 +11,24 @@ import * as serviceWorker from './serviceWorker';
 import { GlobaLoading } from './components/elements';
 import { persistor, store } from './store';
 
+import { Helmet } from "react-helmet";
+
 // const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
   palette: {
     primary: {
-      light: '#8e8cff',
-      main: '#fe8dc3',
-      // dark: '#48515D',
-      contrastText: '#fff',
+      main: '#8250c8',
     },
-    // secondary: {
-    //   light: '#4da9b7',
-    //   main: '#017a87',
-    //   dark: '#004e5a',
-    //   contrastText: '#000',
-    // },
+    secondary: {
+      main: '#fe8dc3',
+    },
   },
   typography: {
     // htmlFontSize: 16,
     fontSize: 12,
     fontFamily: [
       'Montserrat',
+      'system-ui',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
@@ -136,6 +133,15 @@ ReactDOM.render(
       </SnackbarProvider>
       {/* </PersistGate> */}
     </Provider>
+    <Helmet>
+      <title>Lovelock - Cherish Your Intimate Memories</title>
+      <meta property="og:title" content="Lovelock - Cherish Your Intimate Memories" />
+      <meta property="og:type" content="website" />
+      <meta name="description" content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends." />
+      <meta property="og:image" content={`${process.env.PUBLIC_URL}/static/img/share.jpg`} />
+      <meta property="og:description"
+        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends." />
+    </Helmet>
   </MuiThemeProvider>,
   document.getElementById('root')
 );

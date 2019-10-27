@@ -25,6 +25,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
@@ -32,7 +33,7 @@ import { AvatarPro } from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
-import LandingPage from './LandingPage';
+// import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
   font-size: ${rem(20)};
@@ -333,6 +334,7 @@ function Header(props) {
   }
 
   const address = useSelector(state => state.account.address);
+  // const privateKey = useSelector(state => state.account.privateKey);
   const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
   const avatarRedux = useSelector(state => state.account.avatar);
@@ -342,14 +344,15 @@ function Header(props) {
       try {
         if (address) {
           const reps = await getTagsInfo(address);
-          dispatch(actions.setAccount({ displayName: reps['display-name'], avatar: reps.avatar }));
+          const name = reps['display-name'] || '';
+          dispatch(actions.setAccount({ displayName: name, avatar: reps.avatar }));
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
     fetchData();
-  }, []);
+  }, [address]);
 
   const renderMenu = (
     <StyledMenu
@@ -362,6 +365,7 @@ function Header(props) {
       <StyledMenuItem
         onClick={() => {
           props.history.push('/profile');
+          handleMenuClose();
         }}
       >
         <ListItemIcon>
@@ -372,6 +376,7 @@ function Header(props) {
       <StyledMenuItem
         onClick={() => {
           props.history.push('/register');
+          handleMenuClose();
         }}
       >
         <ListItemIcon>
@@ -383,6 +388,7 @@ function Header(props) {
       <StyledMenuItem
         onClick={() => {
           props.history.push('/login');
+          handleMenuClose();
         }}
       >
         <ListItemIcon>
@@ -509,14 +515,14 @@ function Header(props) {
 
   return (
     <div>
-      {address ? (
-        <div className={classes.grow}>
-          <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
-            <StyledToolbar>
-              <StyledLogo to="/">
-                <img src="/static/img/logo.svg" alt="itea-scan" />
-                <span>LoveLock</span>
-              </StyledLogo>
+      <div className={classes.grow}>
+        <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
+          <StyledToolbar>
+            <StyledLogo to="/">
+              <img src="/static/img/logo.svg" alt="itea-scan" />
+              <span>LoveLock</span>
+            </StyledLogo>
+            {address && (
               <React.Fragment>
                 <div className={classes.search}>
                   <div className={classes.searchIcon}>
@@ -537,6 +543,7 @@ function Header(props) {
                   <Typography className={classes.title} noWrap>
                     {displayName}
                   </Typography>
+                  <ExpandMoreIcon className={classes.expandMore} />
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeExplore}>
                   <Typography className={classes.title} noWrap>
@@ -581,12 +588,10 @@ function Header(props) {
                   </IconButton>
                 </div>
               </React.Fragment>
-            </StyledToolbar>
-          </StyledAppBar>
-        </div>
-      ) : (
-        <LandingPage />
-      )}
+            )}
+          </StyledToolbar>
+        </StyledAppBar>
+      </div>
       {renderMobileMenu}
       {renderMenu}
       {friReqMenu}

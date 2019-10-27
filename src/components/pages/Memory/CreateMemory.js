@@ -6,14 +6,19 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
+import cloneDeep from 'lodash/cloneDeep';
 import Editor from './Editor';
-import SimpleModal from '../../elements/Modal';
+import BlogModal from '../../elements/BlogModal';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
+import MemoryTitle from './MemoryTitle';
+import { getDraft, setDraft, delDraft } from '../../../helper/draft';
+
+let blogBody = null;
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -118,23 +123,31 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { reLoadMemory, proIndex } = props;
+  const { onMemoryAdded, proIndex } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
   const avatar = useSelector(state => state.account.avatar);
+  const rName = useSelector(state => state.account.r_name);
+  const sName = useSelector(state => state.account.s_name);
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+  const address = useSelector(state => state.account.address);
 
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [memoDate, setMemoDate] = useState(Date.parse(new Date()));
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
-  const [editorContent, setEditorContent] = useState(null);
+
+  const [blogSubtitle, setBlogSubtitle] = useState('');
+  const [blogTitle, setBlogTitle] = useState('');
+  const [previewOn, setPreviewOn] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -164,12 +177,13 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setMemoryContent(value);
+    //setInitialBlogContent(makeDefaultBlogContent(value))
   }
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
   }
   function onChangeDate(value) {
-    setDate(value);
+    setMemoDate(value);
   }
 
   function onChangeMedia(value) {
@@ -178,37 +192,173 @@ export default function CreateMemory(props) {
     } else {
       setDisableShare(true);
     }
-    console.log('value', value);
     setFilesBuffer(value);
   }
 
-  async function onSubmitEditor(e) {
-    let blocks = editorContent.blocks;
-    for (let i in blocks) {
-      if (blocks[i].type == 'image') {
-        let blob = await fetch(blocks[i].data.url).then(r => r.blob());
-        let file = new File([blob], 'name');
-        let hash = await saveFileToIpfs([file]);
-        blocks[i].data.url = process.env.REACT_APP_IPFS + hash;
+  function extractBlogInfo(content) {
+
+    let firstImg;
+    let firstLine;
+
+    const { blocks } = content;
+
+    for (const i in blocks) {
+      if (!firstImg && blocks[i].type === 'image') {
+        firstImg = blocks[i].data;
+      }
+      if (!firstLine) {
+        firstLine = blocks[i].text || '';
+        if (firstLine.length > 100) {
+          firstLine = `${firstLine.slice(0, 100)}…`;
+        }
+      }
+      if (firstImg && firstLine) break;
+    }
+
+    return {
+      title: firstLine,
+      coverPhoto: firstImg && {
+        width: firstImg.width,
+        height: firstImg.height,
+        url: firstImg.url
       }
     }
-    handleShareMemory(JSON.stringify({ ...editorContent }));
   }
 
-  function onChangeEditor(value) {
-    setEditorContent(value);
+  async function onSubmitEditor() {
+    const combined = combineContent();
+    const blocks = combined.blocks;
+    if (validateEditorContent()) {
+      const images = blocks.reduce((collector, b, i) => {
+        if (
+          b.type === 'image' &&
+          b.data.url &&
+          (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
+        ) {
+          collector[i] = fetch(b.data.url)
+            .then(r => r.arrayBuffer())
+            .then(Buffer.from);
+        }
+        return collector;
+      }, {});
+
+      if (Object.keys(images).length) {
+        const bufs = await Promise.all(Object.values(images));
+        const hashes = await saveToIpfs(bufs);
+        Object.keys(images).forEach((blockIndex, index) => {
+          blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index];
+        });
+      }
+
+      let buffer = Buffer.from(JSON.stringify(combined));
+      let submitContent = await saveFileToIpfs([buffer]);
+
+      const meta = extractBlogInfo(combined)
+      const blogData = JSON.stringify({
+        meta,
+        blogHash: submitContent
+      })
+      await handleShareMemory(blogData);
+
+      // Clean up
+      blogBody = null;
+      setBlogTitle('');
+      setBlogSubtitle('');
+      delDraft();
+    } else {
+      let message = 'Please enter memory content.';
+      enqueueSnackbar(message, { variant: 'error' });
+    }
   }
 
-  async function handleShareMemory(advancedMemory) {
-    if (!advancedMemory && !memoryContent && !filesBuffer) {
+  function validateEditorContent() {
+    let blocks = combineContent().blocks;
+    for (let i in blocks) {
+      if (blocks[i].text.trim() != '') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isNonemptyBlog(body) {
+    if (!body || !body.blocks || !body.blocks.length) return false
+    if (body.blocks.length > 1) return true
+    const b = body.blocks[0]
+    if (b.text ||
+      b.type === 'image' ||
+      b.type === 'video' ||
+      b.type === 'embed') {
+        return true
+      }
+
+    return false
+  }
+
+  function onChangeEditorBody(editor) {
+    blogBody = editor.emitSerializedOutput()
+  }
+
+  function onPreviewSwitched(checked) {
+    setPreviewOn(checked);
+  }
+
+  function combineContent() {
+    if (!blogBody) {
+      // generate a empty body
+      blogBody = makeDefaultBlogContent('');
+    }
+    const body = blogBody;
+
+    const title = blogTitle;
+    const h1 = title && {
+      data: {},
+      depth: 0,
+      entityRanges: [],
+      inlineStyleRanges: [],
+      key: 'blok0',
+      text: title,
+      type: 'header-one',
+    };
+    const subtitle = blogSubtitle;
+    const h3 = subtitle && {
+      data: {},
+      depth: 0,
+      entityRanges: [],
+      inlineStyleRanges: [],
+      key: 'blok1',
+      text: subtitle,
+      type: 'header-three',
+    };
+
+    if (!h1 && !h3) return body; // nothing to merge
+
+    const combined = { ...body };
+    combined.blocks = [...combined.blocks];
+    if (h3) combined.blocks.unshift(h3);
+    if (h1) combined.blocks.unshift(h1);
+
+    return combined;
+  }
+
+  function closeEditorModal() {
+    setOpenModal(false);
+    setGrayLayout(false);
+
+    // ensure next time open in edit mode
+    setPreviewOn(false);
+  }
+
+  async function handleShareMemory(blogData) {
+    if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }
 
-    const content = advancedMemory || memoryContent;
+    const content = blogData || memoryContent;
 
-    if (!privateKey) {
+    if (privacy ? !privateKey : !tokenKey) {
       setNeedAuth(true);
       return;
     }
@@ -216,20 +366,24 @@ export default function CreateMemory(props) {
     setGLoading(true);
     setTimeout(async () => {
       // const hash = await saveFilesToIpfs(filesBuffer);
-      const hash = await saveBufferToIpfs(filesBuffer);
-      const info = { date, hash };
+      // const hash = await saveBufferToIpfs(filesBuffer);
+      // const info = { date, hash };
       let params = [];
-
-      if (privacy) {
+      if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
+        const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
+        const newinfo = { date: memoDate, hash };
+        params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
       } else {
+        const hash = !blogData && await saveBufferToIpfs(filesBuffer);
+        const info = { date: memoDate };
+        info.hash = hash || []
+        if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
-      const method = 'addMemory';
-      const result = await sendTransaction(method, params);
+      const result = await sendTransaction('addMemory', params, { address, tokenAddress });
       if (result) {
-        reLoadMemory(proIndex);
+        onMemoryAdded();
       }
       resetValue();
     }, 100);
@@ -238,13 +392,78 @@ export default function CreateMemory(props) {
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
-    setDate(new Date());
+    setMemoDate(new Date());
     setGLoading(false);
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
+    setOpenModal(false);
   }
 
+  function makeDefaultBlogContent(text) {
+    return {
+      blocks: [
+        {
+          data: {},
+          depth: 0,
+          entityRanges: [],
+          inlineStyleRanges: [],
+          key: 'blok2',
+          text: text,
+          type: 'unstyled',
+        },
+      ],
+      entityMap: {},
+    };
+  }
+
+  function urlToBase64(url) {
+    return fetch(url)
+      .then(r => r.blob())
+      .then(blob => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener('error', reject);
+          reader.readAsDataURL(blob);
+        });
+      });
+  }
+
+  function cloneForIdbSave(content) {
+    return JSON.parse(JSON.stringify(content))
+  }
+
+  async function saveDraft(context, content) {
+    // if (isNonemptyBlog(content)) {
+    //   // we need to change image from blob:// to base64
+
+    //   const body = cloneForIdbSave(content);
+    //   const blocks = body.blocks;
+
+    //   const images = blocks.reduce((collector, b, i) => {
+    //     if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
+    //       collector[i] = urlToBase64(b.data.url);
+    //     }
+    //     return collector;
+    //   }, {});
+
+    //   if (Object.keys(images).length) {
+    //     const base64Array = await Promise.all(Object.values(images));
+    //     Object.keys(images).forEach((blockIndex, index) => {
+    //       blocks[blockIndex].data.url = base64Array[index];
+    //     });
+    //   }
+
+    //   setDraft({
+    //     body,
+    //     title: blogTitle,
+    //     subtitle: blogSubtitle,
+    //   });
+    // }
+  }
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
@@ -273,7 +492,7 @@ export default function CreateMemory(props) {
             <Grid item>
               <AddInfoMessage
                 files={filesBuffer}
-                date={date}
+                date={memoDate}
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
@@ -294,17 +513,14 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button onClick={() => setOpenModal(true)} className={classes.blogBtn}>
+                <button
+                  onClick={() => {
+                    setOpenModal(true);
+                  }}
+                  className={classes.blogBtn}
+                >
                   Write blog...
                 </button>
-                <SimpleModal
-                  open={isOpenModal}
-                  handleClose={() => setOpenModal(false)}
-                  handleSumit={onSubmitEditor}
-                  title="Create your note"
-                >
-                  <Editor onChange={value => onChangeEditor(value)} />
-                </SimpleModal>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
@@ -317,6 +533,30 @@ export default function CreateMemory(props) {
                 </ButtonPro>
               </Grid>
             )}
+            <BlogModal
+              open={isOpenModal}
+              handleClose={closeEditorModal}
+              handleSumit={onSubmitEditor}
+              handlePreview={onPreviewSwitched}
+              closeText="Cancel"
+              title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeEditorModal} />}
+            >
+              {!previewOn && (
+                <Editor
+                  initContent={blogBody || makeDefaultBlogContent(memoryContent)}
+                  title={blogTitle}
+                  onTitleChange={setBlogTitle}
+                  subtitle={blogSubtitle}
+                  onSubtitleChange={setBlogSubtitle}
+                  saveOptions={{
+                    interval: 1500, // save draft everytime user stop typing for 1.5 seconds
+                    save_handler: saveDraft,
+                  }}
+                  onChange={onChangeEditorBody}
+                />
+              )}
+              {previewOn && <Editor initContent={combineContent()} read_only />}
+            </BlogModal>
           </Grid>
         </ShadowBox>
       </CreatePost>

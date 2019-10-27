@@ -10,10 +10,10 @@ import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
-import { tryStringifyJson, getTagsInfo } from '../../../helper/utils';
+import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction } from '../../../helper';
+import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from './CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
@@ -41,12 +41,10 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     width: 100,
     height: 100,
-    margin: theme.spacing(0, 1, 1, 0),
   },
   avatarSug: {
     width: 30,
     height: 30,
-    // margin: theme.spacing(0, 1, 1, 0),
   },
 }));
 
@@ -108,17 +106,46 @@ const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
   -webkit-box-pack: justify;
+  padding: 30px 0 0 0;
   font-size: 14px;
   cursor: pointer;
+  .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
   .upload_img {
     position: relative;
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+    &:hover .changeImg {
+      display: block;
+    }
+  }
+  .changeImg {
+    cursor: pointer;
+    position: absolute;
+    display: none;
+    height: 50px;
+    top: 50px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 80%;
+    line-height: 2;
+    overflow: hidden;
+    border-bottom-left-radius: 600px;
+    border-bottom-right-radius: 600px;
   }
   .fileInput {
     width: 120px;
-    height: 20px;
+    height: 50px;
     padding: 2px;
     cursor: pointer;
   }
@@ -145,13 +172,13 @@ const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
 
-class Promise extends React.Component {
+class PuNewLock extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       partner: '',
       promiseStm: '',
-      date: new Date(),
+      date: Date.parse(new Date()),
       file: '',
       value: '',
       suggestions: [],
@@ -160,6 +187,7 @@ class Promise extends React.Component {
       isOpenCrop: false,
       avatar: '/static/img/no-avatar.jpg',
       originFile: '',
+      isJournal: false,
     };
   }
 
@@ -178,7 +206,6 @@ class Promise extends React.Component {
 
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
-    const { props } = this;
 
     if (escapedValue.length <= 3) {
       this.setState({ suggestions: [] });
@@ -202,13 +229,14 @@ class Promise extends React.Component {
         return { nick, address: result[key].address };
       });
     } catch (err) {
-      console.log(tryStringifyJson(err));
+      console.error(tryStringifyJson(err));
     }
 
-    people = people.filter(person => person.address !== props.address);
+    // people = people.filter(person => person.address !== props.address);
     people = people.filter(person => regex.test(this.getSuggestionValue(person)));
     people = people.slice(0, 10);
     for (let i = 0; i < people.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
       const resp = await getTagsInfo(people[i].address);
       peopleAva.push(resp.avatar);
     }
@@ -229,7 +257,7 @@ class Promise extends React.Component {
     this.setState({
       partner: val,
     });
-    // console.log("view partnerChange", value);
+    // console.log("view partnerChange", val);
   };
 
   promiseStmChange = e => {
@@ -268,11 +296,7 @@ class Promise extends React.Component {
 
   onPartnerChange = (event, { newValue }) => {
     const name = newValue.substring(1);
-    if (newValue !== '@bot-lover') {
-      this.setState({ checked: false });
-    } else {
-      this.setState({ checked: true });
-    }
+    const { address } = this.props;
     const { suggestions } = this.state;
     let add = '';
     if (suggestions) {
@@ -280,6 +304,11 @@ class Promise extends React.Component {
       if (seletedItem && seletedItem.length > 0) {
         add = seletedItem[0].address;
       }
+    }
+    if (add === address) {
+      this.setState({
+        isJournal: true,
+      });
     }
     this.setState({
       value: newValue,
@@ -305,19 +334,16 @@ class Promise extends React.Component {
     if (check) {
       this.setState({
         checked: check,
+        okText: 'Create',
         partner: process.env.REACT_APP_BOT_LOVER,
       });
-      // document.addEventListener('DOMContentLoaded', function(event) {
-      //   document.getElementById('suggestPartner').disabled = true;
-      // });
     } else {
       this.setState({
         checked: false,
+        okText: 'Send',
         value: '',
+        partner: '',
       });
-      // document.addEventListener('DOMContentLoaded', function(event) {
-      //   document.getElementById('suggestPartner').disabled = false;
-      // });
     }
   };
 
@@ -331,7 +357,6 @@ class Promise extends React.Component {
   handleImageChange = event => {
     event.preventDefault();
     const orFiles = event.target.files;
-
     if (orFiles.length > 0) {
       this.setState({
         originFile: orFiles,
@@ -355,8 +380,29 @@ class Promise extends React.Component {
     this.setState({ cropFile: e.cropFile, avatar: e.avaPreview });
   };
 
+  closeJournal = () => {
+    this.setState({ isJournal: false, value: '', partner: '' });
+  };
+
+  createJournal = () => {
+    const { proposes, enqueueSnackbar } = this.props;
+    let message = '';
+    for (let i = 0; i < proposes.length; i++) {
+      if (proposes[i].sender === proposes[i].receiver) {
+        message = 'You already had a journal and cannot create one more.';
+        enqueueSnackbar(message, { variant: 'error' });
+      }
+    }
+
+    if (message) {
+      this.closeJournal();
+    } else {
+      this.setState({ isJournal: false });
+    }
+  };
+
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, close } = this.props;
+    const { setLoading, enqueueSnackbar, close, address, tokenAddress } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva = '';
     let hash = [];
@@ -372,10 +418,7 @@ class Promise extends React.Component {
         if (cropFile) {
           botAva = await saveFileToIpfs(cropFile);
         }
-        const info = {
-          date,
-          hash,
-        };
+        const info = { date, hash };
         const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
@@ -384,13 +427,13 @@ class Promise extends React.Component {
           return;
         }
         if (!promiseStm) {
-          message = 'Please input your promise.';
+          message = 'Please input your lock.';
           enqueueSnackbar(message, { variant: 'error' });
           setLoading(false);
           return;
         }
 
-        let botInfo = {};
+        let botInfo;
         if (checked) {
           if (!firstname) {
             message = 'Please enter your crush first name.';
@@ -416,28 +459,25 @@ class Promise extends React.Component {
             setLoading(false);
             return;
           }
-          botInfo = {
-            firstname,
-            lastname,
-            botAva,
-            botReply,
-          };
+          botInfo = { firstname, lastname, botAva, botReply };
         }
 
         const params = [promiseStm, partner, info, botInfo];
         // const params = [promiseStm, partner, info];
-        const result = await sendTransaction(name, params);
+        const result = await sendTransaction(name, params, { address, tokenAddress });
 
         this.timeoutHanle2 = setTimeout(() => {
           if (result) {
-            message = 'Your propose sent successfully.';
+            message = 'Your lock sent successfully.';
             enqueueSnackbar(message, { variant: 'success' });
             setLoading(false);
             close();
           }
         }, 50);
       } catch (err) {
-        // console.log(err);
+        console.error(err);
+        message = 'an error occurred while sending, please check the inner exception for details';
+        enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
       }
     }, 100);
@@ -445,7 +485,19 @@ class Promise extends React.Component {
 
   render() {
     const { close } = this.props;
-    const { partner, promiseStm, date, file, suggestions, value, checked, isOpenCrop, avatar, originFile } = this.state;
+    const {
+      partner,
+      promiseStm,
+      date,
+      file,
+      suggestions,
+      value,
+      checked,
+      isOpenCrop,
+      avatar,
+      originFile,
+      isJournal,
+    } = this.state;
     // console.log('state CK', this.state);
 
     const inputProps = {
@@ -456,8 +508,8 @@ class Promise extends React.Component {
 
     return (
       <CommonDialog
-        title="Promise"
-        okText="Send"
+        title="New Lock"
+        okText={() => this.state.okText || 'Send'}
         close={close}
         confirm={() => {
           this.createPropose(partner, promiseStm, date, file);
@@ -465,7 +517,7 @@ class Promise extends React.Component {
       >
         {!checked && (
           <div>
-            <TagTitle>Tag your partner you promise</TagTitle>
+            <TagTitle>Tag your partner</TagTitle>
             <Autosuggest
               id="suggestPartner"
               suggestions={suggestions}
@@ -479,14 +531,22 @@ class Promise extends React.Component {
         )}
         <FormControlLabel
           control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
-          label="or create a secret crush"
+          label="or create your own crush"
         />
         {checked && (
           <FlexBox>
             <PreviewContainter>
               <div className="upload_img">
                 <AvatarProCus src={avatar} />
-                <input className="fileInput" type="file" onChange={this.handleImageChange} accept="image/*" />
+                <div className="changeImg">
+                  <input
+                    className="fileInput"
+                    type="file"
+                    onChange={this.handleImageChange}
+                    accept="image/jpeg,image/png"
+                  />
+                  <CameraAltIcon />
+                </div>
               </div>
             </PreviewContainter>
             <RightBotInfo>
@@ -507,7 +567,7 @@ class Promise extends React.Component {
                 // margin="normal"
               />
               <TextFieldPlaceholder
-                label="Crush's response to your promise"
+                label="Crush's response to your lock"
                 fullWidth
                 onChange={this.handleUsername}
                 name="botReply"
@@ -517,18 +577,39 @@ class Promise extends React.Component {
           </FlexBox>
         )}
         <DividerCus />
-        <TagTitle className="prmContent">Promise content</TagTitle>
+        <TagTitle className="prmContent">Lock content</TagTitle>
         <TextFieldMultiLine
           id="outlined-multiline-static"
-          placeholder="promise content ..."
+          placeholder="lock content ..."
           multiline
           fullWidth
           rows="4"
           variant="outlined"
           onChange={this.promiseStmChange}
         />
-        <AddInfoMessage files={file} date={date} onChangeDate={this.onChangeDate} onChangeMedia={this.onChangeMedia} />
+        <AddInfoMessage
+          files={file}
+          date={date}
+          onChangeDate={this.onChangeDate}
+          onChangeMedia={this.onChangeMedia}
+          isCreatePro
+        />
         {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
+        {isJournal && (
+          <CommonDialog
+            title="Journal"
+            okText="Yes, let's create"
+            cancelText="Cancel"
+            close={this.closeJournal}
+            cancel={this.closeJournal}
+            confirm={this.createJournal}
+            isCancel
+          >
+            <TagTitle>
+              <span>By create a lock with yourself, you will create a Journal instead.</span>
+            </TagTitle>
+          </CommonDialog>
+        )}
       </CommonDialog>
     );
   }
@@ -540,13 +621,10 @@ Promise.defaultProps = {
 };
 
 const mapStateToProps = state => {
-  const { loveinfo, account } = state;
   return {
-    propose: loveinfo.propose,
-    currentIndex: loveinfo.currentProIndex,
-    memory: loveinfo.memory,
-    address: account.address,
-    privateKey: account.privateKey,
+    proposes: state.loveinfo.proposes,
+    address: state.account.address,
+    tokenAddress: state.account.tokenAddress,
   };
 };
 
@@ -561,4 +639,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withSnackbar(Promise));
+)(withSnackbar(PuNewLock));

@@ -1,0 +1,111 @@
+{ 
+    "blocks":[ 
+       { 
+          "data":{ 
+ 
+          },
+          "depth":0,
+          "entityRanges":[ 
+ 
+          ],
+          "inlineStyleRanges":[ 
+ 
+          ],
+          "key":"blok0",
+          "text":"Introduce Lovelock",
+          "type":"header-one"
+       },
+       { 
+          "data":{ 
+ 
+          },
+          "depth":0,
+          "entityRanges":[ 
+ 
+          ],
+          "inlineStyleRanges":[ 
+ 
+          ],
+          "key":"blok1",
+          "text":"A safe and peaceful place where you can cherish your meaningful memories, keep them to yourself or share to close friends.",
+          "type":"header-three"
+       },
+       { 
+          "key":"blok2",
+          "text":"Not until recently when I realized I did not use Facebook for weeks. I am fed up with ads, clips of cats, LOL (oops, I meant KOL) saying nonsense, fake news, hatred, flirting, brags and other garbage, all trying to greedily grab my attention.",
+          "type":"unstyled",
+          "depth":0,
+          "inlineStyleRanges":[ 
+ 
+          ],
+          "entityRanges":[ 
+ 
+          ],
+          "data":{ 
+ 
+          }
+       },
+       { 
+          "key":"llhd",
+          "text":"Human beings deserve a better place to spend their meaningful moments.",
+          "type":"unstyled",
+          "depth":0,
+          "inlineStyleRanges":[ 
+ 
+          ],
+          "entityRanges":[ 
+ 
+          ],
+          "data":{ 
+ 
+          }
+       },
+       { 
+          "key":"a954k",
+          "text":"Then, Lovelock is born.",
+          "type":"unstyled",
+          "depth":0,
+          "inlineStyleRanges":[ 
+ 
+          ],
+          "entityRanges":[ 
+ 
+          ],
+          "data":{ 
+ 
+          }
+       },
+       { 
+          "key":"7nqfd",
+          "text":"Dare you lock your love?",
+          "type":"image",
+          "depth":0,
+          "inlineStyleRanges":[ 
+ 
+          ],
+          "entityRanges":[ 
+ 
+          ],
+          "data":{ 
+             "aspect_ratio":{ 
+                "width":1000,
+                "height":525,
+                "ratio":52.5
+             },
+             "width":1200,
+             "caption":"type a caption (optional)",
+             "height":630,
+             "forceUpload":false,
+             "url":"https://ipfs.icetea.io/gateway/ipfs/QmfS4c8BJFoURzA83JqQJM6Ax7qP6rBsE81MN66Y6iyoPZ",
+             "loading_progress":0,
+             "selected":false,
+             "loading":true,
+             "file":null,
+             "direction":"fill"
+          }
+       }
+    ],
+    "entityMap":{ 
+ 
+    }
+ }

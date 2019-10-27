@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import WarningIcon from '@material-ui/icons/Warning';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import tweb3 from '../../../../service/tweb3';
-import { isAliasRegisted, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
+import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
@@ -31,12 +39,83 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     width: 100,
     height: 100,
-    margin: theme.spacing(0, 1, 1, 0),
   },
 }));
 
+const PreviewContainter = styled.div`
+  padding: 10px 0 0 0;
+  display: flex;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  font-size: 14px;
+  cursor: pointer;
+  .upload_img input[type='file'] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .upload_img {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+    &:hover .changeImg {
+      display: block;
+    }
+  }
+  .changeImg {
+    cursor: pointer;
+    position: absolute;
+    display: none;
+    width: 100px;
+    height: 50px;
+    top: 50px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 80%;
+    line-height: 2;
+    overflow: hidden;
+    border-bottom-left-radius: 600px;
+    border-bottom-right-radius: 600px;
+  }
+  .fileInput {
+    width: 120px;
+    height: 50px;
+    padding: 2px;
+    cursor: pointer;
+  }
+`;
+
+const WarningPass = styled.div`
+  .warningSnackbar {
+    background-color: #fe7;
+    box-shadow: none;
+    margin-top: 24px;
+    max-width: 400px;
+  }
+  .warningMessage {
+    display: flex;
+    alignitems: center;
+  }
+  .warningIcon {
+    margin-right: 16px;
+    color: #d90;
+  }
+  .warningText {
+    color: #333;
+    font-style: italic;
+    font-size: 1.1em;
+  }
+`;
+
 function RegisterUsername(props) {
-  const { setStep, setLoading, setAccount } = props;
+  const { setStep, setLoading, setAccount, setIsRemember } = props;
   const [username, setUsername] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -47,6 +126,7 @@ function RegisterUsername(props) {
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [originFile, setOriginFile] = useState([]);
+  const [isRememberState, setIsRememberState] = useState(true);
 
   useEffect(() => {
     ValidatorForm.addValidationRule('isPasswordMatch', value => {
@@ -59,25 +139,25 @@ function RegisterUsername(props) {
     // Fix issue #148
     ValidatorForm.addValidationRule('specialCharacter', async name => {
       // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
-      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+[a-z0-9]$');
       return regex.test(name);
     });
 
-    ValidatorForm.addValidationRule('isAliasRegisted', async name => {
-      const resp = await isAliasRegisted(name);
+    ValidatorForm.addValidationRule('isAliasRegistered', async name => {
+      const resp = await isAliasRegistered(name);
       return !resp;
     });
 
     return () => {
       ValidatorForm.removeValidationRule('isPasswordMatch');
-      ValidatorForm.removeValidationRule('isAliasRegisted');
+      ValidatorForm.removeValidationRule('isAliasRegistered');
     };
   }, [password]);
 
   async function gotoNext() {
-    const isUsernameRegisted = await isAliasRegisted(username);
+    const isUsernameRegisted = await isAliasRegistered(username);
     if (isUsernameRegisted) {
-      const message = 'Username already exists! Please choose another.';
+      const message = 'This username is already taken.';
       enqueueSnackbar(message, { variant: 'error' });
     } else {
       setLoading(true);
@@ -87,43 +167,54 @@ function RegisterUsername(props) {
           const { privateKey, address, publicKey, mnemonic } = account;
           const displayname = `${firstname} ${lastname}`;
 
-          setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
+          // setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
 
-          const resp = await registerAlias(username, address);
-          const respTagName = await setTagsInfo(address, 'display-name', displayname);
-          const respTagFristname = await setTagsInfo(address, 'firstname', firstname);
-          const respTagLastname = await setTagsInfo(address, 'lastname', lastname);
-          const respTagPublicKey = await setTagsInfo(address, 'pub-key', publicKey);
+          const registerInfo = [];
+          const opts = { address };
+          registerInfo.push(registerAlias(username, address));
+          registerInfo.push(
+            setTagsInfo(
+              {
+                'display-name': displayname,
+                firstname,
+                lastname,
+                'pub-key': publicKey,
+              },
+              opts
+            )
+          );
           if (avatarData) {
-            const hash = await saveFileToIpfs(avatarData);
-            await setTagsInfo(address, 'avatar', hash);
+            const setAva = saveFileToIpfs(avatarData).then(hash => setTagsInfo({ avatar: hash }, opts));
+            registerInfo.push(setAva);
           }
+          await Promise.all(registerInfo);
 
-          if (resp && respTagName && respTagPublicKey && respTagFristname && respTagLastname) {
-            setStep('two');
-          } else {
-            const message = 'An error has occured. Please try again.';
-            enqueueSnackbar(message, { variant: 'error' });
-          }
-        } catch (e) {
-          const message = `An error has occured. Detail:${e}`;
+          const newAccount = {
+            address,
+            privateKey,
+            cipher: password,
+            publicKey,
+            mnemonic,
+          };
+          setAccount(newAccount);
+          setLoading(false);
+          setStep('two');
+          setIsRemember(isRememberState);
+        } catch (error) {
+          console.error(error);
+          const message = `An error has occured. Detail:${error}`;
           enqueueSnackbar(message, { variant: 'error' });
+          setLoading(false);
         }
-        setLoading(false);
       }, 100);
     }
   }
 
   function createAccountWithMneomnic() {
-    const resp = wallet.createAccountWithMneomnic();
-    return {
-      privateKey: resp.privateKey,
-      address: resp.address,
-      mnemonic: resp.mnemonic,
-      publicKey: resp.publicKey,
-    };
+    const { mnemonic, privateKey, publicKey, address } = wallet.getAccountFromMneomnic();
+    return { mnemonic, privateKey, publicKey, address };
   }
 
   function gotoLogin() {
@@ -165,11 +256,11 @@ function RegisterUsername(props) {
             setUsername(event.currentTarget.value.toLowerCase());
           }}
           name="username"
-          validators={['required', 'specialCharacter', 'isAliasRegisted']}
+          validators={['required', 'specialCharacter', 'isAliasRegistered']}
           errorMessages={[
-            'This field is required',
-            'Username cannot contain spaces and special character',
-            'Username already exists! Please choose another',
+            'This field is required.',
+            'Username cannot contain spaces and special character.',
+            'This username is already taken.',
           ]}
           margin="dense"
           value={username}
@@ -229,14 +320,55 @@ function RegisterUsername(props) {
         />
         <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
-          <div>
+          {/* <div>
             <AvatarPro src={avatar} className={classes.avatar} />
             <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
-          </div>
+          </div> */}
+          <PreviewContainter>
+            <div className="upload_img">
+              <AvatarPro src={avatar} className={classes.avatar} />
+              <div className="changeImg">
+                <input className="fileInput" type="file" onChange={handleImageChange} accept="image/jpeg,image/png" />
+                <CameraAltIcon />
+              </div>
+            </div>
+          </PreviewContainter>
         </Box>
+        <div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                value={isRememberState}
+                checked={isRememberState}
+                color="primary"
+                onChange={() => setIsRememberState(!isRememberState)}
+              />
+            }
+            label="Remember me for 30 days"
+          />
+        </div>
+        <WarningPass>
+          <SnackbarContent
+            className="warningSnackbar"
+            message={
+              <span className="warningMessage">
+                <WarningIcon className="warningIcon" />
+                <span className="warningText">
+                  It is recommended that you let the browser or a password manager to keep your password. LoveLock
+                  cannot recover forgotten passwords.
+                </span>
+              </span>
+            }
+          />
+        </WarningPass>
 
         <DivControlBtnKeystore>
-          <LinkPro onClick={gotoLogin}>Already had an account? Login</LinkPro>
+          <div>
+            <span>Already had an account?</span>
+            <LinkPro onClick={gotoLogin}>Login</LinkPro>
+          </div>
           <ButtonPro type="submit">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
@@ -248,11 +380,11 @@ function RegisterUsername(props) {
   );
 }
 
-// const mapStateToProps = state => {
-//   const e = state.create;
-//   return {
-//   };
-// };
+const mapStateToProps = state => {
+  return {
+    isRemember: state.create.isRemember,
+  };
+};
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -265,12 +397,15 @@ const mapDispatchToProps = dispatch => {
     setLoading: value => {
       dispatch(actionGlobal.setLoading(value));
     },
+    setIsRemember: value => {
+      dispatch(actionCreate.setIsRemember(value));
+    },
   };
 };
 
 export default withRouter(
   connect(
-    null,
+    mapStateToProps,
     mapDispatchToProps
   )(RegisterUsername)
 );

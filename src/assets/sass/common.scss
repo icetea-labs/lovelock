@@ -27,3 +27,50 @@ input:focus {
 // a:hover {
 //   text-decoration: underline;
 // }
+
+.medium-zoom-overlay {
+  z-index: 9999;
+}
+
+.medium-zoom-image--opened {
+  z-index: 10000;
+}
+
+.memory-modal-enter {
+  transform: scale(0.5);
+  opacity: 0;
+}
+
+.memory-modal-enter-active {
+  transform: scale(1);
+  opacity: 1;
+  transition: opacity 700ms, transform 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.memory-modal-exit-active {
+  opacity: 0;
+  transition: opacity 400ms;
+}
+
+.timeline-blog-appear {
+  opacity: 0;
+}
+
+.timeline-blog-appear-active {
+  opacity: 1;
+  transition: opacity 1000ms;
+}
+
+#dante-menu.dante-sticky-menu {
+  /* change some style to avoid confict with the appbar */
+
+  /* the appbar z-index is 1100 */
+  z-index: 1200;
+  /* height of appbar is 49px */
+  top: 220px!important;
+  text-align: center;
+}
+
+input.dante-menu-input {
+  background-color: transparent!important;
+}

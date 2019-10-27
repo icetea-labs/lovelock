@@ -37,22 +37,62 @@ const BoxAction = styled.div`
 export default function LeftProposes(props) {
   const { loading = false } = props;
 
-  const propose = useSelector(state => state.loveinfo.propose);
+  const proposes = useSelector(state => state.loveinfo.proposes);
   const address = useSelector(state => state.account.address);
-  const proposes = propose.filter(item => item.status === props.flag);
-
+  const proFiltered = proposes.filter(item => item.status === props.flag);
   const classes = useStyles();
-  if (proposes.length <= 0) {
+  if (proFiltered.length <= 0) {
     return (
       <CardHeader
         avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
         title={loading ? <Skeleton height={6} width="80%" /> : ''}
-        subheader={loading ? <Skeleton height={6} width="80%" /> : 'Not yet'}
+        subheader={loading ? <Skeleton height={6} width="80%" /> : 'None'}
       />
     );
   }
-  return proposes.map(item => {
+  const getInfo = item => {
+    switch (item.type) {
+      case 2:
+        return {
+          name: 'My Journal',
+          nick: 'journal',
+          icon: 'waves',
+        };
+      case 1:
+        return {
+          name: item.name,
+          nick: 'crush',
+          icon: 'done',
+        };
+      default:
+        return {
+          name: item.name,
+          nick: item.nick,
+          icon: 'done_all',
+        };
+    }
+  };
+
+  // display on following order
+  // Accepted (flag === 1): journal -> crush -> lock
+  // Pending: sent -> received
+  const compare = (p1, p2) => {
+    if (props.flag === 1) {
+      const v1 = String(p1.type || 0) + p2.id;
+      const v2 = String(p2.type || 0) + p1.id;
+      return v2.localeCompare(v1)
+    } else {
+      const f1 = address === p1.sender ? '0' : '1'
+      const f2 = address === p2.sender ? '0' : '1'
+      const v1 =f1 + p1.id;
+      const v2 = f2 + p2.id;
+      return v1.localeCompare(v2)
+    }
+  };
+
+  return proFiltered.sort(compare).map(item => {
     // console.log('item', item);
+    const info = getInfo(item);
     return (
       <CardHeader
         key={item.id}
@@ -65,11 +105,17 @@ export default function LeftProposes(props) {
           props.handlerSelect(item.id);
         }}
         action={
-          <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
+          props.flag === 0 ? (
+            <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
+          ) : (
+            <BoxAction>
+              <Icon type={info.icon} />
+            </BoxAction>
+          )
         }
-        avatar={<AvatarPro alt="" hash={item.avatar} />}
-        title={item.name}
-        subheader={item.receiver === process.env.REACT_APP_BOT_LOVER ? '' : item.nick}
+        avatar={<AvatarPro alt={info.name} hash={item.avatar} />}
+        title={info.name}
+        subheader={info.nick}
       />
     );
   });
