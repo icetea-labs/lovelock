@@ -437,32 +437,32 @@ export default function CreateMemory(props) {
   }
 
   async function saveDraft(context, content) {
-    if (isNonemptyBlog(content)) {
-      // we need to change image from blob:// to base64
+    // if (isNonemptyBlog(content)) {
+    //   // we need to change image from blob:// to base64
 
-      const body = cloneForIdbSave(content);
-      const blocks = body.blocks;
+    //   const body = cloneForIdbSave(content);
+    //   const blocks = body.blocks;
 
-      const images = blocks.reduce((collector, b, i) => {
-        if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
-          collector[i] = urlToBase64(b.data.url);
-        }
-        return collector;
-      }, {});
+    //   const images = blocks.reduce((collector, b, i) => {
+    //     if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
+    //       collector[i] = urlToBase64(b.data.url);
+    //     }
+    //     return collector;
+    //   }, {});
 
-      if (Object.keys(images).length) {
-        const base64Array = await Promise.all(Object.values(images));
-        Object.keys(images).forEach((blockIndex, index) => {
-          blocks[blockIndex].data.url = base64Array[index];
-        });
-      }
+    //   if (Object.keys(images).length) {
+    //     const base64Array = await Promise.all(Object.values(images));
+    //     Object.keys(images).forEach((blockIndex, index) => {
+    //       blocks[blockIndex].data.url = base64Array[index];
+    //     });
+    //   }
 
-      setDraft({
-        body,
-        title: blogTitle,
-        subtitle: blogSubtitle,
-      });
-    }
+    //   setDraft({
+    //     body,
+    //     title: blogTitle,
+    //     subtitle: blogSubtitle,
+    //   });
+    // }
   }
   return (
     <React.Fragment>
