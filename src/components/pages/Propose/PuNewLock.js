@@ -15,7 +15,7 @@ import * as actions from '../../../store/actions';
 import tweb3 from '../../../service/tweb3';
 import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
-import CommonDialog from './CommonDialog';
+import CommonDialog from '../../elements/CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
 import ImageCrop from '../../elements/ImageCrop';
 import { AvatarPro } from '../../elements';

@@ -1,10 +1,9 @@
 import React from 'react';
-import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
-import CommonDialog from './CommonDialog';
+import CommonDialog from '../../elements/CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { sendTransaction } from '../../../helper/index';
 
