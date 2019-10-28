@@ -528,14 +528,14 @@ function Header(props) {
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
-                  <InputBase
+                  {/* <InputBase
                     placeholder="Search…"
                     classes={{
                       root: classes.inputRoot,
                       input: classes.inputInput,
                     }}
                     inputProps={{ 'aria-label': 'search' }}
-                  />
+                  /> */}
                 </div>
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
@@ -550,7 +550,7 @@ function Header(props) {
                     Explore
                   </Typography>
                 </Button>
-                <div className={classes.sectionDesktop}>
+                {/* <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
                     className={classes.menuIcon}
@@ -575,7 +575,7 @@ function Header(props) {
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>
-                </div>
+                </div> */}
                 <div className={classes.sectionMobile}>
                   <IconButton
                     aria-label="show more"
