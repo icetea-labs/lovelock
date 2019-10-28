@@ -412,14 +412,9 @@ class PuNewLock extends React.Component {
 
     this.timeoutHanle1 = setTimeout(async () => {
       try {
-        if (file) {
-          hash = await saveBufferToIpfs(file);
-        }
         if (cropFile) {
           botAva = await saveFileToIpfs(cropFile);
         }
-        const info = { date, hash };
-        const name = 'createPropose';
         if (!partner) {
           message = 'Please choose your partner.';
           enqueueSnackbar(message, { variant: 'error' });
@@ -461,6 +456,13 @@ class PuNewLock extends React.Component {
           }
           botInfo = { firstname, lastname, botAva, botReply };
         }
+
+        if (file) {
+          hash = await saveBufferToIpfs(file);
+        }
+
+        const info = { date, hash };
+        const name = 'createPropose';
 
         const params = [promiseStm, partner, info, botInfo];
         // const params = [promiseStm, partner, info];
