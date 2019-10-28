@@ -546,7 +546,7 @@ function Header(props) {
             </StyledLogo>
             {address && (
               <React.Fragment>
-                <div className={classes.search}>
+                {/* <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
@@ -558,7 +558,7 @@ function Header(props) {
                     }}
                     inputProps={{ 'aria-label': 'search' }}
                   />
-                </div>
+                </div> */}
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
@@ -572,7 +572,7 @@ function Header(props) {
                     Explore
                   </Typography>
                 </Button>
-                <div className={classes.sectionDesktop}>
+                {/* <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
                     className={classes.menuIcon}
@@ -597,7 +597,7 @@ function Header(props) {
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>
-                </div>
+                </div> */}
                 <div className={classes.sectionMobile}>
                   <IconButton
                     aria-label="show more"
