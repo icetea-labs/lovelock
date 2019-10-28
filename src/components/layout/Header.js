@@ -292,6 +292,8 @@ function Header(props) {
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
   const mnemonic = useSelector(state => state.account.mnemonic);
+  const privateKey = useSelector(state => state.account.privateKey);
+  const mode = useSelector(state => state.account.mode);
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -339,7 +341,11 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handleShowphrase() {
-    if (!mnemonic) dispatch(actions.setNeedAuth(true));
+    if (mode === 1 && !mnemonic) {
+      dispatch(actions.setNeedAuth(true));
+    } else if (!privateKey) {
+      dispatch(actions.setNeedAuth(true));
+    }
     setShowPhrase(true);
   }
   function closeShowMnemonic() {
@@ -619,7 +625,7 @@ function Header(props) {
       {friReqMenu}
       {notiList}
       {needAuth && <GetKeyToAuthen />}
-      {showPhrase && mnemonic && <ShowMnemonic close={closeShowMnemonic} />}
+      {showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );
 }

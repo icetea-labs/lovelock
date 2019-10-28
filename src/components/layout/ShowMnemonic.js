@@ -22,16 +22,16 @@ const MnemonixText = styled.div`
 
 export default function ShowMnemonic(props) {
   const mnemonic = useSelector(state => state.account.mnemonic);
+  const privateKey = useSelector(state => state.account.privateKey);
+  const mode = useSelector(state => state.account.mode);
   const { close } = props;
 
   return (
     <div>
       <CommonDialog title="Recovery phrase" okText="Close" close={close} confirm={close}>
-        <div>
-          <span>Your mnemonic </span>
-        </div>
+        <div>{mode === 1 ? <span>Your mnemonic </span> : <span>Your private key </span>}</div>
         <MnemonixText>
-          <p data-cy="mnemonic">{mnemonic}</p>
+          <p data-cy="mnemonic">{mode === 1 ? mnemonic : privateKey}</p>
         </MnemonixText>
       </CommonDialog>
     </div>
