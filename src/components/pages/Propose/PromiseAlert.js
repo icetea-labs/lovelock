@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { withSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
-import CommonDialog from './CommonDialog';
+import CommonDialog from '../../elements/CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { getAlias, sendTransaction } from '../../../helper';
 

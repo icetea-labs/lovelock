@@ -1,5 +1,4 @@
 const keythereum = require('keythereum');
-const { codec } = require('@iceteachain/common');
 
 /**
  * @privateKey
@@ -14,11 +13,12 @@ function encode(privateKey, password, ops) {
       dklen: 32,
       prf: 'hmac-sha256',
     },
+    noAddress: true,
     ...ops,
   };
 
   const dk = keythereum.create();
-  return keythereum.dump(password, codec.toBuffer(privateKey), dk.salt, dk.iv, options);
+  return keythereum.dump(password, Buffer.from(privateKey), dk.salt, dk.iv, options);
 }
 function encodeTx(data, password, ops) {
   const options = {

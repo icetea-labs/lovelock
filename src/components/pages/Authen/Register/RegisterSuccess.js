@@ -110,7 +110,7 @@ function RegisterSuccess(props) {
         .sendCommit({ from: address })
         .then(async ({ returnValue }) => {
           tweb3.wallet.importAccount(token.privateKey);
-          const keyObject = encode(privateKey, password);
+          const keyObject = encode(mnemonic, password);
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
           storage.sessionData = codec
