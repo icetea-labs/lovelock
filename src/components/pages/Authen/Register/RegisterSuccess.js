@@ -131,7 +131,7 @@ function RegisterSuccess(props) {
             mode,
           };
           setAccount(account);
-          setStep('one');
+          // setStep('one');
           setLoading(false);
           if (pathName) {
             history.push(pathName);

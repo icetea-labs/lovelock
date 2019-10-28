@@ -341,11 +341,12 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handleShowphrase() {
-    if (mode === 1 && !mnemonic) {
-      dispatch(actions.setNeedAuth(true));
-    } else if (!privateKey) {
-      dispatch(actions.setNeedAuth(true));
-    }
+    // if (mode === 1 && !mnemonic) {
+    //   dispatch(actions.setNeedAuth(true));
+    // } else if (!privateKey) {
+    //   dispatch(actions.setNeedAuth(true));
+    // }
+    dispatch(actions.setNeedAuth(true));
     setShowPhrase(true);
   }
   function closeShowMnemonic() {
@@ -625,7 +626,7 @@ function Header(props) {
       {friReqMenu}
       {notiList}
       {needAuth && <GetKeyToAuthen />}
-      {showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
+      {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );
 }
