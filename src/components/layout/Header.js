@@ -524,19 +524,19 @@ function Header(props) {
             </StyledLogo>
             {address && (
               <React.Fragment>
-                <div className={classes.search}>
+                {/* <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
-                  {/* <InputBase
+                  <InputBase
                     placeholder="Search…"
                     classes={{
                       root: classes.inputRoot,
                       input: classes.inputInput,
                     }}
                     inputProps={{ 'aria-label': 'search' }}
-                  /> */}
-                </div>
+                  />
+                </div> */}
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
