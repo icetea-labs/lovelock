@@ -77,10 +77,18 @@ function GetKeyToAuthen(props) {
       setLoading(true);
       setTimeout(() => {
         try {
-          const mnemonic = decode(password, encryptedData);
-          const { privateKey, address } = wallet.getAccountFromMneomnic(mnemonic);
-          // const privateKey = codec.toString(decMnemonic.privateKey);
-          // const address = wallet.getAddressFromPrivateKey(privateKey);
+          const decodeOutput = decode(password, encryptedData);
+          let mode = 0;
+          let privateKey;
+          let address;
+          if (wallet.isMnemonic(decodeOutput)) {
+            const account = wallet.getAccountFromMneomnic(decodeOutput);
+            ({ privateKey, address } = account);
+            mode = 1;
+          } else {
+            privateKey = decodeOutput;
+            address = wallet.getAddressFromPrivateKey(privateKey);
+          }
           tweb3.wallet.importAccount(privateKey);
 
           const token = tweb3.wallet.createRegularAccount();
@@ -111,7 +119,8 @@ function GetKeyToAuthen(props) {
               const account = {
                 address,
                 privateKey,
-                mnemonic,
+                mnemonic: mode === 1 ? decodeOutput : '',
+                mode,
                 tokenAddress: token.address,
                 tokenKey: token.privateKey,
                 cipher: password,
