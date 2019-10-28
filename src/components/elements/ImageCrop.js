@@ -30,7 +30,7 @@ const Container = styled.div`
   background-color: #ffffff;
   box-sizing: border-box;
   position: fixed;
-  top: ${props => props.isCoverImg && '10%'};
+  top: ${props => (props.isCoverImg || props.isChangeProfile) && '10%'};
   left: 50%;
   transform: translate(-50%, -50%);
   .cropper-view-box {
@@ -103,7 +103,7 @@ const Action = styled.div`
 export default function ImageCrop(props) {
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
   const [avaPreview, setAvaPreview] = useState('');
-  const { close, accept, originFile, isCoverImg, isAddInfo } = props;
+  const { close, accept, originFile, isCoverImg, isAddInfo, isChangeProfile } = props;
 
   useEffect(() => {
     const reader = new FileReader();
@@ -157,7 +157,7 @@ export default function ImageCrop(props) {
     <QueueAnim animConfig={{ opacity: [1, 0] }}>
       <PuLayout key={1}>
         <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
-          <Container key={2} isCoverImg={isCoverImg} isAddInfo={isAddInfo}>
+          <Container key={2} isCoverImg={isCoverImg} isAddInfo={isAddInfo} isChangeProfile={isChangeProfile}>
             <PuTitle>
               <span className="title">Crop Image</span>
               <IconButton onClick={close}>

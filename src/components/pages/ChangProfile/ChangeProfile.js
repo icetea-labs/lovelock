@@ -303,7 +303,7 @@ function ChangeProfile(props) {
           </BoxAuthenCus>
         </LayoutAuthen>
       </QueueAnim>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isChangeProfile />}
     </React.Fragment>
   );
 }
