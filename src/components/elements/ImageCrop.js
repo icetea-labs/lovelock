@@ -118,26 +118,15 @@ export default function ImageCrop(props) {
     }
   }, []);
 
-  const acceptCrop = useCallback(async () => {
-    const dataUrl = avaPreview.getCroppedCanvas().toDataURL();
-
-    const cropFile = await base64toBlob(dataUrl);
-    const cropData = { cropFile, avaPreview: dataUrl };
-
-    accept(cropData);
+  const acceptCrop = useCallback(() => {
+    avaPreview.getCroppedCanvas().toBlob(blob => {
+      const { name, type } = originFile[0];
+      const parseFile = new File([blob], name, { type });
+      const url = URL.createObjectURL(blob);
+      const cropData = { cropFile: [parseFile], avaPreview: url };
+      accept(cropData);
+    });
   }, [avaPreview]);
-
-  async function base64toBlob(b64Data) {
-    const newName = originFile[0].name;
-    const newType = originFile[0].type;
-    const list = new DataTransfer();
-
-    const response = await fetch(b64Data);
-    const blob = await response.blob();
-    const parseFile = new File([blob], newName, { type: newType });
-    list.items.add(parseFile);
-    return list.files;
-  }
 
   function crop() {
     if (timeout) clearTimeout(timeout);
