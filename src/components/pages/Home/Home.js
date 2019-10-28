@@ -62,12 +62,15 @@ function Home(props) {
   }
 
   useEffect(() => {
-    if (homePropose) {
+    if (homePropose && homePropose.length > 0) {
       const pro = homePropose.filter(item => item.status === 1);
+      let index;
       if (pro.length > 0) {
-        const index = pro[0].id;
-        history.push(`/lock/${index}`);
+        index = pro[0].id;
+      } else {
+        index = homePropose[0].id;
       }
+      history.push(`/lock/${index}`);
     }
   }, [homePropose]);
 
