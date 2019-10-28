@@ -144,8 +144,7 @@ const Copyright = styled.div`
 
 class LandingPage extends PureComponent {
   render() {
-    const currentUrl = window.location.href;
-    const isPropose = currentUrl.includes('propose');
+    const isPropose = window.location.pathname.indexOf('/lock/') === 0;
     return !isPropose ? (
       <React.Fragment>
         <OutBox>

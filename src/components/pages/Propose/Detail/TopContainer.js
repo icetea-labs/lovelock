@@ -259,10 +259,10 @@ function TopContrainer(props) {
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
-  const needUpdate = !topInfo || (proIndex !== topInfo.index)
+  const needUpdate = !topInfo || proIndex !== topInfo.index;
 
   useEffect(() => {
-    setLoading(needUpdate)
+    setLoading(needUpdate);
     if (!needUpdate) {
       setProposeLikeInfo();
     }
@@ -375,8 +375,10 @@ function TopContrainer(props) {
         if (result) {
           setCropFile('');
           setCropImg('');
-          topInfo.coverImg = hash
-          setTopInfo(topInfo)
+          const newTopInfo = Object.assign({}, topInfo, { coverImg: hash });
+          setTopInfo(newTopInfo);
+          // topInfo.coverImg = hash
+          // setTopInfo(topInfo)
           // callView('getProposeByIndex', [proIndex]).then(propose => {
           //   const pro = (propose && propose[0]) || {};
           //   console.log(topInfo, pro)

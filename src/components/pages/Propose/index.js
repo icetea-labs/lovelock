@@ -1,1 +1,1 @@
-export { default as Promise } from './Promise';
+// export { default as Promise } from './Promise';

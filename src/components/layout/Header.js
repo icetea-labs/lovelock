@@ -26,11 +26,13 @@ import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements/AvatarPro';
 import GetKeyToAuthen from './GetKeyToAuthen';
+import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
 // import LandingPage from './LandingPage';
@@ -286,8 +288,12 @@ const notifiList = [
 ];
 
 function Header(props) {
+  const dispatch = useDispatch();
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
+  const mnemonic = useSelector(state => state.account.mnemonic);
+
+  const [showPhrase, setShowPhrase] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [anchorElNoti, setAnchorElNoti] = useState(null);
@@ -332,10 +338,15 @@ function Header(props) {
   function handeExplore() {
     props.history.push('/explore');
   }
-
+  function handleShowphrase() {
+    if (!mnemonic) dispatch(actions.setNeedAuth(true));
+    setShowPhrase(true);
+  }
+  function closeShowMnemonic() {
+    setShowPhrase(false);
+  }
   const address = useSelector(state => state.account.address);
   // const privateKey = useSelector(state => state.account.privateKey);
-  const dispatch = useDispatch();
   const displayName = useSelector(state => state.account.displayName);
   const avatarRedux = useSelector(state => state.account.avatar);
 
@@ -372,6 +383,17 @@ function Header(props) {
           <PersonIcon />
         </ListItemIcon>
         <ListItemText primary="Update Profile" />
+      </StyledMenuItem>
+      <StyledMenuItem
+        onClick={() => {
+          handleShowphrase();
+          handleMenuClose();
+        }}
+      >
+        <ListItemIcon>
+          <VpnKeyIcon />
+        </ListItemIcon>
+        <ListItemText primary="View recovery phrase" />
       </StyledMenuItem>
       <StyledMenuItem
         onClick={() => {
@@ -524,7 +546,7 @@ function Header(props) {
             </StyledLogo>
             {address && (
               <React.Fragment>
-                <div className={classes.search}>
+                {/* <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
@@ -536,7 +558,7 @@ function Header(props) {
                     }}
                     inputProps={{ 'aria-label': 'search' }}
                   />
-                </div>
+                </div> */}
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
@@ -550,7 +572,7 @@ function Header(props) {
                     Explore
                   </Typography>
                 </Button>
-                <div className={classes.sectionDesktop}>
+                {/* <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
                     className={classes.menuIcon}
@@ -575,7 +597,7 @@ function Header(props) {
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>
-                </div>
+                </div> */}
                 <div className={classes.sectionMobile}>
                   <IconButton
                     aria-label="show more"
@@ -597,6 +619,7 @@ function Header(props) {
       {friReqMenu}
       {notiList}
       {needAuth && <GetKeyToAuthen />}
+      {showPhrase && mnemonic && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );
 }

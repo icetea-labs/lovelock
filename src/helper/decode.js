@@ -1,10 +1,9 @@
 const keythereum = require('keythereum');
-const { getAccount } = require('@iceteachain/common/src/utils');
+// const { getAccount } = require('@iceteachain/common/src/utils');
 
 function decode(password, keyObject) {
-  const privateKey = keythereum.recover(password, keyObject);
-  const account = getAccount(privateKey);
-  return account;
+  const mnemonic = keythereum.recover(password, keyObject);
+  return new TextDecoder('utf-8').decode(mnemonic).replace(/%20/g, ' ');
 }
 function decodeTx(password, keyObject, encode) {
   let data = keythereum.recover(password, keyObject);
