@@ -34,7 +34,6 @@ const styles = theme => ({
 
 function ByMnemonic(props) {
   const { setLoading, setAccount, setStep, history } = props;
-  const [isPrivateKey, setIsPrivateKey] = useState(false);
   const [password, setPassword] = useState('');
   const [valueInput, setValueInput] = useState('');
   const [rePassErr] = useState('');
@@ -64,14 +63,17 @@ function ByMnemonic(props) {
     setLoading(true);
     setTimeout(async () => {
       try {
-        let privateKey = '';
-        if (isPrivateKey) {
-          privateKey = valueInput;
+        let privateKey = valueInput;
+        let address;
+        let mode = 0;
+        if (wallet.isMnemonic(valueInput)) {
+          const recoveryAccount = wallet.getAccountFromMneomnic(valueInput);
+          ({ privateKey, address } = recoveryAccount);
+          mode = 1;
         } else {
-          privateKey = wallet.getPrivateKeyFromMnemonic(valueInput);
+          address = wallet.getAddressFromPrivateKey(privateKey);
         }
         // console.log('getAddressFromPrivateKey', privateKey);
-        const address = wallet.getAddressFromPrivateKey(privateKey);
         const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
 
@@ -94,7 +96,7 @@ function ByMnemonic(props) {
           .sendCommit({ from: address })
           .then(({ returnValue }) => {
             tweb3.wallet.importAccount(token.privateKey);
-            const keyObject = encode(privateKey, password);
+            const keyObject = encode(valueInput, password);
             const storage = isRemember ? localStorage : sessionStorage;
             // save token account
             storage.sessionData = codec
@@ -106,7 +108,7 @@ function ByMnemonic(props) {
               })
               .toString('base64');
             // save main account
-            savetoLocalStorage(address, keyObject);
+            savetoLocalStorage({ address, mode, keyObject });
             const account = {
               address,
               privateKey,
@@ -114,6 +116,8 @@ function ByMnemonic(props) {
               tokenKey: token.privateKey,
               cipher: password,
               encryptedData: keyObject,
+              mode,
+              mnemonic: wallet.isMnemonic(valueInput) ? valueInput : '',
             };
             setAccount(account);
             setLoading(false);
@@ -136,9 +140,6 @@ function ByMnemonic(props) {
 
   function handleMnemonic(event) {
     const value = event.target.value.trim();
-    if (value.indexOf(' ') < 0) {
-      setIsPrivateKey(true);
-    }
     setValueInput(value);
   }
 

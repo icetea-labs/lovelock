@@ -19,6 +19,7 @@ const initialState = Object.assign(
     mnemonic: '',
     encryptedData: '',
     displayName: '',
+    mode: '',
   },
   (function getSessionStorage() {
     const resp = {};
@@ -39,6 +40,7 @@ const initialState = Object.assign(
     // eslint-disable-next-line no-cond-assign
     if ((user = (user && JSON.parse(user)) || {}).address) {
       resp.address = user.address;
+      resp.mode = user.mode; //  0: privatekey - 1: mnemonic
       resp.encryptedData = user.keyObject;
     }
 
