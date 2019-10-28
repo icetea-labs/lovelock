@@ -257,7 +257,6 @@ class PuNewLock extends React.Component {
     this.setState({
       partner: val,
     });
-    // console.log("view partnerChange", val);
   };
 
   promiseStmChange = e => {
@@ -265,7 +264,6 @@ class PuNewLock extends React.Component {
     this.setState({
       promiseStm: val,
     });
-    // console.log("view promiseStmChange", value);
   };
 
   escapeRegexCharacters = str => {
@@ -500,7 +498,6 @@ class PuNewLock extends React.Component {
       originFile,
       isJournal,
     } = this.state;
-    // console.log('state CK', this.state);
 
     const inputProps = {
       placeholder: '@partner',

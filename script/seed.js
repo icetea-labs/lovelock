@@ -55,6 +55,8 @@ const registerUsers = (
     const register = (username, from) => alias.register(username, from)
         .sendCommit({ from })
         .then(({ returnValue }) => returnValue.split('.')[1])
+    const senderAvatar = 'QmZK5Z8VXjg6RUHbp6BzJnExrFLQRkpJ3H9J11CGJndhUf'
+    const receiverAvatar = 'QmciNMPPa2GsRAMM7ftnsg8GiaRKdiWBaCh432r2bDddc4'
 
     const setProfile = (username, pkey, avatar, from) => did.setTag(from, {
         firstname: username,
@@ -68,8 +70,8 @@ const registerUsers = (
     return Promise.all([
         register(senderName, sender),
         register(receiverName, receiver),
-        setProfile(senderName, spkey, sender),
-        setProfile(receiverName, rpkey, receiver)
+        setProfile(senderName, spkey, senderAvatar, sender),
+        setProfile(receiverName, rpkey, receiverAvatar, receiver)
     ])
 }
 

@@ -151,7 +151,7 @@ class LandingPage extends PureComponent {
           <SplitLeft>
             <SplitContentLeft>
               <LoveLockQuote>
-                  An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting. Keep it to yourself or share with close friends.
+                  An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting. Keep to yourself or share with close friends.
               </LoveLockQuote>
             </SplitContentLeft>
           </SplitLeft>

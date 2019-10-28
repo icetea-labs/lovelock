@@ -45,7 +45,7 @@ class PromiseConfirm extends React.Component {
 
   async messageAccept(message) {
     const { index, enqueueSnackbar, close, address, tokenAddress } = this.props;
-    // console.log('view confirm props', this.props);
+
     try {
       const name = 'acceptPropose';
       const params = [index, message];
@@ -66,7 +66,7 @@ class PromiseConfirm extends React.Component {
       const name = 'cancelPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params, { address, tokenAddress });
-      // console.log('View result', result);
+
       if (result) {
         // window.alert('Success');
         const errMessage = 'Your lock has been rejected.';

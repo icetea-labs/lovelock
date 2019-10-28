@@ -70,7 +70,6 @@ function ByMnemonic(props) {
         } else {
           privateKey = wallet.getPrivateKeyFromMnemonic(valueInput);
         }
-        // console.log('getAddressFromPrivateKey', privateKey);
         const address = wallet.getAddressFromPrivateKey(privateKey);
         const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;

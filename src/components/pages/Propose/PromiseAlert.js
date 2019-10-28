@@ -65,7 +65,7 @@ function PromiseAlert(props) {
       const funcName = 'cancelPropose';
       const params = [ind, 'no'];
       const result = await sendTransaction(funcName, params, { address, tokenAddress });
-      // console.log('View result', result);
+
       if (result) {
         const message = 'Your proposes has been removed.';
         enqueueSnackbar(message, { variant: 'info' });

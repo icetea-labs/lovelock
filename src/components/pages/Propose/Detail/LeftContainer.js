@@ -163,7 +163,6 @@ function LeftContainer(props) {
     }
     setStep('pending');
     setIndex(proIndex);
-    // console.log('view pending index', index);
   }
 
   function eventConfirmPropose(data, signal) {

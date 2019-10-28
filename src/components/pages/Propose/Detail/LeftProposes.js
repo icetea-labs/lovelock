@@ -91,7 +91,6 @@ export default function LeftProposes(props) {
   };
 
   return proFiltered.sort(compare).map(item => {
-    // console.log('item', item);
     const info = getInfo(item);
     return (
       <CardHeader

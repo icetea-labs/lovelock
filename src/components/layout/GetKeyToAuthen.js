@@ -78,10 +78,7 @@ function GetKeyToAuthen(props) {
       setTimeout(() => {
         try {
           const mnemonic = decode(password, encryptedData);
-          console.log('decMnemonic', mnemonic);
           const { privateKey, address } = wallet.getAccountFromMneomnic(mnemonic);
-          console.log('privateKey', privateKey);
-          console.log('address', address);
           // const privateKey = codec.toString(decMnemonic.privateKey);
           // const address = wallet.getAddressFromPrivateKey(privateKey);
           tweb3.wallet.importAccount(privateKey);
@@ -89,7 +86,6 @@ function GetKeyToAuthen(props) {
           const token = tweb3.wallet.createRegularAccount();
           const ms = tweb3.contract('system.did').methods;
           const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          // console.log('expire', expire);
           ms.grantAccessToken(
             address,
             [process.env.REACT_APP_CONTRACT, 'system.did'],

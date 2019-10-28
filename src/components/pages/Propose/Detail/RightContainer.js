@@ -36,7 +36,6 @@ export default function RightContainer(props) {
     setChanged(c => !c)
   }
 
-  // console.log('isOwner', isOwner);
   return (
     <RightBox>
       {address && isOwner && <CreateMemory proIndex={proIndex} onMemoryAdded={refresh} />}
