@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" style="font-size: 16px">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="fragment" content="!">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#8250c8">
+    <meta name="msapplication-TileColor" content="#8250c8">
+    <meta name="theme-color" content="#8250c8">
+    <style>
+        body {
+            background-color: #ddd;
+            padding: 2.5%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        #wrapper {
+            height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #announce {
+            max-width: 320px;
+            margin: 0 auto;
+            text-align: center;
+            background-color: #f8f8f8;
+            color: #333;
+            padding: 16px 16px 24px 16px;
+            border-radius: 5px;
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
+            vertical-align: middle;
+        }
+
+        main {
+            line-height: 1.35;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 80%;
+            color: #999;
+        }
+
+        footer a {
+            text-decoration: none;
+        }
+
+        a {
+            color: #8250c8;
+        }
+
+        #logo {
+            margin-top: -32px;
+        }
+
+        .b {
+            display: none;
+        }
+
+        .browser .b {
+            display: inline
+        }
+
+        .browser .d {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="announce">
+            <header>
+                <img id="logo" src='./static/img/logo.svg' width="48" height="48" />
+                <h2><span class='d'>MOBILE DEVICE NOT SUPPORTED YET</span><span class='b'>YOUR BROWSER IS
+                        OUTDATED</span>
+                </h2>
+            </header>
+            <main>
+                <p><span class='d'>In the meanwhile, you can try Lovelock on
+                        your desktop
+                        browser.</span><span class='b'>Lovelock requires modern browsers. Please download <a
+                            href="https://www.google.com/chrome/">Chrome</a>, <a
+                            href="https://www.mozilla.org/en-US/firefox/new/">FireFox</a>, or use <a
+                            href="https://www.apple.com/vn/safari/">Safari</a>.</span></p>
+                <p>We are sorry for the inconvenience.</p>
+            </main>
+        </div>
+    </div>
+    <footer>Made with Love on <a href="https://icetea.io">Icetea Platform</a></footer>
+    <script>
+        if (window.location.hash === '#browser') {
+            document.getElementById('announce').setAttribute('class', 'browser')
+        }
+    </script>
+</body>
+
+</html>

@@ -11,7 +11,6 @@ import DetailPropose from './components/pages/Propose/Detail';
 import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
 import Explore from './components/pages/Home/Explore';
-import { checkDevice } from './helper';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -21,27 +20,6 @@ function RouteWithLayout({ layout, component, ...rest }) {
 
 function App(props) {
   const { isLoading } = props;
-  // const checkBrowser = checkDevice.get_browser();
-  // console.log('Br', checkBrowser);
-  const message =
-    'This application is currently not supported on mobile and tablet. Please open the application in a desktop browsers.';
-  const oldBrowser =
-    'This application requires modern browsers. Please install a recent version of Chrome or FireFox.';
-  if (window.screen.width < 966 || checkDevice.isMobile()) {
-    return (
-      <div>
-        <span>{message}</span>
-      </div>
-    );
-  }
-  if (!('caches' in window)) {
-    return (
-      <div>
-        <span>{oldBrowser}</span>
-      </div>
-    );
-  }
-  
   return (
     <div className="App">
       <Router>
