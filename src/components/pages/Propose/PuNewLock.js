@@ -207,7 +207,7 @@ class PuNewLock extends React.Component {
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
 
-    if (escapedValue.length <= 3) {
+    if (escapedValue.length < 3) {
       this.setState({ suggestions: [] });
       return;
     }
