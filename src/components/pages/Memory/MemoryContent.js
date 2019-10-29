@@ -349,7 +349,7 @@ function MemoryContent(props) {
         <span>
           <span>Locked with </span>
           <Typography component="span" className={classes.relationshipName}>
-            {propose.r_name}
+            {propose.s_name}
           </Typography>
         </span>
       </Typography>
