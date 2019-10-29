@@ -30,8 +30,19 @@ const TopContainerBox = styled.div`
     position: relative;
     overflow: hidden;
     max-width: ${rem(900)};
-    max-height: ${rem(425)};
+    /* max-height: ${rem(425)}; */
     min-height: ${rem(225)};
+    .showChangeImg {
+      display: none;
+    }
+    &:hover {
+      .showChangeImg {
+        display: block;
+        position: absolute;
+        top: 5px;
+        left: 5px;
+      }
+    }
     img {
       width: 100%;
       height: 100%;
@@ -194,14 +205,15 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10,
   },
   media: {
-    height: 450,
+    height: 0,
+    paddingTop: '56.25%', // 16:9
     position: 'relative',
     overflow: 'hidden',
     backgroundSize: 'cover',
     '&:hover': {
       '& $icon': {
-        display: 'flex',
-        alignItem: 'center',
+        // display: 'flex',
+        // alignItem: 'center',
       },
     },
   },
@@ -209,7 +221,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
     fontSize: '12px',
     color: 'white',
-    display: 'none',
+    // display: 'none',
   },
   photoCameraIcon: {
     marginRight: theme.spacing(1),
@@ -333,7 +345,7 @@ function TopContrainer(props) {
 
   function handleImageChange(event) {
     event.preventDefault();
-    const orFiles = event.target.files;
+    const orFiles = Array.from(event.target.files);
 
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
@@ -387,6 +399,23 @@ function TopContrainer(props) {
     }, 1);
   }
 
+  const buttonChange = (
+    <Button className={classes.icon}>
+      <PhotoCameraIcon className={classes.photoCameraIcon} />
+      <input
+        accept="image/jpeg,image/png"
+        className="fileInput"
+        role="button"
+        type="file"
+        value=""
+        onChange={handleImageChange}
+      />
+      <Typography className={classes.changeCoverTitle} noWrap>
+        Change
+      </Typography>
+    </Button>
+  );
+
   if (loading) {
     return (
       <TopContainerBox>
@@ -420,19 +449,15 @@ function TopContrainer(props) {
       <div className="top__coverimg">
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg} title="Change lock image">
-            <Button className={classes.icon}>
-              <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <input className="fileInput" type="file" accept="image/jpeg,image/png" onChange={handleImageChange} />
-              <Typography className={classes.changeCoverTitle} noWrap>
-                Change
-              </Typography>
-            </Button>
-            <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
-              Cancel
-            </Button>
-            <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
-              OK
-            </Button>
+            <div className="showChangeImg">
+              <div>{buttonChange}</div>
+              <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
+                Cancel
+              </Button>
+              <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
+                OK
+              </Button>
+            </div>
           </CardMedia>
         ) : (
           <CardMedia
@@ -440,13 +465,7 @@ function TopContrainer(props) {
             image={process.env.REACT_APP_IPFS + topInfo.coverImg}
             title="Change lock image"
           >
-            <Button className={classes.icon}>
-              <PhotoCameraIcon className={classes.photoCameraIcon} />
-              <input className="fileInput" type="file" accept="image/jpeg,image/png" onChange={handleImageChange} />
-              <Typography className={classes.changeCoverTitle} noWrap>
-                Change
-              </Typography>
-            </Button>
+            <div className="showChangeImg">{buttonChange}</div>
           </CardMedia>
         )}
       </div>

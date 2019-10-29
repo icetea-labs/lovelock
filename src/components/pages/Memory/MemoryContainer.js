@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { useSnackbar } from 'notistack';
 
-import { getTagsInfo, getJsonFromIpfs, getQueryParam } from '../../../helper';
+import { getTagsInfo, getJsonFromIpfs, getQueryParam, signalPrerenderDone } from '../../../helper';
 import MemoryContent from './MemoryContent';
 import * as actions from '../../../store/actions';
 
@@ -86,9 +86,7 @@ function MemoryContainer(props) {
     setLoading(false);
 
     if (!hasViewDetail) {
-      window.setTimeout(() => {
-        window.prerenderReady = true
-      }, 500)
+      signalPrerenderDone()
     }
   }
 

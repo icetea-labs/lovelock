@@ -3,6 +3,7 @@ import Dante from 'Dante2';
 import { withStyles } from '@material-ui/core/styles';
 import mediumZoom from 'medium-zoom';
 import Input from '@material-ui/core/Input';
+import { DividerBlockConfig } from "Dante2/package/es/components/blocks/divider";
 
 const font =
   '"jaf-bernino-sans", "Open Sans", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
@@ -55,11 +56,13 @@ class Editor extends React.Component {
   }
 
   configWidgets = () => {
-    const widgets = Dante.defaultProps.widgets;
+    const widgets = [ ...Dante.defaultProps.widgets ];
     const imgBlock = widgets[0];
 
     // remove the border when item is selected in view mode
     imgBlock.selected_class = this.props.read_only ? 'is-selected' : 'is-selected is-mediaFocused';
+
+    widgets.push(DividerBlockConfig())
 
     return widgets;
   };

@@ -21,7 +21,8 @@ import {
   loadMemCacheAPI,
   decodeImg,
   getJsonFromIpfs,
-  makeProposeName
+  makeProposeName,
+  signalPrerenderDone
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -349,7 +350,7 @@ function MemoryContent(props) {
         <span>
           <span>Locked with </span>
           <Typography component="span" className={classes.relationshipName}>
-            {propose.r_name}
+            {propose.s_name}
           </Typography>
         </span>
       </Typography>
@@ -373,9 +374,7 @@ function MemoryContent(props) {
   };
 
   const renderHelmet = blogInfo => {
-    window.setTimeout(() => {
-      window.prerenderReady = true
-    }, 500)
+    signalPrerenderDone()
 
     const title = `${blogInfo.title} - A story on Lovelock`
     const desc = makeProposeName(propose)
