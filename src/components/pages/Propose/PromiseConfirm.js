@@ -1,10 +1,9 @@
 import React from 'react';
-import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
-import CommonDialog from './CommonDialog';
+import CommonDialog from '../../elements/CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { sendTransaction } from '../../../helper/index';
 
@@ -46,7 +45,7 @@ class PromiseConfirm extends React.Component {
 
   async messageAccept(message) {
     const { index, enqueueSnackbar, close, address, tokenAddress } = this.props;
-    // console.log('view confirm props', this.props);
+
     try {
       const name = 'acceptPropose';
       const params = [index, message];
@@ -67,7 +66,7 @@ class PromiseConfirm extends React.Component {
       const name = 'cancelPropose';
       const params = [index, message];
       const result = await sendTransaction(name, params, { address, tokenAddress });
-      // console.log('View result', result);
+
       if (result) {
         // window.alert('Success');
         const errMessage = 'Your lock has been rejected.';

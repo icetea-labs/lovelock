@@ -4,7 +4,7 @@ import QueueAnim from 'rc-queue-anim';
 
 import { ValidatorForm } from 'react-material-ui-form-validator';
 import IconButton from '@material-ui/core/IconButton';
-import { ButtonPro, LinkPro } from '../../elements/Button';
+import { ButtonPro, LinkPro } from './Button';
 
 const PuLayout = styled.div`
   position: fixed;

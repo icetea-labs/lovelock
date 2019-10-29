@@ -46,7 +46,6 @@ function MemoryContainer(props) {
     const showMemoryId = parseInt(getQueryParam('memory'))
     let newMemoryList = [];
     setLoading(true);
-    // console.log('memorydata', memorydata);
 
     let tags = memorydata.map(mem => {
       return getTagsInfo(mem.sender);

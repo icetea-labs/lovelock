@@ -141,7 +141,6 @@ export default function MemoryComments(props) {
       respTags.push(resp);
     }
     respTags = await Promise.all(respTags);
-    // console.log('respTags', respTags);
     for (let i = 0; i < respComment.length; i++) {
       respComment[i].nick = respTags[i]['display-name'];
       respComment[i].avatar = respTags[i].avatar;
@@ -158,7 +157,6 @@ export default function MemoryComments(props) {
     }
     const method = 'addComment';
     const params = [memoryIndex, comment, ''];
-    // console.log('memoryIndex', memoryIndex);
     await sendTransaction(method, params, { address, tokenAddress });
     myFormRef.reset();
     setComment('');

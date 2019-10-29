@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { withSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
-import CommonDialog from './CommonDialog';
+import CommonDialog from '../../elements/CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { getAlias, sendTransaction } from '../../../helper';
 
@@ -65,7 +65,7 @@ function PromiseAlert(props) {
       const funcName = 'cancelPropose';
       const params = [ind, 'no'];
       const result = await sendTransaction(funcName, params, { address, tokenAddress });
-      // console.log('View result', result);
+
       if (result) {
         const message = 'Your proposes has been removed.';
         enqueueSnackbar(message, { variant: 'info' });

@@ -102,6 +102,7 @@ function RegisterSuccess(props) {
   function gotoHome() {
     setLoading(true);
     setTimeout(async () => {
+      const mode = 1;
       const token = tweb3.wallet.createRegularAccount();
       const ms = tweb3.contract('system.did').methods;
       const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
@@ -110,7 +111,7 @@ function RegisterSuccess(props) {
         .sendCommit({ from: address })
         .then(async ({ returnValue }) => {
           tweb3.wallet.importAccount(token.privateKey);
-          const keyObject = encode(privateKey, password);
+          const keyObject = encode(mnemonic, password);
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
           storage.sessionData = codec
@@ -122,14 +123,15 @@ function RegisterSuccess(props) {
             })
             .toString('base64');
           // save main account
-          savetoLocalStorage(address, keyObject);
+          savetoLocalStorage({ address, mode, keyObject });
           const account = {
             tokenAddress: token.address,
             tokenKey: token.privateKey,
             encryptedData: keyObject,
+            mode,
           };
           setAccount(account);
-          setStep('one');
+          // setStep('one');
           setLoading(false);
           if (pathName) {
             history.push(pathName);

@@ -80,20 +80,20 @@ function LeftContainer(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    let signal = {}
+    let signal = {};
 
     loadProposes(signal);
     watchCreatePropose(signal);
     // watchConfirmPropose(signal);
 
-    return () => signal.cancel = true
+    return () => (signal.cancel = true);
   }, []);
 
   function watchCreatePropose(signal) {
     const filter = {};
     return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
       if (error) {
-        showSubscriptionError(error, enqueueSnackbar)
+        showSubscriptionError(error, enqueueSnackbar);
       } else {
         const repsNew = result.filter(({ eventName }) => {
           return eventName === 'createPropose';
@@ -163,7 +163,6 @@ function LeftContainer(props) {
     }
     setStep('pending');
     setIndex(proIndex);
-    // console.log('view pending index', index);
   }
 
   function eventConfirmPropose(data, signal) {
@@ -175,7 +174,7 @@ function LeftContainer(props) {
   }
 
   async function eventCreatePropose(data, signal) {
-    const log = await addInfoToProposes([data.log]);
+    const log = await addInfoToProposes([data.log], signal);
     addPropose(log[0]);
 
     if (address !== log[0].sender) {
@@ -195,7 +194,7 @@ function LeftContainer(props) {
       resp = (await callView('getProposeByAddress', [address])) || [];
     }
     const newPropose = await addInfoToProposes(resp, signal);
-    if (signal.cancel) return
+    if (signal.cancel) return;
 
     setPropose(newPropose);
     setLoading(false);
@@ -219,12 +218,12 @@ function LeftContainer(props) {
         // Get info tags partner. case on receiver is bot address -> get tags info of sender address
         // eslint-disable-next-line no-await-in-loop
         const reps = await getTagsInfo(partnerAddress);
-        if (signal.cancel) return
+        if (signal.cancel) return;
         clonePro[i].name = reps['display-name'];
         clonePro[i].avatar = reps.avatar;
         // eslint-disable-next-line no-await-in-loop
         const nick = await getAlias(partnerAddress);
-        if (signal.cancel) return
+        if (signal.cancel) return;
         clonePro[i].nick = `@${nick}`;
       }
     }

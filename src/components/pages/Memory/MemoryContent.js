@@ -209,7 +209,6 @@ function MemoryContent(props) {
           mem.info.hash[i].src = URL.createObjectURL(blob);
         }
       }
-      // console.log('mem', mem, 'id=', memory.id);
     }
     
     return mem
@@ -243,7 +242,6 @@ function MemoryContent(props) {
   function decodePrivateMemory() {
     setTimeout(() => {
       const obj = Object.assign({}, memoryDecrypted);
-      // console.log(privateKey, '-', publicKey, obj.pubkey, !obj.isUnlock);
       if (!obj.isUnlock && privateKey && publicKey && obj.pubkey) {
         setDecoding(true);
         setTimeout(async () => {

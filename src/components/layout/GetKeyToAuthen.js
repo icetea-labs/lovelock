@@ -12,7 +12,7 @@ import { withRouter } from 'react-router-dom';
 import tweb3 from '../../service/tweb3';
 import * as actions from '../../store/actions';
 import { wallet, decode, savetoLocalStorage } from '../../helper';
-import CommonDialog from '../pages/Propose/CommonDialog';
+import CommonDialog from '../elements/CommonDialog';
 import { encode } from '../../helper/encode';
 
 function GetKeyToAuthen(props) {
@@ -77,14 +77,23 @@ function GetKeyToAuthen(props) {
       setLoading(true);
       setTimeout(() => {
         try {
-          const privateKey = codec.toString(decode(password, encryptedData).privateKey);
-          const address = wallet.getAddressFromPrivateKey(privateKey);
+          const decodeOutput = decode(password, encryptedData);
+          let mode = 0;
+          let privateKey;
+          let address;
+          if (wallet.isMnemonic(decodeOutput)) {
+            const account = wallet.getAccountFromMneomnic(decodeOutput);
+            ({ privateKey, address } = account);
+            mode = 1;
+          } else {
+            privateKey = decodeOutput;
+            address = wallet.getAddressFromPrivateKey(privateKey);
+          }
           tweb3.wallet.importAccount(privateKey);
 
           const token = tweb3.wallet.createRegularAccount();
           const ms = tweb3.contract('system.did').methods;
           const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          // console.log('expire', expire);
           ms.grantAccessToken(
             address,
             [process.env.REACT_APP_CONTRACT, 'system.did'],
@@ -94,7 +103,7 @@ function GetKeyToAuthen(props) {
             .sendCommit({ from: address })
             .then(({ returnValue }) => {
               tweb3.wallet.importAccount(token.privateKey);
-              const keyObject = encode(privateKey, password);
+              // const keyObject = encode(privateKey, password);
               const storage = isRemember ? localStorage : sessionStorage;
               // save token account
               storage.sessionData = codec
@@ -106,14 +115,15 @@ function GetKeyToAuthen(props) {
                 })
                 .toString('base64');
               // re-save main account
-              savetoLocalStorage(address, keyObject);
+              // savetoLocalStorage(address, keyObject);
               const account = {
                 address,
                 privateKey,
+                mnemonic: mode === 1 ? decodeOutput : '',
+                mode,
                 tokenAddress: token.address,
                 tokenKey: token.privateKey,
                 cipher: password,
-                encryptedData: keyObject,
               };
               setAccount(account);
               setLoading(false);
@@ -121,8 +131,8 @@ function GetKeyToAuthen(props) {
                 close();
               }, 50);
             });
-        } catch (err) {
-          // console.log(err);
+        } catch (error) {
+          console.error(error);
           setLoading(false);
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });

@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
+import { withRouter } from 'react-router-dom';
 
 import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
 import { HeaderAuthen } from '../../../elements/Common';
 import RegisterUsername from './RegisterUsername';
 import RegisterSuccess from './RegisterSuccess';
+import * as actionCreate from '../../../../store/actions/create';
 
 function Register(props) {
-  const { step } = props;
+  const { step, setStep } = props;
+
+  useEffect(() => {
+    setStep('one');
+  }, []);
+
   return (
     <div>
       <QueueAnim delay={200} type={['top', 'bottom']}>
@@ -32,11 +39,14 @@ const mapStateToProps = state => {
   };
 };
 
-// const mapDispatchToProps = (dispatch) => {
-//   return {
-//   };
-// }
+const mapDispatchToProps = dispatch => {
+  return {
+    setStep: step => {
+      dispatch(actionCreate.setStep(step));
+    },
+  };
+};
 export default connect(
   mapStateToProps,
-  null
-)(Register);
+  mapDispatchToProps
+)(withRouter(Register));

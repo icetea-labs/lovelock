@@ -30,12 +30,8 @@ const {
 
 const toHttpRpc = wsUrl => {
     const url = new URL(wsUrl)
-    return `http://${url.host}`
-}
-
-const toWebUrl = wsUrl => {
-    const url = new URL(wsUrl)
-    return `http://${url.hostname}:${PORT || 3000}`
+    const protocol = url.protocol === 'wss:' ? 'https' : 'http'
+    return `${protocol}://${url.host}`
 }
 
 const endpoint = toHttpRpc(REACT_APP_RPC)
@@ -55,6 +51,8 @@ const registerUsers = (
     const register = (username, from) => alias.register(username, from)
         .sendCommit({ from })
         .then(({ returnValue }) => returnValue.split('.')[1])
+    const senderAvatar = 'QmZK5Z8VXjg6RUHbp6BzJnExrFLQRkpJ3H9J11CGJndhUf'
+    const receiverAvatar = 'QmciNMPPa2GsRAMM7ftnsg8GiaRKdiWBaCh432r2bDddc4'
 
     const setProfile = (username, pkey, avatar, from) => did.setTag(from, {
         firstname: username,
@@ -68,8 +66,8 @@ const registerUsers = (
     return Promise.all([
         register(senderName, sender),
         register(receiverName, receiver),
-        setProfile(senderName, spkey, sender),
-        setProfile(receiverName, rpkey, receiver)
+        setProfile(senderName, spkey, senderAvatar, sender),
+        setProfile(receiverName, rpkey, receiverAvatar, receiver)
     ])
 }
 
@@ -198,7 +196,7 @@ const blogParams = [JSON.stringify({
         await Promise.all(promises)
 
         // print the URL
-        console.log(`${toWebUrl(REACT_APP_RPC)}/lock/${pIndex}`)
+        console.log(`http://localhost:3000/lock/${pIndex}`)
 
         // create a pending propose
         await makeLove({
@@ -239,10 +237,13 @@ const blogParams = [JSON.stringify({
         })
 
         // print out the private key :D
+        console.log('Import the following private keys to use:')
         if (keyGenerated) {
-            console.log('Import the following privateky to use: ' + pkey)
+            console.log('Sender key: ' + pkey)
+        } else {
+            console.log('Sender key: use value in your env variable.')
         }
-
+        console.log('Receiver key: ' + toKeyString(toAccountObj.privateKey))
 
     })().catch(e => {
         console.error(e)

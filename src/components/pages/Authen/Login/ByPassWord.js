@@ -65,15 +65,27 @@ function ByPassWord(props) {
 
       setTimeout(() => {
         try {
-          const privateKey = codec.toString(decode(password, encryptedData).privateKey);
-          const address = wallet.getAddressFromPrivateKey(privateKey);
+          const decodeOutput = decode(password, encryptedData);
+          let mode = 0;
+          let privateKey;
+          let address;
+          if (wallet.isMnemonic(decodeOutput)) {
+            const account = wallet.getAccountFromMneomnic(decodeOutput);
+            ({ privateKey, address } = account);
+            mode = 1;
+          } else {
+            privateKey = decodeOutput;
+            address = wallet.getAddressFromPrivateKey(privateKey);
+          }
+
+          // const privateKey = codec.toString(decode(password, encryptedData).privateKey);
+          // const address = wallet.getAddressFromPrivateKey(privateKey);
           // const account = { address, privateKey, cipher: password };
           tweb3.wallet.importAccount(privateKey);
           // tweb3.wallet.defaultAccount = address;
           const token = tweb3.wallet.createRegularAccount();
           const ms = tweb3.contract('system.did').methods;
           const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          // console.log('expire', expire);
           ms.grantAccessToken(
             address,
             [process.env.REACT_APP_CONTRACT, 'system.did'],
@@ -95,7 +107,7 @@ function ByPassWord(props) {
                 })
                 .toString('base64');
               // re-save main account
-              savetoLocalStorage(address, keyObject);
+              savetoLocalStorage({ address, mode, keyObject });
               const account = {
                 address,
                 privateKey,
@@ -103,6 +115,7 @@ function ByPassWord(props) {
                 tokenKey: token.privateKey,
                 cipher: password,
                 encryptedData: keyObject,
+                mode,
               };
               setAccount(account);
               setLoading(false);

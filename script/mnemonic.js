@@ -16,7 +16,7 @@ exports.toPkey = mnemonic => {
             // there must be something wrong, because the ratio of regular account is 50%
             throw new Error('Too many tries deriving regular account from seed.')
         }
-        pkey = hdkey.deriveChild(i)
+        pkey = hdkey.deriveChild(i).privateKey
         const { address } = ecc.toPubKeyAndAddress(pkey)
         found = codec.isRegularAddress(address)
     }

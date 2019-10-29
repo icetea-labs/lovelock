@@ -14,23 +14,23 @@ const paths = 'm’/44’/349’/0’/0';
 export const contract = process.env.REACT_APP_CONTRACT;
 
 export function showSubscriptionError(error, enqueueSnackbar) {
-  const clickToMuch = error.code === -32000
+  const clickToMuch = error.code === -32000;
   const variant = clickToMuch ? 'info' : 'warning';
-  const message = clickToMuch ? 
-    'It appears that you click too quickly.' : 
-    `An warning happened, you may need to reload the page. (${error.code})`
-  console.warn(error)
+  const message = clickToMuch
+    ? 'It appears that you click too quickly.'
+    : `An warning happened, you may need to reload the page. (${error.code})`;
+  console.warn(error);
   enqueueSnackbar(message, { variant, autoHideDuration: 5000 });
 }
 
 export function getQueryParam(name) {
-  const search = window.location.search
-  const params = new URLSearchParams(search)
-  return name ? params.get(name) : params
+  const search = window.location.search;
+  const params = new URLSearchParams(search);
+  return name ? params.get(name) : params;
 }
 
 export function makeProposeName(p, prefix = '') {
-  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} ❤️ ${p.r_name}`)
+  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} ❤️ ${p.r_name}`);
 }
 
 export function callPure(funcName, params) {
@@ -46,7 +46,7 @@ function callReadOrPure(funcName, params, method) {
 export async function sendTransaction(funcName, params, opts) {
   console.log('sendTransaction', funcName, params);
   const ct = tweb3.contract(contract);
-  const sendType = opts.sendType || 'sendCommit'
+  const sendType = opts.sendType || 'sendCommit';
   const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
     signers: opts.tokenAddress,
@@ -362,9 +362,9 @@ export function diffTime(time) {
   return moment(time).fromNow();
 }
 
-export async function savetoLocalStorage(address, keyObject) {
+export async function savetoLocalStorage(value) {
   localStorage.removeItem('user');
-  localStorage.setItem('user', JSON.stringify({ address, keyObject }));
+  localStorage.setItem('user', JSON.stringify(value));
 }
 let cachesharekey = {};
 export async function generateSharedKey(privateKeyA, publicKeyB) {
@@ -431,7 +431,7 @@ export const wallet = {
     return codec.toKeyString(privateKey);
   },
   getHdKeyFromMnemonic(mnemonic) {
-    if (!bip39.validateMnemonic(mnemonic)) {
+    if (!this.isMnemonic(mnemonic)) {
       throw new Error('wrong mnemonic format');
     }
     const seed = bip39.mnemonicToSeedSync(mnemonic);
@@ -453,6 +453,12 @@ export const wallet = {
   getAddressFromPrivateKey(privateKey) {
     const { address } = ecc.toPubKeyAndAddressBuffer(privateKey);
     return address;
+  },
+  isMnemonic(mnemonic) {
+    if (bip39.validateMnemonic(mnemonic)) {
+      return true;
+    }
+    return false;
   },
 };
 

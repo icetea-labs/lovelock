@@ -41,7 +41,6 @@ export default function DetailPropose(props) {
       setPageErr(true);
     } else {
       callView('getProposeByIndex', [proIndex]).then(async propose => {
-        // console.log('--------Detail propose loaded ------');
         const proInfo = propose[0] || {};
 
         // add basic extra info

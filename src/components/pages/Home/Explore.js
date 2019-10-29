@@ -21,7 +21,6 @@ function Explore(props) {
 
   async function loadMemory() {
     const result = await callView('getMemoriesByRange', [0, 10]);
-    // console.log('memoByRange', result);
     setMemoByRange(result);
   }
 

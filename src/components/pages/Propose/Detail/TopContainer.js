@@ -250,7 +250,6 @@ function TopContrainer(props) {
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  // console.log('topInfo', topInfo);
   // const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
   // const [likes, setLikes] = useState({});
@@ -259,10 +258,10 @@ function TopContrainer(props) {
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
-  const needUpdate = !topInfo || (proIndex !== topInfo.index)
+  const needUpdate = !topInfo || proIndex !== topInfo.index;
 
   useEffect(() => {
-    setLoading(needUpdate)
+    setLoading(needUpdate);
     if (!needUpdate) {
       setProposeLikeInfo();
     }
@@ -323,7 +322,6 @@ function TopContrainer(props) {
     if (likes[address]) {
       isMyLike = true;
     }
-    // console.log('serialLikeData');
     return { numLike: num, isMyLike };
   }
 
@@ -375,11 +373,12 @@ function TopContrainer(props) {
         if (result) {
           setCropFile('');
           setCropImg('');
-          topInfo.coverImg = hash
-          setTopInfo(topInfo)
+          const newTopInfo = Object.assign({}, topInfo, { coverImg: hash });
+          setTopInfo(newTopInfo);
+          // topInfo.coverImg = hash
+          // setTopInfo(topInfo)
           // callView('getProposeByIndex', [proIndex]).then(propose => {
           //   const pro = (propose && propose[0]) || {};
-          //   console.log(topInfo, pro)
           //   setTopInfo(Object.assign({}, topInfo, pro));
           // });
         }
@@ -387,7 +386,7 @@ function TopContrainer(props) {
       setGLoading(false);
     }, 1);
   }
-  // console.log('render topcomtainer', loading);
+
   if (loading) {
     return (
       <TopContainerBox>
