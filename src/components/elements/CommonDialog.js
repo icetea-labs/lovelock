@@ -12,7 +12,7 @@ const PuLayout = styled.div`
   left: 0px;
   right: 0px;
   bottom: 0px;
-  z-index: 1100;
+  z-index: ${props => props.zIndex || 1100}};
   background: rgba(0, 0, 0, 0.5);
 `;
 
@@ -109,10 +109,10 @@ class CommonDialog extends React.Component {
   }
 
   render() {
-    const { cancel, confirm, close, okText, cancelText, children, title, isCancel } = this.props;
+    const { cancel, confirm, close, okText, cancelText, children, title, zIndex } = this.props;
     return (
       <QueueAnim animConfig={{ opacity: [1, 0] }}>
-        <PuLayout key={1}>
+        <PuLayout key={1} zIndex={zIndex}>
           <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
             <Container key={2}>
               <PuTitle>
@@ -125,7 +125,7 @@ class CommonDialog extends React.Component {
                 {children}
                 <Action>
                   <div className="actionConfirm">
-                    {isCancel && (
+                    {cancelText && cancel && (
                       <ValidatorForm onSubmit={cancel}>
                         <LinkPro className="deny" type="submit">
                           {cancelText}
@@ -149,7 +149,6 @@ class CommonDialog extends React.Component {
 }
 
 CommonDialog.defaultProps = {
-  isCancel: false,
   close() {},
   cancel() {},
   confirm() {},

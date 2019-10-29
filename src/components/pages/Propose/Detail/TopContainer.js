@@ -550,7 +550,7 @@ function TopContrainer(props) {
           </FlexWidthBox>
         )}
       </WarrperChatBox>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
     </TopContainerBox>
   );
 }

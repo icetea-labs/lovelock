@@ -260,6 +260,7 @@ export default function AddInfoMessage(props) {
   }
 
   async function captureUploadFile(event) {
+    event.preventDefault();
     const imgFiles = event.target.files;
 
     if (imgFiles.length) {
@@ -286,9 +287,8 @@ export default function AddInfoMessage(props) {
   function handleImageChange(event) {
     event.preventDefault();
     if (files) removeFile(0);
-    const orFiles = event.target.files;
-    const arrFiles = Array.from(orFiles);
-    if (orFiles.length > 0) {
+    const arrFiles = Array.from(event.target.files);
+    if (arrFiles.length > 0) {
       setIsOpenCrop(true);
       setOriginFile(arrFiles);
     } else {
@@ -406,7 +406,7 @@ export default function AddInfoMessage(props) {
           </Grid>
         </Grid>
       </InfoBox>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isAddInfo />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
     </Container>
   );
 }

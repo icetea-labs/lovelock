@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { withRouter } from 'react-router-dom';
@@ -8,13 +8,28 @@ import { HeaderAuthen } from '../../../elements/Common';
 import RegisterUsername from './RegisterUsername';
 import RegisterSuccess from './RegisterSuccess';
 import * as actionCreate from '../../../../store/actions/create';
+import ImageCrop from '../../../elements/ImageCrop';
 
 function Register(props) {
   const { step, setStep } = props;
+  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [originFile, setOriginFile] = useState([]);
+  const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
+  const [avatarData, setAvatarData] = useState('');
 
   useEffect(() => {
     setStep('one');
   }, []);
+
+  function closeCrop() {
+    setIsOpenCrop(false);
+  }
+
+  function acceptCrop(e) {
+    closeCrop();
+    setAvatarData(e.cropFile);
+    setAvatar(e.avaPreview);
+  }
 
   return (
     <div>
@@ -23,12 +38,20 @@ function Register(props) {
           <BoxAuthen>
             <ShadowBoxAuthen>
               {step === 'one' && <HeaderAuthen title="Create New Account" />}
-              {step === 'one' && <RegisterUsername />}
+              {step === 'one' && (
+                <RegisterUsername
+                  setIsOpenCrop={setIsOpenCrop}
+                  setOriginFile={setOriginFile}
+                  avatar={avatar}
+                  avatarData={avatarData}
+                />
+              )}
               {step === 'two' && <RegisterSuccess />}
             </ShadowBoxAuthen>
           </BoxAuthen>
         </LayoutAuthen>
       </QueueAnim>
+      {isOpenCrop && <ImageCrop originFile={originFile} close={closeCrop} accept={acceptCrop} />}
     </div>
   );
 }
