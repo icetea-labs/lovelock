@@ -135,7 +135,7 @@ class LoveLock {
 
     // create the first memory for auto-accepted lock
     if (pendingPropose.status === LOCK_STATUS_ACCEPTED) {
-      this._addMemory(index, false, '', { hash: [], date: Date.now() }, 1, [true]);
+      this._addMemory(index, false, '', { hash: [], date: Date.now() }, [true]);
     }
 
     // map address to propose
@@ -174,7 +174,7 @@ class LoveLock {
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
     const ret = this._confirmPropose(proIndex, r_content, 1);
-    this._addMemory(proIndex, false, '', { hash: [], date: Date.now() }, 1, [true, ...ret]);
+    this._addMemory(proIndex, false, '', { hash: [], date: Date.now() }, [true, ...ret]);
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
@@ -233,7 +233,6 @@ class LoveLock {
     isPrivate: boolean,
     content: string,
     info,
-    type = 0,
     [isFirstMemory, pro, proposes] = []
   ) {
     if (!pro || !proposes) {
@@ -242,10 +241,12 @@ class LoveLock {
 
     expectProposeOwners(pro, 'Cannot add memory');
     const sender = msg.sender;
-    const memory = { isPrivate, sender, proIndex, content, info, type, likes: {}, comments: [] };
+    const memory = { isPrivate, sender, proIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
 
     //new memories
-    if (type === 1) {
+    if (sender === pro.sender) {
+      memory.receiver = pro.receiver;
+    } else {
       memory.receiver = pro.sender;
     }
 
@@ -281,8 +282,8 @@ class LoveLock {
   }
 
   // info { img:Array, location:string, date:string }
-  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info, type = 0) {
-    return this._addMemory(proIndex, isPrivate, content, info, type);
+  @transaction addMemory(proIndex: number, isPrivate: boolean, content: string, info) {
+    return this._addMemory(proIndex, isPrivate, content, info);
   }
 
   // create like for memory: type -> 0:unlike, 1:like, 2:love
