@@ -28,6 +28,7 @@ function GetKeyToAuthen(props) {
   useEffect(() => {
     if (!addressRedux) {
       setPathName(window.location.pathname);
+      setNeedAuth(false);
       props.history.push('/register');
     }
     const handleUserKeyPress = event => {
