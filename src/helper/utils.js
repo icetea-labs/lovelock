@@ -13,6 +13,15 @@ const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
 
+export function signalPrerenderDone(wait) {
+  if (wait == null) {
+    wait = process.env.REACT_APP_PRERENDER_WAIT || 100
+  }
+  window.setTimeout(() => {
+    window.prerenderReady = true
+  }, wait)
+}
+
 export function showSubscriptionError(error, enqueueSnackbar) {
   const clickTooQuick = error.code === -32000;
   const variant = clickTooQuick ? 'info' : 'warning';
