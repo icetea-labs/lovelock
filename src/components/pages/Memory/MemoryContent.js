@@ -143,8 +143,9 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-around',
   },
   editorComment: {
-    width: 800,
-    maxWidth: '100%',
+    clear: 'both',
+    maxWidth: 740,
+    width: '100%',
     margin: '0 auto',
   },
 }));
