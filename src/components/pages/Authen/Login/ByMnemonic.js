@@ -178,6 +178,7 @@ function ByMnemonic(props) {
         margin="normal"
         onChange={handlePassword}
         type="password"
+        inputProps={{ autoComplete: "new-password" }}
       />
       <FormControlLabel
         control={

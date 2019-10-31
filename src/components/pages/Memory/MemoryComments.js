@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
@@ -105,7 +105,7 @@ export default function MemoryComments(props) {
   const [comments, setComments] = useState([]);
   const [numHidencmt, setNumHidencmt] = useState(0);
   const [showComments, setShowComments] = useState([]);
-  let myFormRef = React.createRef();
+  let myFormRef = useRef();
 
   useEffect(() => {
     let cancel = false;
@@ -158,7 +158,7 @@ export default function MemoryComments(props) {
     const method = 'addComment';
     const params = [memoryIndex, comment, ''];
     await sendTransaction(method, params, { address, tokenAddress });
-    myFormRef.reset();
+    myFormRef.current && myFormRef.current.reset();
     setComment('');
   }
 
@@ -220,9 +220,7 @@ export default function MemoryComments(props) {
             container
             wrap="nowrap"
             component="form"
-            ref={el => {
-              myFormRef = el;
-            }}
+            ref={myFormRef}
           >
             <Grid item>
               <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />

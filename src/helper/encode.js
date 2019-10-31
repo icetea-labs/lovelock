@@ -1,5 +1,7 @@
 const keythereum = require('keythereum');
 
+const iteration = process.env.REACT_APP_KDF_ITERATION || 10000
+
 /**
  * @privateKey
  * @password
@@ -9,7 +11,7 @@ function encode(privateKey, password, ops) {
     kdf: 'pbkdf2',
     cipher: 'aes-128-ctr',
     kdfparams: {
-      c: 262144,
+      c: iteration,
       dklen: 32,
       prf: 'hmac-sha256',
     },
