@@ -27,7 +27,7 @@ export function showSubscriptionError(error, enqueueSnackbar) {
   const variant = clickTooQuick ? 'info' : 'warning';
   const message = clickTooQuick
     ? 'It appears that you click too quickly.'
-    : `An warning happened, you may need to reload the page. (${error.code})`;
+    : `A warning happened, you may need to reload the page. (${error.code || 'no error code'})`;
   console.warn(error);
   enqueueSnackbar(message, { variant, autoHideDuration: 5000 });
 }

@@ -63,16 +63,17 @@ function MemoryActionButton(props) {
   const [likes, setLikes] = useState(props.memoryLikes);
   const [numLike, setNumLike] = useState(0);
   const [isMyLike, setIsMyLike] = useState(false);
-  const { enqueueSnackbar } = useSnackbar();
+  // const { enqueueSnackbar } = useSnackbar();
 
-  const [needUpdateLike, setNeedUpdateLike] = useState(false)
-  const timeout = useRef()
-  const mounted = useRef(false)
+  // const [needUpdateLike, setNeedUpdateLike] = useState(false)
+  // const timeout = useRef()
+  // const mounted = useRef(false)
 
   useEffect(() => {
     serialLikeData();
   }, [likes]);
 
+  /*
   useEffect(() => {
     let cancel = false
 
@@ -129,6 +130,8 @@ function MemoryActionButton(props) {
       }
     });
   }
+
+  */
 
   function serialLikeData() {
     const num = Object.keys(likes).length;

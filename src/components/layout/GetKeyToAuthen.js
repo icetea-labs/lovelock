@@ -26,10 +26,20 @@ function GetKeyToAuthen(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+
+    // if (window.PasswordCredential) {
+    //   navigator.credentials.get({
+    //     password: true,
+    //     mediation: 'silent'
+    //   }).then(cred => {
+    //   })
+    // }
+
     if (!addressRedux) {
       setPathName(window.location.pathname);
       setNeedAuth(false);
       props.history.push('/register');
+      return;
     }
     const handleUserKeyPress = event => {
       if (event.keyCode === 13) {
@@ -153,6 +163,7 @@ function GetKeyToAuthen(props) {
         margin="normal"
         onChange={passwordChange}
         type="password"
+        inputProps={{ autoComplete: "current-password" }}
       />
       <FormControlLabel
         control={

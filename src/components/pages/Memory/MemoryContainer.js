@@ -61,10 +61,16 @@ function MemoryContainer(props) {
       obj.name = tags[i]['display-name'];
       obj.pubkey = tags[i]['pub-key'];
       obj.avatar = tags[i].avatar;
-      if (obj.receiver) {
+      if (obj.receiver !== process.env.REACT_APP_BOT_LOVER) {
         // eslint-disable-next-line no-await-in-loop
         const receiverTags = await getTagsInfo(obj.receiver);
         obj.r_name = receiverTags['display-name'];
+      } else {
+        if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
+          obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name
+        } else {
+          obj.r_name = '' // a crush name, but let it empty for now
+        }
       }
       if (!obj.isPrivate) {
         obj.isUnlock = true;
