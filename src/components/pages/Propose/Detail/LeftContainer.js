@@ -175,7 +175,12 @@ function LeftContainer(props) {
 
   async function eventCreatePropose(data, signal) {
     const log = await addInfoToProposes([data.log], signal);
+<<<<<<< HEAD
     console.log('log');
+=======
+    if (!log || !log.length) return;
+    
+>>>>>>> c83736d380aab45c7c119a4e0a8f24e50d11ed23
     addPropose(log[0]);
 
     if (address !== log[0].sender) {
