@@ -85,9 +85,9 @@ const FoolterBtn = styled.div`
 function RegisterSuccess(props) {
   const {
     address,
-    privateKey,
+    // privateKey,
     setLoading,
-    setStep,
+    // setStep,
     history,
     password,
     mnemonic,

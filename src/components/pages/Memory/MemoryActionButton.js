@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSelector, useDispatch, connect } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, connect } from 'react-redux';
 import { CardActions, Button, Typography } from '@material-ui/core';
 import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-import { useSnackbar } from 'notistack';
+//import { useSnackbar } from 'notistack';
 
 import * as actions from '../../../store/actions';
-import { sendTransaction, callView, showSubscriptionError } from '../../../helper';
-import tweb3 from '../../../service/tweb3';
+// import { sendTransaction, callView, showSubscriptionError } from '../../../helper';
+import { sendTransaction } from '../../../helper';
+//import tweb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -60,7 +61,8 @@ function MemoryActionButton(props) {
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
 
-  const [likes, setLikes] = useState(props.memoryLikes);
+  // const [likes, setLikes] = useState(props.memoryLikes);
+  const [likes] = useState(props.memoryLikes);
   const [numLike, setNumLike] = useState(0);
   const [isMyLike, setIsMyLike] = useState(false);
   // const { enqueueSnackbar } = useSnackbar();
@@ -70,6 +72,13 @@ function MemoryActionButton(props) {
   // const mounted = useRef(false)
 
   useEffect(() => {
+    function serialLikeData() {
+      const num = Object.keys(likes).length;
+      setIsMyLike(!!likes[address]);
+      setNumLike(num);
+      if (memoryType === 1) setLikeTopInfo({ numLike: num, isMyLike: !!likes[address] });
+    }
+
     serialLikeData();
   }, [likes]);
 
@@ -132,13 +141,6 @@ function MemoryActionButton(props) {
   }
 
   */
-
-  function serialLikeData() {
-    const num = Object.keys(likes).length;
-    setIsMyLike(!!likes[address]);
-    setNumLike(num);
-    if (memoryType === 1) setLikeTopInfo({ numLike: num, isMyLike: !!likes[address] });
-  }
 
   function handleLike() {
     if (!tokenKey) {

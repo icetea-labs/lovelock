@@ -6,7 +6,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import InputBase from '@material-ui/core/InputBase';
+// import InputBase from '@material-ui/core/InputBase';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
@@ -17,7 +17,7 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
-import SearchIcon from '@material-ui/icons/Search';
+// import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
 import NotificationsIcon from '@material-ui/icons/Notifications';
@@ -321,17 +321,17 @@ function Header(props) {
     setMobileMoreAnchorEl(event.currentTarget);
   }
 
-  function handleFriReqOpen(event) {
-    setAnchorEl(event.currentTarget);
-  }
+  // function handleFriReqOpen(event) {
+  //   setAnchorEl(event.currentTarget);
+  // }
 
   function handleFriReqClose() {
     setAnchorEl(null);
   }
 
-  function handleNotiOpen(event) {
-    setAnchorElNoti(event.currentTarget);
-  }
+  // function handleNotiOpen(event) {
+  //   setAnchorElNoti(event.currentTarget);
+  // }
 
   function handleNotiClose() {
     setAnchorElNoti(null);
@@ -370,7 +370,7 @@ function Header(props) {
       }
     }
     fetchData();
-  }, [address]);
+  }, [address, dispatch]);
 
   const renderMenu = (
     <StyledMenu

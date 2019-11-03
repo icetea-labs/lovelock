@@ -464,10 +464,7 @@ export const wallet = {
     return address;
   },
   isMnemonic(mnemonic) {
-    if (bip39.validateMnemonic(mnemonic)) {
-      return true;
-    }
-    return false;
+    return !!bip39.validateMnemonic(mnemonic)
   },
 };
 

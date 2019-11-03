@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import LeftContainer from '../Propose/Detail/LeftContainer';
-import { callView, getTagsInfo } from '../../../helper';
+import { callView } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 
 const RightBox = styled.div`

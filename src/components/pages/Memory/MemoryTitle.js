@@ -26,7 +26,7 @@ export default function MemoryTitle(props) {
         ) : (
             <>
               {props.sender}
-              <img className={classes.icon} src="/static/img/logo.svg" width="20" />
+              <img className={classes.icon} src="/static/img/logo.svg" width="20" alt='LoveLock logo' />
               {props.receiver}
             </>
           )}

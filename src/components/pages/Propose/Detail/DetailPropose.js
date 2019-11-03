@@ -108,7 +108,6 @@ export default function DetailPropose(props) {
       pro.r_name = receiverTags['display-name'];
       pro.r_publicKey = receiverTags['pub-key'] || '';
       pro.r_avatar = receiverTags.avatar;
-      pro.r_content = pro.r_content;
     }
     pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
 

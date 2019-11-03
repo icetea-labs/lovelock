@@ -6,7 +6,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { useSnackbar } from 'notistack';
+// import { useSnackbar } from 'notistack';
 
 import { getTagsInfo, getJsonFromIpfs, getQueryParam, signalPrerenderDone } from '../../../helper';
 import MemoryContent from './MemoryContent';
@@ -29,72 +29,72 @@ function MemoryContainer(props) {
   const [loading, setLoading] = useState(false);
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
-  const { enqueueSnackbar } = useSnackbar();
+  // const { enqueueSnackbar } = useSnackbar();
 
   const classes = useStyles();
   useEffect(() => {
     let signal = {}
+
+    async function prepareMemory(signal) {
+      const showMemoryId = parseInt(getQueryParam('memory'))
+      let newMemoryList = [];
+      setLoading(true);
+  
+      let tags = memorydata.map(mem => {
+        return getTagsInfo(mem.sender);
+      });
+      tags = await Promise.all(tags);
+      if (signal.cancel) return
+  
+      let hasViewDetail = false
+      for (let i = 0; i < memorydata.length; i++) {
+        const obj = memorydata[i];
+        obj.showDetail = showMemoryId === obj.id
+        if (obj.info.blog && obj.showDetail) hasViewDetail = true
+        obj.name = tags[i]['display-name'];
+        obj.pubkey = tags[i]['pub-key'];
+        obj.avatar = tags[i].avatar;
+        if (obj.receiver !== process.env.REACT_APP_BOT_LOVER) {
+          // eslint-disable-next-line no-await-in-loop
+          const receiverTags = await getTagsInfo(obj.receiver);
+          obj.r_name = receiverTags['display-name'];
+        } else {
+          if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
+            obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name
+          } else {
+            obj.r_name = '' // a crush name, but let it empty for now
+          }
+        }
+        if (!obj.isPrivate) {
+          obj.isUnlock = true;
+          for (let j = 0; j < obj.info.hash.length; j++) {
+            // eslint-disable-next-line no-await-in-loop
+            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+            if (signal.cancel) return
+          }
+        } else {
+          // obj.info.hash = [];
+          obj.isUnlock = false;
+        }
+  
+        newMemoryList.push(obj);
+      }
+      newMemoryList = newMemoryList.reverse();
+      setMemory(newMemoryList);
+  
+      setLoading(false);
+  
+      if (!hasViewDetail) {
+        signalPrerenderDone()
+      }
+    }
 
     if (memorydata.length > 0) {
       prepareMemory(signal)
     }
 
     return () => signal.cancel = true
-  }, [memorydata]);
-
-  async function prepareMemory(signal) {
-    const showMemoryId = parseInt(getQueryParam('memory'))
-    let newMemoryList = [];
-    setLoading(true);
-
-    let tags = memorydata.map(mem => {
-      return getTagsInfo(mem.sender);
-    });
-    tags = await Promise.all(tags);
-    if (signal.cancel) return
-
-    let hasViewDetail = false
-    for (let i = 0; i < memorydata.length; i++) {
-      const obj = memorydata[i];
-      obj.showDetail = showMemoryId === obj.id
-      if (obj.info.blog && obj.showDetail) hasViewDetail = true
-      obj.name = tags[i]['display-name'];
-      obj.pubkey = tags[i]['pub-key'];
-      obj.avatar = tags[i].avatar;
-      if (obj.receiver !== process.env.REACT_APP_BOT_LOVER) {
-        // eslint-disable-next-line no-await-in-loop
-        const receiverTags = await getTagsInfo(obj.receiver);
-        obj.r_name = receiverTags['display-name'];
-      } else {
-        if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
-          obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name
-        } else {
-          obj.r_name = '' // a crush name, but let it empty for now
-        }
-      }
-      if (!obj.isPrivate) {
-        obj.isUnlock = true;
-        for (let j = 0; j < obj.info.hash.length; j++) {
-          // eslint-disable-next-line no-await-in-loop
-          obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
-          if (signal.cancel) return
-        }
-      } else {
-        // obj.info.hash = [];
-        obj.isUnlock = false;
-      }
-
-      newMemoryList.push(obj);
-    }
-    newMemoryList = newMemoryList.reverse();
-    setMemory(newMemoryList);
-
-    setLoading(false);
-
-    if (!hasViewDetail) {
-      signalPrerenderDone()
-    }
-  }
+  }, [memorydata, proposeInfo, setMemory]);
 
   if (memoryList.length <= 0 || loading) {
     if (!loading) return <div />;

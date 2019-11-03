@@ -112,26 +112,22 @@ export default function MemoryComments(props) {
 
     loadData(memoryIndex).then(respComment => {
       if (!cancel) {
-        handleComments(respComment)
+        if (respComment.length > numComment) {
+          const numMore = respComment.length - numComment;
+          setNumHidencmt(numMore);
+          setShowComments(respComment.slice(numMore));
+        } else {
+          setShowComments(respComment);
+        }
+        setComments(respComment);
+        handerNumberComment(respComment.length);
       }
     });
 
     return () => {
       cancel = true;
     };
-  }, [comment]);
-
-  function handleComments(respComment) {
-    if (respComment.length > numComment) {
-      const numMore = respComment.length - numComment;
-      setNumHidencmt(numMore);
-      setShowComments(respComment.slice(numMore));
-    } else {
-      setShowComments(respComment);
-    }
-    setComments(respComment);
-    handerNumberComment(respComment.length);
-  }
+  }, [memoryIndex, handerNumberComment]);
 
   async function loadData(index) {
     const respComment = await callView('getCommentsByMemoIndex', [index]);
