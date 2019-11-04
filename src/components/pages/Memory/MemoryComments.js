@@ -127,7 +127,7 @@ export default function MemoryComments(props) {
     return () => {
       cancel = true;
     };
-  }, [memoryIndex, comment]);
+  }, [memoryIndex, comment]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadData(index) {
     const respComment = await callView('getCommentsByMemoIndex', [index]);

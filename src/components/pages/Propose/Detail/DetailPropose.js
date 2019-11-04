@@ -68,7 +68,7 @@ export default function DetailPropose(props) {
     }
 
     return () => (cancel = true);
-  }, [proIndex]);
+  }, [proIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHelmet = () => {
     const title = makeProposeName(proposeInfo, 'Lovelock - ');

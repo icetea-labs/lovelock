@@ -54,7 +54,7 @@ function ByPassWord(props) {
     }
 
     loadData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function gotoLogin() {
     if (encryptedData) {
