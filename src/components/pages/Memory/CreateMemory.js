@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
-import cloneDeep from 'lodash/cloneDeep';
+// import cloneDeep from 'lodash/cloneDeep';
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
 
@@ -16,7 +16,8 @@ import * as actions from '../../../store/actions';
 import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
-import { getDraft, setDraft, delDraft } from '../../../helper/draft';
+// import { getDraft, setDraft, delDraft } from '../../../helper/draft';
+import { delDraft } from '../../../helper/draft';
 
 let blogBody = null;
 
@@ -140,7 +141,7 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
-  const [memoDate, setMemoDate] = useState(Date.parse(new Date()));
+  const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
@@ -151,9 +152,9 @@ export default function CreateMemory(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    resetValue();
-  }, [proIndex]);
+  // useEffect(() => {
+  //   resetValue();
+  // }, [proIndex]);
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -202,7 +203,8 @@ export default function CreateMemory(props) {
 
     const { blocks } = content;
 
-    for (const i in blocks) {
+    let i
+    for (i in blocks) {
       if (!firstImg && blocks[i].type === 'image') {
         firstImg = blocks[i].data;
       }
@@ -273,27 +275,28 @@ export default function CreateMemory(props) {
 
   function validateEditorContent() {
     let blocks = combineContent().blocks;
-    for (let i in blocks) {
-      if (blocks[i].text.trim() != '') {
+    let i
+    for (i in blocks) {
+      if (blocks[i].text.trim() !== '') {
         return true;
       }
     }
     return false;
   }
 
-  function isNonemptyBlog(body) {
-    if (!body || !body.blocks || !body.blocks.length) return false
-    if (body.blocks.length > 1) return true
-    const b = body.blocks[0]
-    if (b.text ||
-      b.type === 'image' ||
-      b.type === 'video' ||
-      b.type === 'embed') {
-        return true
-      }
+  // function isNonemptyBlog(body) {
+  //   if (!body || !body.blocks || !body.blocks.length) return false
+  //   if (body.blocks.length > 1) return true
+  //   const b = body.blocks[0]
+  //   if (b.text ||
+  //     b.type === 'image' ||
+  //     b.type === 'video' ||
+  //     b.type === 'embed') {
+  //       return true
+  //     }
 
-    return false
-  }
+  //   return false
+  // }
 
   function onChangeEditorBody(editor) {
     blogBody = editor.emitSerializedOutput()
@@ -417,24 +420,24 @@ export default function CreateMemory(props) {
     };
   }
 
-  function urlToBase64(url) {
-    return fetch(url)
-      .then(r => r.blob())
-      .then(blob => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.addEventListener('load', () => {
-            resolve(reader.result);
-          });
-          reader.addEventListener('error', reject);
-          reader.readAsDataURL(blob);
-        });
-      });
-  }
+  // function urlToBase64(url) {
+  //   return fetch(url)
+  //     .then(r => r.blob())
+  //     .then(blob => {
+  //       return new Promise((resolve, reject) => {
+  //         const reader = new FileReader();
+  //         reader.addEventListener('load', () => {
+  //           resolve(reader.result);
+  //         });
+  //         reader.addEventListener('error', reject);
+  //         reader.readAsDataURL(blob);
+  //       });
+  //     });
+  // }
 
-  function cloneForIdbSave(content) {
-    return JSON.parse(JSON.stringify(content))
-  }
+  // function cloneForIdbSave(content) {
+  //   return JSON.parse(JSON.stringify(content))
+  // }
 
   async function saveDraft(context, content) {
     // if (isNonemptyBlog(content)) {

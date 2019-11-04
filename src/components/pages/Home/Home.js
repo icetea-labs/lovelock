@@ -51,7 +51,9 @@ function Home(props) {
 
   useEffect(() => {
     loadAcceptPropose();
-  }, []);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   function loadAcceptPropose() {
     if (address) {
@@ -72,7 +74,7 @@ function Home(props) {
       }
       history.push(`/lock/${index}`);
     }
-  }, [homePropose]);
+  }, [homePropose, history]);
 
   function openPopup() {
     if (!tokenKey) {

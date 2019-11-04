@@ -27,6 +27,7 @@ export default function BlogShowcase(props) {
           <CSSTransition classNames="timeline-blog" timeout={1100} appear>
             <img
               src={photo ? photo.url : '/static/img/landing.svg'}
+              alt='blog cover'
               className={classes.blogImgTimeline}
               style={photo ? {} : { maxHeight: height, objectFit: 'cover' }}
               onLoad={() => {

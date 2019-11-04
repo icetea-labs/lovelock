@@ -273,21 +273,23 @@ function TopContrainer(props) {
   const needUpdate = !topInfo || proIndex !== topInfo.index;
 
   useEffect(() => {
+    async function setProposeLikeInfo() {
+      if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
+        const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
+        const { numLike, isMyLike } = serialLikeData(likes);
+        topInfo.numLike = numLike;
+        topInfo.isMyLike = isMyLike;
+        setTopInfo(topInfo);
+      }
+    }
+
     setLoading(needUpdate);
     if (!needUpdate) {
       setProposeLikeInfo();
     }
-  }, [needUpdate]);
 
-  async function setProposeLikeInfo() {
-    if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
-      const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
-      const { numLike, isMyLike } = serialLikeData(likes);
-      topInfo.numLike = numLike;
-      topInfo.isMyLike = isMyLike;
-      setTopInfo(topInfo);
-    }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needUpdate, setTopInfo, topInfo]);
 
   function handerLike() {
     try {

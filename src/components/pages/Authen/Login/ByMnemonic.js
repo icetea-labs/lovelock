@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { codec } from '@iceteachain/common';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -41,37 +41,38 @@ function ByMnemonic(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    const handleUserKeyPress = event => {
-      if (event.keyCode === 13) {
-        gotoLogin();
-      }
-    };
-    window.document.body.addEventListener('keydown', handleUserKeyPress);
-    return () => {
-      window.document.body.removeEventListener('keydown', handleUserKeyPress);
-    };
-  }, []);
+  async function gotoLogin(e) {
+    e.preventDefault()
 
-  async function gotoLogin() {
-    let message = '';
-    if (!valueInput) {
-      message = `Please input recovery phrase or key.`;
-      enqueueSnackbar(message, { variant: 'error' });
-      return;
+    const phrase = valueInput.trim()
+
+    if (!phrase) {
+      enqueueSnackbar('Please input recovery phrase or key.', { variant: 'error' });
+      return
     }
+
+    if (!password) {
+      enqueueSnackbar('Please input new password.', { variant: 'error' });
+      return
+    }
+
     setLoading(true);
-    setTimeout(async () => {
+    // setTimeout(async () => {
       try {
-        let privateKey = valueInput;
+        let privateKey = phrase;
         let address;
         let mode = 0;
-        if (wallet.isMnemonic(valueInput)) {
-          const recoveryAccount = wallet.getAccountFromMneomnic(valueInput);
+        if (wallet.isMnemonic(phrase)) {
+          const recoveryAccount = wallet.getAccountFromMneomnic(phrase);
           ({ privateKey, address } = recoveryAccount);
           mode = 1;
         } else {
-          address = wallet.getAddressFromPrivateKey(privateKey);
+          try {
+            address = wallet.getAddressFromPrivateKey(privateKey);
+          } catch (err) {
+            err.showMessage = 'Invalid recovery phrase.'
+            throw err
+          }
         }
         // console.log('getAddressFromPrivateKey', privateKey);
         const acc = tweb3.wallet.importAccount(privateKey);
@@ -79,9 +80,10 @@ function ByMnemonic(props) {
 
         // check if account is a regular address
         if (!tweb3.utils.isRegularAccount(acc.address)) {
-          throw new Error(
-            'The recovery phrase is for a bank account. LoveLock only accepts regular (non-bank) account.'
-          );
+          const m = 'The recovery phrase is for a bank account. LoveLock only accepts regular (non-bank) account.'
+          const error = new Error(m);
+          error.showMessage = m
+          throw error
         }
         const token = tweb3.wallet.createRegularAccount();
         const ms = tweb3.contract('system.did').methods;
@@ -96,7 +98,7 @@ function ByMnemonic(props) {
           .sendCommit({ from: address })
           .then(({ returnValue }) => {
             tweb3.wallet.importAccount(token.privateKey);
-            const keyObject = encode(valueInput, password);
+            const keyObject = encode(phrase, password);
             const storage = isRemember ? localStorage : sessionStorage;
             // save token account
             storage.sessionData = codec
@@ -117,20 +119,20 @@ function ByMnemonic(props) {
               cipher: password,
               encryptedData: keyObject,
               mode,
-              mnemonic: wallet.isMnemonic(valueInput) ? valueInput : '',
+              mnemonic: mode === 1 ? phrase : '',
             };
             setAccount(account);
             setLoading(false);
             history.push('/');
           });
       } catch (error) {
-        console.error(error);
-        message = `An error occurred, please try again later`;
-        enqueueSnackbar(message, { variant: 'error' });
+        console.warn(error);
+        const m = error.showMessage || `An error occurred: ${error.message || 'unknown'}`;
+        enqueueSnackbar(m, { variant: 'error' });
         setLoading(false);
       }
       // setLoading(false);
-    }, 100);
+    //}, 100);
   }
 
   function handlePassword(event) {
@@ -153,13 +155,14 @@ function ByMnemonic(props) {
   }
 
   return (
-    <div>
+    <form onSubmit={gotoLogin}>
       <TextField
         id="outlined-multiline-static"
         label="Recovery phrase or key"
         placeholder="Enter your Recovery phrase or key"
         multiline
         rows="4"
+        onKeyDown={e => e.keyCode === 13 && gotoLogin(e)}
         onChange={handleMnemonic}
         margin="normal"
         variant="outlined"
@@ -178,7 +181,7 @@ function ByMnemonic(props) {
         margin="normal"
         onChange={handlePassword}
         type="password"
-        inputProps={{ autoComplete: "new-password" }}
+        autoComplete="new-password"
       />
       <FormControlLabel
         control={
@@ -197,11 +200,11 @@ function ByMnemonic(props) {
         <ButtonPro color="primary" onClick={loginWithPrivatekey}>
           Back
         </ButtonPro>
-        <ButtonPro variant="contained" color="primary" onClick={gotoLogin}>
+        <ButtonPro variant="contained" color="primary" type="submit">
           Recover
         </ButtonPro>
       </DivControlBtnKeystore>
-    </div>
+    </form>
   );
 }
 

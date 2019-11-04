@@ -11,9 +11,10 @@ import { withRouter } from 'react-router-dom';
 
 import tweb3 from '../../service/tweb3';
 import * as actions from '../../store/actions';
-import { wallet, decode, savetoLocalStorage } from '../../helper';
+// import { wallet, decode, savetoLocalStorage } from '../../helper';
+import { wallet, decode } from '../../helper';
 import CommonDialog from '../elements/CommonDialog';
-import { encode } from '../../helper/encode';
+// import { encode } from '../../helper/encode';
 
 function GetKeyToAuthen(props) {
   const [password, setPassword] = useState('');
@@ -53,7 +54,7 @@ function GetKeyToAuthen(props) {
     return () => {
       window.document.body.removeEventListener('keydown', handleUserKeyPress);
     };
-  }, [password]);
+  }, [addressRedux]);
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -163,7 +164,7 @@ function GetKeyToAuthen(props) {
         margin="normal"
         onChange={passwordChange}
         type="password"
-        inputProps={{ autoComplete: "current-password" }}
+        autoComplete="current-password"
       />
       <FormControlLabel
         control={

@@ -2,8 +2,6 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
-import { ThemeProvider } from '@material-ui/styles';
-import { createMuiTheme } from '@material-ui/core/styles';
 
 const OutBox = styled.div`
   display: flex;

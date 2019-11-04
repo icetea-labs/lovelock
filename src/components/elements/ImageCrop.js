@@ -116,7 +116,7 @@ export default function ImageCrop(props) {
       };
       reader.readAsArrayBuffer(file);
     }
-  }, []);
+  }, [originFile]);
 
   const acceptCrop = useCallback(() => {
     avaPreview.getCroppedCanvas().toBlob(blob => {
@@ -126,7 +126,7 @@ export default function ImageCrop(props) {
       const cropData = { cropFile: [parseFile], avaPreview: url };
       accept(cropData);
     });
-  }, [avaPreview]);
+  }, [avaPreview, originFile, accept]);
 
   function crop() {
     if (timeout) clearTimeout(timeout);

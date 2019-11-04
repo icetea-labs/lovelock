@@ -14,7 +14,7 @@ function Register(props) {
 
   useEffect(() => {
     setStep('one');
-  }, []);
+  }, [setStep]);
 
   return (
     <div>

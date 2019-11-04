@@ -38,23 +38,23 @@ function ByPassWord(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+    async function loadData() {
+      const { address } = props;
+      if (address) {
+        const reps = await getTagsInfo(address);
+        if (reps) {
+          setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
+        }
+      } else {
+        setState({ ...state, username: 'undefined' });
+        const message = 'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
+        enqueueSnackbar(message, { variant: 'info', autoHideDuration: 15000, anchorOrigin: {vertical: 'top', horizontal: 'center'} });
+        setStep('two');
+      }
+    }
+
     loadData();
   }, []);
-
-  async function loadData() {
-    const { address } = props;
-    if (address) {
-      const reps = await getTagsInfo(address);
-      if (reps) {
-        setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
-      }
-    } else {
-      setState({ ...state, username: 'undefined' });
-      const message = 'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
-      enqueueSnackbar(message, { variant: 'info', autoHideDuration: 15000, anchorOrigin: {vertical: 'top', horizontal: 'center'} });
-      setStep('two');
-    }
-  }
 
   async function gotoLogin() {
     if (encryptedData) {
@@ -150,7 +150,7 @@ function ByPassWord(props) {
           <AvatarPro hash={state.avatar} />
         </Grid>
         <Grid item>
-          <TextField label="Username" value={state.username} disabled inputProps={{ autoComplete: "username" }} />
+          <TextField label="Username" value={state.username} disabled autoComplete="username" />
         </Grid>
       </Grid>
       <ValidatorForm onSubmit={gotoLogin}>
