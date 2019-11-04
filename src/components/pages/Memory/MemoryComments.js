@@ -92,7 +92,7 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 const numComment = 4;
 export default function MemoryComments(props) {
-  const { handerNumberComment, memoryIndex, textInput } = props;
+  const { handleNumberComment, memoryIndex, textInput } = props;
   const dispatch = useDispatch();
 
   // const privateKey = useSelector(state => state.account.privateKey);
@@ -120,7 +120,7 @@ export default function MemoryComments(props) {
           setShowComments(respComment);
         }
         setComments(respComment);
-        handerNumberComment(respComment.length);
+        handleNumberComment(respComment.length);
       }
     });
 

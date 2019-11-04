@@ -104,7 +104,7 @@ function MemoryActionButton(props) {
     setMemoryNumLike(!!memoryLikes[address]);
     setMemoryIsMyLike(num);
 
-  }, [memoryType, memoryLikes]);
+  }, [memoryType, memoryLikes, address, isAuto]);
 
   function handleLike() {
     if (!tokenKey) {
