@@ -87,7 +87,7 @@ function LeftContainer(props) {
     // watchConfirmPropose(signal);
 
     return () => (signal.cancel = true);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function watchCreatePropose(signal) {
     const filter = {};
@@ -118,6 +118,7 @@ function LeftContainer(props) {
       }
     });
   }
+
   // function watchConfirmPropose(signal) {
   //   const filter = {};
   //   return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
