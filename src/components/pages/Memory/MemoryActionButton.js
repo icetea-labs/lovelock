@@ -56,91 +56,55 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 function MemoryActionButton(props) {
-  const { memoryType, memoryIndex, handerShowComment, numComment, setLikeTopInfo, setNeedAuth } = props;
+  const { 
+    memoryType, 
+    memoryLikes,
+    memoryIndex, 
+    handerShowComment, 
+    numComment, 
+    setLikeTopInfo, 
+    setNeedAuth, 
+    numLike,  // Lock-level number of likes
+    isMyLike // Lock-level isMyLike
+   } = props;
+
+  const isAuto = memoryType === 1
+
   const address = useSelector(state => state.account.address);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
 
-  // const [likes, setLikes] = useState(props.memoryLikes);
-  const [likes] = useState(props.memoryLikes);
-  const [numLike, setNumLike] = useState(0);
-  const [isMyLike, setIsMyLike] = useState(false);
-  // const { enqueueSnackbar } = useSnackbar();
+  const [memoryNumLike, setMemoryNumLike] = useState(0);
+  const [memoryIsMyLike, setMemoryIsMyLike] = useState(false);
 
-  // const [needUpdateLike, setNeedUpdateLike] = useState(false)
-  // const timeout = useRef()
-  // const mounted = useRef(false)
-
-  useEffect(() => {
-    function serialLikeData() {
-      const num = Object.keys(likes).length;
-      setIsMyLike(!!likes[address]);
-      setNumLike(num);
-      if (memoryType === 1) setLikeTopInfo({ numLike: num, isMyLike: !!likes[address] });
+  const realLikeData = isAuto ? {
+      numLike, isMyLike
+    } : {
+      numLike: memoryNumLike,
+      isMyLike: memoryIsMyLike
     }
 
-    serialLikeData();
-  }, [likes]);
-
-  /*
-  useEffect(() => {
-    let cancel = false
-
-    if (!mounted.current) {
-      //console.log('First time, use like data passed in props.')
+  const setLikeData = (numLike, isMyLike) => {
+    if (isAuto) {
+      // dispatch to global state to sync with lock-level like data
+      setLikeTopInfo({ numLike, isMyLike });
     } else {
-      //console.log('Getting like for ' + memoryIndex)
-      callView('getLikeByMemoIndex', [memoryIndex]).then(data => {
-        if (!cancel && mounted.current) {
-          //console.log('Setting like data to state to re-render')
-          setLikes(data);
-        } else {
-          //console.log('LikeData gotton from server but component already unmounted, no need to setState!')
-        }
-      });
+      setMemoryNumLike(numLike)
+      setMemoryIsMyLike(isMyLike)
     }
-
-    return () => {
-      cancel = true
-    }
-  }, [needUpdateLike])
-
-  useEffect(() => {
-    let returnValue;
-    if (memoryType === 1) returnValue = watchAddlike();
-
-    return () => {
-      if (memoryType === 1)
-        Promise.resolve(returnValue).then(result => {
-          //console.log(result)
-          if (result && result.unsubscribe) result.unsubscribe();
-        });
-    };
-  }, []);
-
-  useEffect(() => {
-    mounted.current = true
-  }, [])
-
-  const refrestLikeCount = () => {
-    //console.log('LikeCount reloading requested.')
-    mounted.current && setNeedUpdateLike(c => !c)
   }
 
-  function watchAddlike() {
-    const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events[`addLike_${memoryIndex}`](filter, async (error, result) => {
-      //console.log('watchlike event', { error, result });
-      if (error) {
-        showSubscriptionError(error, enqueueSnackbar)
-      } else {
-        if (timeout.current) window.clearTimeout(timeout.current)
-        timeout.current = window.setTimeout(refrestLikeCount, 1000);
-      }
-    });
-  }
 
-  */
+  useEffect(() => {
+    if (isAuto) {
+      return
+    }
+
+    const num = Object.keys(memoryLikes).length;
+    setMemoryNumLike(!!memoryLikes[address]);
+    setMemoryIsMyLike(num);
+
+  }, [memoryType, memoryLikes, address, isAuto]);
 
   function handleLike() {
     if (!tokenKey) {
@@ -149,37 +113,30 @@ function MemoryActionButton(props) {
     }
     const params = [memoryIndex, 1];
     sendTransaction('addLike', params, { tokenAddress, address, sendType: 'sendAsync' })
-    // No need to refresh as we already watch for like
-    //.then(() => {
-      //refrestLikeCount();
-    //});
 
     // Change like to make quick feedback
     // the subscription will update number a couple of seconds later
-    if (isMyLike) {
-      setNumLike(numLike - 1);
-    } else {
-      setNumLike(numLike + 1);
-    }
-    setIsMyLike(!isMyLike);
+    const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1
+    const newIsMyLike = !realLikeData.isMyLike
+    setLikeData(newNumLike, newIsMyLike)
   }
 
   const classes = useStyles();
   return (
     <StyledCardActions className={classes.acctionsBt}>
       <Button className={classes.button} onClick={handleLike}>
-        {isMyLike ? (
+        {realLikeData.isMyLike ? (
           <React.Fragment>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
             <Typography component="span" variant="body2" color="primary">
-              {numLike > 0 && ` ${numLike}`}
+              {realLikeData.numLike > 0 && ` ${realLikeData.numLike}`}
             </Typography>
           </React.Fragment>
         ) : (
           <React.Fragment>
             <FavoriteBorderIcon fontSize="small" className={classes.rightIcon} />
             <Typography component="span" variant="body2">
-              {numLike > 0 && ` ${numLike}`}
+              {realLikeData.numLike > 0 && ` ${realLikeData.numLike}`}
             </Typography>
           </React.Fragment>
         )}
@@ -200,6 +157,15 @@ function MemoryActionButton(props) {
     </StyledCardActions>
   );
 }
+
+const mapStateToProps = state => {
+  const top = state.loveinfo.topInfo
+  return {
+    numLike: top.numLike,
+    isMyLike: top.isMyLike
+  };
+};
+
 const mapDispatchToProps = dispatch => {
   return {
     setLikeTopInfo: value => {
@@ -212,6 +178,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(MemoryActionButton);

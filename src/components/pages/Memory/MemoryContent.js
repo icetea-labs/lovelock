@@ -280,7 +280,7 @@ function MemoryContent(props) {
     }, 100);
   }
 
-  function handerNumberComment(number) {
+  function handleNumberComment(number) {
     setNumComment(number);
   }
 
@@ -446,7 +446,7 @@ function MemoryContent(props) {
               )}
               {showComment && (
                 <MemoryComments
-                  handerNumberComment={handerNumberComment}
+                  handleNumberComment={handleNumberComment}
                   memoryIndex={memory.id}
                   memory={memory}
                   textInput={textInput}
@@ -485,7 +485,7 @@ function MemoryContent(props) {
 
   const renderComments = () => (
     <MemoryComments
-      handerNumberComment={handerNumberComment}
+      handleNumberComment={handleNumberComment}
       memoryIndex={memory.id}
       memory={memory}
       textInput={textInput}

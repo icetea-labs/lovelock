@@ -276,10 +276,8 @@ function TopContrainer(props) {
     async function setProposeLikeInfo() {
       if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
         const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
-        const { numLike, isMyLike } = serialLikeData(likes);
-        topInfo.numLike = numLike;
-        topInfo.isMyLike = isMyLike;
-        setTopInfo(topInfo);
+        const likeData = serialLikeData(likes);
+        setTopInfo(Object.assign({}, topInfo, likeData));
       }
     }
 
@@ -289,7 +287,7 @@ function TopContrainer(props) {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needUpdate, setTopInfo, topInfo]);
+  }, [needUpdate]);
 
   function handerLike() {
     try {
@@ -331,11 +329,8 @@ function TopContrainer(props) {
   }
 
   function serialLikeData(likes) {
-    let isMyLike = false;
+    let isMyLike = !!likes[address];
     const num = Object.keys(likes).length;
-    if (likes[address]) {
-      isMyLike = true;
-    }
     return { numLike: num, isMyLike };
   }
 
