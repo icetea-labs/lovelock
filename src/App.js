@@ -11,7 +11,7 @@ import DetailPropose from './components/pages/Propose/Detail';
 import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
 import Explore from './components/pages/Home/Explore';
-import BLogView from './components/pages/Memory/BlogView'
+import BLogView from './components/pages/Memory/BlogView';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (

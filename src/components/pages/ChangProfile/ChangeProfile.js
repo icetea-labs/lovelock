@@ -201,7 +201,7 @@ function ChangeProfile(props) {
 
   function handleImageChange(event) {
     event.preventDefault();
-    const orFiles = event.target.files;
+    const orFiles = Array.from(event.target.files);
 
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
@@ -243,6 +243,7 @@ function ChangeProfile(props) {
                         <input
                           className="fileInput"
                           type="file"
+                          value=""
                           onChange={handleImageChange}
                           accept="image/jpeg,image/png"
                         />
@@ -303,7 +304,7 @@ function ChangeProfile(props) {
           </BoxAuthenCus>
         </LayoutAuthen>
       </QueueAnim>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isChangeProfile />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
     </React.Fragment>
   );
 }

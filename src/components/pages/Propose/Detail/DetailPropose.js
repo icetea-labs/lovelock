@@ -28,7 +28,7 @@ export default function DetailPropose(props) {
   let isOwner = false;
   let isView = false;
   const dispatch = useDispatch();
-  const proIndex = parseInt(match.params.index);
+  const proIndex = parseInt(match.params.index, 10);
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
   const [proposeInfo, setProposeInfo] = useState(null);
