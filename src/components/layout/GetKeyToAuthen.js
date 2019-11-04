@@ -11,9 +11,10 @@ import { withRouter } from 'react-router-dom';
 
 import tweb3 from '../../service/tweb3';
 import * as actions from '../../store/actions';
-import { wallet, decode, savetoLocalStorage } from '../../helper';
+// import { wallet, decode, savetoLocalStorage } from '../../helper';
+import { wallet, decode } from '../../helper';
 import CommonDialog from '../elements/CommonDialog';
-import { encode } from '../../helper/encode';
+// import { encode } from '../../helper/encode';
 
 function GetKeyToAuthen(props) {
   const [password, setPassword] = useState('');
@@ -26,9 +27,19 @@ function GetKeyToAuthen(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+
+    // if (window.PasswordCredential) {
+    //   navigator.credentials.get({
+    //     password: true,
+    //     mediation: 'silent'
+    //   }).then(cred => {
+    //   })
+    // }
+
     if (!addressRedux) {
       setPathName(window.location.pathname);
       props.history.push('/register');
+      return;
     }
     const handleUserKeyPress = event => {
       if (event.keyCode === 13) {
@@ -42,7 +53,7 @@ function GetKeyToAuthen(props) {
     return () => {
       window.document.body.removeEventListener('keydown', handleUserKeyPress);
     };
-  }, [password]);
+  }, [addressRedux]);
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -152,6 +163,7 @@ function GetKeyToAuthen(props) {
         margin="normal"
         onChange={passwordChange}
         type="password"
+        autoComplete="current-password"
       />
       <FormControlLabel
         control={

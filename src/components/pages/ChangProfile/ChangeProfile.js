@@ -99,6 +99,22 @@ function ChangeProfile(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+    async function getData() {
+      const [alias, tags] = await getAliasAndTags(address);
+      if (alias) {
+        setIsRegistered(true);
+        setUsername(alias);
+      } else {
+        setIsRegistered(false);
+      }
+  
+      if (tags) {
+        setFirstname({ old: tags.firstname || '', new: tags.firstname || '' });
+        setLastname({ old: tags.lastname || '', new: tags.lastname || '' });
+        setAvatar(tags.avatar);
+      }
+    }
+
     getData();
     // Fix issue #148
     ValidatorForm.addValidationRule('specialCharacter', async name => {
@@ -116,23 +132,7 @@ function ChangeProfile(props) {
       ValidatorForm.removeValidationRule('isPasswordMatch');
       ValidatorForm.removeValidationRule('isAliasRegistered');
     };
-  }, []);
-
-  async function getData() {
-    const [alias, tags] = await getAliasAndTags(address);
-    if (alias) {
-      setIsRegistered(true);
-      setUsername(alias);
-    } else {
-      setIsRegistered(false);
-    }
-
-    if (tags) {
-      setFirstname({ old: tags.firstname || '', new: tags.firstname || '' });
-      setLastname({ old: tags.lastname || '', new: tags.lastname || '' });
-      setAvatar(tags.avatar);
-    }
-  }
+  }, [address]);
 
   async function saveChange() {
     if (isRegistered ? !tokenKey : !privateKey) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
@@ -92,7 +92,7 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 const numComment = 4;
 export default function MemoryComments(props) {
-  const { handerNumberComment, memoryIndex, textInput } = props;
+  const { handleNumberComment, memoryIndex, textInput } = props;
   const dispatch = useDispatch();
 
   // const privateKey = useSelector(state => state.account.privateKey);
@@ -105,33 +105,29 @@ export default function MemoryComments(props) {
   const [comments, setComments] = useState([]);
   const [numHidencmt, setNumHidencmt] = useState(0);
   const [showComments, setShowComments] = useState([]);
-  let myFormRef = React.createRef();
+  let myFormRef = useRef();
 
   useEffect(() => {
     let cancel = false;
 
     loadData(memoryIndex).then(respComment => {
       if (!cancel) {
-        handleComments(respComment)
+        if (respComment.length > numComment) {
+          const numMore = respComment.length - numComment;
+          setNumHidencmt(numMore);
+          setShowComments(respComment.slice(numMore));
+        } else {
+          setShowComments(respComment);
+        }
+        setComments(respComment);
+        handleNumberComment(respComment.length);
       }
     });
 
     return () => {
       cancel = true;
     };
-  }, [comment]);
-
-  function handleComments(respComment) {
-    if (respComment.length > numComment) {
-      const numMore = respComment.length - numComment;
-      setNumHidencmt(numMore);
-      setShowComments(respComment.slice(numMore));
-    } else {
-      setShowComments(respComment);
-    }
-    setComments(respComment);
-    handerNumberComment(respComment.length);
-  }
+  }, [memoryIndex, comment]);
 
   async function loadData(index) {
     const respComment = await callView('getCommentsByMemoIndex', [index]);
@@ -158,7 +154,7 @@ export default function MemoryComments(props) {
     const method = 'addComment';
     const params = [memoryIndex, comment, ''];
     await sendTransaction(method, params, { address, tokenAddress });
-    myFormRef.reset();
+    myFormRef.current && myFormRef.current.reset();
     setComment('');
   }
 
@@ -220,9 +216,7 @@ export default function MemoryComments(props) {
             container
             wrap="nowrap"
             component="form"
-            ref={el => {
-              myFormRef = el;
-            }}
+            ref={myFormRef}
           >
             <Grid item>
               <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />

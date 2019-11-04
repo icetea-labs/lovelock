@@ -38,26 +38,23 @@ function ByPassWord(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    loaddata();
-  }, []);
-
-  async function loaddata() {
-    const { address } = props;
-    if (address) {
-      const reps = await getTagsInfo(address);
-      if (reps) {
-        // setUsername();
-        setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
-        // setAvatar(reps.avatar);
+    async function loadData() {
+      const { address } = props;
+      if (address) {
+        const reps = await getTagsInfo(address);
+        if (reps) {
+          setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
+        }
+      } else {
+        setState({ ...state, username: 'undefined' });
+        const message = 'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
+        enqueueSnackbar(message, { variant: 'info', autoHideDuration: 15000, anchorOrigin: {vertical: 'top', horizontal: 'center'} });
+        setStep('two');
       }
-    } else {
-      // setUsername('');
-      setState({ ...state, username: 'undefined' });
-      const message = 'Your information is empty, Please use [recovery phrase] or [Register]';
-      enqueueSnackbar(message, { variant: 'info' });
-      setStep('two');
     }
-  }
+
+    loadData();
+  }, []);
 
   async function gotoLogin() {
     if (encryptedData) {
@@ -153,7 +150,7 @@ function ByPassWord(props) {
           <AvatarPro hash={state.avatar} />
         </Grid>
         <Grid item>
-          <TextField label="Username" value={state.username} disabled />
+          <TextField label="Username" value={state.username} disabled autoComplete="username" />
         </Grid>
       </Grid>
       <ValidatorForm onSubmit={gotoLogin}>
@@ -167,6 +164,7 @@ function ByPassWord(props) {
           errorMessages={['This field is required']}
           margin="normal"
           value={password}
+          inputProps={{ autoComplete: "current-password" }}
         />
         <FormControlLabel
           control={

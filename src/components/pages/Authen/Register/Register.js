@@ -19,7 +19,7 @@ function Register(props) {
 
   useEffect(() => {
     setStep('one');
-  }, []);
+  }, [setStep]);
 
   function closeCrop() {
     setIsOpenCrop(false);

@@ -11,7 +11,7 @@ import RightContainer from './RightContainer';
 import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
 
-window.prerenderReady = false
+window.prerenderReady = false;
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -28,43 +28,50 @@ export default function DetailPropose(props) {
   let isOwner = false;
   let isView = false;
   const dispatch = useDispatch();
-  const proIndex = parseInt(match.params.index);
+  const proIndex = parseInt(match.params.index, 10);
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
   const [proposeInfo, setProposeInfo] = useState(null);
   const [pageErr, setPageErr] = useState(false);
 
   useEffect(() => {
-    let cancel = false
+    let cancel = false;
 
     if (isNaN(match.params.index)) {
       setPageErr(true);
     } else {
-      callView('getProposeByIndex', [proIndex]).then(async propose => {
-        const proInfo = propose[0] || {};
+      callView('getProposes').then(async allPropose => {
+        const proposeNum = allPropose.length - 1;
+        if (proIndex > proposeNum) {
+          setPageErr(true);
+        } else {
+          callView('getProposeByIndex', [proIndex]).then(async propose => {
+            const proInfo = propose[0] || {};
 
-        // add basic extra info
-        proInfo.index = proIndex
-        proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
-        proInfo.isJournal = proInfo.sender === proInfo.receiver
-        proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER
-        proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush
+            // add basic extra info
+            proInfo.index = proIndex;
+            proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+            proInfo.isJournal = proInfo.sender === proInfo.receiver;
+            proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
+            proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
 
-        // add more detailed info
-        await addInfoToPropose(proInfo);
-        
-        if (cancel) return
+            // add more detailed info
+            await addInfoToPropose(proInfo);
 
-        setProposeInfo(proInfo);
-        dispatch(actions.setTopInfo(proInfo));
+            if (cancel) return;
+
+            setProposeInfo(proInfo);
+            dispatch(actions.setTopInfo(proInfo));
+          });
+        }
       });
     }
 
-    return () => cancel = true
+    return () => (cancel = true);
   }, [proIndex]);
 
   const renderHelmet = () => {
-    const title = makeProposeName(proposeInfo, 'Lovelock - ')
+    const title = makeProposeName(proposeInfo, 'Lovelock - ');
     const desc = proposeInfo.s_content;
     const coverImg = proposeInfo.coverImg
       ? process.env.REACT_APP_IPFS + proposeInfo.coverImg
@@ -101,7 +108,6 @@ export default function DetailPropose(props) {
       pro.r_name = receiverTags['display-name'];
       pro.r_publicKey = receiverTags['pub-key'] || '';
       pro.r_avatar = receiverTags.avatar;
-      pro.r_content = pro.r_content;
     }
     pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
 

@@ -21,7 +21,8 @@ import {
   loadMemCacheAPI,
   decodeImg,
   getJsonFromIpfs,
-  makeProposeName
+  makeProposeName,
+  signalPrerenderDone
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -142,8 +143,9 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-around',
   },
   editorComment: {
-    width: 800,
-    maxWidth: '100%',
+    clear: 'both',
+    maxWidth: 740,
+    width: '100%',
     margin: '0 auto',
   },
 }));
@@ -170,6 +172,34 @@ function MemoryContent(props) {
     let cancel = false
     const abort = new AbortController()
 
+    async function serialMemory(signal) {
+      let mem = memory;
+      if (memory.info.blog) {
+        const blogData = JSON.parse(memory.content);
+        mem = { ...memory }
+        mem.meta = blogData.meta;
+        mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
+          .then(d => d.json())
+          .catch(err => {
+            if (err.name === 'AbortError') return
+            throw err
+          })
+      } else if (memory.isPrivate) {
+        const memCache = await loadMemCacheAPI(memory.id);
+        if (memCache) {
+          mem = memCache;
+          for (let i = 0; i < mem.info.hash.length; i++) {
+            const newBuffer = Buffer.from(mem.info.buffer[i]);
+            // mem.info.hash[i] = await getJsonFromIpfs(newBuffer, i);
+            const blob = new Blob([newBuffer], { type: 'image/jpeg' });
+            mem.info.hash[i].src = URL.createObjectURL(blob);
+          }
+        }
+      }
+      
+      return mem
+    }
+
     serialMemory(abort.signal).then(mem => {
       if (cancel || !mem) return
 
@@ -184,35 +214,7 @@ function MemoryContent(props) {
       abort.abort()
       cancel = true
     }
-  }, []);
-
-  async function serialMemory(signal) {
-    let mem = memory;
-    if (memory.info.blog) {
-      const blogData = JSON.parse(memory.content);
-      mem = { ... memory }
-      mem.meta = blogData.meta;
-      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
-        .then(d => d.json())
-        .catch(err => {
-          if (err.name === 'AbortError') return
-          throw err
-        })
-    } else if (memory.isPrivate) {
-      const memCache = await loadMemCacheAPI(memory.id);
-      if (memCache) {
-        mem = memCache;
-        for (let i = 0; i < mem.info.hash.length; i++) {
-          const newBuffer = Buffer.from(mem.info.buffer[i]);
-          // mem.info.hash[i] = await getJsonFromIpfs(newBuffer, i);
-          const blob = new Blob([newBuffer], { type: 'image/jpeg' });
-          mem.info.hash[i].src = URL.createObjectURL(blob);
-        }
-      }
-    }
-    
-    return mem
-  }
+  }, [memory, memory.showDetail, memory.info.blog]);
 
   function FacebookProgress(propsFb) {
     const classesFb = useStylesFacebook();
@@ -278,7 +280,7 @@ function MemoryContent(props) {
     }, 100);
   }
 
-  function handerNumberComment(number) {
+  function handleNumberComment(number) {
     setNumComment(number);
   }
 
@@ -348,9 +350,9 @@ function MemoryContent(props) {
         </div>
         <span>
           <span>Locked with </span>
-          <Typography component="span" className={classes.relationshipName}>
-            {propose.r_name}
-          </Typography>
+          {memoryDecrypted.r_name ? <Typography component="span" className={classes.relationshipName}>
+            {memoryDecrypted.r_name}
+          </Typography> : <span>a crush</span>}
         </span>
       </Typography>
     );
@@ -364,7 +366,7 @@ function MemoryContent(props) {
         </div>
         <span>
           <Typography component="span" className={classes.relationshipName}>
-            {propose.r_name}
+            {memoryDecrypted.name}
           </Typography>
           <span> started the journal.</span>
         </span>
@@ -373,9 +375,7 @@ function MemoryContent(props) {
   };
 
   const renderHelmet = blogInfo => {
-    window.setTimeout(() => {
-      window.prerenderReady = true
-    }, 500)
+    signalPrerenderDone()
 
     const title = `${blogInfo.title} - A story on Lovelock`
     const desc = makeProposeName(propose)
@@ -403,7 +403,7 @@ function MemoryContent(props) {
   const renderContentUnlock = () => {
     const isBlog = !!memoryDecrypted.info.blog;
     const blogInfo = memoryDecrypted.meta || {};
-    const isJournal = propose.sender === propose.receiver;
+    const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
     return (
       <React.Fragment>
         {memoryDecrypted.type === 1 ? (
@@ -446,7 +446,7 @@ function MemoryContent(props) {
               )}
               {showComment && (
                 <MemoryComments
-                  handerNumberComment={handerNumberComment}
+                  handleNumberComment={handleNumberComment}
                   memoryIndex={memory.id}
                   memory={memory}
                   textInput={textInput}
@@ -485,7 +485,7 @@ function MemoryContent(props) {
 
   const renderComments = () => (
     <MemoryComments
-      handerNumberComment={handerNumberComment}
+      handleNumberComment={handleNumberComment}
       memoryIndex={memory.id}
       memory={memory}
       textInput={textInput}

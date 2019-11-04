@@ -80,7 +80,7 @@ function LeftContainer(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    let signal = {};
+    const signal = {};
 
     loadProposes(signal);
     watchCreatePropose(signal);
@@ -175,6 +175,8 @@ function LeftContainer(props) {
 
   async function eventCreatePropose(data, signal) {
     const log = await addInfoToProposes([data.log], signal);
+    if (!log || !log.length) return;
+
     addPropose(log[0]);
 
     if (address !== log[0].sender) {

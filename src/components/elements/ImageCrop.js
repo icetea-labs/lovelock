@@ -20,7 +20,7 @@ const ContWrap = styled.div`
 export default function ImageCrop(props) {
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
   const [avaPreview, setAvaPreview] = useState('');
-  const { close, accept, originFile, isViewSquare } = props;
+  const { close, accept, originFile, isViewSquare, paddingTop } = props;
 
   useEffect(() => {
     const reader = new FileReader();
@@ -33,7 +33,7 @@ export default function ImageCrop(props) {
       };
       reader.readAsArrayBuffer(file);
     }
-  }, []);
+  }, [originFile]);
 
   const acceptCrop = useCallback(() => {
     avaPreview.getCroppedCanvas().toBlob(blob => {
@@ -43,7 +43,7 @@ export default function ImageCrop(props) {
       const cropData = { cropFile: [parseFile], avaPreview: url };
       accept(cropData);
     });
-  }, [avaPreview]);
+  }, [avaPreview, originFile, accept]);
 
   function crop() {
     if (timeout) clearTimeout(timeout);
@@ -67,7 +67,7 @@ export default function ImageCrop(props) {
       confirm={acceptCrop}
       cancel={close}
       close={close}
-      zIndex={1101}
+      paddingTop={paddingTop}
     >
       <ContWrap isViewSquare={isViewSquare}>
         {originFile && (

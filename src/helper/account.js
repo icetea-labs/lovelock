@@ -52,11 +52,9 @@ export async function getTagsInfo(address) {
     return didMethods
         .query(address)
         .call()
-        .then(({ tags } = {}) => {
-            if (tags) {
-                item.tags = tags
-                return tags
-            }
+        .then(({ tags = {} } = {}) => {
+            item.tags = tags
+            return tags
         })
 }
 

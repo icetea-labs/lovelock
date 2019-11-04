@@ -406,7 +406,9 @@ export default function AddInfoMessage(props) {
           </Grid>
         </Grid>
       </InfoBox>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
+      {isOpenCrop && (
+        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare paddingTop="-2%" />
+      )}
     </Container>
   );
 }

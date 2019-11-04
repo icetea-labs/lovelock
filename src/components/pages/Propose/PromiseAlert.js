@@ -44,21 +44,21 @@ function PromiseAlert(props) {
   const hash = promiseImg;
 
   useEffect(() => {
-    loaddata();
-  }, []);
-
-  async function loaddata() {
-    const obj = proposes.filter(item => item.id === index)[0];
-
-    if (obj.status === 0) {
-      const addr = address === obj.sender ? obj.receiver : obj.sender;
-      const alias = await getAlias(addr);
-      setSender(obj.sender);
-      setContent(obj.s_content);
-      setPromiseImg(obj.coverImg);
-      setName(alias);
+    async function loadData() {
+      const obj = proposes.find(item => item.id === index);
+  
+      if (obj.status === 0) {
+        const addr = address === obj.sender ? obj.receiver : obj.sender;
+        const alias = await getAlias(addr);
+        setSender(obj.sender);
+        setContent(obj.s_content);
+        setPromiseImg(obj.coverImg);
+        setName(alias);
+      }
     }
-  }
+
+    loadData();
+  }, [address, proposes, index]);
 
   async function cancelPromise(ind) {
     try {

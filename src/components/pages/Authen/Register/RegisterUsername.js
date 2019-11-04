@@ -185,8 +185,12 @@ function RegisterUsername(props) {
               opts
             )
           );
+          let avatarUrl
           if (avatarData) {
-            const setAva = saveFileToIpfs(avatarData).then(hash => setTagsInfo({ avatar: hash }, opts));
+            const setAva = saveFileToIpfs(avatarData).then(hash => {
+              avatarUrl = process.env.REACT_APP_IPFS + hash
+              setTagsInfo({ avatar: hash }, opts)
+            });
             registerInfo.push(setAva);
           }
           await Promise.all(registerInfo);
@@ -202,6 +206,27 @@ function RegisterUsername(props) {
           setLoading(false);
           setStep('two');
           setIsRemember(isRememberState);
+
+          // REMARK:
+          // No matter we explicitly store or not, Chrome ALWAYS shows a popup
+          // offering user to save password. It is the user who decides.
+          // The following code just adds extra info (display name, avatar)
+          // if user opt to save.
+          // This extra data makes the 'select account' popup looks better
+          // when we get password later in non-silent mode
+
+          // save to browser password manager
+          if (window.PasswordCredential) {
+            const credData = { id: username, password, name: displayname }
+            if (avatarUrl) {
+              credData.iconURL = avatarUrl;
+            }
+            const cred = new window.PasswordCredential(credData);
+
+            // If error, just warn to console because this feature is not essential
+            navigator.credentials.store(cred).catch(console.warn)
+          }
+
         } catch (error) {
           console.error(error);
           const message = `An error has occured. Detail:${error}`;
@@ -264,6 +289,7 @@ function RegisterUsername(props) {
           ]}
           margin="dense"
           value={username}
+          inputProps={{ autoComplete: "username" }}
         />
         <FlexBox>
           <TextValidator
@@ -304,6 +330,7 @@ function RegisterUsername(props) {
           errorMessages={['This field is required']}
           margin="dense"
           value={password}
+          inputProps={{ autoComplete: "new-password" }}
         />
         <TextValidator
           label="Repeat password"
@@ -317,6 +344,7 @@ function RegisterUsername(props) {
           errorMessages={['Password mismatch', 'This field is required']}
           margin="dense"
           value={rePassword}
+          inputProps={{ autoComplete: "new-password" }}
         />
         <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
@@ -404,6 +432,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actionGlobal.setLoading(value));
     },
     setIsRemember: value => {
+      window.localStorage['remember'] = value ? '1' : '0'
       dispatch(actionCreate.setIsRemember(value));
     },
   };

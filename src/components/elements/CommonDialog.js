@@ -12,7 +12,7 @@ const PuLayout = styled.div`
   left: 0px;
   right: 0px;
   bottom: 0px;
-  z-index: ${props => props.zIndex || 1100}};
+  z-index: 1100;
   background: rgba(0, 0, 0, 0.5);
 `;
 
@@ -26,7 +26,7 @@ const Container = styled.div`
   /* padding: 10px; */
   box-sizing: border-box;
   position: fixed;
-  top: 10%;
+  top: ${props => props.paddingTop || '10%'};
   left: 50%;
   transform: translate(-50%, -50%);
   @media (max-width: 768px) {
@@ -109,12 +109,12 @@ class CommonDialog extends React.Component {
   }
 
   render() {
-    const { cancel, confirm, close, okText, cancelText, children, title, zIndex } = this.props;
+    const { cancel, confirm, close, okText, cancelText, children, title, paddingTop } = this.props;
     return (
       <QueueAnim animConfig={{ opacity: [1, 0] }}>
-        <PuLayout key={1} zIndex={zIndex}>
+        <PuLayout key={1}>
           <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
-            <Container key={2}>
+            <Container key={2} paddingTop={paddingTop}>
               <PuTitle>
                 <span className="title">{title}</span>
                 <IconButton onClick={close}>

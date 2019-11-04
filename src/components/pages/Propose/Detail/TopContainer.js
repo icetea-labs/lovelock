@@ -30,7 +30,7 @@ const TopContainerBox = styled.div`
     position: relative;
     overflow: hidden;
     max-width: ${rem(900)};
-    /* max-height: ${rem(1425)}; */
+    /* max-height: ${rem(425)}; */
     min-height: ${rem(225)};
     .showChangeImg {
       display: none;
@@ -221,7 +221,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
     fontSize: '12px',
     color: 'white',
-    // display: 'block',
+    // display: 'none',
   },
   photoCameraIcon: {
     marginRight: theme.spacing(1),
@@ -273,21 +273,19 @@ function TopContrainer(props) {
   const needUpdate = !topInfo || proIndex !== topInfo.index;
 
   useEffect(() => {
+    async function setProposeLikeInfo() {
+      if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
+        const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
+        const likeData = serialLikeData(likes);
+        setTopInfo(Object.assign({}, topInfo, likeData));
+      }
+    }
+
     setLoading(needUpdate);
     if (!needUpdate) {
       setProposeLikeInfo();
     }
   }, [needUpdate]);
-
-  async function setProposeLikeInfo() {
-    if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
-      const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
-      const { numLike, isMyLike } = serialLikeData(likes);
-      topInfo.numLike = numLike;
-      topInfo.isMyLike = isMyLike;
-      setTopInfo(topInfo);
-    }
-  }
 
   function handerLike() {
     try {
@@ -329,11 +327,8 @@ function TopContrainer(props) {
   }
 
   function serialLikeData(likes) {
-    let isMyLike = false;
+    const isMyLike = !!likes[address];
     const num = Object.keys(likes).length;
-    if (likes[address]) {
-      isMyLike = true;
-    }
     return { numLike: num, isMyLike };
   }
 
@@ -398,6 +393,23 @@ function TopContrainer(props) {
     }, 1);
   }
 
+  const buttonChange = (
+    <Button className={classes.icon}>
+      <PhotoCameraIcon className={classes.photoCameraIcon} />
+      <input
+        accept="image/jpeg,image/png"
+        className="fileInput"
+        role="button"
+        type="file"
+        value=""
+        onChange={handleImageChange}
+      />
+      <Typography className={classes.changeCoverTitle} noWrap>
+        Change
+      </Typography>
+    </Button>
+  );
+
   if (loading) {
     return (
       <TopContainerBox>
@@ -432,22 +444,7 @@ function TopContrainer(props) {
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg} title="Change lock image">
             <div className="showChangeImg">
-              <div>
-                <Button className={classes.icon}>
-                  <PhotoCameraIcon className={classes.photoCameraIcon} />
-                  <input
-                    accept="image/jpeg,image/png"
-                    className="fileInput"
-                    role="button"
-                    type="file"
-                    value=""
-                    onChange={handleImageChange}
-                  />
-                  <Typography className={classes.changeCoverTitle} noWrap>
-                    Change
-                  </Typography>
-                </Button>
-              </div>
+              <div>{buttonChange}</div>
               <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
                 Cancel
               </Button>
@@ -462,22 +459,7 @@ function TopContrainer(props) {
             image={process.env.REACT_APP_IPFS + topInfo.coverImg}
             title="Change lock image"
           >
-            <div className="showChangeImg">
-              <Button className={classes.icon}>
-                <PhotoCameraIcon className={classes.photoCameraIcon} />
-                <input
-                  accept="image/jpeg,image/png"
-                  className="fileInput"
-                  role="button"
-                  type="file"
-                  value=""
-                  onChange={handleImageChange}
-                />
-                <Typography className={classes.changeCoverTitle} noWrap>
-                  Change
-                </Typography>
-              </Button>
-            </div>
+            <div className="showChangeImg">{buttonChange}</div>
           </CardMedia>
         )}
       </div>
