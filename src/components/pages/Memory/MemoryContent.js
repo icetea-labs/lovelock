@@ -22,7 +22,8 @@ import {
   decodeImg,
   getJsonFromIpfs,
   makeProposeName,
-  signalPrerenderDone
+  signalPrerenderDone,
+  smartFetchIpfsJson
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -178,8 +179,8 @@ function MemoryContent(props) {
         const blogData = JSON.parse(memory.content);
         mem = { ...memory }
         mem.meta = blogData.meta;
-        mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
-          .then(d => d.json())
+        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date.getTime() })
+          .then(d => d.json)
           .catch(err => {
             if (err.name === 'AbortError') return
             throw err

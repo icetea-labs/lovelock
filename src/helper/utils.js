@@ -22,7 +22,9 @@ export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
 export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
     timeout = 10, // almost race
     signal,
-    abortAtTimeout
+    abortAtTimeout, // whether to abort main gateway when timeout
+    abortMain, // whether to abort main gateway when resolved
+    abortFallback // whether to abort fallback gateway when resolve
 } = {}) {
 
   if (signal && signal.aborted) {
@@ -35,10 +37,16 @@ export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
 
     const timeoutId = setTimeout(() => {
       abortAtTimeout && mainController.abort()
-      fetch(fallbackGateway, { signal: secondController && secondController.signal })
+      fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
         .then(response => response.json())
-        .then(json => resolve({ json, gateway: fallbackGateway }))
-        .catch(reject)
+        .then(json => {
+          resolve({ json, gateway: fallbackGateway })
+          abortMain && mainController.abort()
+        }).catch(err => {
+          if (err.name !== 'AbortError') {
+            reject(err)
+          }
+        })
     }, timeout);
 
     if (signal) {
@@ -54,8 +62,13 @@ export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
     .then(response => {
       clearTimeout(timeoutId)
       return response.json()
-    }).then(json => resolve({ json: json, gateway: mainGateway })
-    ).catch(err => {
+    }).then(json => {
+      resolve({ json: json, gateway: mainGateway })
+      if (abortFallback) {
+        clearTimeout(timeoutId);
+        secondController && secondController.abort()
+      }
+    }).catch(err => {
       if (err.name !== 'AbortError') {
         reject(err)
       }
@@ -64,7 +77,10 @@ export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
   })
 }
 
-export function fetchMainFirstIpfsJson(hash, options) {
+export function fetchMainFirstIpfsJson(hash, options = {}) {
+  if (options.abortMain == null) {
+    options.abortMain = true
+  }
   return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options)
 }
 
@@ -72,7 +88,18 @@ export function fetchAltFirstIpfsJson(hash, options = {}) {
   if (options.timeout == null) {
     options.timeout = 1500 // wait a little to reduce load for our main gateway
   }
+  if (options.abortFallback == null) {
+    options.abortFallback = true
+  }
   return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options)
+}
+
+export function smartFetchIpfsJson(hash, options = {}) {
+  let func = fetchMainFirstIpfsJson
+  if (options.timestamp && (Date.now() - options.timestamp > 10 * 60 * 1000)) {
+    func = fetchAltFirstIpfsJson
+  }
+  return func(hash, options)
 }
 
 export function signalPrerenderDone(wait) {
