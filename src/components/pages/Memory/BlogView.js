@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Editor from '../Memory/Editor';
-
-const PATH = process.env.REACT_APP_ALT_IPFS || process.env.REACT_APP_IPFS
+import { fetchAltFirstIpfsJson } from '../../../helper/utils'
 
 export function BlogView({ hash } = {}) {
   const [content, setContent] = useState(null)
@@ -10,11 +9,15 @@ export function BlogView({ hash } = {}) {
     let cancel = false
     const abort = new AbortController()
 
-    hash && fetch(PATH + hash, { signal: abort.signal }).then(r => r.json()).then(json => {
+    hash && fetchAltFirstIpfsJson(hash, { signal: abort.signal })
+      .then(({ json }) => {
         if (!cancel) {
             setContent(json)
         }
-    }).catch(console.warn)
+    }).catch(err => {
+      if (err.name === 'AbortError') return
+      throw err
+    })
 
     return () => {
         abort.abort()
@@ -25,9 +28,8 @@ export function BlogView({ hash } = {}) {
   return (
     <div style={{ 
         backgroundColor: '#fdfdfd',
-        marginTop: -40,
-        paddingTop: 40,
-        paddingBottom: 40
+        height: '100vh',
+        paddingTop: 40
     }}>
         {content && <Editor initContent={content} read_only />}
     </div>

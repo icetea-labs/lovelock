@@ -12,6 +12,68 @@ import { decodeTx, decode } from './decode';
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
+export const ipfsGateway = process.env.REACT_APP_IPFS;
+export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
+
+export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
+  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json())
+}
+
+export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
+    timeout = 10, // almost race
+    signal,
+    abortAtTimeout
+} = {}) {
+
+  if (signal && signal.aborted) {
+    return Promise.reject(new DOMException('Aborted', 'AbortError'));
+  }
+
+  return new Promise((resolve, reject) => {
+    const mainController = new AbortController();
+    const secondController = signal ? new AbortController() : undefined
+
+    const timeoutId = setTimeout(() => {
+      abortAtTimeout && mainController.abort()
+      fetch(fallbackGateway, { signal: secondController && secondController.signal })
+        .then(response => response.json())
+        .then(json => resolve({ json, gateway: fallbackGateway }))
+        .catch(reject)
+    }, timeout);
+
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        mainController.abort()
+        secondController && secondController.abort()
+        reject(new DOMException('Aborted', 'AbortError'));
+      })
+    }
+
+    fetch(mainGateway + hash, { signal: mainController.signal })
+    .then(response => {
+      clearTimeout(timeoutId)
+      return response.json()
+    }).then(json => resolve({ json: json, gateway: mainGateway })
+    ).catch(err => {
+      if (err.name !== 'AbortError') {
+        reject(err)
+      }
+    })
+
+  })
+}
+
+export function fetchMainFirstIpfsJson(hash, options) {
+  return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options)
+}
+
+export function fetchAltFirstIpfsJson(hash, options = {}) {
+  if (options.timeout == null) {
+    options.timeout = 1500 // wait a little to reduce load for our main gateway
+  }
+  return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options)
+}
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
