@@ -54,7 +54,7 @@ function GetKeyToAuthen(props) {
     return () => {
       window.document.body.removeEventListener('keydown', handleUserKeyPress);
     };
-  }, [addressRedux]);
+  }, [addressRedux]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -87,7 +87,7 @@ function GetKeyToAuthen(props) {
         return;
       }
       setLoading(true);
-      setTimeout(() => {
+      //setTimeout(() => {
         try {
           const decodeOutput = decode(password, encryptedData);
           let mode = 0;
@@ -149,7 +149,7 @@ function GetKeyToAuthen(props) {
           const message = 'Your password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
         }
-      }, 100);
+      //}, 100);
     }
   }
 
