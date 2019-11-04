@@ -289,7 +289,7 @@ function TopContrainer(props) {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needUpdate, setTopInfo, topInfo]);
+  }, [needUpdate]);
 
   function handerLike() {
     try {

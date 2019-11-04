@@ -94,7 +94,7 @@ function MemoryContainer(props) {
     }
 
     return () => signal.cancel = true
-  }, [memorydata, proposeInfo, setMemory]);
+  }, [memorydata]);
 
   if (memoryList.length <= 0 || loading) {
     if (!loading) return <div />;
