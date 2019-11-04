@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import mediumZoom from 'medium-zoom';
 import Input from '@material-ui/core/Input';
 import { DividerBlockConfig } from "Dante2/package/es/components/blocks/divider";
+import { waitForHtmlTags } from '../../../helper'
 
 const font =
   '"jaf-bernino-sans", "Open Sans", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
@@ -37,12 +38,7 @@ class Editor extends React.Component {
 
   componentDidMount() {
     if (this.props.read_only) {
-      setTimeout(() => {
-        const images = document.querySelectorAll('.graf-image');
-        if (images.length) {
-          mediumZoom(images);
-        }
-      }, 500);
+      waitForHtmlTags('.graf-image', mediumZoom)
     } else {
       const titleInput = this.titleText.current;
       // for some reason, could not set this through react

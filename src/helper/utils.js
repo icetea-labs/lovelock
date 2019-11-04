@@ -15,6 +15,28 @@ export const contract = process.env.REACT_APP_CONTRACT;
 export const ipfsGateway = process.env.REACT_APP_IPFS;
 export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
 
+export function waitForHtmlTags(selector, callback, { 
+  timeout = 3000,
+  step = 100,
+  func = 'querySelectorAll',
+  testProp = 'length',
+  timeoutCallBack
+} = {}) {
+  if (timeout < 0) {
+    !!timeoutCallBack && timeoutCallBack();
+    return null;
+  }
+  
+  var el = document[func](selector);
+  if (el && (!testProp || el[testProp])) {
+    callback(el);
+  } else {
+    setTimeout(function() {
+      waitForHtmlTags(selector, callback, { timeout: timeout - step, timeoutCallBack });
+    }, 100);
+  }
+}
+
 export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
   return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json())
 }
@@ -104,7 +126,7 @@ export function smartFetchIpfsJson(hash, options = {}) {
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
-    wait = process.env.REACT_APP_PRERENDER_WAIT || 100
+    wait = +process.env.REACT_APP_PRERENDER_WAIT || 100
   }
   window.setTimeout(() => {
     window.prerenderReady = true
