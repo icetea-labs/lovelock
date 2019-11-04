@@ -127,7 +127,7 @@ export default function MemoryComments(props) {
     return () => {
       cancel = true;
     };
-  }, [memoryIndex, handerNumberComment]);
+  }, [memoryIndex, comment]);
 
   async function loadData(index) {
     const respComment = await callView('getCommentsByMemoIndex', [index]);
