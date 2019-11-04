@@ -285,7 +285,7 @@ function TopContrainer(props) {
     if (!needUpdate) {
       setProposeLikeInfo();
     }
-  }, [needUpdate]);
+  }, [needUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handerLike() {
     try {

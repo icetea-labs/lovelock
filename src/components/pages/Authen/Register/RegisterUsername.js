@@ -19,7 +19,7 @@ import tweb3 from '../../../../service/tweb3';
 import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
-import ImageCrop from '../../../elements/ImageCrop';
+// import ImageCrop from '../../../elements/ImageCrop';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
