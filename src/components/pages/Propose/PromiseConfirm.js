@@ -95,7 +95,6 @@ class PromiseConfirm extends React.Component {
             this.messageDeny(messageDeny);
           }
         }}
-        isCancel
       >
         <TagTitle>{isDeny ? 'Your message (optional)' : 'Your message'}</TagTitle>
         {isDeny ? (

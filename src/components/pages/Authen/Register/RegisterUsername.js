@@ -19,7 +19,7 @@ import tweb3 from '../../../../service/tweb3';
 import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
-import ImageCrop from '../../../elements/ImageCrop';
+// import ImageCrop from '../../../elements/ImageCrop';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
@@ -115,17 +115,17 @@ const WarningPass = styled.div`
 `;
 
 function RegisterUsername(props) {
-  const { setStep, setLoading, setAccount, setIsRemember } = props;
+  const { setStep, setLoading, setAccount, setIsRemember, setIsOpenCrop, setOriginFile, avatar, avatarData } = props;
   const [username, setUsername] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
-  const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
-  const [avatarData, setAvatarData] = useState('');
-  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  // const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
+  // const [avatarData, setAvatarData] = useState('');
+  // const [isOpenCrop, setIsOpenCrop] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
-  const [originFile, setOriginFile] = useState([]);
+  // const [originFile, setOriginFile] = useState([]);
   const [isRememberState, setIsRememberState] = useState(true);
 
   useEffect(() => {
@@ -249,7 +249,7 @@ function RegisterUsername(props) {
 
   function handleImageChange(event) {
     event.preventDefault();
-    const orFiles = event.target.files;
+    const orFiles = Array.from(event.target.files);
 
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
@@ -259,19 +259,19 @@ function RegisterUsername(props) {
     }
   }
 
-  function closeCrop() {
-    setIsOpenCrop(false);
-  }
+  // function closeCrop() {
+  //   setIsOpenCrop(false);
+  // }
 
-  function acceptCrop(e) {
-    closeCrop();
-    setAvatarData(e.cropFile);
-    setAvatar(e.avaPreview);
-  }
+  // function acceptCrop(e) {
+  //   closeCrop();
+  //   setAvatarData(e.cropFile);
+  //   setAvatar(e.avaPreview);
+  // }
 
   const classes = useStyles();
   return (
-    <div>
+    <React.Fragment>
       <ValidatorForm onSubmit={gotoNext}>
         <TextValidator
           label="Username"
@@ -356,7 +356,13 @@ function RegisterUsername(props) {
             <div className="upload_img">
               <AvatarPro src={avatar} className={classes.avatar} />
               <div className="changeImg">
-                <input className="fileInput" type="file" onChange={handleImageChange} accept="image/jpeg,image/png" />
+                <input
+                  className="fileInput"
+                  type="file"
+                  value=""
+                  onChange={handleImageChange}
+                  accept="image/jpeg,image/png"
+                />
                 <CameraAltIcon />
               </div>
             </div>
@@ -403,8 +409,8 @@ function RegisterUsername(props) {
           </ButtonPro>
         </DivControlBtnKeystore>
       </ValidatorForm>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
-    </div>
+      {/* {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />} */}
+    </React.Fragment>
   );
 }
 

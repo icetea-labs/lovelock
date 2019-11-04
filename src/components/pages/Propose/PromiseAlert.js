@@ -77,7 +77,7 @@ function PromiseAlert(props) {
   }
 
   return (
-    <div>
+    <React.Fragment>
       {address === sender ? (
         <CommonDialog
           title="Lock alert"
@@ -97,15 +97,7 @@ function PromiseAlert(props) {
           <PageView>{content}</PageView>
         </CommonDialog>
       ) : (
-        <CommonDialog
-          title="Lock alert"
-          okText="Accept"
-          cancelText="Deny"
-          close={close}
-          cancel={deny}
-          confirm={accept}
-          isCancel
-        >
+        <CommonDialog title="Lock alert" okText="Accept" confirm={accept} cancelText="Deny" cancel={deny} close={close}>
           <TagTitle>
             <span className="highlight">{name}</span>
             <span> sent a lock to you</span>
@@ -116,7 +108,7 @@ function PromiseAlert(props) {
           <PageView>{content}</PageView>
         </CommonDialog>
       )}
-    </div>
+    </React.Fragment>
   );
 }
 

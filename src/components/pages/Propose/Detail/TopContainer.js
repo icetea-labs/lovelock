@@ -285,9 +285,7 @@ function TopContrainer(props) {
     if (!needUpdate) {
       setProposeLikeInfo();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needUpdate]);
+  }, [needUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handerLike() {
     try {
@@ -329,7 +327,7 @@ function TopContrainer(props) {
   }
 
   function serialLikeData(likes) {
-    let isMyLike = !!likes[address];
+    const isMyLike = !!likes[address];
     const num = Object.keys(likes).length;
     return { numLike: num, isMyLike };
   }
@@ -343,7 +341,6 @@ function TopContrainer(props) {
   function handleImageChange(event) {
     event.preventDefault();
     const orFiles = Array.from(event.target.files);
-
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
       setIsOpenCrop(true);
@@ -535,7 +532,7 @@ function TopContrainer(props) {
           </FlexWidthBox>
         )}
       </WarrperChatBox>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
     </TopContainerBox>
   );
 }
