@@ -248,40 +248,40 @@ const StyledMenuItem = withStyles(theme => ({
 const friReqList = [
   {
     id: 0,
-    avatar: '/static/img/user-men.jpg',
-    name: 'HuyHQ',
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Huy Hoang',
   },
   {
     id: 1,
-    avatar: '/static/img/user-women.jpg',
-    name: 'MyNTT',
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'MyMy',
   },
   {
     id: 2,
-    avatar: '/static/img/user-men.jpg',
-    name: 'ChuChimNhoBoCaTheGioi',
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Luong Hoa',
   },
 ];
 
 const notifiList = [
   {
     id: 0,
-    avatar: '/static/img/user-men.jpg',
-    name: 'HuyHQ',
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Huy Hoang',
     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
     time: 'just now',
   },
   {
     id: 1,
-    avatar: '/static/img/user-women.jpg',
-    name: 'MyNTT',
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'MyMy',
     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
     time: 'just now',
   },
   {
     id: 2,
-    avatar: '/static/img/user-men.jpg',
-    name: 'ThiTH',
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Thi Truong',
     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
     time: 'just now',
   },

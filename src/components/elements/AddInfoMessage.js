@@ -376,7 +376,8 @@ export default function AddInfoMessage(props) {
               <div className="icon-datetime">
                 <MaterialUIPickers
                   autoOk
-                  clearable
+                  clearable={false}
+                  showTodayButton
                   value={date}
                   format="dd/MM/yyyy"
                   disableFuture

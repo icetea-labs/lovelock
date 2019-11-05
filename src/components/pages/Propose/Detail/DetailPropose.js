@@ -50,7 +50,7 @@ export default function DetailPropose(props) {
 
             // add basic extra info
             proInfo.index = proIndex;
-            proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+            proInfo.coverImg = proInfo.coverImg || 'QmXtwtitd7ouUKJfmfXXcmsUhq2nGv98nxnw2reYg4yncM';
             proInfo.isJournal = proInfo.sender === proInfo.receiver;
             proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
             proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
