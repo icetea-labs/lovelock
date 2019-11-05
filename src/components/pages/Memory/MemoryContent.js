@@ -414,7 +414,7 @@ function MemoryContent(props) {
             renderLockEventMemory()
           )
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
+          <Typography variant="body1" style={{ whiteSpace: 'pre-line' }} component="div">
             {!isBlog && memoryDecrypted.content}
             {isBlog && blogInfo.title && (
               <BlogShowcase
