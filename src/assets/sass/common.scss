@@ -94,3 +94,19 @@ input.dante-menu-input {
   max-width: none!important;
   max-height: none!important;
 }
+
+.main-appbar::after{
+  content: "BETA";
+  position: fixed;
+  width: 80px;
+  height: 25px;
+  background-color: rgba(255,255,255,.75);
+  top: 7px;
+  left: -20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #8250c8;
+  line-height: 27px;
+  transform:rotate(-45deg);
+}

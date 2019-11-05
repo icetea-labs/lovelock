@@ -545,7 +545,7 @@ function Header(props) {
   return (
     <div>
       <div className={classes.grow}>
-        <StyledAppBar position="static" color="inherit" className={classes.AppBar}>
+        <StyledAppBar position="static" color="inherit" className={classes.AppBar + ' main-appbar'}>
           <StyledToolbar>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
