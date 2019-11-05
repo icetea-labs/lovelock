@@ -381,8 +381,9 @@ export default function AddInfoMessage(props) {
                   format="dd/MM/yyyy"
                   disableFuture
                   onChange={handleDateChange}
+                  style={{ paddingTop: 2 }}
                 />
-                <i className="material-icons">event</i>
+                <i className="material-icons" style={{ paddingLeft : 12 }}>event</i>
               </div>
             </DateBox>
           </Grid>

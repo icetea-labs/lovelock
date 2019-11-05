@@ -548,7 +548,7 @@ class PuNewLock extends React.Component {
               </PreviewContainter>
               <RightBotInfo>
                 <TextFieldPlaceholder
-                  label="First Name"
+                  label="Crush First Name"
                   fullWidth
                   onChange={this.handleUsername}
                   name="firstname"
@@ -556,7 +556,7 @@ class PuNewLock extends React.Component {
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label="Last Name"
+                  label="Crush Last Name"
                   fullWidth
                   onChange={this.handleUsername}
                   name="lastname"
@@ -564,7 +564,7 @@ class PuNewLock extends React.Component {
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label="Crush's response to your lock"
+                  label="Crush's Reply to You"
                   fullWidth
                   onChange={this.handleUsername}
                   name="botReply"
@@ -574,10 +574,10 @@ class PuNewLock extends React.Component {
             </FlexBox>
           )}
           <DividerCus />
-          <TagTitle className="prmContent">Lock content</TagTitle>
+          <TagTitle className="prmContent">Your Message</TagTitle>
           <TextFieldMultiLine
             id="outlined-multiline-static"
-            placeholder="lock content ..."
+            placeholder={checked ? 'Express yourself to your crush…' : 'Say something to your partner…'}
             multiline
             fullWidth
             rows="4"
