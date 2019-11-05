@@ -10,7 +10,7 @@ import { withStyles, makeStyles } from '@material-ui/core/styles';
 import * as actions from '../../../store/actions';
 // import { sendTransaction, callView, showSubscriptionError } from '../../../helper';
 import { sendTransaction } from '../../../helper';
-//import tweb3 from '../../../service/tweb3';
+//import getWeb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
   button: {

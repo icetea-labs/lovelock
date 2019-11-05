@@ -5,7 +5,7 @@ import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
-import tweb3 from '../service/tweb3';
+import { getWeb3, getContract } from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
@@ -161,12 +161,12 @@ export function callView(funcName, params) {
   return callReadOrPure(funcName, params, 'callReadonlyContractMethod');
 }
 function callReadOrPure(funcName, params, method) {
-  return tweb3[method](contract, funcName, params || []);
+  return getWeb3()[method](contract, funcName, params || []);
 }
 
 export async function sendTransaction(funcName, params, opts) {
   console.log('sendTransaction', funcName, params);
-  const ct = tweb3.contract(contract);
+  const ct = getContract();
   const sendType = opts.sendType || 'sendCommit';
   const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
@@ -188,7 +188,7 @@ export function tryStringifyJson(p, replacer = undefined, space = 2) {
 
 export async function getAccountInfo(address) {
   try {
-    const info = await tweb3.getAccountInfo(address);
+    const info = await getWeb3().getAccountInfo(address);
     return info;
   } catch (err) {
     throw err;

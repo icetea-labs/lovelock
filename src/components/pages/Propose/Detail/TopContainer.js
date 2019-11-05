@@ -10,7 +10,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { useSnackbar } from 'notistack';
 
-// import tweb3 from '../../../../service/tweb3';
+// import getWeb3 from '../../../../service/tweb3';
 
 import {
   callView,

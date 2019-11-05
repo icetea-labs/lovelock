@@ -12,7 +12,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import * as actions from '../../../store/actions';
-import tweb3 from '../../../service/tweb3';
+import { getAliasContract } from '../../../service/tweb3';
 import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from '../../elements/CommonDialog';
@@ -219,11 +219,7 @@ class PuNewLock extends React.Component {
     const peopleAva = [];
 
     try {
-      const method = 'callReadonlyContractMethod';
-      const add = 'system.alias';
-      const func = 'query';
-
-      const result = await tweb3[method](add, func, [escapedValue]);
+      const result = await getAliasContract().methods.query(escapedValue).call()
       people = Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
         return { nick, address: result[key].address };

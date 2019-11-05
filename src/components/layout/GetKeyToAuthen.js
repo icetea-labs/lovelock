@@ -9,7 +9,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { withRouter } from 'react-router-dom';
 
-import tweb3 from '../../service/tweb3';
+import { getWeb3, grantAccessToken} from '../../service/tweb3';
 import * as actions from '../../store/actions';
 // import { wallet, decode, savetoLocalStorage } from '../../helper';
 import { wallet, decode } from '../../helper';
@@ -100,18 +100,12 @@ function GetKeyToAuthen(props) {
             privateKey = decodeOutput;
             address = wallet.getAddressFromPrivateKey(privateKey);
           }
+
+          const tweb3 = getWeb3()
           tweb3.wallet.importAccount(privateKey);
 
           const token = tweb3.wallet.createRegularAccount();
-          const ms = tweb3.contract('system.did').methods;
-          const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          ms.grantAccessToken(
-            address,
-            [process.env.REACT_APP_CONTRACT, 'system.did'],
-            token.address,
-            parseInt(expire, 10)
-          )
-            .sendCommit({ from: address })
+          grantAccessToken(address, token.address, isRemember)
             .then(({ returnValue }) => {
               tweb3.wallet.importAccount(token.privateKey);
               // const keyObject = encode(privateKey, password);

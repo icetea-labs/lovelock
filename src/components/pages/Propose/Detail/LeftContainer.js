@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import tweb3 from '../../../../service/tweb3';
+import { getContract } from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, getAlias, showSubscriptionError } from '../../../../helper';
 import Icon from '../../../elements/Icon';
@@ -91,7 +91,7 @@ function LeftContainer(props) {
 
   function watchCreatePropose(signal) {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
+    return getContract().events.allEvents(filter, async (error, result) => {
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
@@ -121,7 +121,7 @@ function LeftContainer(props) {
 
   // function watchConfirmPropose(signal) {
   //   const filter = {};
-  //   return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
+  //   return getContract().events.allEvents(filter, async (error, result) => {
   //     if (error) {
   //       const message = 'Watch confirmPropose error';
   //       enqueueSnackbar(message, { variant: 'error' });
