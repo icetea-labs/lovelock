@@ -48,19 +48,29 @@ const ShadowBox = styled.div`
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
-// const TagBox = styled.div`
-//   width: 100%;
-//   display: flex;
-//   flex-wrap: wrap;
-//   .tagName {
-//     color: #8250c8;
-//     margin-right: ${rem(7)};
-//     font-size: ${rem(12)};
-//     :hover {
-//       cursor: pointer;
-//     }
-//   }
-// `;
+
+const TagBox = styled.div`
+  padding-top: 1rem;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  .tagName {
+    color: #8250c8;
+    margin-right: ${rem(7)};
+    font-size: ${rem(12)};
+    cursor: pointer;
+    margin-bottom: ${rem(9)}
+    padding: 3px 12px 3px 6px;
+    :hover {
+      text-decoration: underline;
+    }
+    .material-icons {
+      vertical-align: middle;
+    }
+    .tagText {
+    }
+  }
+`;
 
 function LeftContainer(props) {
   const {
@@ -233,16 +243,21 @@ function LeftContainer(props) {
     return clonePro;
   }
 
-  //function renderTag() {
-  // const { tag } = state;
-  // return tag.map((item, index) => {
-  //   return (
-  //     <span className="tagName" key={index}>
-  //       #{item}
-  //     </span>
-  //   );
-  // });
-  //}
+  function renderCollections() {
+    const sample = [
+      { name: "Travel", description: "Travel together around the world!"},
+      { name: "Honeymoon", description: "Honeymoon every year..."},
+      { name: "Love Letters", description: "Letters from bottoms of hearts."}
+    ]
+    return sample.map((item, index) => {
+      return (
+        <div className="tagName" key={index}>
+          <Icon type='collections' />
+          <span className="tagText" title={item.description}>{item.name}</span>
+        </div>
+      );
+    });
+  }
 
   return (
     <React.Fragment>
@@ -262,6 +277,8 @@ function LeftContainer(props) {
           <div>
             <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} />
           </div>
+          <div className="title">Collection</div>
+          <TagBox>{renderCollections()}</TagBox>
         </ShadowBox>
       </LeftBox>
       {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}
