@@ -229,11 +229,16 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro, hasParentDialog } = props;
+  const { files, date, isCreatePro, hasParentDialog, onDialogToggle } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
-  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [isOpenCrop, _setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState('');
+
+  const setIsOpenCrop = value => {
+    onDialogToggle && onDialogToggle(value)
+    _setIsOpenCrop(value)
+  }
 
   useEffect(() => {
     if (files.length === 0) {
@@ -382,6 +387,8 @@ export default function AddInfoMessage(props) {
                   format="dd/MM/yyyy"
                   disableFuture
                   onChange={handleDateChange}
+                  onOpen={() => (onDialogToggle && onDialogToggle(true))}
+                  onClose={() => (onDialogToggle && onDialogToggle(false))}
                   style={{ paddingTop: 2 }}
                 />
                 <i className="material-icons" style={{ paddingLeft : 12 }}>event</i>

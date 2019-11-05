@@ -41,7 +41,7 @@ function GetKeyToAuthen(props) {
       props.history.push('/register');
       return;
     }
-  }, [addressRedux]);
+  }, [addressRedux]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -135,7 +135,7 @@ function GetKeyToAuthen(props) {
   }
 
   return needAuth ? (
-    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={confirm}>
+    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={confirm} onKeyReturn>
       <TextField
         id="Password"
         label="Password"

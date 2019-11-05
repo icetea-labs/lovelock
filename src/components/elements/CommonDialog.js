@@ -1,8 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import QueueAnim from 'rc-queue-anim';
-
-import { ValidatorForm } from 'react-material-ui-form-validator';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonPro, LinkPro } from './Button';
 
@@ -110,7 +107,7 @@ class CommonDialog extends React.Component {
   componentDidMount(){
     const { hasParentDialog } = this.props
 
-    document.addEventListener("keydown", this.handleKeyDown, false);
+    document.addEventListener("keydown", this.handleKeyDown, true);
     const style = document.body.style
     this.oldBodyOverflow = style.overflow
     style.overflow = 'hidden'
@@ -123,7 +120,7 @@ class CommonDialog extends React.Component {
   componentWillUnmount(){
     const { hasParentDialog } = this.props
 
-    document.removeEventListener("keydown", this.handleKeyDown, false);
+    document.removeEventListener("keydown", this.handleKeyDown, true);
     document.body.style.overflow = this.oldBodyOverflow
 
     if (hasParentDialog) {
@@ -132,21 +129,43 @@ class CommonDialog extends React.Component {
   }
 
   handleKeyDown = e => {
-    if(this.props.close && e.keyCode === 27) {
-      e.stopPropagation()
-      e.preventDefault()
-      this.props.close()
-    } else if(this.props.confirm && e.keyCode === 13) {
-      e.stopPropagation()
-      e.preventDefault()
-      //this.props.confirm()
+    const { onKeyEsc, close, cancel, confirm } = this.props
+    if(e.keyCode === 27) {
+      if (typeof onKeyEsc === 'function') {
+        onKeyEsc(e)
+      } else if (onKeyEsc === true) {
+        const fn = close || cancel
+        fn && fn()
+      }
+    } else if(e.keyCode === 13) {
+      if (document.activeElement.tagName === 'TEXTAREA') {
+        return
+      }
+      const { onKeyReturn } = this.props
+      if (typeof onKeyReturn === 'function') {
+        onKeyReturn(e)
+      } else if (onKeyReturn === true) {
+        confirm && confirm()
+      }
+    }
+  }
+
+  handleBackdropClick = e => {
+    const { onKeyEsc, close, cancel } = this.props
+    if(e.target === e.currentTarget) {
+      if (typeof onKeyEsc === 'function') {
+        onKeyEsc(e)
+      } else if (onKeyEsc === true) {
+        const fn = close || cancel
+        fn && fn()
+      }
     }
   }
 
   render() {
     const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog } = this.props;
     return (
-        <PuLayout className='cdialog-layout' key={1} onClick={e => (close && (e.target === e.currentTarget) && close())}>
+        <PuLayout className='cdialog-layout' key={1} onClick={this.handleBackdropClick}>
             <Container className='cdialog-container' key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
               <PuTitle>
                 <span className="title">{title}</span>
@@ -183,7 +202,9 @@ CommonDialog.defaultProps = {
   cancelText: '',
   title: '',
   children: null,
-  hasParentDialog: false
+  hasParentDialog: false,
+  onKeyEsc: true,
+  onKeyReturn: false
 };
 
 export default CommonDialog;

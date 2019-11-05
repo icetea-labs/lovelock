@@ -479,6 +479,16 @@ class PuNewLock extends React.Component {
     }, 100);
   }
 
+  onKeyEsc = () => {
+    if (!this.dialogShown && !this.state.isJournal) {
+      this.props.close()
+    }
+  }
+
+  onDialogToggle = value => {
+    this.dialogShown = value
+  }
+
   render() {
     const { close } = this.props;
     const {
@@ -508,6 +518,7 @@ class PuNewLock extends React.Component {
           title="New Lock"
           okText={() => this.state.okText || 'Send'}
           close={close}
+          onKeyEsc={this.onKeyEsc}
           confirm={() => {
             this.createPropose(partner, promiseStm, date, file);
           }}
@@ -592,6 +603,7 @@ class PuNewLock extends React.Component {
             onChangeMedia={this.onChangeMedia}
             isCreatePro
             hasParentDialog
+            onDialogToggle={this.onDialogToggle}
           />
         </CommonDialog>
         {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />}
