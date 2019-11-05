@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonPro, LinkPro } from './Button';
 
-const PuLayout = styled.div`
+const Backdrop = styled.div`
   position: fixed;
   top: 0px;
   left: 0px;
@@ -11,6 +11,8 @@ const PuLayout = styled.div`
   bottom: 0px;
   z-index: 1100;
   background: rgba(0, 0, 0, 0.5);
+  transition: opacity 1s;
+  opacity: 0;
 `;
 
 const Container = styled.div`
@@ -25,6 +27,9 @@ const Container = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   overflow: scroll;
+  z-index: 1101;
+  transition: opacity .6s ease-in;
+  opacity: 0;
   @media (max-width: 768px) {
     width: 100%;
     min-width: 300px;
@@ -101,12 +106,14 @@ class CommonDialog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.backdropRef = React.createRef()
     this.containerRef = React.createRef()
   }
 
   componentDidMount(){
     const { hasParentDialog } = this.props
-
+    this.backdropRef.current.style.opacity = '1'
+    this.containerRef.current.style.opacity = '1'
     document.addEventListener("keydown", this.handleKeyDown, true);
     const style = document.body.style
     this.oldBodyOverflow = style.overflow
@@ -165,31 +172,32 @@ class CommonDialog extends React.Component {
   render() {
     const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog } = this.props;
     return (
-        <PuLayout className='cdialog-layout' key={1} onClick={this.handleBackdropClick}>
-            <Container className='cdialog-container' key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
-              <PuTitle>
-                <span className="title">{title}</span>
-                <IconButton onClick={close}>
-                  <i className="material-icons">close</i>
-                </IconButton>
-              </PuTitle>
-              <ContWrap>
-                  {children}
-                  <Action>
-                    <div className="actionConfirm">
-                      {cancelText && cancel && (
-                        <LinkPro className="deny" onClick={cancel}>
-                          {cancelText}
-                        </LinkPro>
-                      )}
-                      <ButtonPro className="send" onClick={confirm}>
-                        {typeof okText !== 'function' ? okText : okText()}
-                      </ButtonPro>
-                    </div>
-                  </Action>
-              </ContWrap>
-            </Container>
-        </PuLayout>
+      <>
+        <Backdrop className='cdialog-backdrop' key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
+        <Container className='cdialog-container' key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
+          <PuTitle>
+            <span className="title">{title}</span>
+            <IconButton onClick={close}>
+              <i className="material-icons">close</i>
+            </IconButton>
+          </PuTitle>
+          <ContWrap>
+              {children}
+              <Action>
+                <div className="actionConfirm">
+                  {cancelText && cancel && (
+                    <LinkPro className="deny" onClick={cancel}>
+                      {cancelText}
+                    </LinkPro>
+                  )}
+                  <ButtonPro className="send" onClick={confirm}>
+                    {typeof okText !== 'function' ? okText : okText()}
+                  </ButtonPro>
+                </div>
+              </Action>
+          </ContWrap>
+        </Container>
+        </>
     );
   }
 }
