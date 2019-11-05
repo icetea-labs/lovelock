@@ -18,22 +18,23 @@ export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
 export function waitForHtmlTags(selector, callback, { 
   timeout = 3000,
   step = 100,
+  rootElement,
   func = 'querySelectorAll',
   testProp = 'length',
   timeoutCallBack
 } = {}) {
   if (timeout < 0) {
-    !!timeoutCallBack && timeoutCallBack();
-    return null;
+    timeoutCallBack && timeoutCallBack();
+    return;
   }
   
-  var el = document[func](selector);
+  var el =   (rootElement || document)[func](selector);
   if (el && (!testProp || el[testProp])) {
     callback(el);
   } else {
-    setTimeout(function() {
-      waitForHtmlTags(selector, callback, { timeout: timeout - step, timeoutCallBack });
-    }, 100);
+    setTimeout(() => {
+      waitForHtmlTags(selector, callback, { timeout: timeout - step, step, rootElement, func, testProp, timeoutCallBack });
+    }, step);
   }
 }
 
