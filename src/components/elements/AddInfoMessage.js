@@ -229,7 +229,7 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro } = props;
+  const { files, date, isCreatePro, hasParentDialog } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
   const [isOpenCrop, setIsOpenCrop] = useState(false);
@@ -409,7 +409,7 @@ export default function AddInfoMessage(props) {
         </Grid>
       </InfoBox>
       {isOpenCrop && (
-        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare paddingTop="-2%" />
+        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare hasParentDialog={hasParentDialog} />
       )}
     </Container>
   );

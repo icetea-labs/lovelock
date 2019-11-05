@@ -55,13 +55,14 @@ const TagBox = styled.div`
   display: flex;
   flex-wrap: wrap;
   .tagName {
-    color: #8250c8;
+    color: #5a5e67;
     margin-right: ${rem(7)};
     font-size: ${rem(12)};
     cursor: pointer;
     margin-bottom: ${rem(9)}
     padding: 3px 12px 3px 6px;
     :hover {
+      color: #8250c8;
       text-decoration: underline;
     }
     .material-icons {

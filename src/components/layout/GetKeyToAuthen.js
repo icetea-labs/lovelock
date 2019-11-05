@@ -41,19 +41,7 @@ function GetKeyToAuthen(props) {
       props.history.push('/register');
       return;
     }
-    const handleUserKeyPress = event => {
-      if (event.keyCode === 13) {
-        confirm();
-      }
-      if (event.keyCode === 27) {
-        close();
-      }
-    };
-    window.document.body.addEventListener('keydown', handleUserKeyPress);
-    return () => {
-      window.document.body.removeEventListener('keydown', handleUserKeyPress);
-    };
-  }, [addressRedux]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [addressRedux]);
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));

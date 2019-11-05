@@ -20,7 +20,7 @@ const ContWrap = styled.div`
 export default function ImageCrop(props) {
   const [imgPreviewUrl, setImgPreviewUrl] = useState('');
   const [avaPreview, setAvaPreview] = useState('');
-  const { close, accept, originFile, isViewSquare, paddingTop } = props;
+  const { close, accept, originFile, isViewSquare, hasParentDialog } = props;
 
   useEffect(() => {
     const reader = new FileReader();
@@ -67,7 +67,7 @@ export default function ImageCrop(props) {
       confirm={acceptCrop}
       cancel={close}
       close={close}
-      paddingTop={paddingTop}
+      hasParentDialog={hasParentDialog}
     >
       <ContWrap isViewSquare={isViewSquare}>
         {originFile && (

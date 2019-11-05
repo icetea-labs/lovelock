@@ -499,6 +499,7 @@ class PuNewLock extends React.Component {
       placeholder: '@partner',
       value,
       onChange: this.onPartnerChange,
+      autoFocus: true
     };
 
     return (
@@ -590,9 +591,10 @@ class PuNewLock extends React.Component {
             onChangeDate={this.onChangeDate}
             onChangeMedia={this.onChangeMedia}
             isCreatePro
+            hasParentDialog
           />
         </CommonDialog>
-        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
+        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />}
         {isJournal && (
           <CommonDialog
             title="Journal"
@@ -601,6 +603,7 @@ class PuNewLock extends React.Component {
             close={this.closeJournal}
             cancel={this.closeJournal}
             confirm={this.createJournal}
+            hasParentDialog
           >
             <TagTitle>
               <span>By create a lock with yourself, you will create a Journal instead.</span>
