@@ -42,6 +42,10 @@ class LoveLock {
   @view getA2p = () => this.getState('a2p', {});
   setA2p = value => this.setState('a2p', value);
 
+  // mapping: person to person
+  // 1:n { 'address':[address1,address2,address3...] }
+  @view getAFA = () => this.getState('afa', {});
+  setAFA = value => this.setState('afa', value);
   // mapping: propose to memory
   // 1:n  { 'proindex':[1,2,3...] }
   // @view getP2m = () => this.getState('p2m', {});
@@ -64,8 +68,6 @@ class LoveLock {
 
   // mapping follow: save address following other address
   // 1:n  { 'address':[address1, address1,...] }
-  @view getAFA = () => this.getState('afa', {});
-  setAFA = value => this.setState('afa', value);
 
   @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
     const self = this;

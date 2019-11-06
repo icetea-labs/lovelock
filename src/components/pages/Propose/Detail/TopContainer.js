@@ -360,14 +360,11 @@ function TopContrainer(props) {
     });
   }
   function serialLikeData(likes) {
-    console.log('likes', likes);
     const isMyLike = !!likes[address];
     const num = Object.keys(likes).length;
     return { numLike: num, isMyLike };
   }
   function serialFollowData(follow) {
-    console.log('follow', follow);
-    console.log('follow', address);
     const isMyFollow = follow.includes(address);
     const num = follow.length;
     return { numFollow: num, isMyFollow };
