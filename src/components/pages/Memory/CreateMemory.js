@@ -68,9 +68,6 @@ const useStyles = makeStyles(theme => ({
       width: '100%',
       marginTop: 20
     },
-    '@media (max-width: 400px)': {
-      width: '50%'
-    },
   },
   selectStyle: {
     minWidth: 110,
