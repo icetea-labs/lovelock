@@ -359,4 +359,74 @@ class LoveLock {
     const log = { ...pro, id: index };
     this.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
   }
+
+  @view getLockCollections(lockIndex: number) {
+    const [lock] = this.getPropose(lockIndex);
+
+    // Note: the collection is not sorted by ID, client should sort if desired
+    return lock.collections || []
+  }
+
+  @transaction addLockCollection(lockIndex: number, collectionData) {
+    const [lock, locks] = this.getPropose(lockIndex);
+    expectProposeOwners(lock)
+
+    collectionData = validate(
+      collectionData,
+      Joi.object({
+        name: Joi.string().required(),
+        description: Joi.string(),
+        avatar: Joi.string(),
+        banner: Joi.string()
+      }).label('collectionData').required()
+    )
+    
+    const cols = lock.collections = (lock.collections || [])
+    lock.nextCollectionId = lock.nextCollectionId || 0
+    collectionData.id = lock.nextCollectionId
+    lock.nextCollectionId++
+    cols.push(collectionData)
+
+    this.setProposes(locks)
+  }
+
+  @transaction setLockCollection(lockIndex: number, collectionId: number, collectionData) {
+    const [lock, locks] = this.getPropose(lockIndex);
+    expectProposeOwners(lock)
+
+    collectionData = validate(
+      collectionData,
+      Joi.object({
+        id: Joi.number(),
+        name: Joi.string(),
+        description: Joi.string(),
+        avatar: Joi.string(),
+        banner: Joi.string()
+      }).label('collectionData').or('name', 'description', 'avatar', 'banner')
+    )
+
+    if (collectionData != null && collectionData.hasOwnProperty('id') && collectionData.id !== collectionId) {
+      throw new Error(`The specified collectionId ${collectionId} does not match collectionData.id ${collectionData.id}`)
+    }
+    
+    const cols = lock.collections = (lock.collections || [])
+    const oldIndex = cols.findIndex(c => c.id === collectionId)
+    const old = oldIndex >= 0 ? cols[oldIndex] : null
+    if (old) {
+      if (collectionData == null) {
+        // delete - faster than cols.splice(oldIndex, 1)
+        cols[oldIndex] = cols[cols.length - 1]
+        cols.pop()
+      } else {
+        // update
+        Object.assign(old, collectionData)
+      }
+    } else {
+      // It is an error
+      // If user wants to create new, should use addLockCollection method instead
+      throw new Error(`Collection id ${collectionId} does not exist in lock ${lockIndex}`)
+    }
+
+    this.setProposes(locks)
+  }
 }
