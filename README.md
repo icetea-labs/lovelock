@@ -30,6 +30,8 @@ REACT_APP_RPC=wss://rpc.icetea.io/websocket
 
 > Deploying contracts will make the app uses the new contracts, thus all existing data will be lost. Only deploying at the first time you install Icetea, when the contracts' sources were changed, or after you reset the local Icetea Node.
 
+To create some seed data: `npm run seed` then import the outputted private key for testing (use __Forgot Password__ screen to import).
+
 ### 4. Start the app
 
 - `npm start`
