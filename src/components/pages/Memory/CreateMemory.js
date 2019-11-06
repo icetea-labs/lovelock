@@ -47,6 +47,9 @@ const ShadowBox = styled.div`
   border-radius: 5px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 const useStyles = makeStyles(theme => ({
   margin: {
@@ -61,6 +64,12 @@ const useStyles = makeStyles(theme => ({
     width: 254,
     height: 46,
     borderRadius: 23,
+    '@media (min-width: 769px) and (max-width: 830px)': {
+      width: 200
+    },
+    '@media (max-width: 400px)': {
+      width: '50%'
+    },
   },
   selectStyle: {
     minWidth: 110,
@@ -74,10 +83,13 @@ const useStyles = makeStyles(theme => ({
     color: '#8250c8',
     marginRight: theme.spacing(1),
   },
+  midBox: {
+    paddingTop: 10
+  },
   btBox: {
     display: 'flex',
     justifyContent: 'space-between',
-    paddingBottom: '25px !important',
+    padding: '25px 0 15px'
   },
   blogBtn: {
     color: '#8250c8',
@@ -92,6 +104,12 @@ const useStyles = makeStyles(theme => ({
     marginLeft: -50,
     outline: 'none',
     cursor: 'pointer',
+    '@media (max-width: 910px)': {
+      margin: '5px 10px 0 10px'
+    },
+    '@media (max-width: 768px)': {
+      display: 'none'
+    },
   },
 }));
 
@@ -472,8 +490,8 @@ export default function CreateMemory(props) {
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
       <CreatePost grayLayout={grayLayout}>
         <ShadowBox>
-          <Grid container direction="column" spacing={3}>
-            <Grid item>
+          <Grid container direction="column">
+            <Grid>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
                   <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
@@ -492,7 +510,7 @@ export default function CreateMemory(props) {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item>
+            <Grid classes={{ root: classes.midBox }}>
               <AddInfoMessage
                 files={filesBuffer}
                 date={memoDate}
@@ -502,7 +520,7 @@ export default function CreateMemory(props) {
               />
             </Grid>
             {grayLayout && (
-              <Grid item classes={{ root: classes.btBox }}>
+              <Grid classes={{ root: classes.btBox }}>
                 <Select
                   native
                   value={privacy}

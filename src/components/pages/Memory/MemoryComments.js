@@ -31,8 +31,7 @@ const useStyles = makeStyles(theme => ({
     },
     borderRadius: 20,
     background: '#f5f6f7',
-    fontSize: 12,
-    width: 554,
+    fontSize: 12
   },
   notchedOutline: {
     // borderWidth: '1px',

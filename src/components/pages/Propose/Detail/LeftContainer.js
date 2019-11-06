@@ -41,12 +41,19 @@ const LeftBox = styled.div`
     text-transform: uppercase;
     /* margin-bottom: ${rem(20)}; */
   }
+  @media (max-width: 768px) {
+    min-height: auto;
+    margin-bottom: ${rem(20)};
+  }
 `;
 const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  @media (max-width: 768px) {
+    border-radius: 4px;
+  }
 `;
 
 const TagBox = styled.div`

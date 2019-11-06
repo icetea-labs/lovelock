@@ -9,6 +9,9 @@ import CreateMemory from '../../Memory/CreateMemory';
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
 `;
 
 export default function RightContainer(props) {

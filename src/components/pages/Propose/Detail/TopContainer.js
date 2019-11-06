@@ -21,7 +21,7 @@ import {
   sendTransaction,
 } from '../../../../helper';
 import * as actions from '../../../../store/actions';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
+import { FlexBox, rem } from '../../../elements/StyledUtils';
 import { AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
 
@@ -89,15 +89,13 @@ const TopContainerBox = styled.div`
 `;
 const WarrperChatBox = styled(FlexBox)`
   margin-top: ${rem(15)};
-  /* & > div:first-child {
-    padding-right: ${rem(15)};
-  } */
   div:nth-child(even) .content_detail p {
     background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
     background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
   }
   .proposeMes {
     display : flex;
+    width: 50%;
   }
   .user_photo {
     display: block;
@@ -145,8 +143,8 @@ const WarrperChatBox = styled(FlexBox)`
     margin-top: 23px;
   }
   .rightContent {
-      text-align: right;
-    }
+    text-align: right;
+  }
   p {
     display: block;
     padding: ${rem(11)} ${rem(14)};
@@ -158,6 +156,16 @@ const WarrperChatBox = styled(FlexBox)`
     box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
     background-image: -webkit-linear-gradient(113deg, #76a8ff, #8df6fe);
     background-image: linear-gradient(337deg, #76a8ff, #8df6fe);
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeMes {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .name_time {
+      color: red;
+    }
   }
 `;
 
@@ -365,6 +373,7 @@ function TopContrainer(props) {
     return { numLike: num, isMyLike };
   }
   function serialFollowData(follow) {
+    if (!follow) return { numFollow: 0, isMyFollow: false };
     const isMyFollow = follow.includes(address);
     const num = follow.length;
     return { numFollow: num, isMyFollow };
@@ -454,22 +463,22 @@ function TopContrainer(props) {
           <Skeleton variant="rect" width="100%" height={425} />
         </div>
         <WarrperChatBox>
-          <FlexWidthBox width="50%" className="proposeMes">
+          <div className="proposeMes">
             <CardHeader
               className={classes.card}
               avatar={<Skeleton variant="circle" width={40} height={40} />}
               title={<Skeleton height={6} width="80%" />}
               subheader={<Skeleton height={12} width="80%" />}
             />
-          </FlexWidthBox>
-          <FlexWidthBox width="50%" className="proposeMes">
+          </div>
+          <div className="proposeMes">
             <CardHeader
               className={classes.card}
               avatar={<Skeleton variant="circle" width={40} height={40} />}
               title={<Skeleton height={6} width="80%" />}
               subheader={<Skeleton height={12} width="80%" />}
             />
-          </FlexWidthBox>
+          </div>
         </WarrperChatBox>
       </TopContainerBox>
     );
@@ -557,7 +566,7 @@ function TopContrainer(props) {
       </SummaryCard>
       <WarrperChatBox>
         {topInfo.s_content && (
-          <FlexWidthBox width="50%" className="proposeMes">
+          <div className="proposeMes">
             <div className="user_photo fl">
               <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
             </div>
@@ -571,10 +580,10 @@ function TopContrainer(props) {
               </div>
               <p>{topInfo.s_content}</p>
             </div>
-          </FlexWidthBox>
+          </div>
         )}
         {topInfo.r_content && (
-          <FlexWidthBox width="50%" className="proposeMes">
+          <div className="proposeMes">
             <div className="content_detail fl clearfix">
               <div className="name_time fr">
                 <span className="user_name color-violet">{topInfo.r_name}</span>
@@ -586,7 +595,7 @@ function TopContrainer(props) {
             <div className="user_photo fr">
               <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
             </div>
-          </FlexWidthBox>
+          </div>
         )}
       </WarrperChatBox>
       {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
