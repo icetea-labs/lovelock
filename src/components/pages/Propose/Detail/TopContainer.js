@@ -250,23 +250,18 @@ const useStyles = makeStyles(theme => ({
   },
   rightIcon: {
     margin: theme.spacing(0, 1),
+    fontWeight: 700,
   },
 }));
 
 function TopContrainer(props) {
   const { proIndex, setNeedAuth, topInfo, setTopInfo, setGLoading } = props;
   const dispatch = useDispatch();
-  // const proposes = useSelector(state => state.loveinfo.proposes);
-  // const privateKey = useSelector(state => state.account.privateKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  // const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
-  // const [likes, setLikes] = useState({});
-  // const [isMyLike, setIsMyLike] = useState(false);
-  // const [numLike, setNumLike] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
@@ -274,11 +269,13 @@ function TopContrainer(props) {
 
   useEffect(() => {
     async function setProposeLikeInfo() {
+      let likeData = {};
       if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
         const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
-        const likeData = serialLikeData(likes);
-        setTopInfo(Object.assign({}, topInfo, likeData));
+        likeData = serialLikeData(likes);
       }
+      const followData = serialFollowData(topInfo.follows);
+      setTopInfo(Object.assign({}, topInfo, likeData, followData));
     }
 
     setLoading(needUpdate);
@@ -314,6 +311,33 @@ function TopContrainer(props) {
     }
   }
 
+  function handerFlow() {
+    try {
+      if (!tokenKey) {
+        dispatch(actions.setNeedAuth(true));
+        return;
+      }
+      const params = [topInfo.index];
+      sendTransaction('addFlowLock', params, { tokenAddress, address }).then(() => {
+        getNumTopFollow();
+      });
+
+      let { numFollow, isMyFollow } = topInfo;
+      if (isMyFollow) {
+        numFollow -= 1;
+      } else {
+        numFollow += 1;
+      }
+      isMyFollow = !isMyFollow;
+      const newTopInfo = Object.assign({}, topInfo, { numFollow, isMyFollow });
+      setTopInfo(newTopInfo);
+    } catch (error) {
+      console.error(error);
+      const message = `An error occurred, please try again later`;
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  }
+
   function getNumTopLikes() {
     if (topInfo.memoryRelationIndex === '' || topInfo.memoryRelationIndex == null || topInfo.memoryRelationIndex < 0)
       return;
@@ -326,12 +350,28 @@ function TopContrainer(props) {
     });
   }
 
+  function getNumTopFollow() {
+    callView('getFollowByLockIndex', [topInfo.index]).then(data => {
+      const { numFollow, isMyFollow } = serialFollowData(data);
+      if (topInfo.numFollow !== numFollow || topInfo.isMyLike !== isMyFollow) {
+        const newTopInfo = Object.assign({}, topInfo, { numFollow, isMyFollow });
+        setTopInfo(newTopInfo);
+      }
+    });
+  }
   function serialLikeData(likes) {
+    console.log('likes', likes);
     const isMyLike = !!likes[address];
     const num = Object.keys(likes).length;
     return { numLike: num, isMyLike };
   }
-
+  function serialFollowData(follow) {
+    console.log('follow', follow);
+    console.log('follow', address);
+    const isMyFollow = follow.includes(address);
+    const num = follow.length;
+    return { numFollow: num, isMyFollow };
+  }
   const classes = useStyles();
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
@@ -479,6 +519,26 @@ function TopContrainer(props) {
           <HolidayEvent day={topInfo.s_date} />
         </div>
         <div className="proLike">
+          <Button onClick={handerFlow}>
+            {topInfo.isMyFollow ? (
+              <React.Fragment>
+                {/* <FavoriteIcon color="primary" className={classes.rightIcon} /> */}
+                <Typography component="span" variant="body2" color="primary" className={classes.rightIcon}>
+                  I care
+                </Typography>
+                <Typography component="span" variant="body2" color="primary">
+                  {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                </Typography>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                {/* <FavoriteBorderIcon className={classes.rightIcon} /> */}
+                <Typography component="span" variant="body2">
+                  I care {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                </Typography>
+              </React.Fragment>
+            )}
+          </Button>
           <Button onClick={handerLike}>
             {topInfo.isMyLike ? (
               <React.Fragment>
