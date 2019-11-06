@@ -4,12 +4,16 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
 import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
+import { callView, getTagsInfo, makeProposeName, sendTransaction } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
 import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
+
+import CommonDialog from '../../../elements/CommonDialog';
+import TextField from '@material-ui/core/TextField';
+import { useSnackbar } from 'notistack';
 
 window.prerenderReady = false;
 
@@ -29,15 +33,30 @@ export default function DetailPropose(props) {
   let isView = false;
   const dispatch = useDispatch();
   const proIndex = parseInt(match.params.index, 10);
+  let collectionId = parseInt(match.params.cid, 10);
+  const invalidCollectionId = match.params.cid != null && isNaN(collectionId)
+  if (isNaN(collectionId)) collectionId = null
+  let collections, currentCollection
+
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  const tokenKey = useSelector(state => state.account.tokenKey);
+
   const [proposeInfo, setProposeInfo] = useState(null);
   const [pageErr, setPageErr] = useState(false);
+
+  const [dialogVisible, setDialogVisible] = useState(false)
+  const [colName, setColName] = useState('')
+  const [colDesc, setColDesc] = useState('')
+  const [colCreationCallback, setColCreationCallback] = useState()
+
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     let cancel = false;
 
-    if (isNaN(match.params.index)) {
+    if (isNaN(proIndex) || invalidCollectionId) {
       setPageErr(true);
     } else {
       callView('getProposes').then(async allPropose => {
@@ -69,6 +88,39 @@ export default function DetailPropose(props) {
 
     return () => (cancel = true);
   }, [proIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const hideDialog = () => setDialogVisible(false)
+
+  const handleNewCollection = callback => {
+    setColCreationCallback(() => callback)
+    setDialogVisible(true)
+  }
+
+  const createCollection = () => {
+    hideDialog() // prevent dialog over dialog
+
+    if (!tokenKey) {
+      dispatch(actions.setNeedAuth(true));
+      return;
+    }
+
+    const data = {
+      name: colName,
+    }
+
+    const desc = colDesc.trim().normalize()
+    if (desc) {
+      data.description = desc
+    }
+
+    sendTransaction('addLockCollection', [proIndex, data], { address, tokenAddress }).then(r => {
+      data.id = r.returnValue
+      colCreationCallback && colCreationCallback(data)
+    }).catch(err => {
+      console.warn(err)
+      enqueueSnackbar(err.message, { variant: 'error' });
+    })
+  }
 
   const renderHelmet = () => {
     const title = makeProposeName(proposeInfo, 'Lovelock - ');
@@ -138,10 +190,16 @@ export default function DetailPropose(props) {
 
       <FlexBox wrap="wrap" minHeight="100vh">
         <FlexWidthBox width="30%">
-          <LeftContainer />
+          <LeftContainer proIndex={proIndex} />
         </FlexWidthBox>
         <FlexWidthBox width="70%">
-          <RightContainer proIndex={proIndex} isOwner={isOwner} />
+          <RightContainer 
+            proIndex={proIndex} 
+            collectionId={collectionId}
+            collections={collections}
+            currentCollection={currentCollection}
+            handleNewCollection={handleNewCollection}
+            isOwner={isOwner} />
         </FlexWidthBox>
       </FlexBox>
 
@@ -154,12 +212,34 @@ export default function DetailPropose(props) {
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
+
+    collections = proposeInfo.collections || []
+    if (collectionId != null) {
+      currentCollection = collections.find(c => c.id === collectionId)
+    }
   }
 
   return (
     <React.Fragment>
       {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
       {pageErr && renderNotFound()}
+      {dialogVisible && <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
+          <TextField
+            autoFocus
+            required
+            onChange={e => setColName(e.target.value)}
+            label="Collection name"
+            type="text"
+            autoComplete="off"
+          />
+          <TextField
+            onChange={e => setColDesc(e.target.value)}
+            label="Description"
+            type="text"
+            style={{marginTop: 16}}
+            fullWidth
+          />
+      </CommonDialog>}
     </React.Fragment>
   );
 }

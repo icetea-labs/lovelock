@@ -135,7 +135,7 @@ class LoveLock {
 
     // create the first memory for auto-accepted lock
     if (pendingPropose.status === LOCK_STATUS_ACCEPTED) {
-      this._addMemory(index, false, '', { hash: [], date: Date.now() }, [true]);
+      this._addMemory(index, false, '', { hash: [] }, [true]);
     }
 
     // map address to propose
@@ -174,7 +174,7 @@ class LoveLock {
 
   @transaction acceptPropose(proIndex: number, r_content: string) {
     const ret = this._confirmPropose(proIndex, r_content, 1);
-    this._addMemory(proIndex, false, '', { hash: [], date: Date.now() }, [true, ...ret]);
+    this._addMemory(proIndex, false, '', { hash: [] }, [true, ...ret]);
   }
 
   @transaction cancelPropose(proIndex: number, r_content: string) {
@@ -205,12 +205,14 @@ class LoveLock {
     return resp;
   }
 
-  @view getMemoriesByProIndex(proIndex: number) {
+  @view getMemoriesByProIndex(proIndex: number, collectionId: ?number) {
     const memoryPro = this.getP2m()[proIndex] || [];
     const memories = this.getMemories();
     return memoryPro.reduce((res, index) => {
       const mem = getDataByIndex(memories, index);
-      res.push({ ...mem, id: index });
+      if (collectionId == null || isNaN(collectionId) || mem.info.collectionId === collectionId) {
+        res.push({ ...mem, id: index });
+      }
       return res;
     }, []);
   }
@@ -232,9 +234,18 @@ class LoveLock {
     proIndex: number,
     isPrivate: boolean,
     content: string,
-    info,
+    info = {},
     [isFirstMemory, pro, proposes] = []
   ) {
+
+    if (info.date == null) {
+      info.date = block.timestamp
+    } else {
+      if (typeof info.date !== 'number' || !Number.isInteger(info.date) || info.date < 0) {
+        throw new Error('info.date must be a timestamp (integer).')
+      }
+    }
+
     if (!pro || !proposes) {
       [pro, proposes] = this.getPropose(proIndex);
     }
@@ -363,11 +374,24 @@ class LoveLock {
   @view getLockCollections(lockIndex: number) {
     const [lock] = this.getPropose(lockIndex);
 
-    // Note: the collection is not sorted by ID, client should sort if desired
     return lock.collections || []
   }
 
-  @transaction addLockCollection(lockIndex: number, collectionData) {
+  validateCollectionName = (newName, collections) => {
+    if (!newName || !newName.trim()) throw new Error('Invalid name.')
+
+    const nomalName = newName.trim().normalize()
+    const lname = nomalName.toLowerCase()
+    collections.forEach(({ name }) => {
+      if (lname === name.toLowerCase()) {
+        throw new Error(`Collection name ${newName} already exists.`)
+      }
+    })
+
+    return nomalName
+  }
+
+  @transaction addLockCollection(lockIndex: number, collectionData): number {
     const [lock, locks] = this.getPropose(lockIndex);
     expectProposeOwners(lock)
 
@@ -375,19 +399,23 @@ class LoveLock {
       collectionData,
       Joi.object({
         name: Joi.string().required(),
-        description: Joi.string(),
-        avatar: Joi.string(),
+        description: Joi.string().allow(''),
+        avatar: Joi.string().allow(''),
         banner: Joi.string()
       }).label('collectionData').required()
     )
     
     const cols = lock.collections = (lock.collections || [])
+    collectionData.name = this.validateCollectionName(collectionData.name, cols)
+
     lock.nextCollectionId = lock.nextCollectionId || 0
     collectionData.id = lock.nextCollectionId
     lock.nextCollectionId++
     cols.push(collectionData)
 
     this.setProposes(locks)
+
+    return collectionData.id
   }
 
   @transaction setLockCollection(lockIndex: number, collectionId: number, collectionData) {
@@ -410,13 +438,20 @@ class LoveLock {
     }
     
     const cols = lock.collections = (lock.collections || [])
+    if (collectionData.hasOwnProperty('name')) {
+      collectionData.name = this.validateCollectionName(collectionData.name, cols)
+    }
+
     const oldIndex = cols.findIndex(c => c.id === collectionId)
     const old = oldIndex >= 0 ? cols[oldIndex] : null
     if (old) {
       if (collectionData == null) {
-        // delete - faster than cols.splice(oldIndex, 1)
-        cols[oldIndex] = cols[cols.length - 1]
-        cols.pop()
+        // delete
+        cols.splice(oldIndex, 1)
+
+        // this method is faster but not sorted
+        // cols[oldIndex] = cols[cols.length - 1]
+        // cols.pop()
       } else {
         // update
         Object.assign(old, collectionData)

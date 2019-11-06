@@ -179,7 +179,7 @@ function MemoryContent(props) {
         const blogData = JSON.parse(memory.content);
         mem = { ...memory }
         mem.meta = blogData.meta;
-        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date.getTime() })
+        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
           .then(d => d.json)
           .catch(err => {
             if (err.name === 'AbortError') return

@@ -89,9 +89,7 @@ function MemoryContainer(props) {
       }
     }
 
-    if (memorydata.length > 0) {
-      prepareMemory(signal)
-    }
+    prepareMemory(signal)
 
     return () => signal.cancel = true
   }, [memorydata]); // eslint-disable-line react-hooks/exhaustive-deps

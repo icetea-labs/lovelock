@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -124,7 +124,7 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryAdded, proIndex } = props;
+  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -143,6 +143,7 @@ export default function CreateMemory(props) {
   const [grayLayout, setGrayLayout] = useState(false);
   const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
+  const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? "" : collectionId)
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
 
@@ -152,9 +153,9 @@ export default function CreateMemory(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  // useEffect(() => {
-  //   resetValue();
-  // }, [proIndex]);
+  useEffect(() => {
+    resetValue();
+  }, [proIndex, collectionId]);
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -183,6 +184,27 @@ export default function CreateMemory(props) {
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
   }
+
+  function collectionAdded(col) {
+    // now we add this collection to the list
+    collections.push(col)
+
+    // and make it seleted
+    setPostCollectionId(col.id)
+  }
+
+  function handleChangePostCollectionId(event) {
+    const value = event.target.value
+    if (value !== 'add') {
+      setPostCollectionId(event.target.value)
+    } else {
+      setPostCollectionId(postCollectionId)
+      if (handleNewCollection) {
+        handleNewCollection(collectionAdded)
+      }
+    }
+  }
+
   function onChangeDate(value) {
     setMemoDate(value);
   }
@@ -352,6 +374,19 @@ export default function CreateMemory(props) {
     setPreviewOn(false);
   }
 
+  function addCollectionId(info) {
+    const colId = +postCollectionId
+    if (typeof colId === 'number' && !isNaN(colId)) {
+      info.collectionId = colId
+    }
+  }
+
+  function addMemoTimestamp(info) {
+    if (memoDate) {
+      info.date = memoDate.getTime ? memoDate.getTime() : memoDate
+    }
+  }
+
   async function handleShareMemory(blogData) {
     if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
@@ -375,18 +410,22 @@ export default function CreateMemory(props) {
       if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
-        const newinfo = { date: memoDate, hash };
-        params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
+        const info = { hash };
+        addMemoTimestamp(info)
+        addCollectionId(info)
+        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
       } else {
         const hash = !blogData && await saveBufferToIpfs(filesBuffer);
-        const info = { date: memoDate };
+        const info = { };
         info.hash = hash || []
+        addMemoTimestamp(info)
+        addCollectionId(info)
         if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction('addMemory', params, { address, tokenAddress });
       if (result) {
-        onMemoryAdded();
+        onMemoryAdded(result.returnValue, params);
       }
       resetValue();
     }, 100);
@@ -395,6 +434,7 @@ export default function CreateMemory(props) {
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
+    setPostCollectionId(collectionId == null ? "" : collectionId);
     setMemoDate(new Date());
     setGLoading(false);
     setGrayLayout(false);
@@ -499,6 +539,9 @@ export default function CreateMemory(props) {
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
+                onBlogClick={() => {
+                  setOpenModal(true);
+                }}
               />
             </Grid>
             {grayLayout && (
@@ -516,14 +559,21 @@ export default function CreateMemory(props) {
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button
-                  onClick={() => {
-                    setOpenModal(true);
+                <Select
+                  native
+                  value={postCollectionId}
+                  onChange={handleChangePostCollectionId}
+                  classes={{
+                    root: classes.selectStyle,
+                    icon: classes.selectIcon,
                   }}
-                  className={classes.blogBtn}
+                  style= {{minWidth: 160}}
+                  input={<BootstrapInput name="collection" id="outlined-collection" />}
                 >
-                  Write blog...
-                </button>
+                  <option value="">(No collection)</option>
+                  {collections && collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="add">(+) New Collection</option>
+                </Select>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}

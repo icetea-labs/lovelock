@@ -49,12 +49,12 @@ const ShadowBox = styled.div`
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
 
-const TagBox = styled.div`
+const CollectionBox = styled.div`
   padding-top: 1rem;
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  .tagName {
+  .colName {
     color: #5a5e67;
     margin-right: ${rem(7)};
     font-size: ${rem(12)};
@@ -68,7 +68,7 @@ const TagBox = styled.div`
     .material-icons {
       vertical-align: middle;
     }
-    .tagText {
+    .colText {
     }
   }
 `;
@@ -76,15 +76,20 @@ const TagBox = styled.div`
 function LeftContainer(props) {
   const {
     proposes,
-    setPropose,
+    setProposes,
     addPropose,
     confirmPropose,
+    topInfo,
+    proIndex,
     address,
     tokenAddress,
     tokenKey,
     setNeedAuth,
     history,
   } = props;
+
+  const collections = topInfo && topInfo.index === proIndex ? (topInfo.collections || []) : []
+
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
@@ -158,8 +163,12 @@ function LeftContainer(props) {
     setStep('deny');
   }
 
-  function selectAccepted(proIndex) {
-    history.push(`/lock/${proIndex}`);
+  function selectAccepted(proIndex, collectionId) {
+    let url = '/lock/' + proIndex
+    if (collectionId != null) {
+      url += '/collection/' + collectionId
+    }
+    history.push(url);
   }
 
   function newLock() {
@@ -207,10 +216,10 @@ function LeftContainer(props) {
     if (address) {
       resp = (await callView('getProposeByAddress', [address])) || [];
     }
-    const newPropose = await addInfoToProposes(resp, signal);
+    const newProposes = await addInfoToProposes(resp, signal);
     if (signal.cancel) return;
 
-    setPropose(newPropose);
+    setProposes(newProposes);
     setLoading(false);
   }
 
@@ -244,17 +253,13 @@ function LeftContainer(props) {
     return clonePro;
   }
 
-  function renderCollections() {
-    const sample = [
-      { name: "Travel", description: "Travel together around the world!"},
-      { name: "Honeymoon", description: "Honeymoon every year..."},
-      { name: "Love Letters", description: "Letters from bottoms of hearts."}
-    ]
-    return sample.map((item, index) => {
+  function renderCollections(collections) {
+    const cols = [{ name: 'All', description: 'All memories.'}].concat(collections)
+    return cols.map((item, index) => {
       return (
-        <div className="tagName" key={index}>
+        <div className="colName" key={index} onClick={() => selectAccepted(proIndex, item.id)}>
           <Icon type='collections' />
-          <span className="tagText" title={item.description}>{item.name}</span>
+          <span className="colText" title={item.description}>{item.name}</span>
         </div>
       );
     });
@@ -279,7 +284,7 @@ function LeftContainer(props) {
             <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} />
           </div>
           <div className="title">Collection</div>
-          <TagBox>{renderCollections()}</TagBox>
+          <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
       </LeftBox>
       {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}
@@ -304,6 +309,7 @@ const mapStateToProps = state => {
   return {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
+    topInfo: state.loveinfo.topInfo,
     tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,
   };
@@ -311,7 +317,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setPropose: value => {
+    setProposes: value => {
       dispatch(actions.setPropose(value));
     },
     addPropose: value => {
