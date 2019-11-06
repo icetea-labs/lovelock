@@ -15,7 +15,7 @@
   <script>
     if (window.screen.width < 966) {
       window.location.href = "/unsupported.html"
-    } else if (!('caches' in window)) {
+    } else if (!('caches' in window) || !('AbortController' in window)) {
       window.location.href = "/unsupported.html#browser"
     }
   </script>

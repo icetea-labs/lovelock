@@ -10,7 +10,7 @@ import { withStyles, makeStyles } from '@material-ui/core/styles';
 import * as actions from '../../../store/actions';
 // import { sendTransaction, callView, showSubscriptionError } from '../../../helper';
 import { sendTransaction } from '../../../helper';
-//import tweb3 from '../../../service/tweb3';
+//import getWeb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -101,8 +101,8 @@ function MemoryActionButton(props) {
     }
 
     const num = Object.keys(memoryLikes).length;
-    setMemoryNumLike(!!memoryLikes[address]);
-    setMemoryIsMyLike(num);
+    setMemoryIsMyLike(!!memoryLikes[address]);
+    setMemoryNumLike(num);
 
   }, [memoryType, memoryLikes, address, isAuto]);
 
@@ -129,14 +129,14 @@ function MemoryActionButton(props) {
           <React.Fragment>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
             <Typography component="span" variant="body2" color="primary">
-              {realLikeData.numLike > 0 && ` ${realLikeData.numLike}`}
+              {realLikeData.numLike ? ` ${realLikeData.numLike}` : ''}
             </Typography>
           </React.Fragment>
         ) : (
           <React.Fragment>
             <FavoriteBorderIcon fontSize="small" className={classes.rightIcon} />
             <Typography component="span" variant="body2">
-              {realLikeData.numLike > 0 && ` ${realLikeData.numLike}`}
+            {realLikeData.numLike ? ` ${realLikeData.numLike}` : ''}
             </Typography>
           </React.Fragment>
         )}

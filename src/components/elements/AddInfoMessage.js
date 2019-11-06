@@ -229,11 +229,16 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro } = props;
+  const { files, date, isCreatePro, hasParentDialog, onDialogToggle } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
-  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [isOpenCrop, _setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState('');
+
+  const setIsOpenCrop = value => {
+    onDialogToggle && onDialogToggle(value)
+    _setIsOpenCrop(value)
+  }
 
   useEffect(() => {
     if (files.length === 0) {
@@ -376,13 +381,17 @@ export default function AddInfoMessage(props) {
               <div className="icon-datetime">
                 <MaterialUIPickers
                   autoOk
-                  clearable
+                  clearable={false}
+                  showTodayButton
                   value={date}
                   format="dd/MM/yyyy"
                   disableFuture
                   onChange={handleDateChange}
+                  onOpen={() => (onDialogToggle && onDialogToggle(true))}
+                  onClose={() => (onDialogToggle && onDialogToggle(false))}
+                  style={{ paddingTop: 2 }}
                 />
-                <i className="material-icons">event</i>
+                <i className="material-icons" style={{ paddingLeft : 12 }}>event</i>
               </div>
             </DateBox>
           </Grid>
@@ -407,7 +416,7 @@ export default function AddInfoMessage(props) {
         </Grid>
       </InfoBox>
       {isOpenCrop && (
-        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare paddingTop="-2%" />
+        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare hasParentDialog={hasParentDialog} />
       )}
     </Container>
   );

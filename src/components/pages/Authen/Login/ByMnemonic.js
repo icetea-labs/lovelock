@@ -15,7 +15,7 @@ import { ButtonPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
-import tweb3 from '../../../../service/tweb3';
+import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 
 import { encode } from '../../../../helper/encode';
@@ -75,6 +75,8 @@ function ByMnemonic(props) {
           }
         }
         // console.log('getAddressFromPrivateKey', privateKey);
+
+        const tweb3 = getWeb3()
         const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
 
@@ -85,17 +87,9 @@ function ByMnemonic(props) {
           error.showMessage = m
           throw error
         }
-        const token = tweb3.wallet.createRegularAccount();
-        const ms = tweb3.contract('system.did').methods;
-        const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
 
-        ms.grantAccessToken(
-          address,
-          [process.env.REACT_APP_CONTRACT, 'system.did'],
-          token.address,
-          parseInt(expire, 10)
-        )
-          .sendCommit({ from: address })
+        const token = tweb3.wallet.createRegularAccount();
+        grantAccessToken(address, token.address, isRemember)
           .then(({ returnValue }) => {
             tweb3.wallet.importAccount(token.privateKey);
             const keyObject = encode(phrase, password);

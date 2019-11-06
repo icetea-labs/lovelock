@@ -15,7 +15,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
-import tweb3 from '../../../../service/tweb3';
+import getWeb3 from '../../../../service/tweb3';
 import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
@@ -168,6 +168,7 @@ function RegisterUsername(props) {
           const displayname = `${firstname} ${lastname}`;
 
           // setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
+          const tweb3 = getWeb3()
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
 

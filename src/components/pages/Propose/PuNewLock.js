@@ -12,7 +12,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import * as actions from '../../../store/actions';
-import tweb3 from '../../../service/tweb3';
+import { getAliasContract } from '../../../service/tweb3';
 import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from '../../elements/CommonDialog';
@@ -219,11 +219,7 @@ class PuNewLock extends React.Component {
     const peopleAva = [];
 
     try {
-      const method = 'callReadonlyContractMethod';
-      const add = 'system.alias';
-      const func = 'query';
-
-      const result = await tweb3[method](add, func, [escapedValue]);
+      const result = await getAliasContract().methods.query(escapedValue).call()
       people = Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
         return { nick, address: result[key].address };
@@ -483,6 +479,16 @@ class PuNewLock extends React.Component {
     }, 100);
   }
 
+  onKeyEsc = () => {
+    if (!this.dialogShown && !this.state.isJournal) {
+      this.props.close()
+    }
+  }
+
+  onDialogToggle = value => {
+    this.dialogShown = value
+  }
+
   render() {
     const { close } = this.props;
     const {
@@ -503,6 +509,7 @@ class PuNewLock extends React.Component {
       placeholder: '@partner',
       value,
       onChange: this.onPartnerChange,
+      autoFocus: true
     };
 
     return (
@@ -511,6 +518,7 @@ class PuNewLock extends React.Component {
           title="New Lock"
           okText={() => this.state.okText || 'Send'}
           close={close}
+          onKeyEsc={this.onKeyEsc}
           confirm={() => {
             this.createPropose(partner, promiseStm, date, file);
           }}
@@ -552,7 +560,7 @@ class PuNewLock extends React.Component {
               </PreviewContainter>
               <RightBotInfo>
                 <TextFieldPlaceholder
-                  label="First Name"
+                  label="Crush First Name"
                   fullWidth
                   onChange={this.handleUsername}
                   name="firstname"
@@ -560,7 +568,7 @@ class PuNewLock extends React.Component {
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label="Last Name"
+                  label="Crush Last Name"
                   fullWidth
                   onChange={this.handleUsername}
                   name="lastname"
@@ -568,7 +576,7 @@ class PuNewLock extends React.Component {
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label="Crush's response to your lock"
+                  label="Crush's Reply to You"
                   fullWidth
                   onChange={this.handleUsername}
                   name="botReply"
@@ -578,10 +586,10 @@ class PuNewLock extends React.Component {
             </FlexBox>
           )}
           <DividerCus />
-          <TagTitle className="prmContent">Lock content</TagTitle>
+          <TagTitle className="prmContent">Your Message</TagTitle>
           <TextFieldMultiLine
             id="outlined-multiline-static"
-            placeholder="lock content ..."
+            placeholder={checked ? 'Express yourself to your crush…' : 'Say something to your partner…'}
             multiline
             fullWidth
             rows="4"
@@ -594,9 +602,11 @@ class PuNewLock extends React.Component {
             onChangeDate={this.onChangeDate}
             onChangeMedia={this.onChangeMedia}
             isCreatePro
+            hasParentDialog
+            onDialogToggle={this.onDialogToggle}
           />
         </CommonDialog>
-        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
+        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />}
         {isJournal && (
           <CommonDialog
             title="Journal"
@@ -605,6 +615,7 @@ class PuNewLock extends React.Component {
             close={this.closeJournal}
             cancel={this.closeJournal}
             confirm={this.createJournal}
+            hasParentDialog
           >
             <TagTitle>
               <span>By create a lock with yourself, you will create a Journal instead.</span>

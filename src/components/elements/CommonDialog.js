@@ -1,12 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import QueueAnim from 'rc-queue-anim';
-
-import { ValidatorForm } from 'react-material-ui-form-validator';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonPro, LinkPro } from './Button';
 
-const PuLayout = styled.div`
+const Backdrop = styled.div`
   position: fixed;
   top: 0px;
   left: 0px;
@@ -14,21 +11,25 @@ const PuLayout = styled.div`
   bottom: 0px;
   z-index: 1100;
   background: rgba(0, 0, 0, 0.5);
+  transition: opacity 1s;
+  opacity: 0;
 `;
 
 const Container = styled.div`
-  width: 600px;
-  /* min-height: 390px; */
-  max-height: 730px;
+  width: ${props => (props.hasParentDialog ? '550px' : '600px')};
+  max-height: 100vh;
   border-radius: 10px;
   box-shadow: 0 14px 52px 0 rgba(0, 0, 0, 0.12);
   background-color: #ffffff;
-  /* padding: 10px; */
   box-sizing: border-box;
   position: fixed;
-  top: ${props => props.paddingTop || '10%'};
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  overflow: scroll;
+  z-index: 1101;
+  transition: opacity .6s ease-in;
+  opacity: 0;
   @media (max-width: 768px) {
     width: 100%;
     min-width: 300px;
@@ -40,7 +41,6 @@ const Container = styled.div`
 
 const PuTitle = styled.div`
   display: flex;
-  /* width: 600px; */
   height: 62px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
@@ -106,44 +106,98 @@ class CommonDialog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.backdropRef = React.createRef()
+    this.containerRef = React.createRef()
+  }
+
+  componentDidMount(){
+    const { hasParentDialog } = this.props
+    this.backdropRef.current.style.opacity = '1'
+    this.containerRef.current.style.opacity = '1'
+    document.addEventListener("keydown", this.handleKeyDown, true);
+    const style = document.body.style
+    this.oldBodyOverflow = style.overflow
+    style.overflow = 'hidden'
+    if (hasParentDialog) {
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'visible')
+      this.containerRef.current && (this.containerRef.current.style.overflow = 'scroll')
+    }
+  }
+
+  componentWillUnmount(){
+    const { hasParentDialog } = this.props
+
+    document.removeEventListener("keydown", this.handleKeyDown, true);
+    document.body.style.overflow = this.oldBodyOverflow
+
+    if (hasParentDialog) {
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'scroll')
+    }
+  }
+
+  handleKeyDown = e => {
+    const { onKeyEsc, close, cancel, confirm } = this.props
+    if(e.keyCode === 27) {
+      if (typeof onKeyEsc === 'function') {
+        onKeyEsc(e)
+      } else if (onKeyEsc === true) {
+        const fn = close || cancel
+        fn && fn()
+      }
+    } else if(e.keyCode === 13) {
+      if (document.activeElement.tagName === 'TEXTAREA') {
+        return
+      }
+      const { onKeyReturn } = this.props
+      if (typeof onKeyReturn === 'function') {
+        onKeyReturn(e)
+      } else if (onKeyReturn === true) {
+        confirm && confirm()
+      }
+    }
+  }
+
+  handleBackdropClick = e => {
+    const { onKeyEsc, close, cancel } = this.props
+    if(e.target === e.currentTarget) {
+      if (typeof onKeyEsc === 'function') {
+        onKeyEsc(e)
+      } else if (onKeyEsc === true) {
+        const fn = close || cancel
+        fn && fn()
+      }
+    }
   }
 
   render() {
-    const { cancel, confirm, close, okText, cancelText, children, title, paddingTop } = this.props;
+    const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog } = this.props;
     return (
-      <QueueAnim animConfig={{ opacity: [1, 0] }}>
-        <PuLayout key={1}>
-          <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
-            <Container key={2} paddingTop={paddingTop}>
-              <PuTitle>
-                <span className="title">{title}</span>
-                <IconButton onClick={close}>
-                  <i className="material-icons">close</i>
-                </IconButton>
-              </PuTitle>
-              <ContWrap>
-                {children}
-                <Action>
-                  <div className="actionConfirm">
-                    {cancelText && cancel && (
-                      <ValidatorForm onSubmit={cancel}>
-                        <LinkPro className="deny" type="submit">
-                          {cancelText}
-                        </LinkPro>
-                      </ValidatorForm>
-                    )}
-                    <ValidatorForm onSubmit={confirm}>
-                      <ButtonPro className="send" type="submit">
-                        {typeof okText !== 'function' ? okText : okText()}
-                      </ButtonPro>
-                    </ValidatorForm>
-                  </div>
-                </Action>
-              </ContWrap>
-            </Container>
-          </QueueAnim>
-        </PuLayout>
-      </QueueAnim>
+      <>
+        <Backdrop className='cdialog-backdrop' key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
+        <Container className='cdialog-container' key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
+          <PuTitle>
+            <span className="title">{title}</span>
+            <IconButton onClick={close}>
+              <i className="material-icons">close</i>
+            </IconButton>
+          </PuTitle>
+          <ContWrap>
+              {children}
+              <Action>
+                <div className="actionConfirm">
+                  {cancelText && cancel && (
+                    <LinkPro className="deny" onClick={cancel}>
+                      {cancelText}
+                    </LinkPro>
+                  )}
+                  <ButtonPro className="send" onClick={confirm}>
+                    {typeof okText !== 'function' ? okText : okText()}
+                  </ButtonPro>
+                </div>
+              </Action>
+          </ContWrap>
+        </Container>
+        </>
     );
   }
 }
@@ -156,6 +210,9 @@ CommonDialog.defaultProps = {
   cancelText: '',
   title: '',
   children: null,
+  hasParentDialog: false,
+  onKeyEsc: true,
+  onKeyReturn: false
 };
 
 export default CommonDialog;

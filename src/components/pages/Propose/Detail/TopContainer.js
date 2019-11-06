@@ -10,7 +10,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { useSnackbar } from 'notistack';
 
-// import tweb3 from '../../../../service/tweb3';
+// import getWeb3 from '../../../../service/tweb3';
 
 import {
   callView,
@@ -541,14 +541,14 @@ function TopContrainer(props) {
               <React.Fragment>
                 <FavoriteIcon color="primary" className={classes.rightIcon} />
                 <Typography component="span" variant="body2" color="primary">
-                  {topInfo.numLike > 0 && `${topInfo.numLike}`}
+                  {topInfo.numLike ? `${topInfo.numLike}` : ''}
                 </Typography>
               </React.Fragment>
             ) : (
               <React.Fragment>
                 <FavoriteBorderIcon className={classes.rightIcon} />
                 <Typography component="span" variant="body2">
-                  {topInfo.numLike > 0 && `${topInfo.numLike}`}
+                  {topInfo.numLike ? `${topInfo.numLike}` : ''}
                 </Typography>
               </React.Fragment>
             )}

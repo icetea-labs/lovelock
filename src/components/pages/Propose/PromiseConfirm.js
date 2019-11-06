@@ -107,6 +107,7 @@ class PromiseConfirm extends React.Component {
             margin="normal"
             variant="outlined"
             onChange={this.messageDenyChange}
+            autoFocus
           />
         ) : (
           <div>
@@ -119,6 +120,7 @@ class PromiseConfirm extends React.Component {
               margin="normal"
               variant="outlined"
               onChange={this.messageAcceptChange}
+              autoFocus
             />
             {/* <IconView>
               <i className="material-icons">insert_photo</i>
