@@ -29,7 +29,7 @@ const InfoBox = styled.div`
   border-bottom: ${props => props.grayLayout && '1px solid #e1e1e1'};
   color: '#8250c8';
 `;
-const ImgUpLoad = styled.div`
+const ActionItem = styled.div`
   display: inline-block;
   position: relative;
   overflow: hidden;
@@ -39,6 +39,7 @@ const ImgUpLoad = styled.div`
   line-height: 32px;
   font-size: 12px;
   color: #8250c8;
+  cursor: pointer;
   :hover {
     background: #ebedf0;
   }
@@ -229,7 +230,7 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro, hasParentDialog, onDialogToggle } = props;
+  const { files, date, isCreatePro, onBlogClick, hasParentDialog, onDialogToggle } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
   const [isOpenCrop, _setIsOpenCrop] = useState(false);
@@ -396,7 +397,7 @@ export default function AddInfoMessage(props) {
             </DateBox>
           </Grid>
           <Grid item>
-            <ImgUpLoad>
+            <ActionItem>
               <div className="icon-upload">
                 <i className="material-icons">insert_photo</i>
                 <div>Photo</div>
@@ -411,8 +412,16 @@ export default function AddInfoMessage(props) {
                 value=""
                 onChange={isCreatePro ? handleImageChange : captureUploadFile}
               />
-            </ImgUpLoad>
+            </ActionItem>
           </Grid>
+          {onBlogClick && <Grid item onClick={onBlogClick}>
+            <ActionItem>
+                <div className="icon-upload">
+                  <i className="material-icons">menu_book</i>
+                  <div>Blog</div>
+                </div>
+            </ActionItem>
+          </Grid>}
         </Grid>
       </InfoBox>
       {isOpenCrop && (

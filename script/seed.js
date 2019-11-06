@@ -154,6 +154,24 @@ const blogParams = [JSON.stringify({
             from: toAccount
         }, pIndex, `${receiver} accepts ${sender}`)
 
+
+        // now add 2 collections
+        await makeLove({
+            method: 'addLockCollection',
+            from: fromAccount
+        }, pIndex, {
+            name: 'Travel',
+            description: 'Life is a journey, travel it well.'
+        })
+
+        await makeLove({
+            method: 'addLockCollection',
+            from: toAccount
+        }, pIndex, {
+            name: 'Love letters',
+            description: 'Every letter counts.'
+        })
+
         // then add 100 memories
         const count = Number(MEMORY_COUNT || process.env.MEMORY_COUNT) || 10
 
@@ -173,14 +191,15 @@ const blogParams = [JSON.stringify({
                 send: 'sendAsync'
             }, pIndex, false, `Memory ${i} for lock ${pIndex}`, {
                 hash: selectedHashes,
-                date: Date.now()
+                date: Date.now(),
+                collectionId: Math.round(Math.random())
             }).then(r => {
                 //console.log(`Created memory ${i} for lock ${pIndex}`)
                 return r
             }))
         }
 
-        // add a single block
+        // add a single blog
         promises.push(makeLove({
             method: 'addMemory',
             fromAccount,
