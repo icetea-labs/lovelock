@@ -83,7 +83,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
 
   // create the first memory for auto-accepted lock
   if (pendingPropose.status === LOCK_STATUS_ACCEPTED) {
-    apiCreateMemory(self, index, false, '', { hash: [], date: Date.now() }, [true]);
+    apiCreateMemory(self, index, false, '', { hash: [] }, [true]);
   }
 
   // map address to propose
@@ -101,7 +101,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
 };
 exports.apiAcceptLock = (self, lockIndex, r_content) => {
   const ret = _confirmLock(self, lockIndex, r_content, LOCK_STATUS_ACCEPTED);
-  apiCreateMemory(self, lockIndex, false, '', { hash: [], date: Date.now() }, [true, ...ret]);
+  apiCreateMemory(self, lockIndex, false, '', { hash: [] }, [true, ...ret]);
 };
 exports.apiCancelLock = (self, lockIndex, r_content) => {
   _confirmLock(self, lockIndex, r_content, LOCK_STATUS_DENIED, true);
