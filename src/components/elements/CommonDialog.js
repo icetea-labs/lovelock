@@ -31,7 +31,7 @@ const Container = styled.div`
   z-index: 1101;
   transition: opacity 0.6s ease-in;
   opacity: 0;
-  @media (max-width: 768px) {
+  @media (max-width: 624px) {
     width: 100%;
     min-width: 300px;
     max-height: 95vh;
@@ -117,7 +117,7 @@ class CommonDialog extends React.Component {
     this.oldBodyOverflow = style.overflow;
     style.overflow = 'hidden';
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'visible');
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'visible');
       this.containerRef.current && (this.containerRef.current.style.overflowY = 'scroll');
     }
   }
