@@ -419,7 +419,7 @@ export default function AddInfoMessage(props) {
                 <div className="icon-upload">
                   <i className="material-icons">menu_book</i>
                   <div>Blog</div>
-                </div>            
+                </div>
             </ActionItem>
           </Grid>}
         </Grid>

@@ -24,7 +24,8 @@ const BoxContent = styled.div`
   grid-area: content;
   justify-items: center;
   align-items: center;
-  width: ${rem(960)};
+  width: 100%;
+  max-width: ${rem(960)};
   margin: 0 auto;
 `;
 const Content = styled(BoxContent)`

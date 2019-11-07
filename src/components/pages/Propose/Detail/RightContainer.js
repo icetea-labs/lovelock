@@ -14,6 +14,9 @@ import CollectionsIcon from '@material-ui/icons/Collections';
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
 `;
 
 const CollectionIndicator = styled.div`

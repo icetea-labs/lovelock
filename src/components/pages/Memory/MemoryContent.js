@@ -382,7 +382,7 @@ function MemoryContent(props) {
     const desc = makeProposeName(propose)
     let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url
     if (!img) {
-      img = propose.coverImg ? 
+      img = propose.coverImg ?
         process.env.REACT_APP_IPFS + propose.coverImg :
         process.env.PUBLIC_URL + '/static/img/share.jpg'
     }

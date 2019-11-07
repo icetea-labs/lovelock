@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
+import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, makeProposeName, sendTransaction } from '../../../../helper';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
@@ -25,6 +25,27 @@ const ShadowBox = styled.div`
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+`;
+const ProposeWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+    }
+  }
 `;
 
 export default function DetailPropose(props) {
@@ -187,21 +208,21 @@ export default function DetailPropose(props) {
           <TopContrainer proIndex={proIndex} />
         </ShadowBox>
       </BannerContainer>
-
-      <FlexBox wrap="wrap" minHeight="100vh">
-        <FlexWidthBox width="30%">
+  
+      <ProposeWrapper>
+        <div className="proposeColumn proposeColumn--left">
           <LeftContainer proIndex={proIndex} />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightContainer 
-            proIndex={proIndex} 
+        </div>
+        <div className="proposeColumn proposeColumn--right">
+          <RightContainer
+            proIndex={proIndex}
             collectionId={collectionId}
             collections={collections}
             currentCollection={currentCollection}
             handleNewCollection={handleNewCollection}
             isOwner={isOwner} />
-        </FlexWidthBox>
-      </FlexBox>
+        </div>
+      </ProposeWrapper>
 
       {proposeInfo && renderHelmet()}
     </React.Fragment>

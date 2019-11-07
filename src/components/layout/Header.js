@@ -69,7 +69,8 @@ const StyledAppBar = withStyles(() => ({
 }))(AppBar);
 const StyledToolbar = withStyles({
   root: {
-    width: 960,
+    width: '100%',
+    maxWidth: 960,
     height: '100%',
     padding: '0',
     flexGrow: 1,
