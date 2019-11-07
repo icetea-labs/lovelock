@@ -379,33 +379,41 @@ class LoveLock {
 
   validateCollectionName = (newName, collections) => {
     if (!newName || !newName.trim()) throw new Error('Invalid name.')
+    const normalName = newName.trim().normalize()
+    if (normalName.length < 4 || normalName.length > 16) {
+      throw new Error(`Collection name must be 4~16 characters.`)
+    }
 
-    const nomalName = newName.trim().normalize()
-    const lname = nomalName.toLowerCase()
+    const lname = normalName.toLowerCase()
     collections.forEach(({ name }) => {
       if (lname === name.toLowerCase()) {
         throw new Error(`Collection name ${newName} already exists.`)
       }
     })
 
-    return nomalName
+    return normalName
   }
 
   @transaction addLockCollection(lockIndex: number, collectionData): number {
     const [lock, locks] = this.getPropose(lockIndex);
     expectProposeOwners(lock)
 
+    const cols = lock.collections = (lock.collections || [])
+    const MAX_COLLECTION_PER_LOCK = 5
+    if (cols.length > MAX_COLLECTION_PER_LOCK) {
+      throw new Error(`This lock already has ${MAX_COLLECTION_PER_LOCK} collections and cannot create more.`)
+    }
+
     collectionData = validate(
       collectionData,
       Joi.object({
         name: Joi.string().required(),
-        description: Joi.string().allow(''),
-        avatar: Joi.string().allow(''),
+        description: Joi.string(),
+        avatar: Joi.string(),
         banner: Joi.string()
       }).label('collectionData').required()
     )
     
-    const cols = lock.collections = (lock.collections || [])
     collectionData.name = this.validateCollectionName(collectionData.name, cols)
 
     lock.nextCollectionId = lock.nextCollectionId || 0
