@@ -27,9 +27,12 @@ const InfoBox = styled.div`
   justify-content: space-between;
   /* border-top: 1px solid #e1e1e1; */
   border-bottom: ${props => props.grayLayout && '1px solid #e1e1e1'};
-  color: '#8250c8';
+  color: #8250c8;
+  @media (max-width: 599.95px) {
+    display: ${props => (props.grayLayout ? 'flex' : 'none')};
+  }
 `;
-const ImgUpLoad = styled.div`
+const ActionItem = styled.div`
   display: inline-block;
   position: relative;
   overflow: hidden;
@@ -39,6 +42,7 @@ const ImgUpLoad = styled.div`
   line-height: 32px;
   font-size: 12px;
   color: #8250c8;
+  cursor: pointer;
   :hover {
     background: #ebedf0;
   }
@@ -218,6 +222,11 @@ const useStyles = makeStyles(theme => ({
     color: 'white',
     display: 'none',
   },
+  btnRow: {
+    [theme.breakpoints.down('xs')]: {
+      margin: '16px 0'
+    }
+  }
 }));
 
 function MaterialUIPickers(props) {
@@ -229,11 +238,16 @@ function MaterialUIPickers(props) {
 }
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro } = props;
+  const { files, date, isCreatePro, onBlogClick, hasParentDialog, onDialogToggle } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
-  const [isOpenCrop, setIsOpenCrop] = useState(false);
+  const [isOpenCrop, _setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState('');
+
+  const setIsOpenCrop = value => {
+    onDialogToggle && onDialogToggle(value)
+    _setIsOpenCrop(value)
+  }
 
   useEffect(() => {
     if (files.length === 0) {
@@ -260,6 +274,7 @@ export default function AddInfoMessage(props) {
   }
 
   async function captureUploadFile(event) {
+    event.preventDefault();
     const imgFiles = event.target.files;
 
     if (imgFiles.length) {
@@ -286,9 +301,8 @@ export default function AddInfoMessage(props) {
   function handleImageChange(event) {
     event.preventDefault();
     if (files) removeFile(0);
-    const orFiles = event.target.files;
-    const arrFiles = Array.from(orFiles);
-    if (orFiles.length > 0) {
+    const arrFiles = Array.from(event.target.files);
+    if (arrFiles.length > 0) {
       setIsOpenCrop(true);
       setOriginFile(arrFiles);
     } else {
@@ -370,24 +384,28 @@ export default function AddInfoMessage(props) {
         </ImgUploadPreview>
       )}
       <InfoBox grayLayout={grayLayout}>
-        <Grid container spacing={3} alignItems="center" justify="flex-end">
-          <Grid item>
+        <Grid container spacing={3} alignItems="center" justify="flex-end" className={classes.btnRow}>
+          <Grid item xs={12} sm='auto'>
             <DateBox>
               <div className="icon-datetime">
                 <MaterialUIPickers
                   autoOk
-                  clearable
+                  clearable={false}
+                  showTodayButton
                   value={date}
                   format="dd/MM/yyyy"
                   disableFuture
                   onChange={handleDateChange}
+                  onOpen={() => (onDialogToggle && onDialogToggle(true))}
+                  onClose={() => (onDialogToggle && onDialogToggle(false))}
+                  style={{ paddingTop: 2 }}
                 />
-                <i className="material-icons">event</i>
+                <i className="material-icons" style={{ paddingLeft : 12 }}>event</i>
               </div>
             </DateBox>
           </Grid>
-          <Grid item>
-            <ImgUpLoad>
+          <Grid item xs={12} sm='auto'>
+            <ActionItem>
               <div className="icon-upload">
                 <i className="material-icons">insert_photo</i>
                 <div>Photo</div>
@@ -402,11 +420,21 @@ export default function AddInfoMessage(props) {
                 value=""
                 onChange={isCreatePro ? handleImageChange : captureUploadFile}
               />
-            </ImgUpLoad>
+            </ActionItem>
           </Grid>
+          {onBlogClick && <Grid item onClick={onBlogClick} xs={12} sm='auto'>
+            <ActionItem>
+                <div className="icon-upload">
+                  <i className="material-icons">menu_book</i>
+                  <div>Blog</div>
+                </div>
+            </ActionItem>
+          </Grid>}
         </Grid>
       </InfoBox>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isAddInfo />}
+      {isOpenCrop && (
+        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare hasParentDialog={hasParentDialog} />
+      )}
     </Container>
   );
 }

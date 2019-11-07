@@ -12,7 +12,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import * as actions from '../../../store/actions';
-import tweb3 from '../../../service/tweb3';
+import { getAliasContract } from '../../../service/tweb3';
 import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from '../../elements/CommonDialog';
@@ -219,11 +219,7 @@ class PuNewLock extends React.Component {
     const peopleAva = [];
 
     try {
-      const method = 'callReadonlyContractMethod';
-      const add = 'system.alias';
-      const func = 'query';
-
-      const result = await tweb3[method](add, func, [escapedValue]);
+      const result = await getAliasContract().methods.query(escapedValue).call()
       people = Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
         return { nick, address: result[key].address };
@@ -356,7 +352,7 @@ class PuNewLock extends React.Component {
 
   handleImageChange = event => {
     event.preventDefault();
-    const orFiles = event.target.files;
+    const orFiles = Array.from(event.target.files);
     if (orFiles.length > 0) {
       this.setState({
         originFile: orFiles,
@@ -485,6 +481,16 @@ class PuNewLock extends React.Component {
     }, 100);
   }
 
+  onKeyEsc = () => {
+    if (!this.dialogShown && !this.state.isJournal) {
+      this.props.close()
+    }
+  }
+
+  onDialogToggle = value => {
+    this.dialogShown = value
+  }
+
   render() {
     const { close } = this.props;
     const {
@@ -505,97 +511,104 @@ class PuNewLock extends React.Component {
       placeholder: '@partner',
       value,
       onChange: this.onPartnerChange,
+      autoFocus: true
     };
 
     return (
-      <CommonDialog
-        title="New Lock"
-        okText={() => this.state.okText || 'Send'}
-        close={close}
-        confirm={() => {
-          this.createPropose(partner, promiseStm, date, file);
-        }}
-      >
-        {!checked && (
-          <div>
-            <TagTitle>Tag your partner</TagTitle>
-            <Autosuggest
-              id="suggestPartner"
-              suggestions={suggestions}
-              onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-              onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-              getSuggestionValue={this.getSuggestionValue}
-              renderSuggestion={this.renderSuggestion}
-              inputProps={inputProps}
-            />
-          </div>
-        )}
-        <FormControlLabel
-          control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
-          label="or create your own crush"
-        />
-        {checked && (
-          <FlexBox>
-            <PreviewContainter>
-              <div className="upload_img">
-                <AvatarProCus src={avatar} />
-                <div className="changeImg">
-                  <input
-                    className="fileInput"
-                    type="file"
-                    onChange={this.handleImageChange}
-                    accept="image/jpeg,image/png"
-                  />
-                  <CameraAltIcon />
+      <React.Fragment>
+        <CommonDialog
+          title="New Lock"
+          okText={() => this.state.okText || 'Send'}
+          close={close}
+          onKeyEsc={this.onKeyEsc}
+          confirm={() => {
+            this.createPropose(partner, promiseStm, date, file);
+          }}
+        >
+          {!checked && (
+            <div>
+              <TagTitle>Tag your partner</TagTitle>
+              <Autosuggest
+                id="suggestPartner"
+                suggestions={suggestions}
+                onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                getSuggestionValue={this.getSuggestionValue}
+                renderSuggestion={this.renderSuggestion}
+                inputProps={inputProps}
+              />
+            </div>
+          )}
+          <FormControlLabel
+            control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
+            label="or create your own crush"
+          />
+          {checked && (
+            <FlexBox>
+              <PreviewContainter>
+                <div className="upload_img">
+                  <AvatarProCus src={avatar} />
+                  <div className="changeImg">
+                    <input
+                      className="fileInput"
+                      type="file"
+                      value=""
+                      onChange={this.handleImageChange}
+                      accept="image/jpeg,image/png"
+                    />
+                    <CameraAltIcon />
+                  </div>
                 </div>
-              </div>
-            </PreviewContainter>
-            <RightBotInfo>
-              <TextFieldPlaceholder
-                label="First Name"
-                fullWidth
-                onChange={this.handleUsername}
-                name="firstname"
-                validators={['required']}
-                // margin="normal"
-              />
-              <TextFieldPlaceholder
-                label="Last Name"
-                fullWidth
-                onChange={this.handleUsername}
-                name="lastname"
-                validators={['required']}
-                // margin="normal"
-              />
-              <TextFieldPlaceholder
-                label="Crush's response to your lock"
-                fullWidth
-                onChange={this.handleUsername}
-                name="botReply"
-                validators={['required']}
-              />
-            </RightBotInfo>
-          </FlexBox>
-        )}
-        <DividerCus />
-        <TagTitle className="prmContent">Lock content</TagTitle>
-        <TextFieldMultiLine
-          id="outlined-multiline-static"
-          placeholder="lock content ..."
-          multiline
-          fullWidth
-          rows="4"
-          variant="outlined"
-          onChange={this.promiseStmChange}
-        />
-        <AddInfoMessage
-          files={file}
-          date={date}
-          onChangeDate={this.onChangeDate}
-          onChangeMedia={this.onChangeMedia}
-          isCreatePro
-        />
-        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
+              </PreviewContainter>
+              <RightBotInfo>
+                <TextFieldPlaceholder
+                  label="Crush First Name"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="firstname"
+                  validators={['required']}
+                  // margin="normal"
+                />
+                <TextFieldPlaceholder
+                  label="Crush Last Name"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="lastname"
+                  validators={['required']}
+                  // margin="normal"
+                />
+                <TextFieldPlaceholder
+                  label="Crush's Reply to You"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="botReply"
+                  validators={['required']}
+                />
+              </RightBotInfo>
+            </FlexBox>
+          )}
+          <DividerCus />
+          <TagTitle className="prmContent">Your Message</TagTitle>
+          <TextFieldMultiLine
+            id="outlined-multiline-static"
+            placeholder={checked ? 'Express yourself to your crush…' : 'Say something to your partner…'}
+            multiline
+            fullWidth
+            rows="4"
+            variant="outlined"
+            onChange={this.promiseStmChange}
+          />
+          <AddInfoMessage
+            files={file}
+            date={date}
+            onChangeDate={this.onChangeDate}
+            onChangeMedia={this.onChangeMedia}
+            isCreatePro
+            hasParentDialog
+            onDialogToggle={this.onDialogToggle}
+          />
+        </CommonDialog>
+        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />}
         {isJournal && (
           <CommonDialog
             title="Journal"
@@ -604,14 +617,14 @@ class PuNewLock extends React.Component {
             close={this.closeJournal}
             cancel={this.closeJournal}
             confirm={this.createJournal}
-            isCancel
+            hasParentDialog
           >
             <TagTitle>
               <span>By create a lock with yourself, you will create a Journal instead.</span>
             </TagTitle>
           </CommonDialog>
         )}
-      </CommonDialog>
+      </React.Fragment>
     );
   }
 }

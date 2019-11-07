@@ -95,7 +95,6 @@ class PromiseConfirm extends React.Component {
             this.messageDeny(messageDeny);
           }
         }}
-        isCancel
       >
         <TagTitle>{isDeny ? 'Your message (optional)' : 'Your message'}</TagTitle>
         {isDeny ? (
@@ -108,6 +107,7 @@ class PromiseConfirm extends React.Component {
             margin="normal"
             variant="outlined"
             onChange={this.messageDenyChange}
+            autoFocus
           />
         ) : (
           <div>
@@ -120,6 +120,7 @@ class PromiseConfirm extends React.Component {
               margin="normal"
               variant="outlined"
               onChange={this.messageAcceptChange}
+              autoFocus
             />
             {/* <IconView>
               <i className="material-icons">insert_photo</i>

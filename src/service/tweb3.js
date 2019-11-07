@@ -1,4 +1,39 @@
 import { IceteaWeb3 } from "@iceteachain/web3";
 
-const tweb3 = new IceteaWeb3(process.env.REACT_APP_RPC);
-export default tweb3;
+const instances = {}
+const contracts = {}
+
+const MAIN_URL = process.env.REACT_APP_RPC
+const WS_URL = process.env.REACT_APP_WS_RPC
+const HTTP_URL = process.env.REACT_APP_HTTP_RPC
+const CONTRACT = process.env.REACT_APP_CONTRACT
+
+export const getWeb3 = (url = MAIN_URL) => {
+    if (!instances[url]) {
+        instances[url] = new IceteaWeb3(process.env.REACT_APP_RPC)
+    }
+    return instances[url]
+}
+
+export const getWsWeb3 = () => getWeb3(WS_URL)
+export const getHttpWeb3 = () => getWeb3(HTTP_URL)
+
+export const getContract = (address = CONTRACT) => {
+    if (!contracts[address]) {
+        contracts[address] = getWeb3().contract(address)
+    }
+    return contracts[address]
+}
+
+export const getAliasContract = () => getContract('system.alias')
+export const getDidContract = () => getContract('system.did')
+
+export const grantAccessToken = (mainAddress, tokenAddress, remember, sendType = 'sendCommit') => {
+    const did = getDidContract().methods;
+    const expire = remember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+
+    const method = did.grantAccessToken(mainAddress, [CONTRACT, 'system.did'], tokenAddress, +expire)
+    return method[sendType]({ from: mainAddress })
+}
+
+export default getWeb3;

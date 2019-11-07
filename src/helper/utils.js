@@ -5,17 +5,129 @@ import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
-import tweb3 from '../service/tweb3';
+import { getWeb3, getContract } from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
+export const ipfsGateway = process.env.REACT_APP_IPFS;
+export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
+
+export function waitForHtmlTags(selector, callback, { 
+  timeout = 3000,
+  step = 100,
+  rootElement,
+  func = 'querySelectorAll',
+  testProp = 'length',
+  timeoutCallBack
+} = {}) {
+  if (timeout < 0) {
+    timeoutCallBack && timeoutCallBack();
+    return;
+  }
+  
+  var el =   (rootElement || document)[func](selector);
+  if (el && (!testProp || el[testProp])) {
+    callback(el);
+  } else {
+    setTimeout(() => {
+      waitForHtmlTags(selector, callback, { timeout: timeout - step, step, rootElement, func, testProp, timeoutCallBack });
+    }, step);
+  }
+}
+
+export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
+  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json())
+}
+
+export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
+    timeout = 10, // almost race
+    signal,
+    abortAtTimeout, // whether to abort main gateway when timeout
+    abortMain, // whether to abort main gateway when resolved
+    abortFallback // whether to abort fallback gateway when resolve
+} = {}) {
+
+  if (signal && signal.aborted) {
+    return Promise.reject(new DOMException('Aborted', 'AbortError'));
+  }
+
+  return new Promise((resolve, reject) => {
+    const mainController = new AbortController();
+    const secondController = signal ? new AbortController() : undefined
+
+    const timeoutId = setTimeout(() => {
+      abortAtTimeout && mainController.abort()
+      fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
+        .then(response => response.json())
+        .then(json => {
+          resolve({ json, gateway: fallbackGateway })
+          abortMain && mainController.abort()
+        }).catch(err => {
+          if (err.name !== 'AbortError') {
+            reject(err)
+          }
+        })
+    }, timeout);
+
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        mainController.abort()
+        secondController && secondController.abort()
+        reject(new DOMException('Aborted', 'AbortError'));
+      })
+    }
+
+    fetch(mainGateway + hash, { signal: mainController.signal })
+    .then(response => {
+      clearTimeout(timeoutId)
+      return response.json()
+    }).then(json => {
+      resolve({ json: json, gateway: mainGateway })
+      if (abortFallback) {
+        clearTimeout(timeoutId);
+        secondController && secondController.abort()
+      }
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        reject(err)
+      }
+    })
+
+  })
+}
+
+export function fetchMainFirstIpfsJson(hash, options = {}) {
+  if (options.abortMain == null) {
+    options.abortMain = true
+  }
+  return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options)
+}
+
+export function fetchAltFirstIpfsJson(hash, options = {}) {
+  if (options.timeout == null) {
+    options.timeout = 1500 // wait a little to reduce load for our main gateway
+  }
+  if (options.abortFallback == null) {
+    options.abortFallback = true
+  }
+  return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options)
+}
+
+export function smartFetchIpfsJson(hash, options = {}) {
+  let func = fetchMainFirstIpfsJson
+  if (options.timestamp && (Date.now() - options.timestamp > 10 * 60 * 1000)) {
+    func = fetchAltFirstIpfsJson
+  }
+  return func(hash, options)
+}
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
-    wait = process.env.REACT_APP_PRERENDER_WAIT || 100
+    wait = +process.env.REACT_APP_PRERENDER_WAIT || 100
   }
   window.setTimeout(() => {
     window.prerenderReady = true
@@ -49,12 +161,12 @@ export function callView(funcName, params) {
   return callReadOrPure(funcName, params, 'callReadonlyContractMethod');
 }
 function callReadOrPure(funcName, params, method) {
-  return tweb3[method](contract, funcName, params || []);
+  return getWeb3()[method](contract, funcName, params || []);
 }
 
 export async function sendTransaction(funcName, params, opts) {
   console.log('sendTransaction', funcName, params);
-  const ct = tweb3.contract(contract);
+  const ct = getContract();
   const sendType = opts.sendType || 'sendCommit';
   const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
@@ -76,7 +188,7 @@ export function tryStringifyJson(p, replacer = undefined, space = 2) {
 
 export async function getAccountInfo(address) {
   try {
-    const info = await tweb3.getAccountInfo(address);
+    const info = await getWeb3().getAccountInfo(address);
     return info;
   } catch (err) {
     throw err;

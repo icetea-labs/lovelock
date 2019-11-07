@@ -21,7 +21,7 @@ const config = envfile.parseFileSync(envPath)
 const endpoint = config.REACT_APP_RPC
 
 // load source file
-const src = fs.readFileSync('./contracts/index.js')
+const src = fs.readFileSync('./contracts/lovelock.js')
 
 ;(async () => {
 

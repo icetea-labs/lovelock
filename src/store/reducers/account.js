@@ -1,6 +1,6 @@
 import { codec } from '@iceteachain/common';
 import { actionTypes } from '../actions/account';
-import tweb3 from '../../service/tweb3';
+import getWeb3 from '../../service/tweb3';
 
 const initialState = Object.assign(
   {
@@ -30,7 +30,7 @@ const initialState = Object.assign(
       const isExpired = process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
       if (!isExpired) {
         resp.tokenKey = codec.toString(token.tokenKey);
-        tweb3.wallet.importAccount(resp.tokenKey);
+        getWeb3().wallet.importAccount(resp.tokenKey);
       }
       resp.tokenAddress = token.tokenAddress;
       resp.expireAfter = token.expireAfter;

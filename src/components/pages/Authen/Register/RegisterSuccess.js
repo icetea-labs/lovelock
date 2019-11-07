@@ -14,7 +14,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import { encode } from '../../../../helper/encode';
 import { savetoLocalStorage } from '../../../../helper';
-import tweb3 from '../../../../service/tweb3';
+import { getWeb3, grantAccessToken} from '../../../../service/tweb3';
 
 const WrapperImg = styled.div`
   margin-top: 20px;
@@ -103,12 +103,10 @@ function RegisterSuccess(props) {
     setLoading(true);
     setTimeout(async () => {
       const mode = 1;
-      const token = tweb3.wallet.createRegularAccount();
-      const ms = tweb3.contract('system.did').methods;
-      const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
+      const tweb3 = getWeb3()
 
-      ms.grantAccessToken(address, [process.env.REACT_APP_CONTRACT, 'system.did'], token.address, parseInt(expire, 10))
-        .sendCommit({ from: address })
+      const token = tweb3.wallet.createRegularAccount();
+      grantAccessToken(address, token.address, isRemember)
         .then(async ({ returnValue }) => {
           tweb3.wallet.importAccount(token.privateKey);
           const keyObject = encode(mnemonic, password);

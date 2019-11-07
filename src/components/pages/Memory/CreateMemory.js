@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -47,6 +47,9 @@ const ShadowBox = styled.div`
   border-radius: 5px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 const useStyles = makeStyles(theme => ({
   margin: {
@@ -58,15 +61,25 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10,
   },
   btShare: {
-    width: 254,
+    width: 232,
     height: 46,
     borderRadius: 23,
+    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+      width: '100%',
+      marginTop: 20
+    },
   },
   selectStyle: {
     minWidth: 110,
     height: 36,
     fontSize: 12,
     color: '#8250c8',
+  },
+  selectStyleMid: {
+    minWidth: 160,
+    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+      marginLeft: 24
+    },
   },
   selectIcon: {
     width: 24,
@@ -77,21 +90,16 @@ const useStyles = makeStyles(theme => ({
   btBox: {
     display: 'flex',
     justifyContent: 'space-between',
-    paddingBottom: '25px !important',
+    padding: '25px 0 15px',
+    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+      display: 'block',
+      textAlign: 'right'
+    },
   },
-  blogBtn: {
-    color: '#8250c8',
-    border: '1px solid #8250c8',
-    padding: '10px 18px 11px 18px',
-    boxSizing: 'border-box',
-    borderRadius: 23,
-    height: 36,
-    fontSize: 12,
-    minWidth: 110,
-    marginTop: 5,
-    marginLeft: -50,
-    outline: 'none',
-    cursor: 'pointer',
+  rightBtBox: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '0',
   },
 }));
 
@@ -124,8 +132,8 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryAdded, proIndex } = props;
-  const classes = useStyles();
+  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
+  const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
@@ -141,8 +149,10 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
+
   const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
+  const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? "" : collectionId)
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
 
@@ -152,9 +162,9 @@ export default function CreateMemory(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  // useEffect(() => {
-  //   resetValue();
-  // }, [proIndex]);
+  useEffect(() => {
+    resetValue();
+  }, [proIndex, collectionId]);
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -183,6 +193,27 @@ export default function CreateMemory(props) {
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
   }
+
+  function collectionAdded(col) {
+    // now we add this collection to the list
+    collections.push(col)
+
+    // and make it seleted
+    setPostCollectionId(col.id)
+  }
+
+  function handleChangePostCollectionId(event) {
+    const value = event.target.value
+    if (value !== 'add') {
+      setPostCollectionId(event.target.value)
+    } else {
+      setPostCollectionId(postCollectionId)
+      if (handleNewCollection) {
+        handleNewCollection(collectionAdded)
+      }
+    }
+  }
+
   function onChangeDate(value) {
     setMemoDate(value);
   }
@@ -352,6 +383,19 @@ export default function CreateMemory(props) {
     setPreviewOn(false);
   }
 
+  function addCollectionId(info) {
+    const colId = +postCollectionId
+    if (typeof colId === 'number' && !isNaN(colId)) {
+      info.collectionId = colId
+    }
+  }
+
+  function addMemoTimestamp(info) {
+    if (memoDate) {
+      info.date = memoDate.getTime ? memoDate.getTime() : memoDate
+    }
+  }
+
   async function handleShareMemory(blogData) {
     if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
@@ -375,18 +419,22 @@ export default function CreateMemory(props) {
       if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
-        const newinfo = { date: memoDate, hash };
-        params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
+        const info = { hash };
+        addMemoTimestamp(info)
+        addCollectionId(info)
+        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
       } else {
         const hash = !blogData && await saveBufferToIpfs(filesBuffer);
-        const info = { date: memoDate };
+        const info = { };
         info.hash = hash || []
+        addMemoTimestamp(info)
+        addCollectionId(info)
         if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
       const result = await sendTransaction('addMemory', params, { address, tokenAddress });
       if (result) {
-        onMemoryAdded();
+        onMemoryAdded(result.returnValue, params);
       }
       resetValue();
     }, 100);
@@ -395,6 +443,7 @@ export default function CreateMemory(props) {
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
+    setPostCollectionId(collectionId == null ? "" : collectionId);
     setMemoDate(new Date());
     setGLoading(false);
     setGrayLayout(false);
@@ -472,8 +521,8 @@ export default function CreateMemory(props) {
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
       <CreatePost grayLayout={grayLayout}>
         <ShadowBox>
-          <Grid container direction="column" spacing={3}>
-            <Grid item>
+          <Grid container direction="column">
+            <Grid>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
                   <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
@@ -485,24 +534,28 @@ export default function CreateMemory(props) {
                     fullWidth
                     multiline
                     value={memoryContent}
-                    placeholder="Describe your Memory...."
+                    placeholder={grayLayout ? "Describe your memory" : "Add a new memory…"}
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
                   />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item>
+            <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
                 files={filesBuffer}
                 date={memoDate}
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
+                onBlogClick={() => {
+                  setOpenModal(true);
+                }}
               />
             </Grid>
             {grayLayout && (
-              <Grid item classes={{ root: classes.btBox }}>
+              <Grid classes={{ root: classes.btBox }}>
+                <div className={classes.rightBtBox}>
                 <Select
                   native
                   value={privacy}
@@ -511,19 +564,27 @@ export default function CreateMemory(props) {
                     root: classes.selectStyle,
                     icon: classes.selectIcon,
                   }}
+                  style={{marginRight: '1vw'}}
                   input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                 >
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button
-                  onClick={() => {
-                    setOpenModal(true);
+                <Select
+                  native
+                  value={postCollectionId}
+                  onChange={handleChangePostCollectionId}
+                  classes={{
+                    root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                    icon: classes.selectIcon,
                   }}
-                  className={classes.blogBtn}
+                  input={<BootstrapInput name="collection" id="outlined-collection" />}
                 >
-                  Write blog...
-                </button>
+                  <option value="">(No collection)</option>
+                  {collections && collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="add">(+) New Collection</option>
+                </Select>
+                </div>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}

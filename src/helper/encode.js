@@ -11,7 +11,7 @@ function encode(privateKey, password, ops) {
     kdf: 'pbkdf2',
     cipher: 'aes-128-ctr',
     kdfparams: {
-      c: iteration,
+      c: +iteration,
       dklen: 32,
       prf: 'hmac-sha256',
     },

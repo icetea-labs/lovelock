@@ -22,7 +22,8 @@ import {
   decodeImg,
   getJsonFromIpfs,
   makeProposeName,
-  signalPrerenderDone
+  signalPrerenderDone,
+  smartFetchIpfsJson
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -178,8 +179,8 @@ function MemoryContent(props) {
         const blogData = JSON.parse(memory.content);
         mem = { ...memory }
         mem.meta = blogData.meta;
-        mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
-          .then(d => d.json())
+        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
+          .then(d => d.json)
           .catch(err => {
             if (err.name === 'AbortError') return
             throw err
@@ -381,7 +382,7 @@ function MemoryContent(props) {
     const desc = makeProposeName(propose)
     let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url
     if (!img) {
-      img = propose.coverImg ? 
+      img = propose.coverImg ?
         process.env.REACT_APP_IPFS + propose.coverImg :
         process.env.PUBLIC_URL + '/static/img/share.jpg'
     }
@@ -413,7 +414,7 @@ function MemoryContent(props) {
             renderLockEventMemory()
           )
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
+          <Typography variant="body1" style={{ whiteSpace: 'pre-line' }} component="div">
             {!isBlog && memoryDecrypted.content}
             {isBlog && blogInfo.title && (
               <BlogShowcase
