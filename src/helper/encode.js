@@ -1,6 +1,6 @@
 const keythereum = require('keythereum');
 
-const iteration = process.env.REACT_APP_KDF_ITERATION || 10000
+const iteration = parseInt(process.env.REACT_APP_KDF_ITERATION || 10000, 10);
 
 /**
  * @privateKey
@@ -18,7 +18,6 @@ function encode(privateKey, password, ops) {
     noAddress: true,
     ...ops,
   };
-
   const dk = keythereum.create();
   return keythereum.dump(password, Buffer.from(privateKey), dk.salt, dk.iv, options);
 }

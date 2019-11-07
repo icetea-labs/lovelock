@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import QueueAnim from 'rc-queue-anim';
 
-import { ValidatorForm } from 'react-material-ui-form-validator';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonPro, LinkPro } from './Button';
 
@@ -26,7 +25,7 @@ const Container = styled.div`
   /* padding: 10px; */
   box-sizing: border-box;
   position: fixed;
-  top: 10%;
+  top: ${props => props.paddingTop || '10%'};
   left: 50%;
   transform: translate(-50%, -50%);
   @media (max-width: 768px) {
@@ -109,12 +108,12 @@ class CommonDialog extends React.Component {
   }
 
   render() {
-    const { cancel, confirm, close, okText, cancelText, children, title, isCancel } = this.props;
+    const { cancel, confirm, close, okText, cancelText, children, title, paddingTop } = this.props;
     return (
       <QueueAnim animConfig={{ opacity: [1, 0] }}>
         <PuLayout key={1}>
           <QueueAnim leaveReverse delay={100} type={['top', 'bottom']}>
-            <Container key={2}>
+            <Container key={2} paddingTop={paddingTop}>
               <PuTitle>
                 <span className="title">{title}</span>
                 <IconButton onClick={close}>
@@ -125,18 +124,14 @@ class CommonDialog extends React.Component {
                 {children}
                 <Action>
                   <div className="actionConfirm">
-                    {isCancel && (
-                      <ValidatorForm onSubmit={cancel}>
-                        <LinkPro className="deny" type="submit">
-                          {cancelText}
-                        </LinkPro>
-                      </ValidatorForm>
+                    {cancelText && cancel && (
+                      <LinkPro className="deny" onClick={cancel}>
+                        {cancelText}
+                      </LinkPro>
                     )}
-                    <ValidatorForm onSubmit={confirm}>
-                      <ButtonPro className="send" type="submit">
-                        {typeof okText !== 'function' ? okText : okText()}
-                      </ButtonPro>
-                    </ValidatorForm>
+                    <ButtonPro className="send" onClick={confirm}>
+                      {typeof okText !== 'function' ? okText : okText()}
+                    </ButtonPro>
                   </div>
                 </Action>
               </ContWrap>
@@ -149,7 +144,6 @@ class CommonDialog extends React.Component {
 }
 
 CommonDialog.defaultProps = {
-  isCancel: false,
   close() {},
   cancel() {},
   confirm() {},
