@@ -33,24 +33,24 @@ function MemoryContainer(props) {
 
   const classes = useStyles();
   useEffect(() => {
-    let signal = {}
+    let signal = {};
 
     async function prepareMemory(signal) {
-      const showMemoryId = parseInt(getQueryParam('memory'))
+      const showMemoryId = parseInt(getQueryParam('memory'));
       let newMemoryList = [];
       setLoading(true);
-  
+
       let tags = memorydata.map(mem => {
         return getTagsInfo(mem.sender);
       });
       tags = await Promise.all(tags);
-      if (signal.cancel) return
-  
-      let hasViewDetail = false
+      if (signal.cancel) return;
+
+      let hasViewDetail = false;
       for (let i = 0; i < memorydata.length; i++) {
         const obj = memorydata[i];
-        obj.showDetail = showMemoryId === obj.id
-        if (obj.info.blog && obj.showDetail) hasViewDetail = true
+        obj.showDetail = showMemoryId === obj.id;
+        if (obj.info.blog && obj.showDetail) hasViewDetail = true;
         obj.name = tags[i]['display-name'];
         obj.pubkey = tags[i]['pub-key'];
         obj.avatar = tags[i].avatar;
@@ -58,40 +58,41 @@ function MemoryContainer(props) {
           // eslint-disable-next-line no-await-in-loop
           const receiverTags = await getTagsInfo(obj.receiver);
           obj.r_name = receiverTags['display-name'];
+        } else if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
+          obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name;
         } else {
-          if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
-            obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name
-          } else {
-            obj.r_name = '' // a crush name, but let it empty for now
-          }
+          obj.r_name = ''; // a crush name, but let it empty for now
         }
         if (!obj.isPrivate) {
           obj.isUnlock = true;
           for (let j = 0; j < obj.info.hash.length; j++) {
             // eslint-disable-next-line no-await-in-loop
             obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
-            if (signal.cancel) return
+            if (signal.cancel) return;
           }
         } else {
           // obj.info.hash = [];
           obj.isUnlock = false;
         }
-  
+
         newMemoryList.push(obj);
       }
-      newMemoryList = newMemoryList.reverse();
+      // newMemoryList = newMemoryList.reverse();
+      newMemoryList = newMemoryList.sort((a, b) => {
+        return b.id - a.id;
+      });
       setMemory(newMemoryList);
-  
+
       setLoading(false);
-  
+
       if (!hasViewDetail) {
-        signalPrerenderDone()
+        signalPrerenderDone();
       }
     }
 
     prepareMemory(signal)
 
-    return () => signal.cancel = true
+    return () => (signal.cancel = true);
   }, [memorydata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (memoryList.length <= 0 || loading) {

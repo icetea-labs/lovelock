@@ -186,7 +186,7 @@ const SummaryCard = styled.div`
     }
     .summaryCongrat {
       text-align: center;
-      margin: 7px;
+      margin: 7px 0 0 7px;
       height: 36px;
       border-radius: 18px;
       background-color: #fdf0f6;

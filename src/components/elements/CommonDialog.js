@@ -29,7 +29,7 @@ const Container = styled.div`
   overflow-x: hidden;
   overflow-y: scroll;
   z-index: 1101;
-  transition: opacity .6s ease-in;
+  transition: opacity 0.6s ease-in;
   opacity: 0;
   @media (max-width: 768px) {
     width: 100%;
@@ -104,75 +104,75 @@ class CommonDialog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.backdropRef = React.createRef()
-    this.containerRef = React.createRef()
+    this.backdropRef = React.createRef();
+    this.containerRef = React.createRef();
   }
 
-  componentDidMount(){
-    const { hasParentDialog } = this.props
-    this.backdropRef.current.style.opacity = '1'
-    this.containerRef.current.style.opacity = '1'
-    document.addEventListener("keydown", this.handleKeyDown, true);
-    const style = document.body.style
-    this.oldBodyOverflow = style.overflow
-    style.overflow = 'hidden'
+  componentDidMount() {
+    const { hasParentDialog } = this.props;
+    this.backdropRef.current.style.opacity = '1';
+    this.containerRef.current.style.opacity = '1';
+    document.addEventListener('keydown', this.handleKeyDown, true);
+    const style = document.body.style;
+    this.oldBodyOverflow = style.overflow;
+    style.overflow = 'hidden';
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'visible')
-      this.containerRef.current && (this.containerRef.current.style.overflowY = 'scroll')
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'visible');
+      this.containerRef.current && (this.containerRef.current.style.overflowY = 'scroll');
     }
   }
 
-  componentWillUnmount(){
-    const { hasParentDialog } = this.props
+  componentWillUnmount() {
+    const { hasParentDialog } = this.props;
 
-    document.removeEventListener("keydown", this.handleKeyDown, true);
-    document.body.style.overflow = this.oldBodyOverflow
+    document.removeEventListener('keydown', this.handleKeyDown, true);
+    document.body.style.overflow = this.oldBodyOverflow;
 
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'scroll')
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'scroll');
     }
   }
 
   handleKeyDown = e => {
-    const { onKeyEsc, close, cancel, confirm } = this.props
-    if(e.keyCode === 27) {
+    const { onKeyEsc, close, cancel, confirm } = this.props;
+    if (e.keyCode === 27) {
       if (typeof onKeyEsc === 'function') {
-        onKeyEsc(e)
+        onKeyEsc(e);
       } else if (onKeyEsc === true) {
-        const fn = close || cancel
-        fn && fn()
+        const fn = close || cancel;
+        fn && fn();
       }
-    } else if(e.keyCode === 13) {
+    } else if (e.keyCode === 13) {
       if (document.activeElement.tagName === 'TEXTAREA') {
-        return
+        return;
       }
-      const { onKeyReturn } = this.props
+      const { onKeyReturn } = this.props;
       if (typeof onKeyReturn === 'function') {
-        onKeyReturn(e)
+        onKeyReturn(e);
       } else if (onKeyReturn === true) {
-        confirm && confirm()
+        confirm && confirm();
       }
     }
-  }
+  };
 
   handleBackdropClick = e => {
-    const { onKeyEsc, close, cancel } = this.props
-    if(e.target === e.currentTarget) {
+    const { onKeyEsc, close, cancel } = this.props;
+    if (e.target === e.currentTarget) {
       if (typeof onKeyEsc === 'function') {
-        onKeyEsc(e)
+        onKeyEsc(e);
       } else if (onKeyEsc === true) {
-        const fn = close || cancel
-        fn && fn()
+        const fn = close || cancel;
+        fn && fn();
       }
     }
-  }
+  };
 
   render() {
     const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog } = this.props;
     return (
       <>
-        <Backdrop className='cdialog-backdrop' key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
-        <Container className='cdialog-container' key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
+        <Backdrop className="cdialog-backdrop" key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
+        <Container className="cdialog-container" key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
           <PuTitle>
             <span className="title">{title}</span>
             <IconButton onClick={close}>
@@ -180,22 +180,22 @@ class CommonDialog extends React.Component {
             </IconButton>
           </PuTitle>
           <ContWrap>
-              {children}
-              <Action>
-                <div className="actionConfirm">
-                  {cancelText && cancel && (
-                    <LinkPro className="deny" onClick={cancel}>
-                      {cancelText}
-                    </LinkPro>
-                  )}
-                  <ButtonPro className="send" onClick={confirm}>
-                    {typeof okText !== 'function' ? okText : okText()}
-                  </ButtonPro>
-                </div>
-              </Action>
+            {children}
+            <Action>
+              <div className="actionConfirm">
+                {cancelText && cancel && (
+                  <LinkPro className="deny" onClick={cancel}>
+                    {cancelText}
+                  </LinkPro>
+                )}
+                <ButtonPro className="send" onClick={confirm}>
+                  {typeof okText !== 'function' ? okText : okText()}
+                </ButtonPro>
+              </div>
+            </Action>
           </ContWrap>
         </Container>
-        </>
+      </>
     );
   }
 }
@@ -210,7 +210,7 @@ CommonDialog.defaultProps = {
   children: null,
   hasParentDialog: false,
   onKeyEsc: true,
-  onKeyReturn: false
+  onKeyReturn: false,
 };
 
 export default CommonDialog;

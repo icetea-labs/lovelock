@@ -18,7 +18,6 @@ function encode(privateKey, password, ops) {
     noAddress: true,
     ...ops,
   };
-
   const dk = keythereum.create();
   return keythereum.dump(password, Buffer.from(privateKey), dk.salt, dk.iv, options);
 }
