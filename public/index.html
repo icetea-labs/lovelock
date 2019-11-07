@@ -13,7 +13,7 @@
   <meta name="msapplication-TileColor" content="#8250c8">
   <meta name="theme-color" content="#8250c8">
   <script>
-    if (window.screen.width < 966) {
+    if (window.location.hostname !== 'localhost' && window.screen.width < 966) {
       window.location.href = "/unsupported.html"
     } else if (!('caches' in window) || !('AbortController' in window)) {
       window.location.href = "/unsupported.html#browser"

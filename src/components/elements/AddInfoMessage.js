@@ -27,7 +27,10 @@ const InfoBox = styled.div`
   justify-content: space-between;
   /* border-top: 1px solid #e1e1e1; */
   border-bottom: ${props => props.grayLayout && '1px solid #e1e1e1'};
-  color: '#8250c8';
+  color: #8250c8;
+  @media (max-width: 599.95px) {
+    display: ${props => (props.grayLayout ? 'flex' : 'none')};
+  }
 `;
 const ActionItem = styled.div`
   display: inline-block;
@@ -219,6 +222,11 @@ const useStyles = makeStyles(theme => ({
     color: 'white',
     display: 'none',
   },
+  btnRow: {
+    [theme.breakpoints.down('xs')]: {
+      margin: '16px 0'
+    }
+  }
 }));
 
 function MaterialUIPickers(props) {
@@ -376,8 +384,8 @@ export default function AddInfoMessage(props) {
         </ImgUploadPreview>
       )}
       <InfoBox grayLayout={grayLayout}>
-        <Grid container spacing={3} alignItems="center" justify="flex-end">
-          <Grid item>
+        <Grid container spacing={3} alignItems="center" justify="flex-end" className={classes.btnRow}>
+          <Grid item xs={12} sm='auto'>
             <DateBox>
               <div className="icon-datetime">
                 <MaterialUIPickers
@@ -396,7 +404,7 @@ export default function AddInfoMessage(props) {
               </div>
             </DateBox>
           </Grid>
-          <Grid item>
+          <Grid item xs={12} sm='auto'>
             <ActionItem>
               <div className="icon-upload">
                 <i className="material-icons">insert_photo</i>
@@ -414,7 +422,7 @@ export default function AddInfoMessage(props) {
               />
             </ActionItem>
           </Grid>
-          {onBlogClick && <Grid item onClick={onBlogClick}>
+          {onBlogClick && <Grid item onClick={onBlogClick} xs={12} sm='auto'>
             <ActionItem>
                 <div className="icon-upload">
                   <i className="material-icons">menu_book</i>

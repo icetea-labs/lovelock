@@ -61,7 +61,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10,
   },
   btShare: {
-    width: 254,
+    width: 232,
     height: 46,
     borderRadius: 23,
     '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
@@ -87,9 +87,6 @@ const useStyles = makeStyles(theme => ({
     color: '#8250c8',
     marginRight: theme.spacing(1),
   },
-  midBox: {
-    paddingTop: 10
-  },
   btBox: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -98,6 +95,11 @@ const useStyles = makeStyles(theme => ({
       display: 'block',
       textAlign: 'right'
     },
+  },
+  rightBtBox: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '0',
   },
 }));
 
@@ -131,7 +133,7 @@ const BootstrapTextField = withStyles(theme => ({
 
 export default function CreateMemory(props) {
   const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
-  const classes = useStyles();
+  const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
@@ -147,6 +149,7 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
+
   const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? "" : collectionId)
@@ -538,7 +541,7 @@ export default function CreateMemory(props) {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid classes={{ root: classes.midBox }}>
+            <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
                 files={filesBuffer}
                 date={memoDate}
@@ -552,6 +555,7 @@ export default function CreateMemory(props) {
             </Grid>
             {grayLayout && (
               <Grid classes={{ root: classes.btBox }}>
+                <div className={classes.rightBtBox}>
                 <Select
                   native
                   value={privacy}
@@ -560,6 +564,7 @@ export default function CreateMemory(props) {
                     root: classes.selectStyle,
                     icon: classes.selectIcon,
                   }}
+                  style={{marginRight: '1vw'}}
                   input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                 >
                   <option value={0}>Public</option>
@@ -579,6 +584,7 @@ export default function CreateMemory(props) {
                   {collections && collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   <option value="add">(+) New Collection</option>
                 </Select>
+                </div>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
