@@ -38,6 +38,7 @@ function GetKeyToAuthen(props) {
 
     if (!addressRedux) {
       setPathName(window.location.pathname);
+      setNeedAuth(false);
       props.history.push('/register');
       return;
     }

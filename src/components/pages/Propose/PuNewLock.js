@@ -207,7 +207,7 @@ class PuNewLock extends React.Component {
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
 
-    if (escapedValue.length <= 3) {
+    if (escapedValue.length < 3) {
       this.setState({ suggestions: [] });
       return;
     }
@@ -234,7 +234,9 @@ class PuNewLock extends React.Component {
     for (let i = 0; i < people.length; i++) {
       // eslint-disable-next-line no-await-in-loop
       const resp = await getTagsInfo(people[i].address);
-      peopleAva.push(resp.avatar);
+      if (resp && resp.avatar) {
+        peopleAva.push(resp.avatar);
+      }
     }
     for (let i = 0; i < people.length; i++) {
       Object.assign(people[i], { avatar: peopleAva[i] });
