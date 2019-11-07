@@ -32,7 +32,7 @@ const Container = styled.div`
   transition: opacity 0.6s ease-in;
   opacity: 0;
   @media (max-width: 624px) {
-    width: 100%;
+    width: ${props => (props.hasParentDialog ? '90%' : '100%')};;
     min-width: 300px;
     max-height: 95vh;
     max-width: 95%;
@@ -74,28 +74,32 @@ const ContWrap = styled.div`
 const Action = styled.div`
   .actionConfirm {
     width: 100%;
-    margin: 40px 0 16px;
+    margin: 48px 0 16px;
     justify-content: center;
     display: flex;
     button {
-      width: 172px;
+      min-width: 128px;
       line-height: 34px;
       font-size: 16px;
       color: #ffffff;
       font-weight: 600;
       border-radius: 23px;
+      white-space: nowrap;
     }
     .send {
       background-image: linear-gradient(340deg, #b276ff, #fe8dc3);
     }
     .deny {
-      margin-right: 34px;
+      margin-right: 8%;
       background: #ffffff;
       border: 1px solid #5e5e5e;
       display: flex;
       justify-content: center;
       font-weight: 600;
       color: #373737;
+      @media (max-width: 413px) {
+        margin-right: 4px;
+      }
     }
   }
 `;
