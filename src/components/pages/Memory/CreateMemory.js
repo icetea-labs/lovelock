@@ -534,7 +534,7 @@ export default function CreateMemory(props) {
                     fullWidth
                     multiline
                     value={memoryContent}
-                    placeholder="Add a new memory…"
+                    placeholder={grayLayout ? "Describe your memory" : "Add a new memory…"}
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
                   />
