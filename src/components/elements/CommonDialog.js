@@ -26,7 +26,8 @@ const Container = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: scroll;
   z-index: 1101;
   transition: opacity .6s ease-in;
   opacity: 0;
@@ -34,8 +35,7 @@ const Container = styled.div`
     width: 100%;
     min-width: 300px;
     max-height: 95vh;
-    max-width: 90%;
-    padding: 15px;
+    max-width: 95%;
   }
 `;
 
@@ -68,8 +68,6 @@ const PuTitle = styled.div`
 `;
 
 const ContWrap = styled.div`
-  width: 90%;
-  height: 90%;
   padding: 30px;
 `;
 
@@ -119,8 +117,8 @@ class CommonDialog extends React.Component {
     this.oldBodyOverflow = style.overflow
     style.overflow = 'hidden'
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'visible')
-      this.containerRef.current && (this.containerRef.current.style.overflow = 'scroll')
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'visible')
+      this.containerRef.current && (this.containerRef.current.style.overflowY = 'scroll')
     }
   }
 
@@ -131,7 +129,7 @@ class CommonDialog extends React.Component {
     document.body.style.overflow = this.oldBodyOverflow
 
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'scroll')
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'scroll')
     }
   }
 
