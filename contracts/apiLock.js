@@ -1,8 +1,3 @@
-const { expect, validate } = require(';');
-const Joi = require('@hapi/joi');
-const { expectProposeOwners, getDataByIndex } = require('./helper.js');
-const { apiCreateMemory } = require('./apiMemory.js');
-
 const LOCK_STATUS_PENDING = 0;
 const LOCK_STATUS_ACCEPTED = 1;
 const LOCK_STATUS_DENIED = 2;

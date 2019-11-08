@@ -1,7 +1,3 @@
-const { expect, validate } = require(';');
-const Joi = require('@hapi/joi');
-const { expectProposeOwners, getDataByIndex } = require('./helper.js');
-
 exports.apiCreateMemory = (self, lockIndex, isPrivate, content, info = {}, opts = []) => {
   return _addMemory(self, lockIndex, isPrivate, content, info, [...opts]);
 };

@@ -12,6 +12,7 @@ import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
 import Explore from './components/pages/Home/Explore';
 import BLogView from './components/pages/Memory/BlogView';
+import Feed from './components/pages/Feed';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -28,6 +29,8 @@ function App(props) {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/memory/:hash" component={BLogView} />
+          <RouteWithLayout layout={HomeLayout} exact path="/feed" component={Feed} />
+          <RouteWithLayout layout={HomeLayout} exact path="/feed/:address" component={Feed} />
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
           <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
           <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
