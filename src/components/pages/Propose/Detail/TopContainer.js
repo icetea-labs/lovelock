@@ -235,13 +235,16 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(1),
     marginTop: theme.spacing(0.5),
   },
-  button: {
+  btChangeCover: {
     margin: theme.spacing(1),
     opacity: 0.8,
     '&:hover': {
       background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
       opacity: 1,
     },
+  },
+  btLikeFollow: {
+    color: theme.palette.text.secondary,
   },
   changeCoverTitle: {
     marginTop: '4px',
@@ -492,10 +495,10 @@ function TopContrainer(props) {
           <CardMedia className={classes.media} image={cropImg} title="Change lock image">
             <div className="showChangeImg">
               <div>{buttonChange}</div>
-              <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
+              <Button variant="contained" color="primary" className={classes.btChangeCover} onClick={cancelCoverImg}>
                 Cancel
               </Button>
-              <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
+              <Button variant="contained" color="primary" className={classes.btChangeCover} onClick={acceptCoverImg}>
                 OK
               </Button>
             </div>
@@ -527,7 +530,7 @@ function TopContrainer(props) {
         </div>
         <div className="proLike">
           <ArrowTooltip title="I Care">
-            <Button onClick={handerFlow}>
+            <Button onClick={handerFlow} className={classes.btLikeFollow}>
               {topInfo.isMyFollow ? (
                 <React.Fragment>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
@@ -546,7 +549,7 @@ function TopContrainer(props) {
             </Button>
           </ArrowTooltip>
           <ArrowTooltip title="Like">
-            <Button onClick={handerLike}>
+            <Button onClick={handerLike} className={classes.btLikeFollow}>
               {topInfo.isMyLike ? (
                 <React.Fragment>
                   <FavoriteIcon color="primary" className={classes.rightIcon} />
