@@ -249,15 +249,30 @@ export default function CreateMemory(props) {
 
     const { blocks } = content;
 
-    let i
-    for (i in blocks) {
-      if (!firstImg && blocks[i].type === 'image') {
-        firstImg = blocks[i].data;
+    let b
+    for (b of blocks) {
+      if (!firstImg) {
+        if (b.type === 'image') {
+          firstImg = b.data;
+        } else if (b.type === 'video') {
+          // get the video thumbnail
+          const data = b.data && b.data.embed_data
+          if (data) {
+            firstImg = {
+              width: data.get('width'),
+              height: data.get('height'),
+              url: data.get('thumbnail_url')
+            }
+            if (firstImg.url) {
+              firstImg.url = firstImg.url.replace('hqdefault.jpg', 'maxresdefault.jpg')
+            }
+          }
+        }
       }
       if (!firstLine) {
-        firstLine = blocks[i].text || '';
-        if (firstLine.length > 100) {
-          firstLine = `${firstLine.slice(0, 100)}…`;
+        firstLine = b.text || '';
+        if (firstLine.length > 69) {
+          firstLine = `${firstLine.slice(0, 69)}…`;
         }
       }
       if (firstImg && firstLine) break;
