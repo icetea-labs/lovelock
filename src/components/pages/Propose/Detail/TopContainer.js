@@ -10,7 +10,6 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
-import WavesIcon from '@material-ui/icons/Waves';
 import { useSnackbar } from 'notistack';
 
 import {
@@ -31,8 +30,8 @@ const TopContainerBox = styled.div`
     position: relative;
     overflow: hidden;
     max-width: ${rem(900)};
-    /* max-height: ${rem(425)}; */
-    min-height: ${rem(225)};
+    /* max-height: ${rem(425)};
+    min-height: ${rem(225)}; */
     .showChangeImg {
       position: absolute;
       top: 5px;
@@ -249,6 +248,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
     fontSize: '12px',
     color: 'white',
+    backgroundColor: 'rgba(0,0,0,.05)',
     // display: 'none',
   },
   photoCameraIcon: {
@@ -257,7 +257,7 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     margin: theme.spacing(1),
-    opacity: 0.8,
+    opacity: 0.9,
     '&:hover': {
       // background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
       opacity: 1,
