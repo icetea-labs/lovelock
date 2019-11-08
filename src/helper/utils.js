@@ -196,10 +196,15 @@ export async function getAccountInfo(address) {
 }
 
 export async function saveToIpfs(files) {
-  if (!files) return '';
+  if (!files || !files.length) return [];
   // simple upload
   let ipfsId = [];
   console.log('saveToIpfs', files);
+
+  if (files.length !== 1) {
+    files = files.map(f => ({ content: f}))
+  }
+
   try {
     const results = await ipfs.add([...files]);
     ipfsId = results.map(el => {
@@ -210,6 +215,7 @@ export async function saveToIpfs(files) {
   }
   return ipfsId;
 }
+
 // upload one file
 export async function saveFileToIpfs(files) {
   const ipfsId = await saveToIpfs(files);
@@ -247,6 +253,7 @@ export async function saveBufferToIpfs(files, opts = {}) {
   }
   return ipfsId;
 }
+
 // Return buffer
 export async function decodeImg(cid, privateKey, partnerKey) {
   const buff = await ipfs.get(cid);
@@ -254,13 +261,15 @@ export async function decodeImg(cid, privateKey, partnerKey) {
   const data = await decodeWithPublicKey(fileJsonData, privateKey, partnerKey, 'img');
   return data;
 }
+
 // upload one file
 export async function getJsonFromIpfs(cid, key) {
   const result = {};
   let url;
   // console.log('Buffer.isBuffer(cid)', Buffer.isBuffer(cid), '--', cid);
+  let blob
   if (Buffer.isBuffer(cid)) {
-    const blob = new Blob([cid], { type: 'image/jpeg' });
+    blob = new Blob([cid], { type: 'image/jpeg' });
     url = URL.createObjectURL(blob);
   } else {
     url = process.env.REACT_APP_IPFS + cid;
@@ -270,6 +279,10 @@ export async function getJsonFromIpfs(cid, key) {
   result.width = dimensions.w;
   result.height = dimensions.h;
   result.key = `Key-${key}`;
+
+  if (blob) {
+    URL.revokeObjectURL(url)
+  }
 
   return result;
 }

@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
     margin: '0 auto'
   },
   postBody: {
-    marginTop: 72,
+    marginTop: 24, // this is suitable for banner-photo post
   },
   subtitle: {
     fontSize: '0.8em',
