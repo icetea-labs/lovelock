@@ -44,6 +44,9 @@ const ProposeWrapper = styled.div`
     display: block;
     .proposeColumn {
       width: 100%;
+      &--left {
+        display: none;
+      }
     }
   }
 `;

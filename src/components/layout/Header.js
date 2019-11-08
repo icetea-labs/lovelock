@@ -17,7 +17,9 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
-// import SearchIcon from '@material-ui/icons/Search';
+import Drawer from '@material-ui/core/Drawer';
+
+import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import GroupIcon from '@material-ui/icons/Group';
 import NotificationsIcon from '@material-ui/icons/Notifications';
@@ -35,6 +37,7 @@ import GetKeyToAuthen from './GetKeyToAuthen';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
+import LeftContainer from "../pages/Propose/Detail/LeftContainer";
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
@@ -210,6 +213,14 @@ const useStyles = makeStyles(theme => ({
       display: 'none',
     },
   },
+  leftMenu: {
+    display: 'none',
+    '@media (max-width: 768px)': {
+      display: 'block',
+      cursor: 'pointer',
+      margin: '0 25px 0 30px'
+    }
+  }
 }));
 
 const StyledMenu = withStyles({
@@ -301,6 +312,7 @@ function Header(props) {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [anchorElNoti, setAnchorElNoti] = useState(null);
   const [anchorElMenu, setAnchorElMenu] = useState(null);
+  const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -548,6 +560,14 @@ function Header(props) {
       <div className={classes.grow}>
         <StyledAppBar position="static" color="inherit" className={classes.AppBar + ' main-appbar'}>
           <StyledToolbar>
+            <MenuIcon
+              fontSize="large"
+              className={classes.leftMenu}
+              onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
+            />
+            <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
+              <LeftContainer/>
+            </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
               <span>LoveLock</span>
