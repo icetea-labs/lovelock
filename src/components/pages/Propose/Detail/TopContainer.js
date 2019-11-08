@@ -32,15 +32,18 @@ const TopContainerBox = styled.div`
     max-width: ${rem(900)};
     /* max-height: ${rem(425)}; */
     min-height: ${rem(225)};
-    .showChangeImg {
+    .boxChangeCover {
+      display: block;
+      position: absolute;
+      top: 5px;
+      left: 5px;
+    }
+    .hideButton {
       display: none;
     }
     &:hover {
-      .showChangeImg {
+      .hideButton {
         display: block;
-        position: absolute;
-        top: 5px;
-        left: 5px;
       }
     }
     img {
@@ -225,15 +228,15 @@ const useStyles = makeStyles(theme => ({
       },
     },
   },
-  icon: {
+  btChange: {
     margin: theme.spacing(1),
-    fontSize: '12px',
-    color: 'white',
-    // display: 'none',
+    color: '#fff',
+  },
+  input: {
+    display: 'none',
   },
   photoCameraIcon: {
     marginRight: theme.spacing(1),
-    marginTop: theme.spacing(0.5),
   },
   btChangeCover: {
     margin: theme.spacing(1),
@@ -245,9 +248,6 @@ const useStyles = makeStyles(theme => ({
   },
   btLikeFollow: {
     color: theme.palette.text.secondary,
-  },
-  changeCoverTitle: {
-    marginTop: '4px',
   },
   title: {
     display: 'none',
@@ -330,7 +330,7 @@ function TopContrainer(props) {
         return;
       }
       const params = [topInfo.index];
-      sendTransaction('addFlowLock', params, { tokenAddress, address }).then(() => {
+      sendTransaction('followLock', params, { tokenAddress, address }).then(() => {
         getNumTopFollow();
       });
 
@@ -444,20 +444,20 @@ function TopContrainer(props) {
   }
 
   const buttonChange = (
-    <Button className={classes.icon}>
-      <PhotoCameraIcon className={classes.photoCameraIcon} />
-      <input
-        accept="image/jpeg,image/png"
-        className="fileInput"
-        role="button"
-        type="file"
-        value=""
-        onChange={handleImageChange}
-      />
-      <Typography className={classes.changeCoverTitle} noWrap>
-        Change
-      </Typography>
-    </Button>
+    <label htmlFor="outlined-button-file">
+      <Button component="span" className={classes.btChange}>
+        <PhotoCameraIcon className={classes.photoCameraIcon} />
+        <Typography noWrap>Change Cover</Typography>
+        <input
+          accept="image/jpeg,image/png"
+          className={classes.input}
+          id="outlined-button-file"
+          type="file"
+          value=""
+          onChange={handleImageChange}
+        />
+      </Button>
+    </label>
   );
 
   if (loading) {
@@ -493,7 +493,7 @@ function TopContrainer(props) {
       <div className="top__coverimg">
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg} title="Change lock image">
-            <div className="showChangeImg">
+            <div className="boxChangeCover">
               <div>{buttonChange}</div>
               <Button variant="contained" color="primary" className={classes.btChangeCover} onClick={cancelCoverImg}>
                 Cancel
@@ -509,7 +509,7 @@ function TopContrainer(props) {
             image={process.env.REACT_APP_IPFS + topInfo.coverImg}
             title="Change lock image"
           >
-            <div className="showChangeImg">{buttonChange}</div>
+            <div className="boxChangeCover hideButton">{buttonChange}</div>
           </CardMedia>
         )}
       </div>
