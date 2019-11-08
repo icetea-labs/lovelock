@@ -63,7 +63,7 @@ class Editor extends React.Component {
     }
   }
 
-  componentWillMount() {
+  componentWillUnmount() {
     this.resizeEventHandler && window.removeEventListener('resize', this.resizeEventHandler)
   }
 

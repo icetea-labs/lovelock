@@ -608,7 +608,7 @@ export default function CreateMemory(props) {
                   }}
                   className={classes.btShare}
                 >
-                  Share
+                  Post
                 </ButtonPro>
               </Grid>
             )}
