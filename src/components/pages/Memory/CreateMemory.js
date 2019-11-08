@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -16,6 +16,9 @@ import * as actions from '../../../store/actions';
 import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
+
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
 // import { getDraft, setDraft, delDraft } from '../../../helper/draft';
 import { delDraft } from '../../../helper/draft';
 
@@ -162,9 +165,20 @@ export default function CreateMemory(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
+  // Is this component display as "compact" version (e.g. on mobile)
+  const isCompact = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const componentRef = useRef()
+
   useEffect(() => {
     resetValue();
-  }, [proIndex, collectionId]);
+  }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  useEffect(() => {
+    if (grayLayout && isCompact) {
+      componentRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [grayLayout, isCompact])
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -175,8 +189,9 @@ export default function CreateMemory(props) {
   }
 
   function memoryOnFocus() {
-    if (!grayLayout) setGrayLayout(true);
+    !grayLayout && setGrayLayout(true);
   }
+
   function clickLayout(e) {
     if (e.target === layoutRef.current) setGrayLayout(false);
   }
@@ -519,7 +534,7 @@ export default function CreateMemory(props) {
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
-      <CreatePost grayLayout={grayLayout}>
+      <CreatePost grayLayout={grayLayout} ref={componentRef}>
         <ShadowBox>
           <Grid container direction="column">
             <Grid>
