@@ -64,18 +64,6 @@
         #logo {
             margin-top: -32px;
         }
-
-        .b {
-            display: none;
-        }
-
-        .browser .b {
-            display: inline
-        }
-
-        .browser .d {
-            display: none;
-        }
     </style>
 </head>
 
@@ -84,27 +72,18 @@
         <div id="announce">
             <header>
                 <img id="logo" src='./static/img/logo.svg' width="48" height="48" />
-                <h2><span class='d'>MOBILE DEVICE NOT SUPPORTED YET</span><span class='b'>YOUR BROWSER IS
-                        OUTDATED</span>
-                </h2>
+                <h2>YOUR BROWSER IS OUTDATED</h2>
             </header>
             <main>
-                <p><span class='d'>In the meanwhile, you can try Lovelock on
-                        your desktop
-                        browser.</span><span class='b'>Lovelock requires modern browsers. Please download <a
+                <p>Lovelock requires modern browsers. Please download <a
                             href="https://www.google.com/chrome/">Chrome</a>, <a
                             href="https://www.mozilla.org/en-US/firefox/new/">FireFox</a>, or use <a
-                            href="https://www.apple.com/vn/safari/">Safari</a>.</span></p>
+                            href="https://www.apple.com/vn/safari/">Safari</a>.</p>
                 <p>We are sorry for the inconvenience.</p>
             </main>
         </div>
     </div>
-    <footer>Made with Love on <a href="https://icetea.io">Icetea Platform</a></footer>
-    <script>
-        if (window.location.hash === '#browser') {
-            document.getElementById('announce').setAttribute('class', 'browser')
-        }
-    </script>
+    <footer>Made with ❤️ on <a href="https://icetea.io">Icetea Platform</a></footer>
 </body>
 
 </html>

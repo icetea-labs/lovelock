@@ -27,7 +27,7 @@ const Container = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
   z-index: 1101;
   transition: opacity 0.6s ease-in;
   opacity: 0;
@@ -122,7 +122,7 @@ class CommonDialog extends React.Component {
     style.overflow = 'hidden';
     if (hasParentDialog) {
       document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'visible');
-      this.containerRef.current && (this.containerRef.current.style.overflowY = 'scroll');
+      this.containerRef.current && (this.containerRef.current.style.overflowY = 'auto');
     }
   }
 
@@ -133,7 +133,7 @@ class CommonDialog extends React.Component {
     document.body.style.overflow = this.oldBodyOverflow;
 
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'scroll');
+      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'auto');
     }
   }
 
