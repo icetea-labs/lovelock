@@ -10,6 +10,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
+import WavesIcon from '@material-ui/icons/Waves';
 import { useSnackbar } from 'notistack';
 
 import {
@@ -33,14 +34,21 @@ const TopContainerBox = styled.div`
     /* max-height: ${rem(425)}; */
     min-height: ${rem(225)};
     .showChangeImg {
-      display: none;
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      & > div {
+        display: none;
+      }
+      & > button {
+        display: inline-flex;
+      }
     }
     &:hover {
       .showChangeImg {
-        display: block;
-        position: absolute;
-        top: 5px;
-        left: 5px;
+        & > div {
+          display: block;
+        }
       }
     }
     img {
@@ -88,7 +96,7 @@ const TopContainerBox = styled.div`
   }
 `;
 const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(15)};
+  margin-top: ${props => (props && props.isJournal ? '-4px' : rem(15))};
   div:nth-child(even) .content_detail p {
     background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
     background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
@@ -172,6 +180,18 @@ const WarrperChatBox = styled(FlexBox)`
 const SummaryCard = styled.div`
   display: flex;
   justify-content: space-between;
+  .journalTitle {
+    display: inline-block;
+    background-color: rgba(0,0,0,.3);
+    color: #f5f5f5;
+    position: relative;
+    top: -32px;
+    padding: 0 16px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 32px;
+    height: 32px;
+  }
   .dayago {
     display: flex;
     align-items: flex-end;
@@ -239,7 +259,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
     opacity: 0.8,
     '&:hover': {
-      background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+      // background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
       opacity: 1,
     },
   },
@@ -441,7 +461,7 @@ function TopContrainer(props) {
   }
 
   const buttonChange = (
-    <Button className={classes.icon}>
+    <Button className={classes.icon} title="Change lock image">
       <PhotoCameraIcon className={classes.photoCameraIcon} />
       <input
         accept="image/jpeg,image/png"
@@ -489,14 +509,13 @@ function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
-          <CardMedia className={classes.media} image={cropImg} title="Change lock image">
+          <CardMedia className={classes.media} image={cropImg}>
             <div className="showChangeImg">
-              <div>{buttonChange}</div>
-              <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
+              <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
                 Cancel
               </Button>
               <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
-                OK
+                Apply
               </Button>
             </div>
           </CardMedia>
@@ -504,29 +523,26 @@ function TopContrainer(props) {
           <CardMedia
             className={classes.media}
             image={process.env.REACT_APP_IPFS + topInfo.coverImg}
-            title="Change lock image"
           >
-            <div className="showChangeImg">{buttonChange}</div>
+            <div className="showChangeImg"><div>{buttonChange}</div></div>
           </CardMedia>
         )}
       </div>
       <SummaryCard>
-        <div className="dayago">
-          {topInfo.type !== 2 && <img src="/static/img/happy-copy.svg" alt="together" />}
+        {!topInfo.isJournal ? <div className="dayago">
+          <img src="/static/img/happy-copy.svg" alt="together" />}
           <div className="summaryDay">
-            {topInfo.type === 2 ? (
-              'JOURNAL'
-            ) : (
               <span>
                 {diffDate === 0 && 'First day'}
                 {diffDate > 0 && (diffDate === 1 ? `${diffDate} day` : `${diffDate} days`)}
               </span>
-            )}
-          </div>
+            </div>
           <HolidayEvent day={topInfo.s_date} />
-        </div>
+        </div> : <div className='journalTitle'>
+          JOURNAL
+        </div>}
         <div className="proLike">
-          <ArrowTooltip title="I Care">
+          <ArrowTooltip title="Follow">
             <Button onClick={handerFlow}>
               {topInfo.isMyFollow ? (
                 <React.Fragment>
@@ -545,7 +561,7 @@ function TopContrainer(props) {
               )}
             </Button>
           </ArrowTooltip>
-          <ArrowTooltip title="Like">
+          <ArrowTooltip title="Express feelings">
             <Button onClick={handerLike}>
               {topInfo.isMyLike ? (
                 <React.Fragment>
@@ -566,7 +582,7 @@ function TopContrainer(props) {
           </ArrowTooltip>
         </div>
       </SummaryCard>
-      <WarrperChatBox>
+      <WarrperChatBox isJournal={topInfo.isJournal}>
         {topInfo.s_content && (
           <div className="proposeMes">
             <div className="user_photo fl">
