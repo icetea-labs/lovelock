@@ -21,8 +21,9 @@ import Drawer from '@material-ui/core/Drawer';
 
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import GroupIcon from '@material-ui/icons/Group';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+// import GroupIcon from '@material-ui/icons/Group';
+// import NotificationsIcon from '@material-ui/icons/Notifications';
+import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
@@ -525,7 +526,7 @@ function Header(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
+      { /* <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="primary">
             <GroupIcon />
@@ -540,17 +541,27 @@ function Header(props) {
           </Badge>
         </IconButton>
         <p>Notifications</p>
-      </MenuItem>
+      </MenuItem> */ }
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
+          aria-label="profile settings"
+          aria-controls="primary-search-profile-menu"
           aria-haspopup="true"
           color="inherit"
         >
           <AccountCircle />
         </IconButton>
         <p>Profile</p>
+      </MenuItem>
+      <MenuItem onClick={handeExplore}>
+        <IconButton
+          aria-label="explore post of other users"
+          aria-controls="primary-search-explore-menu"
+          color="inherit"
+        >
+          <ExploreIcon />
+        </IconButton>
+        <p>Explore</p>
       </MenuItem>
     </Menu>
   );
