@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import LazyLoad from 'react-lazyload';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { getPalette } from '../../../helper/palette';
 import Skeleton from '@material-ui/lab/Skeleton';
 
 export default function BlogShowcase(props) {
-  const [colors, setColors] = useState(props.colors || {});
+  const [colors, _setColors] = useState(props.colors || {});
   const { classes, photo, title, openHandler } = props;
   const ratio = photo && photo.height / photo.width;
   const height = ratio ? Math.floor(6.27 * ratio) : 160; // current image with on timeline is 627
@@ -14,9 +14,26 @@ export default function BlogShowcase(props) {
     frameStyle.paddingBottom = 0;
   }
   const labelStyle = colors.labelBackColor ? { backgroundColor: colors.labelBackColor } : {};
+
+  const mounted = useRef(false)
+
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
+
+  const setColors = colors => {
+    if (mounted.current) {
+      _setColors(colors)
+    }
+  }
+
   if (!title) {
     return  <Skeleton variant="rect" width='100%' height={164} />
   }
+
   return (
     <span className={classes.blogImgWrp} style={frameStyle} onClick={openHandler}>
       <span className={classes.blogTitleImg} style={labelStyle}>
