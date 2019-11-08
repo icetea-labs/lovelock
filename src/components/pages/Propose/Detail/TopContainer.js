@@ -8,9 +8,9 @@ import { CardMedia, Button, Typography } from '@material-ui/core';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
-
-// import getWeb3 from '../../../../service/tweb3';
 
 import {
   callView,
@@ -22,7 +22,7 @@ import {
 } from '../../../../helper';
 import * as actions from '../../../../store/actions';
 import { FlexBox, rem } from '../../../elements/StyledUtils';
-import { AvatarPro } from '../../../elements';
+import { ArrowTooltip, AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
 
 const TopContainerBox = styled.div`
@@ -94,7 +94,7 @@ const WarrperChatBox = styled(FlexBox)`
     background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
   }
   .proposeMes {
-    display : flex;
+    display: flex;
     width: 50%;
   }
   .user_photo {
@@ -137,7 +137,7 @@ const WarrperChatBox = styled(FlexBox)`
   .clearfix::after {
     display: block;
     clear: both;
-    content: "";
+    content: '';
   }
   .contentPage {
     margin-top: 23px;
@@ -290,7 +290,8 @@ function TopContrainer(props) {
     if (!needUpdate) {
       setProposeLikeInfo();
     }
-  }, [needUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needUpdate]);
 
   function handerLike() {
     try {
@@ -525,43 +526,44 @@ function TopContrainer(props) {
           <HolidayEvent day={topInfo.s_date} />
         </div>
         <div className="proLike">
-          <Button onClick={handerFlow}>
-            {topInfo.isMyFollow ? (
-              <React.Fragment>
-                {/* <FavoriteIcon color="primary" className={classes.rightIcon} /> */}
-                <Typography component="span" variant="body2" color="primary" className={classes.rightIcon}>
-                  I care
-                </Typography>
-                <Typography component="span" variant="body2" color="primary">
-                  {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
-                </Typography>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                {/* <FavoriteBorderIcon className={classes.rightIcon} /> */}
-                <Typography component="span" variant="body2">
-                  I care {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
-                </Typography>
-              </React.Fragment>
-            )}
-          </Button>
-          <Button onClick={handerLike}>
-            {topInfo.isMyLike ? (
-              <React.Fragment>
-                <FavoriteIcon color="primary" className={classes.rightIcon} />
-                <Typography component="span" variant="body2" color="primary">
-                  {topInfo.numLike ? `${topInfo.numLike}` : ''}
-                </Typography>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                <FavoriteBorderIcon className={classes.rightIcon} />
-                <Typography component="span" variant="body2">
-                  {topInfo.numLike ? `${topInfo.numLike}` : ''}
-                </Typography>
-              </React.Fragment>
-            )}
-          </Button>
+          <ArrowTooltip title="I Care">
+            <Button onClick={handerFlow}>
+              {topInfo.isMyFollow ? (
+                <React.Fragment>
+                  <BookmarkIcon color="primary" className={classes.rightIcon} />
+                  <Typography component="span" variant="body2" color="primary">
+                    {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                  </Typography>
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <BookmarkBorderIcon className={classes.rightIcon} />
+                  <Typography component="span" variant="body2">
+                    {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                  </Typography>
+                </React.Fragment>
+              )}
+            </Button>
+          </ArrowTooltip>
+          <ArrowTooltip title="Like">
+            <Button onClick={handerLike}>
+              {topInfo.isMyLike ? (
+                <React.Fragment>
+                  <FavoriteIcon color="primary" className={classes.rightIcon} />
+                  <Typography component="span" variant="body2" color="primary">
+                    {topInfo.numLike ? `${topInfo.numLike}` : ''}
+                  </Typography>
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <FavoriteBorderIcon className={classes.rightIcon} />
+                  <Typography component="span" variant="body2">
+                    {topInfo.numLike ? `${topInfo.numLike}` : ''}
+                  </Typography>
+                </React.Fragment>
+              )}
+            </Button>
+          </ArrowTooltip>
         </div>
       </SummaryCard>
       <WarrperChatBox>

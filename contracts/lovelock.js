@@ -1,4 +1,5 @@
-const { expect } = require(';');
+const { expect, validate } = require(';');
+const Joi = require('@hapi/joi');
 const { expectProposeOwners, getDataByIndex } = require('./helper.js');
 const {
   apiCreateLock,
