@@ -6,12 +6,11 @@ export function BlogView({ hash } = {}) {
   const [content, setContent] = useState(null)
 
   useEffect(() => {
-    let cancel = false
     const abort = new AbortController()
 
     hash && fetchAltFirstIpfsJson(hash, { signal: abort.signal })
       .then(({ json }) => {
-        if (!cancel) {
+        if (!abort.signal.aborted) {
             setContent(json)
         }
     }).catch(err => {
@@ -21,7 +20,6 @@ export function BlogView({ hash } = {}) {
 
     return () => {
         abort.abort()
-        cancel = true
     }
   }, [hash])
 
