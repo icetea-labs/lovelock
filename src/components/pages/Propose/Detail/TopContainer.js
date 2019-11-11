@@ -530,7 +530,7 @@ function TopContrainer(props) {
       </div>
       <SummaryCard>
         {!topInfo.isJournal ? <div className="dayago">
-          <img src="/static/img/happy-copy.svg" alt="together" />}
+          <img src="/static/img/happy-copy.svg" alt="together" />
           <div className="summaryDay">
               <span>
                 {diffDate === 0 && 'First day'}
