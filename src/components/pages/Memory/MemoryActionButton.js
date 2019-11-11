@@ -5,12 +5,9 @@ import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-//import { useSnackbar } from 'notistack';
 
 import * as actions from '../../../store/actions';
-// import { sendTransaction, callView, showSubscriptionError } from '../../../helper';
 import { sendTransaction } from '../../../helper';
-//import getWeb3 from '../../../service/tweb3';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -56,19 +53,19 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 
 function MemoryActionButton(props) {
-  const { 
-    memoryType, 
+  const {
+    memoryType,
     memoryLikes,
-    memoryIndex, 
-    handerShowComment, 
-    numComment, 
-    setLikeTopInfo, 
-    setNeedAuth, 
-    numLike,  // Lock-level number of likes
-    isMyLike // Lock-level isMyLike
-   } = props;
+    memoryIndex,
+    handerShowComment,
+    numComment,
+    setLikeTopInfo,
+    setNeedAuth,
+    numLike, // Lock-level number of likes
+    isMyLike, // Lock-level isMyLike
+  } = props;
 
-  const isAuto = memoryType === 1
+  const isAuto = memoryType === 1;
 
   const address = useSelector(state => state.account.address);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -77,33 +74,34 @@ function MemoryActionButton(props) {
   const [memoryNumLike, setMemoryNumLike] = useState(0);
   const [memoryIsMyLike, setMemoryIsMyLike] = useState(false);
 
-  const realLikeData = isAuto ? {
-      numLike, isMyLike
-    } : {
-      numLike: memoryNumLike,
-      isMyLike: memoryIsMyLike
-    }
+  const realLikeData = isAuto
+    ? {
+        numLike,
+        isMyLike,
+      }
+    : {
+        numLike: memoryNumLike,
+        isMyLike: memoryIsMyLike,
+      };
 
   const setLikeData = (numLike, isMyLike) => {
     if (isAuto) {
       // dispatch to global state to sync with lock-level like data
       setLikeTopInfo({ numLike, isMyLike });
     } else {
-      setMemoryNumLike(numLike)
-      setMemoryIsMyLike(isMyLike)
+      setMemoryNumLike(numLike);
+      setMemoryIsMyLike(isMyLike);
     }
-  }
-
+  };
 
   useEffect(() => {
     if (isAuto) {
-      return
+      return;
     }
 
     const num = Object.keys(memoryLikes).length;
     setMemoryIsMyLike(!!memoryLikes[address]);
     setMemoryNumLike(num);
-
   }, [memoryType, memoryLikes, address, isAuto]);
 
   function handleLike() {
@@ -112,13 +110,13 @@ function MemoryActionButton(props) {
       return;
     }
     const params = [memoryIndex, 1];
-    sendTransaction('addLike', params, { tokenAddress, address, sendType: 'sendAsync' })
+    sendTransaction('addLike', params, { tokenAddress, address, sendType: 'sendAsync' });
 
     // Change like to make quick feedback
     // the subscription will update number a couple of seconds later
-    const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1
-    const newIsMyLike = !realLikeData.isMyLike
-    setLikeData(newNumLike, newIsMyLike)
+    const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1;
+    const newIsMyLike = !realLikeData.isMyLike;
+    setLikeData(newNumLike, newIsMyLike);
   }
 
   const classes = useStyles();
@@ -136,7 +134,7 @@ function MemoryActionButton(props) {
           <React.Fragment>
             <FavoriteBorderIcon fontSize="small" className={classes.rightIcon} />
             <Typography component="span" variant="body2">
-            {realLikeData.numLike ? ` ${realLikeData.numLike}` : ''}
+              {realLikeData.numLike ? ` ${realLikeData.numLike}` : ''}
             </Typography>
           </React.Fragment>
         )}
@@ -159,10 +157,10 @@ function MemoryActionButton(props) {
 }
 
 const mapStateToProps = state => {
-  const top = state.loveinfo.topInfo
+  const top = state.loveinfo.topInfo;
   return {
     numLike: top.numLike,
-    isMyLike: top.isMyLike
+    isMyLike: top.isMyLike,
   };
 };
 

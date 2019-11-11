@@ -2,9 +2,15 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 
+import Icon from '../../elements/Icon';
+import { LinkPro } from '../../elements/Button';
+import LeftProposes from '../Propose/Detail/LeftProposes';
 import { rem } from '../../elements/StyledUtils';
 import * as actions from '../../../store/actions';
+import { AvatarPro } from '../../elements';
 
 const LeftBox = styled.div`
   width: 100%;
@@ -33,6 +39,25 @@ const LeftBox = styled.div`
     text-transform: uppercase;
     /* margin-bottom: ${rem(20)}; */
   }
+  .feedBox {
+    padding-bottom: 30px;
+    .feedAvata {
+      /* background:rebeccapurple; */
+    }
+    .feedName {
+      font-size: 20px;
+      line-height: 24px;
+      margin-top: 5px;
+    }
+    .feedNick {
+      font-size: 14px;
+      line-height: 16px;
+      color: rgba(0, 0, 0, 0.54);
+      margin-top: 4px;
+      cursor: pointer;
+    }
+  }
+
   @media (max-width: 768px) {
     min-height: auto;
     margin-bottom: ${rem(20)};
@@ -48,50 +73,46 @@ const ShadowBox = styled.div`
   }
 `;
 
-const CollectionBox = styled.div`
-  padding-top: 1rem;
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  .colName {
-    color: #5a5e67;
-    margin-right: ${rem(7)};
-    font-size: ${rem(12)};
-    cursor: pointer;
-    margin-bottom: ${rem(9)}
-    padding: 3px 12px 3px 6px;
-    :hover {
-      color: #8250c8;
-      text-decoration: underline;
-    }
-    .material-icons {
-      vertical-align: middle;
-    }
-    .colText {
-    }
-  }
-`;
+const useStyles = makeStyles(theme => ({
+  card: {
+    width: '100%',
+  },
+  avatar: {
+    width: 172,
+    height: 172,
+    // border: ['4px', 'solid', '#fff'].join(' '),
+  },
+}));
 
 function LeftFeed(props) {
-  const { address } = props;
+  const classes = useStyles();
+  const { feedAddress, address } = props;
+  const loading = false;
   function newLock() {}
+  function selectAccepted() {}
+  console.log('feedAddress', feedAddress);
 
   return (
     <React.Fragment>
       <LeftBox>
         <ShadowBox>
-          {/* {address && (
+          <div className="feedBox">
+            <div className="feedAvata">
+              <AvatarPro alt="img" hash="QmXtwtitd7ouUKJfmfXXcmsUhq2nGv98nxnw2reYg4yncM" className={classes.avatar} />
+            </div>
+            <div className="feedName">Hoang Huy</div>
+            <div className="feedNick">@HoangHuy226</div>
+          </div>
+          {address === feedAddress && (
             <LinkPro className="btn_add_promise" onClick={newLock}>
               <Icon type="add" />
               New Lock
             </LinkPro>
-          )} */}
+          )}
           <div className="title">Public lock</div>
-          <div>{/* <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} /> */}</div>
-          {/* <div className="title">Pending lock</div> */}
-          <div>{/* <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} /> */}</div>
-          {/* <div className="title">Collection</div> */}
-          {/* <CollectionBox>{renderCollections(collections)}</CollectionBox> */}
+          <div>
+            <LeftProposes loading={loading} flag={1} handlerSelect={selectAccepted} />
+          </div>
         </ShadowBox>
       </LeftBox>
     </React.Fragment>

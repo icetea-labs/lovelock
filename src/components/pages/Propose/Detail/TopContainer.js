@@ -181,7 +181,7 @@ const SummaryCard = styled.div`
   justify-content: space-between;
   .journalTitle {
     display: inline-block;
-    background-color: rgba(0,0,0,.3);
+    background-color: rgba(0, 0, 0, 0.3);
     color: #f5f5f5;
     position: relative;
     top: -32px;
@@ -244,7 +244,7 @@ const useStyles = makeStyles(theme => ({
       },
     },
   },
-  icon: {
+  btChange: {
     margin: theme.spacing(1),
     fontSize: '12px',
     color: 'white',
@@ -253,7 +253,9 @@ const useStyles = makeStyles(theme => ({
   },
   photoCameraIcon: {
     marginRight: theme.spacing(1),
-    marginTop: theme.spacing(0.5),
+  },
+  input: {
+    display: 'none',
   },
   button: {
     margin: theme.spacing(1),
@@ -303,7 +305,7 @@ function TopContrainer(props) {
         likeData = serialLikeData(likes);
       }
       const followData = serialFollowData(topInfo.follows);
-      setTopInfo(Object.assign({}, topInfo, likeData, followData));
+      setTopInfo({ ...topInfo, ...likeData, ...followData });
     }
 
     setLoading(needUpdate);
@@ -331,7 +333,7 @@ function TopContrainer(props) {
         numLike += 1;
       }
       isMyLike = !isMyLike;
-      const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+      const newTopInfo = { ...topInfo, numLike, isMyLike };
       setTopInfo(newTopInfo);
     } catch (error) {
       console.error(error);
@@ -347,7 +349,7 @@ function TopContrainer(props) {
         return;
       }
       const params = [topInfo.index];
-      sendTransaction('addFlowLock', params, { tokenAddress, address }).then(() => {
+      sendTransaction('followLock', params, { tokenAddress, address }).then(() => {
         getNumTopFollow();
       });
 
@@ -358,7 +360,7 @@ function TopContrainer(props) {
         numFollow += 1;
       }
       isMyFollow = !isMyFollow;
-      const newTopInfo = Object.assign({}, topInfo, { numFollow, isMyFollow });
+      const newTopInfo = { ...topInfo, numFollow, isMyFollow };
       setTopInfo(newTopInfo);
     } catch (error) {
       console.error(error);
@@ -373,7 +375,7 @@ function TopContrainer(props) {
     callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
       const { numLike, isMyLike } = serialLikeData(data);
       if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
-        const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+        const newTopInfo = { ...topInfo, numLike, isMyLike };
         setTopInfo(newTopInfo);
       }
     });
@@ -383,7 +385,7 @@ function TopContrainer(props) {
     callView('getFollowByLockIndex', [topInfo.index]).then(data => {
       const { numFollow, isMyFollow } = serialFollowData(data);
       if (topInfo.numFollow !== numFollow || topInfo.isMyLike !== isMyFollow) {
-        const newTopInfo = Object.assign({}, topInfo, { numFollow, isMyFollow });
+        const newTopInfo = { ...topInfo, numFollow, isMyFollow };
         setTopInfo(newTopInfo);
       }
     });
@@ -446,7 +448,7 @@ function TopContrainer(props) {
         if (result) {
           setCropFile('');
           setCropImg('');
-          const newTopInfo = Object.assign({}, topInfo, { coverImg: hash });
+          const newTopInfo = { ...topInfo, coverImg: hash };
           setTopInfo(newTopInfo);
           // topInfo.coverImg = hash
           // setTopInfo(topInfo)
@@ -461,20 +463,20 @@ function TopContrainer(props) {
   }
 
   const buttonChange = (
-    <Button className={classes.icon} title="Change lock image">
-      <PhotoCameraIcon className={classes.photoCameraIcon} />
-      <input
-        accept="image/jpeg,image/png"
-        className="fileInput"
-        role="button"
-        type="file"
-        value=""
-        onChange={handleImageChange}
-      />
-      <Typography className={classes.changeCoverTitle} noWrap>
-        Change
-      </Typography>
-    </Button>
+    <label htmlFor="outlined-button-file">
+      <Button component="span" className={classes.btChange}>
+        <PhotoCameraIcon className={classes.photoCameraIcon} />
+        <Typography noWrap>Change Cover</Typography>
+        <input
+          accept="image/jpeg,image/png"
+          className={classes.input}
+          id="outlined-button-file"
+          type="file"
+          value=""
+          onChange={handleImageChange}
+        />
+      </Button>
+    </label>
   );
 
   if (loading) {
@@ -520,63 +522,64 @@ function TopContrainer(props) {
             </div>
           </CardMedia>
         ) : (
-          <CardMedia
-            className={classes.media}
-            image={process.env.REACT_APP_IPFS + topInfo.coverImg}
-          >
-            <div className="showChangeImg"><div>{buttonChange}</div></div>
+          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverImg}>
+            <div className="showChangeImg">
+              <div>{buttonChange}</div>
+            </div>
           </CardMedia>
         )}
       </div>
       <SummaryCard>
-        {!topInfo.isJournal ? <div className="dayago">
-          <img src="/static/img/happy-copy.svg" alt="together" />}
-          <div className="summaryDay">
+        {!topInfo.isJournal ? (
+          <div className="dayago">
+            <img src="/static/img/happy-copy.svg" alt="together" />
+            <div className="summaryDay">
               <span>
                 {diffDate === 0 && 'First day'}
                 {diffDate > 0 && (diffDate === 1 ? `${diffDate} day` : `${diffDate} days`)}
               </span>
             </div>
-          <HolidayEvent day={topInfo.s_date} />
-        </div> : <div className='journalTitle'>
-          JOURNAL
-        </div>}
+            <HolidayEvent day={topInfo.s_date} />
+          </div>
+        ) : (
+          <div className="journalTitle">JOURNAL</div>
+        )}
         <div className="proLike">
           <ArrowTooltip title="Follow">
             <Button onClick={handerFlow}>
               {topInfo.isMyFollow ? (
-                <React.Fragment>
+                <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
                   <Typography component="span" variant="body2" color="primary">
                     {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
                   </Typography>
-                </React.Fragment>
+                </>
               ) : (
-                <React.Fragment>
+                <>
                   <BookmarkBorderIcon className={classes.rightIcon} />
                   <Typography component="span" variant="body2">
                     {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
                   </Typography>
-                </React.Fragment>
+                </>
               )}
             </Button>
           </ArrowTooltip>
           <ArrowTooltip title="Express feelings">
             <Button onClick={handerLike}>
               {topInfo.isMyLike ? (
-                <React.Fragment>
+                <>
                   <FavoriteIcon color="primary" className={classes.rightIcon} />
                   <Typography component="span" variant="body2" color="primary">
                     {topInfo.numLike ? `${topInfo.numLike}` : ''}
                   </Typography>
-                </React.Fragment>
+                </>
               ) : (
-                <React.Fragment>
+                <>
                   <FavoriteBorderIcon className={classes.rightIcon} />
                   <Typography component="span" variant="body2">
                     {topInfo.numLike ? `${topInfo.numLike}` : ''}
                   </Typography>
-                </React.Fragment>
+                </>
               )}
             </Button>
           </ArrowTooltip>

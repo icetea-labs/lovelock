@@ -5,7 +5,7 @@ const {
   apiCreateLock,
   apiAcceptLock,
   apiCancelLock,
-  apiFlowLock,
+  apiFollowLock,
   apiLikeLock,
   apiGetLockByAddress,
   apiGetLockByIndex,
@@ -87,9 +87,9 @@ class LoveLock {
     const self = this;
     apiLikeLock(self, index, type);
   }
-  @transaction addFlowLock(index: number) {
+  @transaction followLock(index: number) {
     const self = this;
-    apiFlowLock(self, index);
+    apiFollowLock(self, index);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
     const self = this;
