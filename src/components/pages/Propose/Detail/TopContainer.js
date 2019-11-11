@@ -268,6 +268,9 @@ const useStyles = makeStyles(theme => ({
   changeCoverTitle: {
     marginTop: '4px',
   },
+  btLikeFollow: {
+    color: theme.palette.text.secondary,
+  },
   title: {
     display: 'none',
     color: '#fff',
@@ -546,7 +549,7 @@ function TopContrainer(props) {
         )}
         <div className="proLike">
           <ArrowTooltip title="Follow">
-            <Button onClick={handerFlow}>
+            <Button onClick={handerFlow} className={classes.btLikeFollow}>
               {topInfo.isMyFollow ? (
                 <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
@@ -565,7 +568,7 @@ function TopContrainer(props) {
             </Button>
           </ArrowTooltip>
           <ArrowTooltip title="Express feelings">
-            <Button onClick={handerLike}>
+            <Button onClick={handerLike} className={classes.btLikeFollow}>
               {topInfo.isMyLike ? (
                 <>
                   <FavoriteIcon color="primary" className={classes.rightIcon} />
