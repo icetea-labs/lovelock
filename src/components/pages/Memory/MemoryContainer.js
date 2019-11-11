@@ -6,6 +6,8 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { LinkPro } from '../../elements/Button';
+import useInfiniteScroll from '../../elements/useInfiniteScroll';
 // import { useSnackbar } from 'notistack';
 
 import { getTagsInfo, getJsonFromIpfs, getQueryParam, signalPrerenderDone } from '../../../helper';
@@ -30,6 +32,8 @@ function MemoryContainer(props) {
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
   // const { enqueueSnackbar } = useSnackbar();
+  const [limit, setLimit] = useState(5);
+  const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreListItems);
 
   const classes = useStyles();
   useEffect(() => {
@@ -90,7 +94,7 @@ function MemoryContainer(props) {
       }
     }
 
-    prepareMemory(signal)
+    prepareMemory(signal);
 
     return () => (signal.cancel = true);
   }, [memorydata]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -120,9 +124,35 @@ function MemoryContainer(props) {
       );
     });
   }
-  return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
-  });
+
+  // return memoryList.map((memory, index) => {
+  //   return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
+  // });
+
+  // function onLoadMore() {
+  //   setLimit(limit + 5);
+  // }
+
+  function fetchMoreListItems() {
+    for (let i = 5; i < memoryList.length; i += 5) {
+      setLimit(limit + 5);
+      setIsFetching(false);
+    }
+  }
+
+  const renderMemory = () => {
+    return memoryList.slice(0, limit).map((memory, index) => {
+      return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
+    });
+  };
+
+  return (
+    <div>
+      {renderMemory()}
+      {/* <LinkPro onClick={onLoadMore}>{limit > memoryList.length ? 'You view all memory' : 'Load more...'}</LinkPro> */}
+      {isFetching && 'Load more...'}
+    </div>
+  );
 }
 
 const mapStateToProps = state => {
