@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
     margin: '0 auto'
   },
   postBody: {
-    marginTop: 72,
+    marginTop: 24, // this is suitable for banner-photo post
   },
   subtitle: {
     fontSize: '0.8em',
@@ -57,7 +57,11 @@ const useStyles = makeStyles(theme => ({
   },
   back: {
     margin: theme.spacing(1),
-    marginRight: theme.spacing(4)
+    marginRight: theme.spacing(4),
+    color: theme.palette.text.secondary,
+    '&:hover': {
+      color: theme.palette.text.primary
+    }
   },
 }));
 
@@ -78,7 +82,7 @@ export default function BlogModal(props) {
             <AppBar className={classes.appbar}>
             <Toolbar  className={classes.toolbar}>
               <div className={classes.title}>
-                <Typography variant="h5">{props.title}</Typography>
+                <Typography variant="h6">{props.title}</Typography>
                 {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
               </div>
               {props.handlePreview && (
@@ -96,8 +100,8 @@ export default function BlogModal(props) {
                     Publish
                   </Button>
                 )}
-                <Button variant="outlined" className={classes.back} onClick={props.handleClose}>
-                  {props.closeText || 'Back'}
+                <Button className={classes.back} onClick={props.handleClose}>
+                  {props.closeText || <i className="material-icons">close</i>}
                 </Button>
             </Toolbar>
             </AppBar>

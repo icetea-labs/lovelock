@@ -7,7 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 // import InputBase from '@material-ui/core/InputBase';
-import Badge from '@material-ui/core/Badge';
+// import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Button from '@material-ui/core/Button';
@@ -17,10 +17,13 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
-// import SearchIcon from '@material-ui/icons/Search';
+import Drawer from '@material-ui/core/Drawer';
+
+import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import GroupIcon from '@material-ui/icons/Group';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+// import GroupIcon from '@material-ui/icons/Group';
+// import NotificationsIcon from '@material-ui/icons/Notifications';
+import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/Add';
@@ -35,6 +38,7 @@ import GetKeyToAuthen from './GetKeyToAuthen';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
+import LeftContainer from "../pages/Propose/Detail/LeftContainer";
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
@@ -210,6 +214,14 @@ const useStyles = makeStyles(theme => ({
       display: 'none',
     },
   },
+  leftMenu: {
+    display: 'none',
+    '@media (max-width: 768px)': {
+      display: 'block',
+      cursor: 'pointer',
+      margin: '0 25px 0 30px'
+    }
+  }
 }));
 
 const StyledMenu = withStyles({
@@ -301,6 +313,7 @@ function Header(props) {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [anchorElNoti, setAnchorElNoti] = useState(null);
   const [anchorElMenu, setAnchorElMenu] = useState(null);
+  const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -513,7 +526,7 @@ function Header(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
+      { /* <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="primary">
             <GroupIcon />
@@ -528,17 +541,27 @@ function Header(props) {
           </Badge>
         </IconButton>
         <p>Notifications</p>
-      </MenuItem>
+      </MenuItem> */ }
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
+          aria-label="profile settings"
+          aria-controls="primary-search-profile-menu"
           aria-haspopup="true"
           color="inherit"
         >
           <AccountCircle />
         </IconButton>
         <p>Profile</p>
+      </MenuItem>
+      <MenuItem onClick={handeExplore}>
+        <IconButton
+          aria-label="explore post of other users"
+          aria-controls="primary-search-explore-menu"
+          color="inherit"
+        >
+          <ExploreIcon />
+        </IconButton>
+        <p>Explore</p>
       </MenuItem>
     </Menu>
   );
@@ -548,6 +571,14 @@ function Header(props) {
       <div className={classes.grow}>
         <StyledAppBar position="static" color="inherit" className={classes.AppBar + ' main-appbar'}>
           <StyledToolbar>
+            <MenuIcon
+              fontSize="large"
+              className={classes.leftMenu}
+              onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
+            />
+            <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
+              <LeftContainer/>
+            </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
               <span>LoveLock</span>

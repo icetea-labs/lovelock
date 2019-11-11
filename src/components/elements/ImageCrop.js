@@ -10,7 +10,7 @@ let timeout = null;
 
 const ContWrap = styled.div`
   img {
-    height: 400px;
+    max-height: 400px;
   }
   .cropper-view-box {
     border-radius: ${props => props.isViewSquare && '0'};
@@ -76,7 +76,7 @@ export default function ImageCrop(props) {
               cropper = value;
             }}
             src={imgPreviewUrl}
-            style={{ width: '100%', padding: '20px 0', background: '#f2f2f2' }}
+            style={{ background: '#f2f2f2' }}
             // Cropper.js options
             aspectRatio={expectRatio}
             guides={false}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -16,6 +16,9 @@ import * as actions from '../../../store/actions';
 import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
+
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
 // import { getDraft, setDraft, delDraft } from '../../../helper/draft';
 import { delDraft } from '../../../helper/draft';
 
@@ -61,7 +64,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10,
   },
   btShare: {
-    width: 254,
+    width: 232,
     height: 46,
     borderRadius: 23,
     '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
@@ -87,9 +90,6 @@ const useStyles = makeStyles(theme => ({
     color: '#8250c8',
     marginRight: theme.spacing(1),
   },
-  midBox: {
-    paddingTop: 10
-  },
   btBox: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -98,6 +98,11 @@ const useStyles = makeStyles(theme => ({
       display: 'block',
       textAlign: 'right'
     },
+  },
+  rightBtBox: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '0',
   },
 }));
 
@@ -131,7 +136,7 @@ const BootstrapTextField = withStyles(theme => ({
 
 export default function CreateMemory(props) {
   const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
-  const classes = useStyles();
+  const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
@@ -147,6 +152,7 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
+
   const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? "" : collectionId)
@@ -159,9 +165,20 @@ export default function CreateMemory(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
+  // Is this component display as "compact" version (e.g. on mobile)
+  const isCompact = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const componentRef = useRef()
+
   useEffect(() => {
     resetValue();
-  }, [proIndex, collectionId]);
+  }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  useEffect(() => {
+    if (grayLayout && isCompact) {
+      componentRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [grayLayout, isCompact])
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
@@ -172,8 +189,9 @@ export default function CreateMemory(props) {
   }
 
   function memoryOnFocus() {
-    if (!grayLayout) setGrayLayout(true);
+    !grayLayout && setGrayLayout(true);
   }
+
   function clickLayout(e) {
     if (e.target === layoutRef.current) setGrayLayout(false);
   }
@@ -231,15 +249,30 @@ export default function CreateMemory(props) {
 
     const { blocks } = content;
 
-    let i
-    for (i in blocks) {
-      if (!firstImg && blocks[i].type === 'image') {
-        firstImg = blocks[i].data;
+    let b
+    for (b of blocks) {
+      if (!firstImg) {
+        if (b.type === 'image') {
+          firstImg = b.data;
+        } else if (b.type === 'video') {
+          // get the video thumbnail
+          const data = b.data && b.data.embed_data
+          if (data) {
+            firstImg = {
+              width: data.get('width'),
+              height: data.get('height'),
+              url: data.get('thumbnail_url')
+            }
+            if (firstImg.url) {
+              firstImg.url = firstImg.url.replace('hqdefault.jpg', 'maxresdefault.jpg')
+            }
+          }
+        }
       }
       if (!firstLine) {
-        firstLine = blocks[i].text || '';
-        if (firstLine.length > 100) {
-          firstLine = `${firstLine.slice(0, 100)}…`;
+        firstLine = b.text || '';
+        if (firstLine.length > 69) {
+          firstLine = `${firstLine.slice(0, 69)}…`;
         }
       }
       if (firstImg && firstLine) break;
@@ -516,7 +549,7 @@ export default function CreateMemory(props) {
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
-      <CreatePost grayLayout={grayLayout}>
+      <CreatePost grayLayout={grayLayout} ref={componentRef}>
         <ShadowBox>
           <Grid container direction="column">
             <Grid>
@@ -531,14 +564,14 @@ export default function CreateMemory(props) {
                     fullWidth
                     multiline
                     value={memoryContent}
-                    placeholder="Add a new memory…"
+                    placeholder={grayLayout ? "Describe your memory" : "Add a new memory…"}
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
                   />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid classes={{ root: classes.midBox }}>
+            <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
                 files={filesBuffer}
                 date={memoDate}
@@ -552,6 +585,7 @@ export default function CreateMemory(props) {
             </Grid>
             {grayLayout && (
               <Grid classes={{ root: classes.btBox }}>
+                <div className={classes.rightBtBox}>
                 <Select
                   native
                   value={privacy}
@@ -560,6 +594,7 @@ export default function CreateMemory(props) {
                     root: classes.selectStyle,
                     icon: classes.selectIcon,
                   }}
+                  style={{marginRight: '1vw'}}
                   input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                 >
                   <option value={0}>Public</option>
@@ -579,6 +614,7 @@ export default function CreateMemory(props) {
                   {collections && collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   <option value="add">(+) New Collection</option>
                 </Select>
+                </div>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
@@ -587,7 +623,7 @@ export default function CreateMemory(props) {
                   }}
                   className={classes.btShare}
                 >
-                  Share
+                  Post
                 </ButtonPro>
               </Grid>
             )}

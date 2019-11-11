@@ -22,6 +22,10 @@ const SplitLeft = styled.div`
   color: #fff;
   background-size: cover;
   background-image: url('/static/img/landing.svg');
+  @media (max-width: 768px) {
+    height: 50%;
+    width: 100%;
+  }
 `;
 
 const SplitRight = styled.div`
@@ -34,6 +38,11 @@ const SplitRight = styled.div`
   padding-top: 20px;
   right: 0;
   background-color: #fff;
+  @media (max-width: 768px) {
+    height: 50%;
+    width: 100%;
+    top: 50%;
+  }
 `;
 
 const SplitContentLeft = styled.div`

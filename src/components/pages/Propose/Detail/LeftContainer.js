@@ -59,8 +59,7 @@ const ShadowBox = styled.div`
 const CollectionBox = styled.div`
   padding-top: 1rem;
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
+  display: block;
   .colName {
     color: #5a5e67;
     margin-right: ${rem(7)};

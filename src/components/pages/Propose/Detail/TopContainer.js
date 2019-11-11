@@ -30,20 +30,24 @@ const TopContainerBox = styled.div`
     position: relative;
     overflow: hidden;
     max-width: ${rem(900)};
-    /* max-height: ${rem(425)}; */
-    min-height: ${rem(225)};
-    .boxChangeCover {
-      display: block;
+    /* max-height: ${rem(425)};
+    min-height: ${rem(225)}; */
+    .showChangeImg {
       position: absolute;
       top: 5px;
       left: 5px;
-    }
-    .hideButton {
-      display: none;
+      & > div {
+        display: none;
+      }
+      & > button {
+        display: inline-flex;
+      }
     }
     &:hover {
-      .hideButton {
-        display: block;
+      .showChangeImg {
+        & > div {
+          display: block;
+        }
       }
     }
     img {
@@ -91,7 +95,7 @@ const TopContainerBox = styled.div`
   }
 `;
 const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(15)};
+  margin-top: ${props => (props && props.isJournal ? '-4px' : rem(15))};
   div:nth-child(even) .content_detail p {
     background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
     background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
@@ -175,6 +179,18 @@ const WarrperChatBox = styled(FlexBox)`
 const SummaryCard = styled.div`
   display: flex;
   justify-content: space-between;
+  .journalTitle {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #f5f5f5;
+    position: relative;
+    top: -32px;
+    padding: 0 16px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 32px;
+    height: 32px;
+  }
   .dayago {
     display: flex;
     align-items: flex-end;
@@ -189,7 +205,7 @@ const SummaryCard = styled.div`
     }
     .summaryCongrat {
       text-align: center;
-      margin: 7px;
+      margin: 7px 0 0 7px;
       height: 36px;
       border-radius: 18px;
       background-color: #fdf0f6;
@@ -230,24 +246,27 @@ const useStyles = makeStyles(theme => ({
   },
   btChange: {
     margin: theme.spacing(1),
-    color: '#fff',
-  },
-  input: {
-    display: 'none',
+    fontSize: '12px',
+    color: 'white',
+    backgroundColor: 'rgba(0,0,0,.05)',
+    // display: 'none',
   },
   photoCameraIcon: {
     marginRight: theme.spacing(1),
   },
-  btChangeCover: {
+  input: {
+    display: 'none',
+  },
+  button: {
     margin: theme.spacing(1),
-    opacity: 0.8,
+    opacity: 0.9,
     '&:hover': {
-      background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+      // background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
       opacity: 1,
     },
   },
-  btLikeFollow: {
-    color: theme.palette.text.secondary,
+  changeCoverTitle: {
+    marginTop: '4px',
   },
   title: {
     display: 'none',
@@ -286,7 +305,7 @@ function TopContrainer(props) {
         likeData = serialLikeData(likes);
       }
       const followData = serialFollowData(topInfo.follows);
-      setTopInfo(Object.assign({}, topInfo, likeData, followData));
+      setTopInfo({ ...topInfo, ...likeData, ...followData });
     }
 
     setLoading(needUpdate);
@@ -314,7 +333,7 @@ function TopContrainer(props) {
         numLike += 1;
       }
       isMyLike = !isMyLike;
-      const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+      const newTopInfo = { ...topInfo, numLike, isMyLike };
       setTopInfo(newTopInfo);
     } catch (error) {
       console.error(error);
@@ -341,7 +360,7 @@ function TopContrainer(props) {
         numFollow += 1;
       }
       isMyFollow = !isMyFollow;
-      const newTopInfo = Object.assign({}, topInfo, { numFollow, isMyFollow });
+      const newTopInfo = { ...topInfo, numFollow, isMyFollow };
       setTopInfo(newTopInfo);
     } catch (error) {
       console.error(error);
@@ -356,7 +375,7 @@ function TopContrainer(props) {
     callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
       const { numLike, isMyLike } = serialLikeData(data);
       if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
-        const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+        const newTopInfo = { ...topInfo, numLike, isMyLike };
         setTopInfo(newTopInfo);
       }
     });
@@ -366,7 +385,7 @@ function TopContrainer(props) {
     callView('getFollowByLockIndex', [topInfo.index]).then(data => {
       const { numFollow, isMyFollow } = serialFollowData(data);
       if (topInfo.numFollow !== numFollow || topInfo.isMyLike !== isMyFollow) {
-        const newTopInfo = Object.assign({}, topInfo, { numFollow, isMyFollow });
+        const newTopInfo = { ...topInfo, numFollow, isMyFollow };
         setTopInfo(newTopInfo);
       }
     });
@@ -429,7 +448,7 @@ function TopContrainer(props) {
         if (result) {
           setCropFile('');
           setCropImg('');
-          const newTopInfo = Object.assign({}, topInfo, { coverImg: hash });
+          const newTopInfo = { ...topInfo, coverImg: hash };
           setTopInfo(newTopInfo);
           // topInfo.coverImg = hash
           // setTopInfo(topInfo)
@@ -492,84 +511,81 @@ function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
-          <CardMedia className={classes.media} image={cropImg} title="Change lock image">
-            <div className="boxChangeCover">
-              <div>{buttonChange}</div>
-              <Button variant="contained" color="primary" className={classes.btChangeCover} onClick={cancelCoverImg}>
+          <CardMedia className={classes.media} image={cropImg}>
+            <div className="showChangeImg">
+              <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
                 Cancel
               </Button>
-              <Button variant="contained" color="primary" className={classes.btChangeCover} onClick={acceptCoverImg}>
-                OK
+              <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
+                Apply
               </Button>
             </div>
           </CardMedia>
         ) : (
-          <CardMedia
-            className={classes.media}
-            image={process.env.REACT_APP_IPFS + topInfo.coverImg}
-            title="Change lock image"
-          >
-            <div className="boxChangeCover hideButton">{buttonChange}</div>
+          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverImg}>
+            <div className="showChangeImg">
+              <div>{buttonChange}</div>
+            </div>
           </CardMedia>
         )}
       </div>
       <SummaryCard>
-        <div className="dayago">
-          {topInfo.type !== 2 && <img src="/static/img/happy-copy.svg" alt="together" />}
-          <div className="summaryDay">
-            {topInfo.type === 2 ? (
-              'JOURNAL'
-            ) : (
+        {!topInfo.isJournal ? (
+          <div className="dayago">
+            <img src="/static/img/happy-copy.svg" alt="together" />
+            <div className="summaryDay">
               <span>
                 {diffDate === 0 && 'First day'}
                 {diffDate > 0 && (diffDate === 1 ? `${diffDate} day` : `${diffDate} days`)}
               </span>
-            )}
+            </div>
+            <HolidayEvent day={topInfo.s_date} />
           </div>
-          <HolidayEvent day={topInfo.s_date} />
-        </div>
+        ) : (
+          <div className="journalTitle">JOURNAL</div>
+        )}
         <div className="proLike">
-          <ArrowTooltip title="I Care">
-            <Button onClick={handerFlow} className={classes.btLikeFollow}>
+          <ArrowTooltip title="Follow">
+            <Button onClick={handerFlow}>
               {topInfo.isMyFollow ? (
-                <React.Fragment>
+                <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
                   <Typography component="span" variant="body2" color="primary">
                     {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
                   </Typography>
-                </React.Fragment>
+                </>
               ) : (
-                <React.Fragment>
+                <>
                   <BookmarkBorderIcon className={classes.rightIcon} />
                   <Typography component="span" variant="body2">
                     {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
                   </Typography>
-                </React.Fragment>
+                </>
               )}
             </Button>
           </ArrowTooltip>
-          <ArrowTooltip title="Like">
-            <Button onClick={handerLike} className={classes.btLikeFollow}>
+          <ArrowTooltip title="Express feelings">
+            <Button onClick={handerLike}>
               {topInfo.isMyLike ? (
-                <React.Fragment>
+                <>
                   <FavoriteIcon color="primary" className={classes.rightIcon} />
                   <Typography component="span" variant="body2" color="primary">
                     {topInfo.numLike ? `${topInfo.numLike}` : ''}
                   </Typography>
-                </React.Fragment>
+                </>
               ) : (
-                <React.Fragment>
+                <>
                   <FavoriteBorderIcon className={classes.rightIcon} />
                   <Typography component="span" variant="body2">
                     {topInfo.numLike ? `${topInfo.numLike}` : ''}
                   </Typography>
-                </React.Fragment>
+                </>
               )}
             </Button>
           </ArrowTooltip>
         </div>
       </SummaryCard>
-      <WarrperChatBox>
+      <WarrperChatBox isJournal={topInfo.isJournal}>
         {topInfo.s_content && (
           <div className="proposeMes">
             <div className="user_photo fl">
