@@ -60,10 +60,8 @@ export default function DetailPropose(props) {
   let collectionId = parseInt(match.params.cid, 10);
   const invalidCollectionId = match.params.cid != null && isNaN(collectionId)
   if (isNaN(collectionId)) collectionId = null
-  let collections, currentCollection
 
   const address = useSelector(state => state.account.address);
-  // const topInfo = useSelector(state => state.loveinfo.topInfo);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
 
@@ -139,6 +137,10 @@ export default function DetailPropose(props) {
 
     sendTransaction('addLockCollection', [proIndex, data], { address, tokenAddress }).then(r => {
       data.id = r.returnValue
+      proposeInfo.collections.push(data)
+      // push to redux
+      dispatch(actions.setTopInfo(proposeInfo));
+
       colCreationCallback && colCreationCallback(data)
     }).catch(err => {
       console.warn(err)
@@ -220,8 +222,6 @@ export default function DetailPropose(props) {
           <RightContainer
             proIndex={proIndex}
             collectionId={collectionId}
-            collections={collections}
-            currentCollection={currentCollection}
             handleNewCollection={handleNewCollection}
             isOwner={isOwner} />
         </div>
@@ -237,10 +237,7 @@ export default function DetailPropose(props) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
-    collections = proposeInfo.collections || []
-    if (collectionId != null) {
-      currentCollection = collections.find(c => c.id === collectionId)
-    }
+    proposeInfo.collections = proposeInfo.collections || []
   }
 
   return (

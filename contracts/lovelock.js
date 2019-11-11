@@ -163,7 +163,7 @@ class LoveLock {
 
     const cols = (lock.collections = lock.collections || []);
     const MAX_COLLECTION_PER_LOCK = 5;
-    if (cols.length > MAX_COLLECTION_PER_LOCK) {
+    if (cols.length >= MAX_COLLECTION_PER_LOCK) {
       throw new Error(`This lock already has ${MAX_COLLECTION_PER_LOCK} collections and cannot create more.`);
     }
 

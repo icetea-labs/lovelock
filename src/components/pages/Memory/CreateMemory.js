@@ -210,10 +210,6 @@ export default function CreateMemory(props) {
   }
 
   function collectionAdded(col) {
-    // now we add this collection to the list
-    collections.push(col)
-
-    // and make it seleted
     setPostCollectionId(col.id)
   }
 
@@ -611,7 +607,7 @@ export default function CreateMemory(props) {
                   input={<BootstrapInput name="collection" id="outlined-collection" />}
                 >
                   <option value="">(No collection)</option>
-                  {collections && collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   <option value="add">(+) New Collection</option>
                 </Select>
                 </div>

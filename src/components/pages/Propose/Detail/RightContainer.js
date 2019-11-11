@@ -24,10 +24,12 @@ const CollectionIndicator = styled.div`
 `;
 
 export default function RightContainer(props) {
-  const { proIndex, collectionId, collections, currentCollection, handleNewCollection, isOwner } = props;
+  const { proIndex, collectionId, handleNewCollection, isOwner } = props;
   const [memoByProIndex, setMemoByProIndex] = useState([]);
   const [changed, setChanged] = useState(false)
   const address = useSelector(state => state.account.address);
+  const collections = useSelector(state => state.loveinfo.topInfo.collections)
+  const collectionName = collectionId == null ? null : collections.find(c => c.id === collectionId)
 
 
   const history = useHistory()
@@ -53,7 +55,7 @@ export default function RightContainer(props) {
         <CollectionIndicator>
           <Chip 
             color="primary"
-            label={currentCollection.name}
+            label={collectionName}
             icon={<CollectionsIcon />}
             onDelete={() => history.push('/lock/' + proIndex)} />
         </CollectionIndicator>
