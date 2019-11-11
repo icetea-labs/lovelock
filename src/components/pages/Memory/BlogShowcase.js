@@ -55,7 +55,7 @@ export default function BlogShowcase(props) {
                 if (!photo) {
                   setColors(defaultColors)
                 } else {
-                  getPalette(event.currentTarget, { defaultColors })
+                  getPalette(photo.url, { defaultColors })
                     .then(colors => colors && setColors(colors)).catch(console.warn)
                 }
               }}

@@ -28,7 +28,7 @@ function App(props) {
         <Switch>
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
-          <Route exact path="/memory/:hash" component={BLogView} />
+          <Route exact path="/blog/:hash" component={BLogView} />
           <RouteWithLayout layout={HomeLayout} exact path="/feed" component={Feed} />
           <RouteWithLayout layout={HomeLayout} exact path="/feed/:address" component={Feed} />
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
