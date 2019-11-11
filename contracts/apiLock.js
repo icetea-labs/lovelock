@@ -125,13 +125,15 @@ exports.apiChangeLockImg = (self, index, imgHash) => {
   const log = { ...pro, id: index };
   self.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
 };
-exports.apiFlowLock = (self, lockIndex) => {
+exports.apiFollowLock = (self, lockIndex) => {
   const sender = msg.sender;
   const [pro, proposes] = self.getPropose(lockIndex);
   const index = pro.follows.indexOf(sender);
   if (index !== -1) {
+    // unfollowLock
     pro.follows.splice(index, 1);
   } else {
+    //  followLock
     pro.follows.push(sender);
   }
   // save proposes

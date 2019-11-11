@@ -6,7 +6,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { LinkPro } from '../../elements/Button';
+// import { LinkPro } from '../../elements/Button';
 import useInfiniteScroll from '../../elements/useInfiniteScroll';
 // import { useSnackbar } from 'notistack';
 
@@ -40,7 +40,7 @@ function MemoryContainer(props) {
     let signal = {};
 
     async function prepareMemory(signal) {
-      const showMemoryId = parseInt(getQueryParam('memory'));
+      const showMemoryId = parseInt(getQueryParam('memory'), 10);
       let newMemoryList = [];
       setLoading(true);
 
@@ -111,10 +111,10 @@ function MemoryContainer(props) {
           />
           <CardContent>
             {loading ? (
-              <React.Fragment>
+              <>
                 <Skeleton height={6} />
                 <Skeleton height={6} width="80%" />
-              </React.Fragment>
+              </>
             ) : (
               <Typography variant="body2" color="textSecondary" component="p" />
             )}

@@ -19,7 +19,7 @@ const ShadowBox = styled.div`
     padding: 16px;
   }
 `;
-const ProposeWrapper = styled.div`
+const PageWrapper = styled.div`
   display: flex;
   min-height: 100vh;
   .proposeColumn {
@@ -47,20 +47,20 @@ export default function Feed(props) {
 
   return (
     <React.Fragment>
-      <BannerContainer>
+      {/* <BannerContainer>
         <ShadowBox>
           <TopFeed feedAddress={feedAddress} />
         </ShadowBox>
-      </BannerContainer>
+      </BannerContainer> */}
 
-      <ProposeWrapper>
+      <PageWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftFeed feedAddress={feedAddress} />
         </div>
         <div className="proposeColumn proposeColumn--right">
           <RightFeed feedAddress={feedAddress} />
         </div>
-      </ProposeWrapper>
+      </PageWrapper>
       {/* {proposeInfo && renderHelmet()} */}
     </React.Fragment>
   );

@@ -35,21 +35,13 @@ const BoxAction = styled.div`
 `;
 
 export default function LeftProposes(props) {
+  const classes = useStyles();
   const { loading = false } = props;
 
   const proposes = useSelector(state => state.loveinfo.proposes);
   const address = useSelector(state => state.account.address);
-  const proFiltered = proposes.filter(item => item.status === props.flag);
-  const classes = useStyles();
-  if (proFiltered.length <= 0) {
-    return (
-      <CardHeader
-        avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
-        title={loading ? <Skeleton height={6} width="80%" /> : ''}
-        subheader={loading ? <Skeleton height={6} width="80%" /> : 'None'}
-      />
-    );
-  }
+  const locksByStatus = proposes.filter(item => item.status === props.flag);
+
   const getInfo = item => {
     switch (item.type) {
       case 2:
@@ -80,42 +72,53 @@ export default function LeftProposes(props) {
     if (props.flag === 1) {
       const v1 = String(p1.type || 0) + p2.id;
       const v2 = String(p2.type || 0) + p1.id;
-      return v2.localeCompare(v1)
-    } else {
-      const f1 = address === p1.sender ? '0' : '1'
-      const f2 = address === p2.sender ? '0' : '1'
-      const v1 =f1 + p1.id;
-      const v2 = f2 + p2.id;
-      return v1.localeCompare(v2)
+      return v2.localeCompare(v1);
     }
+    const f1 = address === p1.sender ? '0' : '1';
+    const f2 = address === p2.sender ? '0' : '1';
+    const v1 = f1 + p1.id;
+    const v2 = f2 + p2.id;
+    return v1.localeCompare(v2);
   };
+  const layoutLoading = (
+    <CardHeader
+      avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
+      title={loading ? <Skeleton height={6} width="80%" /> : ''}
+      subheader={loading ? <Skeleton height={6} width="80%" /> : 'None'}
+    />
+  );
+  const layoutLoaded = (() => {
+    const isPenddingLock = !!(props.flag === 0);
 
-  return proFiltered.sort(compare).map(item => {
-    const info = getInfo(item);
-    return (
-      <CardHeader
-        key={item.id}
-        classes={{
-          root: classes.root, // class name, e.g. `classes-nesting-root-x`
-          title: classes.title,
-          subheader: classes.subheader,
-        }}
-        onClick={() => {
-          props.handlerSelect(item.id);
-        }}
-        action={
-          props.flag === 0 ? (
-            <BoxAction>{address === item.sender ? <Icon type="call_made" /> : <Icon type="call_received" />}</BoxAction>
-          ) : (
+    return locksByStatus.sort(compare).map(item => {
+      const info = getInfo(item);
+      return (
+        <CardHeader
+          key={item.id}
+          classes={{
+            root: classes.root, // class name, e.g. `classes-nesting-root-x`
+            title: classes.title,
+            subheader: classes.subheader,
+          }}
+          onClick={() => {
+            props.handlerSelect(item.id);
+          }}
+          action={
             <BoxAction>
-              <Icon type={info.icon} />
+              {isPenddingLock ? (
+                <Icon type={address === item.sender ? 'call_made' : 'call_received'} />
+              ) : (
+                <Icon type={info.icon} />
+              )}
             </BoxAction>
-          )
-        }
-        avatar={<AvatarPro alt={info.name} hash={item.avatar} />}
-        title={info.name}
-        subheader={info.nick}
-      />
-    );
-  });
+          }
+          avatar={<AvatarPro alt={info.name} hash={item.avatar} />}
+          title={info.name}
+          subheader={info.nick}
+        />
+      );
+    });
+  })();
+
+  return <React.Fragment>{locksByStatus.length <= 0 ? layoutLoading : layoutLoaded}</React.Fragment>;
 }
