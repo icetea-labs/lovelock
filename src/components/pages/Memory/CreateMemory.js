@@ -411,7 +411,7 @@ export default function CreateMemory(props) {
 
   function addCollectionId(info) {
     const colId = +postCollectionId
-    if (typeof colId === 'number' && !isNaN(colId)) {
+    if (postCollectionId !== '' && typeof colId === 'number' && !isNaN(colId)) {
       info.collectionId = colId
     }
   }
