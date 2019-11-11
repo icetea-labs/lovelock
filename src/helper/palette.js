@@ -30,8 +30,8 @@ export function getPalette(img,  { options, defaultColors } = {}) {
             cache[src] = colors
             return colors
         })
-        .catch(error => {
-            console.warn('Cannot get palette from image.', src, error)
+        .catch(() => {
+            //console.warn('Cannot get palette from image.', src, error)
             return defaultColors
         })
 }

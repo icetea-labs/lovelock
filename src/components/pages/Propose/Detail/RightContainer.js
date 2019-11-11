@@ -29,21 +29,22 @@ export default function RightContainer(props) {
   const [changed, setChanged] = useState(false)
   const address = useSelector(state => state.account.address);
   const collections = useSelector(state => state.loveinfo.topInfo.collections)
-  const collectionName = collectionId == null ? null : collections.find(c => c.id === collectionId)
-
+  const currentCol = !collections || collectionId == null ? '' : collections.find(c => c.id === collectionId)
+  const collectionName = currentCol == null ? '' : currentCol.name
+  const validCollectionId = collectionName ? collectionId : null
 
   const history = useHistory()
 
   useEffect(() => {
     let cancel = false
 
-    callView('getMemoriesByProIndex', [proIndex, collectionId]).then(memories => {
+    callView('getMemoriesByProIndex', [proIndex, validCollectionId]).then(memories => {
       if (cancel) return
       setMemoByProIndex(memories)
     })
 
     return () => (cancel = true)
-  }, [proIndex, changed, collectionId]);
+  }, [proIndex, changed, validCollectionId]);
 
   function refresh() {
     setChanged(c => !c)
@@ -51,7 +52,7 @@ export default function RightContainer(props) {
 
   return (
     <RightBox>
-      {collectionId != null && (
+      {collectionName && (
         <CollectionIndicator>
           <Chip 
             color="primary"
@@ -62,11 +63,11 @@ export default function RightContainer(props) {
       )}
       {address && isOwner && <CreateMemory 
         proIndex={proIndex} 
-        collectionId={collectionId}
+        collectionId={validCollectionId}
         collections={collections}
         onMemoryAdded={refresh}
         handleNewCollection={handleNewCollection} />}
-      <MemoryContainer proIndex={proIndex} collectionId={collectionId} memorydata={memoByProIndex} />
+      <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={memoByProIndex} />
     </RightBox>
   );
 }
