@@ -107,7 +107,7 @@ function ChangeProfile(props) {
       } else {
         setIsRegistered(false);
       }
-  
+
       if (tags) {
         setFirstname({ old: tags.firstname || '', new: tags.firstname || '' });
         setLastname({ old: tags.lastname || '', new: tags.lastname || '' });
@@ -221,10 +221,13 @@ function ChangeProfile(props) {
     setAvatar(e.avaPreview);
   }
 
+  console.log('avaPreview', avatar);
+  console.log('cropFile', cropFile);
+
   const classes = useStyles();
 
   return (
-    <React.Fragment>
+    <>
       <QueueAnim delay={200} type={['top', 'bottom']}>
         <LayoutAuthen key={1}>
           <BoxAuthenCus>
@@ -305,7 +308,7 @@ function ChangeProfile(props) {
         </LayoutAuthen>
       </QueueAnim>
       {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
-    </React.Fragment>
+    </>
   );
 }
 

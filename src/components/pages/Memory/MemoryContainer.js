@@ -150,7 +150,7 @@ function MemoryContainer(props) {
     <div>
       {renderMemory()}
       {/* <LinkPro onClick={onLoadMore}>{limit > memoryList.length ? 'You view all memory' : 'Load more...'}</LinkPro> */}
-      {isFetching && 'Load more...'}
+      {/* {isFetching && 'Load more...'} */}
     </div>
   );
 }
