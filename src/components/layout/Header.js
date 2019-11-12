@@ -34,7 +34,7 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements/AvatarPro';
-import GetKeyToAuthen from './GetKeyToAuthen';
+import GetKeyToAuthen from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
