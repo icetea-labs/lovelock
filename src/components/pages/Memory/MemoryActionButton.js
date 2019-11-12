@@ -104,24 +104,26 @@ function MemoryActionButton(props) {
     setMemoryNumLike(num);
   }, [memoryType, memoryLikes, address, isAuto]);
 
-  function handleLike() {
-
-    const performLike = () => {
-      const params = [memoryIndex, 1];
-      sendTransaction('addLike', params, { tokenAddress, address, sendType: 'sendAsync' });
-  
-      // Change like to make quick feedback
-      // the subscription will update number a couple of seconds later
-      const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1;
-      const newIsMyLike = !realLikeData.isMyLike;
-      setLikeData(newNumLike, newIsMyLike);
+  function sendTxWithAuthen(...args) {
+    if (tokenKey) {
+      return sendTransaction(...args)
     }
 
-    if (!tokenKey) {
-      setNeedAuth(performLike);
-    } else {
-      performLike()
-    }
+    return new Promise((resolve, reject) => {
+      const sendTx = () => {
+        return sendTransaction(...args).then(resolve).catch(reject)
+      }
+      setNeedAuth(sendTx);
+    })
+  }
+
+  async function handleLike() {
+    const params = [memoryIndex, 1];
+    await sendTxWithAuthen('addLike', params, { tokenAddress, address, sendType: 'sendAsync' })
+
+    const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1;
+    const newIsMyLike = !realLikeData.isMyLike;
+    setLikeData(newNumLike, newIsMyLike);
   }
 
   const classes = useStyles();

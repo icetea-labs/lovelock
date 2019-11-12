@@ -25,7 +25,11 @@ function PasswordPrompt(props) {
   const [isRemember, setIsRemember] = useState(true);
 
   let credLoading = useRef(false)
-  const [autoPassFailed, setAutoPassFailed] = useState(false)
+  const [autoPassFailed, _setAutoPassFailed] = useState(false)
+  const setAutoPassFailed = () => {
+    _setAutoPassFailed(true)
+    credLoading.current = false
+  }
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -47,14 +51,11 @@ function PasswordPrompt(props) {
       if (cred && cred.password) {
         confirm(cred.password, true)
       } else {
-        setAutoPassFailed(true)
+        setAutoPassFailed()
       }
     }).catch(err => {
-      setAutoPassFailed(true)
+      setAutoPassFailed()
       console.warn(err)
-    })
-    .finally(() => {
-      credLoading.current = false
     })
 }
 
@@ -144,7 +145,7 @@ function PasswordPrompt(props) {
             });
         } catch (error) {
           if (isAuto) {
-            setAutoPassFailed(true)
+            setAutoPassFailed()
           } else {
             console.error(error);
             const message = 'Your password is invalid. Please try again.';
