@@ -137,6 +137,9 @@ function PasswordPrompt(props) {
 
               //setTimeout(() => {
                 close();
+                if (typeof needAuth === 'function') {
+                  needAuth()
+                }
               //}, 50);
             });
         } catch (error) {
