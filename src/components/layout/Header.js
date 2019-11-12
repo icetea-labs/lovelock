@@ -318,6 +318,10 @@ function Header(props) {
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  const lockIndexText = props.match.params.index;
+  const lockIndexInt = parseInt(lockIndexText, 10)
+  const lockIndex = (isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt)) ? undefined : lockIndexInt
+
   function handleProfileMenuOpen(event) {
     setAnchorElMenu(event.currentTarget);
   }
@@ -577,7 +581,7 @@ function Header(props) {
               onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
             />
             <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
-              <LeftContainer/>
+              <LeftContainer proIndex={lockIndex} />
             </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
