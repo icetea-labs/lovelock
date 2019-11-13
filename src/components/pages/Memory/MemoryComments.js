@@ -5,7 +5,8 @@ import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
-import { sendTransaction, callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
+import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
+import { useTx } from '../../../helper/hooks'
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -31,8 +32,7 @@ const useStyles = makeStyles(theme => ({
     },
     borderRadius: 20,
     background: '#f5f6f7',
-    fontSize: 12,
-    width: 554,
+    fontSize: 12
   },
   notchedOutline: {
     // borderWidth: '1px',
@@ -92,13 +92,9 @@ const StyledCardActions = withStyles(theme => ({
 }))(CardActions);
 const numComment = 4;
 export default function MemoryComments(props) {
-  const { handerNumberComment, memoryIndex, textInput } = props;
-  const dispatch = useDispatch();
+  const { handleNumberComment, memoryIndex, textInput } = props;
 
-  // const privateKey = useSelector(state => state.account.privateKey);
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
-  const address = useSelector(state => state.account.address);
+  const tx = useTx()
 
   const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
@@ -112,26 +108,22 @@ export default function MemoryComments(props) {
 
     loadData(memoryIndex).then(respComment => {
       if (!cancel) {
-        handleComments(respComment)
+        if (respComment.length > numComment) {
+          const numMore = respComment.length - numComment;
+          setNumHidencmt(numMore);
+          setShowComments(respComment.slice(numMore));
+        } else {
+          setShowComments(respComment);
+        }
+        setComments(respComment);
+        handleNumberComment(respComment.length);
       }
     });
 
     return () => {
       cancel = true;
     };
-  }, [comment]);
-
-  function handleComments(respComment) {
-    if (respComment.length > numComment) {
-      const numMore = respComment.length - numComment;
-      setNumHidencmt(numMore);
-      setShowComments(respComment.slice(numMore));
-    } else {
-      setShowComments(respComment);
-    }
-    setComments(respComment);
-    handerNumberComment(respComment.length);
-  }
+  }, [memoryIndex, comment]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadData(index) {
     const respComment = await callView('getCommentsByMemoIndex', [index]);
@@ -151,13 +143,9 @@ export default function MemoryComments(props) {
 
   async function newComment() {
     if (!comment) return;
-    if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
-      return;
-    }
-    const method = 'addComment';
-    const params = [memoryIndex, comment, ''];
-    await sendTransaction(method, params, { address, tokenAddress });
+
+    await tx.sendCommit('addComment', memoryIndex, comment, '')
+
     myFormRef.current && myFormRef.current.reset();
     setComment('');
   }

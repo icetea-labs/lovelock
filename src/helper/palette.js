@@ -17,12 +17,12 @@ const processColors = rawColors => {
     }
 }
 
-export function getPalette(img, opts) {
+export function getPalette(img,  { options, defaultColors } = {}) {
     const src = String(img.src || img).toLowerCase()
     const old = cache[src]
 
     return old ? Promise.resolve(old) : 
-        from(img, opts)
+        from(img, options)
         // .useQuantizer(Vibrant.Quantizer.WebWorker)
         .getPalette()
         .then(colors => {
@@ -31,6 +31,7 @@ export function getPalette(img, opts) {
             return colors
         })
         .catch(error => {
-            console.error('An error occured while getting palette from image.', src, error)
+            console.warn('Cannot get palette from image.', src, error)
+            return defaultColors
         })
 }

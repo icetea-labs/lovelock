@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
@@ -6,17 +6,22 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
-import cloneDeep from 'lodash/cloneDeep';
+// import cloneDeep from 'lodash/cloneDeep';
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, encodeWithPublicKey, sendTxUtil } from '../../../helper';
+import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
-import { getDraft, setDraft, delDraft } from '../../../helper/draft';
+
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
+// import { getDraft, setDraft, delDraft } from '../../../helper/draft';
+import { delDraft } from '../../../helper/draft';
 
 let blogBody = null;
 
@@ -46,6 +51,9 @@ const ShadowBox = styled.div`
   border-radius: 5px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 const useStyles = makeStyles(theme => ({
   margin: {
@@ -57,15 +65,25 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10,
   },
   btShare: {
-    width: 254,
+    width: 232,
     height: 46,
     borderRadius: 23,
+    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+      width: '100%',
+      marginTop: 20
+    },
   },
   selectStyle: {
     minWidth: 110,
     height: 36,
     fontSize: 12,
     color: '#8250c8',
+  },
+  selectStyleMid: {
+    minWidth: 160,
+    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+      marginLeft: 24
+    },
   },
   selectIcon: {
     width: 24,
@@ -76,21 +94,16 @@ const useStyles = makeStyles(theme => ({
   btBox: {
     display: 'flex',
     justifyContent: 'space-between',
-    paddingBottom: '25px !important',
+    padding: '25px 0 15px',
+    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+      display: 'block',
+      textAlign: 'right'
+    },
   },
-  blogBtn: {
-    color: '#8250c8',
-    border: '1px solid #8250c8',
-    padding: '10px 18px 11px 18px',
-    boxSizing: 'border-box',
-    borderRadius: 23,
-    height: 36,
-    fontSize: 12,
-    minWidth: 110,
-    marginTop: 5,
-    marginLeft: -50,
-    outline: 'none',
-    cursor: 'pointer',
+  rightBtBox: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '0',
   },
 }));
 
@@ -123,8 +136,8 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryAdded, proIndex } = props;
-  const classes = useStyles();
+  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
+  const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
@@ -140,8 +153,10 @@ export default function CreateMemory(props) {
   const [filesBuffer, setFilesBuffer] = useState([]);
   const [memoryContent, setMemoryContent] = useState('');
   const [grayLayout, setGrayLayout] = useState(false);
-  const [memoDate, setMemoDate] = useState(Date.parse(new Date()));
+
+  const [memoDate, setMemoDate] = useState(new Date());
   const [privacy, setPrivacy] = useState(0);
+  const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? "" : collectionId)
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
 
@@ -151,21 +166,29 @@ export default function CreateMemory(props) {
 
   const { enqueueSnackbar } = useSnackbar();
 
+  // Is this component display as "compact" version (e.g. on mobile)
+  const isCompact = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const componentRef = useRef()
+
   useEffect(() => {
     resetValue();
-  }, [proIndex]);
+  }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  useEffect(() => {
+    if (grayLayout && isCompact) {
+      componentRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [grayLayout, isCompact])
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
   }
 
-  function setNeedAuth(value) {
-    dispatch(actions.setNeedAuth(value));
+  function memoryOnFocus() {
+    !grayLayout && setGrayLayout(true);
   }
 
-  function memoryOnFocus() {
-    if (!grayLayout) setGrayLayout(true);
-  }
   function clickLayout(e) {
     if (e.target === layoutRef.current) setGrayLayout(false);
   }
@@ -182,6 +205,23 @@ export default function CreateMemory(props) {
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
   }
+
+  function collectionAdded(col) {
+    setPostCollectionId(col.id)
+  }
+
+  function handleChangePostCollectionId(event) {
+    const value = event.target.value
+    if (value !== 'add') {
+      setPostCollectionId(event.target.value)
+    } else {
+      setPostCollectionId(postCollectionId)
+      if (handleNewCollection) {
+        handleNewCollection(collectionAdded)
+      }
+    }
+  }
+
   function onChangeDate(value) {
     setMemoDate(value);
   }
@@ -202,14 +242,30 @@ export default function CreateMemory(props) {
 
     const { blocks } = content;
 
-    for (const i in blocks) {
-      if (!firstImg && blocks[i].type === 'image') {
-        firstImg = blocks[i].data;
+    let b
+    for (b of blocks) {
+      if (!firstImg) {
+        if (b.type === 'image') {
+          firstImg = b.data;
+        } else if (b.type === 'video') {
+          // get the video thumbnail
+          const data = b.data && b.data.embed_data
+          if (data) {
+            firstImg = {
+              width: data.get('width'),
+              height: data.get('height'),
+              url: data.get('thumbnail_url')
+            }
+            if (firstImg.url) {
+              firstImg.url = firstImg.url.replace('hqdefault.jpg', 'maxresdefault.jpg')
+            }
+          }
+        }
       }
       if (!firstLine) {
-        firstLine = blocks[i].text || '';
-        if (firstLine.length > 100) {
-          firstLine = `${firstLine.slice(0, 100)}…`;
+        firstLine = b.text || '';
+        if (firstLine.length > 69) {
+          firstLine = `${firstLine.slice(0, 69)}…`;
         }
       }
       if (firstImg && firstLine) break;
@@ -225,7 +281,18 @@ export default function CreateMemory(props) {
     }
   }
 
-  async function onSubmitEditor() {
+  function onSubmitEditor() {
+    setGLoading(true)
+    submitEditor().then(() => {
+      setGLoading(false)
+    }).catch(err => {
+      setGLoading(false)
+      const message = 'An error has occured, you can try again later: ' + err.message;
+      enqueueSnackbar(message, { variant: 'error' });
+    })
+  }
+
+  async function submitEditor() {
     const combined = combineContent();
     const blocks = combined.blocks;
     if (validateEditorContent()) {
@@ -266,34 +333,35 @@ export default function CreateMemory(props) {
       setBlogSubtitle('');
       delDraft();
     } else {
-      let message = 'Please enter memory content.';
+      const message = 'Please enter memory content.';
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
 
   function validateEditorContent() {
     let blocks = combineContent().blocks;
-    for (let i in blocks) {
-      if (blocks[i].text.trim() != '') {
+    let i
+    for (i in blocks) {
+      if (blocks[i].text.trim() !== '') {
         return true;
       }
     }
     return false;
   }
 
-  function isNonemptyBlog(body) {
-    if (!body || !body.blocks || !body.blocks.length) return false
-    if (body.blocks.length > 1) return true
-    const b = body.blocks[0]
-    if (b.text ||
-      b.type === 'image' ||
-      b.type === 'video' ||
-      b.type === 'embed') {
-        return true
-      }
+  // function isNonemptyBlog(body) {
+  //   if (!body || !body.blocks || !body.blocks.length) return false
+  //   if (body.blocks.length > 1) return true
+  //   const b = body.blocks[0]
+  //   if (b.text ||
+  //     b.type === 'image' ||
+  //     b.type === 'video' ||
+  //     b.type === 'embed') {
+  //       return true
+  //     }
 
-    return false
-  }
+  //   return false
+  // }
 
   function onChangeEditorBody(editor) {
     blogBody = editor.emitSerializedOutput()
@@ -349,6 +417,19 @@ export default function CreateMemory(props) {
     setPreviewOn(false);
   }
 
+  function addCollectionId(info) {
+    const colId = +postCollectionId
+    if (postCollectionId !== '' && typeof colId === 'number' && !isNaN(colId)) {
+      info.collectionId = colId
+    }
+  }
+
+  function addMemoTimestamp(info) {
+    if (memoDate) {
+      info.date = memoDate.getTime ? memoDate.getTime() : memoDate
+    }
+  }
+
   async function handleShareMemory(blogData) {
     if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
@@ -357,41 +438,50 @@ export default function CreateMemory(props) {
     }
 
     const content = blogData || memoryContent;
+    
+    let params = [];
+    const uploadThenSendTx = async () => {
+      setGLoading(true);
 
-    if (privacy ? !privateKey : !tokenKey) {
-      setNeedAuth(true);
-      return;
-    }
-
-    setGLoading(true);
-    setTimeout(async () => {
-      // const hash = await saveFilesToIpfs(filesBuffer);
-      // const hash = await saveBufferToIpfs(filesBuffer);
-      // const info = { date, hash };
-      let params = [];
       if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
-        const newinfo = { date: memoDate, hash };
-        params = [proIndex, !!privacy, JSON.stringify(newContent), newinfo];
+        const info = { hash };
+        addMemoTimestamp(info)
+        addCollectionId(info)
+        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
       } else {
         const hash = !blogData && await saveBufferToIpfs(filesBuffer);
-        const info = { date: memoDate };
+        const info = { };
         info.hash = hash || []
+        addMemoTimestamp(info)
+        addCollectionId(info)
         if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
-      const result = await sendTransaction('addMemory', params, { address, tokenAddress });
-      if (result) {
-        onMemoryAdded();
-      }
+      return await sendTxUtil('addMemory', params, { address, tokenAddress });
+    }
+
+    try {
+      const result = await ensureToken({
+        tokenKey: privacy ? privateKey : tokenKey,
+        dispatch
+      }, uploadThenSendTx)
+
+      onMemoryAdded(result.returnValue, params);
       resetValue();
-    }, 100);
+    } catch (err) {
+      setGLoading(false);
+      const message = 'An error has occured, you can try again later: ' + err.message;
+      enqueueSnackbar(message, { variant: 'error' });
+      console.error(err)
+    }    
   }
 
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
+    setPostCollectionId(collectionId == null ? "" : collectionId);
     setMemoDate(new Date());
     setGLoading(false);
     setGrayLayout(false);
@@ -417,24 +507,24 @@ export default function CreateMemory(props) {
     };
   }
 
-  function urlToBase64(url) {
-    return fetch(url)
-      .then(r => r.blob())
-      .then(blob => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.addEventListener('load', () => {
-            resolve(reader.result);
-          });
-          reader.addEventListener('error', reject);
-          reader.readAsDataURL(blob);
-        });
-      });
-  }
+  // function urlToBase64(url) {
+  //   return fetch(url)
+  //     .then(r => r.blob())
+  //     .then(blob => {
+  //       return new Promise((resolve, reject) => {
+  //         const reader = new FileReader();
+  //         reader.addEventListener('load', () => {
+  //           resolve(reader.result);
+  //         });
+  //         reader.addEventListener('error', reject);
+  //         reader.readAsDataURL(blob);
+  //       });
+  //     });
+  // }
 
-  function cloneForIdbSave(content) {
-    return JSON.parse(JSON.stringify(content))
-  }
+  // function cloneForIdbSave(content) {
+  //   return JSON.parse(JSON.stringify(content))
+  // }
 
   async function saveDraft(context, content) {
     // if (isNonemptyBlog(content)) {
@@ -467,10 +557,10 @@ export default function CreateMemory(props) {
   return (
     <React.Fragment>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
-      <CreatePost grayLayout={grayLayout}>
+      <CreatePost grayLayout={grayLayout} ref={componentRef}>
         <ShadowBox>
-          <Grid container direction="column" spacing={3}>
-            <Grid item>
+          <Grid container direction="column">
+            <Grid>
               <Grid container wrap="nowrap" spacing={1}>
                 <Grid item>
                   <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
@@ -482,24 +572,28 @@ export default function CreateMemory(props) {
                     fullWidth
                     multiline
                     value={memoryContent}
-                    placeholder="Describe your Memory...."
+                    placeholder={grayLayout ? "Describe your memory" : "Add a new memory…"}
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
                   />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item>
+            <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
                 files={filesBuffer}
                 date={memoDate}
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
+                onBlogClick={() => {
+                  setOpenModal(true);
+                }}
               />
             </Grid>
             {grayLayout && (
-              <Grid item classes={{ root: classes.btBox }}>
+              <Grid classes={{ root: classes.btBox }}>
+                <div className={classes.rightBtBox}>
                 <Select
                   native
                   value={privacy}
@@ -508,19 +602,27 @@ export default function CreateMemory(props) {
                     root: classes.selectStyle,
                     icon: classes.selectIcon,
                   }}
+                  style={{marginRight: '1vw'}}
                   input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                 >
                   <option value={0}>Public</option>
                   <option value={1}>Private</option>
                 </Select>
-                <button
-                  onClick={() => {
-                    setOpenModal(true);
+                <Select
+                  native
+                  value={postCollectionId}
+                  onChange={handleChangePostCollectionId}
+                  classes={{
+                    root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                    icon: classes.selectIcon,
                   }}
-                  className={classes.blogBtn}
+                  input={<BootstrapInput name="collection" id="outlined-collection" />}
                 >
-                  Write blog...
-                </button>
+                  <option value="">(No collection)</option>
+                  {collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="add">(+) New Collection</option>
+                </Select>
+                </div>
                 <ButtonPro
                   type="submit"
                   isGrayout={disableShare}
@@ -529,7 +631,7 @@ export default function CreateMemory(props) {
                   }}
                   className={classes.btShare}
                 >
-                  Share
+                  Post
                 </ButtonPro>
               </Grid>
             )}

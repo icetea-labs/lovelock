@@ -17,6 +17,7 @@ import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthe
 import { HeaderAuthen } from '../../elements/Common';
 import { AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
+import RotationImg from '../../elements/RotationImg';
 
 const useStyles = makeStyles(() => ({
   avatar: {
@@ -97,8 +98,25 @@ function ChangeProfile(props) {
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
+  const [rotation, setRotation] = useState(0);
 
   useEffect(() => {
+    async function getData() {
+      const [alias, tags] = await getAliasAndTags(address);
+      if (alias) {
+        setIsRegistered(true);
+        setUsername(alias);
+      } else {
+        setIsRegistered(false);
+      }
+
+      if (tags) {
+        setFirstname({ old: tags.firstname || '', new: tags.firstname || '' });
+        setLastname({ old: tags.lastname || '', new: tags.lastname || '' });
+        setAvatar(tags.avatar);
+      }
+    }
+
     getData();
     // Fix issue #148
     ValidatorForm.addValidationRule('specialCharacter', async name => {
@@ -116,23 +134,62 @@ function ChangeProfile(props) {
       ValidatorForm.removeValidationRule('isPasswordMatch');
       ValidatorForm.removeValidationRule('isAliasRegistered');
     };
-  }, []);
+  }, [address]);
 
-  async function getData() {
-    const [alias, tags] = await getAliasAndTags(address);
-    if (alias) {
-      setIsRegistered(true);
-      setUsername(alias);
-    } else {
-      setIsRegistered(false);
-    }
+  const applyRotation = (file, orientation) =>
+    new Promise(resolve => {
+      const maxWidth = 250;
+      const reader = new FileReader();
 
-    if (tags) {
-      setFirstname({ old: tags.firstname || '', new: tags.firstname || '' });
-      setLastname({ old: tags.lastname || '', new: tags.lastname || '' });
-      setAvatar(tags.avatar);
-    }
-  }
+      reader.onload = () => {
+        const url = reader.result;
+
+        const image = new Image();
+
+        image.onload = () => {
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          let { width, height } = image;
+
+          const [outputWidth, outputHeight] = orientation >= 5 && orientation <= 8 ? [height, width] : [width, height];
+
+          const scale = outputWidth > maxWidth ? maxWidth / outputWidth : 1;
+
+          width *= scale;
+          height *= scale;
+
+          // set proper canvas dimensions before transform & export
+          canvas.width = outputWidth * scale;
+          canvas.height = outputHeight * scale;
+
+          // transform context before drawing image
+          switch (orientation) {
+            case 3:
+              context.transform(-1, 0, 0, -1, width, height);
+              break;
+            case 6:
+              context.transform(0, -1, 1, 0, 0, width);
+              break;
+            case 8:
+              context.transform(0, 1, -1, 0, height, 0);
+              break;
+            default:
+              break;
+          }
+
+          // draw image
+          context.drawImage(image, 0, 0, width, height);
+
+          // export base64
+          resolve(canvas.toDataURL('image/jpeg'));
+        };
+
+        image.src = url;
+      };
+
+      reader.readAsDataURL(file);
+    });
 
   async function saveChange() {
     if (isRegistered ? !tokenKey : !privateKey) {
@@ -157,8 +214,29 @@ function ChangeProfile(props) {
 
           const listSetTags = [];
           const accountInfo = { displayName };
+          let orient = 1;
+          if (rotation === 180 || rotation === -180) {
+            orient = 3;
+          } else if (rotation === 270 || rotation === -90) {
+            orient = 6;
+          } else if (rotation === 90 || rotation === -270) {
+            orient = 8;
+          }
           if (cropFile) {
-            const saveAvatar = saveFileToIpfs(cropFile).then(hash => {
+            const newFile = await applyRotation(cropFile[0], orient);
+            const { name, type } = cropFile[0];
+            const byteString = atob(newFile.split(',')[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ia], { type });
+            const parseFile = new File([blob], name, { type });
+            const saveFile = [parseFile];
+
+            // console.log('saveFile', saveFile);
+            const saveAvatar = saveFileToIpfs(saveFile).then(hash => {
               accountInfo.avatar = hash;
               if (avatar !== hash) {
                 return setTagsInfo({ avatar: hash }, { address, tokenAddress });
@@ -201,7 +279,7 @@ function ChangeProfile(props) {
 
   function handleImageChange(event) {
     event.preventDefault();
-    const orFiles = event.target.files;
+    const orFiles = Array.from(event.target.files);
 
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
@@ -218,13 +296,37 @@ function ChangeProfile(props) {
   function acceptCrop(e) {
     closeCrop();
     setCropFile(e.cropFile);
-    setAvatar(e.avaPreview);
+    // setAvatar(e.avaPreview);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatar(reader.result);
+    };
+    reader.readAsDataURL(e.cropFile[0]);
   }
+
+  function rotateRight() {
+    let newRotation = rotation + 90;
+    if (newRotation >= 360) {
+      newRotation = 0;
+    }
+    setRotation(newRotation);
+  }
+
+  function rotateleft() {
+    let newRotation = rotation - 90;
+    if (newRotation <= -360) {
+      newRotation = 0;
+    }
+    setRotation(newRotation);
+  }
+
+  // console.log('avaPreview', avatar);
+  // console.log('avatar', avatar);
 
   const classes = useStyles();
 
   return (
-    <React.Fragment>
+    <>
       <QueueAnim delay={200} type={['top', 'bottom']}>
         <LayoutAuthen key={1}>
           <BoxAuthenCus>
@@ -235,7 +337,12 @@ function ChangeProfile(props) {
                   <PreviewContainter>
                     <div className="upload_img">
                       {cropFile ? (
-                        <AvatarPro src={avatar} className={classes.avatar} />
+                        // <AvatarPro src={avatar} className={classes.avatar} />
+                        <div>
+                          <RotationImg src={avatar} rotation={rotation} />
+                          <input onClick={rotateleft} type="button" value="left" />
+                          <input onClick={rotateRight} type="button" value="right" />
+                        </div>
                       ) : (
                         <AvatarPro hash={avatar} className={classes.avatar} />
                       )}
@@ -243,6 +350,7 @@ function ChangeProfile(props) {
                         <input
                           className="fileInput"
                           type="file"
+                          value=""
                           onChange={handleImageChange}
                           accept="image/jpeg,image/png"
                         />
@@ -303,8 +411,8 @@ function ChangeProfile(props) {
           </BoxAuthenCus>
         </LayoutAuthen>
       </QueueAnim>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isChangeProfile />}
-    </React.Fragment>
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />}
+    </>
   );
 }
 

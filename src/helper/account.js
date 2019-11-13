@@ -1,7 +1,7 @@
-import tweb3 from '../service/tweb3';
+import { getAliasContract, getDidContract } from '../service/tweb3';
 
-const aliasMethods = tweb3.contract('system.alias').methods
-const didMethods = tweb3.contract('system.did').methods
+const aliasMethods = getAliasContract().methods
+const didMethods = getDidContract().methods
 const cache = {}
 
 export async function getAlias(address) {
@@ -52,11 +52,9 @@ export async function getTagsInfo(address) {
     return didMethods
         .query(address)
         .call()
-        .then(({ tags } = {}) => {
-            if (tags) {
-                item.tags = tags
-                return tags
-            }
+        .then(({ tags = {} } = {}) => {
+            item.tags = tags
+            return tags
         })
 }
 

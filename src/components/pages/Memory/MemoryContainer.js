@@ -6,7 +6,9 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { useSnackbar } from 'notistack';
+// import { LinkPro } from '../../elements/Button';
+import useInfiniteScroll from '../../elements/useInfiniteScroll';
+// import { useSnackbar } from 'notistack';
 
 import { getTagsInfo, getJsonFromIpfs, getQueryParam, signalPrerenderDone } from '../../../helper';
 import MemoryContent from './MemoryContent';
@@ -29,72 +31,73 @@ function MemoryContainer(props) {
   const [loading, setLoading] = useState(false);
   // const [memoryList, setMemoryList] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
-  const { enqueueSnackbar } = useSnackbar();
+  // const { enqueueSnackbar } = useSnackbar();
+  const [limit, setLimit] = useState(5);
+  const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreListItems);
 
   const classes = useStyles();
   useEffect(() => {
-    let signal = {}
+    let signal = {};
 
-    if (memorydata.length > 0) {
-      prepareMemory(signal)
-    }
+    async function prepareMemory(signal) {
+      const showMemoryId = parseInt(getQueryParam('memory'), 10);
+      let newMemoryList = [];
+      setLoading(true);
 
-    return () => signal.cancel = true
-  }, [memorydata]);
+      let tags = memorydata.map(mem => {
+        return getTagsInfo(mem.sender);
+      });
+      tags = await Promise.all(tags);
+      if (signal.cancel) return;
 
-  async function prepareMemory(signal) {
-    const showMemoryId = parseInt(getQueryParam('memory'))
-    let newMemoryList = [];
-    setLoading(true);
-
-    let tags = memorydata.map(mem => {
-      return getTagsInfo(mem.sender);
-    });
-    tags = await Promise.all(tags);
-    if (signal.cancel) return
-
-    let hasViewDetail = false
-    for (let i = 0; i < memorydata.length; i++) {
-      const obj = memorydata[i];
-      obj.showDetail = showMemoryId === obj.id
-      if (obj.info.blog && obj.showDetail) hasViewDetail = true
-      obj.name = tags[i]['display-name'];
-      obj.pubkey = tags[i]['pub-key'];
-      obj.avatar = tags[i].avatar;
-      if (obj.receiver !== process.env.REACT_APP_BOT_LOVER) {
-        // eslint-disable-next-line no-await-in-loop
-        const receiverTags = await getTagsInfo(obj.receiver);
-        obj.r_name = receiverTags['display-name'];
-      } else {
-        if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
-          obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name
-        } else {
-          obj.r_name = '' // a crush name, but let it empty for now
-        }
-      }
-      if (!obj.isPrivate) {
-        obj.isUnlock = true;
-        for (let j = 0; j < obj.info.hash.length; j++) {
+      let hasViewDetail = false;
+      for (let i = 0; i < memorydata.length; i++) {
+        const obj = memorydata[i];
+        obj.showDetail = showMemoryId === obj.id;
+        if (obj.info.blog && obj.showDetail) hasViewDetail = true;
+        obj.name = tags[i]['display-name'];
+        obj.pubkey = tags[i]['pub-key'];
+        obj.avatar = tags[i].avatar;
+        if (obj.receiver !== process.env.REACT_APP_BOT_LOVER) {
           // eslint-disable-next-line no-await-in-loop
-          obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
-          if (signal.cancel) return
+          const receiverTags = await getTagsInfo(obj.receiver);
+          obj.r_name = receiverTags['display-name'];
+        } else if (proposeInfo && [proposeInfo.sender, proposeInfo.receiver].includes(obj.sender)) {
+          obj.r_name = proposeInfo.sender === obj.sender ? proposeInfo.r_name : proposeInfo.s_name;
+        } else {
+          obj.r_name = ''; // a crush name, but let it empty for now
         }
-      } else {
-        // obj.info.hash = [];
-        obj.isUnlock = false;
+        if (!obj.isPrivate) {
+          obj.isUnlock = true;
+          for (let j = 0; j < obj.info.hash.length; j++) {
+            // eslint-disable-next-line no-await-in-loop
+            obj.info.hash[j] = await getJsonFromIpfs(obj.info.hash[j], j);
+            if (signal.cancel) return;
+          }
+        } else {
+          // obj.info.hash = [];
+          obj.isUnlock = false;
+        }
+
+        newMemoryList.push(obj);
       }
+      // newMemoryList = newMemoryList.reverse();
+      newMemoryList = newMemoryList.sort((a, b) => {
+        return b.id - a.id;
+      });
+      setMemory(newMemoryList);
 
-      newMemoryList.push(obj);
+      setLoading(false);
+
+      if (!hasViewDetail) {
+        signalPrerenderDone();
+      }
     }
-    newMemoryList = newMemoryList.reverse();
-    setMemory(newMemoryList);
 
-    setLoading(false);
+    prepareMemory(signal);
 
-    if (!hasViewDetail) {
-      signalPrerenderDone()
-    }
-  }
+    return () => (signal.cancel = true);
+  }, [memorydata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (memoryList.length <= 0 || loading) {
     if (!loading) return <div />;
@@ -108,10 +111,10 @@ function MemoryContainer(props) {
           />
           <CardContent>
             {loading ? (
-              <React.Fragment>
+              <>
                 <Skeleton height={6} />
                 <Skeleton height={6} width="80%" />
-              </React.Fragment>
+              </>
             ) : (
               <Typography variant="body2" color="textSecondary" component="p" />
             )}
@@ -121,9 +124,35 @@ function MemoryContainer(props) {
       );
     });
   }
-  return memoryList.map((memory, index) => {
-    return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
-  });
+
+  // return memoryList.map((memory, index) => {
+  //   return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
+  // });
+
+  // function onLoadMore() {
+  //   setLimit(limit + 5);
+  // }
+
+  function fetchMoreListItems() {
+    for (let i = 5; i < memoryList.length; i += 5) {
+      setLimit(limit + 5);
+      setIsFetching(false);
+    }
+  }
+
+  const renderMemory = () => {
+    return memoryList.slice(0, limit).map((memory, index) => {
+      return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
+    });
+  };
+
+  return (
+    <div>
+      {renderMemory()}
+      {/* <LinkPro onClick={onLoadMore}>{limit > memoryList.length ? 'You view all memory' : 'Load more...'}</LinkPro> */}
+      {/* {isFetching && 'Load more...'} */}
+    </div>
+  );
 }
 
 const mapStateToProps = state => {

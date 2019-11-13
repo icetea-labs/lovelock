@@ -8,9 +8,9 @@ import { CardMedia, Button, Typography } from '@material-ui/core';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
-
-// import tweb3 from '../../../../service/tweb3';
 
 import {
   callView,
@@ -18,11 +18,11 @@ import {
   HolidayEvent,
   TimeWithFormat,
   saveFileToIpfs,
-  sendTransaction,
 } from '../../../../helper';
+import { useTx } from '../../../../helper/hooks';
 import * as actions from '../../../../store/actions';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
-import { AvatarPro } from '../../../elements';
+import { FlexBox, rem } from '../../../elements/StyledUtils';
+import { ArrowTooltip, AvatarPro } from '../../../elements';
 import ImageCrop from '../../../elements/ImageCrop';
 
 const TopContainerBox = styled.div`
@@ -30,17 +30,24 @@ const TopContainerBox = styled.div`
     position: relative;
     overflow: hidden;
     max-width: ${rem(900)};
-    /* max-height: ${rem(425)}; */
-    min-height: ${rem(225)};
+    /* max-height: ${rem(425)};
+    min-height: ${rem(225)}; */
     .showChangeImg {
-      display: none;
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      & > div {
+        display: none;
+      }
+      & > button {
+        display: inline-flex;
+      }
     }
     &:hover {
       .showChangeImg {
-        display: block;
-        position: absolute;
-        top: 5px;
-        left: 5px;
+        & > div {
+          display: block;
+        }
       }
     }
     img {
@@ -88,16 +95,14 @@ const TopContainerBox = styled.div`
   }
 `;
 const WarrperChatBox = styled(FlexBox)`
-  margin-top: ${rem(15)};
-  /* & > div:first-child {
-    padding-right: ${rem(15)};
-  } */
+  margin-top: ${props => (props && props.isJournal ? '-4px' : rem(15))};
   div:nth-child(even) .content_detail p {
     background-image: -webkit-linear-gradient(128deg, #ad76ff, #8dc1fe);
     background-image: linear-gradient(322deg, #ad76ff, #8dc1fe);
   }
   .proposeMes {
-    display : flex;
+    display: flex;
+    width: 50%;
   }
   .user_photo {
     display: block;
@@ -139,14 +144,14 @@ const WarrperChatBox = styled(FlexBox)`
   .clearfix::after {
     display: block;
     clear: both;
-    content: "";
+    content: '';
   }
   .contentPage {
     margin-top: 23px;
   }
   .rightContent {
-      text-align: right;
-    }
+    text-align: right;
+  }
   p {
     display: block;
     padding: ${rem(11)} ${rem(14)};
@@ -159,11 +164,33 @@ const WarrperChatBox = styled(FlexBox)`
     background-image: -webkit-linear-gradient(113deg, #76a8ff, #8df6fe);
     background-image: linear-gradient(337deg, #76a8ff, #8df6fe);
   }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeMes {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .name_time {
+      color: red;
+    }
+  }
 `;
 
 const SummaryCard = styled.div`
   display: flex;
   justify-content: space-between;
+  .journalTitle {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #f5f5f5;
+    position: relative;
+    top: -32px;
+    padding: 0 16px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 32px;
+    height: 32px;
+  }
   .dayago {
     display: flex;
     align-items: flex-end;
@@ -178,7 +205,7 @@ const SummaryCard = styled.div`
     }
     .summaryCongrat {
       text-align: center;
-      margin: 7px;
+      margin: 7px 0 0 7px;
       height: 36px;
       border-radius: 18px;
       background-color: #fdf0f6;
@@ -217,21 +244,24 @@ const useStyles = makeStyles(theme => ({
       },
     },
   },
-  icon: {
+  btChange: {
     margin: theme.spacing(1),
     fontSize: '12px',
     color: 'white',
+    backgroundColor: 'rgba(0,0,0,.05)',
     // display: 'none',
   },
   photoCameraIcon: {
     marginRight: theme.spacing(1),
-    marginTop: theme.spacing(0.5),
+  },
+  input: {
+    display: 'none',
   },
   button: {
     margin: theme.spacing(1),
-    opacity: 0.8,
+    opacity: 0.9,
     '&:hover': {
-      background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
+      // background: 'linear-gradient(332deg, #591ea5, #fe8dc3)',
       opacity: 1,
     },
   },
@@ -250,53 +280,44 @@ const useStyles = makeStyles(theme => ({
   },
   rightIcon: {
     margin: theme.spacing(0, 1),
+    fontWeight: 700,
   },
 }));
 
 function TopContrainer(props) {
-  const { proIndex, setNeedAuth, topInfo, setTopInfo, setGLoading } = props;
-  const dispatch = useDispatch();
-  // const proposes = useSelector(state => state.loveinfo.proposes);
-  // const privateKey = useSelector(state => state.account.privateKey);
+  const { proIndex, topInfo, setTopInfo, setGLoading } = props;
   const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
+  const tx = useTx()
 
-  // const [topInfo, setTopInfo] = useState({});
   const [loading, setLoading] = useState(true);
-  // const [likes, setLikes] = useState({});
-  // const [isMyLike, setIsMyLike] = useState(false);
-  // const [numLike, setNumLike] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
 
   const needUpdate = !topInfo || proIndex !== topInfo.index;
 
   useEffect(() => {
+    async function setProposeLikeInfo() {
+      let likeData = {};
+      if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
+        const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
+        likeData = serialLikeData(likes);
+      }
+      const followData = serialFollowData(topInfo.follows);
+      setTopInfo({ ...topInfo, ...likeData, ...followData });
+    }
+
     setLoading(needUpdate);
     if (!needUpdate) {
       setProposeLikeInfo();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needUpdate]);
-
-  async function setProposeLikeInfo() {
-    if (topInfo.memoryRelationIndex || topInfo.memoryRelationIndex === 0) {
-      const likes = await callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]);
-      const { numLike, isMyLike } = serialLikeData(likes);
-      topInfo.numLike = numLike;
-      topInfo.isMyLike = isMyLike;
-      setTopInfo(topInfo);
-    }
-  }
 
   function handerLike() {
     try {
-      if (!tokenKey) {
-        dispatch(actions.setNeedAuth(true));
-        return;
-      }
-      const params = [topInfo.memoryRelationIndex, 1];
-      sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
+
+      tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1).then(() => {
         getNumTopLikes();
       });
 
@@ -307,7 +328,30 @@ function TopContrainer(props) {
         numLike += 1;
       }
       isMyLike = !isMyLike;
-      const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+      const newTopInfo = { ...topInfo, numLike, isMyLike };
+      setTopInfo(newTopInfo);
+    } catch (error) {
+      console.error(error);
+      const message = `An error occurred, please try again later`;
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  }
+
+  function handerFlow() {
+    try {
+
+      tx.sendCommit('followLock', topInfo.index, { tokenAddress, address }).then(() => {
+        getNumTopFollow();
+      });
+
+      let { numFollow, isMyFollow } = topInfo;
+      if (isMyFollow) {
+        numFollow -= 1;
+      } else {
+        numFollow += 1;
+      }
+      isMyFollow = !isMyFollow;
+      const newTopInfo = { ...topInfo, numFollow, isMyFollow };
       setTopInfo(newTopInfo);
     } catch (error) {
       console.error(error);
@@ -322,21 +366,32 @@ function TopContrainer(props) {
     callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
       const { numLike, isMyLike } = serialLikeData(data);
       if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
-        const newTopInfo = Object.assign({}, topInfo, { numLike, isMyLike });
+        const newTopInfo = { ...topInfo, numLike, isMyLike };
         setTopInfo(newTopInfo);
       }
     });
   }
 
+  function getNumTopFollow() {
+    callView('getFollowByLockIndex', [topInfo.index]).then(data => {
+      const { numFollow, isMyFollow } = serialFollowData(data);
+      if (topInfo.numFollow !== numFollow || topInfo.isMyLike !== isMyFollow) {
+        const newTopInfo = { ...topInfo, numFollow, isMyFollow };
+        setTopInfo(newTopInfo);
+      }
+    });
+  }
   function serialLikeData(likes) {
-    let isMyLike = false;
+    const isMyLike = !!likes[address];
     const num = Object.keys(likes).length;
-    if (likes[address]) {
-      isMyLike = true;
-    }
     return { numLike: num, isMyLike };
   }
-
+  function serialFollowData(follow) {
+    if (!follow) return { numFollow: 0, isMyFollow: false };
+    const isMyFollow = follow.includes(address);
+    const num = follow.length;
+    return { numFollow: num, isMyFollow };
+  }
   const classes = useStyles();
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
@@ -346,7 +401,6 @@ function TopContrainer(props) {
   function handleImageChange(event) {
     event.preventDefault();
     const orFiles = Array.from(event.target.files);
-
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
       setIsOpenCrop(true);
@@ -371,28 +425,17 @@ function TopContrainer(props) {
   }
 
   function acceptCoverImg() {
-    if (!tokenKey) {
-      setNeedAuth(true);
-      return;
-    }
+
     setGLoading(true);
     setTimeout(async () => {
       if (cropFile) {
         const hash = await saveFileToIpfs(cropFile);
-        const method = 'changeCoverImg';
-        const params = [proIndex, hash];
-        const result = await sendTransaction(method, params, { address, tokenAddress });
+        const result = await tx.sendCommit('changeCoverImg', proIndex, hash);
         if (result) {
           setCropFile('');
           setCropImg('');
-          const newTopInfo = Object.assign({}, topInfo, { coverImg: hash });
+          const newTopInfo = { ...topInfo, coverImg: hash };
           setTopInfo(newTopInfo);
-          // topInfo.coverImg = hash
-          // setTopInfo(topInfo)
-          // callView('getProposeByIndex', [proIndex]).then(propose => {
-          //   const pro = (propose && propose[0]) || {};
-          //   setTopInfo(Object.assign({}, topInfo, pro));
-          // });
         }
       }
       setGLoading(false);
@@ -400,20 +443,20 @@ function TopContrainer(props) {
   }
 
   const buttonChange = (
-    <Button className={classes.icon}>
-      <PhotoCameraIcon className={classes.photoCameraIcon} />
-      <input
-        accept="image/jpeg,image/png"
-        className="fileInput"
-        role="button"
-        type="file"
-        value=""
-        onChange={handleImageChange}
-      />
-      <Typography className={classes.changeCoverTitle} noWrap>
-        Change
-      </Typography>
-    </Button>
+    <label htmlFor="outlined-button-file">
+      <Button component="span" className={classes.btChange}>
+        <PhotoCameraIcon className={classes.photoCameraIcon} />
+        <Typography noWrap>Change Cover</Typography>
+        <input
+          accept="image/jpeg,image/png"
+          className={classes.input}
+          id="outlined-button-file"
+          type="file"
+          value=""
+          onChange={handleImageChange}
+        />
+      </Button>
+    </label>
   );
 
   if (loading) {
@@ -423,22 +466,22 @@ function TopContrainer(props) {
           <Skeleton variant="rect" width="100%" height={425} />
         </div>
         <WarrperChatBox>
-          <FlexWidthBox width="50%" className="proposeMes">
+          <div className="proposeMes">
             <CardHeader
               className={classes.card}
               avatar={<Skeleton variant="circle" width={40} height={40} />}
               title={<Skeleton height={6} width="80%" />}
               subheader={<Skeleton height={12} width="80%" />}
             />
-          </FlexWidthBox>
-          <FlexWidthBox width="50%" className="proposeMes">
+          </div>
+          <div className="proposeMes">
             <CardHeader
               className={classes.card}
               avatar={<Skeleton variant="circle" width={40} height={40} />}
               title={<Skeleton height={6} width="80%" />}
               subheader={<Skeleton height={12} width="80%" />}
             />
-          </FlexWidthBox>
+          </div>
         </WarrperChatBox>
       </TopContainerBox>
     );
@@ -448,65 +491,83 @@ function TopContrainer(props) {
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
-          <CardMedia className={classes.media} image={cropImg} title="Change lock image">
+          <CardMedia className={classes.media} image={cropImg}>
             <div className="showChangeImg">
-              <div>{buttonChange}</div>
-              <Button variant="contained" color="primary" className={classes.button} onClick={cancelCoverImg}>
+              <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
                 Cancel
               </Button>
               <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
-                OK
+                Apply
               </Button>
             </div>
           </CardMedia>
         ) : (
-          <CardMedia
-            className={classes.media}
-            image={process.env.REACT_APP_IPFS + topInfo.coverImg}
-            title="Change lock image"
-          >
-            <div className="showChangeImg">{buttonChange}</div>
+          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverImg}>
+            <div className="showChangeImg">
+              <div>{buttonChange}</div>
+            </div>
           </CardMedia>
         )}
       </div>
       <SummaryCard>
-        <div className="dayago">
-          {topInfo.type !== 2 && <img src="/static/img/happy-copy.svg" alt="together" />}
-          <div className="summaryDay">
-            {topInfo.type === 2 ? (
-              'JOURNAL'
-            ) : (
+        {!topInfo.isJournal ? (
+          <div className="dayago">
+            <img src="/static/img/happy-copy.svg" alt="together" />
+            <div className="summaryDay">
               <span>
                 {diffDate === 0 && 'First day'}
                 {diffDate > 0 && (diffDate === 1 ? `${diffDate} day` : `${diffDate} days`)}
               </span>
-            )}
+            </div>
+            <HolidayEvent day={topInfo.s_date} />
           </div>
-          <HolidayEvent day={topInfo.s_date} />
-        </div>
+        ) : (
+          <div className="journalTitle">JOURNAL</div>
+        )}
         <div className="proLike">
-          <Button onClick={handerLike}>
-            {topInfo.isMyLike ? (
-              <React.Fragment>
-                <FavoriteIcon color="primary" className={classes.rightIcon} />
-                <Typography component="span" variant="body2" color="primary">
-                  {topInfo.numLike > 0 && `${topInfo.numLike}`}
-                </Typography>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                <FavoriteBorderIcon className={classes.rightIcon} />
-                <Typography component="span" variant="body2">
-                  {topInfo.numLike > 0 && `${topInfo.numLike}`}
-                </Typography>
-              </React.Fragment>
-            )}
-          </Button>
+          <ArrowTooltip title="Follow">
+            <Button onClick={handerFlow}>
+              {topInfo.isMyFollow ? (
+                <>
+                  <BookmarkIcon color="primary" className={classes.rightIcon} />
+                  <Typography component="span" variant="body2" color="primary">
+                    {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <BookmarkBorderIcon className={classes.rightIcon} />
+                  <Typography component="span" variant="body2">
+                    {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                  </Typography>
+                </>
+              )}
+            </Button>
+          </ArrowTooltip>
+          <ArrowTooltip title="Express feelings">
+            <Button onClick={handerLike}>
+              {topInfo.isMyLike ? (
+                <>
+                  <FavoriteIcon color="primary" className={classes.rightIcon} />
+                  <Typography component="span" variant="body2" color="primary">
+                    {topInfo.numLike ? `${topInfo.numLike}` : ''}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <FavoriteBorderIcon className={classes.rightIcon} />
+                  <Typography component="span" variant="body2">
+                    {topInfo.numLike ? `${topInfo.numLike}` : ''}
+                  </Typography>
+                </>
+              )}
+            </Button>
+          </ArrowTooltip>
         </div>
       </SummaryCard>
-      <WarrperChatBox>
+      <WarrperChatBox isJournal={topInfo.isJournal}>
         {topInfo.s_content && (
-          <FlexWidthBox width="50%" className="proposeMes">
+          <div className="proposeMes">
             <div className="user_photo fl">
               <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
             </div>
@@ -520,10 +581,10 @@ function TopContrainer(props) {
               </div>
               <p>{topInfo.s_content}</p>
             </div>
-          </FlexWidthBox>
+          </div>
         )}
         {topInfo.r_content && (
-          <FlexWidthBox width="50%" className="proposeMes">
+          <div className="proposeMes">
             <div className="content_detail fl clearfix">
               <div className="name_time fr">
                 <span className="user_name color-violet">{topInfo.r_name}</span>
@@ -535,10 +596,10 @@ function TopContrainer(props) {
             <div className="user_photo fr">
               <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
             </div>
-          </FlexWidthBox>
+          </div>
         )}
       </WarrperChatBox>
-      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isCoverImg />}
+      {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
     </TopContainerBox>
   );
 }
@@ -555,9 +616,6 @@ const mapDispatchToProps = dispatch => {
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));
-    },
-    setNeedAuth(value) {
-      dispatch(actions.setNeedAuth(value));
     },
     setGLoading(value) {
       dispatch(actions.setLoading(value));

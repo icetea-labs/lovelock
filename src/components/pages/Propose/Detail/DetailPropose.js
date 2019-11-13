@@ -3,13 +3,18 @@ import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
-import { FlexBox, FlexWidthBox, rem } from '../../../elements/StyledUtils';
+import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
+import { useTx } from '../../../../helper/hooks';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
 import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
+
+import CommonDialog from '../../../elements/CommonDialog';
+import TextField from '@material-ui/core/TextField';
+import { useSnackbar } from 'notistack';
 
 window.prerenderReady = false;
 
@@ -21,6 +26,30 @@ const ShadowBox = styled.div`
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+`;
+const ProposeWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+      &--left {
+        display: none;
+      }
+    }
+  }
 `;
 
 export default function DetailPropose(props) {
@@ -28,16 +57,28 @@ export default function DetailPropose(props) {
   let isOwner = false;
   let isView = false;
   const dispatch = useDispatch();
-  const proIndex = parseInt(match.params.index);
+  const proIndex = parseInt(match.params.index, 10);
+  let collectionId = parseInt(match.params.cid, 10);
+  const invalidCollectionId = match.params.cid != null && isNaN(collectionId)
+  if (isNaN(collectionId)) collectionId = null
+
   const address = useSelector(state => state.account.address);
-  // const topInfo = useSelector(state => state.loveinfo.topInfo);
+  const tx = useTx()
+
   const [proposeInfo, setProposeInfo] = useState(null);
   const [pageErr, setPageErr] = useState(false);
+
+  const [dialogVisible, setDialogVisible] = useState(false)
+  const [colName, setColName] = useState('')
+  const [colDesc, setColDesc] = useState('')
+  const [colCreationCallback, setColCreationCallback] = useState()
+
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     let cancel = false;
 
-    if (isNaN(match.params.index)) {
+    if (isNaN(proIndex) || invalidCollectionId) {
       setPageErr(true);
     } else {
       callView('getProposes').then(async allPropose => {
@@ -50,7 +91,7 @@ export default function DetailPropose(props) {
 
             // add basic extra info
             proInfo.index = proIndex;
-            proInfo.coverImg = proInfo.coverImg || 'QmdQ61HJbJcTP86W4Lo9DQwmCUSETm3669TCMK42o8Fw4f';
+            proInfo.coverImg = proInfo.coverImg || 'QmXtwtitd7ouUKJfmfXXcmsUhq2nGv98nxnw2reYg4yncM';
             proInfo.isJournal = proInfo.sender === proInfo.receiver;
             proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
             proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
@@ -68,7 +109,39 @@ export default function DetailPropose(props) {
     }
 
     return () => (cancel = true);
-  }, [proIndex]);
+  }, [proIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const hideDialog = () => setDialogVisible(false)
+
+  const handleNewCollection = callback => {
+    setColCreationCallback(() => callback)
+    setDialogVisible(true)
+  }
+
+  const createCollection = () => {
+    hideDialog() // prevent dialog over dialog
+
+    const data = {
+      name: colName,
+    }
+
+    const desc = colDesc.trim().normalize()
+    if (desc) {
+      data.description = desc
+    }
+
+    tx.sendCommit('addLockCollection', proIndex, data).then(r => {
+      data.id = r.returnValue
+      proposeInfo.collections.push(data)
+      // push to redux
+      dispatch(actions.setTopInfo(proposeInfo));
+
+      colCreationCallback && colCreationCallback(data)
+    }).catch(err => {
+      console.warn(err)
+      enqueueSnackbar(err.message, { variant: 'error' });
+    })
+  }
 
   const renderHelmet = () => {
     const title = makeProposeName(proposeInfo, 'Lovelock - ');
@@ -108,7 +181,6 @@ export default function DetailPropose(props) {
       pro.r_name = receiverTags['display-name'];
       pro.r_publicKey = receiverTags['pub-key'] || '';
       pro.r_avatar = receiverTags.avatar;
-      pro.r_content = pro.r_content;
     }
     pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
 
@@ -136,15 +208,19 @@ export default function DetailPropose(props) {
           <TopContrainer proIndex={proIndex} />
         </ShadowBox>
       </BannerContainer>
-
-      <FlexBox wrap="wrap" minHeight="100vh">
-        <FlexWidthBox width="30%">
-          <LeftContainer />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightContainer proIndex={proIndex} isOwner={isOwner} />
-        </FlexWidthBox>
-      </FlexBox>
+  
+      <ProposeWrapper>
+        <div className="proposeColumn proposeColumn--left">
+          <LeftContainer proIndex={proIndex} />
+        </div>
+        <div className="proposeColumn proposeColumn--right">
+          <RightContainer
+            proIndex={proIndex}
+            collectionId={collectionId}
+            handleNewCollection={handleNewCollection}
+            isOwner={isOwner} />
+        </div>
+      </ProposeWrapper>
 
       {proposeInfo && renderHelmet()}
     </React.Fragment>
@@ -155,12 +231,31 @@ export default function DetailPropose(props) {
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
+
+    proposeInfo.collections = proposeInfo.collections || []
   }
 
   return (
     <React.Fragment>
       {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
       {pageErr && renderNotFound()}
+      {dialogVisible && <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
+          <TextField
+            autoFocus
+            required
+            onChange={e => setColName(e.target.value)}
+            label="Collection name"
+            type="text"
+            autoComplete="off"
+          />
+          <TextField
+            onChange={e => setColDesc(e.target.value)}
+            label="Description"
+            type="text"
+            style={{marginTop: 16}}
+            fullWidth
+          />
+      </CommonDialog>}
     </React.Fragment>
   );
 }

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import tweb3 from '../../../../service/tweb3';
+import { getContract } from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, getAlias, showSubscriptionError } from '../../../../helper';
 import Icon from '../../../elements/Icon';
@@ -41,57 +41,76 @@ const LeftBox = styled.div`
     text-transform: uppercase;
     /* margin-bottom: ${rem(20)}; */
   }
+  @media (max-width: 768px) {
+    min-height: auto;
+    margin-bottom: ${rem(20)};
+  }
 `;
 const ShadowBox = styled.div`
   padding: 30px;
   border-radius: 10px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  @media (max-width: 768px) {
+    border-radius: 4px;
+  }
 `;
-// const TagBox = styled.div`
-//   width: 100%;
-//   display: flex;
-//   flex-wrap: wrap;
-//   .tagName {
-//     color: #8250c8;
-//     margin-right: ${rem(7)};
-//     font-size: ${rem(12)};
-//     :hover {
-//       cursor: pointer;
-//     }
-//   }
-// `;
+
+const CollectionBox = styled.div`
+  padding-top: 1rem;
+  width: 100%;
+  display: block;
+  .colName {
+    color: #5a5e67;
+    margin-right: ${rem(7)};
+    font-size: ${rem(12)};
+    cursor: pointer;
+    margin-bottom: ${rem(9)}
+    padding: 3px 12px 3px 6px;
+    :hover {
+      color: #8250c8;
+      text-decoration: underline;
+    }
+    .material-icons {
+      vertical-align: middle;
+    }
+    .colText {
+    }
+  }
+`;
 
 function LeftContainer(props) {
   const {
     proposes,
-    setPropose,
+    setProposes,
     addPropose,
     confirmPropose,
+    topInfo,
+    proIndex,
     address,
-    tokenAddress,
-    tokenKey,
-    setNeedAuth,
     history,
   } = props;
+
+  const collections = topInfo && topInfo.index === proIndex ? (topInfo.collections || []) : []
+
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    let signal = {};
+    const signal = {};
 
     loadProposes(signal);
     watchCreatePropose(signal);
     // watchConfirmPropose(signal);
 
     return () => (signal.cancel = true);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function watchCreatePropose(signal) {
     const filter = {};
-    return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
+    return getContract().events.allEvents(filter, async (error, result) => {
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
@@ -118,9 +137,10 @@ function LeftContainer(props) {
       }
     });
   }
+
   // function watchConfirmPropose(signal) {
   //   const filter = {};
-  //   return tweb3.contract(process.env.REACT_APP_CONTRACT).events.allEvents(filter, async (error, result) => {
+  //   return getContract().events.allEvents(filter, async (error, result) => {
   //     if (error) {
   //       const message = 'Watch confirmPropose error';
   //       enqueueSnackbar(message, { variant: 'error' });
@@ -146,21 +166,19 @@ function LeftContainer(props) {
     setStep('deny');
   }
 
-  function selectAccepted(proIndex) {
-    history.push(`/lock/${proIndex}`);
+  function selectAccepted(proIndex, collectionId) {
+    let url = '/lock/' + proIndex
+    if (collectionId != null) {
+      url += '/collection/' + collectionId
+    }
+    history.push(url);
   }
 
   function newLock() {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
     setStep('new');
   }
 
   function selectPending(proIndex) {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
     setStep('pending');
     setIndex(proIndex);
   }
@@ -176,7 +194,7 @@ function LeftContainer(props) {
   async function eventCreatePropose(data, signal) {
     const log = await addInfoToProposes([data.log], signal);
     if (!log || !log.length) return;
-    
+
     addPropose(log[0]);
 
     if (address !== log[0].sender) {
@@ -195,10 +213,10 @@ function LeftContainer(props) {
     if (address) {
       resp = (await callView('getProposeByAddress', [address])) || [];
     }
-    const newPropose = await addInfoToProposes(resp, signal);
+    const newProposes = await addInfoToProposes(resp, signal);
     if (signal.cancel) return;
 
-    setPropose(newPropose);
+    setProposes(newProposes);
     setLoading(false);
   }
 
@@ -226,22 +244,23 @@ function LeftContainer(props) {
         // eslint-disable-next-line no-await-in-loop
         const nick = await getAlias(partnerAddress);
         if (signal.cancel) return;
-        clonePro[i].nick = `@${nick}`;
+        clonePro[i].nick = nick ? `@${nick}` : '(no username)';
       }
     }
     return clonePro;
   }
 
-  //function renderTag() {
-  // const { tag } = state;
-  // return tag.map((item, index) => {
-  //   return (
-  //     <span className="tagName" key={index}>
-  //       #{item}
-  //     </span>
-  //   );
-  // });
-  //}
+  function renderCollections(collections) {
+    const cols = [{ name: 'All', description: 'All memories.'}].concat(collections)
+    return cols.map((item, index) => {
+      return (
+        <div className="colName" key={index} onClick={() => selectAccepted(proIndex, item.id)}>
+          <Icon type='collections' />
+          <span className="colText" title={item.description}>{item.name}</span>
+        </div>
+      );
+    });
+  }
 
   return (
     <React.Fragment>
@@ -261,15 +280,16 @@ function LeftContainer(props) {
           <div>
             <LeftProposes loading={loading} flag={0} handlerSelect={selectPending} />
           </div>
+          <div className="title">Collection</div>
+          <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
       </LeftBox>
-      {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}
-      {step === 'pending' && tokenKey && (
+      {step === 'new' && <PuNewLock close={closePopup} />}
+      {step === 'pending' && (
         <PromiseAlert
           index={index}
           proposes={proposes}
           address={address}
-          tokenAddress={tokenAddress}
           close={closePopup}
           accept={nextToAccept}
           deny={nextToDeny}
@@ -285,14 +305,13 @@ const mapStateToProps = state => {
   return {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
-    tokenAddress: state.account.tokenAddress,
-    tokenKey: state.account.tokenKey,
+    topInfo: state.loveinfo.topInfo,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    setPropose: value => {
+    setProposes: value => {
       dispatch(actions.setPropose(value));
     },
     addPropose: value => {
@@ -300,9 +319,6 @@ const mapDispatchToProps = dispatch => {
     },
     confirmPropose: value => {
       dispatch(actions.confirmPropose(value));
-    },
-    setNeedAuth: value => {
-      dispatch(actions.setNeedAuth(value));
     },
   };
 };

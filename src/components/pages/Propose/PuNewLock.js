@@ -12,8 +12,9 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import * as actions from '../../../store/actions';
-import tweb3 from '../../../service/tweb3';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
+import { getAliasContract } from '../../../service/tweb3';
+import { saveFileToIpfs, saveBufferToIpfs, tryStringifyJson, getTagsInfo } from '../../../helper';
+import { ensureToken, sendTransaction } from '../../../helper/hooks';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from '../../elements/CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
@@ -192,8 +193,8 @@ class PuNewLock extends React.Component {
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timeoutHanle1);
-    clearTimeout(this.timeoutHanle2);
+    this.timeoutHanle1 && clearTimeout(this.timeoutHanle1);
+    this.timeoutHanle2 && clearTimeout(this.timeoutHanle2);
   }
 
   onChangeDate = date => {
@@ -207,7 +208,7 @@ class PuNewLock extends React.Component {
   async getSuggestions(value) {
     let escapedValue = this.escapeRegexCharacters(value.trim());
 
-    if (escapedValue.length <= 3) {
+    if (escapedValue.length < 3) {
       this.setState({ suggestions: [] });
       return;
     }
@@ -219,11 +220,7 @@ class PuNewLock extends React.Component {
     const peopleAva = [];
 
     try {
-      const method = 'callReadonlyContractMethod';
-      const add = 'system.alias';
-      const func = 'query';
-
-      const result = await tweb3[method](add, func, [escapedValue]);
+      const result = await getAliasContract().methods.query(escapedValue).call()
       people = Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
         return { nick, address: result[key].address };
@@ -238,7 +235,9 @@ class PuNewLock extends React.Component {
     for (let i = 0; i < people.length; i++) {
       // eslint-disable-next-line no-await-in-loop
       const resp = await getTagsInfo(people[i].address);
-      peopleAva.push(resp.avatar);
+      if (resp && resp.avatar) {
+        peopleAva.push(resp.avatar);
+      }
     }
     for (let i = 0; i < people.length; i++) {
       Object.assign(people[i], { avatar: peopleAva[i] });
@@ -354,7 +353,7 @@ class PuNewLock extends React.Component {
 
   handleImageChange = event => {
     event.preventDefault();
-    const orFiles = event.target.files;
+    const orFiles = Array.from(event.target.files);
     if (orFiles.length > 0) {
       this.setState({
         originFile: orFiles,
@@ -400,19 +399,14 @@ class PuNewLock extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, close, address, tokenAddress } = this.props;
+    const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva = '';
     let hash = [];
     let message = '';
 
-    setLoading(true);
-
-    this.timeoutHanle1 = setTimeout(async () => {
+    //this.timeoutHanle1 = setTimeout(async () => {
       try {
-        if (cropFile) {
-          botAva = await saveFileToIpfs(cropFile);
-        }
         if (!partner) {
           message = 'Please choose your partner.';
           enqueueSnackbar(message, { variant: 'error' });
@@ -422,7 +416,6 @@ class PuNewLock extends React.Component {
         if (!promiseStm) {
           message = 'Please input your lock.';
           enqueueSnackbar(message, { variant: 'error' });
-          setLoading(false);
           return;
         }
 
@@ -431,56 +424,69 @@ class PuNewLock extends React.Component {
           if (!firstname) {
             message = 'Please enter your crush first name.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
           if (!lastname) {
             message = 'Please enter your crush last name.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
           if (!cropFile) {
             message = 'Please choose avatar of your crush.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
           if (!botReply) {
             message = 'Please enter the reply from your crush.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
-          botInfo = { firstname, lastname, botAva, botReply };
+          botInfo = { firstname, lastname, botReply };
         }
 
-        if (file) {
-          hash = await saveBufferToIpfs(file);
+        const uploadThenSendTx = async () => {
+          setLoading(true);
+
+          if (cropFile) {
+            botAva = await saveFileToIpfs(cropFile);
+            botInfo.botAva = botAva
+          }
+
+          if (file) {
+            hash = await saveBufferToIpfs(file);
+          }
+  
+          const info = { date, hash };
+          return await sendTransaction(this.props, 'createPropose', promiseStm, partner, info, botInfo)
         }
 
-        const info = { date, hash };
-        const name = 'createPropose';
+        const result = await ensureToken(this.props, uploadThenSendTx)
 
-        const params = [promiseStm, partner, info, botInfo];
-        // const params = [promiseStm, partner, info];
-        const result = await sendTransaction(name, params, { address, tokenAddress });
-
-        this.timeoutHanle2 = setTimeout(() => {
-          if (result) {
+        //this.timeoutHanle2 = setTimeout(() => {
+        //  if (result) {
             message = 'Your lock sent successfully.';
             enqueueSnackbar(message, { variant: 'success' });
             setLoading(false);
             close();
-          }
-        }, 50);
+        //  }
+        //}, 50);
       } catch (err) {
         console.error(err);
         message = 'an error occurred while sending, please check the inner exception for details';
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
       }
-    }, 100);
+    //}, 100);
+  }
+
+  onKeyEsc = () => {
+    if (!this.dialogShown && !this.state.isJournal) {
+      this.props.close()
+    }
+  }
+
+  onDialogToggle = value => {
+    this.dialogShown = value
   }
 
   render() {
@@ -503,97 +509,104 @@ class PuNewLock extends React.Component {
       placeholder: '@partner',
       value,
       onChange: this.onPartnerChange,
+      autoFocus: true
     };
 
     return (
-      <CommonDialog
-        title="New Lock"
-        okText={() => this.state.okText || 'Send'}
-        close={close}
-        confirm={() => {
-          this.createPropose(partner, promiseStm, date, file);
-        }}
-      >
-        {!checked && (
-          <div>
-            <TagTitle>Tag your partner</TagTitle>
-            <Autosuggest
-              id="suggestPartner"
-              suggestions={suggestions}
-              onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-              onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-              getSuggestionValue={this.getSuggestionValue}
-              renderSuggestion={this.renderSuggestion}
-              inputProps={inputProps}
-            />
-          </div>
-        )}
-        <FormControlLabel
-          control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
-          label="or create your own crush"
-        />
-        {checked && (
-          <FlexBox>
-            <PreviewContainter>
-              <div className="upload_img">
-                <AvatarProCus src={avatar} />
-                <div className="changeImg">
-                  <input
-                    className="fileInput"
-                    type="file"
-                    onChange={this.handleImageChange}
-                    accept="image/jpeg,image/png"
-                  />
-                  <CameraAltIcon />
+      <React.Fragment>
+        <CommonDialog
+          title="New Lock"
+          okText={() => this.state.okText || 'Send'}
+          close={close}
+          onKeyEsc={this.onKeyEsc}
+          confirm={() => {
+            this.createPropose(partner, promiseStm, date, file);
+          }}
+        >
+          {!checked && (
+            <div>
+              <TagTitle>Tag your partner</TagTitle>
+              <Autosuggest
+                id="suggestPartner"
+                suggestions={suggestions}
+                onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                getSuggestionValue={this.getSuggestionValue}
+                renderSuggestion={this.renderSuggestion}
+                inputProps={inputProps}
+              />
+            </div>
+          )}
+          <FormControlLabel
+            control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
+            label="or create your own crush"
+          />
+          {checked && (
+            <FlexBox>
+              <PreviewContainter>
+                <div className="upload_img">
+                  <AvatarProCus src={avatar} />
+                  <div className="changeImg">
+                    <input
+                      className="fileInput"
+                      type="file"
+                      value=""
+                      onChange={this.handleImageChange}
+                      accept="image/jpeg,image/png"
+                    />
+                    <CameraAltIcon />
+                  </div>
                 </div>
-              </div>
-            </PreviewContainter>
-            <RightBotInfo>
-              <TextFieldPlaceholder
-                label="First Name"
-                fullWidth
-                onChange={this.handleUsername}
-                name="firstname"
-                validators={['required']}
-                // margin="normal"
-              />
-              <TextFieldPlaceholder
-                label="Last Name"
-                fullWidth
-                onChange={this.handleUsername}
-                name="lastname"
-                validators={['required']}
-                // margin="normal"
-              />
-              <TextFieldPlaceholder
-                label="Crush's response to your lock"
-                fullWidth
-                onChange={this.handleUsername}
-                name="botReply"
-                validators={['required']}
-              />
-            </RightBotInfo>
-          </FlexBox>
-        )}
-        <DividerCus />
-        <TagTitle className="prmContent">Lock content</TagTitle>
-        <TextFieldMultiLine
-          id="outlined-multiline-static"
-          placeholder="lock content ..."
-          multiline
-          fullWidth
-          rows="4"
-          variant="outlined"
-          onChange={this.promiseStmChange}
-        />
-        <AddInfoMessage
-          files={file}
-          date={date}
-          onChangeDate={this.onChangeDate}
-          onChangeMedia={this.onChangeMedia}
-          isCreatePro
-        />
-        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} />}
+              </PreviewContainter>
+              <RightBotInfo>
+                <TextFieldPlaceholder
+                  label="Crush First Name"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="firstname"
+                  validators={['required']}
+                  // margin="normal"
+                />
+                <TextFieldPlaceholder
+                  label="Crush Last Name"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="lastname"
+                  validators={['required']}
+                  // margin="normal"
+                />
+                <TextFieldPlaceholder
+                  label="Crush's Reply to You"
+                  fullWidth
+                  onChange={this.handleUsername}
+                  name="botReply"
+                  validators={['required']}
+                />
+              </RightBotInfo>
+            </FlexBox>
+          )}
+          <DividerCus />
+          <TagTitle className="prmContent">Your Message</TagTitle>
+          <TextFieldMultiLine
+            id="outlined-multiline-static"
+            placeholder={checked ? 'Express yourself to your crush…' : 'Say something to your partner…'}
+            multiline
+            fullWidth
+            rows="4"
+            variant="outlined"
+            onChange={this.promiseStmChange}
+          />
+          <AddInfoMessage
+            files={file}
+            date={date}
+            onChangeDate={this.onChangeDate}
+            onChangeMedia={this.onChangeMedia}
+            isCreatePro
+            hasParentDialog
+            onDialogToggle={this.onDialogToggle}
+          />
+        </CommonDialog>
+        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />}
         {isJournal && (
           <CommonDialog
             title="Journal"
@@ -602,14 +615,14 @@ class PuNewLock extends React.Component {
             close={this.closeJournal}
             cancel={this.closeJournal}
             confirm={this.createJournal}
-            isCancel
+            hasParentDialog
           >
             <TagTitle>
               <span>By create a lock with yourself, you will create a Journal instead.</span>
             </TagTitle>
           </CommonDialog>
         )}
-      </CommonDialog>
+      </React.Fragment>
     );
   }
 }
@@ -624,6 +637,7 @@ const mapStateToProps = state => {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
     tokenAddress: state.account.tokenAddress,
+    tokenKey: state.account.tokenKey,
   };
 };
 
@@ -632,6 +646,7 @@ const mapDispatchToProps = dispatch => {
     setLoading: value => {
       dispatch(actions.setLoading(value));
     },
+    dispatch
   };
 };
 

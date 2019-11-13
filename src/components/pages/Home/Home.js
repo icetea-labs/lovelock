@@ -46,12 +46,14 @@ const ShadowBox = styled.div`
 
 function Home(props) {
   const [openPromise, setOpenPromise] = useState(false);
-  const { address, history, setNeedAuth, tokenKey } = props;
+  const { address, history } = props;
   const [homePropose, setHomePropose] = useState(null);
 
   useEffect(() => {
     loadAcceptPropose();
-  }, []);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   function loadAcceptPropose() {
     if (address) {
@@ -72,12 +74,9 @@ function Home(props) {
       }
       history.push(`/lock/${index}`);
     }
-  }, [homePropose]);
+  }, [homePropose, history]);
 
   function openPopup() {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
     setOpenPromise(true);
   }
 
@@ -113,7 +112,7 @@ function Home(props) {
           </div>
         </RightBox>
       </ShadowBox>
-      {openPromise && tokenKey && <PuNewLock close={closePopup} />}
+      {openPromise && <PuNewLock close={closePopup} />}
     </FlexWidthBox>
   );
 
@@ -129,19 +128,10 @@ function Home(props) {
 const mapStateToProps = state => {
   return {
     address: state.account.address,
-    tokenKey: state.account.tokenKey,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    setNeedAuth: value => {
-      dispatch(actions.setNeedAuth(value));
-    },
   };
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  null
 )(Home);

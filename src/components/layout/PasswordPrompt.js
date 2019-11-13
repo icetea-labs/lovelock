@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import { codec } from '@iceteachain/common';
@@ -9,50 +9,56 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { withRouter } from 'react-router-dom';
 
-import tweb3 from '../../service/tweb3';
+import { getWeb3, grantAccessToken} from '../../service/tweb3';
 import * as actions from '../../store/actions';
-import { wallet, decode, savetoLocalStorage } from '../../helper';
+// import { wallet, decode, savetoLocalStorage } from '../../helper';
+import { wallet, decode } from '../../helper';
+import { useRemember } from '../../helper/hooks'
 import CommonDialog from '../elements/CommonDialog';
-import { encode } from '../../helper/encode';
+// import { encode } from '../../helper/encode';
 
-function GetKeyToAuthen(props) {
+function PasswordPrompt(props) {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const encryptedData = useSelector(state => state.account.encryptedData);
   const needAuth = useSelector(state => state.account.needAuth);
   const addressRedux = useSelector(state => state.account.address);
-  const [isRemember, setIsRemember] = useState(true);
+  const [isRemember, setIsRemember] = useRemember();
+
+  let credLoading = useRef(false)
+  const [autoPassFailed, _setAutoPassFailed] = useState(false)
+  const setAutoPassFailed = () => {
+    _setAutoPassFailed(true)
+    credLoading.current = false
+  }
 
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-
-    // if (window.PasswordCredential) {
-    //   navigator.credentials.get({
-    //     password: true,
-    //     mediation: 'silent'
-    //   }).then(cred => {
-    //   })
-    // }
-
-    if (!addressRedux) {
-      setPathName(window.location.pathname);
-      props.history.push('/register');
-      return;
-    }
-    const handleUserKeyPress = event => {
-      if (event.keyCode === 13) {
-        confirm();
+  if (!addressRedux) {
+    setPathName(window.location.pathname);
+    setNeedAuth(false);
+    props.history.push('/register');
+    return null
+  }
+  
+  if (!autoPassFailed && !credLoading.current && window.PasswordCredential) {
+    credLoading.current = true
+    navigator.credentials.get({
+      password: true,
+      mediation: 'silent'
+    }).then(cred => {
+      // because we use silent mediation
+      // it only goes here if we have 01 saved pass
+      if (cred && cred.password) {
+        confirm(cred.password, true)
+      } else {
+        setAutoPassFailed()
       }
-      if (event.keyCode === 27) {
-        close();
-      }
-    };
-    window.document.body.addEventListener('keydown', handleUserKeyPress);
-    return () => {
-      window.document.body.removeEventListener('keydown', handleUserKeyPress);
-    };
-  }, [password]);
+    }).catch(err => {
+      setAutoPassFailed()
+      console.warn(err)
+    })
+}
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -79,15 +85,15 @@ function GetKeyToAuthen(props) {
     setNeedAuth(false);
   }
 
-  function confirm() {
+  function confirm(decryptPass, isAuto) {
     if (encryptedData) {
-      if (!password) {
+      if (!decryptPass) {
         return;
       }
       setLoading(true);
-      setTimeout(() => {
+      //setTimeout(() => {
         try {
-          const decodeOutput = decode(password, encryptedData);
+          const decodeOutput = decode(decryptPass, encryptedData);
           let mode = 0;
           let privateKey;
           let address;
@@ -99,21 +105,15 @@ function GetKeyToAuthen(props) {
             privateKey = decodeOutput;
             address = wallet.getAddressFromPrivateKey(privateKey);
           }
+
+          const tweb3 = getWeb3()
           tweb3.wallet.importAccount(privateKey);
 
           const token = tweb3.wallet.createRegularAccount();
-          const ms = tweb3.contract('system.did').methods;
-          const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          ms.grantAccessToken(
-            address,
-            [process.env.REACT_APP_CONTRACT, 'system.did'],
-            token.address,
-            parseInt(expire, 10)
-          )
-            .sendCommit({ from: address })
+          grantAccessToken(address, token.address, isRemember)
             .then(({ returnValue }) => {
               tweb3.wallet.importAccount(token.privateKey);
-              // const keyObject = encode(privateKey, password);
+              // const keyObject = encode(privateKey, decryptPass);
               const storage = isRemember ? localStorage : sessionStorage;
               // save token account
               storage.sessionData = codec
@@ -133,26 +133,38 @@ function GetKeyToAuthen(props) {
                 mode,
                 tokenAddress: token.address,
                 tokenKey: token.privateKey,
-                cipher: password,
+                cipher: decryptPass,
               };
               setAccount(account);
-              setLoading(false);
-              setTimeout(() => {
+
+              //setTimeout(() => {
                 close();
-              }, 50);
+                if (typeof needAuth === 'function') {
+                  needAuth()
+                }
+              //}, 50);
             });
         } catch (error) {
-          console.error(error);
+          if (isAuto) {
+            setAutoPassFailed()
+          } else {
+            console.error(error);
+            const message = 'Your password is invalid. Please try again.';
+            enqueueSnackbar(message, { variant: 'error' });
+          }
+        } finally {
           setLoading(false);
-          const message = 'Your password is invalid. Please try again.';
-          enqueueSnackbar(message, { variant: 'error' });
         }
-      }, 100);
+      //}, 100);
     }
   }
 
-  return needAuth ? (
-    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={confirm}>
+  function handleConfirm() {
+    confirm(password)
+  }
+
+  return ((!credLoading.current || autoPassFailed) && needAuth) ? (
+    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={handleConfirm} onKeyReturn hasParentDialog ensureTopLevel>
       <TextField
         id="Password"
         label="Password"
@@ -162,7 +174,7 @@ function GetKeyToAuthen(props) {
         margin="normal"
         onChange={passwordChange}
         type="password"
-        inputProps={{ autoComplete: "current-password" }}
+        autoComplete="current-password"
       />
       <FormControlLabel
         control={
@@ -181,4 +193,4 @@ function GetKeyToAuthen(props) {
   ) : null;
 }
 
-export default withRouter(GetKeyToAuthen);
+export default withRouter(PasswordPrompt);

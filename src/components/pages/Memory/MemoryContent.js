@@ -22,7 +22,8 @@ import {
   decodeImg,
   getJsonFromIpfs,
   makeProposeName,
-  signalPrerenderDone
+  signalPrerenderDone,
+  smartFetchIpfsJson
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -150,8 +151,33 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const setMemoryCollection = (propose, memory) => {
+  const cid = memory.info.collectionId
+  if (cid != null) {
+    const cs = propose.collections || []
+    memory.collection = cs.find(c => c.id === cid)
+  }
+}
+
+const renderCardSubtitle = memory => {
+  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
+  const hasCol = memory.collection
+  if (!hasCol) return time
+
+  const { id, name } = memory.collection
+  return (
+    <>
+      <a href={`/lock/${memory.lockIndex}/collection/${id}`}>{name}</a>
+      <span>・</span>
+      {time}
+    </>
+  )
+}
+
 function MemoryContent(props) {
   const { memory, setNeedAuth, propose } = props;
+  setMemoryCollection(propose, memory)
+
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -172,6 +198,34 @@ function MemoryContent(props) {
     let cancel = false
     const abort = new AbortController()
 
+    async function serialMemory(signal) {
+      let mem = memory;
+      if (memory.info.blog) {
+        const blogData = JSON.parse(memory.content);
+        mem = { ...memory }
+        mem.meta = blogData.meta;
+        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
+          .then(d => d.json)
+          .catch(err => {
+            if (err.name === 'AbortError') return
+            throw err
+          })
+      } else if (memory.isPrivate) {
+        const memCache = await loadMemCacheAPI(memory.id);
+        if (memCache) {
+          mem = memCache;
+          for (let i = 0; i < mem.info.hash.length; i++) {
+            const newBuffer = Buffer.from(mem.info.buffer[i]);
+            // mem.info.hash[i] = await getJsonFromIpfs(newBuffer, i);
+            const blob = new Blob([newBuffer], { type: 'image/jpeg' });
+            mem.info.hash[i].src = URL.createObjectURL(blob);
+          }
+        }
+      }
+      
+      return mem
+    }
+
     serialMemory(abort.signal).then(mem => {
       if (cancel || !mem) return
 
@@ -186,35 +240,7 @@ function MemoryContent(props) {
       abort.abort()
       cancel = true
     }
-  }, []);
-
-  async function serialMemory(signal) {
-    let mem = memory;
-    if (memory.info.blog) {
-      const blogData = JSON.parse(memory.content);
-      mem = { ... memory }
-      mem.meta = blogData.meta;
-      mem.blogContent = await fetch(process.env.REACT_APP_IPFS + blogData.blogHash, { signal })
-        .then(d => d.json())
-        .catch(err => {
-          if (err.name === 'AbortError') return
-          throw err
-        })
-    } else if (memory.isPrivate) {
-      const memCache = await loadMemCacheAPI(memory.id);
-      if (memCache) {
-        mem = memCache;
-        for (let i = 0; i < mem.info.hash.length; i++) {
-          const newBuffer = Buffer.from(mem.info.buffer[i]);
-          // mem.info.hash[i] = await getJsonFromIpfs(newBuffer, i);
-          const blob = new Blob([newBuffer], { type: 'image/jpeg' });
-          mem.info.hash[i].src = URL.createObjectURL(blob);
-        }
-      }
-    }
-    
-    return mem
-  }
+  }, [memory, memory.showDetail, memory.info.blog, propose]);
 
   function FacebookProgress(propsFb) {
     const classesFb = useStylesFacebook();
@@ -280,7 +306,7 @@ function MemoryContent(props) {
     }, 100);
   }
 
-  function handerNumberComment(number) {
+  function handleNumberComment(number) {
     setNumComment(number);
   }
 
@@ -381,7 +407,7 @@ function MemoryContent(props) {
     const desc = makeProposeName(propose)
     let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url
     if (!img) {
-      img = propose.coverImg ? 
+      img = propose.coverImg ?
         process.env.REACT_APP_IPFS + propose.coverImg :
         process.env.PUBLIC_URL + '/static/img/share.jpg'
     }
@@ -413,7 +439,7 @@ function MemoryContent(props) {
             renderLockEventMemory()
           )
         ) : (
-          <Typography variant="body2" style={{ whiteSpace: 'pre-line' }} component="div">
+          <Typography variant="body1" style={{ whiteSpace: 'pre-line' }} component="div">
             {!isBlog && memoryDecrypted.content}
             {isBlog && blogInfo.title && (
               <BlogShowcase
@@ -446,7 +472,7 @@ function MemoryContent(props) {
               )}
               {showComment && (
                 <MemoryComments
-                  handerNumberComment={handerNumberComment}
+                  handleNumberComment={handleNumberComment}
                   memoryIndex={memory.id}
                   memory={memory}
                   textInput={textInput}
@@ -485,7 +511,7 @@ function MemoryContent(props) {
 
   const renderComments = () => (
     <MemoryComments
-      handerNumberComment={handerNumberComment}
+      handleNumberComment={handleNumberComment}
       memoryIndex={memory.id}
       memory={memory}
       textInput={textInput}
@@ -499,7 +525,7 @@ function MemoryContent(props) {
         <CardHeader
           avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
           title={memoryDecrypted.name}
-          subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+          subheader={renderCardSubtitle(memoryDecrypted)}
           action={
             <IconButton aria-label="settings">
               <MoreVertIcon />

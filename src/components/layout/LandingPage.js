@@ -2,8 +2,6 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
-import { ThemeProvider } from '@material-ui/styles';
-import { createMuiTheme } from '@material-ui/core/styles';
 
 const OutBox = styled.div`
   display: flex;
@@ -24,6 +22,10 @@ const SplitLeft = styled.div`
   color: #fff;
   background-size: cover;
   background-image: url('/static/img/landing.svg');
+  @media (max-width: 768px) {
+    height: 50%;
+    width: 100%;
+  }
 `;
 
 const SplitRight = styled.div`
@@ -36,6 +38,11 @@ const SplitRight = styled.div`
   padding-top: 20px;
   right: 0;
   background-color: #fff;
+  @media (max-width: 768px) {
+    height: 50%;
+    width: 100%;
+    top: 50%;
+  }
 `;
 
 const SplitContentLeft = styled.div`

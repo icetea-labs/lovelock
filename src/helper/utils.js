@@ -5,17 +5,129 @@ import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
-import tweb3 from '../service/tweb3';
+import { getWeb3, getContract } from '../service/tweb3';
 import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
+export const ipfsGateway = process.env.REACT_APP_IPFS;
+export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
+
+export function waitForHtmlTags(selector, callback, { 
+  timeout = 3000,
+  step = 100,
+  rootElement,
+  func = 'querySelectorAll',
+  testProp = 'length',
+  timeoutCallBack
+} = {}) {
+  if (timeout < 0) {
+    timeoutCallBack && timeoutCallBack();
+    return;
+  }
+  
+  var el =   (rootElement || document)[func](selector);
+  if (el && (!testProp || el[testProp])) {
+    callback(el);
+  } else {
+    setTimeout(() => {
+      waitForHtmlTags(selector, callback, { timeout: timeout - step, step, rootElement, func, testProp, timeoutCallBack });
+    }, step);
+  }
+}
+
+export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
+  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json())
+}
+
+export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
+    timeout = 10, // almost race
+    signal,
+    abortAtTimeout, // whether to abort main gateway when timeout
+    abortMain, // whether to abort main gateway when resolved
+    abortFallback // whether to abort fallback gateway when resolve
+} = {}) {
+
+  if (signal && signal.aborted) {
+    return Promise.reject(new DOMException('Aborted', 'AbortError'));
+  }
+
+  return new Promise((resolve, reject) => {
+    const mainController = new AbortController();
+    const secondController = signal ? new AbortController() : undefined
+
+    const timeoutId = setTimeout(() => {
+      abortAtTimeout && mainController.abort()
+      fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
+        .then(response => response.json())
+        .then(json => {
+          resolve({ json, gateway: fallbackGateway })
+          abortMain && mainController.abort()
+        }).catch(err => {
+          if (err.name !== 'AbortError') {
+            reject(err)
+          }
+        })
+    }, timeout);
+
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        mainController.abort()
+        secondController && secondController.abort()
+        reject(new DOMException('Aborted', 'AbortError'));
+      })
+    }
+
+    fetch(mainGateway + hash, { signal: mainController.signal })
+    .then(response => {
+      clearTimeout(timeoutId)
+      return response.json()
+    }).then(json => {
+      resolve({ json: json, gateway: mainGateway })
+      if (abortFallback) {
+        clearTimeout(timeoutId);
+        secondController && secondController.abort()
+      }
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        reject(err)
+      }
+    })
+
+  })
+}
+
+export function fetchMainFirstIpfsJson(hash, options = {}) {
+  if (options.abortMain == null) {
+    options.abortMain = true
+  }
+  return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options)
+}
+
+export function fetchAltFirstIpfsJson(hash, options = {}) {
+  if (options.timeout == null) {
+    options.timeout = 1500 // wait a little to reduce load for our main gateway
+  }
+  if (options.abortFallback == null) {
+    options.abortFallback = true
+  }
+  return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options)
+}
+
+export function smartFetchIpfsJson(hash, options = {}) {
+  let func = fetchMainFirstIpfsJson
+  if (options.timestamp && (Date.now() - options.timestamp > 10 * 60 * 1000)) {
+    func = fetchAltFirstIpfsJson
+  }
+  return func(hash, options)
+}
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
-    wait = process.env.REACT_APP_PRERENDER_WAIT || 100
+    wait = +process.env.REACT_APP_PRERENDER_WAIT || 100
   }
   window.setTimeout(() => {
     window.prerenderReady = true
@@ -49,13 +161,15 @@ export function callView(funcName, params) {
   return callReadOrPure(funcName, params, 'callReadonlyContractMethod');
 }
 function callReadOrPure(funcName, params, method) {
-  return tweb3[method](contract, funcName, params || []);
+  return getWeb3()[method](contract, funcName, params || []);
 }
 
-export async function sendTransaction(funcName, params, opts) {
-  console.log('sendTransaction', funcName, params);
-  const ct = tweb3.contract(contract);
+export async function sendTxUtil(funcName, params, opts) {
+  const ct = getContract();
   const sendType = opts.sendType || 'sendCommit';
+
+  console.log(sendType, funcName, params);
+  
   const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
     signers: opts.tokenAddress,
@@ -76,7 +190,7 @@ export function tryStringifyJson(p, replacer = undefined, space = 2) {
 
 export async function getAccountInfo(address) {
   try {
-    const info = await tweb3.getAccountInfo(address);
+    const info = await getWeb3().getAccountInfo(address);
     return info;
   } catch (err) {
     throw err;
@@ -84,10 +198,15 @@ export async function getAccountInfo(address) {
 }
 
 export async function saveToIpfs(files) {
-  if (!files) return '';
+  if (!files || !files.length) return [];
   // simple upload
   let ipfsId = [];
   console.log('saveToIpfs', files);
+
+  if (files.length !== 1) {
+    files = files.map(f => ({ content: f}))
+  }
+
   try {
     const results = await ipfs.add([...files]);
     ipfsId = results.map(el => {
@@ -98,6 +217,7 @@ export async function saveToIpfs(files) {
   }
   return ipfsId;
 }
+
 // upload one file
 export async function saveFileToIpfs(files) {
   const ipfsId = await saveToIpfs(files);
@@ -135,6 +255,7 @@ export async function saveBufferToIpfs(files, opts = {}) {
   }
   return ipfsId;
 }
+
 // Return buffer
 export async function decodeImg(cid, privateKey, partnerKey) {
   const buff = await ipfs.get(cid);
@@ -142,13 +263,15 @@ export async function decodeImg(cid, privateKey, partnerKey) {
   const data = await decodeWithPublicKey(fileJsonData, privateKey, partnerKey, 'img');
   return data;
 }
+
 // upload one file
 export async function getJsonFromIpfs(cid, key) {
   const result = {};
   let url;
   // console.log('Buffer.isBuffer(cid)', Buffer.isBuffer(cid), '--', cid);
+  let blob
   if (Buffer.isBuffer(cid)) {
-    const blob = new Blob([cid], { type: 'image/jpeg' });
+    blob = new Blob([cid], { type: 'image/jpeg' });
     url = URL.createObjectURL(blob);
   } else {
     url = process.env.REACT_APP_IPFS + cid;
@@ -158,6 +281,10 @@ export async function getJsonFromIpfs(cid, key) {
   result.width = dimensions.w;
   result.height = dimensions.h;
   result.key = `Key-${key}`;
+
+  if (blob) {
+    URL.revokeObjectURL(url)
+  }
 
   return result;
 }
@@ -464,54 +591,7 @@ export const wallet = {
     return address;
   },
   isMnemonic(mnemonic) {
-    if (bip39.validateMnemonic(mnemonic)) {
-      return true;
-    }
-    return false;
+    return !!bip39.validateMnemonic(mnemonic)
   },
 };
 
-export const checkDevice = {
-  get_browser() {
-    const ua = navigator.userAgent;
-    let tem = [];
-    let M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-    if (/trident/i.test(M[1])) {
-      tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-      return `IE ${tem[1] || ''}`;
-    }
-    if (M[1] === 'Chrome') {
-      tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
-      if (tem != null)
-        return tem
-          .slice(1)
-          .join(' ')
-          .replace('OPR', 'Opera');
-    }
-    M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
-    tem = ua.match(/version\/(\d+)/i);
-    if (tem !== null) M.splice(1, 1, tem[1]);
-    const strTemp = M.join(' ');
-    const name = strTemp.split(' ')[0];
-    const version = strTemp.split(' ')[1];
-    return {
-      name,
-      version,
-    };
-  },
-  isMobile() {
-    let check = false;
-    (a => {
-      if (
-        /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(
-          a
-        ) ||
-        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-          a.substr(0, 4)
-        )
-      )
-        check = true;
-    })(navigator.userAgent || navigator.vendor || window.opera);
-    return check;
-  },
-};

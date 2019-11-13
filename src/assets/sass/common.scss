@@ -74,3 +74,46 @@ input:focus {
 input.dante-menu-input {
   background-color: transparent!important;
 }
+
+.iframeContainer {
+  position: relative; 
+  padding-bottom: 56.25%; 
+  height: 0; 
+  overflow: hidden; 
+  max-width: 100%;
+}
+.iframeContainer iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sectionLayout--fullWidth .aspectRatioPlaceholder {
+  max-width: none!important;
+  max-height: none!important;
+}
+
+@media (max-width: 1012px) {
+  .graf--layoutFillWidth {
+    margin-left: -9.5%!important;
+    margin-right: -9.5%!important;
+  }
+}
+
+.main-appbar::after{
+  content: "BETA";
+  position: fixed;
+  width: 80px;
+  height: 25px;
+  background-color: rgba(255,255,255,.75);
+  top: 7px;
+  left: -20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #8250c8;
+  line-height: 27px;
+  transform:rotate(-45deg);
+}

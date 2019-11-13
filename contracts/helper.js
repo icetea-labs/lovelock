@@ -1,5 +1,5 @@
 //private function
-exports.expectProposeOwners = (propose, message) => {
+exports.expectProposeOwners = (propose, message = 'Permission denied') => {
   const errmsg = message + ': You must be owner of the lock.';
   expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg);
 };

@@ -4,14 +4,14 @@ import { Provider } from 'react-redux';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 // import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
-import { PersistGate } from 'redux-persist/lib/integration/react';
+// import { PersistGate } from 'redux-persist/lib/integration/react';
 
+import { Helmet } from 'react-helmet';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { GlobaLoading } from './components/elements';
-import { persistor, store } from './store';
-
-import { Helmet } from "react-helmet";
+// import { GlobaLoading } from './components/elements';
+// import { persistor, store } from './store';
+import { store } from './store';
 
 // const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
@@ -137,10 +137,15 @@ ReactDOM.render(
       <title>Lovelock - Cherish Your Intimate Memories</title>
       <meta property="og:title" content="Lovelock - Cherish Your Intimate Memories" />
       <meta property="og:type" content="website" />
-      <meta name="description" content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends." />
+      <meta
+        name="description"
+        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
+      />
       <meta property="og:image" content={`${process.env.PUBLIC_URL}/static/img/share.jpg`} />
-      <meta property="og:description"
-        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends." />
+      <meta
+        property="og:description"
+        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
+      />
     </Helmet>
   </MuiThemeProvider>,
   document.getElementById('root')

@@ -12,7 +12,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import { AvatarPro } from '../../../elements';
-import tweb3 from '../../../../service/tweb3';
+import { getWeb3, grantAccessToken} from '../../../../service/tweb3';
 import { wallet, decode, getTagsInfo, savetoLocalStorage } from '../../../../helper';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -20,6 +20,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { encode } from '../../../../helper/encode';
+import { useRemember } from '../../../../helper/hooks';
 
 const useStyles = makeStyles(theme => ({
   avatar: {
@@ -34,27 +35,27 @@ function ByPassWord(props) {
     avatar: '',
   });
   const [password, setPassword] = useState('');
-  const [isRemember, setIsRemember] = useState(true);
+  const [isRemember, setIsRemember] = useRemember();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    const { address } = props;
-    if (address) {
-      const reps = await getTagsInfo(address);
-      if (reps) {
-        setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
+    async function loadData() {
+      const { address } = props;
+      if (address) {
+        const reps = await getTagsInfo(address);
+        if (reps) {
+          setState({ ...state, username: reps['display-name'] || '', avatar: reps.avatar });
+        }
+      } else {
+        setState({ ...state, username: 'undefined' });
+        const message = 'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
+        enqueueSnackbar(message, { variant: 'info', autoHideDuration: 15000, anchorOrigin: {vertical: 'top', horizontal: 'center'} });
+        setStep('two');
       }
-    } else {
-      setState({ ...state, username: 'undefined' });
-      const message = 'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
-      enqueueSnackbar(message, { variant: 'info', autoHideDuration: 15000, anchorOrigin: {vertical: 'top', horizontal: 'center'} });
-      setStep('two');
     }
-  }
+
+    loadData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function gotoLogin() {
     if (encryptedData) {
@@ -78,18 +79,12 @@ function ByPassWord(props) {
           // const privateKey = codec.toString(decode(password, encryptedData).privateKey);
           // const address = wallet.getAddressFromPrivateKey(privateKey);
           // const account = { address, privateKey, cipher: password };
+          const tweb3 = getWeb3()
           tweb3.wallet.importAccount(privateKey);
           // tweb3.wallet.defaultAccount = address;
+
           const token = tweb3.wallet.createRegularAccount();
-          const ms = tweb3.contract('system.did').methods;
-          const expire = isRemember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
-          ms.grantAccessToken(
-            address,
-            [process.env.REACT_APP_CONTRACT, 'system.did'],
-            token.address,
-            parseInt(expire, 10)
-          )
-            .sendCommit({ from: address })
+          grantAccessToken(address, token.address, isRemember)
             .then(({ returnValue }) => {
               tweb3.wallet.importAccount(token.privateKey);
               const keyObject = encode(privateKey, password);
@@ -150,7 +145,7 @@ function ByPassWord(props) {
           <AvatarPro hash={state.avatar} />
         </Grid>
         <Grid item>
-          <TextField label="Username" value={state.username} disabled inputProps={{ autoComplete: "username" }} />
+          <TextField label="Username" value={state.username} disabled autoComplete="username" />
         </Grid>
       </Grid>
       <ValidatorForm onSubmit={gotoLogin}>

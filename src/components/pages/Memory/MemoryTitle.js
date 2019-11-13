@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   icon: {
-    margin: '0 10px',
+    margin: '0 .35em',
   }
 }));
 
@@ -26,7 +26,7 @@ export default function MemoryTitle(props) {
         ) : (
             <>
               {props.sender}
-              <img className={classes.icon} src="/static/img/logo.svg" width="20" />
+              <img className={classes.icon} src="/static/img/logo.svg" width="16" alt='LoveLock logo' />
               {props.receiver}
             </>
           )}
