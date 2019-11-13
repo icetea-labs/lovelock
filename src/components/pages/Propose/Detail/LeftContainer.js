@@ -244,7 +244,7 @@ function LeftContainer(props) {
         // eslint-disable-next-line no-await-in-loop
         const nick = await getAlias(partnerAddress);
         if (signal.cancel) return;
-        clonePro[i].nick = `@${nick}`;
+        clonePro[i].nick = nick ? `@${nick}` : '(no username)';
       }
     }
     return clonePro;

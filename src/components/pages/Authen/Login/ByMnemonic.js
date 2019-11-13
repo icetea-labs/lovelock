@@ -18,6 +18,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 
+import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
 
 const styles = theme => ({
@@ -37,7 +38,7 @@ function ByMnemonic(props) {
   const [password, setPassword] = useState('');
   const [valueInput, setValueInput] = useState('');
   const [rePassErr] = useState('');
-  const [isRemember, setIsRemember] = useState(true);
+  const [isRemember, setIsRemember] = useRemember();
 
   const { enqueueSnackbar } = useSnackbar();
 

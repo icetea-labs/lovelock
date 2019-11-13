@@ -2,6 +2,19 @@ import { getContract } from '../service/tweb3'
 import { useSelector, useDispatch } from 'react-redux';
 import { sendTxUtil } from './utils'
 import { setNeedAuth as actionSetNeedAuth } from '../store/actions/account';
+import { useState } from 'react';
+
+// use for 'remember me' checkbox
+export function useRemember() {
+    const [value, _setValue] = useState(window.localStorage['remember'] === '1')
+    const setValue = value => {
+        const boolValue = !!value
+        _setValue(boolValue)
+        window.localStorage['remember'] = boolValue ? '1' : '0'
+    }
+
+    return [value, setValue]
+}
 
 /* usage
 const tx = useTx()

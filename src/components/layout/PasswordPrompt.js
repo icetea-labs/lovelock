@@ -13,6 +13,7 @@ import { getWeb3, grantAccessToken} from '../../service/tweb3';
 import * as actions from '../../store/actions';
 // import { wallet, decode, savetoLocalStorage } from '../../helper';
 import { wallet, decode } from '../../helper';
+import { useRemember } from '../../helper/hooks'
 import CommonDialog from '../elements/CommonDialog';
 // import { encode } from '../../helper/encode';
 
@@ -22,7 +23,7 @@ function PasswordPrompt(props) {
   const encryptedData = useSelector(state => state.account.encryptedData);
   const needAuth = useSelector(state => state.account.needAuth);
   const addressRedux = useSelector(state => state.account.address);
-  const [isRemember, setIsRemember] = useState(true);
+  const [isRemember, setIsRemember] = useRemember();
 
   let credLoading = useRef(false)
   const [autoPassFailed, _setAutoPassFailed] = useState(false)
