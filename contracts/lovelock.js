@@ -21,6 +21,7 @@ const {
 const {
   importState,
   exportState,
+  migrateState
 } = require('./migration.js')(this)
 
 @contract
@@ -262,7 +263,11 @@ class LoveLock {
     return exportState()
   }
 
-  @transaction importState(data, overwrite = false) {
+  @transaction importState(data, overwrite: ?bool = false) {
     return importState(data, overwrite)
+  }
+
+  @transaction migrateState(fromContract: address, overwrite: ?bool = false) {
+    return migrateState(fromContract, overwrite)
   }
 }

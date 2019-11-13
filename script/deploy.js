@@ -61,11 +61,9 @@ const src = fs.readFileSync('./contracts/lovelock.js')
   const oldAddress = config.REACT_APP_CONTRACT.trim()
   if (oldAddress) {
     console.log('Trying to migrate data from ' + oldAddress)
-    const oldContract = tweb3.contract(oldAddress)
     try {
-      const oldData = await oldContract.methods.exportState().call()
       const newContract = tweb3.contract(r)
-      await newContract.methods.importState(oldData, true).sendCommit({ from: account.address })
+      await newContract.methods.migrateState(oldAddress, true).sendCommit({ from: account.address })
       console.log('Data migration finished.')
     } catch (e) {
       console.log('Fail to migrate data: ', e.message)

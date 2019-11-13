@@ -20,14 +20,15 @@ const expectOwner = context => {
     }
 }
 
-module.exports = context => ({
-    exportState() {
+module.exports = context => {
+    function exportState() {
         return context.getStateKeys().reduce((data, key) => {
             data[key] = context.getState(key)
             return data
         }, {})
-    },
-    importState(data, overwrite) {
+    }
+
+    function importState(data, overwrite) {
         expectOwner(context)
         Object.entries(data).forEach(([key, value]) => {
             if (overwrite) {
@@ -38,4 +39,15 @@ module.exports = context => ({
             }
         })
     }
-})
+
+    function migrateState(fromContract, overwrite) {
+        const c = context.runtime.loadContract(fromContract)
+        const data = c.exportState.invokeView()
+        console.log(data)
+        if (data && typeof data == 'object') {
+            importState(data, overwrite)
+        }
+    }
+
+    return { exportState, importState, migrateState }
+}
