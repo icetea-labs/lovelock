@@ -281,7 +281,18 @@ export default function CreateMemory(props) {
     }
   }
 
-  async function onSubmitEditor() {
+  function onSubmitEditor() {
+    setGLoading(true)
+    submitEditor().then(() => {
+      setGLoading(false)
+    }).catch(err => {
+      setGLoading(false)
+      const message = 'An error has occured, you can try again later: ' + err.message;
+      enqueueSnackbar(message, { variant: 'error' });
+    })
+  }
+
+  async function submitEditor() {
     const combined = combineContent();
     const blocks = combined.blocks;
     if (validateEditorContent()) {
@@ -322,7 +333,7 @@ export default function CreateMemory(props) {
       setBlogSubtitle('');
       delDraft();
     } else {
-      let message = 'Please enter memory content.';
+      const message = 'Please enter memory content.';
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
