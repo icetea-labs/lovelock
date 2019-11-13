@@ -13,7 +13,8 @@ import BlogModal from '../../elements/BlogModal';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, encodeWithPublicKey, sendTxUtil } from '../../../helper';
+import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 
@@ -182,10 +183,6 @@ export default function CreateMemory(props) {
 
   function setGLoading(value) {
     dispatch(actions.setLoading(value));
-  }
-
-  function setNeedAuth(value) {
-    dispatch(actions.setNeedAuth(value));
   }
 
   function memoryOnFocus() {
@@ -430,18 +427,11 @@ export default function CreateMemory(props) {
     }
 
     const content = blogData || memoryContent;
+    
+    let params = [];
+    const uploadThenSendTx = async () => {
+      setGLoading(true);
 
-    if (privacy ? !privateKey : !tokenKey) {
-      setNeedAuth(true);
-      return;
-    }
-
-    setGLoading(true);
-    setTimeout(async () => {
-      // const hash = await saveFilesToIpfs(filesBuffer);
-      // const hash = await saveBufferToIpfs(filesBuffer);
-      // const info = { date, hash };
-      let params = [];
       if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
@@ -458,12 +448,23 @@ export default function CreateMemory(props) {
         if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
-      const result = await sendTransaction('addMemory', params, { address, tokenAddress });
-      if (result) {
-        onMemoryAdded(result.returnValue, params);
-      }
+      return await sendTxUtil('addMemory', params, { address, tokenAddress });
+    }
+
+    try {
+      const result = await ensureToken({
+        tokenKey: privacy ? privateKey : tokenKey,
+        dispatch
+      }, uploadThenSendTx)
+
+      onMemoryAdded(result.returnValue, params);
       resetValue();
-    }, 100);
+    } catch (err) {
+      setGLoading(false);
+      const message = 'An error has occured, you can try again later: ' + err.message;
+      enqueueSnackbar(message, { variant: 'error' });
+      console.error(err)
+    }    
   }
 
   function resetValue() {

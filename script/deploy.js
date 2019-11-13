@@ -73,7 +73,7 @@ const src = fs.readFileSync('./contracts/lovelock.js')
   // update .env
   config.REACT_APP_CONTRACT = r.address
   fs.writeFileSync(envPath, envfile.stringifySync(config)) 
-  console.log(`New contract address was update to ${envPath}.`)
+  console.log(`New contract address was updated to ${envPath}.`)
 
   process.exit(0)
 

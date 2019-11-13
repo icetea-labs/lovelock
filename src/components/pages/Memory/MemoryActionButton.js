@@ -6,7 +6,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 
-import * as actions from '../../../store/actions';
+import { setLikeTopInfo } from '../../../store/actions';
 import { useTx } from '../../../helper/hooks';
 
 const useStyles = makeStyles(theme => ({
@@ -104,17 +104,11 @@ function MemoryActionButton(props) {
 
   async function handleLike() {
     const LOVE = 1 // like, love, wow, etc.
-    tx.sendCommit('addLike', memoryIndex, LOVE).then(likes => {
-      // Slow fix
+    tx.sendCommit('addLike', memoryIndex, LOVE).then(({ returnValue : likes }) => {
       const newNumLike = Object.keys(likes).length
       const newIsMyLike = !!likes[address]
       setLikeData(newNumLike, newIsMyLike);
     })
-
-    // Quick response
-    const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1;
-    const newIsMyLike = !realLikeData.isMyLike;
-    setLikeData(newNumLike, newIsMyLike);
   }
 
   const classes = useStyles();
@@ -165,7 +159,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     setLikeTopInfo: value => {
-      dispatch(actions.setLikeTopInfo(value));
+      dispatch(setLikeTopInfo(value));
     }
   };
 };

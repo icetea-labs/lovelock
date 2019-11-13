@@ -359,11 +359,6 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handleShowphrase() {
-    // if (mode === 1 && !mnemonic) {
-    //   dispatch(actions.setNeedAuth(true));
-    // } else if (!privateKey) {
-    //   dispatch(actions.setNeedAuth(true));
-    // }
     dispatch(actions.setNeedAuth(true));
     setShowPhrase(true);
   }

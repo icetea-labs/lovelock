@@ -14,7 +14,6 @@ const merge = (o, n) => {
 }
 
 const expectOwner = context => {
-    console.log(context.deployedBy, context.runtime.msg.sender)
     if (context.runtime.msg.sender !== context.deployedBy) {
         throw new Error('Permission denied.')
     }
@@ -43,7 +42,6 @@ module.exports = context => {
     function migrateState(fromContract, overwrite) {
         const c = context.runtime.loadContract(fromContract)
         const data = c.exportState.invokeView()
-        console.log(data)
         if (data && typeof data == 'object') {
             importState(data, overwrite)
         }

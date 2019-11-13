@@ -13,7 +13,8 @@ import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import * as actions from '../../../store/actions';
 import { getAliasContract } from '../../../service/tweb3';
-import { saveFileToIpfs, saveBufferToIpfs, sendTransaction, tryStringifyJson, getTagsInfo } from '../../../helper';
+import { saveFileToIpfs, saveBufferToIpfs, tryStringifyJson, getTagsInfo } from '../../../helper';
+import { ensureToken, sendTransaction } from '../../../helper/hooks';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import CommonDialog from '../../elements/CommonDialog';
 import { FlexBox } from '../../elements/StyledUtils';
@@ -192,8 +193,8 @@ class PuNewLock extends React.Component {
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timeoutHanle1);
-    clearTimeout(this.timeoutHanle2);
+    this.timeoutHanle1 && clearTimeout(this.timeoutHanle1);
+    this.timeoutHanle2 && clearTimeout(this.timeoutHanle2);
   }
 
   onChangeDate = date => {
@@ -398,19 +399,14 @@ class PuNewLock extends React.Component {
   };
 
   async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, close, address, tokenAddress } = this.props;
+    const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva = '';
     let hash = [];
     let message = '';
 
-    setLoading(true);
-
-    this.timeoutHanle1 = setTimeout(async () => {
+    //this.timeoutHanle1 = setTimeout(async () => {
       try {
-        if (cropFile) {
-          botAva = await saveFileToIpfs(cropFile);
-        }
         if (!partner) {
           message = 'Please choose your partner.';
           enqueueSnackbar(message, { variant: 'error' });
@@ -420,7 +416,6 @@ class PuNewLock extends React.Component {
         if (!promiseStm) {
           message = 'Please input your lock.';
           enqueueSnackbar(message, { variant: 'error' });
-          setLoading(false);
           return;
         }
 
@@ -429,56 +424,59 @@ class PuNewLock extends React.Component {
           if (!firstname) {
             message = 'Please enter your crush first name.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
           if (!lastname) {
             message = 'Please enter your crush last name.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
           if (!cropFile) {
             message = 'Please choose avatar of your crush.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
           if (!botReply) {
             message = 'Please enter the reply from your crush.';
             enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
             return;
           }
-          botInfo = { firstname, lastname, botAva, botReply };
+          botInfo = { firstname, lastname, botReply };
         }
 
-        if (file) {
-          hash = await saveBufferToIpfs(file);
+        const uploadThenSendTx = async () => {
+          setLoading(true);
+
+          if (cropFile) {
+            botAva = await saveFileToIpfs(cropFile);
+            botInfo.botAva = botAva
+          }
+
+          if (file) {
+            hash = await saveBufferToIpfs(file);
+          }
+  
+          const info = { date, hash };
+          return await sendTransaction(this.props, 'createPropose', promiseStm, partner, info, botInfo)
         }
 
-        const info = { date, hash };
-        const name = 'createPropose';
+        const result = await ensureToken(this.props, uploadThenSendTx)
 
-        const params = [promiseStm, partner, info, botInfo];
-        // const params = [promiseStm, partner, info];
-        const result = await sendTransaction(name, params, { address, tokenAddress });
-
-        this.timeoutHanle2 = setTimeout(() => {
-          if (result) {
+        //this.timeoutHanle2 = setTimeout(() => {
+        //  if (result) {
             message = 'Your lock sent successfully.';
             enqueueSnackbar(message, { variant: 'success' });
             setLoading(false);
             close();
-          }
-        }, 50);
+        //  }
+        //}, 50);
       } catch (err) {
         console.error(err);
         message = 'an error occurred while sending, please check the inner exception for details';
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
       }
-    }, 100);
+    //}, 100);
   }
 
   onKeyEsc = () => {
@@ -639,6 +637,7 @@ const mapStateToProps = state => {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
     tokenAddress: state.account.tokenAddress,
+    tokenKey: state.account.tokenKey,
   };
 };
 
@@ -647,6 +646,7 @@ const mapDispatchToProps = dispatch => {
     setLoading: value => {
       dispatch(actions.setLoading(value));
     },
+    dispatch
   };
 };
 

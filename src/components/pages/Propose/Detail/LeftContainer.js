@@ -88,9 +88,6 @@ function LeftContainer(props) {
     topInfo,
     proIndex,
     address,
-    tokenAddress,
-    tokenKey,
-    setNeedAuth,
     history,
   } = props;
 
@@ -178,16 +175,10 @@ function LeftContainer(props) {
   }
 
   function newLock() {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
     setStep('new');
   }
 
   function selectPending(proIndex) {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
     setStep('pending');
     setIndex(proIndex);
   }
@@ -293,13 +284,12 @@ function LeftContainer(props) {
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
       </LeftBox>
-      {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}
-      {step === 'pending' && tokenKey && (
+      {step === 'new' && <PuNewLock close={closePopup} />}
+      {step === 'pending' && (
         <PromiseAlert
           index={index}
           proposes={proposes}
           address={address}
-          tokenAddress={tokenAddress}
           close={closePopup}
           accept={nextToAccept}
           deny={nextToDeny}
@@ -316,8 +306,6 @@ const mapStateToProps = state => {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
-    tokenAddress: state.account.tokenAddress,
-    tokenKey: state.account.tokenKey,
   };
 };
 
@@ -331,9 +319,6 @@ const mapDispatchToProps = dispatch => {
     },
     confirmPropose: value => {
       dispatch(actions.confirmPropose(value));
-    },
-    setNeedAuth: value => {
-      dispatch(actions.setNeedAuth(value));
     },
   };
 };

@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, makeProposeName, sendTransaction } from '../../../../helper';
+import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
+import { useTx } from '../../../../helper/hooks';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
@@ -62,8 +63,7 @@ export default function DetailPropose(props) {
   if (isNaN(collectionId)) collectionId = null
 
   const address = useSelector(state => state.account.address);
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
+  const tx = useTx()
 
   const [proposeInfo, setProposeInfo] = useState(null);
   const [pageErr, setPageErr] = useState(false);
@@ -121,11 +121,6 @@ export default function DetailPropose(props) {
   const createCollection = () => {
     hideDialog() // prevent dialog over dialog
 
-    if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
-      return;
-    }
-
     const data = {
       name: colName,
     }
@@ -135,7 +130,7 @@ export default function DetailPropose(props) {
       data.description = desc
     }
 
-    sendTransaction('addLockCollection', [proIndex, data], { address, tokenAddress }).then(r => {
+    tx.sendCommit('addLockCollection', proIndex, data).then(r => {
       data.id = r.returnValue
       proposeInfo.collections.push(data)
       // push to redux

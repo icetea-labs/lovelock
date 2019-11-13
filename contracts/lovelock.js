@@ -81,24 +81,24 @@ class LoveLock {
   }
   @transaction acceptPropose(index: number, r_content: string) {
     const self = this;
-    apiAcceptLock(self, index, r_content);
+    return apiAcceptLock(self, index, r_content);
   }
   @transaction cancelPropose(index: number, r_content: string) {
     const self = this;
-    apiCancelLock(self, index, r_content);
+    return apiCancelLock(self, index, r_content);
   }
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLikePropose(index: number, type: number) {
     const self = this;
-    apiLikeLock(self, index, type);
+    return apiLikeLock(self, index, type);
   }
   @transaction followLock(index: number) {
     const self = this;
-    apiFollowLock(self, index);
+    return apiFollowLock(self, index);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
     const self = this;
-    apiChangeLockImg(self, index, imgHash);
+    return apiChangeLockImg(self, index, imgHash);
   }
   @view getProposeByAddress(address: ?address) {
     const self = this;
@@ -120,12 +120,12 @@ class LoveLock {
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const self = this;
-    apiLikeMemory(self, memoIndex, type);
+    return apiLikeMemory(self, memoIndex, type);
   }
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
     const self = this;
-    apiCommentMemory(self, memoIndex, content, info);
+    return apiCommentMemory(self, memoIndex, content, info);
   }
   @view getMemoriesByProIndex(lockIndex: number, collectionId: ?number) {
     const self = this;

@@ -163,7 +163,7 @@ function PasswordPrompt(props) {
   }
 
   return ((!credLoading.current || autoPassFailed) && needAuth) ? (
-    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={handleConfirm} onKeyReturn>
+    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={handleConfirm} onKeyReturn hasParentDialog ensureTopLevel>
       <TextField
         id="Password"
         label="Password"

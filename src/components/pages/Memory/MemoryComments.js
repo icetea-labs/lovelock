@@ -5,7 +5,8 @@ import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
-import { sendTransaction, callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
+import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
+import { useTx } from '../../../helper/hooks'
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -92,12 +93,8 @@ const StyledCardActions = withStyles(theme => ({
 const numComment = 4;
 export default function MemoryComments(props) {
   const { handleNumberComment, memoryIndex, textInput } = props;
-  const dispatch = useDispatch();
 
-  // const privateKey = useSelector(state => state.account.privateKey);
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
-  const address = useSelector(state => state.account.address);
+  const tx = useTx()
 
   const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
@@ -146,13 +143,9 @@ export default function MemoryComments(props) {
 
   async function newComment() {
     if (!comment) return;
-    if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
-      return;
-    }
-    const method = 'addComment';
-    const params = [memoryIndex, comment, ''];
-    await sendTransaction(method, params, { address, tokenAddress });
+
+    await tx.sendCommit('addComment', memoryIndex, comment, '')
+
     myFormRef.current && myFormRef.current.reset();
     setComment('');
   }
