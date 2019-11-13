@@ -7,7 +7,7 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 
 import * as actions from '../../../store/actions';
-import { sendTransaction } from '../../../helper';
+import { useTx } from '../../../helper/hooks';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -60,7 +60,6 @@ function MemoryActionButton(props) {
     handerShowComment,
     numComment,
     setLikeTopInfo,
-    setNeedAuth,
     numLike, // Lock-level number of likes
     isMyLike, // Lock-level isMyLike
   } = props;
@@ -68,8 +67,7 @@ function MemoryActionButton(props) {
   const isAuto = memoryType === 1;
 
   const address = useSelector(state => state.account.address);
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
+  const tx = useTx()
 
   const [memoryNumLike, setMemoryNumLike] = useState(0);
   const [memoryIsMyLike, setMemoryIsMyLike] = useState(false);
@@ -104,23 +102,16 @@ function MemoryActionButton(props) {
     setMemoryNumLike(num);
   }, [memoryType, memoryLikes, address, isAuto]);
 
-  function sendTxWithAuthen(...args) {
-    if (tokenKey) {
-      return sendTransaction(...args)
-    }
-
-    return new Promise((resolve, reject) => {
-      const sendTx = () => {
-        return sendTransaction(...args).then(resolve).catch(reject)
-      }
-      setNeedAuth(sendTx);
-    })
-  }
-
   async function handleLike() {
-    const params = [memoryIndex, 1];
-    await sendTxWithAuthen('addLike', params, { tokenAddress, address, sendType: 'sendAsync' })
+    const LOVE = 1 // like, love, wow, etc.
+    tx.sendCommit('addLike', memoryIndex, LOVE).then(likes => {
+      // Slow fix
+      const newNumLike = Object.keys(likes).length
+      const newIsMyLike = !!likes[address]
+      setLikeData(newNumLike, newIsMyLike);
+    })
 
+    // Quick response
     const newNumLike = realLikeData.isMyLike ? realLikeData.numLike - 1 : realLikeData.numLike + 1;
     const newIsMyLike = !realLikeData.isMyLike;
     setLikeData(newNumLike, newIsMyLike);
@@ -175,10 +166,7 @@ const mapDispatchToProps = dispatch => {
   return {
     setLikeTopInfo: value => {
       dispatch(actions.setLikeTopInfo(value));
-    },
-    setNeedAuth(value) {
-      dispatch(actions.setNeedAuth(value));
-    },
+    }
   };
 };
 

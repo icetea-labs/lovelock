@@ -1,75 +1,38 @@
-import { useEffect } from 'react';
+import { getContract } from '../service/tweb3'
+import { useSelector, useDispatch } from 'react-redux';
+import { setNeedAuth } from '../store/actions/account';
 
-const makeAbortError = () => {
-    return new DOMException('Operation aborted', 'AbortError')
-}
+/* usage
 
-const abortableFetch = (signal, convertFn) => (req, init = {}) => {
-    let f = fetch(req, { ... init, signal })
-    convertFn && (f = f.then(r => r[convertFn]()))
+const tx = useTx(address) // address is optional
+tx.sendCommit
+tx.sendAsync
+tx.sendSync
 
-    return f
-}
+*/
+export function useTx(address) {
+    const ms = getContract(address).methods
+    const tokenKey = useSelector(state => state.account.tokenKey)
+    const from = useSelector(state => state.account.address)
+    const signers = useSelector(state => state.account.tokenAddress)
+    const dispatch = useDispatch()
 
-const abortableTimeFn = (signal, timeFn, clearTimeFn) => (fn, timeout) => {
-    if (signal.aborted) return Promise.reject(makeAbortError())
+    const make = m => (method, ...params) => {
+        const send = ms[method](...params)[m]
+        if (tokenKey) {
+            return send(from, signers)
+        }
 
-    return new Promise((resolve, reject) => {
-        const id = window[timeFn](() => resolve(fn()), timeout)
-        signal.addEventListener('abort', e => {
-            window[clearTimeFn](id)
-            reject(makeAbortError())
-        })
-    })
-}
-
-const abortablePromise = signal => promise => {
-    if (signal.aborted) return Promise.reject(makeAbortError())
-
-    return new Promise((resolve, reject) => {
-        signal.addEventListener('abort', e => {
-            reject(makeAbortError())
-        })
-        promise.then(resolve)
-    })
-} 
-
-const getAbortable = signal => {
-    return {
-        fetch: abortableFetch(signal),
-        fetchJson: abortableFetch(signal, 'json'),
-        setTimeout: abortableTimeFn(signal, 'setTimeout', 'clearTimeout'),
-        setInterval: abortableTimeFn(signal, 'setInterval', 'clearInterval'),
-        promise: abortablePromise(signal),
-
-    }
-}
-
-export function useAbortableEffect(makeFn, takeFn, deps) {
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        const abortable = getAbortable(signal)
-
-        const promise = makeFn(abortable)
-        if (promise != null) {
-            if (typeof promise.then !== 'function') {
-                throw new Error('useAbortableEffort makeFn must return a promise.')
+        return new Promise((resolve, reject) => {
+            const sendTx = () => {
+                return send(from, signers).then(resolve).catch(reject)
             }
-            promise.then(data => {
-                !signal.aborted && takeFn(data)
-            }).catch(err => {
-                if (err.name !== 'AbortError') {
-                    throw err
-                }
-            })
-        }
+            dispatch(setNeedAuth(sendTx))
+        })
+    }
 
-        // cleanup function
-        return () => {
-            controller.abort()
-        }
-
-    }, deps) 
+    return ['sendCommit', 'sendAsync', 'sendSync'].reduce((o, m) => {
+        o[m] = make(m)
+        return o
+    }, {})
 }
