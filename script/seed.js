@@ -1,11 +1,9 @@
 const envfile = require('envfile')
-const fs = require('fs')
 const { toPkey } = require('./mnemonic')
 const { IceteaWeb3 } = require('@iceteachain/web3')
 const { toKeyString } = require('@iceteachain/common').codec
 const { mode, envPath } = require('./mode')
 const { randomBytes } = require('crypto')
-const blogContent = require('./blogcontent.json')
 
 if (['-h', '--help'].includes(mode)) {
     console.log('Purpose: Seed data.')
@@ -22,9 +20,8 @@ console.log(`Load RPC endpoint from ${envPath}`)
 const {
     REACT_APP_RPC,
     REACT_APP_CONTRACT,
-    PORT,
-    SEED_PKEY,
-    SEED_MNEMONIC,
+    PKEY,
+    MNEMONIC,
     MEMORY_COUNT
 } = envfile.parseFileSync(envPath)
 
@@ -77,9 +74,9 @@ const makeLove = ({ method, from, send = 'sendCommit' }, ...args) => {
 
 let fromAccount
 let fromAccountObj
-let pkey = SEED_PKEY || process.env.SEED_PKEY
+let pkey = PKEY || process.env.PKEY
 if (!pkey) {
-    const seed = SEED_MNEMONIC || process.env.SEED_MNEMONIC
+    const seed = MNEMONIC || process.env.MNEMONIC
     if (seed) {
         pkey = toPkey(seed)
     }

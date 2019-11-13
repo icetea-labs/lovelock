@@ -1,5 +1,6 @@
 const envfile = require('envfile')
 const fs = require('fs')
+const { toPkey } = require('./mnemonic')
 const { transpile } = require('@iceteachain/sunseed')
 const { IceteaWeb3 } = require('@iceteachain/web3')
 
@@ -33,7 +34,14 @@ const src = fs.readFileSync('./contracts/lovelock.js')
   console.log(`Connected to ${endpoint}.`)
 
   // create a private key
-  const pkey = config.DEPLOY_KEY || process.env.DEPLOY_KEY
+  let pkey = config.PKEY || process.env.PKEY
+  if (!pkey) {
+    const seed = config.MNEMONIC || process.env.MNEMONIC
+    if (seed) {
+        pkey = toPkey(seed)
+    }
+}
+
   let account
   if (pkey) {
     account = tweb3.wallet.importAccount(pkey)
@@ -48,6 +56,21 @@ const src = fs.readFileSync('./contracts/lovelock.js')
   // deploy the contract
   const r = await tweb3.deployJs(compiledSrc, [], { from: account.address })
   console.log(`Contract created: ${r.address}`)
+
+  // migrate data
+  const oldAddress = config.REACT_APP_CONTRACT.trim()
+  if (oldAddress) {
+    console.log('Trying to migrate data from ' + oldAddress)
+    const oldContract = tweb3.contract(oldAddress)
+    try {
+      const oldData = await oldContract.methods.exportState().call()
+      const newContract = tweb3.contract(r)
+      await newContract.methods.importState(oldData, true).sendCommit({ from: account.address })
+      console.log('Data migration finished.')
+    } catch (e) {
+      console.log('Fail to migrate data: ', e.message)
+    }
+  }
 
   // update .env
   config.REACT_APP_CONTRACT = r.address

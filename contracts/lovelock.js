@@ -18,6 +18,10 @@ const {
   apiGetMemoriesByLock,
   apiGetMemoriesByRange,
 } = require('./apiMemory.js');
+const {
+  importState,
+  exportState,
+} = require('./migration.js')(this)
 
 @contract
 class LoveLock {
@@ -251,5 +255,14 @@ class LoveLock {
     if (!afp[address]) afp[address] = [];
     afp[address].push(sender);
     this.setAFA(afp);
+  }
+
+  // ========== DATA MIGRATION =============
+  @view exportState() {
+    return exportState()
+  }
+
+  @transaction importState(data, overwrite = false) {
+    return importState(data, overwrite)
   }
 }
