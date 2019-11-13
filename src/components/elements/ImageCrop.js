@@ -90,6 +90,9 @@ export default function ImageCrop(props) {
             cropBoxResizable={false}
             cropBoxMovable={false}
             dragMode="move"
+            checkOrientation
+            rotatable
+            scalable
           />
         )}
       </ContWrap>
