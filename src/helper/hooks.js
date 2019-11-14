@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 // use for 'remember me' checkbox
 export function useRemember() {
-    const [value, _setValue] = useState(window.localStorage['remember'] === '1')
+    const [value, _setValue] = useState(window.localStorage['remember'] !== '0')
     const setValue = value => {
         const boolValue = !!value
         _setValue(boolValue)
