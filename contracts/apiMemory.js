@@ -15,7 +15,7 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
   const eventName = 'addLike_' + memoIndex;
   self.emitEvent(eventName, { by: msg.sender, memoIndex, type }, ['by', 'memoIndex']);
 
-  return memo.likes || []
+  return memo.likes || [];
 };
 exports.apiCommentMemory = (self, memoIndex, content, info) => {
   const sender = msg.sender;
@@ -99,10 +99,33 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
 };
 exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
   const allMem = self.getMemories();
+  return _addInfoToMems(allMem, listMemIndex, self);
+};
+function _addInfoToMems(mems, listMemIndex, self) {
+  const ctDid = loadContract('system.did');
   let res = [];
-
   listMemIndex.forEach(index => {
-    res.push({ ...allMem[index], id: index });
+    let mem = mems[index];
+    let tmp = {};
+    tmp.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
+    tmp.name = tmp.s_tags['display-name']; // tmp
+    tmp.pubkey = tmp.s_tags['pub-key']; // tmp
+    //LOCK_TYPE_JOURNAL
+    if (mem.receiver === mem.sender) {
+      tmp.r_tags = {};
+    } else if (mem.receiver === self.botAddress) {
+      let lock = getDataByIndex(self.getProposes(), mem.lockIndex);
+      lock.bot_info.avatar = lock.bot_info.botAva;
+      lock.bot_info['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      tmp.r_tags = lock.bot_info;
+    } else {
+      tmp.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
+    }
+    res.push({ ...mem, id: index, ...tmp });
+  });
+  // sort descending by mem id;
+  res = res.sort((a, b) => {
+    return b.id - a.id;
   });
   return res;
-};
+}

@@ -11,6 +11,7 @@ import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
 
 import * as actions from '../../../store/actions';
@@ -23,7 +24,7 @@ import {
   getJsonFromIpfs,
   makeProposeName,
   signalPrerenderDone,
-  smartFetchIpfsJson
+  smartFetchIpfsJson,
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -152,31 +153,31 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const setMemoryCollection = (propose, memory) => {
-  const cid = memory.info.collectionId
+  const cid = memory.info.collectionId;
   if (cid != null) {
-    const cs = propose.collections || []
-    memory.collection = cs.find(c => c.id === cid)
+    const cs = propose.collections || [];
+    memory.collection = cs.find(c => c.id === cid);
   }
-}
+};
 
 const renderCardSubtitle = memory => {
-  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
-  const hasCol = memory.collection
-  if (!hasCol) return time
+  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />;
+  const hasCol = memory.collection;
+  if (!hasCol) return time;
 
-  const { id, name } = memory.collection
+  const { id, name } = memory.collection;
   return (
     <>
       <a href={`/lock/${memory.lockIndex}/collection/${id}`}>{name}</a>
       <span>・</span>
       {time}
     </>
-  )
-}
+  );
+};
 
 function MemoryContent(props) {
   const { memory, setNeedAuth, propose } = props;
-  setMemoryCollection(propose, memory)
+  setMemoryCollection(propose, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
@@ -195,21 +196,21 @@ function MemoryContent(props) {
   const classes = useStyles();
 
   useEffect(() => {
-    let cancel = false
-    const abort = new AbortController()
+    let cancel = false;
+    const abort = new AbortController();
 
     async function serialMemory(signal) {
       let mem = memory;
       if (memory.info.blog) {
         const blogData = JSON.parse(memory.content);
-        mem = { ...memory }
+        mem = { ...memory };
         mem.meta = blogData.meta;
         mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
           .then(d => d.json)
           .catch(err => {
-            if (err.name === 'AbortError') return
-            throw err
-          })
+            if (err.name === 'AbortError') return;
+            throw err;
+          });
       } else if (memory.isPrivate) {
         const memCache = await loadMemCacheAPI(memory.id);
         if (memCache) {
@@ -222,14 +223,14 @@ function MemoryContent(props) {
           }
         }
       }
-      
-      return mem
+
+      return mem;
     }
 
     serialMemory(abort.signal).then(mem => {
-      if (cancel || !mem) return
+      if (cancel || !mem) return;
 
-      setMemoryDecrypted(mem)
+      setMemoryDecrypted(mem);
 
       if (memory.showDetail && memory.info.blog) {
         setOpenModal(true);
@@ -237,9 +238,9 @@ function MemoryContent(props) {
     });
 
     return () => {
-      abort.abort()
-      cancel = true
-    }
+      abort.abort();
+      cancel = true;
+    };
   }, [memory, memory.showDetail, memory.info.blog, propose]);
 
   function FacebookProgress(propsFb) {
@@ -269,7 +270,7 @@ function MemoryContent(props) {
 
   function decodePrivateMemory() {
     setTimeout(() => {
-      const obj = Object.assign({}, memoryDecrypted);
+      const obj = { ...memoryDecrypted };
       if (!obj.isUnlock && privateKey && publicKey && obj.pubkey) {
         setDecoding(true);
         setTimeout(async () => {
@@ -352,7 +353,7 @@ function MemoryContent(props) {
 
   const renderContentLocked = () => {
     return (
-      <React.Fragment>
+      <>
         {decoding ? (
           <span>
             <FacebookProgress /> Unlock...
@@ -364,7 +365,7 @@ function MemoryContent(props) {
             </IconButton>
           </Tooltip>
         )}
-      </React.Fragment>
+      </>
     );
   };
 
@@ -376,9 +377,13 @@ function MemoryContent(props) {
         </div>
         <span>
           <span>Locked with </span>
-          {memoryDecrypted.r_name ? <Typography component="span" className={classes.relationshipName}>
-            {memoryDecrypted.r_name}
-          </Typography> : <span>a crush</span>}
+          {memoryDecrypted.r_name ? (
+            <Typography component="span" className={classes.relationshipName}>
+              {memoryDecrypted.r_name}
+            </Typography>
+          ) : (
+            <span>a crush</span>
+          )}
         </span>
       </Typography>
     );
@@ -401,37 +406,34 @@ function MemoryContent(props) {
   };
 
   const renderHelmet = blogInfo => {
-    signalPrerenderDone()
+    signalPrerenderDone();
 
-    const title = `${blogInfo.title} - A story on Lovelock`
-    const desc = makeProposeName(propose)
-    let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url
+    const title = `${blogInfo.title} - A story on Lovelock`;
+    const desc = makeProposeName(propose);
+    let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url;
     if (!img) {
-      img = propose.coverImg ?
-        process.env.REACT_APP_IPFS + propose.coverImg :
-        process.env.PUBLIC_URL + '/static/img/share.jpg'
+      img = propose.coverImg
+        ? process.env.REACT_APP_IPFS + propose.coverImg
+        : `${process.env.PUBLIC_URL}/static/img/share.jpg`;
     }
     return (
-        <Helmet>
-          <title>{title}</title>
-          <meta property="og:title" content={title} />
-          <meta property="og:type" content="article" />
-          <meta name="description" content={desc} />
-          <meta
-            property="og:image"
-            content={img}
-          />
-          <meta property="og:description" content={desc} />
-        </Helmet>
-      )
-  }
+      <Helmet>
+        <title>{title}</title>
+        <meta property="og:title" content={title} />
+        <meta property="og:type" content="article" />
+        <meta name="description" content={desc} />
+        <meta property="og:image" content={img} />
+        <meta property="og:description" content={desc} />
+      </Helmet>
+    );
+  };
 
   const renderContentUnlock = () => {
     const isBlog = !!memoryDecrypted.info.blog;
     const blogInfo = memoryDecrypted.meta || {};
     const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
     return (
-      <React.Fragment>
+      <>
         {memoryDecrypted.type === 1 ? (
           isJournal ? (
             renderJournalCreationMemory()
@@ -481,7 +483,7 @@ function MemoryContent(props) {
             </div>
           </BlogModal>
         )}
-      </React.Fragment>
+      </>
     );
   };
   const renderImgUnlock = () => {
@@ -519,12 +521,27 @@ function MemoryContent(props) {
   );
 
   const { isUnlock } = memoryDecrypted;
+
+  const renderTitleMem = mem => {
+    if (mem.r_tags && mem.r_tags['display-name']) {
+      return (
+        <>
+          <span>{mem.name}</span>
+          <ArrowRightIcon color="primary" />
+          <span>{mem.r_tags['display-name']}</span>
+        </>
+      );
+    }
+    // console.log('mem', mem);
+    return <>{mem.name}</>;
+  };
+
   return (
-    <React.Fragment>
+    <>
       <Card key={memoryDecrypted.index} className={classes.card}>
         <CardHeader
           avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
-          title={memoryDecrypted.name}
+          title={renderTitleMem(memoryDecrypted)}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
             <IconButton aria-label="settings">
@@ -551,7 +568,7 @@ function MemoryContent(props) {
           </Modal>
         ) : null}
       </ModalGateway>
-    </React.Fragment>
+    </>
   );
 }
 // const mapStateToProps = state => {

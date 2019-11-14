@@ -36,7 +36,7 @@ const ProposeWrapper = styled.div`
   }
 `;
 function MasterContainer(props) {
-  const { setProposes } = props;
+  const { setProposes, setMemory } = props;
   const [memoByRange, setMemoByRange] = useState([]);
   const { address } = props;
 
@@ -53,9 +53,18 @@ function MasterContainer(props) {
     });
     // console.log('arrayMem', arrayMem);
     const memorydata = await callView('getMemoriesByListMemIndex', [arrayMem]);
-    setMemoByRange(memorydata);
+    // setMemoByRange(memorydata);
+    const newMem = memorydata.map(mem => {
+      if (mem.isPrivate) {
+        mem.isUnlock = false;
+      } else {
+        mem.isUnlock = true;
+      }
+      return mem;
+    });
+    setMemory(newMem);
     // console.log('lockForFeed', lockForFeed);
-    // console.log('memorydata', memorydata);
+    console.log('memorydata', memorydata);
     // setMemoByRange(getMemoriesByRange);
   }
 
@@ -98,6 +107,9 @@ const mapDispatchToProps = dispatch => {
     },
     setNeedAuth: value => {
       dispatch(actions.setNeedAuth(value));
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
     },
   };
 };
