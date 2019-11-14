@@ -1,13 +1,27 @@
 import React from 'react';
+import styled from 'styled-components';
 import './NotFound.scss';
-import notFoundImg from '../../../assets/img/404notFound.png';
+import notFoundImg from '../../../assets/img/404-page-background.jpg';
+
+const NotFoundContainer = styled.div`
+  /* The image used */
+  background-image: url('/static/img/404PageBackground.jpg');
+
+  /* Full height */
+  height: 100%;
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+`;
 
 function NotFound() {
   return (
-    <div>
-      <div className="not-found_img">
+    <div className=".ot-found ">
+      {/* <div className="not-found_img">
         <img src={notFoundImg} alt="tradatech" />
-      </div>
+      </div> */}
     </div>
   );
 }

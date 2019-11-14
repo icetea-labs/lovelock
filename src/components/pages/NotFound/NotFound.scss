@@ -1,19 +1,22 @@
 .not-found {
-  position: absolute;
-  top: 15%;
-  left: 40%;
-  // color: white;
-  text-align: center;
+  /* The image used */
+  background-image: url('/static/img/404PageBackground.jpg');
+
+  /* Full height */
+  height: 100%;
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .exception {
   font-size: 20px;
 }
 .not-found_img {
   img {
-    position: absolute;
-    width: 50%;
+    position: fixed;
+    width: 100%;
     // height: 100%;
-    top: 25%;
-    left: 25%;
   }
 }
