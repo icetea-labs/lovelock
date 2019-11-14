@@ -30,8 +30,21 @@ const BoxAuthenCus = styled(BoxAuthen)`
   top: 30px;
 `;
 
+const RotateImage = styled.div`
+  input {
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(332deg, #b276ff, #fe8dc3);
+    color: #fff;
+  }
+  .rightRotate {
+    float: right;
+  }
+`;
+
 const PreviewContainter = styled.div`
-  display: flex;
+  display: block;
   flex-direction: row;
   -webkit-box-pack: justify;
   padding: 20px 0 0 0;
@@ -46,6 +59,7 @@ const PreviewContainter = styled.div`
     cursor: pointer;
   }
   .upload_img {
+    height: 120px;
     position: relative;
     overflow: hidden;
     display: inline-block;
@@ -338,11 +352,7 @@ function ChangeProfile(props) {
                     <div className="upload_img">
                       {cropFile ? (
                         // <AvatarPro src={avatar} className={classes.avatar} />
-                        <div>
-                          <RotationImg src={avatar} rotation={rotation} />
-                          <input onClick={rotateleft} type="button" value="left" />
-                          <input onClick={rotateRight} type="button" value="right" />
-                        </div>
+                        <RotationImg src={avatar} rotation={rotation} />
                       ) : (
                         <AvatarPro hash={avatar} className={classes.avatar} />
                       )}
@@ -357,6 +367,12 @@ function ChangeProfile(props) {
                         <CameraAltIcon />
                       </div>
                     </div>
+                    {cropFile && (
+                      <RotateImage>
+                        <input onClick={rotateleft} type="button" value="left" className="leftRotate" />
+                        <input onClick={rotateRight} type="button" value="right" className="rightRotate" />
+                      </RotateImage>
+                    )}
                   </PreviewContainter>
                   <RightProfile>
                     <TextValidator

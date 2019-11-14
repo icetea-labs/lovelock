@@ -53,25 +53,25 @@ const ProposeWrapper = styled.div`
 `;
 
 export default function DetailPropose(props) {
-  const { match } = props;
+  const { match, history } = props;
   let isOwner = false;
   let isView = false;
   const dispatch = useDispatch();
   const proIndex = parseInt(match.params.index, 10);
   let collectionId = parseInt(match.params.cid, 10);
-  const invalidCollectionId = match.params.cid != null && isNaN(collectionId)
-  if (isNaN(collectionId)) collectionId = null
+  const invalidCollectionId = match.params.cid != null && isNaN(collectionId);
+  if (isNaN(collectionId)) collectionId = null;
 
   const address = useSelector(state => state.account.address);
-  const tx = useTx()
+  const tx = useTx();
 
   const [proposeInfo, setProposeInfo] = useState(null);
-  const [pageErr, setPageErr] = useState(false);
+  // const [pageErr, setPageErr] = useState(false);
 
-  const [dialogVisible, setDialogVisible] = useState(false)
-  const [colName, setColName] = useState('')
-  const [colDesc, setColDesc] = useState('')
-  const [colCreationCallback, setColCreationCallback] = useState()
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [colName, setColName] = useState('');
+  const [colDesc, setColDesc] = useState('');
+  const [colCreationCallback, setColCreationCallback] = useState();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -79,12 +79,14 @@ export default function DetailPropose(props) {
     let cancel = false;
 
     if (isNaN(proIndex) || invalidCollectionId) {
-      setPageErr(true);
+      // setPageErr(true);
+      history.push('/notFound');
     } else {
       callView('getProposes').then(async allPropose => {
         const proposeNum = allPropose.length - 1;
         if (proIndex > proposeNum) {
-          setPageErr(true);
+          // setPageErr(true);
+          history.push('/notFound');
         } else {
           callView('getProposeByIndex', [proIndex]).then(async propose => {
             const proInfo = propose[0] || {};
@@ -111,37 +113,39 @@ export default function DetailPropose(props) {
     return () => (cancel = true);
   }, [proIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hideDialog = () => setDialogVisible(false)
+  const hideDialog = () => setDialogVisible(false);
 
   const handleNewCollection = callback => {
-    setColCreationCallback(() => callback)
-    setDialogVisible(true)
-  }
+    setColCreationCallback(() => callback);
+    setDialogVisible(true);
+  };
 
   const createCollection = () => {
-    hideDialog() // prevent dialog over dialog
+    hideDialog(); // prevent dialog over dialog
 
     const data = {
       name: colName,
-    }
+    };
 
-    const desc = colDesc.trim().normalize()
+    const desc = colDesc.trim().normalize();
     if (desc) {
-      data.description = desc
+      data.description = desc;
     }
 
-    tx.sendCommit('addLockCollection', proIndex, data).then(r => {
-      data.id = r.returnValue
-      proposeInfo.collections.push(data)
-      // push to redux
-      dispatch(actions.setTopInfo(proposeInfo));
+    tx.sendCommit('addLockCollection', proIndex, data)
+      .then(r => {
+        data.id = r.returnValue;
+        proposeInfo.collections.push(data);
+        // push to redux
+        dispatch(actions.setTopInfo(proposeInfo));
 
-      colCreationCallback && colCreationCallback(data)
-    }).catch(err => {
-      console.warn(err)
-      enqueueSnackbar(err.message, { variant: 'error' });
-    })
-  }
+        colCreationCallback && colCreationCallback(data);
+      })
+      .catch(err => {
+        console.warn(err);
+        enqueueSnackbar(err.message, { variant: 'error' });
+      });
+  };
 
   const renderHelmet = () => {
     const title = makeProposeName(proposeInfo, 'Lovelock - ');
@@ -202,13 +206,13 @@ export default function DetailPropose(props) {
   }
 
   const renderDetailPropose = () => (
-    <React.Fragment>
+    <>
       <BannerContainer>
         <ShadowBox>
           <TopContrainer proIndex={proIndex} />
         </ShadowBox>
       </BannerContainer>
-  
+
       <ProposeWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftContainer proIndex={proIndex} />
@@ -218,28 +222,30 @@ export default function DetailPropose(props) {
             proIndex={proIndex}
             collectionId={collectionId}
             handleNewCollection={handleNewCollection}
-            isOwner={isOwner} />
+            isOwner={isOwner}
+          />
         </div>
       </ProposeWrapper>
 
       {proposeInfo && renderHelmet()}
-    </React.Fragment>
+    </>
   );
 
-  const renderNotFound = () => <NotFound />;
+  const renderNotFound = () => <>{history.push('/notFound')}</>;
 
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
-    proposeInfo.collections = proposeInfo.collections || []
+    proposeInfo.collections = proposeInfo.collections || [];
   }
 
   return (
-    <React.Fragment>
-      {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
-      {pageErr && renderNotFound()}
-      {dialogVisible && <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
+    <>
+      {proposeInfo && <>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</>}
+      {/* {pageErr && renderNotFound()} */}
+      {dialogVisible && (
+        <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
           <TextField
             autoFocus
             required
@@ -252,10 +258,11 @@ export default function DetailPropose(props) {
             onChange={e => setColDesc(e.target.value)}
             label="Description"
             type="text"
-            style={{marginTop: 16}}
+            style={{ marginTop: 16 }}
             fullWidth
           />
-      </CommonDialog>}
-    </React.Fragment>
+        </CommonDialog>
+      )}
+    </>
   );
 }
