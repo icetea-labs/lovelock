@@ -7,6 +7,7 @@ import { callView } from '../../../helper';
 import * as actions from '../../../store/actions';
 import PuNewLock from '../Propose/PuNewLock';
 import LandingPage from '../../layout/LandingPage';
+import FeedContainer from '../Feed';
 
 const RightBox = styled.div`
   text-align: center;
@@ -72,7 +73,7 @@ function Home(props) {
       } else {
         index = homePropose[0].id;
       }
-      history.push(`/lock/${index}`);
+      // history.push(`/lock/${index}`);
     }
   }, [homePropose, history]);
 
@@ -117,9 +118,15 @@ function Home(props) {
   );
 
   return address ? (
-    <FlexBox wrap="wrap" justify="center">
-      {homePropose && homePropose.length < 1 && renderHomeEmptyPropose}
-    </FlexBox>
+    <>
+      {homePropose && homePropose.length < 1 ? (
+        <FlexBox wrap="wrap" justify="center">
+          {renderHomeEmptyPropose}
+        </FlexBox>
+      ) : (
+        <FeedContainer />
+      )}
+    </>
   ) : (
     <LandingPage />
   );

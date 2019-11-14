@@ -35,7 +35,7 @@ const ProposeWrapper = styled.div`
     }
   }
 `;
-function MasterContainer(props) {
+function FeedContainer(props) {
   const { setProposes, setMemory } = props;
   const { address } = props;
 
@@ -112,4 +112,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(MasterContainer);
+)(FeedContainer);
