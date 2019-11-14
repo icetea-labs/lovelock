@@ -4,13 +4,12 @@ import styled from 'styled-components';
 
 import { useHistory } from 'react-router-dom';
 
+import CollectionsIcon from '@material-ui/icons/Collections';
+import Chip from '@material-ui/core/Chip';
 import { rem } from '../../../elements/StyledUtils';
 import { callView } from '../../../../helper';
 import MemoryContainer from '../../Memory/MemoryContainer';
 import CreateMemory from '../../Memory/CreateMemory';
-
-import Chip from '@material-ui/core/Chip';
-import CollectionsIcon from '@material-ui/icons/Collections';
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -20,50 +19,53 @@ const RightBox = styled.div`
 `;
 
 const CollectionIndicator = styled.div`
-  margin-bottom: ${rem(16)}
+  margin-bottom: ${rem(16)};
 `;
 
 export default function RightContainer(props) {
   const { proIndex, collectionId, collections, currentCollection, handleNewCollection, isOwner } = props;
   const [memoByProIndex, setMemoByProIndex] = useState([]);
-  const [changed, setChanged] = useState(false)
+  const [changed, setChanged] = useState(false);
   const address = useSelector(state => state.account.address);
 
-
-  const history = useHistory()
+  const history = useHistory();
 
   useEffect(() => {
-    let cancel = false
+    let cancel = false;
 
     callView('getMemoriesByProIndex', [proIndex, collectionId]).then(memories => {
-      if (cancel) return
-      setMemoByProIndex(memories)
-    })
+      if (cancel) return;
+      setMemoByProIndex(memories);
+    });
 
-    return () => (cancel = true)
+    return () => (cancel = true);
   }, [proIndex, changed, collectionId]);
 
   function refresh() {
-    setChanged(c => !c)
+    setChanged(c => !c);
   }
 
   return (
     <RightBox>
       {collectionId != null && (
         <CollectionIndicator>
-          <Chip 
+          <Chip
             color="primary"
             label={currentCollection.name}
             icon={<CollectionsIcon />}
-            onDelete={() => history.push('/lock/' + proIndex)} />
+            onDelete={() => history.push(`/lock/${proIndex}`)}
+          />
         </CollectionIndicator>
       )}
-      {address && isOwner && <CreateMemory 
-        proIndex={proIndex} 
-        collectionId={collectionId}
-        collections={collections}
-        onMemoryAdded={refresh}
-        handleNewCollection={handleNewCollection} />}
+      {address && isOwner && (
+        <CreateMemory
+          proIndex={proIndex}
+          collectionId={collectionId}
+          collections={collections}
+          onMemoryAdded={refresh}
+          handleNewCollection={handleNewCollection}
+        />
+      )}
       <MemoryContainer proIndex={proIndex} collectionId={collectionId} memorydata={memoByProIndex} />
     </RightBox>
   );

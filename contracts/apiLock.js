@@ -128,16 +128,24 @@ exports.apiChangeLockImg = (self, index, imgHash) => {
 exports.apiFollowLock = (self, lockIndex) => {
   const sender = msg.sender;
   const [pro, proposes] = self.getPropose(lockIndex);
+  const afl = self.getAFL();
+  if (!afl[sender]) afl[sender] = [];
   const index = pro.follows.indexOf(sender);
   if (index !== -1) {
     // unfollowLock
     pro.follows.splice(index, 1);
+    afl[sender].splice(afl[sender].indexOf(lockIndex), 1);
   } else {
     //  followLock
     pro.follows.push(sender);
+    afl[sender].push(lockIndex);
   }
+  // set map address follow lock
+  self.setAFL(afl);
+
   // save proposes
   self.setProposes(proposes);
+  return sender;
 };
 //private function
 function _confirmLock(self, index, r_content, status, saveFlag) {
@@ -166,19 +174,36 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
 }
 
 // ========== GET DATA ==================
-exports.apiGetLockByAddress = (self, address) => {
-  if (!address) address = msg.sender;
-  const arrPro = self.getA2p()[address] || [];
+exports.apiGetLocksByAddress = (self, address) => {
+  const locks = self.getProposes();
+  const locksIndex = self.getA2p()[address] || [];
+  return _prepareData(locks, locksIndex);
+};
+exports.apiGetFollowingLocksByAddress = (self, address) => {
+  const locks = self.getProposes();
+  const locksIndex = self.getAFL()[address] || [];
+  return _prepareData(locks, locksIndex);
+};
+exports.apiGetFollowingPersionLocksByAddress = (self, address) => {
   let resp = [];
-  const proposes = self.getProposes();
-  arrPro.forEach(index => {
-    let pro = getDataByIndex(proposes, index);
-    pro = Object.assign({}, pro, { id: index });
-    resp.push(pro);
+  const followingAddress = self.getAFA()[address] || [];
+  followingAddress.forEach(add => {
+    let lock = apiGetLocksByAddress(self, add);
+    resp.push([...lock]);
   });
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
   return resp;
 };
+function _prepareData(locks, locksIndex) {
+  let resp = [];
+  locksIndex.forEach(index => {
+    let lock = getDataByIndex(locks, index);
+    lock = Object.assign({}, lock, { id: index });
+    resp.push(lock);
+  });
+  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
+  return resp;
+}
 exports.apiGetLockByIndex = (self, index) => {
   const [pro] = self.getPropose(index);
   let resp = [];
@@ -188,3 +213,51 @@ exports.apiGetLockByIndex = (self, index) => {
   resp.push(pro);
   return resp;
 };
+exports.apiGetLocksForFeed = (self, address) => {
+  let resp = [];
+  const ownerLocks = apiGetLocksByAddress(self, address);
+  const followLocks = exports.apiGetFollowingLocksByAddress(self, address);
+  const followPersionLocks = exports.apiGetFollowingPersionLocksByAddress(self, address);
+  // remove duplicate locks
+  resp = ownerLocks.concat(followLocks).concat(followPersionLocks);
+  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
+  // get more info from system.did, system.alias
+  resp = _addInfoToLocks(resp);
+  const ownerLocksId = ownerLocks.map(lock => lock.id);
+  const followLocksId = followLocks
+    .map(lock => lock.id)
+    .filter(id => {
+      return ownerLocksId.indexOf(id) === -1;
+    });
+  const followPersionLocksId = followPersionLocks
+    .map(lock => lock.id)
+    .filter(id => {
+      return ownerLocksId.indexOf(id) === -1;
+    });
+
+  return { locks: resp, ownerLocksId, followLocksId, followPersionLocksId };
+};
+
+function _addInfoToLocks(locks) {
+  const ctDid = loadContract('system.did');
+  const ctAlias = loadContract('system.alias');
+  locks.forEach(lock => {
+    if (lock.type === LOCK_TYPE_JOURNAL) {
+      lock.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
+    } else if (lock.type === LOCK_TYPE_CRUSH) {
+      lock.bot_info.avatar = lock.bot_info.botAva;
+      lock.bot_info['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      // lock.r_tags = lock.bot_info;
+      // lock.r_alias = lock.s_alias;
+    } else {
+      lock.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
+      lock.r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
+
+      const s_alias = ctAlias.byAddress.invokeView(lock.sender);
+      lock.s_alias = (Array.isArray(s_alias) ? s_alias[0] : s_alias).replace('account.', '');
+      const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
+      lock.r_alias = (Array.isArray(r_alias) ? r_alias[0] : r_alias).replace('account.', '');
+    }
+  });
+  return locks;
+}

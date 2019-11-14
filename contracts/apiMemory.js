@@ -95,3 +95,12 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
   }
   return res;
 };
+exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
+  const allMem = self.getMemories();
+  let res = [];
+
+  listMemIndex.forEach(index => {
+    res.push({ ...allMem[index], id: index });
+  });
+  return res;
+};

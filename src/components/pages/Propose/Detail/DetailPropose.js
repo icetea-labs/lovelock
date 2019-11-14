@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
+import TextField from '@material-ui/core/TextField';
+import { useSnackbar } from 'notistack';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, makeProposeName, sendTransaction } from '../../../../helper';
 import TopContrainer from './TopContainer';
@@ -12,8 +14,6 @@ import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
 
 import CommonDialog from '../../../elements/CommonDialog';
-import TextField from '@material-ui/core/TextField';
-import { useSnackbar } from 'notistack';
 
 window.prerenderReady = false;
 
@@ -58,9 +58,10 @@ export default function DetailPropose(props) {
   const dispatch = useDispatch();
   const proIndex = parseInt(match.params.index, 10);
   let collectionId = parseInt(match.params.cid, 10);
-  const invalidCollectionId = match.params.cid != null && isNaN(collectionId)
-  if (isNaN(collectionId)) collectionId = null
-  let collections, currentCollection
+  const invalidCollectionId = match.params.cid != null && isNaN(collectionId);
+  if (isNaN(collectionId)) collectionId = null;
+  let collections;
+  let currentCollection;
 
   const address = useSelector(state => state.account.address);
   // const topInfo = useSelector(state => state.loveinfo.topInfo);
@@ -70,10 +71,10 @@ export default function DetailPropose(props) {
   const [proposeInfo, setProposeInfo] = useState(null);
   const [pageErr, setPageErr] = useState(false);
 
-  const [dialogVisible, setDialogVisible] = useState(false)
-  const [colName, setColName] = useState('')
-  const [colDesc, setColDesc] = useState('')
-  const [colCreationCallback, setColCreationCallback] = useState()
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [colName, setColName] = useState('');
+  const [colDesc, setColDesc] = useState('');
+  const [colCreationCallback, setColCreationCallback] = useState();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -113,15 +114,15 @@ export default function DetailPropose(props) {
     return () => (cancel = true);
   }, [proIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hideDialog = () => setDialogVisible(false)
+  const hideDialog = () => setDialogVisible(false);
 
   const handleNewCollection = callback => {
-    setColCreationCallback(() => callback)
-    setDialogVisible(true)
-  }
+    setColCreationCallback(() => callback);
+    setDialogVisible(true);
+  };
 
   const createCollection = () => {
-    hideDialog() // prevent dialog over dialog
+    hideDialog(); // prevent dialog over dialog
 
     if (!tokenKey) {
       dispatch(actions.setNeedAuth(true));
@@ -130,21 +131,23 @@ export default function DetailPropose(props) {
 
     const data = {
       name: colName,
-    }
+    };
 
-    const desc = colDesc.trim().normalize()
+    const desc = colDesc.trim().normalize();
     if (desc) {
-      data.description = desc
+      data.description = desc;
     }
 
-    sendTransaction('addLockCollection', [proIndex, data], { address, tokenAddress }).then(r => {
-      data.id = r.returnValue
-      colCreationCallback && colCreationCallback(data)
-    }).catch(err => {
-      console.warn(err)
-      enqueueSnackbar(err.message, { variant: 'error' });
-    })
-  }
+    sendTransaction('addLockCollection', [proIndex, data], { address, tokenAddress })
+      .then(r => {
+        data.id = r.returnValue;
+        colCreationCallback && colCreationCallback(data);
+      })
+      .catch(err => {
+        console.warn(err);
+        enqueueSnackbar(err.message, { variant: 'error' });
+      });
+  };
 
   const renderHelmet = () => {
     const title = makeProposeName(proposeInfo, 'Lovelock - ');
@@ -205,13 +208,13 @@ export default function DetailPropose(props) {
   }
 
   const renderDetailPropose = () => (
-    <React.Fragment>
+    <>
       <BannerContainer>
         <ShadowBox>
           <TopContrainer proIndex={proIndex} />
         </ShadowBox>
       </BannerContainer>
-  
+
       <ProposeWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftContainer proIndex={proIndex} />
@@ -223,12 +226,13 @@ export default function DetailPropose(props) {
             collections={collections}
             currentCollection={currentCollection}
             handleNewCollection={handleNewCollection}
-            isOwner={isOwner} />
+            isOwner={isOwner}
+          />
         </div>
       </ProposeWrapper>
 
       {proposeInfo && renderHelmet()}
-    </React.Fragment>
+    </>
   );
 
   const renderNotFound = () => <NotFound />;
@@ -237,17 +241,18 @@ export default function DetailPropose(props) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
-    collections = proposeInfo.collections || []
+    collections = proposeInfo.collections || [];
     if (collectionId != null) {
-      currentCollection = collections.find(c => c.id === collectionId)
+      currentCollection = collections.find(c => c.id === collectionId);
     }
   }
 
   return (
-    <React.Fragment>
-      {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
+    <>
+      {proposeInfo && <>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</>}
       {pageErr && renderNotFound()}
-      {dialogVisible && <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
+      {dialogVisible && (
+        <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
           <TextField
             autoFocus
             required
@@ -260,10 +265,11 @@ export default function DetailPropose(props) {
             onChange={e => setColDesc(e.target.value)}
             label="Description"
             type="text"
-            style={{marginTop: 16}}
+            style={{ marginTop: 16 }}
             fullWidth
           />
-      </CommonDialog>}
-    </React.Fragment>
+        </CommonDialog>
+      )}
+    </>
   );
 }

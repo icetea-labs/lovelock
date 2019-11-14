@@ -7,9 +7,10 @@ const {
   apiCancelLock,
   apiFollowLock,
   apiLikeLock,
-  apiGetLockByAddress,
-  apiGetLockByIndex,
   apiChangeLockImg,
+  apiGetLockByIndex,
+  apiGetLocksByAddress,
+  apiGetLocksForFeed,
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
@@ -17,6 +18,7 @@ const {
   apiCommentMemory,
   apiGetMemoriesByLock,
   apiGetMemoriesByRange,
+  apiGetMemoriesByListMemIndex,
 } = require('./apiMemory.js');
 
 @contract
@@ -43,10 +45,6 @@ class LoveLock {
   @view getA2p = () => this.getState('a2p', {});
   setA2p = value => this.setState('a2p', value);
 
-  // mapping: person to person
-  // 1:n { 'address':[address1,address2,address3...] }
-  @view getAFA = () => this.getState('afa', {});
-  setAFA = value => this.setState('afa', value);
   // mapping: propose to memory
   // 1:n  { 'proindex':[1,2,3...] }
   // @view getP2m = () => this.getState('p2m', {});
@@ -57,10 +55,15 @@ class LoveLock {
   // @view getM2p = () => this.getState('m2p', {});
   // setM2p = value => this.setState('m2p', value);
 
-  // mapping follow: save locks index that address following
+  // mapp address -> following locks.
   // 1:n  { 'address':[lockIndex1, lockIndex2,...] }
-  // @view getAFL = () => this.getState('afl', {});
-  // setAFL = value => this.setState('afl', value);
+  @view getAFL = () => this.getState('afl', {});
+  setAFL = value => this.setState('afl', value);
+
+  // mapping: person -> other person
+  // 1:n { 'address':[address1,address2,address3...] }
+  @view getAFA = () => this.getState('afa', {});
+  setAFA = value => this.setState('afa', value);
 
   // mapping follow: save addresses following lock
   // 1:n  { 'lockIndex':[address1, address2...] }
@@ -89,15 +92,15 @@ class LoveLock {
   }
   @transaction followLock(index: number) {
     const self = this;
-    apiFollowLock(self, index);
+    return apiFollowLock(self, index);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
     const self = this;
     apiChangeLockImg(self, index, imgHash);
   }
-  @view getProposeByAddress(address: ?address) {
+  @view getProposeByAddress(address: address) {
     const self = this;
-    return apiGetLockByAddress(self, address);
+    return apiGetLocksByAddress(self, address);
   }
   @view getProposeByIndex(index: number) {
     const self = this;
@@ -105,6 +108,10 @@ class LoveLock {
   }
   @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;
+  @view getLocksForFeed = (address: address) => {
+    const self = this;
+    return apiGetLocksForFeed(self, address);
+  };
 
   // =========== MEMORY ================
   // info { img:Array, location:string, date:string }
@@ -129,6 +136,10 @@ class LoveLock {
   @view getMemoriesByRange(start: number, end: number) {
     const self = this;
     return apiGetMemoriesByRange(self, start, end);
+  }
+  @view getMemoriesByListMemIndex(listMemIndex) {
+    const self = this;
+    return apiGetMemoriesByListMemIndex(self, listMemIndex);
   }
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
   @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
@@ -242,7 +253,7 @@ class LoveLock {
     this.setProposes(locks);
   }
   // =========== OTHER ================
-  @transaction setFlowPerson(address: ?address) {
+  @transaction setFlowPerson(address: address) {
     const sender = msg.sender;
     const afp = this.getAFA();
 

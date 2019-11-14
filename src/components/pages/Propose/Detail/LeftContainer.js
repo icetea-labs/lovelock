@@ -65,7 +65,7 @@ const CollectionBox = styled.div`
     margin-right: ${rem(7)};
     font-size: ${rem(12)};
     cursor: pointer;
-    margin-bottom: ${rem(9)}
+    margin-bottom: ${rem(9)};
     padding: 3px 12px 3px 6px;
     :hover {
       color: #8250c8;
@@ -94,7 +94,7 @@ function LeftContainer(props) {
     history,
   } = props;
 
-  const collections = topInfo && topInfo.index === proIndex ? (topInfo.collections || []) : []
+  const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
@@ -169,10 +169,10 @@ function LeftContainer(props) {
     setStep('deny');
   }
 
-  function selectAccepted(proIndex, collectionId) {
-    let url = '/lock/' + proIndex
+  function selectAccepted(lockIndex, collectionId) {
+    let url = `/lock/${lockIndex}`;
     if (collectionId != null) {
-      url += '/collection/' + collectionId
+      url += `/collection/${collectionId}`;
     }
     history.push(url);
   }
@@ -184,15 +184,15 @@ function LeftContainer(props) {
     setStep('new');
   }
 
-  function selectPending(proIndex) {
+  function selectPending(lockIndex) {
     if (!tokenKey) {
       setNeedAuth(true);
     }
     setStep('pending');
-    setIndex(proIndex);
+    setIndex(lockIndex);
   }
 
-  function eventConfirmPropose(data, signal) {
+  function eventConfirmPropose(data) {
     confirmPropose(data.log);
     if (address === data.log.sender) {
       const message = 'Your lock request has been accepted.';
@@ -259,20 +259,22 @@ function LeftContainer(props) {
     return clonePro;
   }
 
-  function renderCollections(collections) {
-    const cols = [{ name: 'All', description: 'All memories.'}].concat(collections)
-    return cols.map((item, index) => {
+  function renderCollections(collec) {
+    const cols = [{ name: 'All', description: 'All memories.' }].concat(collec);
+    return cols.map((item, i) => {
       return (
-        <div className="colName" key={index} onClick={() => selectAccepted(proIndex, item.id)}>
-          <Icon type='collections' />
-          <span className="colText" title={item.description}>{item.name}</span>
+        <div className="colName" key={i} onClick={() => selectAccepted(proIndex, item.id)} role="button">
+          <Icon type="collections" />
+          <span className="colText" title={item.description}>
+            {item.name}
+          </span>
         </div>
       );
     });
   }
 
   return (
-    <React.Fragment>
+    <>
       <LeftBox>
         <ShadowBox>
           {address && (
@@ -307,7 +309,7 @@ function LeftContainer(props) {
       )}
       {step === 'accept' && <PromiseConfirm close={closePopup} index={index} />}
       {step === 'deny' && <PromiseConfirm isDeny close={closePopup} index={index} />}
-    </React.Fragment>
+    </>
   );
 }
 
