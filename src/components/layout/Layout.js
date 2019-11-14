@@ -34,7 +34,6 @@ const Content = styled(BoxContent)`
 
 const Layout = ({ children }) => (
   <Container>
-    <Header />
     <Content> {children} </Content>
     {/* <Footer /> */}
   </Container>

@@ -53,7 +53,7 @@ const ProposeWrapper = styled.div`
 `;
 
 export default function DetailPropose(props) {
-  const { match } = props;
+  const { match, history } = props;
   let isOwner = false;
   let isView = false;
   const dispatch = useDispatch();
@@ -66,7 +66,7 @@ export default function DetailPropose(props) {
   const tx = useTx();
 
   const [proposeInfo, setProposeInfo] = useState(null);
-  const [pageErr, setPageErr] = useState(false);
+  // const [pageErr, setPageErr] = useState(false);
 
   const [dialogVisible, setDialogVisible] = useState(false);
   const [colName, setColName] = useState('');
@@ -79,12 +79,14 @@ export default function DetailPropose(props) {
     let cancel = false;
 
     if (isNaN(proIndex) || invalidCollectionId) {
-      setPageErr(true);
+      // setPageErr(true);
+      history.push('/notFound');
     } else {
       callView('getMaxLocksIndex').then(async maxIndex => {
         // console.log('allPropose', maxIndex);
         if (proIndex > maxIndex) {
-          setPageErr(true);
+          // setPageErr(true);
+          history.push('/notFound');
         } else {
           callView('getProposeByIndex', [proIndex]).then(async propose => {
             const proInfo = propose[0] || {};
@@ -232,7 +234,7 @@ export default function DetailPropose(props) {
     </>
   );
 
-  const renderNotFound = () => <NotFound />;
+  const renderNotFound = () => <>{history.push('/notFound')}</>;
 
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
@@ -243,8 +245,8 @@ export default function DetailPropose(props) {
 
   return (
     <>
-      {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
-      {pageErr && renderNotFound()}
+      {proposeInfo && <>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</>}
+      {/* {pageErr && renderNotFound()} */}
       {dialogVisible && (
         <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
           <TextField

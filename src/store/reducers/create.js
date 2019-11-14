@@ -10,7 +10,7 @@ const initialState = {
   keyStoreText: '',
   showPrivateKey: false,
   confirmMnemonic: false,
-  isRemember: window.localStorage.remember === '1',
+  isRemember: window.localStorage.remember !== '0',
   pathName: '',
 };
 
