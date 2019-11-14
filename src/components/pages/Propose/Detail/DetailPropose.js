@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
+import TextField from '@material-ui/core/TextField';
+import { useSnackbar } from 'notistack';
 import { rem } from '../../../elements/StyledUtils';
 import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
 import { useTx } from '../../../../helper/hooks';
@@ -13,8 +15,6 @@ import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
 
 import CommonDialog from '../../../elements/CommonDialog';
-import TextField from '@material-ui/core/TextField';
-import { useSnackbar } from 'notistack';
 
 window.prerenderReady = false;
 
@@ -81,9 +81,9 @@ export default function DetailPropose(props) {
     if (isNaN(proIndex) || invalidCollectionId) {
       setPageErr(true);
     } else {
-      callView('getProposes').then(async allPropose => {
-        const proposeNum = allPropose.length - 1;
-        if (proIndex > proposeNum) {
+      callView('getMaxLocksIndex').then(async maxIndex => {
+        // console.log('allPropose', maxIndex);
+        if (proIndex > maxIndex) {
           setPageErr(true);
         } else {
           callView('getProposeByIndex', [proIndex]).then(async propose => {
@@ -97,7 +97,7 @@ export default function DetailPropose(props) {
             proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
 
             // add more detailed info
-            await addInfoToPropose(proInfo);
+            // await addInfoToPropose(proInfo);
 
             if (cancel) return;
 
@@ -105,6 +105,9 @@ export default function DetailPropose(props) {
             dispatch(actions.setTopInfo(proInfo));
           });
         }
+      });
+      callView('getLocksForFeed', [address]).then(async lockForFeed => {
+        dispatch(actions.setPropose(lockForFeed.locks));
       });
     }
 
@@ -163,48 +166,48 @@ export default function DetailPropose(props) {
     );
   };
 
-  async function addInfoToPropose(pro) {
-    const { sender, receiver } = pro;
+  // async function addInfoToPropose(pro) {
+  //   const { sender, receiver } = pro;
 
-    const senderTags = await getTagsInfo(sender);
-    pro.s_name = senderTags['display-name'];
-    pro.s_publicKey = senderTags['pub-key'] || '';
-    pro.s_avatar = senderTags.avatar;
+  //   const senderTags = await getTagsInfo(sender);
+  //   pro.s_name = senderTags['display-name'];
+  //   pro.s_publicKey = senderTags['pub-key'] || '';
+  //   pro.s_avatar = senderTags.avatar;
 
-    const botInfo = pro.bot_info;
+  //   const botInfo = pro.bot_info;
 
-    if (receiver === process.env.REACT_APP_BOT_LOVER) {
-      pro.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
-      pro.r_publicKey = senderTags['pub-key'] || '';
-      pro.r_avatar = botInfo.botAva;
-      pro.r_content = botInfo.botReply;
-    } else {
-      const receiverTags = await getTagsInfo(receiver);
-      pro.r_name = receiverTags['display-name'];
-      pro.r_publicKey = receiverTags['pub-key'] || '';
-      pro.r_avatar = receiverTags.avatar;
-    }
-    pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
+  //   if (receiver === process.env.REACT_APP_BOT_LOVER) {
+  //     pro.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
+  //     pro.r_publicKey = senderTags['pub-key'] || '';
+  //     pro.r_avatar = botInfo.botAva;
+  //     pro.r_content = botInfo.botReply;
+  //   } else {
+  //     const receiverTags = await getTagsInfo(receiver);
+  //     pro.r_name = receiverTags['display-name'];
+  //     pro.r_publicKey = receiverTags['pub-key'] || '';
+  //     pro.r_avatar = receiverTags.avatar;
+  //   }
+  //   pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
 
-    const info = pro.s_info;
-    pro.s_date = info.date;
-    pro.r_date = info.date;
+  //   const info = pro.s_info;
+  //   pro.s_date = info.date;
+  //   pro.r_date = info.date;
 
-    const accountInfo = {
-      s_publicKey: pro.s_publicKey,
-      s_address: pro.sender,
-      s_name: pro.s_name,
-      r_publicKey: pro.r_publicKey,
-      r_address: pro.receiver,
-      r_name: pro.r_name,
-      publicKey: pro.publicKey,
-    };
-    dispatch(actions.setAccount(accountInfo));
-    return pro;
-  }
+  //   const accountInfo = {
+  //     s_publicKey: pro.s_publicKey,
+  //     s_address: pro.sender,
+  //     s_name: pro.s_name,
+  //     r_publicKey: pro.r_publicKey,
+  //     r_address: pro.receiver,
+  //     r_name: pro.r_name,
+  //     publicKey: pro.publicKey,
+  //   };
+  //   // dispatch(actions.setAccount(accountInfo));
+  //   return pro;
+  // }
 
   const renderDetailPropose = () => (
-    <React.Fragment>
+    <>
       <BannerContainer>
         <ShadowBox>
           <TopContrainer proIndex={proIndex} />
@@ -226,7 +229,7 @@ export default function DetailPropose(props) {
       </ProposeWrapper>
 
       {proposeInfo && renderHelmet()}
-    </React.Fragment>
+    </>
   );
 
   const renderNotFound = () => <NotFound />;
@@ -239,7 +242,7 @@ export default function DetailPropose(props) {
   }
 
   return (
-    <React.Fragment>
+    <>
       {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
       {pageErr && renderNotFound()}
       {dialogVisible && (
@@ -261,6 +264,6 @@ export default function DetailPropose(props) {
           />
         </CommonDialog>
       )}
-    </React.Fragment>
+    </>
   );
 }

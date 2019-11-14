@@ -8,7 +8,7 @@ const {
   apiFollowLock,
   apiLikeLock,
   apiChangeLockImg,
-  apiGetLockByIndex,
+  apiGetTopInfoLockByIndex,
   apiGetLocksByAddress,
   apiGetLocksForFeed,
 } = require('./apiLock.js');
@@ -20,11 +20,7 @@ const {
   apiGetMemoriesByRange,
   apiGetMemoriesByListMemIndex,
 } = require('./apiMemory.js');
-const {
-  importState,
-  exportState,
-  migrateState
-} = require('./migration.js')(this)
+const { importState, exportState, migrateState } = require('./migration.js')(this);
 
 @contract
 class LoveLock {
@@ -37,7 +33,19 @@ class LoveLock {
     const proposes = this.getProposes();
     return [getDataByIndex(proposes, index), proposes];
   };
-
+  // function getMemory(index, defaultValue) {
+  //   return this.getState([‘memories’, index], defaultValue)
+  // }
+  // function pushMemory(memo) {
+  //   return this.invokeState([‘memories’], [], ‘push’, memo)
+  // }
+  // function saveLock(index, lock) {
+  //   return this.setState([‘proposes’, index], lock)
+  // }
+  // function saveLockName(index, name) {
+  //   return this.setState([‘proposes’, index, ‘name’], name)
+  // }
+  // setState([‘locks’, index], oldLock => Object.assign({}, oldLock || {}, { name: ‘thi’, age: 1 }))
   @view getMemories = () => this.getState('memories', []);
   setMemories = value => this.setState('memories', value);
   getMemory = index => {
@@ -109,7 +117,7 @@ class LoveLock {
   }
   @view getProposeByIndex(index: number) {
     const self = this;
-    return apiGetLockByIndex(self, index);
+    return apiGetTopInfoLockByIndex(self, index);
   }
   @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;
@@ -117,7 +125,10 @@ class LoveLock {
     const self = this;
     return apiGetLocksForFeed(self, address);
   };
-
+  @view getMaxLocksIndex = () => {
+    const proposes = this.getProposes();
+    return proposes.length - 1;
+  };
   // =========== MEMORY ================
   // info { img:Array, location:string, date:string }
   @transaction addMemory(lockIndex: number, isPrivate: boolean, content: string, info) {
@@ -271,14 +282,14 @@ class LoveLock {
 
   // ========== DATA MIGRATION =============
   @view exportState() {
-    return exportState()
+    return exportState();
   }
 
-  @transaction importState(data, overwrite: ?bool = false) {
-    return importState(data, overwrite)
+  @transaction importState(data, overwrite: ?boolean = false) {
+    return importState(data, overwrite);
   }
 
-  @transaction migrateState(fromContract: address, overwrite: ?bool = false) {
-    return migrateState(fromContract, overwrite)
+  @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
+    return migrateState(fromContract, overwrite);
   }
 }

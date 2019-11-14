@@ -206,14 +206,20 @@ function _prepareData(locks, locksIndex) {
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
   return resp;
 }
-exports.apiGetLockByIndex = (self, index) => {
+// exports.apiGetLockByIndex = (self, index) => {
+//   const [pro] = self.getPropose(index);
+//   // let resp = [];
+//   // if (pro && pro.isPrivate) {
+//   //   expectProposeOwners(pro, "Can't get propose.");
+//   // }
+//   const newLock = _addTopInfoToLocks([pro], [pro.id]);
+//   // resp.push(newLock[0]);
+//   return newLock;
+// };
+exports.apiGetTopInfoLockByIndex = (self, index) => {
   const [pro] = self.getPropose(index);
-  let resp = [];
-  if (pro && pro.isPrivate) {
-    expectProposeOwners(pro, "Can't get propose.");
-  }
-  resp.push(pro);
-  return resp;
+  const newLock = _addTopInfoToLocks([pro]);
+  return newLock;
 };
 exports.apiGetLocksForFeed = (self, address) => {
   let resp = [];
@@ -235,37 +241,62 @@ exports.apiGetLocksForFeed = (self, address) => {
   resp = ownerLocks.concat(followLocks).concat(followPersionLocks);
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
   // get more info from system.did, system.alias
-  resp = _addInfoToLocks(resp, ownerLocksId);
+  resp = _addLeftInfoToLocks(resp, ownerLocksId);
 
   return { locks: resp, ownerLocksId, followLocksId, followPersionLocksId };
 };
 
-function _addInfoToLocks(locks, ownerLocksId = []) {
+function _addLeftInfoToLocks(locks, ownerLocksId = []) {
   const ctDid = loadContract('system.did');
   const ctAlias = loadContract('system.alias');
+  let resp = [];
   locks.forEach(lock => {
+    let tmp = {};
     if (lock.type === LOCK_TYPE_JOURNAL) {
-      lock.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
+      tmp.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
     } else if (lock.type === LOCK_TYPE_CRUSH) {
-      lock.bot_info.avatar = lock.bot_info.botAva;
-      lock.bot_info['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
-      // lock.r_tags = lock.bot_info;
-      // lock.r_alias = lock.s_alias;
+      const tmpBotInfo = {};
+      tmpBotInfo.avatar = lock.bot_info.botAva;
+      tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      tmp.bot_info = { ...lock.bot_info, ...tmpBotInfo };
     } else {
-      lock.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
-      lock.r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
+      tmp.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
+      tmp.r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
 
       const s_alias = ctAlias.byAddress.invokeView(lock.sender);
-      lock.s_alias = (Array.isArray(s_alias) ? s_alias[0] : s_alias).replace('account.', '');
+      tmp.s_alias = (Array.isArray(s_alias) ? s_alias[0] : s_alias).replace('account.', '');
       const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
-      lock.r_alias = (Array.isArray(r_alias) ? r_alias[0] : r_alias).replace('account.', '');
+      tmp.r_alias = (Array.isArray(r_alias) ? r_alias[0] : r_alias).replace('account.', '');
     }
-
-    if (ownerLocksId.indexOf(lock.id) === -1) {
-      lock.isMyLocks = false;
+    if (ownerLocksId.indexOf(lock.id) !== -1) {
+      tmp.isMyLocks = true;
     } else {
-      lock.isMyLocks = true;
+      tmp.isMyLocks = false;
     }
+    resp.push({ ...lock, ...tmp });
   });
-  return locks;
+  return resp;
+}
+
+function _addTopInfoToLocks(locks) {
+  const ctDid = loadContract('system.did');
+  let resp = [];
+  locks.forEach(lock => {
+    let tmp = {};
+    const s_tags = ctDid.query.invokeView(lock.sender).tags || {};
+    tmp.s_name = s_tags['display-name'];
+    tmp.s_avatar = s_tags.avatar;
+    tmp.s_date = lock.s_info.date;
+    if (lock.type === LOCK_TYPE_CRUSH) {
+      tmp.r_name = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      tmp.r_avatar = lock.bot_info.botAva;
+      tmp.r_content = lock.bot_info.botReply;
+    } else {
+      const r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
+      tmp.r_name = r_tags['display-name'];
+      tmp.r_avatar = r_tags.avatar;
+    }
+    resp.push({ ...lock, ...tmp });
+  });
+  return resp;
 }

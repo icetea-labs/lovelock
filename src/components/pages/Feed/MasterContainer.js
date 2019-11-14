@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 
 import { rem } from '../../elements/StyledUtils';
-import LeftContainer from './LeftContainer';
+import LeftContainer from '../Propose/Detail/LeftContainer';
 import { callView } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
@@ -45,7 +45,7 @@ function MasterContainer(props) {
 
   async function loadLocksForFeed() {
     const lockForFeed = await callView('getLocksForFeed', [address]);
-    console.log('lockForFeed.locks', lockForFeed.locks);
+    // console.log('lockForFeed.locks', lockForFeed.locks);
     setProposes(lockForFeed.locks);
     let arrayMem = [];
     lockForFeed.locks.forEach(lock => {
@@ -67,18 +67,16 @@ function MasterContainer(props) {
   }
 
   return (
-    address && (
-      <ProposeWrapper>
-        <div className="proposeColumn proposeColumn--left">
-          <LeftContainer />
-        </div>
-        <div className="proposeColumn proposeColumn--right">
-          <RightBox>
-            <MemoryContainer memorydata={[]} />
-          </RightBox>
-        </div>
-      </ProposeWrapper>
-    )
+    <ProposeWrapper>
+      <div className="proposeColumn proposeColumn--left">
+        <LeftContainer />
+      </div>
+      <div className="proposeColumn proposeColumn--right">
+        <RightBox>
+          <MemoryContainer memorydata={[]} />
+        </RightBox>
+      </div>
+    </ProposeWrapper>
   );
 }
 
