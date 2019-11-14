@@ -113,7 +113,7 @@ exports.apiLikeLock = (self, lockIndex, type) => {
   // save proposes
   self.setProposes(proposes);
 
-  return pro.likes || []
+  return pro.likes || [];
 };
 exports.apiChangeLockImg = (self, index, imgHash) => {
   const [pro, proposes] = self.getPropose(index);
@@ -220,11 +220,6 @@ exports.apiGetLocksForFeed = (self, address) => {
   const ownerLocks = apiGetLocksByAddress(self, address);
   const followLocks = exports.apiGetFollowingLocksByAddress(self, address);
   const followPersionLocks = exports.apiGetFollowingPersionLocksByAddress(self, address);
-  // remove duplicate locks
-  resp = ownerLocks.concat(followLocks).concat(followPersionLocks);
-  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
-  // get more info from system.did, system.alias
-  resp = _addInfoToLocks(resp);
   const ownerLocksId = ownerLocks.map(lock => lock.id);
   const followLocksId = followLocks
     .map(lock => lock.id)
@@ -236,11 +231,16 @@ exports.apiGetLocksForFeed = (self, address) => {
     .filter(id => {
       return ownerLocksId.indexOf(id) === -1;
     });
+  // remove duplicate locks
+  resp = ownerLocks.concat(followLocks).concat(followPersionLocks);
+  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
+  // get more info from system.did, system.alias
+  resp = _addInfoToLocks(resp, ownerLocksId);
 
   return { locks: resp, ownerLocksId, followLocksId, followPersionLocksId };
 };
 
-function _addInfoToLocks(locks) {
+function _addInfoToLocks(locks, ownerLocksId = []) {
   const ctDid = loadContract('system.did');
   const ctAlias = loadContract('system.alias');
   locks.forEach(lock => {
@@ -259,6 +259,12 @@ function _addInfoToLocks(locks) {
       lock.s_alias = (Array.isArray(s_alias) ? s_alias[0] : s_alias).replace('account.', '');
       const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
       lock.r_alias = (Array.isArray(r_alias) ? r_alias[0] : r_alias).replace('account.', '');
+    }
+
+    if (ownerLocksId.indexOf(lock.id) === -1) {
+      lock.isMyLocks = false;
+    } else {
+      lock.isMyLocks = true;
     }
   });
   return locks;

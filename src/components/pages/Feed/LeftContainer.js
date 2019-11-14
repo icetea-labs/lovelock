@@ -134,31 +134,37 @@ function LeftContainer(props) {
     });
   }
 
-  function renderOwnerLocks(locks, currentAddress) {
+  function renderOwnerLocks(locks, myAddress) {
     // tmp condition
     const loading = locks.length <= 0;
+    const newLocks = locks.filter(lock => {
+      return lock.isMyLocks;
+    });
     return (
       <>
         <div className="title">My lock</div>
         <div>
-          <Lock loading={loading} locksData={locks} address={currentAddress} flag={1} handlerSelect={selectAccepted} />
+          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
         <div className="title">Pending lock</div>
         <div>
-          <Lock loading={loading} locksData={locks} address={currentAddress} flag={0} handlerSelect={selectPending} />
+          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={0} handlerSelect={selectPending} />
         </div>
       </>
     );
   }
 
-  function renderFollowingLocks(locks, currentAddress) {
+  function renderFollowingLocks(locks, myAddress) {
     // tmp condition
     const loading = locks.length <= 0;
+    const newLocks = locks.filter(lock => {
+      return !lock.isMyLocks;
+    });
     return (
       <>
         <div className="title">Following lock</div>
         <div>
-          <Lock loading={loading} locksData={locks} address={currentAddress} flag={1} handlerSelect={selectAccepted} />
+          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
       </>
     );
@@ -175,7 +181,7 @@ function LeftContainer(props) {
             </LinkPro>
           )}
           {renderOwnerLocks(proposes, address)}
-          {/* {renderFollowingLocks(proposes, address)} */}
+          {renderFollowingLocks(proposes, address)}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>

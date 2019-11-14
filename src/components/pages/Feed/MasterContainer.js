@@ -45,6 +45,7 @@ function MasterContainer(props) {
 
   async function loadLocksForFeed() {
     const lockForFeed = await callView('getLocksForFeed', [address]);
+    console.log('lockForFeed.locks', lockForFeed.locks);
     setProposes(lockForFeed.locks);
     let arrayMem = [];
     lockForFeed.locks.forEach(lock => {
