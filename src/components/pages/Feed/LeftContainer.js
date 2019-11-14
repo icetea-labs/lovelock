@@ -175,7 +175,7 @@ function LeftContainer(props) {
             </LinkPro>
           )}
           {renderOwnerLocks(proposes, address)}
-          {renderFollowingLocks(proposes, address)}
+          {/* {renderFollowingLocks(proposes, address)} */}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>

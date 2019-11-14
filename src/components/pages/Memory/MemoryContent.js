@@ -271,15 +271,17 @@ function MemoryContent(props) {
   function decodePrivateMemory() {
     setTimeout(() => {
       const obj = { ...memoryDecrypted };
-      if (!obj.isUnlock && privateKey && publicKey && obj.pubkey) {
+      if (!obj.isUnlock && privateKey && obj.pubkey && (publicKey || obj.r_tags)) {
         setDecoding(true);
         setTimeout(async () => {
           try {
+            const isOwner = address === obj.sender;
             // loadMemCacheAPI(obj.id);
-            let partnerKey = obj.pubkey;
-            if (address === obj.sender) {
-              partnerKey = publicKey;
+            let partnerKey = obj.pubkey; // public key of sender
+            if (isOwner) {
+              partnerKey = publicKey || obj.r_tags['pub-key'] || obj.s_tags['pub-key'];
             }
+            // console.log('partnerKey', partnerKey);
             obj.content = await decodeWithPublicKey(JSON.parse(obj.content || '{}'), privateKey, partnerKey);
             for (let i = 0; i < obj.info.hash.length; i++) {
               // eslint-disable-next-line no-await-in-loop
@@ -458,7 +460,13 @@ function MemoryContent(props) {
           <BlogModal
             open={isOpenModal}
             handleClose={closeMemory}
-            title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeMemory} />}
+            title={
+              <MemoryTitle
+                sender={sName || memoryDecrypted.s_tags['display-name']}
+                receiver={rName || memoryDecrypted.r_tags['display-name']}
+                handleClose={closeMemory}
+              />
+            }
             subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
             <Editor initContent={memoryDecrypted.blogContent} read_only />

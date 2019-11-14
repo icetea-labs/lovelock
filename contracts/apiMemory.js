@@ -115,9 +115,10 @@ function _addInfoToMems(mems, listMemIndex, self) {
       tmp.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
       let lock = getDataByIndex(self.getProposes(), mem.lockIndex);
-      lock.bot_info.avatar = lock.bot_info.botAva;
-      lock.bot_info['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
-      tmp.r_tags = lock.bot_info;
+      const tmpBotInfo = {};
+      tmpBotInfo.avatar = lock.bot_info.botAva;
+      tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      tmp.r_tags = { ...tmpBotInfo, ...lock.bot_info };
     } else {
       tmp.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
     }

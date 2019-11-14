@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 
@@ -37,7 +37,6 @@ const ProposeWrapper = styled.div`
 `;
 function MasterContainer(props) {
   const { setProposes, setMemory } = props;
-  const [memoByRange, setMemoByRange] = useState([]);
   const { address } = props;
 
   useEffect(() => {
@@ -53,7 +52,6 @@ function MasterContainer(props) {
     });
     // console.log('arrayMem', arrayMem);
     const memorydata = await callView('getMemoriesByListMemIndex', [arrayMem]);
-    // setMemoByRange(memorydata);
     const newMem = memorydata.map(mem => {
       if (mem.isPrivate) {
         mem.isUnlock = false;
@@ -65,7 +63,6 @@ function MasterContainer(props) {
     setMemory(newMem);
     // console.log('lockForFeed', lockForFeed);
     console.log('memorydata', memorydata);
-    // setMemoByRange(getMemoriesByRange);
   }
 
   return (
@@ -76,7 +73,7 @@ function MasterContainer(props) {
         </div>
         <div className="proposeColumn proposeColumn--right">
           <RightBox>
-            <MemoryContainer memorydata={memoByRange} />
+            <MemoryContainer memorydata={[]} />
           </RightBox>
         </div>
       </ProposeWrapper>
