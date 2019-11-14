@@ -63,6 +63,7 @@ const theme = createMuiTheme({
         color: '#8250c8',
         fontWeight: 600,
         fontSize: 14,
+        display: 'flex',
       },
       content: {
         color: '#8f8f8f',

@@ -2,26 +2,24 @@ import { codec } from '@iceteachain/common';
 import { actionTypes } from '../actions/account';
 import getWeb3 from '../../service/tweb3';
 
-const initialState = Object.assign(
-  {
-    needAuth: false,
-    publicKey: '',
-    r_publicKey: '',
-    r_address: '',
-    s_publicKey: '',
-    s_address: '',
-    cipher: '',
-    address: '',
-    privateKey: '',
-    tokenAddress: '',
-    tokenKey: '',
-    expireAfter: '',
-    mnemonic: '',
-    encryptedData: '',
-    displayName: '',
-    mode: '',
-  },
-  (function getSessionStorage() {
+const initialState = {
+  needAuth: false,
+  publicKey: '',
+  r_publicKey: '',
+  r_address: '',
+  s_publicKey: '',
+  s_address: '',
+  cipher: '',
+  address: '',
+  privateKey: '',
+  tokenAddress: '',
+  tokenKey: '',
+  expireAfter: '',
+  mnemonic: '',
+  encryptedData: '',
+  displayName: '',
+  mode: '',
+  ...(function getSessionStorage() {
     const resp = {};
     const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
 
@@ -45,26 +43,22 @@ const initialState = Object.assign(
     }
 
     return resp;
-  })()
-);
+  })(),
+};
 
 const account = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_ACCOUNT:
-      return Object.assign({}, state, action.data);
+      return { ...state, ...action.data };
 
     case actionTypes.IMPORT_NEW_ACCOUNT:
-      return Object.assign({}, state, action.data);
+      return { ...state, ...action.data };
 
     case actionTypes.SET_USER_INFO:
-      return Object.assign({}, state, {
-        userInfo: action.data,
-      });
+      return { ...state, userInfo: action.data };
     case actionTypes.SET_NEEDAUTH:
       // if (state.flags.isHardware) action.data = false;
-      return Object.assign({}, state, {
-        needAuth: action.data,
-      });
+      return { ...state, needAuth: action.data };
     default:
       return state;
   }

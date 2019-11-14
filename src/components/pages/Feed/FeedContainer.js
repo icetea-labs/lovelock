@@ -1,33 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
+
+import { rem } from '../../elements/StyledUtils';
 import LeftContainer from '../Propose/Detail/LeftContainer';
 import { callView } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
-const RightBox = styled.div`
-  padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
-`;
 
-function Explore(props) {
-  // const [loading, setLoading] = useState(true);
-  const [memoByRange, setMemoByRange] = useState([]);
-  const { address, setProposes, setMemory } = props;
+const RightBox = styled.div`
+  padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
+`;
+const ProposeWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+      &--left {
+        display: none;
+      }
+    }
+  }
+`;
+function FeedContainer(props) {
+  const { setProposes, setMemory } = props;
+  const { address } = props;
 
   useEffect(() => {
-    loadLocksForExplore();
+    loadLocksForFeed();
   }, []);
 
-  async function loadLocksForExplore() {
+  async function loadLocksForFeed() {
     const lockForFeed = await callView('getLocksForFeed', [address]);
     // console.log('lockForFeed.locks', lockForFeed.locks);
     setProposes(lockForFeed.locks);
-    const myLocks = lockForFeed.locks.filter(lock => {
-      return lock.isMyLocks;
-    });
     let arrayMem = [];
-    myLocks.forEach(lock => {
+    lockForFeed.locks.forEach(lock => {
       arrayMem = arrayMem.concat(lock.memoIndex);
     });
     // console.log('arrayMem', arrayMem);
@@ -46,27 +67,29 @@ function Explore(props) {
   }
 
   return (
-    address && (
-      <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
-          <LeftContainer />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightBox>
-            <MemoryContainer memorydata={[]} />
-          </RightBox>
-        </FlexWidthBox>
-      </FlexBox>
-    )
+    <ProposeWrapper>
+      <div className="proposeColumn proposeColumn--left">
+        <LeftContainer />
+      </div>
+      <div className="proposeColumn proposeColumn--right">
+        <RightBox>
+          <MemoryContainer memorydata={[]} />
+        </RightBox>
+      </div>
+    </ProposeWrapper>
   );
 }
 
 const mapStateToProps = state => {
-  const { account } = state;
   return {
-    address: account.address,
+    proposes: state.loveinfo.proposes,
+    address: state.account.address,
+    topInfo: state.loveinfo.topInfo,
+    tokenAddress: state.account.tokenAddress,
+    tokenKey: state.account.tokenKey,
   };
 };
+
 const mapDispatchToProps = dispatch => {
   return {
     setProposes: value => {
@@ -89,4 +112,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Explore);
+)(FeedContainer);

@@ -7,9 +7,10 @@ const {
   apiCancelLock,
   apiFollowLock,
   apiLikeLock,
-  apiGetLockByAddress,
-  apiGetLockByIndex,
   apiChangeLockImg,
+  apiGetTopInfoLockByIndex,
+  apiGetLocksByAddress,
+  apiGetLocksForFeed,
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
@@ -17,12 +18,9 @@ const {
   apiCommentMemory,
   apiGetMemoriesByLock,
   apiGetMemoriesByRange,
+  apiGetMemoriesByListMemIndex,
 } = require('./apiMemory.js');
-const {
-  importState,
-  exportState,
-  migrateState
-} = require('./migration.js')(this)
+const { importState, exportState, migrateState } = require('./migration.js')(this);
 
 @contract
 class LoveLock {
@@ -35,7 +33,19 @@ class LoveLock {
     const proposes = this.getProposes();
     return [getDataByIndex(proposes, index), proposes];
   };
-
+  // function getMemory(index, defaultValue) {
+  //   return this.getState([‘memories’, index], defaultValue)
+  // }
+  // function pushMemory(memo) {
+  //   return this.invokeState([‘memories’], [], ‘push’, memo)
+  // }
+  // function saveLock(index, lock) {
+  //   return this.setState([‘proposes’, index], lock)
+  // }
+  // function saveLockName(index, name) {
+  //   return this.setState([‘proposes’, index, ‘name’], name)
+  // }
+  // setState([‘locks’, index], oldLock => Object.assign({}, oldLock || {}, { name: ‘thi’, age: 1 }))
   @view getMemories = () => this.getState('memories', []);
   setMemories = value => this.setState('memories', value);
   getMemory = index => {
@@ -48,10 +58,6 @@ class LoveLock {
   @view getA2p = () => this.getState('a2p', {});
   setA2p = value => this.setState('a2p', value);
 
-  // mapping: person to person
-  // 1:n { 'address':[address1,address2,address3...] }
-  @view getAFA = () => this.getState('afa', {});
-  setAFA = value => this.setState('afa', value);
   // mapping: propose to memory
   // 1:n  { 'proindex':[1,2,3...] }
   // @view getP2m = () => this.getState('p2m', {});
@@ -62,10 +68,15 @@ class LoveLock {
   // @view getM2p = () => this.getState('m2p', {});
   // setM2p = value => this.setState('m2p', value);
 
-  // mapping follow: save locks index that address following
+  // mapp address -> following locks.
   // 1:n  { 'address':[lockIndex1, lockIndex2,...] }
-  // @view getAFL = () => this.getState('afl', {});
-  // setAFL = value => this.setState('afl', value);
+  @view getAFL = () => this.getState('afl', {});
+  setAFL = value => this.setState('afl', value);
+
+  // mapping: person -> other person
+  // 1:n { 'address':[address1,address2,address3...] }
+  @view getAFA = () => this.getState('afa', {});
+  setAFA = value => this.setState('afa', value);
 
   // mapping follow: save addresses following lock
   // 1:n  { 'lockIndex':[address1, address2...] }
@@ -100,17 +111,24 @@ class LoveLock {
     const self = this;
     return apiChangeLockImg(self, index, imgHash);
   }
-  @view getProposeByAddress(address: ?address) {
+  @view getProposeByAddress(address: address) {
     const self = this;
-    return apiGetLockByAddress(self, address);
+    return apiGetLocksByAddress(self, address);
   }
   @view getProposeByIndex(index: number) {
     const self = this;
-    return apiGetLockByIndex(self, index);
+    return apiGetTopInfoLockByIndex(self, index);
   }
   @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;
-
+  @view getLocksForFeed = (address: address) => {
+    const self = this;
+    return apiGetLocksForFeed(self, address);
+  };
+  @view getMaxLocksIndex = () => {
+    const proposes = this.getProposes();
+    return proposes.length - 1;
+  };
   // =========== MEMORY ================
   // info { img:Array, location:string, date:string }
   @transaction addMemory(lockIndex: number, isPrivate: boolean, content: string, info) {
@@ -134,6 +152,10 @@ class LoveLock {
   @view getMemoriesByRange(start: number, end: number) {
     const self = this;
     return apiGetMemoriesByRange(self, start, end);
+  }
+  @view getMemoriesByListMemIndex(listMemIndex) {
+    const self = this;
+    return apiGetMemoriesByListMemIndex(self, listMemIndex);
   }
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
   @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
@@ -247,7 +269,7 @@ class LoveLock {
     this.setProposes(locks);
   }
   // =========== OTHER ================
-  @transaction setFlowPerson(address: ?address) {
+  @transaction setFlowPerson(address: address) {
     const sender = msg.sender;
     const afp = this.getAFA();
 
@@ -260,14 +282,14 @@ class LoveLock {
 
   // ========== DATA MIGRATION =============
   @view exportState() {
-    return exportState()
+    return exportState();
   }
 
-  @transaction importState(data, overwrite: ?bool = false) {
-    return importState(data, overwrite)
+  @transaction importState(data, overwrite: ?boolean = false) {
+    return importState(data, overwrite);
   }
 
-  @transaction migrateState(fromContract: address, overwrite: ?bool = false) {
-    return migrateState(fromContract, overwrite)
+  @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
+    return migrateState(fromContract, overwrite);
   }
 }

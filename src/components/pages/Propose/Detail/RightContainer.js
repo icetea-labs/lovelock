@@ -20,53 +20,57 @@ const RightBox = styled.div`
 `;
 
 const CollectionIndicator = styled.div`
-  margin-bottom: ${rem(16)}
+  margin-bottom: ${rem(16)};
 `;
 
 export default function RightContainer(props) {
   const { proIndex, collectionId, handleNewCollection, isOwner } = props;
   const [memoByProIndex, setMemoByProIndex] = useState([]);
-  const [changed, setChanged] = useState(false)
+  const [changed, setChanged] = useState(false);
   const address = useSelector(state => state.account.address);
-  const collections = useSelector(state => state.loveinfo.topInfo.collections)
-  const currentCol = !collections || collectionId == null ? '' : collections.find(c => c.id === collectionId)
-  const collectionName = currentCol == null ? '' : currentCol.name
-  const validCollectionId = collectionName ? collectionId : null
+  const collections = useSelector(state => state.loveinfo.topInfo.collections);
+  const currentCol = !collections || collectionId == null ? '' : collections.find(c => c.id === collectionId);
+  const collectionName = currentCol == null ? '' : currentCol.name;
+  const validCollectionId = collectionName ? collectionId : null;
 
-  const history = useHistory()
+  const history = useHistory();
 
   useEffect(() => {
-    let cancel = false
+    let cancel = false;
 
     callView('getMemoriesByProIndex', [proIndex, validCollectionId]).then(memories => {
-      if (cancel) return
-      setMemoByProIndex(memories)
-    })
+      if (cancel) return;
+      setMemoByProIndex(memories);
+    });
 
-    return () => (cancel = true)
+    return () => (cancel = true);
   }, [proIndex, changed, validCollectionId]);
 
   function refresh() {
-    setChanged(c => !c)
+    setChanged(c => !c);
   }
 
   return (
     <RightBox>
       {collectionName && (
         <CollectionIndicator>
-          <Chip 
+          <Chip
             color="primary"
             label={collectionName}
             icon={<CollectionsIcon />}
-            onDelete={() => history.push('/lock/' + proIndex)} />
+            onDelete={() => history.push('/lock/' + proIndex)}
+          />
         </CollectionIndicator>
       )}
-      {address && isOwner && <CreateMemory 
-        proIndex={proIndex} 
-        collectionId={validCollectionId}
-        collections={collections}
-        onMemoryAdded={refresh}
-        handleNewCollection={handleNewCollection} />}
+      {address && isOwner && (
+        <CreateMemory
+          proIndex={proIndex}
+          collectionId={validCollectionId}
+          collections={collections}
+          onMemoryAdded={refresh}
+          handleNewCollection={handleNewCollection}
+        />
+      )}
       <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={memoByProIndex} />
     </RightBox>
   );

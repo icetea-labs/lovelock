@@ -1,12 +1,11 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-import { AvatarPro } from '../../../elements';
-import Icon from '../../../elements/Icon';
+import { AvatarPro } from './AvatarPro';
+import Icon from './Icon';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -34,33 +33,35 @@ const BoxAction = styled.div`
   }
 `;
 
-export default function LeftProposes(props) {
+function Lock(props) {
   const classes = useStyles();
-  const { loading = false } = props;
-
-  const proposes = useSelector(state => state.loveinfo.proposes);
-  const address = useSelector(state => state.account.address);
-  const locksByStatus = proposes.filter(item => item.status === props.flag);
+  const { loading = false, locksData, address } = props;
+  const locksByStatus = locksData.filter(item => item.status === props.flag);
 
   const getInfo = item => {
+    const prefix = item.sender === address ? 'r' : 's';
+
     switch (item.type) {
       case 2:
         return {
           name: 'My Journal',
           nick: 'journal',
           icon: 'waves',
+          avatar: item.s_tags.avatar,
         };
       case 1:
         return {
-          name: item.name,
+          name: item.bot_info['display-name'],
           nick: 'crush',
           icon: 'done',
+          avatar: item.bot_info.avatar,
         };
       default:
         return {
-          name: item.name,
-          nick: item.nick,
+          name: item[`${prefix}_tags`]['display-name'],
+          nick: item[`${prefix}_alias`],
           icon: 'done_all',
+          avatar: item[`${prefix}_tags`].avatar,
         };
     }
   };
@@ -80,6 +81,7 @@ export default function LeftProposes(props) {
     const v2 = f2 + p2.id;
     return v1.localeCompare(v2);
   };
+
   const layoutLoading = (
     <CardHeader
       avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
@@ -87,11 +89,13 @@ export default function LeftProposes(props) {
       subheader={loading ? <Skeleton height={6} width="80%" /> : 'None'}
     />
   );
+
   const layoutLoaded = (() => {
     const isPenddingLock = !!(props.flag === 0);
 
     return locksByStatus.sort(compare).map(item => {
       const info = getInfo(item);
+
       return (
         <CardHeader
           key={item.id}
@@ -112,7 +116,7 @@ export default function LeftProposes(props) {
               )}
             </BoxAction>
           }
-          avatar={<AvatarPro alt={info.name} hash={item.avatar} />}
+          avatar={<AvatarPro alt={info.name} hash={info.avatar} />}
           title={info.name}
           subheader={info.nick}
         />
@@ -120,5 +124,7 @@ export default function LeftProposes(props) {
     });
   })();
 
-  return <React.Fragment>{locksByStatus.length <= 0 ? layoutLoading : layoutLoaded}</React.Fragment>;
+  return <>{locksByStatus.length <= 0 ? layoutLoading : layoutLoaded}</>;
 }
+export { Lock };
+export default Lock;
