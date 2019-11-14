@@ -18,8 +18,8 @@ import {
   HolidayEvent,
   TimeWithFormat,
   saveFileToIpfs,
-  sendTransaction,
 } from '../../../../helper';
+import { useTx } from '../../../../helper/hooks';
 import * as actions from '../../../../store/actions';
 import { FlexBox, rem } from '../../../elements/StyledUtils';
 import { ArrowTooltip, AvatarPro } from '../../../elements';
@@ -288,11 +288,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, setNeedAuth, topInfo, setTopInfo, setGLoading } = props;
-  const dispatch = useDispatch();
+  const { proIndex, topInfo, setTopInfo, setGLoading } = props;
   const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
+  const tx = useTx()
 
   const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
@@ -320,12 +319,8 @@ function TopContrainer(props) {
 
   function handerLike() {
     try {
-      if (!tokenKey) {
-        dispatch(actions.setNeedAuth(true));
-        return;
-      }
-      const params = [topInfo.memoryRelationIndex, 1];
-      sendTransaction('addLike', params, { tokenAddress, address }).then(() => {
+
+      tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1).then(() => {
         getNumTopLikes();
       });
 
@@ -347,12 +342,8 @@ function TopContrainer(props) {
 
   function handerFlow() {
     try {
-      if (!tokenKey) {
-        dispatch(actions.setNeedAuth(true));
-        return;
-      }
-      const params = [topInfo.index];
-      sendTransaction('followLock', params, { tokenAddress, address }).then(() => {
+
+      tx.sendCommit('followLock', topInfo.index, { tokenAddress, address }).then(() => {
         getNumTopFollow();
       });
 
@@ -437,28 +428,17 @@ function TopContrainer(props) {
   }
 
   function acceptCoverImg() {
-    if (!tokenKey) {
-      setNeedAuth(true);
-      return;
-    }
+
     setGLoading(true);
     setTimeout(async () => {
       if (cropFile) {
         const hash = await saveFileToIpfs(cropFile);
-        const method = 'changeCoverImg';
-        const params = [proIndex, hash];
-        const result = await sendTransaction(method, params, { address, tokenAddress });
+        const result = await tx.sendCommit('changeCoverImg', proIndex, hash);
         if (result) {
           setCropFile('');
           setCropImg('');
           const newTopInfo = { ...topInfo, coverImg: hash };
           setTopInfo(newTopInfo);
-          // topInfo.coverImg = hash
-          // setTopInfo(topInfo)
-          // callView('getProposeByIndex', [proIndex]).then(propose => {
-          //   const pro = (propose && propose[0]) || {};
-          //   setTopInfo(Object.assign({}, topInfo, pro));
-          // });
         }
       }
       setGLoading(false);
@@ -639,9 +619,6 @@ const mapDispatchToProps = dispatch => {
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));
-    },
-    setNeedAuth(value) {
-      dispatch(actions.setNeedAuth(value));
     },
     setGLoading(value) {
       dispatch(actions.setLoading(value));

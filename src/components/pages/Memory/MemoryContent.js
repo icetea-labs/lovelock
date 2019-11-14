@@ -151,8 +151,33 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const setMemoryCollection = (propose, memory) => {
+  const cid = memory.info.collectionId
+  if (cid != null) {
+    const cs = propose.collections || []
+    memory.collection = cs.find(c => c.id === cid)
+  }
+}
+
+const renderCardSubtitle = memory => {
+  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />
+  const hasCol = memory.collection
+  if (!hasCol) return time
+
+  const { id, name } = memory.collection
+  return (
+    <>
+      <a href={`/lock/${memory.lockIndex}/collection/${id}`}>{name}</a>
+      <span>・</span>
+      {time}
+    </>
+  )
+}
+
 function MemoryContent(props) {
   const { memory, setNeedAuth, propose } = props;
+  setMemoryCollection(propose, memory)
+
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
@@ -215,7 +240,7 @@ function MemoryContent(props) {
       abort.abort()
       cancel = true
     }
-  }, [memory, memory.showDetail, memory.info.blog]);
+  }, [memory, memory.showDetail, memory.info.blog, propose]);
 
   function FacebookProgress(propsFb) {
     const classesFb = useStylesFacebook();
@@ -500,7 +525,7 @@ function MemoryContent(props) {
         <CardHeader
           avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
           title={memoryDecrypted.name}
-          subheader={<TimeWithFormat value={memoryDecrypted.info.date} format="h:mm a DD MMM YYYY" />}
+          subheader={renderCardSubtitle(memoryDecrypted)}
           action={
             <IconButton aria-label="settings">
               <MoreVertIcon />

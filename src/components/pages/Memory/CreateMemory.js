@@ -13,7 +13,8 @@ import BlogModal from '../../elements/BlogModal';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, sendTransaction, encodeWithPublicKey } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, encodeWithPublicKey, sendTxUtil } from '../../../helper';
+import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
 
@@ -184,10 +185,6 @@ export default function CreateMemory(props) {
     dispatch(actions.setLoading(value));
   }
 
-  function setNeedAuth(value) {
-    dispatch(actions.setNeedAuth(value));
-  }
-
   function memoryOnFocus() {
     !grayLayout && setGrayLayout(true);
   }
@@ -210,10 +207,6 @@ export default function CreateMemory(props) {
   }
 
   function collectionAdded(col) {
-    // now we add this collection to the list
-    collections.push(col)
-
-    // and make it seleted
     setPostCollectionId(col.id)
   }
 
@@ -288,7 +281,18 @@ export default function CreateMemory(props) {
     }
   }
 
-  async function onSubmitEditor() {
+  function onSubmitEditor() {
+    setGLoading(true)
+    submitEditor().then(() => {
+      setGLoading(false)
+    }).catch(err => {
+      setGLoading(false)
+      const message = 'An error has occured, you can try again later: ' + err.message;
+      enqueueSnackbar(message, { variant: 'error' });
+    })
+  }
+
+  async function submitEditor() {
     const combined = combineContent();
     const blocks = combined.blocks;
     if (validateEditorContent()) {
@@ -329,7 +333,7 @@ export default function CreateMemory(props) {
       setBlogSubtitle('');
       delDraft();
     } else {
-      let message = 'Please enter memory content.';
+      const message = 'Please enter memory content.';
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
@@ -415,7 +419,7 @@ export default function CreateMemory(props) {
 
   function addCollectionId(info) {
     const colId = +postCollectionId
-    if (typeof colId === 'number' && !isNaN(colId)) {
+    if (postCollectionId !== '' && typeof colId === 'number' && !isNaN(colId)) {
       info.collectionId = colId
     }
   }
@@ -434,18 +438,11 @@ export default function CreateMemory(props) {
     }
 
     const content = blogData || memoryContent;
+    
+    let params = [];
+    const uploadThenSendTx = async () => {
+      setGLoading(true);
 
-    if (privacy ? !privateKey : !tokenKey) {
-      setNeedAuth(true);
-      return;
-    }
-
-    setGLoading(true);
-    setTimeout(async () => {
-      // const hash = await saveFilesToIpfs(filesBuffer);
-      // const hash = await saveBufferToIpfs(filesBuffer);
-      // const info = { date, hash };
-      let params = [];
       if (privacy && !blogData) { // TODO: support private blog
         const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
         const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
@@ -462,12 +459,23 @@ export default function CreateMemory(props) {
         if (blogData) info.blog = true
         params = [proIndex, !!privacy, content, info];
       }
-      const result = await sendTransaction('addMemory', params, { address, tokenAddress });
-      if (result) {
-        onMemoryAdded(result.returnValue, params);
-      }
+      return await sendTxUtil('addMemory', params, { address, tokenAddress });
+    }
+
+    try {
+      const result = await ensureToken({
+        tokenKey: privacy ? privateKey : tokenKey,
+        dispatch
+      }, uploadThenSendTx)
+
+      onMemoryAdded(result.returnValue, params);
       resetValue();
-    }, 100);
+    } catch (err) {
+      setGLoading(false);
+      const message = 'An error has occured, you can try again later: ' + err.message;
+      enqueueSnackbar(message, { variant: 'error' });
+      console.error(err)
+    }    
   }
 
   function resetValue() {
@@ -611,7 +619,7 @@ export default function CreateMemory(props) {
                   input={<BootstrapInput name="collection" id="outlined-collection" />}
                 >
                   <option value="">(No collection)</option>
-                  {collections && collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   <option value="add">(+) New Collection</option>
                 </Select>
                 </div>

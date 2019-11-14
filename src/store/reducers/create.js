@@ -10,7 +10,7 @@ const initialState = {
   keyStoreText: '',
   showPrivateKey: false,
   confirmMnemonic: false,
-  isRemember: true,
+  isRemember: window.localStorage['remember'] === '1',
   pathName: '',
 };
 
@@ -24,10 +24,13 @@ function create(state = initialState, action) {
       return Object.assign({}, state, {
         step: action.step,
       });
-    case actionTypes.SET_ISREMEMBER:
+    case actionTypes.SET_ISREMEMBER: {
+      const boolValue = !!action.data
+      window.localStorage['remember'] = boolValue ? '1' : '0'
       return Object.assign({}, state, {
-        isRemember: action.data,
+        isRemember: boolValue,
       });
+    }
     case actionTypes.SET_PATH_NAME:
       return Object.assign({}, state, {
         pathName: action.data,

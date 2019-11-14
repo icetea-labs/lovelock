@@ -112,6 +112,8 @@ exports.apiLikeLock = (self, lockIndex, type) => {
   }
   // save proposes
   self.setProposes(proposes);
+
+  return pro.likes || []
 };
 exports.apiChangeLockImg = (self, index, imgHash) => {
   const [pro, proposes] = self.getPropose(index);

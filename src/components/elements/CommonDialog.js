@@ -28,7 +28,7 @@ const Container = styled.div`
   transform: translate(-50%, -50%);
   overflow-x: hidden;
   overflow-y: auto;
-  z-index: 1101;
+  z-index: ${props => (props.ensureTopLevel ? '2001' : (props.hasParentDialog ? '1102' : '1101'))};
   transition: opacity 0.6s ease-in;
   opacity: 0;
   @media (max-width: 624px) {

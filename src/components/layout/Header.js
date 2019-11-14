@@ -34,7 +34,7 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements/AvatarPro';
-import GetKeyToAuthen from './GetKeyToAuthen';
+import GetKeyToAuthen from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
@@ -318,6 +318,10 @@ function Header(props) {
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  const lockIndexText = props.match.params.index;
+  const lockIndexInt = parseInt(lockIndexText, 10)
+  const lockIndex = (isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt)) ? undefined : lockIndexInt
+
   function handleProfileMenuOpen(event) {
     setAnchorElMenu(event.currentTarget);
   }
@@ -355,11 +359,6 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handleShowphrase() {
-    // if (mode === 1 && !mnemonic) {
-    //   dispatch(actions.setNeedAuth(true));
-    // } else if (!privateKey) {
-    //   dispatch(actions.setNeedAuth(true));
-    // }
     dispatch(actions.setNeedAuth(true));
     setShowPhrase(true);
   }
@@ -577,7 +576,7 @@ function Header(props) {
               onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
             />
             <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
-              <LeftContainer/>
+              <LeftContainer proIndex={lockIndex} />
             </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />

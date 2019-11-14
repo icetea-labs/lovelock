@@ -24,6 +24,7 @@ import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
+import { useRemember } from '../../../../helper/hooks';
 
 const useStyles = makeStyles(theme => ({
   rightIcon: {
@@ -126,7 +127,7 @@ function RegisterUsername(props) {
   // const [isOpenCrop, setIsOpenCrop] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   // const [originFile, setOriginFile] = useState([]);
-  const [isRememberState, setIsRememberState] = useState(true);
+  const [isRememberState, setIsRememberState] = useRemember();
 
   useEffect(() => {
     ValidatorForm.addValidationRule('isPasswordMatch', value => {

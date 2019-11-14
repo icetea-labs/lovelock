@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
 import CommonDialog from '../../elements/CommonDialog';
 import { TagTitle } from './PuNewLock';
-import { sendTransaction } from '../../../helper/index';
+import { sendTxWithAuthen } from '../../../helper/hooks';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -44,12 +44,10 @@ class PromiseConfirm extends React.Component {
   };
 
   async messageAccept(message) {
-    const { index, enqueueSnackbar, close, address, tokenAddress } = this.props;
+    const { index, enqueueSnackbar, close } = this.props;
 
     try {
-      const name = 'acceptPropose';
-      const params = [index, message];
-      const result = await sendTransaction(name, params, { address, tokenAddress });
+      const result = await sendTxWithAuthen(this.props, 'acceptPropose', index, message);
       if (result) {
         const errMessage = 'Your lock has been confirmed.';
         enqueueSnackbar(errMessage, { variant: 'success' });
@@ -61,11 +59,9 @@ class PromiseConfirm extends React.Component {
   }
 
   async messageDeny(message) {
-    const { index, enqueueSnackbar, close, address, tokenAddress } = this.props;
+    const { index, enqueueSnackbar, close } = this.props;
     try {
-      const name = 'cancelPropose';
-      const params = [index, message];
-      const result = await sendTransaction(name, params, { address, tokenAddress });
+      const result = await sendTxWithAuthen(this.props, 'cancelPropose', index, message);
 
       if (result) {
         // window.alert('Success');

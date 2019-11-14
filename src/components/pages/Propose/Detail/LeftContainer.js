@@ -65,7 +65,7 @@ const CollectionBox = styled.div`
     margin-right: ${rem(7)};
     font-size: ${rem(12)};
     cursor: pointer;
-    margin-bottom: ${rem(9)};
+    margin-bottom: ${rem(9)}
     padding: 3px 12px 3px 6px;
     :hover {
       color: #8250c8;
@@ -88,13 +88,10 @@ function LeftContainer(props) {
     topInfo,
     proIndex,
     address,
-    tokenAddress,
-    tokenKey,
-    setNeedAuth,
     history,
   } = props;
 
-  const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
+  const collections = topInfo && topInfo.index === proIndex ? (topInfo.collections || []) : []
 
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
@@ -169,30 +166,24 @@ function LeftContainer(props) {
     setStep('deny');
   }
 
-  function selectAccepted(lockIndex, collectionId) {
-    let url = `/lock/${lockIndex}`;
+  function selectAccepted(proIndex, collectionId) {
+    let url = '/lock/' + proIndex
     if (collectionId != null) {
-      url += `/collection/${collectionId}`;
+      url += '/collection/' + collectionId
     }
     history.push(url);
   }
 
   function newLock() {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
     setStep('new');
   }
 
-  function selectPending(lockIndex) {
-    if (!tokenKey) {
-      setNeedAuth(true);
-    }
+  function selectPending(proIndex) {
     setStep('pending');
-    setIndex(lockIndex);
+    setIndex(proIndex);
   }
 
-  function eventConfirmPropose(data) {
+  function eventConfirmPropose(data, signal) {
     confirmPropose(data.log);
     if (address === data.log.sender) {
       const message = 'Your lock request has been accepted.';
@@ -253,28 +244,26 @@ function LeftContainer(props) {
         // eslint-disable-next-line no-await-in-loop
         const nick = await getAlias(partnerAddress);
         if (signal.cancel) return;
-        clonePro[i].nick = `@${nick}`;
+        clonePro[i].nick = nick ? `@${nick}` : '(no username)';
       }
     }
     return clonePro;
   }
 
-  function renderCollections(collec) {
-    const cols = [{ name: 'All', description: 'All memories.' }].concat(collec);
-    return cols.map((item, i) => {
+  function renderCollections(collections) {
+    const cols = [{ name: 'All', description: 'All memories.'}].concat(collections)
+    return cols.map((item, index) => {
       return (
-        <div className="colName" key={i} onClick={() => selectAccepted(proIndex, item.id)} role="button">
-          <Icon type="collections" />
-          <span className="colText" title={item.description}>
-            {item.name}
-          </span>
+        <div className="colName" key={index} onClick={() => selectAccepted(proIndex, item.id)}>
+          <Icon type='collections' />
+          <span className="colText" title={item.description}>{item.name}</span>
         </div>
       );
     });
   }
 
   return (
-    <>
+    <React.Fragment>
       <LeftBox>
         <ShadowBox>
           {address && (
@@ -295,13 +284,12 @@ function LeftContainer(props) {
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
       </LeftBox>
-      {step === 'new' && tokenKey && <PuNewLock close={closePopup} />}
-      {step === 'pending' && tokenKey && (
+      {step === 'new' && <PuNewLock close={closePopup} />}
+      {step === 'pending' && (
         <PromiseAlert
           index={index}
           proposes={proposes}
           address={address}
-          tokenAddress={tokenAddress}
           close={closePopup}
           accept={nextToAccept}
           deny={nextToDeny}
@@ -309,7 +297,7 @@ function LeftContainer(props) {
       )}
       {step === 'accept' && <PromiseConfirm close={closePopup} index={index} />}
       {step === 'deny' && <PromiseConfirm isDeny close={closePopup} index={index} />}
-    </>
+    </React.Fragment>
   );
 }
 
@@ -318,8 +306,6 @@ const mapStateToProps = state => {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
-    tokenAddress: state.account.tokenAddress,
-    tokenKey: state.account.tokenKey,
   };
 };
 
@@ -333,9 +319,6 @@ const mapDispatchToProps = dispatch => {
     },
     confirmPropose: value => {
       dispatch(actions.confirmPropose(value));
-    },
-    setNeedAuth: value => {
-      dispatch(actions.setNeedAuth(value));
     },
   };
 };

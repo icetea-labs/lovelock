@@ -5,7 +5,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
 import CommonDialog from '../../elements/CommonDialog';
 import { TagTitle } from './PuNewLock';
-import { getAlias, sendTransaction } from '../../../helper';
+import { getAlias } from '../../../helper';
+import { useTx } from '../../../helper/hooks';
 
 const ImgView = styled.div`
   margin: 20px 0 20px;
@@ -36,12 +37,13 @@ function CardMediaCus(props) {
 }
 
 function PromiseAlert(props) {
-  const { deny, close, accept, address, tokenAddress, index, proposes, enqueueSnackbar } = props;
+  const { deny, close, accept, address, index, proposes, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const [promiseImg, setPromiseImg] = useState('');
   const hash = promiseImg;
+  const tx = useTx()
 
   useEffect(() => {
     async function loadData() {
@@ -60,11 +62,9 @@ function PromiseAlert(props) {
     loadData();
   }, [address, proposes, index]);
 
-  async function cancelPromise(ind) {
+  async function cancelPromise(index) {
     try {
-      const funcName = 'cancelPropose';
-      const params = [ind, 'no'];
-      const result = await sendTransaction(funcName, params, { address, tokenAddress });
+      const result = await tx.sendCommit('cancelPropose', index, 'no');
 
       if (result) {
         const message = 'Your proposes has been removed.';

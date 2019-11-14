@@ -164,10 +164,12 @@ function callReadOrPure(funcName, params, method) {
   return getWeb3()[method](contract, funcName, params || []);
 }
 
-export async function sendTransaction(funcName, params, opts) {
-  console.log('sendTransaction', funcName, params);
+export async function sendTxUtil(funcName, params, opts) {
   const ct = getContract();
   const sendType = opts.sendType || 'sendCommit';
+
+  console.log(sendType, funcName, params);
+  
   const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
     signers: opts.tokenAddress,

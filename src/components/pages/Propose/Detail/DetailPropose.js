@@ -3,10 +3,9 @@ import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Helmet } from 'react-helmet';
-import TextField from '@material-ui/core/TextField';
-import { useSnackbar } from 'notistack';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, makeProposeName, sendTransaction } from '../../../../helper';
+import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
+import { useTx } from '../../../../helper/hooks';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
@@ -14,6 +13,8 @@ import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
 
 import CommonDialog from '../../../elements/CommonDialog';
+import TextField from '@material-ui/core/TextField';
+import { useSnackbar } from 'notistack';
 
 window.prerenderReady = false;
 
@@ -60,13 +61,9 @@ export default function DetailPropose(props) {
   let collectionId = parseInt(match.params.cid, 10);
   const invalidCollectionId = match.params.cid != null && isNaN(collectionId);
   if (isNaN(collectionId)) collectionId = null;
-  let collections;
-  let currentCollection;
 
   const address = useSelector(state => state.account.address);
-  // const topInfo = useSelector(state => state.loveinfo.topInfo);
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
+  const tx = useTx();
 
   const [proposeInfo, setProposeInfo] = useState(null);
   const [pageErr, setPageErr] = useState(false);
@@ -124,11 +121,6 @@ export default function DetailPropose(props) {
   const createCollection = () => {
     hideDialog(); // prevent dialog over dialog
 
-    if (!tokenKey) {
-      dispatch(actions.setNeedAuth(true));
-      return;
-    }
-
     const data = {
       name: colName,
     };
@@ -138,9 +130,13 @@ export default function DetailPropose(props) {
       data.description = desc;
     }
 
-    sendTransaction('addLockCollection', [proIndex, data], { address, tokenAddress })
+    tx.sendCommit('addLockCollection', proIndex, data)
       .then(r => {
         data.id = r.returnValue;
+        proposeInfo.collections.push(data);
+        // push to redux
+        dispatch(actions.setTopInfo(proposeInfo));
+
         colCreationCallback && colCreationCallback(data);
       })
       .catch(err => {
@@ -208,7 +204,7 @@ export default function DetailPropose(props) {
   }
 
   const renderDetailPropose = () => (
-    <>
+    <React.Fragment>
       <BannerContainer>
         <ShadowBox>
           <TopContrainer proIndex={proIndex} />
@@ -223,8 +219,6 @@ export default function DetailPropose(props) {
           <RightContainer
             proIndex={proIndex}
             collectionId={collectionId}
-            collections={collections}
-            currentCollection={currentCollection}
             handleNewCollection={handleNewCollection}
             isOwner={isOwner}
           />
@@ -232,7 +226,7 @@ export default function DetailPropose(props) {
       </ProposeWrapper>
 
       {proposeInfo && renderHelmet()}
-    </>
+    </React.Fragment>
   );
 
   const renderNotFound = () => <NotFound />;
@@ -241,15 +235,12 @@ export default function DetailPropose(props) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
-    collections = proposeInfo.collections || [];
-    if (collectionId != null) {
-      currentCollection = collections.find(c => c.id === collectionId);
-    }
+    proposeInfo.collections = proposeInfo.collections || [];
   }
 
   return (
-    <>
-      {proposeInfo && <>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</>}
+    <React.Fragment>
+      {proposeInfo && <React.Fragment>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</React.Fragment>}
       {pageErr && renderNotFound()}
       {dialogVisible && (
         <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
@@ -270,6 +261,6 @@ export default function DetailPropose(props) {
           />
         </CommonDialog>
       )}
-    </>
+    </React.Fragment>
   );
 }

@@ -4,11 +4,15 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { getPalette } from '../../../helper/palette';
 import Skeleton from '@material-ui/lab/Skeleton';
 
+const defaultColors = {frameBackColor: '#8250c8', labelBackColor: '#8250c8'}
+
 export default function BlogShowcase(props) {
   const [colors, _setColors] = useState(props.colors || {});
   const { classes, photo, title, openHandler } = props;
   const ratio = photo && photo.height / photo.width;
-  const height = ratio ? Math.floor(6.27 * ratio) : 160; // current image with on timeline is 627
+  // current image width on timeline is 627
+  // TODO: handle width when responsive
+  const height = ratio ? Math.floor(6.27 * ratio) : 160;
   const frameStyle = colors.frameBackColor ? { backgroundColor: colors.frameBackColor } : {};
   if (!photo) {
     frameStyle.paddingBottom = 0;
@@ -47,11 +51,12 @@ export default function BlogShowcase(props) {
               alt='blog cover'
               className={classes.blogImgTimeline}
               style={photo ? {} : { maxHeight: height, objectFit: 'cover' }}
-              onLoad={() => {
+              onLoad={event => {
                 if (!photo) {
-                  setColors({frameBackColor: '#8250c8', labelBackColor: '#8250c8'})
+                  setColors(defaultColors)
                 } else {
-                  getPalette(photo.url).then(colors => colors && setColors(colors));
+                  getPalette(photo.url, { defaultColors })
+                    .then(colors => colors && setColors(colors)).catch(console.warn)
                 }
               }}
             />
