@@ -264,9 +264,9 @@ function _addLeftInfoToLocks(locks, ownerLocksId = []) {
       tmp.r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
 
       const s_alias = ctAlias.byAddress.invokeView(lock.sender);
-      tmp.s_alias = (Array.isArray(s_alias) ? s_alias[0] : s_alias).replace('account.', '');
+      tmp.s_alias = (s_alias || '').replace('account.', '');
       const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
-      tmp.r_alias = (Array.isArray(r_alias) ? r_alias[0] : r_alias).replace('account.', '');
+      tmp.r_alias = (r_alias || '').replace('account.', '');
     }
     if (ownerLocksId.indexOf(lock.id) !== -1) {
       tmp.isMyLocks = true;
