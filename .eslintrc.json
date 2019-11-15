@@ -2,12 +2,14 @@
   // "plugin:react/recommended"
   "extends": ["airbnb", "prettier"],
   "parser": "babel-eslint",
-  "plugins": ["prettier", "react"],
+  "plugins": ["prettier", "react", "react-hooks"],
   "rules": {
     // off:0, warn:1, error:2
     "react/prop-types": 0,
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "no-use-before-define": ["error", { "functions": false, "classes": true }],
+    "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+    "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "react/jsx-one-expression-per-line": 0,
     "react/jsx-wrap-multilines": 0,
     "react/no-array-index-key": 0,

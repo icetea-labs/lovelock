@@ -3,53 +3,37 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import LeftContainer from '../Propose/Detail/LeftContainer';
-import { callView, getJsonFromIpfs } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
+
+import APIService from '../../../service/apiService';
 
 const RightBox = styled.div`
   padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
 `;
 
 function Explore(props) {
-  // const [loading, setLoading] = useState(true);
-  // const [memoByRange, setMemoByRange] = useState([]);
   const { address, setProposes, setMemory } = props;
-
+  // const [users, isLoading, error, retry] = useAPI('getLocksForFeed', [address]);
   useEffect(() => {
-    loadLocksForExplore();
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadLocksForExplore() {
-    const lockForFeed = await callView('getLocksForFeed', [address]);
-    // console.log('lockForFeed.locks', lockForFeed.locks);
-    setProposes(lockForFeed.locks);
-    const myLocks = lockForFeed.locks.filter(lock => {
-      return lock.isMyLocks;
+  async function fetchData() {
+    APIService.getLocksForFeed(address).then(resp => {
+      // set to redux
+      setProposes(resp.locks);
+
+      const { memoIndex } = resp.locks.reduce((tmp, lock) => {
+        return { memoIndex: lock.isMyLocks ? tmp.memoIndex.concat(lock.memoIndex) : tmp.memoIndex };
+      });
+      // console.log('memoIndex', memoIndex);
+      APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+        // set to redux
+        setMemory(mems);
+      });
     });
-    let arrayMem = [];
-    myLocks.forEach(lock => {
-      arrayMem = arrayMem.concat(lock.memoIndex);
-    });
-    // console.log('arrayMem', arrayMem);
-    const memorydata = await callView('getMemoriesByListMemIndex', [arrayMem]);
-    const newMems = [];
-    for (let i = 0; i < memorydata.length; i++) {
-      const mem = memorydata[i];
-      if (mem.isPrivate) {
-        mem.isUnlock = false;
-      } else {
-        mem.isUnlock = true;
-      }
-      for (let j = 0; j < mem.info.hash.length; j++) {
-        // eslint-disable-next-line no-await-in-loop
-        mem.info.hash[j] = await getJsonFromIpfs(mem.info.hash[j], j);
-      }
-      newMems.push(mem);
-    }
-    setMemory(newMems);
-    // console.log('lockForFeed', lockForFeed);
-    // console.log('memorydata', memorydata);
   }
 
   return (
