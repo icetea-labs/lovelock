@@ -74,15 +74,18 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, p
 exports.apiGetMemoriesByLock = (self, lockIndex, collectionId) => {
   // const memoryPro = self.getP2m()[proIndex] || [];
   const memoryPro = getDataByIndex(self.getProposes(), lockIndex)['memoIndex'];
-
   const memories = self.getMemories();
-  return memoryPro.reduce((res, index) => {
-    const mem = getDataByIndex(memories, index);
+
+  let resp = memoryPro.reduce((res, index) => {
+    let mem = getDataByIndex(memories, index);
     if (collectionId == null || isNaN(collectionId) || mem.info.collectionId === collectionId) {
       res.push({ ...mem, id: index });
     }
     return res;
   }, []);
+
+  resp = _addInfoToMems(resp, self);
+  return resp;
 };
 exports.apiGetMemoriesByRange = (self, start, end) => {
   const allMem = self.getMemories();
@@ -98,32 +101,37 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
   return res;
 };
 exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
-  const allMem = self.getMemories();
-  return _addInfoToMems(allMem, listMemIndex, self);
+  const memories = self.getMemories();
+
+  const mems = listMemIndex.map(index => {
+    return { ...getDataByIndex(memories, index), id: index };
+  });
+  return _addInfoToMems(mems, self);
 };
-function _addInfoToMems(mems, listMemIndex, self) {
+
+function _addInfoToMems(memories, self) {
   const ctDid = loadContract('system.did');
-  let res = [];
-  listMemIndex.forEach(index => {
-    let mem = mems[index];
-    let tmp = {};
-    tmp.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
-    tmp.name = tmp.s_tags['display-name']; // tmp
-    tmp.pubkey = tmp.s_tags['pub-key']; // tmp
+
+  let res = memories.map(mem => {
+    let tmpMem = {};
+    tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
+    tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
+    tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
     //LOCK_TYPE_JOURNAL
     if (mem.receiver === mem.sender) {
-      tmp.r_tags = {};
+      tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
       let lock = getDataByIndex(self.getProposes(), mem.lockIndex);
       const tmpBotInfo = {};
       tmpBotInfo.avatar = lock.bot_info.botAva;
       tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
-      tmp.r_tags = { ...tmpBotInfo, ...lock.bot_info };
+      tmpMem.r_tags = { ...tmpBotInfo, ...lock.bot_info };
     } else {
-      tmp.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
+      tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
     }
-    res.push({ ...mem, id: index, ...tmp });
-  });
+    return { ...mem, ...tmpMem };
+  }, []);
+
   // sort descending by mem id;
   res = res.sort((a, b) => {
     return b.id - a.id;

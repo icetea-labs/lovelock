@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { getContract } from '../../../../service/tweb3';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, getAlias, showSubscriptionError } from '../../../../helper';
+import { callView, showSubscriptionError } from '../../../../helper';
 import Icon from '../../../elements/Icon';
 import { LinkPro } from '../../../elements/Button';
 import { Lock } from '../../../elements';

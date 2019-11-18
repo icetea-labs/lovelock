@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useHistory } from 'react-router-dom';
 
-import { rem } from '../../../elements/StyledUtils';
-import { callView } from '../../../../helper';
-import MemoryContainer from '../../Memory/MemoryContainer';
-import CreateMemory from '../../Memory/CreateMemory';
-
 import Chip from '@material-ui/core/Chip';
 import CollectionsIcon from '@material-ui/icons/Collections';
+import { rem } from '../../../elements/StyledUtils';
+import MemoryContainer from '../../Memory/MemoryContainer';
+import CreateMemory from '../../Memory/CreateMemory';
+import * as actions from '../../../../store/actions';
+import APIService from '../../../../service/apiService';
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -25,7 +25,7 @@ const CollectionIndicator = styled.div`
 
 export default function RightContainer(props) {
   const { proIndex, collectionId, handleNewCollection, isOwner } = props;
-  const [memoByProIndex, setMemoByProIndex] = useState([]);
+  // const [memoByProIndex, setMemoByProIndex] = useState([]);
   const [changed, setChanged] = useState(false);
   const address = useSelector(state => state.account.address);
   const collections = useSelector(state => state.loveinfo.topInfo.collections);
@@ -34,16 +34,22 @@ export default function RightContainer(props) {
   const validCollectionId = collectionName ? collectionId : null;
 
   const history = useHistory();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let cancel = false;
 
-    callView('getMemoriesByProIndex', [proIndex, validCollectionId]).then(memories => {
-      if (cancel) return;
-      setMemoByProIndex(memories);
+    // callView('getMemoriesByProIndex', [proIndex, validCollectionId]).then(memories => {
+    //   if (cancel) return;
+    //   setMemoByProIndex(memories);
+    // });
+    APIService.getMemoriesByProIndex(proIndex, validCollectionId).then(mems => {
+      console.log('mem', mems);
+      // set to redux
+      dispatch(actions.setMemory(mems));
     });
-
     return () => (cancel = true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proIndex, changed, validCollectionId]);
 
   function refresh() {
@@ -58,7 +64,7 @@ export default function RightContainer(props) {
             color="primary"
             label={collectionName}
             icon={<CollectionsIcon />}
-            onDelete={() => history.push('/lock/' + proIndex)}
+            onDelete={() => history.push(`/lock/${proIndex}`)}
           />
         </CollectionIndicator>
       )}
@@ -71,7 +77,7 @@ export default function RightContainer(props) {
           handleNewCollection={handleNewCollection}
         />
       )}
-      <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={memoByProIndex} />
+      <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={[]} />
     </RightBox>
   );
 }

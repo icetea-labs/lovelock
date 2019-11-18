@@ -85,7 +85,7 @@ function MemoryContainer(props) {
       newMemoryList = newMemoryList.sort((a, b) => {
         return b.id - a.id;
       });
-      setMemory(newMemoryList);
+      // setMemory(newMemoryList);
 
       setLoading(false);
 

@@ -12,13 +12,7 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
-import {
-  callView,
-  summaryDayCal,
-  HolidayEvent,
-  TimeWithFormat,
-  saveFileToIpfs,
-} from '../../../../helper';
+import { callView, summaryDayCal, HolidayEvent, TimeWithFormat, saveFileToIpfs } from '../../../../helper';
 import { useTx } from '../../../../helper/hooks';
 import * as actions from '../../../../store/actions';
 import { FlexBox, rem } from '../../../elements/StyledUtils';
@@ -291,7 +285,7 @@ function TopContrainer(props) {
   const { proIndex, topInfo, setTopInfo, setGLoading } = props;
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const address = useSelector(state => state.account.address);
-  const tx = useTx()
+  const tx = useTx();
 
   const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
@@ -319,7 +313,6 @@ function TopContrainer(props) {
 
   function handerLike() {
     try {
-
       tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1).then(() => {
         getNumTopLikes();
       });
@@ -342,7 +335,6 @@ function TopContrainer(props) {
 
   function handerFlow() {
     try {
-
       tx.sendCommit('followLock', topInfo.index, { tokenAddress, address }).then(() => {
         getNumTopFollow();
       });
@@ -428,7 +420,6 @@ function TopContrainer(props) {
   }
 
   function acceptCoverImg() {
-
     setGLoading(true);
     setTimeout(async () => {
       if (cropFile) {
@@ -466,7 +457,7 @@ function TopContrainer(props) {
     return (
       <TopContainerBox>
         <div className="top__coverimg">
-          <Skeleton variant="rect" width="100%" height={425} />
+          <Skeleton variant="rect" width="100%" className={classes.media} />
         </div>
         <WarrperChatBox>
           <div className="proposeMes">
