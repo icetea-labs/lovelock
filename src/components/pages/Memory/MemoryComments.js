@@ -3,10 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
-import { useTx } from '../../../helper/hooks'
+import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -32,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     },
     borderRadius: 20,
     background: '#f5f6f7',
-    fontSize: 12
+    fontSize: 12,
   },
   notchedOutline: {
     // borderWidth: '1px',
@@ -67,11 +68,25 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(0.8, 1.5),
     borderRadius: 20,
     fontSize: 12,
+    '&:hover': {
+      background: '#f1f1f1',
+    },
+  },
+  commentRow: {
+    '&:hover': {
+      '& $deleteIc': {
+        display: 'block',
+      },
+    },
   },
   timeComment: {
     fontSize: 11,
     color: '#606770',
     padding: theme.spacing(0, 1.5),
+  },
+  deleteIc: {
+    display: 'none',
+    cursor: 'pointer',
   },
   boxCommentContent: {
     marginTop: theme.spacing(1),
@@ -94,7 +109,7 @@ const numComment = 4;
 export default function MemoryComments(props) {
   const { handleNumberComment, memoryIndex, textInput } = props;
 
-  const tx = useTx()
+  const tx = useTx();
 
   const avatar = useSelector(state => state.account.avatar);
   const [comment, setComment] = useState('');
@@ -144,7 +159,7 @@ export default function MemoryComments(props) {
   async function newComment() {
     if (!comment) return;
 
-    await tx.sendCommit('addComment', memoryIndex, comment, '')
+    await tx.sendCommit('addComment', memoryIndex, comment, '');
 
     myFormRef.current && myFormRef.current.reset();
     setComment('');
@@ -164,6 +179,7 @@ export default function MemoryComments(props) {
   }
 
   const classes = useStyles();
+  console.log('showComments', showComments);
 
   return (
     <StyledCardActions className={classes.boxComment}>
@@ -179,16 +195,17 @@ export default function MemoryComments(props) {
             )}
             {showComments.map((item, indexKey) => {
               return (
-                <Grid item key={indexKey}>
+                <Grid item key={indexKey} className={classes.commentRow}>
                   <Grid container wrap="nowrap" spacing={1} alignItems="flex-start">
                     <Grid item>
                       <AvatarPro alt="img" className={classes.avatarContentComment} hash={item.avatar} />
                     </Grid>
-                    <Grid item sx={12}>
+                    <Grid item sx={10}>
                       <Typography margin="dense" className={classes.contentComment}>
                         <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
                         <span> {item.content}</span>
                       </Typography>
+
                       <ArrowTooltip
                         title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}
                       >
@@ -197,6 +214,9 @@ export default function MemoryComments(props) {
                         </Typography>
                       </ArrowTooltip>
                     </Grid>
+                    <Grid item sx={2}>
+                      <DeleteForeverIcon className={classes.deleteIc} onClick={() => window.alert('click me')} />
+                    </Grid>
                   </Grid>
                 </Grid>
               );
@@ -204,12 +224,7 @@ export default function MemoryComments(props) {
           </Grid>
         </Grid>
         <Grid item>
-          <Grid
-            container
-            wrap="nowrap"
-            component="form"
-            ref={myFormRef}
-          >
+          <Grid container wrap="nowrap" component="form" ref={myFormRef}>
             <Grid item>
               <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
             </Grid>
