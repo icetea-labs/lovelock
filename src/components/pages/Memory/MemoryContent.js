@@ -243,7 +243,7 @@ function MemoryContent(props) {
     };
   }, [memory, memory.showDetail, memory.info.blog, propose]);
 
-  function FacebookProgress(propsFb) {
+  function FacebookProgress() {
     const classesFb = useStylesFacebook();
 
     return (
@@ -254,7 +254,7 @@ function MemoryContent(props) {
           className={classesFb.top}
           size={24}
           thickness={4}
-          {...propsFb}
+          // {...propsFb}
         />
         <CircularProgress
           variant="indeterminate"
@@ -262,7 +262,7 @@ function MemoryContent(props) {
           className={classes.bottom}
           size={24}
           thickness={4}
-          {...propsFb}
+          // {...propsFb}
         />
       </div>
     );
@@ -379,9 +379,9 @@ function MemoryContent(props) {
         </div>
         <span>
           <span>Locked with </span>
-          {memoryDecrypted.r_name ? (
+          {memoryDecrypted.r_tags && memoryDecrypted.r_tags['display-name'] ? (
             <Typography component="span" className={classes.relationshipName}>
-              {memoryDecrypted.r_name}
+              {memoryDecrypted.r_tags['display-name']}
             </Typography>
           ) : (
             <span>a crush</span>
@@ -531,17 +531,17 @@ function MemoryContent(props) {
   const { isUnlock } = memoryDecrypted;
 
   const renderTitleMem = mem => {
-    if (mem.r_tags && mem.r_tags['display-name']) {
-      return (
-        <>
-          <span>{mem.name}</span>
-          <ArrowRightIcon color="primary" />
-          <span>{mem.r_tags['display-name']}</span>
-        </>
-      );
-    }
-    // console.log('mem', mem);
-    return <>{mem.name}</>;
+    return (
+      <>
+        <span>{mem.name}</span>
+        {mem.r_tags && mem.r_tags['display-name'] && (
+          <>
+            <ArrowRightIcon color="primary" />
+            <span>{mem.r_tags['display-name']}</span>
+          </>
+        )}
+      </>
+    );
   };
 
   return (
