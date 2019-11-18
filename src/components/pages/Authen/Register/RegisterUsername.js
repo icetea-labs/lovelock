@@ -44,7 +44,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const PreviewContainter = styled.div`
-  padding: 10px 0 0 0;
   display: flex;
   flex-direction: row;
   -webkit-box-pack: justify;
@@ -97,7 +96,7 @@ const WarningPass = styled.div`
   .warningSnackbar {
     background-color: #fe7;
     box-shadow: none;
-    margin-top: 24px;
+    margin-top: 8px;
     max-width: 400px;
   }
   .warningMessage {
@@ -273,7 +272,7 @@ function RegisterUsername(props) {
 
   const classes = useStyles();
   return (
-    <React.Fragment>
+    <>
       <ValidatorForm onSubmit={gotoNext}>
         <TextValidator
           label="Username"
@@ -412,7 +411,7 @@ function RegisterUsername(props) {
         </DivControlBtnKeystore>
       </ValidatorForm>
       {/* {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />} */}
-    </React.Fragment>
+    </>
   );
 }
 
