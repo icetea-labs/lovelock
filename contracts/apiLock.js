@@ -216,7 +216,7 @@ function _prepareData(locks, locksIndex) {
 //   // resp.push(newLock[0]);
 //   return newLock;
 // };
-exports.apiGetTopInfoLockByIndex = (self, index) => {
+exports.apiGetDetailLock = (self, index) => {
   const [pro] = self.getPropose(index);
   const newLock = _addTopInfoToLocks([pro]);
   return newLock;

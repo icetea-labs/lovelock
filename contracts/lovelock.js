@@ -8,7 +8,7 @@ const {
   apiFollowLock,
   apiLikeLock,
   apiChangeLockImg,
-  apiGetTopInfoLockByIndex,
+  apiGetDetailLock,
   apiGetLocksByAddress,
   apiGetLocksForFeed,
 } = require('./apiLock.js');
@@ -115,9 +115,9 @@ class LoveLock {
     const self = this;
     return apiGetLocksByAddress(self, address);
   }
-  @view getProposeByIndex(index: number) {
+  @view getDetailLock(index: number) {
     const self = this;
-    return apiGetTopInfoLockByIndex(self, index);
+    return apiGetDetailLock(self, index);
   }
   @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;

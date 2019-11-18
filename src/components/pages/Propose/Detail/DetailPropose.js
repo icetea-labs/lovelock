@@ -6,13 +6,14 @@ import { Helmet } from 'react-helmet';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
 import { rem } from '../../../elements/StyledUtils';
-import { callView, getTagsInfo, makeProposeName } from '../../../../helper';
+import { callView, makeProposeName } from '../../../../helper';
 import { useTx } from '../../../../helper/hooks';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
-import { NotFound } from '../../NotFound/NotFound';
+// import { NotFound } from '../../NotFound/NotFound';
 import * as actions from '../../../../store/actions';
+import APIService from '../../../../service/apiService';
 
 import CommonDialog from '../../../elements/CommonDialog';
 
@@ -77,7 +78,6 @@ export default function DetailPropose(props) {
 
   useEffect(() => {
     let cancel = false;
-
     if (isNaN(proIndex) || invalidCollectionId) {
       // setPageErr(true);
       history.push('/notFound');
@@ -88,28 +88,25 @@ export default function DetailPropose(props) {
           // setPageErr(true);
           history.push('/notFound');
         } else {
-          callView('getProposeByIndex', [proIndex]).then(async propose => {
-            const proInfo = propose[0] || {};
-
-            // add basic extra info
-            proInfo.index = proIndex;
-            proInfo.coverImg = proInfo.coverImg || 'QmXtwtitd7ouUKJfmfXXcmsUhq2nGv98nxnw2reYg4yncM';
-            proInfo.isJournal = proInfo.sender === proInfo.receiver;
-            proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
-            proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
-
-            // add more detailed info
-            // await addInfoToPropose(proInfo);
-
+          APIService.getDetailLock(proIndex).then(lock => {
             if (cancel) return;
+            setProposeInfo(lock);
+            dispatch(actions.setTopInfo(lock));
+          });
+          APIService.getLocksForFeed(address).then(resp => {
+            // set to redux
+            dispatch(actions.setPropose(resp.locks));
 
-            setProposeInfo(proInfo);
-            dispatch(actions.setTopInfo(proInfo));
+            // const { memoIndex } = resp.locks.find(lock => {
+            //   return lock.id === proIndex;
+            // }, []);
+
+            // APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+            //   // set to redux
+            //   dispatch(actions.setMemory(mems));
+            // });
           });
         }
-      });
-      callView('getLocksForFeed', [address]).then(async lockForFeed => {
-        dispatch(actions.setPropose(lockForFeed.locks));
       });
     }
 
@@ -142,6 +139,7 @@ export default function DetailPropose(props) {
         // push to redux
         dispatch(actions.setTopInfo(proposeInfo));
 
+        // eslint-disable-next-line no-unused-expressions
         colCreationCallback && colCreationCallback(data);
       })
       .catch(err => {

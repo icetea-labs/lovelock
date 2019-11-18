@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 
 import { rem } from '../../elements/StyledUtils';
 import LeftContainer from '../Propose/Detail/LeftContainer';
-import { callView, getJsonFromIpfs } from '../../../helper';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
+import APIService from '../../../service/apiService';
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -40,39 +40,25 @@ function FeedContainer(props) {
   const { address } = props;
 
   useEffect(() => {
-    loadLocksForFeed();
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadLocksForFeed() {
-    const lockForFeed = await callView('getLocksForFeed', [address]);
-    // console.log('lockForFeed.locks', lockForFeed.locks);
-    setProposes(lockForFeed.locks);
-    let arrayMem = [];
-    lockForFeed.locks.forEach(lock => {
-      arrayMem = arrayMem.concat(lock.memoIndex);
+  async function fetchData() {
+    APIService.getLocksForFeed(address).then(resp => {
+      // set to redux
+      setProposes(resp.locks);
+
+      const { memoIndex } = resp.locks.reduce((tmp, lock) => {
+        return { memoIndex: tmp.memoIndex.concat(lock.memoIndex) };
+      });
+      // console.log('memoIndex', memoIndex);
+      APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+        // set to redux
+        setMemory(mems);
+      });
     });
-    // console.log('arrayMem', arrayMem);
-    const memorydata = await callView('getMemoriesByListMemIndex', [arrayMem]);
-    const newMems = [];
-    for (let i = 0; i < memorydata.length; i++) {
-      const mem = memorydata[i];
-      if (mem.isPrivate) {
-        mem.isUnlock = false;
-      } else {
-        mem.isUnlock = true;
-      }
-      for (let j = 0; j < mem.info.hash.length; j++) {
-        // eslint-disable-next-line no-await-in-loop
-        mem.info.hash[j] = await getJsonFromIpfs(mem.info.hash[j], j);
-      }
-      newMems.push(mem);
-    }
-
-    setMemory(newMems);
-    // console.log('lockForFeed', lockForFeed);
-    // console.log('memorydata', memorydata);
   }
-
   return (
     <ProposeWrapper>
       <div className="proposeColumn proposeColumn--left">
