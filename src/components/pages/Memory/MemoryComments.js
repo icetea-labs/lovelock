@@ -7,7 +7,7 @@ import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
-import { useTx } from '../../../helper/hooks';
+import { useTx, sendTxWithAuthen } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -180,6 +180,7 @@ export default function MemoryComments(props) {
 
   const classes = useStyles();
   console.log('showComments', showComments);
+  console.log('memoryIndex', memoryIndex);
 
   return (
     <StyledCardActions className={classes.boxComment}>
@@ -215,7 +216,20 @@ export default function MemoryComments(props) {
                       </ArrowTooltip>
                     </Grid>
                     <Grid item sx={2}>
-                      <DeleteForeverIcon className={classes.deleteIc} onClick={() => window.alert('click me')} />
+                      <DeleteForeverIcon
+                        className={classes.deleteIc}
+                        onClick={async () => {
+                          // const updateCmt = await callView('getCommentsByMemoIndex', [memoryIndex]);
+                          let cmtIndex = 0;
+                          if (numHidencmt > 0) {
+                            cmtIndex = indexKey + numHidencmt;
+                          } else {
+                            cmtIndex = indexKey;
+                          }
+                          await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
+                          console.log('cmtIndex', cmtIndex);
+                        }}
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
