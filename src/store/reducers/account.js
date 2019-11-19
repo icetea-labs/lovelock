@@ -5,10 +5,6 @@ import getWeb3 from '../../service/tweb3';
 const initialState = {
   needAuth: false,
   publicKey: '',
-  r_publicKey: '',
-  r_address: '',
-  s_publicKey: '',
-  s_address: '',
   cipher: '',
   address: '',
   privateKey: '',

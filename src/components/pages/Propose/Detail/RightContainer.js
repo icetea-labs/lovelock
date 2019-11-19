@@ -32,6 +32,7 @@ export default function RightContainer(props) {
   const currentCol = !collections || collectionId == null ? '' : collections.find(c => c.id === collectionId);
   const collectionName = currentCol == null ? '' : currentCol.name;
   const validCollectionId = collectionName ? collectionId : null;
+  const [loading, setLoading] = useState(false);
 
   const history = useHistory();
   const dispatch = useDispatch();
@@ -39,15 +40,16 @@ export default function RightContainer(props) {
   useEffect(() => {
     let cancel = false;
 
-    // callView('getMemoriesByProIndex', [proIndex, validCollectionId]).then(memories => {
-    //   if (cancel) return;
-    //   setMemoByProIndex(memories);
-    // });
+    if (cancel) return;
+    setLoading(true);
+
     APIService.getMemoriesByProIndex(proIndex, validCollectionId).then(mems => {
-      console.log('mem', mems);
       // set to redux
       dispatch(actions.setMemory(mems));
+      if (cancel) return;
+      setLoading(false);
     });
+
     return () => (cancel = true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proIndex, changed, validCollectionId]);
@@ -77,7 +79,7 @@ export default function RightContainer(props) {
           handleNewCollection={handleNewCollection}
         />
       )}
-      <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={[]} />
+      <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={[]} loading={loading} />
     </RightBox>
   );
 }

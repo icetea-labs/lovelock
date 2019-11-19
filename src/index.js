@@ -46,6 +46,11 @@ const theme = createMuiTheme({
     },
   },
   overrides: {
+    MuiSkeleton: {
+      animate: {
+        animation: 'MuiSkeleton-keyframes-animate 1s ease-in-out infinite',
+      },
+    },
     // Style sheet name ⚛️
     MuiButton: {
       // Name of the rule

@@ -295,6 +295,7 @@ function _addTopInfoToLocks(locks) {
       const r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
       tmp.r_name = r_tags['display-name'];
       tmp.r_avatar = r_tags.avatar;
+      tmp.r_publicKey = r_tags['pub-key'] || '';
     }
     resp.push({ ...lock, ...tmp });
   });

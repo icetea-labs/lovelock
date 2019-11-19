@@ -27,12 +27,13 @@ function Explore(props) {
 
       const { memoIndex } = resp.locks.reduce((tmp, lock) => {
         return { memoIndex: lock.isMyLocks ? tmp.memoIndex.concat(lock.memoIndex) : tmp.memoIndex };
-      });
+      }, {});
       // console.log('memoIndex', memoIndex);
-      APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
-        // set to redux
-        setMemory(mems);
-      });
+      memoIndex &&
+        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+          // set to redux
+          setMemory(mems);
+        });
     });
   }
 
