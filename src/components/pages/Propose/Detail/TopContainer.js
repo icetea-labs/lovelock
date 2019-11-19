@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch, connect } from 'react-redux';
+import { useSelector, connect } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -213,6 +213,7 @@ const SummaryCard = styled.div`
   }
   .proLike {
     display: flex;
+    height: 50px;
   }
 `;
 
@@ -463,17 +464,17 @@ function TopContrainer(props) {
           <div className="proposeMes">
             <CardHeader
               className={classes.card}
-              avatar={<Skeleton variant="circle" width={40} height={40} />}
+              avatar={<Skeleton variant="circle" width={58} height={58} />}
               title={<Skeleton height={6} width="80%" />}
-              subheader={<Skeleton height={12} width="80%" />}
+              subheader={<Skeleton height={40} width="80%" />}
             />
           </div>
           <div className="proposeMes">
             <CardHeader
               className={classes.card}
-              avatar={<Skeleton variant="circle" width={40} height={40} />}
+              avatar={<Skeleton variant="circle" width={58} height={58} />}
               title={<Skeleton height={6} width="80%" />}
-              subheader={<Skeleton height={12} width="80%" />}
+              subheader={<Skeleton height={40} width="80%" />}
             />
           </div>
         </WarrperChatBox>

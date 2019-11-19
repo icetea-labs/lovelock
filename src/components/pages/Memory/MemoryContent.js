@@ -534,7 +534,7 @@ function MemoryContent(props) {
     return (
       <>
         <span>{mem.name}</span>
-        {mem.r_tags && mem.r_tags['display-name'] && (
+        {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />
             <span>{mem.r_tags['display-name']}</span>

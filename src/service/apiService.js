@@ -1,6 +1,6 @@
 import { callView, getJsonFromIpfs } from '../helper';
 
-async function addInfoToMems(memorydata) {
+async function addInfoToMems(memorydata, isDetailScreen = false) {
   const newMems = [];
   for (let i = 0; i < memorydata.length; i++) {
     const mem = memorydata[i];
@@ -13,6 +13,7 @@ async function addInfoToMems(memorydata) {
       // eslint-disable-next-line no-await-in-loop
       mem.info.hash[j] = await getJsonFromIpfs(mem.info.hash[j], j);
     }
+    mem.isDetailScreen = isDetailScreen;
     newMems.push(mem);
   }
   return newMems;
@@ -42,7 +43,7 @@ const APIService = {
   },
   getMemoriesByProIndex: async (lockIndex, validCollectionId) => {
     const memorydata = await callView('getMemoriesByProIndex', [lockIndex, validCollectionId]);
-    return addInfoToMems(memorydata);
+    return addInfoToMems(memorydata, true);
   },
 };
 

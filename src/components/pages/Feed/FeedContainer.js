@@ -48,15 +48,16 @@ function FeedContainer(props) {
     APIService.getLocksForFeed(address).then(resp => {
       // set to redux
       setProposes(resp.locks);
-
+      // console.log(resp.locks);
       const { memoIndex } = resp.locks.reduce((tmp, lock) => {
         return { memoIndex: tmp.memoIndex.concat(lock.memoIndex) };
-      });
+      }, {});
       // console.log('memoIndex', memoIndex);
-      APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
-        // set to redux
-        setMemory(mems);
-      });
+      memoIndex &&
+        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+          // set to redux
+          setMemory(mems);
+        });
     });
   }
   return (
