@@ -233,7 +233,7 @@ export const DivControlBtnKeystore = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: ${props => props.justify || 'space-between'};
-  padding: 20px 0 0 0;
+  padding: 10px 0 0 0;
   font-size: 14px;
   @media (min-width: 320px) and (max-width: 623px) {
     flex-direction: column;

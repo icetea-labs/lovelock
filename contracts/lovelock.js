@@ -19,6 +19,7 @@ const {
   apiGetMemoriesByLock,
   apiGetMemoriesByRange,
   apiGetMemoriesByListMemIndex,
+  apiDeleteComment,
 } = require('./apiMemory.js');
 const { importState, exportState, migrateState } = require('./migration.js')(this);
 
@@ -141,9 +142,14 @@ class LoveLock {
     return apiLikeMemory(self, memoIndex, type);
   }
   // create comment for memory
-  @transaction addComment(memoIndex: number, content: string, info: string) {
+  @transaction addComment(memoIndex: number, content: string, info: string, isDelete: boolean) {
     const self = this;
-    return apiCommentMemory(self, memoIndex, content, info);
+    return apiCommentMemory(self, memoIndex, content, info, isDelete);
+  }
+  //delete comment
+  @transaction deleteComment(index: number, cmtNo: number) {
+    const self = this;
+    return apiDeleteComment(self, index, cmtNo);
   }
   @view getMemoriesByProIndex(lockIndex: number, collectionId: ?number) {
     const self = this;
