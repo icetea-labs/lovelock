@@ -142,9 +142,9 @@ class LoveLock {
     return apiLikeMemory(self, memoIndex, type);
   }
   // create comment for memory
-  @transaction addComment(memoIndex: number, content: string, info: string, isDelete: boolean) {
+  @transaction addComment(memoIndex: number, content: string, info: string) {
     const self = this;
-    return apiCommentMemory(self, memoIndex, content, info, isDelete);
+    return apiCommentMemory(self, memoIndex, content, info);
   }
   //delete comment
   @transaction deleteComment(index: number, cmtNo: number) {
