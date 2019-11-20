@@ -44,7 +44,7 @@ function Lock(props) {
     switch (item.type) {
       case 2:
         return {
-          name: 'My Journal',
+          name: address === item.sender ? 'My Journal' : item['s_tags']['display-name'],
           nick: 'journal',
           icon: 'waves',
           avatar: item.s_tags.avatar,
