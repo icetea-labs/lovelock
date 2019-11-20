@@ -24,7 +24,7 @@ const CollectionIndicator = styled.div`
 `;
 
 export default function RightContainer(props) {
-  const { proIndex, collectionId, handleNewCollection, isOwner } = props;
+  const { proIndex, collectionId, handleNewCollection, isOwner, isFriend } = props;
   // const [memoByProIndex, setMemoByProIndex] = useState([]);
   const [changed, setChanged] = useState(false);
   const address = useSelector(state => state.account.address);
@@ -70,7 +70,7 @@ export default function RightContainer(props) {
           />
         </CollectionIndicator>
       )}
-      {address && isOwner && (
+      {address && (isOwner || isFriend) && (
         <CreateMemory
           proIndex={proIndex}
           collectionId={validCollectionId}

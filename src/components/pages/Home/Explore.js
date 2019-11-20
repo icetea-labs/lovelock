@@ -25,11 +25,11 @@ function Explore(props) {
       // set to redux
       setProposes(resp.locks);
 
-      const { memoIndex } = resp.locks.reduce((tmp, lock) => {
-        return { memoIndex: lock.isMyLocks ? tmp.memoIndex.concat(lock.memoIndex) : tmp.memoIndex };
-      }, {});
+      const memoIndex = resp.locks.reduce((tmp, lock) => {
+        return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
+      }, []);
       // console.log('memoIndex', memoIndex);
-      memoIndex &&
+      memoIndex.lenght > 0 &&
         APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
           // set to redux
           setMemory(mems);

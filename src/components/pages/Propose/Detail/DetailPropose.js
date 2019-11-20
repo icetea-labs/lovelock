@@ -56,6 +56,7 @@ const ProposeWrapper = styled.div`
 export default function DetailPropose(props) {
   const { match, history } = props;
   let isOwner = false;
+  let isFriend = false;
   let isView = false;
   const dispatch = useDispatch();
   const proIndex = parseInt(match.params.index, 10);
@@ -224,6 +225,7 @@ export default function DetailPropose(props) {
             collectionId={collectionId}
             handleNewCollection={handleNewCollection}
             isOwner={isOwner}
+            isFriend={isFriend}
           />
         </div>
       </ProposeWrapper>
@@ -236,6 +238,7 @@ export default function DetailPropose(props) {
 
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
+    isFriend = proposeInfo.contributors.indexOf(address) !== -1;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
     proposeInfo.collections = proposeInfo.collections || [];

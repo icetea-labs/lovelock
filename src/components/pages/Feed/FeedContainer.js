@@ -49,11 +49,11 @@ function FeedContainer(props) {
       // set to redux
       setProposes(resp.locks);
       // console.log(resp.locks);
-      const { memoIndex } = resp.locks.reduce((tmp, lock) => {
-        return { memoIndex: tmp.memoIndex.concat(lock.memoIndex) };
-      }, {});
+      const memoIndex = resp.locks.reduce((tmp, lock) => {
+        return tmp.concat(lock.memoIndex);
+      }, []);
       // console.log('memoIndex', memoIndex);
-      memoIndex &&
+      memoIndex.length > 0 &&
         APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
           // set to redux
           setMemory(mems);
