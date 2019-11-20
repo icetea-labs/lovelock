@@ -1,48 +1,76 @@
 import React from 'react';
 import styled from 'styled-components';
-// import { ButtonPro } from '../../elements/Button';
 import Fab from '@material-ui/core/Fab';
 import { makeStyles } from '@material-ui/core/styles';
-import { rem } from '../../elements/StyledUtils';
 import notFoundImg from '../../../assets/img/404PageBackground.jpg';
 
 const NotFoundContainer = styled.div`
   color: white;
-
   img {
     position: fixed;
     width: 100%;
     height: 100%;
   }
   .title {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: bold;
     position: absolute;
-    top: ${rem(210)};
+    top: 22vh;
     left: 50%;
     transform: translate(-50%, -50%);
+    @media (min-width: 320px) and (max-width: 623px) {
+      font-size: 13px;
+      top: 22vh;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
+
   .title404 {
-    font-size: 75pt;
+    font-size: 70pt;
     font-weight: bold;
     position: absolute;
-    top: ${rem(470)};
+    top: 48vh;
     left: 51%;
     transform: translate(-50%, -50%);
+    @media (min-width: 320px) and (max-width: 623px) {
+      font-size: 50pt;
+      top: 48vh;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
   .guide {
     font-size: 14pt;
     position: absolute;
-    top: ${rem(750)};
+    top: 75vh;
     left: 50%;
     transform: translate(-50%, -50%);
+    @media (min-width: 320px) and (max-width: 623px) {
+      font-size: 9pt;
+      top: 75vh;
+      line-height: 14px;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
   .btn {
     font-size: 24pt;
     position: absolute;
-    top: ${rem(800)};
+    top: 82vh;
     left: 50%;
     transform: translate(-50%, -50%);
+    @media (min-width: 320px) and (max-width: 623px) {
+      top: 83vh;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
 `;
 

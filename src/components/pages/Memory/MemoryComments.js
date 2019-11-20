@@ -4,10 +4,11 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import { useSnackbar } from 'notistack';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
-import { useTx, sendTxWithAuthen } from '../../../helper/hooks';
+import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -112,6 +113,10 @@ export default function MemoryComments(props) {
   const tx = useTx();
 
   const avatar = useSelector(state => state.account.avatar);
+  const address = useSelector(state => state.account.address);
+  const memories = useSelector(state => state.loveinfo.memories);
+  const memory = memories.filter(item => item.id === memoryIndex);
+  const { enqueueSnackbar } = useSnackbar();
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const [numHidencmt, setNumHidencmt] = useState(0);
@@ -179,8 +184,7 @@ export default function MemoryComments(props) {
   }
 
   const classes = useStyles();
-  console.log('showComments', showComments);
-  console.log('memoryIndex', memoryIndex);
+  // console.log('showComments', showComments);
 
   return (
     <StyledCardActions className={classes.boxComment}>
@@ -219,15 +223,30 @@ export default function MemoryComments(props) {
                       <DeleteForeverIcon
                         className={classes.deleteIc}
                         onClick={async () => {
-                          // const updateCmt = await callView('getCommentsByMemoIndex', [memoryIndex]);
+                          const owner = [item.sender, memory[0].sender, memory[0].receiver];
                           let cmtIndex = 0;
                           if (numHidencmt > 0) {
                             cmtIndex = indexKey + numHidencmt;
                           } else {
                             cmtIndex = indexKey;
                           }
-                          await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
-                          console.log('cmtIndex', cmtIndex);
+                          if (!owner.includes(address)) {
+                            const message = `Permission deny, you can not delete this comment.`;
+                            enqueueSnackbar(message, { variant: 'error' });
+                          } else {
+                            await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
+                            loadData(memoryIndex).then(respComment => {
+                              if (respComment.length > numComment) {
+                                const numMore = respComment.length - numComment;
+                                setNumHidencmt(numMore);
+                                setShowComments(respComment.slice(numMore));
+                              } else {
+                                setShowComments(respComment);
+                              }
+                              setComments(respComment);
+                              handleNumberComment(respComment.length);
+                            });
+                          }
                         }}
                       />
                     </Grid>
