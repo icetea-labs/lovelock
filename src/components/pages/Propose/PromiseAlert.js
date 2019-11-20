@@ -43,12 +43,12 @@ function PromiseAlert(props) {
   const [name, setName] = useState('');
   const [promiseImg, setPromiseImg] = useState('');
   const hash = promiseImg;
-  const tx = useTx()
+  const tx = useTx();
 
   useEffect(() => {
     async function loadData() {
       const obj = proposes.find(item => item.id === index);
-  
+
       if (obj.status === 0) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const alias = await getAlias(addr);
@@ -77,7 +77,7 @@ function PromiseAlert(props) {
   }
 
   return (
-    <React.Fragment>
+    <>
       {address === sender ? (
         <CommonDialog
           title="Lock alert"
@@ -108,7 +108,7 @@ function PromiseAlert(props) {
           <PageView>{content}</PageView>
         </CommonDialog>
       )}
-    </React.Fragment>
+    </>
   );
 }
 

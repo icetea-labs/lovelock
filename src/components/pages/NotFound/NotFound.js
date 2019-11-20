@@ -18,7 +18,6 @@ const NotFoundContainer = styled.div`
     font-size: 30px;
     font-weight: bold;
     position: absolute;
-    font-family: 'Montserrat Bold';
     top: ${rem(210)};
     left: 50%;
     transform: translate(-50%, -50%);
@@ -26,7 +25,6 @@ const NotFoundContainer = styled.div`
   .title404 {
     font-size: 75pt;
     font-weight: bold;
-    font-family: 'Montserrat Black';
     position: absolute;
     top: ${rem(470)};
     left: 51%;
@@ -34,7 +32,6 @@ const NotFoundContainer = styled.div`
   }
   .guide {
     font-size: 14pt;
-    font-family: 'Montserrat Semibold';
     position: absolute;
     top: ${rem(750)};
     left: 50%;
@@ -42,7 +39,6 @@ const NotFoundContainer = styled.div`
   }
   .btn {
     font-size: 24pt;
-    font-family: 'Montserrat Bolc';
     position: absolute;
     top: ${rem(800)};
     left: 50%;
