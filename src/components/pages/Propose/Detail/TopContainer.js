@@ -214,6 +214,8 @@ const SummaryCard = styled.div`
   .proLike {
     display: flex;
     height: 50px;
+    padding: 8px 0;
+    box-sizing: border-box;
   }
 `;
 
@@ -265,6 +267,12 @@ const useStyles = makeStyles(theme => ({
   },
   btLikeFollow: {
     color: theme.palette.text.secondary,
+    // color: '#fff',
+    // background: '#92b5fe',
+    marginLeft: theme.spacing(1),
+  },
+  textFollow: {
+    fontWeight: '600',
   },
   title: {
     display: 'none',
@@ -277,7 +285,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   rightIcon: {
-    margin: theme.spacing(0, 1),
+    margin: theme.spacing(0, 0.3),
     fontWeight: 700,
   },
 }));
@@ -525,15 +533,16 @@ function TopContrainer(props) {
               {topInfo.isMyFollow ? (
                 <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
-                  <Typography component="span" variant="body2" color="primary">
-                    {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                  <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
+                    Following
+                    {/* {topInfo.numFollow > 0 && `${topInfo.numFollow}`} */}
                   </Typography>
                 </>
               ) : (
                 <>
                   <BookmarkBorderIcon className={classes.rightIcon} />
-                  <Typography component="span" variant="body2">
-                    {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                  <Typography component="span" variant="body2" className={classes.textFollow}>
+                    Follow {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
                   </Typography>
                 </>
               )}
