@@ -152,8 +152,29 @@ exports.apiFollowLock = (self, lockIndex) => {
 };
 exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
   const [pro, proposes] = self.getPropose(lockIndex);
+  expect(pro.type === LOCK_TYPE_JOURNAL, 'Only support Journal.');
   expectProposeOwners(pro);
+  const Schema = Joi.array().items(
+    Joi.string()
+      .max(43)
+      .min(43)
+  );
+  contributors = validate(contributors, Schema);
+  contributors = contributors.filter(addr => {
+    return pro.contributors.indexOf(addr) === -1;
+  });
   pro.contributors = pro.contributors.concat(contributors);
+  // add follow lock
+  const afl = self.getAFL();
+  contributors.forEach(addr => {
+    const index = pro.follows.indexOf(addr);
+    if (index === -1) {
+      //  followLock
+      pro.follows.push(addr);
+      afl[addr].push(lockIndex);
+    }
+  });
+  self.setAFL(afl);
   // save proposes
   self.setProposes(proposes);
   return contributors;
@@ -161,8 +182,8 @@ exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
 exports.apiRemoveContributorsToLock = (self, lockIndex, contributors) => {
   const [pro, proposes] = self.getPropose(lockIndex);
   expectProposeOwners(pro);
-  pro.contributors = pro.contributors.filter(address => {
-    return contributors.indexOf(address) === -1;
+  pro.contributors = pro.contributors.filter(addr => {
+    return contributors.indexOf(addr) === -1;
   });
   // save proposes
   self.setProposes(proposes);
