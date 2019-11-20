@@ -20,10 +20,9 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
 exports.apiCommentMemory = (self, memoIndex, content, info) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
-  const newblock = block;
   const timestamp = Date.now();
-  const owner = memo.sender;
-  const comment = { owner, sender, content, info, timestamp, newblock };
+
+  const comment = { sender, content, info, timestamp };
   memo.comments.push(comment);
 
   // save memories
@@ -33,9 +32,11 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
-  expect(sender === memo.sender, "Can't delete comment. You must be owner.");
 
   const comments = self.getMemory(memoIndex)[0].comments;
+  const owner = [comments[cmtNo].sender, memo.sender, memo.receiver];
+
+  expect(owner.includes(sender), "Can't delete comment. You must be owner.");
 
   // delete comments.cmtNo;
   const newCmt = comments.splice(cmtNo, 1);

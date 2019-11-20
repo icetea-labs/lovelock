@@ -114,6 +114,8 @@ export default function MemoryComments(props) {
 
   const avatar = useSelector(state => state.account.avatar);
   const address = useSelector(state => state.account.address);
+  const memories = useSelector(state => state.loveinfo.memories);
+  const memory = memories.filter(item => item.id === memoryIndex);
   const { enqueueSnackbar } = useSnackbar();
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -182,6 +184,7 @@ export default function MemoryComments(props) {
   }
 
   const classes = useStyles();
+  // console.log('showComments', showComments);
 
   return (
     <StyledCardActions className={classes.boxComment}>
@@ -220,13 +223,14 @@ export default function MemoryComments(props) {
                       <DeleteForeverIcon
                         className={classes.deleteIc}
                         onClick={async () => {
+                          const owner = [item.sender, memory[0].sender, memory[0].receiver];
                           let cmtIndex = 0;
                           if (numHidencmt > 0) {
                             cmtIndex = indexKey + numHidencmt;
                           } else {
                             cmtIndex = indexKey;
                           }
-                          if (address !== item.owner) {
+                          if (!owner.includes(address)) {
                             const message = `Permission deny, you can not delete this comment.`;
                             enqueueSnackbar(message, { variant: 'error' });
                           } else {
