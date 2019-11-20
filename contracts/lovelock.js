@@ -7,6 +7,8 @@ const {
   apiCancelLock,
   apiFollowLock,
   apiLikeLock,
+  apiAddContributorsToLock,
+  apiRemoveContributorsToLock,
   apiChangeLockImg,
   apiGetDetailLock,
   apiGetLocksByAddress,
@@ -107,6 +109,14 @@ class LoveLock {
   @transaction followLock(index: number) {
     const self = this;
     return apiFollowLock(self, index);
+  }
+  @transaction addContributorsToLock(index: number, contributors = []) {
+    const self = this;
+    return apiAddContributorsToLock(self, index, contributors);
+  }
+  @transaction removeContributorsToLock(index: number, contributors = []) {
+    const self = this;
+    return apiRemoveContributorsToLock(self, index, contributors);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
     const self = this;

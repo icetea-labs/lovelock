@@ -66,6 +66,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
     r_info: '',
     memoIndex: [],
     follows: [],
+    contributors: [],
     bot_info,
     memoryRelationIndex: '',
     ...pendingPropose,
@@ -148,6 +149,24 @@ exports.apiFollowLock = (self, lockIndex) => {
   // save proposes
   self.setProposes(proposes);
   return sender;
+};
+exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
+  const [pro, proposes] = self.getPropose(lockIndex);
+  expectProposeOwners(pro);
+  pro.contributors = pro.contributors.concat(contributors);
+  // save proposes
+  self.setProposes(proposes);
+  return contributors;
+};
+exports.apiRemoveContributorsToLock = (self, lockIndex, contributors) => {
+  const [pro, proposes] = self.getPropose(lockIndex);
+  expectProposeOwners(pro);
+  pro.contributors = pro.contributors.filter(address => {
+    return contributors.indexOf(address) === -1;
+  });
+  // save proposes
+  self.setProposes(proposes);
+  return contributors;
 };
 //private function
 function _confirmLock(self, index, r_content, status, saveFlag) {
