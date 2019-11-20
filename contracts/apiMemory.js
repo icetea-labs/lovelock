@@ -35,14 +35,16 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   const [memo, memories] = self.getMemory(memoIndex);
   expect(sender === memo.sender, "Can't delete comment. You must be owner.");
 
-  let comments = self.getMemory(memoIndex)[0].comments;
-  comments = delete comments.cmtNo;
+  const comments = self.getMemory(memoIndex)[0].comments;
 
-  const log = { ...comments };
-  self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);
+  // delete comments.cmtNo;
+  const newCmt = comments.splice(cmtNo, 1);
 
-  // Object.assign(memo, { comments });
+  // const log = { ...newCmt };
+  // self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);
 
+  // save memories
+  self.setMemories(memories);
 };
 
 function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, pro, proposes] = []) {
