@@ -14,6 +14,9 @@ const styles = {
     margin: '0 auto',
     maxWidth: 740,
     padding: '0 5%',
+    '@media (max-width: 768px)': {
+      padding: '0 24px',
+    }
   },
   titleText: {
     fontFamily: font,

@@ -238,7 +238,7 @@ export default function DetailPropose(props) {
 
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
-    isFriend = proposeInfo.contributors.indexOf(address) !== -1;
+    isFriend = proposeInfo.contributors && proposeInfo.contributors.indexOf(address) !== -1;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
     proposeInfo.collections = proposeInfo.collections || [];
