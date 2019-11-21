@@ -22,6 +22,9 @@ const useStyles = makeStyles(theme => ({
     top: 0,
     width: '100%',
     outline: 'none',
+    '@media (max-width: 768px)': {
+      padding: '32px 0 80px',
+    }
   },
   title: {
     flexGrow: 1,
