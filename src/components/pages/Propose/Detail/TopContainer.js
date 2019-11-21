@@ -542,7 +542,8 @@ function TopContrainer(props) {
                 <>
                   <BookmarkBorderIcon className={classes.rightIcon} />
                   <Typography component="span" variant="body2" className={classes.textFollow}>
-                    Follow {topInfo.numFollow > 0 && `${topInfo.numFollow}`}
+                    Follow
+                    {/* {topInfo.numFollow > 0 && `${topInfo.numFollow}`} */}
                   </Typography>
                 </>
               )}
