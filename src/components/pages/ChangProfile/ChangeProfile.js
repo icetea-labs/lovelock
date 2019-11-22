@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
@@ -7,6 +8,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
+import RotateRightIcon from '@material-ui/icons/RotateRight';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
 import { getAliasAndTags, setTagsInfo, saveFileToIpfs, isAliasRegistered, registerAlias } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
@@ -15,7 +18,7 @@ import * as actionAccount from '../../../store/actions/account';
 import * as actionCreate from '../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
-import { AvatarPro } from '../../elements';
+import { AvatarPro, ArrowTooltip } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
 import RotationImg from '../../elements/RotationImg';
 
@@ -23,6 +26,14 @@ const useStyles = makeStyles(() => ({
   avatar: {
     width: 120,
     height: 120,
+  },
+  leftRotate: {
+    float: 'left',
+    color: '#8250c8',
+  },
+  rightRotate: {
+    float: 'right',
+    color: '#8250c8',
   },
 }));
 
@@ -37,9 +48,6 @@ const RotateImage = styled.div`
     cursor: pointer;
     background: linear-gradient(332deg, #b276ff, #fe8dc3);
     color: #fff;
-  }
-  .rightRotate {
-    float: right;
   }
 `;
 
@@ -294,7 +302,11 @@ function ChangeProfile(props) {
   function handleImageChange(event) {
     event.preventDefault();
     const orFiles = Array.from(event.target.files);
-
+    // if (orFiles[0].size > 2097152) {
+    //   const message = `File size must under 2MB.`;
+    //   enqueueSnackbar(message, { variant: 'error' });
+    //   return;
+    // }
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
       setIsOpenCrop(true);
@@ -369,8 +381,13 @@ function ChangeProfile(props) {
                     </div>
                     {cropFile && (
                       <RotateImage>
-                        <input onClick={rotateleft} type="button" value="left" className="leftRotate" />
-                        <input onClick={rotateRight} type="button" value="right" className="rightRotate" />
+                        <ArrowTooltip title="Rotate Left">
+                          <RotateLeftIcon onClick={rotateleft} className={classes.leftRotate} />
+                        </ArrowTooltip>
+
+                        <ArrowTooltip title="Rotate Right">
+                          <RotateRightIcon onClick={rotateRight} className={classes.rightRotate} />
+                        </ArrowTooltip>
                       </RotateImage>
                     )}
                   </PreviewContainter>
