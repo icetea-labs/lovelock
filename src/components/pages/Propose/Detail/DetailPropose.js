@@ -56,7 +56,7 @@ const ProposeWrapper = styled.div`
 export default function DetailPropose(props) {
   const { match, history } = props;
   let isOwner = false;
-  let isFriend = false;
+  let isContributor = false;
   let isView = false;
   const dispatch = useDispatch();
   const proIndex = parseInt(match.params.index, 10);
@@ -66,9 +66,8 @@ export default function DetailPropose(props) {
 
   const address = useSelector(state => state.account.address);
   const tx = useTx();
-
+  const [loading, setLoading] = useState(true);
   const [proposeInfo, setProposeInfo] = useState(null);
-  // const [pageErr, setPageErr] = useState(false);
 
   const [dialogVisible, setDialogVisible] = useState(false);
   const [colName, setColName] = useState('');
@@ -80,13 +79,10 @@ export default function DetailPropose(props) {
   useEffect(() => {
     let cancel = false;
     if (isNaN(proIndex) || invalidCollectionId) {
-      // setPageErr(true);
       history.push('/notFound');
     } else {
       callView('getMaxLocksIndex').then(async maxIndex => {
-        // console.log('allPropose', maxIndex);
         if (proIndex > maxIndex) {
-          // setPageErr(true);
           history.push('/notFound');
         } else {
           APIService.getDetailLock(proIndex).then(lock => {
@@ -97,15 +93,8 @@ export default function DetailPropose(props) {
           APIService.getLocksForFeed(address).then(resp => {
             // set to redux
             dispatch(actions.setPropose(resp.locks));
-
-            // const { memoIndex } = resp.locks.find(lock => {
-            //   return lock.id === proIndex;
-            // }, []);
-
-            // APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
-            //   // set to redux
-            //   dispatch(actions.setMemory(mems));
-            // });
+            if (cancel) return;
+            setLoading(false);
           });
         }
       });
@@ -167,46 +156,6 @@ export default function DetailPropose(props) {
     );
   };
 
-  // async function addInfoToPropose(pro) {
-  //   const { sender, receiver } = pro;
-
-  //   const senderTags = await getTagsInfo(sender);
-  //   pro.s_name = senderTags['display-name'];
-  //   pro.s_publicKey = senderTags['pub-key'] || '';
-  //   pro.s_avatar = senderTags.avatar;
-
-  //   const botInfo = pro.bot_info;
-
-  //   if (receiver === process.env.REACT_APP_BOT_LOVER) {
-  //     pro.r_name = `${botInfo.firstname} ${botInfo.lastname}`;
-  //     pro.r_publicKey = senderTags['pub-key'] || '';
-  //     pro.r_avatar = botInfo.botAva;
-  //     pro.r_content = botInfo.botReply;
-  //   } else {
-  //     const receiverTags = await getTagsInfo(receiver);
-  //     pro.r_name = receiverTags['display-name'];
-  //     pro.r_publicKey = receiverTags['pub-key'] || '';
-  //     pro.r_avatar = receiverTags.avatar;
-  //   }
-  //   pro.publicKey = sender === address ? pro.r_publicKey : pro.s_publicKey;
-
-  //   const info = pro.s_info;
-  //   pro.s_date = info.date;
-  //   pro.r_date = info.date;
-
-  //   const accountInfo = {
-  //     s_publicKey: pro.s_publicKey,
-  //     s_address: pro.sender,
-  //     s_name: pro.s_name,
-  //     r_publicKey: pro.r_publicKey,
-  //     r_address: pro.receiver,
-  //     r_name: pro.r_name,
-  //     publicKey: pro.publicKey,
-  //   };
-  //   // dispatch(actions.setAccount(accountInfo));
-  //   return pro;
-  // }
-
   const renderDetailPropose = () => (
     <>
       <BannerContainer>
@@ -217,7 +166,7 @@ export default function DetailPropose(props) {
 
       <ProposeWrapper>
         <div className="proposeColumn proposeColumn--left">
-          <LeftContainer proIndex={proIndex} />
+          <LeftContainer proIndex={proIndex} loading={loading} />
         </div>
         <div className="proposeColumn proposeColumn--right">
           <RightContainer
@@ -225,7 +174,7 @@ export default function DetailPropose(props) {
             collectionId={collectionId}
             handleNewCollection={handleNewCollection}
             isOwner={isOwner}
-            isFriend={isFriend}
+            isContributor={isContributor}
           />
         </div>
       </ProposeWrapper>
@@ -238,7 +187,7 @@ export default function DetailPropose(props) {
 
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
-    isFriend = proposeInfo.contributors.indexOf(address) !== -1;
+    isContributor = proposeInfo.contributors.indexOf(address) !== -1;
     isView = proposeInfo.status === 1 && proposeInfo.isPrivate === false;
 
     proposeInfo.collections = proposeInfo.collections || [];

@@ -80,13 +80,12 @@ const CollectionBox = styled.div`
 `;
 
 function LeftContainer(props) {
-  const { proposes, setProposes, addPropose, confirmPropose, topInfo, proIndex, address, history } = props;
+  const { proposes, setProposes, confirmPropose, topInfo, proIndex, address, history, loading } = props;
 
   const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
-  // const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -157,8 +156,8 @@ function LeftContainer(props) {
     setStep('deny');
   }
 
-  function selectAccepted(proIndex, collectionId) {
-    let url = `/lock/${proIndex}`;
+  function selectAccepted(lockIndex, collectionId) {
+    let url = `/lock/${lockIndex}`;
     if (collectionId != null) {
       url += `/collection/${collectionId}`;
     }
@@ -169,12 +168,12 @@ function LeftContainer(props) {
     setStep('new');
   }
 
-  function selectPending(proIndex) {
+  function selectPending(lockIndex) {
     setStep('pending');
-    setIndex(proIndex);
+    setIndex(lockIndex);
   }
 
-  function eventConfirmPropose(data, signal) {
+  function eventConfirmPropose(data) {
     confirmPropose(data.log);
     if (address === data.log.sender) {
       const message = 'Your lock request has been accepted.';
@@ -182,7 +181,7 @@ function LeftContainer(props) {
     }
   }
 
-  async function eventCreatePropose(data, signal) {
+  async function eventCreatePropose(data) {
     const lockForFeed = await callView('getLocksForFeed', [address]);
     setProposes(lockForFeed.locks);
     // const log = await addInfoToProposes([data.log], signal);
@@ -200,52 +199,8 @@ function LeftContainer(props) {
     }
   }
 
-  // async function loadProposes(signal) {
-  //   // setLoading(true);
-  //   let resp = [];
-  //   if (address) {
-  //     resp = (await callView('getLocksForFeed', [address])) || [];
-  //   }
-  //   // const newProposes = await addInfoToProposes(resp, signal);
-  //   if (signal.cancel) return;
-  //   console.log('locks', resp.locks);
-  //   setProposes(resp.locks);
-  //   // setProposes(newProposes);
-  //   // setLoading(false);
-  // }
-
-  // async function addInfoToProposes(resp, signal) {
-  //   const clonePro = resp;
-  //   for (let i = 0; i < clonePro.length; i++) {
-  //     // Get address partner
-  //     let partnerAddress = '';
-  //     if (clonePro[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-  //       partnerAddress = clonePro[i].sender;
-  //     } else {
-  //       partnerAddress = clonePro[i].sender === address ? clonePro[i].receiver : clonePro[i].sender;
-  //     }
-  //     const botInfo = clonePro[i].bot_info;
-  //     if (clonePro[i].receiver === process.env.REACT_APP_BOT_LOVER) {
-  //       clonePro[i].name = `${botInfo.firstname} ${botInfo.lastname}`;
-  //       clonePro[i].avatar = botInfo.botAva;
-  //     } else {
-  //       // Get info tags partner. case on receiver is bot address -> get tags info of sender address
-  //       // eslint-disable-next-line no-await-in-loop
-  //       const reps = await getTagsInfo(partnerAddress);
-  //       if (signal.cancel) return;
-  //       clonePro[i].name = reps['display-name'];
-  //       clonePro[i].avatar = reps.avatar;
-  //       // eslint-disable-next-line no-await-in-loop
-  //       const nick = await getAlias(partnerAddress);
-  //       if (signal.cancel) return;
-  //       clonePro[i].nick = nick ? `@${nick}` : '(no username)';
-  //     }
-  //   }
-  //   return clonePro;
-  // }
-
-  function renderCollections(collections) {
-    const cols = [{ name: 'All', description: 'All memories.' }].concat(collections);
+  function renderCollections(_collections) {
+    const cols = [{ name: 'All', description: 'All memories.' }].concat(_collections);
     return cols.map((item, index) => {
       return (
         <div className="colName" key={index} onClick={() => selectAccepted(proIndex, item.id)}>
@@ -258,8 +213,6 @@ function LeftContainer(props) {
     });
   }
   function renderOwnerLocks(locks, myAddress) {
-    // tmp condition
-    const loading = locks.length <= 0;
     const newLocks = locks.filter(lock => {
       return lock.isMyLocks;
     });
@@ -278,8 +231,6 @@ function LeftContainer(props) {
   }
 
   function renderFollowingLocks(locks, myAddress) {
-    // tmp condition
-    const loading = locks.length <= 0;
     const newLocks = locks.filter(lock => {
       return !lock.isMyLocks;
     });

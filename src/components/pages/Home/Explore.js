@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
@@ -14,6 +14,7 @@ const RightBox = styled.div`
 
 function Explore(props) {
   const { address, setProposes, setMemory } = props;
+  const [loading, setLoading] = useState(true);
   // const [users, isLoading, error, retry] = useAPI('getLocksForFeed', [address]);
   useEffect(() => {
     fetchData();
@@ -34,6 +35,7 @@ function Explore(props) {
           // set to redux
           setMemory(mems);
         });
+      setLoading(false);
     });
   }
 
@@ -41,7 +43,7 @@ function Explore(props) {
     address && (
       <FlexBox wrap="wrap">
         <FlexWidthBox width="30%">
-          <LeftContainer />
+          <LeftContainer loading={loading} />
         </FlexWidthBox>
         <FlexWidthBox width="70%">
           <RightBox>

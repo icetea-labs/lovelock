@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, connect } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
-import CardHeader from '@material-ui/core/CardHeader';
+// import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { CardMedia, Button, Typography } from '@material-ui/core';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
@@ -139,9 +139,6 @@ const WarrperChatBox = styled(FlexBox)`
     display: block;
     clear: both;
     content: '';
-  }
-  .contentPage {
-    margin-top: 23px;
   }
   .rightContent {
     text-align: right;
@@ -312,8 +309,8 @@ function TopContrainer(props) {
       const followData = serialFollowData(topInfo.follows);
       setTopInfo({ ...topInfo, ...likeData, ...followData });
     }
-
     setLoading(needUpdate);
+
     if (!needUpdate) {
       setProposeLikeInfo();
     }
@@ -462,33 +459,33 @@ function TopContrainer(props) {
     </label>
   );
 
-  if (loading) {
-    return (
-      <TopContainerBox>
-        <div className="top__coverimg">
-          <Skeleton variant="rect" width="100%" className={classes.media} />
-        </div>
-        <WarrperChatBox>
-          <div className="proposeMes">
-            <CardHeader
-              className={classes.card}
-              avatar={<Skeleton variant="circle" width={58} height={58} />}
-              title={<Skeleton height={6} width="80%" />}
-              subheader={<Skeleton height={40} width="80%" />}
-            />
-          </div>
-          <div className="proposeMes">
-            <CardHeader
-              className={classes.card}
-              avatar={<Skeleton variant="circle" width={58} height={58} />}
-              title={<Skeleton height={6} width="80%" />}
-              subheader={<Skeleton height={40} width="80%" />}
-            />
-          </div>
-        </WarrperChatBox>
-      </TopContainerBox>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <TopContainerBox>
+  //       <div className="top__coverimg">
+  //         <Skeleton variant="rect" width="100%" className={classes.media} />
+  //       </div>
+  //       <WarrperChatBox>
+  //         <div className="proposeMes">
+  //           <CardHeader
+  //             className={classes.card}
+  //             avatar={<Skeleton variant="circle" width={58} height={58} />}
+  //             title={<Skeleton height={6} width="80%" />}
+  //             subheader={<Skeleton height={40} width="80%" />}
+  //           />
+  //         </div>
+  //         <div className="proposeMes">
+  //           <CardHeader
+  //             className={classes.card}
+  //             avatar={<Skeleton variant="circle" width={58} height={58} />}
+  //             title={<Skeleton height={6} width="80%" />}
+  //             subheader={<Skeleton height={40} width="80%" />}
+  //           />
+  //         </div>
+  //       </WarrperChatBox>
+  //     </TopContainerBox>
+  //   );
+  // }
 
   return (
     <TopContainerBox>
@@ -570,36 +567,51 @@ function TopContrainer(props) {
           </ArrowTooltip>
         </div>
       </SummaryCard>
-      <WarrperChatBox isJournal={topInfo.isJournal}>
+      {/* isJournal={topInfo.isJournal} */}
+      <WarrperChatBox>
         {topInfo.s_content && (
           <div className="proposeMes">
             <div className="user_photo fl">
-              <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
+              {loading ? (
+                <Skeleton className={classes.avatar} />
+              ) : (
+                <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
+              )}
             </div>
             <div className="content_detail fl clearfix">
-              <div className="name_time">
-                <span className="user_name color-violet">{topInfo.s_name}</span>
-                <span className="sinceDate">・</span>
-                <span className="time color-gray">
-                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
-                </span>
-              </div>
-              <p>{topInfo.s_content}</p>
+              {loading ? (
+                <Skeleton height={12} width="60%" />
+              ) : (
+                <div className="name_time">
+                  <span className="user_name color-violet">{topInfo.s_name}</span>
+                  <span className="sinceDate">・</span>
+                  <span className="time color-gray">
+                    <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
+                  </span>
+                </div>
+              )}
+              {loading ? <Skeleton height={40} width="100%" /> : <p>{topInfo.s_content}</p>}
             </div>
           </div>
         )}
         {topInfo.r_content && (
           <div className="proposeMes">
-            <div className="content_detail fl clearfix">
-              <div className="name_time fr">
-                <span className="user_name color-violet">{topInfo.r_name}</span>
-              </div>
-              <div className="contentPage">
-                <p className="rightContent">{topInfo.r_content}</p>
-              </div>
+            <div className="content_detail clearfix">
+              {loading ? (
+                <Skeleton height={12} width="60%" />
+              ) : (
+                <div className="name_time" style={{ width: '100%', textAlign: 'right' }}>
+                  <span className="user_name color-violet">{topInfo.r_name}</span>
+                </div>
+              )}
+              {loading ? <Skeleton height={40} width="100%" /> : <p className="rightContent">{topInfo.r_content}</p>}
             </div>
-            <div className="user_photo fr">
-              <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
+            <div className="user_photo ">
+              {loading ? (
+                <Skeleton className={classes.avatar} />
+              ) : (
+                <AvatarPro alt="img" hash={topInfo.r_avatar} className={classes.avatar} />
+              )}
             </div>
           </div>
         )}

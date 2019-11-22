@@ -74,6 +74,7 @@ const ShadowBox = styled.div`
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
 function Home(props) {
+  const [loading, setLoading] = useState(true);
   const [openPromise, setOpenPromise] = useState(false);
   const { setProposes, setMemory, address, history } = props;
   const [locks, setlocks] = useState(null);
@@ -103,6 +104,7 @@ function Home(props) {
           // set to redux
           setMemory(mems);
         });
+      setLoading(false);
     });
   }
   function openPopup() {
@@ -152,7 +154,7 @@ function Home(props) {
           {locks ? (
             <ProposeWrapper>
               <div className="proposeColumn proposeColumn--left">
-                <LeftContainer />
+                <LeftContainer loading={loading} />
               </div>
               <div className="proposeColumn proposeColumn--right">
                 <RightBoxMemories>
