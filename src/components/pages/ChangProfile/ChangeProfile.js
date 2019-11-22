@@ -11,7 +11,15 @@ import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import RotateRightIcon from '@material-ui/icons/RotateRight';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
-import { getAliasAndTags, setTagsInfo, saveFileToIpfs, isAliasRegistered, registerAlias } from '../../../helper';
+import {
+  getAliasAndTags,
+  setTagsInfo,
+  saveFileToIpfs,
+  isAliasRegistered,
+  registerAlias,
+  applyRotation,
+  imageResize,
+} from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
@@ -158,61 +166,6 @@ function ChangeProfile(props) {
     };
   }, [address]);
 
-  const applyRotation = (file, orientation) =>
-    new Promise(resolve => {
-      const maxWidth = 250;
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const url = reader.result;
-
-        const image = new Image();
-
-        image.onload = () => {
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-
-          let { width, height } = image;
-
-          const [outputWidth, outputHeight] = orientation >= 5 && orientation <= 8 ? [height, width] : [width, height];
-
-          const scale = outputWidth > maxWidth ? maxWidth / outputWidth : 1;
-
-          width *= scale;
-          height *= scale;
-
-          // set proper canvas dimensions before transform & export
-          canvas.width = outputWidth * scale;
-          canvas.height = outputHeight * scale;
-
-          // transform context before drawing image
-          switch (orientation) {
-            case 3:
-              context.transform(-1, 0, 0, -1, width, height);
-              break;
-            case 6:
-              context.transform(0, -1, 1, 0, 0, width);
-              break;
-            case 8:
-              context.transform(0, 1, -1, 0, height, 0);
-              break;
-            default:
-              break;
-          }
-
-          // draw image
-          context.drawImage(image, 0, 0, width, height);
-
-          // export base64
-          resolve(canvas.toDataURL('image/jpeg'));
-        };
-
-        image.src = url;
-      };
-
-      reader.readAsDataURL(file);
-    });
-
   async function saveChange() {
     if (isRegistered ? !tokenKey : !privateKey) {
       setNeedAuth(true);
@@ -245,19 +198,9 @@ function ChangeProfile(props) {
             orient = 8;
           }
           if (cropFile) {
-            const newFile = await applyRotation(cropFile[0], orient);
-            const { name, type } = cropFile[0];
-            const byteString = atob(newFile.split(',')[1]);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-              ia[i] = byteString.charCodeAt(i);
-            }
-            const blob = new Blob([ia], { type });
-            const parseFile = new File([blob], name, { type });
-            const saveFile = [parseFile];
-
-            // console.log('saveFile', saveFile);
+            const newFile = await applyRotation(cropFile[0], orient, 500);
+            const saveFile = imageResize(cropFile[0], newFile);
+            
             const saveAvatar = saveFileToIpfs(saveFile).then(hash => {
               accountInfo.avatar = hash;
               if (avatar !== hash) {

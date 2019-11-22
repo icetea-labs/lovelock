@@ -15,123 +15,133 @@ export const contract = process.env.REACT_APP_CONTRACT;
 export const ipfsGateway = process.env.REACT_APP_IPFS;
 export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
 
-export function waitForHtmlTags(selector, callback, { 
-  timeout = 3000,
-  step = 100,
-  rootElement,
-  func = 'querySelectorAll',
-  testProp = 'length',
-  timeoutCallBack
-} = {}) {
+export function waitForHtmlTags(
+  selector,
+  callback,
+  { timeout = 3000, step = 100, rootElement, func = 'querySelectorAll', testProp = 'length', timeoutCallBack } = {}
+) {
   if (timeout < 0) {
     timeoutCallBack && timeoutCallBack();
     return;
   }
-  
-  var el =   (rootElement || document)[func](selector);
+
+  var el = (rootElement || document)[func](selector);
   if (el && (!testProp || el[testProp])) {
     callback(el);
   } else {
     setTimeout(() => {
-      waitForHtmlTags(selector, callback, { timeout: timeout - step, step, rootElement, func, testProp, timeoutCallBack });
+      waitForHtmlTags(selector, callback, {
+        timeout: timeout - step,
+        step,
+        rootElement,
+        func,
+        testProp,
+        timeoutCallBack,
+      });
     }, step);
   }
 }
 
 export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
-  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json())
+  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json());
 }
 
-export function fetchJsonWithFallback(hash, mainGateway, fallbackGateway, {
+export function fetchJsonWithFallback(
+  hash,
+  mainGateway,
+  fallbackGateway,
+  {
     timeout = 10, // almost race
     signal,
     abortAtTimeout, // whether to abort main gateway when timeout
     abortMain, // whether to abort main gateway when resolved
-    abortFallback // whether to abort fallback gateway when resolve
-} = {}) {
-
+    abortFallback, // whether to abort fallback gateway when resolve
+  } = {}
+) {
   if (signal && signal.aborted) {
     return Promise.reject(new DOMException('Aborted', 'AbortError'));
   }
 
   return new Promise((resolve, reject) => {
     const mainController = new AbortController();
-    const secondController = signal ? new AbortController() : undefined
+    const secondController = signal ? new AbortController() : undefined;
 
     const timeoutId = setTimeout(() => {
-      abortAtTimeout && mainController.abort()
+      abortAtTimeout && mainController.abort();
       fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
         .then(response => response.json())
         .then(json => {
-          resolve({ json, gateway: fallbackGateway })
-          abortMain && mainController.abort()
-        }).catch(err => {
-          if (err.name !== 'AbortError') {
-            reject(err)
-          }
+          resolve({ json, gateway: fallbackGateway });
+          abortMain && mainController.abort();
         })
+        .catch(err => {
+          if (err.name !== 'AbortError') {
+            reject(err);
+          }
+        });
     }, timeout);
 
     if (signal) {
       signal.addEventListener('abort', () => {
         clearTimeout(timeoutId);
-        mainController.abort()
-        secondController && secondController.abort()
+        mainController.abort();
+        secondController && secondController.abort();
         reject(new DOMException('Aborted', 'AbortError'));
-      })
+      });
     }
 
     fetch(mainGateway + hash, { signal: mainController.signal })
-    .then(response => {
-      clearTimeout(timeoutId)
-      return response.json()
-    }).then(json => {
-      resolve({ json: json, gateway: mainGateway })
-      if (abortFallback) {
+      .then(response => {
         clearTimeout(timeoutId);
-        secondController && secondController.abort()
-      }
-    }).catch(err => {
-      if (err.name !== 'AbortError') {
-        reject(err)
-      }
-    })
-
-  })
+        return response.json();
+      })
+      .then(json => {
+        resolve({ json: json, gateway: mainGateway });
+        if (abortFallback) {
+          clearTimeout(timeoutId);
+          secondController && secondController.abort();
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          reject(err);
+        }
+      });
+  });
 }
 
 export function fetchMainFirstIpfsJson(hash, options = {}) {
   if (options.abortMain == null) {
-    options.abortMain = true
+    options.abortMain = true;
   }
-  return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options)
+  return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options);
 }
 
 export function fetchAltFirstIpfsJson(hash, options = {}) {
   if (options.timeout == null) {
-    options.timeout = 1500 // wait a little to reduce load for our main gateway
+    options.timeout = 1500; // wait a little to reduce load for our main gateway
   }
   if (options.abortFallback == null) {
-    options.abortFallback = true
+    options.abortFallback = true;
   }
-  return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options)
+  return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options);
 }
 
 export function smartFetchIpfsJson(hash, options = {}) {
-  let func = fetchMainFirstIpfsJson
-  if (options.timestamp && (Date.now() - options.timestamp > 10 * 60 * 1000)) {
-    func = fetchAltFirstIpfsJson
+  let func = fetchMainFirstIpfsJson;
+  if (options.timestamp && Date.now() - options.timestamp > 10 * 60 * 1000) {
+    func = fetchAltFirstIpfsJson;
   }
-  return func(hash, options)
+  return func(hash, options);
 }
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
-    wait = +process.env.REACT_APP_PRERENDER_WAIT || 100
+    wait = +process.env.REACT_APP_PRERENDER_WAIT || 100;
   }
   window.setTimeout(() => {
-    window.prerenderReady = true
-  }, wait)
+    window.prerenderReady = true;
+  }, wait);
 }
 
 export function showSubscriptionError(error, enqueueSnackbar) {
@@ -169,7 +179,7 @@ export async function sendTxUtil(funcName, params, opts) {
   const sendType = opts.sendType || 'sendCommit';
 
   console.log(sendType, funcName, params);
-  
+
   const result = await ct.methods[funcName](...(params || []))[sendType]({
     from: opts.address,
     signers: opts.tokenAddress,
@@ -204,7 +214,7 @@ export async function saveToIpfs(files) {
   console.log('saveToIpfs', files);
 
   if (files.length !== 1) {
-    files = files.map(f => ({ content: f}))
+    files = files.map(f => ({ content: f }));
   }
 
   try {
@@ -269,7 +279,7 @@ export async function getJsonFromIpfs(cid, key) {
   const result = {};
   let url;
   // console.log('Buffer.isBuffer(cid)', Buffer.isBuffer(cid), '--', cid);
-  let blob
+  let blob;
   if (Buffer.isBuffer(cid)) {
     blob = new Blob([cid], { type: 'image/jpeg' });
     url = URL.createObjectURL(blob);
@@ -283,7 +293,7 @@ export async function getJsonFromIpfs(cid, key) {
   result.key = `Key-${key}`;
 
   if (blob) {
-    URL.revokeObjectURL(url)
+    URL.revokeObjectURL(url);
   }
 
   return result;
@@ -591,7 +601,68 @@ export const wallet = {
     return address;
   },
   isMnemonic(mnemonic) {
-    return !!bip39.validateMnemonic(mnemonic)
+    return !!bip39.validateMnemonic(mnemonic);
   },
 };
 
+export const applyRotation = (file, orientation, maxWidth) =>
+  new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result;
+
+      const image = new Image();
+
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        let { width, height } = image;
+
+        const [outputWidth, outputHeight] = orientation >= 5 && orientation <= 8 ? [height, width] : [width, height];
+
+        const scale = outputWidth > maxWidth ? maxWidth / outputWidth : 1;
+
+        width *= scale;
+        height *= scale;
+
+        // set proper canvas dimensions before transform & export
+        canvas.width = outputWidth * scale;
+        canvas.height = outputHeight * scale;
+        // transform context before drawing image
+        switch (orientation) {
+          case 3:
+            context.transform(-1, 0, 0, -1, width, height);
+            break;
+          case 6:
+            context.transform(0, -1, 1, 0, 0, width);
+            break;
+          case 8:
+            context.transform(0, 1, -1, 0, height, 0);
+            break;
+          default:
+            break;
+        }
+        // draw image
+        context.drawImage(image, 0, 0, width, height);
+        // export base64
+        resolve(canvas.toDataURL('image/jpeg'));
+      };
+      image.src = url;
+    };
+    reader.readAsDataURL(file);
+  });
+
+export function imageResize(oldFile, newFile) {
+  const { name, type } = oldFile;
+  const byteString = atob(newFile.split(',')[1]);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ia], { type });
+  const parseFile = new File([blob], name, { type });
+  const saveFile = [parseFile];
+  return saveFile;
+}
