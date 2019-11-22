@@ -79,6 +79,23 @@ const CollectionBox = styled.div`
   }
 `;
 
+const SupportSite = styled.div`
+  display: block;
+  padding-top: 1rem;
+  line-height: 18px;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  a {
+    color: inherit;
+    &:hover {
+      color: #8250c8;
+      text-decoration: underline;
+    }
+  }
+`;
+
 function LeftContainer(props) {
   const { proposes, setProposes, addPropose, confirmPropose, topInfo, proIndex, address, history } = props;
 
@@ -306,6 +323,20 @@ function LeftContainer(props) {
           {renderFollowingLocks(proposes, address)}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
+          <SupportSite>
+            <p>
+              Email:&nbsp;
+              <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+                info@icetea.io
+              </a>
+            </p>
+            <p>
+              Telegram:&nbsp;
+              <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
+                Icetea Vietnam
+              </a>
+            </p>
+          </SupportSite>
         </ShadowBox>
       </LeftBox>
       {step === 'new' && <PuNewLock close={closePopup} />}
