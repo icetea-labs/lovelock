@@ -12,6 +12,7 @@ import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
 import Explore from './components/pages/Home/Explore';
 import BLogView from './components/pages/Memory/BlogView';
+import Mypage from './components/pages/MyPage';
 
 function RouteWithLayout({ layout, component, ...rest }) {
   return (
@@ -28,11 +29,13 @@ function App(props) {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/blog/:hash" component={BLogView} />
-          <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
+
           <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
+          <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
+          <RouteWithLayout layout={HomeLayout} exact path="/mypage/:address" component={Mypage} />
           <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
+          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailPropose} />
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailPropose} />
-          <RouteWithLayout layout={HomeLayout} path="/lock/:index" component={DetailPropose} />
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
           <Route component={NotFound} />
         </Switch>
