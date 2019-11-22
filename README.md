@@ -4,7 +4,7 @@
 
 <h3 align="center">Lovelock - Cherish Your Intimate Memories</h3>
 
-> An secure place to store and celebrate your meaningful memories. Safe, clutterless, and lasting. Keep to yourself or share with close friends.
+> An secure place to store and celebrate your meaningful memories. Safe, clutterless, and lasting. Keep to yourself or share with close friends. https://lovelock.icetea.io
 
 ## Setup
 
