@@ -47,10 +47,10 @@ export default function RightContainer(props) {
       // set to redux
       dispatch(actions.setMemory(mems));
 
-      setTimeout(() => {
-        if (cancel) return;
-        setLoading(false);
-      }, 2000);
+      // setTimeout(() => {
+      if (cancel) return;
+      setLoading(false);
+      // }, 50);
     });
 
     return () => (cancel = true);

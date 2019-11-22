@@ -339,7 +339,7 @@ function TopContrainer(props) {
     }
   }
 
-  function handerFlow() {
+  function handerFollow() {
     try {
       tx.sendCommit('followLock', topInfo.index, { tokenAddress, address }).then(() => {
         getNumTopFollow();
@@ -526,7 +526,7 @@ function TopContrainer(props) {
         )}
         <div className="proLike">
           <ArrowTooltip title="Follow">
-            <Button onClick={handerFlow} className={classes.btLikeFollow}>
+            <Button onClick={handerFollow} className={classes.btLikeFollow}>
               {topInfo.isMyFollow ? (
                 <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />

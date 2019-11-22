@@ -30,7 +30,7 @@ function Explore(props) {
         return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
       }, []);
       // console.log('memoIndex', memoIndex);
-      memoIndex.lenght > 0 &&
+      memoIndex.length > 0 &&
         APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
           // set to redux
           setMemory(mems);

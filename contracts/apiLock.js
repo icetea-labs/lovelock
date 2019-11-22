@@ -216,25 +216,38 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
 }
 
 // ========== GET DATA ==================
-exports.apiGetLocksByAddress = (self, address) => {
+exports.apiGetLocksByAddress = (self, addr) => {
   const locks = self.getProposes();
-  const locksIndex = self.getA2p()[address] || [];
+  const locksIndex = self.getA2p()[addr] || [];
   return _prepareData(locks, locksIndex);
 };
-exports.apiGetFollowingLocksByAddress = (self, address) => {
+exports.apiGetFollowingLocksByAddress = (self, addr) => {
   const locks = self.getProposes();
-  const locksIndex = self.getAFL()[address] || [];
+  const locksIndex = self.getAFL()[addr] || [];
   return _prepareData(locks, locksIndex);
 };
-exports.apiGetFollowingPersionLocksByAddress = (self, address) => {
-  let resp = [];
-  const followingAddress = self.getAFA()[address] || [];
-  followingAddress.forEach(add => {
-    let lock = apiGetLocksByAddress(self, add);
-    resp.push([...lock]);
-  });
+exports.apiGetFollowingPersionLocksByAddress = (self, addr) => {
+  const followingAddr = self.getFollowing()[addr] || [];
+  let resp = followingAddr.reduce((res, addr) => {
+    let lock = exports.apiGetLocksByAddress(self, addr);
+    res.push({ ...lock[0] });
+    return res;
+  }, []);
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
   return resp;
+};
+exports.apiGetDataForMypage = (self, address) => {
+  const ctDid = loadContract('system.did');
+  const ctAlias = loadContract('system.alias');
+  const alias = ctAlias.byAddress.invokeView(address) || '';
+  const tags = ctDid.query.invokeView(address).tags || {};
+
+  let myData = {};
+  myData.avatar = tags.avatar;
+  myData['display-name'] = tags['display-name'] || '';
+  myData.username = alias.replace('account.', '');
+  myData.followed = self.getFollowed()[address] || [];
+  return [myData];
 };
 function _prepareData(locks, locksIndex) {
   let resp = [];
@@ -261,11 +274,12 @@ exports.apiGetDetailLock = (self, index) => {
   const newLock = _addTopInfoToLocks([pro]);
   return newLock;
 };
-exports.apiGetLocksForFeed = (self, address) => {
+exports.apiGetLocksForFeed = (self, addr) => {
   let resp = [];
-  const ownerLocks = apiGetLocksByAddress(self, address);
-  const followLocks = exports.apiGetFollowingLocksByAddress(self, address);
-  const followPersionLocks = exports.apiGetFollowingPersionLocksByAddress(self, address);
+  const ownerLocks = exports.apiGetLocksByAddress(self, addr);
+  const followLocks = exports.apiGetFollowingLocksByAddress(self, addr);
+  const followPersionLocks = exports.apiGetFollowingPersionLocksByAddress(self, addr);
+  // get locks ID
   const ownerLocksId = ownerLocks.map(lock => lock.id);
   const followLocksId = followLocks
     .map(lock => lock.id)
@@ -277,8 +291,9 @@ exports.apiGetLocksForFeed = (self, address) => {
     .filter(id => {
       return ownerLocksId.indexOf(id) === -1;
     });
-  // remove duplicate locks
+
   resp = ownerLocks.concat(followLocks).concat(followPersionLocks);
+  // remove duplicate locks
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
   // get more info from system.did, system.alias
   resp = _addLeftInfoToLocks(resp, ownerLocksId);

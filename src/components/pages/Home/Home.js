@@ -89,9 +89,12 @@ function Home(props) {
   }, []);
 
   async function fetchData(cancel) {
+    console.log(address);
     APIService.getLocksForFeed(address).then(resp => {
+      console.log(resp);
       // set to redux
       setProposes(resp.locks);
+      console.log(resp);
       if (cancel) return;
       setlocks(resp.locks.length > 0);
       // console.log(resp.locks);

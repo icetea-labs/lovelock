@@ -80,7 +80,7 @@ const CollectionBox = styled.div`
 `;
 
 function LeftContainer(props) {
-  const { proposes, setProposes, confirmPropose, topInfo, proIndex, address, history, loading } = props;
+  const { proposes, setProposes, confirmPropose, topInfo, proIndex, address, history, loading, isGuest } = props;
 
   const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
@@ -212,24 +212,28 @@ function LeftContainer(props) {
       );
     });
   }
+
   function renderOwnerLocks(locks, myAddress) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLocks;
     });
     return (
       <>
-        <div className="title">My lock</div>
+        <div className="title">{!isGuest ? 'My lock' : 'Public lock'} </div>
         <div>
           <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
-        <div className="title">Pending lock</div>
-        <div>
-          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={0} handlerSelect={selectPending} />
-        </div>
+        {!isGuest && (
+          <>
+            <div className="title">Pending lock</div>
+            <div>
+              <Lock loading={loading} locksData={newLocks} address={myAddress} flag={0} handlerSelect={selectPending} />
+            </div>
+          </>
+        )}
       </>
     );
   }
-
   function renderFollowingLocks(locks, myAddress) {
     const newLocks = locks.filter(lock => {
       return !lock.isMyLocks;
@@ -254,7 +258,7 @@ function LeftContainer(props) {
             </LinkPro>
           )}
           {renderOwnerLocks(proposes, address)}
-          {renderFollowingLocks(proposes, address)}
+          {!isGuest && renderFollowingLocks(proposes, address)}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
