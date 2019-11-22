@@ -10,9 +10,12 @@ const {
   apiAddContributorsToLock,
   apiRemoveContributorsToLock,
   apiChangeLockImg,
+  apiGetFollowingPersionLocksByAddress,
+  apiGetFollowingLocksByAddress,
   apiGetDetailLock,
   apiGetLocksByAddress,
   apiGetLocksForFeed,
+  apiGetDataForMypage,
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
@@ -78,16 +81,11 @@ class LoveLock {
 
   // mapping: person -> other person
   // 1:n { 'address':[address1,address2,address3...] }
-  @view getAFA = () => this.getState('afa', {});
-  setAFA = value => this.setState('afa', value);
+  @view getFollowing = () => this.getState('following', {});
+  setFollowing = value => this.setState('following', value);
 
-  // mapping follow: save addresses following lock
-  // 1:n  { 'lockIndex':[address1, address2...] }
-  // @view getLFA = () => this.getState('lfa', {});
-  // setLFA = value => this.setState('lfa', value);
-
-  // mapping follow: save address following other address
-  // 1:n  { 'address':[address1, address1,...] }
+  @view getFollowed = () => this.getState('followed', {});
+  setFollowed = value => this.setState('followed', value);
 
   @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
     const self = this;
@@ -122,9 +120,9 @@ class LoveLock {
     const self = this;
     return apiChangeLockImg(self, index, imgHash);
   }
-  @view getProposeByAddress(address: address) {
+  @view getProposeByAddress(addr: address) {
     const self = this;
-    return apiGetLocksByAddress(self, address);
+    return apiGetLocksByAddress(self, addr);
   }
   @view getDetailLock(index: number) {
     const self = this;
@@ -132,9 +130,9 @@ class LoveLock {
   }
   @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;
-  @view getLocksForFeed = (address: address) => {
+  @view getLocksForFeed = (addr: address) => {
     const self = this;
-    return apiGetLocksForFeed(self, address);
+    return apiGetLocksForFeed(self, addr);
   };
   @view getMaxLocksIndex = () => {
     const proposes = this.getProposes();
@@ -285,15 +283,40 @@ class LoveLock {
     this.setProposes(locks);
   }
   // =========== OTHER ================
-  @transaction setFlowPerson(address: address) {
+  @transaction followPerson(address: address) {
     const sender = msg.sender;
-    const afp = this.getAFA();
+    const following = this.getFollowing();
+    const followed = this.getFollowed();
+    if (!following[sender]) following[sender] = [];
+    const index = following[sender].indexOf(address);
+    if (index !== -1) {
+      // unfollowLock
+      following[sender].splice(index, 1);
+    } else {
+      //  followLock
+      following[sender].push(address);
+    }
+    if (!followed[address]) followed[address] = [];
+    const index2 = followed[address].indexOf(sender);
+    if (index2 !== -1) {
+      // unfollowLock
+      followed[address].splice(index2, 1);
+    } else {
+      //  followLock
+      followed[address].push(sender);
+    }
 
-    if (!afp[sender]) afp[sender] = [];
-    afp[sender].push(address);
-    if (!afp[address]) afp[address] = [];
-    afp[address].push(sender);
-    this.setAFA(afp);
+    this.setFollowing(following);
+    this.setFollowed(followed);
+  }
+  @view getFollowedPerson = (addr: address) => this.getFollowed()[addr] || [];
+  @view getFollowingPerson = (addr: address) => this.getFollowing()[addr] || [];
+  @view getFollowingLocksByAddress = (addr: address) => apiGetFollowingLocksByAddress(this, addr);
+  @view getFollowingPersionLocksByAddress = (addr: address) => apiGetFollowingPersionLocksByAddress(this, addr);
+
+  @view getDataForMypage(addr: address) {
+    const self = this;
+    return apiGetDataForMypage(self, addr);
   }
 
   // ========== DATA MIGRATION =============

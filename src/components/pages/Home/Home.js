@@ -1,14 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
+
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
-import { callView } from '../../../helper';
-import * as actions from '../../../store/actions';
-import PuNewLock from '../Propose/PuNewLock';
+import LeftContainer from '../Propose/Detail/LeftContainer';
+import MemoryContainer from '../Memory/MemoryContainer';
 import LandingPage from '../../layout/LandingPage';
-import FeedContainer from '../Feed';
+import PuNewLock from '../Propose/PuNewLock';
+import * as actions from '../../../store/actions';
+import APIService from '../../../service/apiService';
 
+const RightBoxMemories = styled.div`
+  padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
+`;
+const ProposeWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+      &--left {
+        display: none;
+      }
+    }
+  }
+`;
 const RightBox = styled.div`
   text-align: center;
   padding: ${rem(30)};
@@ -44,39 +73,43 @@ const ShadowBox = styled.div`
   background: #f5f5f8;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
-
 function Home(props) {
+  const [loading, setLoading] = useState(true);
   const [openPromise, setOpenPromise] = useState(false);
-  const { address, history } = props;
-  const [homePropose, setHomePropose] = useState(null);
+  const { setProposes, setMemory, address, history } = props;
+  const [locks, setlocks] = useState(null);
 
   useEffect(() => {
-    loadAcceptPropose();
-
+    let cancel = false;
+    fetchData(cancel);
+    return () => {
+      cancel = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+  }, []);
 
-  function loadAcceptPropose() {
-    if (address) {
-      callView('getProposeByAddress', [address]).then(proposes => {
-        setHomePropose(proposes || []);
-      });
-    }
+  async function fetchData(cancel) {
+    console.log(address);
+    APIService.getLocksForFeed(address).then(resp => {
+      console.log(resp);
+      // set to redux
+      setProposes(resp.locks);
+      console.log(resp);
+      if (cancel) return;
+      setlocks(resp.locks.length > 0);
+      // console.log(resp.locks);
+      const memoIndex = resp.locks.reduce((tmp, lock) => {
+        return tmp.concat(lock.memoIndex);
+      }, []);
+      // console.log('memoIndex', memoIndex);
+      memoIndex.length > 0 &&
+        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+          // set to redux
+          setMemory(mems);
+        });
+      setLoading(false);
+    });
   }
-
-  useEffect(() => {
-    if (homePropose && homePropose.length > 0) {
-      const pro = homePropose.filter(item => item.status === 1);
-      let index;
-      if (pro.length > 0) {
-        index = pro[0].id;
-      } else {
-        index = homePropose[0].id;
-      }
-      // history.push(`/lock/${index}`);
-    }
-  }, [homePropose, history]);
-
   function openPopup() {
     setOpenPromise(true);
   }
@@ -87,7 +120,7 @@ function Home(props) {
 
   function closePopup() {
     setOpenPromise(false);
-    loadAcceptPropose();
+    fetchData();
   }
 
   const renderHomeEmptyPropose = (
@@ -119,12 +152,25 @@ function Home(props) {
 
   return address ? (
     <>
-      {homePropose && homePropose.length < 1 ? (
-        <FlexBox wrap="wrap" justify="center">
-          {renderHomeEmptyPropose}
-        </FlexBox>
-      ) : (
-        <FeedContainer />
+      {locks !== null && (
+        <>
+          {locks ? (
+            <ProposeWrapper>
+              <div className="proposeColumn proposeColumn--left">
+                <LeftContainer loading={loading} />
+              </div>
+              <div className="proposeColumn proposeColumn--right">
+                <RightBoxMemories>
+                  <MemoryContainer memorydata={[]} />
+                </RightBoxMemories>
+              </div>
+            </ProposeWrapper>
+          ) : (
+            <FlexBox wrap="wrap" justify="center">
+              {renderHomeEmptyPropose}
+            </FlexBox>
+          )}
+        </>
       )}
     </>
   ) : (
@@ -138,7 +184,17 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return {
+    setProposes: value => {
+      dispatch(actions.setPropose(value));
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+  };
+};
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Home);
