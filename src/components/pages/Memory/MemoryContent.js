@@ -550,7 +550,7 @@ function MemoryContent(props) {
     <>
       <Card key={memoryDecrypted.index} className={classes.card}>
         <CardHeader
-          avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
+          avatar={<AvatarPro alt="img" hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem(memoryDecrypted)}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={

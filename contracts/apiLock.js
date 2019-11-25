@@ -86,10 +86,12 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   const a2p = self.getA2p();
   if (!a2p[sender]) a2p[sender] = [];
   a2p[sender].push(index);
-  if (!a2p[receiver]) a2p[receiver] = [];
-  a2p[receiver].push(index);
-  self.setA2p(a2p);
 
+  if (!isJournal && !isCrush) {
+    if (!a2p[receiver]) a2p[receiver] = [];
+    a2p[receiver].push(index);
+  }
+  self.setA2p(a2p);
   //emit Event
   const log = { ...pendingPropose, id: index };
   self.emitEvent('createPropose', { by: sender, log }, ['by']);
@@ -230,7 +232,7 @@ exports.apiGetFollowingPersionLocksByAddress = (self, addr) => {
   const followingAddr = self.getFollowing()[addr] || [];
   let resp = followingAddr.reduce((res, addr) => {
     let lock = exports.apiGetLocksByAddress(self, addr);
-    res.push({ ...lock[0] });
+    res = res.concat(lock);
     return res;
   }, []);
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
