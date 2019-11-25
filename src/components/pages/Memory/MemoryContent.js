@@ -539,7 +539,9 @@ function MemoryContent(props) {
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />
-            <span>{mem.r_tags['display-name']}</span>
+            <a href={`/mypage/${mem.receiver}`} style={{ color: 'inherit' }}>
+              {mem.r_tags['display-name']}
+            </a>
           </>
         )}
       </>
