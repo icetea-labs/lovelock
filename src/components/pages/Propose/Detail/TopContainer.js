@@ -231,12 +231,12 @@ const useStyles = makeStyles(theme => ({
     position: 'relative',
     overflow: 'hidden',
     backgroundSize: 'cover',
-    '&:hover': {
-      '& $icon': {
-        // display: 'flex',
-        // alignItem: 'center',
-      },
-    },
+    // '&:hover': {
+    // '& $icon': {
+    // display: 'flex',
+    // alignItem: 'center',
+    // },
+    // },
   },
   btChange: {
     margin: theme.spacing(1),

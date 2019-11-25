@@ -539,7 +539,9 @@ function MemoryContent(props) {
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />
-            <span>{mem.r_tags['display-name']}</span>
+            <a href={`/mypage/${mem.receiver}`} style={{ color: 'inherit' }}>
+              {mem.r_tags['display-name']}
+            </a>
           </>
         )}
       </>
@@ -550,7 +552,7 @@ function MemoryContent(props) {
     <>
       <Card key={memoryDecrypted.index} className={classes.card}>
         <CardHeader
-          avatar={<AvatarPro alt="img" hash={memoryDecrypted.avatar} />}
+          avatar={<AvatarPro alt="img" hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem(memoryDecrypted)}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
