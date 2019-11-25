@@ -21,6 +21,12 @@ If you want to use local Icetea node (easier for debugging).
 
 #### To use the local node:
 
+Setting this in the `.env` file:
+```
+REACT_APP_RPC=ws://localhost:26657/websocket
+```
+
+Then start icetea node.
 `icetea start`
 
 For help, type `icetea -h`.
