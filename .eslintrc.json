@@ -12,6 +12,7 @@
     "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "react/jsx-one-expression-per-line": 0,
     "react/jsx-wrap-multilines": 0,
+    "react/jsx-props-no-spreading": 0,
     "react/no-array-index-key": 0,
     "react/destructuring-assignment": 0,
     "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],

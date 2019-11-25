@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
-import * as actions from '../../../store/actions';
+// import * as actions from '../../../store/actions';
 
 const useStyles = makeStyles(theme => ({
   avatarComment: {

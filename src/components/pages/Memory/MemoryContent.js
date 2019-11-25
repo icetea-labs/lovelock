@@ -533,7 +533,9 @@ function MemoryContent(props) {
   const renderTitleMem = mem => {
     return (
       <>
-        <span>{mem.name}</span>
+        <a href={`/mypage/${mem.sender}`} style={{ color: 'inherit' }}>
+          {mem.name}
+        </a>
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />

@@ -24,7 +24,7 @@ const CollectionIndicator = styled.div`
 `;
 
 export default function RightContainer(props) {
-  const { proIndex, collectionId, handleNewCollection, isOwner, isFriend } = props;
+  const { proIndex, collectionId, handleNewCollection, isOwner, isContributor } = props;
   // const [memoByProIndex, setMemoByProIndex] = useState([]);
   const [changed, setChanged] = useState(false);
   const address = useSelector(state => state.account.address);
@@ -46,8 +46,11 @@ export default function RightContainer(props) {
     APIService.getMemoriesByProIndex(proIndex, validCollectionId).then(mems => {
       // set to redux
       dispatch(actions.setMemory(mems));
+
+      // setTimeout(() => {
       if (cancel) return;
       setLoading(false);
+      // }, 50);
     });
 
     return () => (cancel = true);
@@ -70,7 +73,7 @@ export default function RightContainer(props) {
           />
         </CollectionIndicator>
       )}
-      {address && (isOwner || isFriend) && (
+      {address && (isOwner || isContributor) && (
         <CreateMemory
           proIndex={proIndex}
           collectionId={validCollectionId}

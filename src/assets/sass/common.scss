@@ -110,12 +110,14 @@ input.dante-menu-input {
   transform:rotate(-45deg);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .graf--layoutOutsetLeft {
     width: 100% !important;
     margin: 0 !important;
   }
+}
 
+@media (max-width: 768px) {
   .graf--h2  {
     font-size: 40px !important;
     line-height: 45px !important;
