@@ -239,13 +239,18 @@ export const DivControlBtnKeystore = styled.div`
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    height: 70px;
+    height: 100px;
+    padding: 0 0 100px 0;
     .previous-button {
       order: 1;
     }
     .download-keystore {
       order: 0;
       margin-top: 20px;
+    }
+    .nextBtn {
+      width: 100%;
+      height: 50px;
     }
   }
 `;
@@ -270,6 +275,8 @@ export const BoxAuthen = styled.div`
   }
   @media (max-width: 768px) {
     width: 100%;
+    top: 0;
+    max-height: inherit;
   }
   .btRegister {
     padding-top: 20px;
@@ -286,8 +293,9 @@ export const ShadowBoxAuthen = styled.div`
   padding: ${rem(40)} ${rem(54)};
   @media (min-width: 320px) and (max-width: 623px) {
     box-shadow: none;
-    padding: 5px 20px;
+    padding: 10px 20px;
     box-sizing: border-box;
+    height: 100%;
   }
   @media (min-width: 624px) {
     min-width: ${rem(400)};

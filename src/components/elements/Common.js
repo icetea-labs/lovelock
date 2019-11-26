@@ -15,10 +15,20 @@ const StyledLogo = styled(Link)`
   &:hover {
     text-decoration: none;
   }
+  @media (max-width: 768px) {
+    margin: ${rem(20)} 0;
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+  }
 `;
 const Title = styled.div`
   font-size: ${rem(20)};
   margin-top: ${rem(15)};
+  @media (max-width: 768px) {
+    text-align: center;
+    margin-bottom: ${rem(15)};
+  }
 `;
 
 export function HeaderAuthen({ title }) {
