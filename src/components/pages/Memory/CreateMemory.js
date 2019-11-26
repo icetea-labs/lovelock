@@ -605,7 +605,9 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                   >
                     <option value={0}>Public</option>
-                    <option value={1}>Private</option>
+                    <option value={1} disabled>
+                      Private
+                    </option>
                   </Select>
                   <Select
                     native
