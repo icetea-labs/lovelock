@@ -212,7 +212,7 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
 
   //emit Event
   const log = { ...pro, id: index };
-  self.emitEvent('confirmPropose', { by: sender, log }, ['by']);
+  self.emitEvent('confirmLock', { by: sender, log }, ['by']);
 
   return [pro, proposes];
 }

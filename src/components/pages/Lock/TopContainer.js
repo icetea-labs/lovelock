@@ -20,12 +20,12 @@ import {
   saveFileToIpfs,
   applyRotation,
   imageResize,
-} from '../../../../helper';
-import { useTx } from '../../../../helper/hooks';
-import * as actions from '../../../../store/actions';
-import { FlexBox, rem } from '../../../elements/StyledUtils';
-import { ArrowTooltip, AvatarPro } from '../../../elements';
-import ImageCrop from '../../../elements/ImageCrop';
+} from '../../../helper';
+import { useTx } from '../../../helper/hooks';
+import * as actions from '../../../store/actions';
+import { FlexBox, rem } from '../../elements/StyledUtils';
+import { ArrowTooltip, AvatarPro } from '../../elements';
+import ImageCrop from '../../elements/ImageCrop';
 
 const TopContainerBox = styled.div`
   .top__coverimg {

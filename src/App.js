@@ -7,7 +7,7 @@ import Home from './components/pages/Home';
 import { Login, Register } from './components/pages/Authen';
 // import { NotFound, Exception } from './components/NotFound/NotFound';
 import { GlobaLoading } from './components/elements';
-import DetailPropose from './components/pages/Propose/Detail';
+import DetailContainer from './components/pages/Lock/DetailContainer';
 import { NotFound, Exception } from './components/pages/NotFound/NotFound';
 import ChangeProfile from './components/pages/ChangProfile';
 import Explore from './components/pages/Home/Explore';
@@ -34,8 +34,8 @@ function App(props) {
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
           <RouteWithLayout layout={HomeLayout} exact path="/mypage/:address" component={Mypage} />
           <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
-          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailPropose} />
-          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailPropose} />
+          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
+          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
           <Route component={NotFound} />
         </Switch>

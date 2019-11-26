@@ -8,7 +8,7 @@ import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
 import { rem } from '../../elements/StyledUtils';
-import LeftContainer from '../Propose/Detail/LeftContainer';
+import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import { AvatarPro } from '../../elements';
 import { callView } from '../../../helper';
@@ -89,7 +89,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setProposes, setMemory } = props;
+  const { match, setLocks, setMemory } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -131,7 +131,7 @@ function Mypage(props) {
   async function fetchData() {
     APIService.getLocksForFeed(paramAddress).then(resp => {
       // set to redux
-      setProposes(resp.locks);
+      setLocks(resp.locks);
 
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
@@ -244,8 +244,8 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-    setProposes: value => {
-      dispatch(actions.setPropose(value));
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));

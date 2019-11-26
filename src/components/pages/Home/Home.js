@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
-
+import { connect, useDispatch } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
-import LeftContainer from '../Propose/Detail/LeftContainer';
+import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import LandingPage from '../../layout/LandingPage';
-import PuNewLock from '../Propose/PuNewLock';
+// import PuNewLock from '../Propose/PuNewLock';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
@@ -116,10 +115,10 @@ const SupportSite = styled.div`
 `;
 
 function Home(props) {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const [openPromise, setOpenPromise] = useState(false);
-  const { setProposes, setMemory, address, history } = props;
-  const [locks, setlocks] = useState(null);
+  const { setLocks, setMemory, address, locks, history } = props;
+  // const [locks, setlocks] = useState(null);
 
   useEffect(() => {
     let cancel = false;
@@ -131,12 +130,11 @@ function Home(props) {
   }, []);
 
   async function fetchData(cancel) {
+    console.log('fetchData');
     APIService.getLocksForFeed(address).then(resp => {
       // set to redux
-      setProposes(resp.locks);
+      setLocks(resp.locks);
       if (cancel) return;
-      setlocks(resp.locks.length > 0);
-      // console.log(resp.locks);
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return tmp.concat(lock.memoIndex);
       }, []);
@@ -150,17 +148,16 @@ function Home(props) {
     });
   }
   function openPopup() {
-    setOpenPromise(true);
+    dispatch(actions.setNewLock(true));
   }
 
   function openExplore() {
     history.push('/explore');
   }
 
-  function closePopup() {
-    setOpenPromise(false);
-    fetchData();
-  }
+  // function closePopup() {
+  //   fetchData();
+  // }
 
   const renderHomeEmptyPropose = (
     <FlexWidthBox>
@@ -185,15 +182,16 @@ function Home(props) {
           </div>
         </RightBox>
       </ShadowBox>
-      {openPromise && <PuNewLock close={closePopup} />}
     </FlexWidthBox>
   );
-
-  return address ? (
+  const isRegistered = !!address;
+  const isHaveLocks = locks.length > 0;
+  // console.log('render home', isHaveLocks, '---', loading, '---->', locks);
+  return isRegistered ? (
     <>
-      {locks !== null && (
+      {!loading && (
         <>
-          {locks ? (
+          {isHaveLocks ? (
             <ProposeWrapper>
               <div className="proposeColumn proposeColumn--left">
                 <LeftContainer loading={loading} />
@@ -248,13 +246,14 @@ function Home(props) {
 const mapStateToProps = state => {
   return {
     address: state.account.address,
+    locks: state.loveinfo.locks,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    setProposes: value => {
-      dispatch(actions.setPropose(value));
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));

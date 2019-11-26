@@ -3,9 +3,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
-import CommonDialog from '../../elements/CommonDialog';
+import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
-import { sendTxWithAuthen } from '../../../helper/hooks';
+import { sendTxWithAuthen } from '../../helper/hooks';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -20,7 +20,7 @@ function TextFieldMultiLine(props) {
   return <TextField className={classes.textMulti} {...props} />;
 }
 
-class PromiseConfirm extends React.Component {
+class PuConfirmLock extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -128,7 +128,7 @@ class PromiseConfirm extends React.Component {
   }
 }
 
-PromiseConfirm.defaultProps = {
+PuConfirmLock.defaultProps = {
   isDeny: false,
   index: -1,
   send() {},
@@ -142,8 +142,7 @@ const mapStateToProps = state => {
     tokenKey: state.account.tokenKey,
   };
 };
-
 export default connect(
   mapStateToProps,
   null
-)(withSnackbar(PromiseConfirm));
+)(withSnackbar(PuConfirmLock));

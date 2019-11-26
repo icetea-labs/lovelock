@@ -6,11 +6,11 @@ import { useHistory } from 'react-router-dom';
 
 import Chip from '@material-ui/core/Chip';
 import CollectionsIcon from '@material-ui/icons/Collections';
-import { rem } from '../../../elements/StyledUtils';
-import MemoryContainer from '../../Memory/MemoryContainer';
-import CreateMemory from '../../Memory/CreateMemory';
-import * as actions from '../../../../store/actions';
-import APIService from '../../../../service/apiService';
+import { rem } from '../../elements/StyledUtils';
+import MemoryContainer from '../Memory/MemoryContainer';
+import CreateMemory from '../Memory/CreateMemory';
+import * as actions from '../../../store/actions';
+import APIService from '../../../service/apiService';
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
