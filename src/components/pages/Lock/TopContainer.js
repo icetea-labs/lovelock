@@ -12,12 +12,12 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
-import { callView, summaryDayCal, HolidayEvent, TimeWithFormat, saveFileToIpfs } from '../../../../helper';
-import { useTx } from '../../../../helper/hooks';
-import * as actions from '../../../../store/actions';
-import { FlexBox, rem } from '../../../elements/StyledUtils';
-import { ArrowTooltip, AvatarPro } from '../../../elements';
-import ImageCrop from '../../../elements/ImageCrop';
+import { callView, summaryDayCal, HolidayEvent, TimeWithFormat, saveFileToIpfs } from '../../../helper';
+import { useTx } from '../../../helper/hooks';
+import * as actions from '../../../store/actions';
+import { FlexBox, rem } from '../../elements/StyledUtils';
+import { ArrowTooltip, AvatarPro } from '../../elements';
+import ImageCrop from '../../elements/ImageCrop';
 
 const TopContainerBox = styled.div`
   .top__coverimg {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { rem } from '../../elements/StyledUtils';
-import LeftContainer from '../Propose/Detail/LeftContainer';
+import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
 

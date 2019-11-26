@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { connect, useDispatch } from 'react-redux';
 import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
-import LeftContainer from '../Propose/Detail/LeftContainer';
+import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import LandingPage from '../../layout/LandingPage';
 // import PuNewLock from '../Propose/PuNewLock';

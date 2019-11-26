@@ -8,7 +8,7 @@ import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
 import { rem } from '../../elements/StyledUtils';
-import LeftContainer from '../Propose/Detail/LeftContainer';
+import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import { AvatarPro } from '../../elements';
 import { callView } from '../../../helper';

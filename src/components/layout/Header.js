@@ -39,7 +39,7 @@ import GetKeyToAuthen from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
-import LeftContainer from '../pages/Propose/Detail/LeftContainer';
+import LeftContainer from '../pages/Lock/LeftContainer';
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`

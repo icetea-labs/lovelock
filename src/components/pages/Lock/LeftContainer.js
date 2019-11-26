@@ -3,15 +3,15 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { getContract } from '../../../../service/tweb3';
-import { rem } from '../../../elements/StyledUtils';
-import { callView, showSubscriptionError } from '../../../../helper';
-import Icon from '../../../elements/Icon';
-import { LinkPro } from '../../../elements/Button';
-import { Lock } from '../../../elements';
-import PuConfirmLock from '../../../elements/PuConfirmLock';
-import PuNotifyLock from '../../../elements/PuNotifyLock';
-import * as actions from '../../../../store/actions';
+import { getContract } from '../../../service/tweb3';
+import { rem } from '../../elements/StyledUtils';
+import { callView, showSubscriptionError } from '../../../helper';
+import Icon from '../../elements/Icon';
+import { LinkPro } from '../../elements/Button';
+import { Lock } from '../../elements';
+import PuConfirmLock from '../../elements/PuConfirmLock';
+import PuNotifyLock from '../../elements/PuNotifyLock';
+import * as actions from '../../../store/actions';
 
 const LeftBox = styled.div`
   width: 100%;
@@ -82,7 +82,6 @@ function LeftContainer(props) {
   const {
     proposes,
     setProposes,
-    isNewLock,
     setNewLock,
     confirmPropose,
     topInfo,
@@ -276,7 +275,6 @@ function LeftContainer(props) {
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
       </LeftBox>
-      {/* {isNewLock && <PuNewLock close={closePopup} />} */}
       {step === 'pending' && (
         <PuNotifyLock
           index={index}
@@ -298,7 +296,6 @@ const mapStateToProps = state => {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
-    isNewLock: state.globalData.isNewLock,
   };
 };
 

@@ -5,17 +5,17 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
-import { rem } from '../../../elements/StyledUtils';
-import { callView, makeProposeName } from '../../../../helper';
-import { useTx } from '../../../../helper/hooks';
+import { rem } from '../../elements/StyledUtils';
+import { callView, makeProposeName } from '../../../helper';
+import { useTx } from '../../../helper/hooks';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
 import RightContainer from './RightContainer';
-// import { NotFound } from '../../NotFound/NotFound';
-import * as actions from '../../../../store/actions';
-import APIService from '../../../../service/apiService';
+// import { NotFound } from '../NotFound/NotFound';
+import * as actions from '../../../store/actions';
+import APIService from '../../../service/apiService';
 
-import CommonDialog from '../../../elements/CommonDialog';
+import CommonDialog from '../../elements/CommonDialog';
 
 window.prerenderReady = false;
 
@@ -53,7 +53,7 @@ const ProposeWrapper = styled.div`
   }
 `;
 
-export default function DetailPropose(props) {
+export default function DetailContainer(props) {
   const { match, history } = props;
   let isOwner = false;
   let isContributor = false;
