@@ -9,10 +9,9 @@ import { callView, showSubscriptionError } from '../../../../helper';
 import Icon from '../../../elements/Icon';
 import { LinkPro } from '../../../elements/Button';
 import { Lock } from '../../../elements';
+import PuConfirmLock from '../../../elements/PuConfirmLock';
+import PuNotifyLock from '../../../elements/PuNotifyLock';
 import * as actions from '../../../../store/actions';
-import PuNewLock from '../PuNewLock';
-import PromiseAlert from '../PromiseAlert';
-import PromiseConfirm from '../PromiseConfirm';
 
 const LeftBox = styled.div`
   width: 100%;
@@ -80,7 +79,19 @@ const CollectionBox = styled.div`
 `;
 
 function LeftContainer(props) {
-  const { proposes, setProposes, confirmPropose, topInfo, proIndex, address, history, loading, isGuest } = props;
+  const {
+    proposes,
+    setProposes,
+    isNewLock,
+    setNewLock,
+    confirmPropose,
+    topInfo,
+    proIndex,
+    address,
+    history,
+    loading,
+    isGuest,
+  } = props;
 
   const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
@@ -146,6 +157,7 @@ function LeftContainer(props) {
 
   function closePopup() {
     setStep('');
+    setNewLock(false);
   }
 
   function nextToAccept() {
@@ -165,7 +177,8 @@ function LeftContainer(props) {
   }
 
   function newLock() {
-    setStep('new');
+    // setStep('new');
+    setNewLock(true);
   }
 
   function selectPending(lockIndex) {
@@ -263,9 +276,9 @@ function LeftContainer(props) {
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
       </LeftBox>
-      {step === 'new' && <PuNewLock close={closePopup} />}
+      {/* {isNewLock && <PuNewLock close={closePopup} />} */}
       {step === 'pending' && (
-        <PromiseAlert
+        <PuNotifyLock
           index={index}
           proposes={proposes}
           address={address}
@@ -274,8 +287,8 @@ function LeftContainer(props) {
           deny={nextToDeny}
         />
       )}
-      {step === 'accept' && <PromiseConfirm close={closePopup} index={index} />}
-      {step === 'deny' && <PromiseConfirm isDeny close={closePopup} index={index} />}
+      {step === 'accept' && <PuConfirmLock close={closePopup} index={index} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closePopup} index={index} />}
     </>
   );
 }
@@ -285,6 +298,7 @@ const mapStateToProps = state => {
     proposes: state.loveinfo.proposes,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
+    isNewLock: state.globalData.isNewLock,
   };
 };
 
@@ -292,6 +306,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setProposes: value => {
       dispatch(actions.setPropose(value));
+    },
+    setNewLock: value => {
+      dispatch(actions.setNewLock(value));
     },
     addPropose: value => {
       dispatch(actions.addPropose(value));

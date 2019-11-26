@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import { withSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
-import CommonDialog from '../../elements/CommonDialog';
+import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
-import { getAlias } from '../../../helper';
-import { useTx } from '../../../helper/hooks';
+import { getAlias } from '../../helper';
+import { useTx } from '../../helper/hooks';
 
 const ImgView = styled.div`
   margin: 20px 0 20px;
@@ -36,7 +36,7 @@ function CardMediaCus(props) {
   return <CardMedia className={classes.media} {...props} />;
 }
 
-function PromiseAlert(props) {
+function PuNotifyLock(props) {
   const { deny, close, accept, address, index, proposes, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
   const [content, setContent] = useState('');
@@ -112,11 +112,10 @@ function PromiseAlert(props) {
   );
 }
 
-PromiseAlert.defaultProps = {
+PuNotifyLock.defaultProps = {
   index: 0,
   deny() {},
   accept() {},
   close() {},
 };
-
-export default withSnackbar(PromiseAlert);
+export default withSnackbar(PuNotifyLock);

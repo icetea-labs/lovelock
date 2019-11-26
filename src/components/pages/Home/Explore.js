@@ -1,15 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
+import { rem } from '../../elements/StyledUtils';
 import LeftContainer from '../Propose/Detail/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
 
 import APIService from '../../../service/apiService';
 
-const RightBox = styled.div`
-  padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
+const RightBoxMemories = styled.div`
+  padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
+`;
+const ProposeWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+      &--left {
+        display: none;
+      }
+    }
+  }
 `;
 
 function Explore(props) {
@@ -41,16 +65,26 @@ function Explore(props) {
 
   return (
     address && (
-      <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
+      // <FlexBox wrap="wrap">
+      //   <FlexWidthBox width="30%">
+      //     <LeftContainer loading={loading} />
+      //   </FlexWidthBox>
+      //   <FlexWidthBox width="70%">
+      //     <RightBox>
+      //       <MemoryContainer memorydata={[]} />
+      //     </RightBox>
+      //   </FlexWidthBox>
+      // </FlexBox>
+      <ProposeWrapper>
+        <div className="proposeColumn proposeColumn--left">
           <LeftContainer loading={loading} />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightBox>
+        </div>
+        <div className="proposeColumn proposeColumn--right">
+          <RightBoxMemories>
             <MemoryContainer memorydata={[]} />
-          </RightBox>
-        </FlexWidthBox>
-      </FlexBox>
+          </RightBoxMemories>
+        </div>
+      </ProposeWrapper>
     )
   );
 }
