@@ -477,6 +477,7 @@ function MemoryContent(props) {
                   memoryLikes={memory.likes}
                   memoryIndex={memory.id}
                   memoryType={memory.type}
+                  isDetailScreen={memory.isDetailScreen}
                   numComment={numComment}
                 />
               )}
@@ -515,6 +516,7 @@ function MemoryContent(props) {
       memoryLikes={memory.likes}
       memoryIndex={memory.id}
       memoryType={memory.type}
+      isDetailScreen={memory.isDetailScreen}
       numComment={numComment}
     />
   );
