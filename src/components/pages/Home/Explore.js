@@ -37,7 +37,7 @@ const ProposeWrapper = styled.div`
 `;
 
 function Explore(props) {
-  const { address, setProposes, setMemory } = props;
+  const { address, setLocks, setMemory } = props;
   const [loading, setLoading] = useState(true);
   // const [users, isLoading, error, retry] = useAPI('getLocksForFeed', [address]);
   useEffect(() => {
@@ -48,7 +48,7 @@ function Explore(props) {
   async function fetchData() {
     APIService.getLocksForFeed(address).then(resp => {
       // set to redux
-      setProposes(resp.locks);
+      setLocks(resp.locks);
 
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
@@ -96,8 +96,8 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-    setProposes: value => {
-      dispatch(actions.setPropose(value));
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));

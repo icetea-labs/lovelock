@@ -92,7 +92,7 @@ export default function DetailContainer(props) {
           });
           APIService.getLocksForFeed(address).then(resp => {
             // set to redux
-            dispatch(actions.setPropose(resp.locks));
+            dispatch(actions.setLocks(resp.locks));
             if (cancel) return;
             setLoading(false);
           });

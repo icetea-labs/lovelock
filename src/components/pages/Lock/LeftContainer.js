@@ -79,18 +79,7 @@ const CollectionBox = styled.div`
 `;
 
 function LeftContainer(props) {
-  const {
-    proposes,
-    setProposes,
-    setNewLock,
-    confirmPropose,
-    topInfo,
-    proIndex,
-    address,
-    history,
-    loading,
-    isGuest,
-  } = props;
+  const { locks, setLocks, setNewLock, confirmLock, topInfo, proIndex, address, history, loading, isGuest } = props;
 
   const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
@@ -101,9 +90,7 @@ function LeftContainer(props) {
   useEffect(() => {
     const signal = {};
 
-    // loadProposes(signal);
     watchCreatePropose(signal);
-    // watchConfirmPropose(signal);
 
     return () => (signal.cancel = true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -126,33 +113,17 @@ function LeftContainer(props) {
         }
 
         const respConfirm = result.filter(({ eventName }) => {
-          return eventName === 'confirmPropose';
+          return eventName === 'confirmLock';
         });
         if (
           respConfirm.length > 0 &&
           (respConfirm[0].eventData.log.sender === address || respConfirm[0].eventData.log.receiver === address)
         ) {
-          eventConfirmPropose(respConfirm[0].eventData);
+          eventConfirmLock(respConfirm[0].eventData);
         }
       }
     });
   }
-
-  // function watchConfirmPropose(signal) {
-  //   const filter = {};
-  //   return getContract().events.allEvents(filter, async (error, result) => {
-  //     if (error) {
-  //       const message = 'Watch confirmPropose error';
-  //       enqueueSnackbar(message, { variant: 'error' });
-  //     } else {
-  //       // eventConfirmPropose(result);
-  //       const resp = result.filter(({ eventName }) => {
-  //         return eventName === 'confirmPropose';
-  //       });
-  //       if (resp.length > 0) eventConfirmPropose(resp[0].eventData, signal);
-  //     }
-  //   });
-  // }
 
   function closePopup() {
     setStep('');
@@ -185,8 +156,8 @@ function LeftContainer(props) {
     setIndex(lockIndex);
   }
 
-  function eventConfirmPropose(data) {
-    confirmPropose(data.log);
+  function eventConfirmLock(data) {
+    confirmLock(data.log);
     if (address === data.log.sender) {
       const message = 'Your lock request has been accepted.';
       enqueueSnackbar(message, { variant: 'info' });
@@ -195,11 +166,8 @@ function LeftContainer(props) {
 
   async function eventCreatePropose(data) {
     const lockForFeed = await callView('getLocksForFeed', [address]);
-    setProposes(lockForFeed.locks);
-    // const log = await addInfoToProposes([data.log], signal);
-    // if (!log || !log.length) return;
+    setLocks(lockForFeed.locks);
 
-    // addPropose(log[0]);
     // console.log(data);
     if (address !== data.log.sender) {
       const message = 'You have a new lock.';
@@ -269,8 +237,8 @@ function LeftContainer(props) {
               New Lock
             </LinkPro>
           )}
-          {renderOwnerLocks(proposes, address)}
-          {!isGuest && renderFollowingLocks(proposes, address)}
+          {renderOwnerLocks(locks, address)}
+          {!isGuest && renderFollowingLocks(locks, address)}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
         </ShadowBox>
@@ -278,7 +246,7 @@ function LeftContainer(props) {
       {step === 'pending' && (
         <PuNotifyLock
           index={index}
-          proposes={proposes}
+          locks={locks}
           address={address}
           close={closePopup}
           accept={nextToAccept}
@@ -293,7 +261,7 @@ function LeftContainer(props) {
 
 const mapStateToProps = state => {
   return {
-    proposes: state.loveinfo.proposes,
+    locks: state.loveinfo.locks,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
   };
@@ -301,17 +269,14 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setProposes: value => {
-      dispatch(actions.setPropose(value));
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
     },
     setNewLock: value => {
       dispatch(actions.setNewLock(value));
     },
-    addPropose: value => {
-      dispatch(actions.addPropose(value));
-    },
-    confirmPropose: value => {
-      dispatch(actions.confirmPropose(value));
+    confirmLock: value => {
+      dispatch(actions.confirmLock(value));
     },
   };
 };

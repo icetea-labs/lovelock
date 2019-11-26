@@ -384,10 +384,10 @@ class PuNewLock extends React.Component {
   };
 
   createJournal = () => {
-    const { proposes, enqueueSnackbar } = this.props;
+    const { locks, enqueueSnackbar } = this.props;
     let message = '';
-    for (let i = 0; i < proposes.length; i++) {
-      if (proposes[i].sender === proposes[i].receiver) {
+    for (let i = 0; i < locks.length; i++) {
+      if (locks[i].sender === locks[i].receiver) {
         message = 'You already had a journal and cannot create one more.';
         enqueueSnackbar(message, { variant: 'error' });
       }
@@ -398,6 +398,16 @@ class PuNewLock extends React.Component {
     } else {
       this.setState({ isJournal: false });
     }
+  };
+
+  onKeyEsc = () => {
+    if (!this.dialogShown && !this.state.isJournal) {
+      this.props.close();
+    }
+  };
+
+  onDialogToggle = value => {
+    this.dialogShown = value;
   };
 
   async createPropose(partner, promiseStm, date, file) {
@@ -480,16 +490,6 @@ class PuNewLock extends React.Component {
     }
     // }, 100);
   }
-
-  onKeyEsc = () => {
-    if (!this.dialogShown && !this.state.isJournal) {
-      this.props.close();
-    }
-  };
-
-  onDialogToggle = value => {
-    this.dialogShown = value;
-  };
 
   render() {
     const { close } = this.props;
@@ -638,7 +638,7 @@ Promise.defaultProps = {
 
 const mapStateToProps = state => {
   return {
-    proposes: state.loveinfo.proposes,
+    locks: state.loveinfo.locks,
     address: state.account.address,
     tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,

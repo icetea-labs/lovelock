@@ -75,7 +75,7 @@ const ShadowBox = styled.div`
 function Home(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const { setProposes, setMemory, address, locks, history } = props;
+  const { setLocks, setMemory, address, locks, history } = props;
   // const [locks, setlocks] = useState(null);
 
   useEffect(() => {
@@ -91,7 +91,7 @@ function Home(props) {
     console.log('fetchData');
     APIService.getLocksForFeed(address).then(resp => {
       // set to redux
-      setProposes(resp.locks);
+      setLocks(resp.locks);
       if (cancel) return;
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return tmp.concat(lock.memoIndex);
@@ -176,14 +176,14 @@ function Home(props) {
 const mapStateToProps = state => {
   return {
     address: state.account.address,
-    locks: state.loveinfo.proposes,
+    locks: state.loveinfo.locks,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    setProposes: value => {
-      dispatch(actions.setPropose(value));
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
     },
     setMemory: value => {
       dispatch(actions.setMemory(value));

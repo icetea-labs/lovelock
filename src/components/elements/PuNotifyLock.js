@@ -37,7 +37,7 @@ function CardMediaCus(props) {
 }
 
 function PuNotifyLock(props) {
-  const { deny, close, accept, address, index, proposes, enqueueSnackbar } = props;
+  const { deny, close, accept, address, index, locks, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
@@ -47,7 +47,7 @@ function PuNotifyLock(props) {
 
   useEffect(() => {
     async function loadData() {
-      const obj = proposes.find(item => item.id === index);
+      const obj = locks.find(item => item.id === index);
 
       if (obj.status === 0) {
         const addr = address === obj.sender ? obj.receiver : obj.sender;
@@ -60,14 +60,14 @@ function PuNotifyLock(props) {
     }
 
     loadData();
-  }, [address, proposes, index]);
+  }, [address, locks, index]);
 
   async function cancelPromise(index) {
     try {
       const result = await tx.sendCommit('cancelPropose', index, 'no');
 
       if (result) {
-        const message = 'Your proposes has been removed.';
+        const message = 'Your locks has been removed.';
         enqueueSnackbar(message, { variant: 'info' });
         close();
       }
