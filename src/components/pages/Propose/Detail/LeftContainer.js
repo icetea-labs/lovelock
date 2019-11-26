@@ -15,6 +15,8 @@ import PromiseAlert from '../PromiseAlert';
 import PromiseConfirm from '../PromiseConfirm';
 
 const LeftBox = styled.div`
+  position: sticky;
+  top: 5%;
   width: 100%;
   min-height: ${rem(360)};
   margin-bottom: ${rem(100)};
