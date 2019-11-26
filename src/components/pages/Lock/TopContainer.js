@@ -12,7 +12,15 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
-import { callView, summaryDayCal, HolidayEvent, TimeWithFormat, saveFileToIpfs } from '../../../helper';
+import {
+  callView,
+  summaryDayCal,
+  HolidayEvent,
+  TimeWithFormat,
+  saveFileToIpfs,
+  applyRotation,
+  imageResize,
+} from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import { FlexBox, rem } from '../../elements/StyledUtils';
@@ -429,7 +437,10 @@ function TopContrainer(props) {
     setGLoading(true);
     setTimeout(async () => {
       if (cropFile) {
-        const hash = await saveFileToIpfs(cropFile);
+        const newFile = await applyRotation(cropFile[0], 1, 1200);
+        const saveFile = imageResize(cropFile[0], newFile);
+
+        const hash = await saveFileToIpfs(saveFile);
         const result = await tx.sendCommit('changeCoverImg', proIndex, hash);
         if (result) {
           setCropFile('');

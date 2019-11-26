@@ -14,6 +14,8 @@ import PuNotifyLock from '../../elements/PuNotifyLock';
 import * as actions from '../../../store/actions';
 
 const LeftBox = styled.div`
+  position: sticky;
+  top: 5%;
   width: 100%;
   min-height: ${rem(360)};
   margin-bottom: ${rem(100)};
@@ -75,6 +77,23 @@ const CollectionBox = styled.div`
     }
     /* .colText {
     } */
+  }
+`;
+
+const SupportSite = styled.div`
+  display: block;
+  padding-top: 1rem;
+  line-height: 18px;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  a {
+    color: inherit;
+    &:hover {
+      color: #8250c8;
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -241,6 +260,20 @@ function LeftContainer(props) {
           {!isGuest && renderFollowingLocks(locks, address)}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
+          <SupportSite>
+            <p>
+              Email:&nbsp;
+              <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+                info@icetea.io
+              </a>
+            </p>
+            <p>
+              Telegram:&nbsp;
+              <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
+                Icetea Vietnam
+              </a>
+            </p>
+          </SupportSite>
         </ShadowBox>
       </LeftBox>
       {step === 'pending' && (

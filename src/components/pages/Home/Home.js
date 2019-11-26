@@ -72,6 +72,48 @@ const ShadowBox = styled.div`
   background: #f5f5f8;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
 `;
+
+const FooterWapper = styled.div`
+  height: 20px;
+  line-height: 20px;
+  background: #fff;
+  width: 100%;
+  color: #737373;
+  display: flex;
+  font-size: 12px;
+  font-weight: 300px;
+  border-top: 1px solid #e6ecf0;
+  justify-content: center;
+  padding: 8px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+    display: none;
+  }
+`;
+
+const SupportSite = styled.div`
+  display: flex;
+  margin: 3px 0;
+  line-height: 18px;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  a {
+    color: inherit;
+    &:hover {
+      color: #8250c8;
+      text-decoration: underline;
+    }
+  }
+  .footRight {
+    margin-left: 15px;
+  }
+`;
+
 function Home(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
@@ -163,6 +205,34 @@ function Home(props) {
           ) : (
             <FlexBox wrap="wrap" justify="center">
               {renderHomeEmptyPropose}
+              <FooterWapper>
+                <SupportSite>
+                  <p>
+                    &copy; 2019&nbsp;
+                    <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
+                      Trada Technology
+                    </a>
+                  </p>
+                </SupportSite>
+                <SupportSite>
+                  <div className="footRight">
+                    <p>
+                      Email:&nbsp;
+                      <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+                        info@icetea.io
+                      </a>
+                    </p>
+                  </div>
+                  <div className="footRight">
+                    <p>
+                      Telegram:&nbsp;
+                      <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
+                        Icetea Vietnam
+                      </a>
+                    </p>
+                  </div>
+                </SupportSite>
+              </FooterWapper>
             </FlexBox>
           )}
         </>

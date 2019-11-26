@@ -39,7 +39,7 @@ function Lock(props) {
   const locksByStatus = locksData.filter(item => item.status === props.flag);
 
   const getInfo = item => {
-    const prefix = item.sender === address ? 'r' : 's';
+    const prefix = item.receiver === address ? 's' : 'r';
 
     switch (item.type) {
       case 2:
