@@ -15,7 +15,7 @@ import * as actions from '../../../store/actions';
 
 const LeftBox = styled.div`
   position: sticky;
-  top: 5%;
+  top: 5px;
   width: 100%;
   min-height: ${rem(360)};
   margin-bottom: ${rem(100)};
