@@ -240,7 +240,7 @@ export const DivControlBtnKeystore = styled.div`
     justify-content: space-around;
     align-items: center;
     height: 100px;
-    padding: 0 0 100px 0;
+    /* padding: 0 0 100px 0; */
     .previous-button {
       order: 1;
     }
@@ -251,6 +251,12 @@ export const DivControlBtnKeystore = styled.div`
     .nextBtn {
       width: 100%;
       height: 50px;
+    }
+    .backBtn {
+      width: 100%;
+      height: 50px;
+      margin-bottom: 16px;
+      background: linear-gradient(332deg, #fe8dc3, #b276ff);
     }
   }
 `;
@@ -276,12 +282,14 @@ export const BoxAuthen = styled.div`
   @media (max-width: 768px) {
     width: 100%;
     top: 0;
-    max-height: inherit;
+    /* max-height: inherit; */
   }
   .btRegister {
     padding-top: 20px;
     text-align: center;
-    /* font-size: ${rem(12)}; */
+    @media (min-width: 320px) and (max-width: 623px) {
+      margin: 20px 0;
+    }
   }
 `;
 export const ShadowBoxAuthen = styled.div`
@@ -295,7 +303,7 @@ export const ShadowBoxAuthen = styled.div`
     box-shadow: none;
     padding: 10px 20px;
     box-sizing: border-box;
-    height: 100%;
+    height: 815px;
   }
   @media (min-width: 624px) {
     min-width: ${rem(400)};
