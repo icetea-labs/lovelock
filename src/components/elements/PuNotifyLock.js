@@ -64,7 +64,7 @@ function PuNotifyLock(props) {
 
   async function cancelPromise(index) {
     try {
-      const result = await tx.sendCommit('cancelPropose', index, 'no');
+      const result = await tx.sendCommit('cancelLock', index, 'no');
 
       if (result) {
         const message = 'Your locks has been removed.';

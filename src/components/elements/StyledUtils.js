@@ -293,3 +293,24 @@ export const ShadowBoxAuthen = styled.div`
     min-width: ${rem(400)};
   }
 `;
+export const LeftBoxWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+      &--left {
+        display: none;
+      }
+    }
+  }
+`;

@@ -47,7 +47,7 @@ class PuConfirmLock extends React.Component {
     const { index, enqueueSnackbar, close } = this.props;
 
     try {
-      const result = await sendTxWithAuthen(this.props, 'acceptPropose', index, message);
+      const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
         const errMessage = 'Your lock has been confirmed.';
         enqueueSnackbar(errMessage, { variant: 'success' });
@@ -61,7 +61,7 @@ class PuConfirmLock extends React.Component {
   async messageDeny(message) {
     const { index, enqueueSnackbar, close } = this.props;
     try {
-      const result = await sendTxWithAuthen(this.props, 'cancelPropose', index, message);
+      const result = await sendTxWithAuthen(this.props, 'cancelLock', index, message);
 
       if (result) {
         // window.alert('Success');

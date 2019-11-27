@@ -121,7 +121,7 @@ function LeftContainer(props) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
         const repsNew = result.filter(({ eventName }) => {
-          return eventName === 'createPropose';
+          return eventName === 'createLock';
         });
 
         if (

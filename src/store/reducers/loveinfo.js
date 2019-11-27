@@ -19,13 +19,13 @@ const loveinfo = (state = initialState, action) => {
       return isAdd.length > 0 ? state : { ...state, locks: [...state.locks, action.data] };
     case actionTypes.CONFIRM_LOCK:
       // eslint-disable-next-line no-case-declarations
-      const newProposes = state.locks.map(el => {
+      const newLocks = state.locks.map(el => {
         if (action.data.id === el.id) {
           return { ...el, ...action.data };
         }
         return el;
       });
-      return { ...state, locks: [...newProposes] };
+      return { ...state, locks: [...newLocks] };
     case actionTypes.SET_MEMORY:
       return { ...state, memories: action.data };
     default:

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect, useDispatch } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
+import { FlexBox, FlexWidthBox, rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
 import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import LandingPage from '../../layout/LandingPage';
-// import PuNewLock from '../Propose/PuNewLock';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
@@ -16,27 +15,7 @@ const RightBoxMemories = styled.div`
     padding-left: 0;
   }
 `;
-const ProposeWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-  .proposeColumn {
-    &--left {
-      width: 30%;
-    }
-    &--right {
-      width: 70%;
-    }
-  }
-  @media (max-width: 768px) {
-    display: block;
-    .proposeColumn {
-      width: 100%;
-      &--left {
-        display: none;
-      }
-    }
-  }
-`;
+
 const RightBox = styled.div`
   text-align: center;
   padding: ${rem(30)};
@@ -192,7 +171,7 @@ function Home(props) {
       {!loading && (
         <>
           {isHaveLocks ? (
-            <ProposeWrapper>
+            <LeftBoxWrapper>
               <div className="proposeColumn proposeColumn--left">
                 <LeftContainer loading={loading} />
               </div>
@@ -201,7 +180,7 @@ function Home(props) {
                   <MemoryContainer memorydata={[]} />
                 </RightBoxMemories>
               </div>
-            </ProposeWrapper>
+            </LeftBoxWrapper>
           ) : (
             <FlexBox wrap="wrap" justify="center">
               {renderHomeEmptyPropose}

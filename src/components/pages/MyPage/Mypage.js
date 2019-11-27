@@ -7,7 +7,7 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
-import { rem } from '../../elements/StyledUtils';
+import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import { AvatarPro } from '../../elements';
@@ -35,27 +35,6 @@ const ShadowBox = styled.div`
   }
 `;
 
-const ProposeWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-  .proposeColumn {
-    &--left {
-      width: 30%;
-    }
-    &--right {
-      width: 70%;
-    }
-  }
-  @media (max-width: 768px) {
-    display: block;
-    .proposeColumn {
-      width: 100%;
-      &--left {
-        display: none;
-      }
-    }
-  }
-`;
 const ProfileCover = styled.div``;
 const CoverBox = styled.div`
   text-align: center;
@@ -224,7 +203,7 @@ function Mypage(props) {
           </ProfileCover>
         </ShadowBox>
       </BannerContainer>
-      <ProposeWrapper>
+      <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftContainer loading={loading} isGuest={address !== paramAddress} />
         </div>
@@ -233,7 +212,7 @@ function Mypage(props) {
             <MemoryContainer memorydata={[]} />
           </RightBoxMemories>
         </div>
-      </ProposeWrapper>
+      </LeftBoxWrapper>
     </div>
   );
 }

@@ -433,7 +433,7 @@ class PuNewLock extends React.Component {
     this.dialogShown = value;
   };
 
-  async createPropose(partner, promiseStm, date, file) {
+  async createLock(partner, promiseStm, date, file) {
     const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva = '';
@@ -492,7 +492,7 @@ class PuNewLock extends React.Component {
         }
 
         const info = { date, hash };
-        return await sendTransaction(this.props, 'createPropose', promiseStm, partner, info, botInfo);
+        return await sendTransaction(this.props, 'createLock', promiseStm, partner, info, botInfo);
       };
 
       const result = await ensureToken(this.props, uploadThenSendTx);
@@ -545,7 +545,7 @@ class PuNewLock extends React.Component {
           close={close}
           onKeyEsc={this.onKeyEsc}
           confirm={() => {
-            this.createPropose(partner, promiseStm, date, file);
+            this.createLock(partner, promiseStm, date, file);
           }}
         >
           {!checked && (

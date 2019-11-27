@@ -160,7 +160,7 @@ export function getQueryParam(name) {
   return name ? params.get(name) : params;
 }
 
-export function makeProposeName(p, prefix = '') {
+export function makeLockName(p, prefix = '') {
   return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} ❤️ ${p.r_name}`);
 }
 

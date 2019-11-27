@@ -43,7 +43,7 @@ export default function RightContainer(props) {
     if (cancel) return;
     setLoading(true);
 
-    APIService.getMemoriesByProIndex(proIndex, validCollectionId).then(mems => {
+    APIService.getMemoriesByLockIndex(proIndex, validCollectionId).then(mems => {
       // set to redux
       dispatch(actions.setMemory(mems));
 

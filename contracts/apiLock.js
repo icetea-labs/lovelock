@@ -362,7 +362,7 @@ function _addTopInfoToLocks(locks) {
 // ========== DELETE DATA ==================
 exports.apiDeleteLock = (self, lockIndex) => {
   const sender = msg.sender;
-  const [lock, locks] = self.getLock(lockIndex);
+  const [lock, locks] = self.getLock(lockIndex);
 
   expect(owner.includes(sender), 'You must be in admin group.');
 
