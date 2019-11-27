@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { codec } from '@iceteachain/common';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -33,6 +33,15 @@ const styles = theme => ({
   },
 });
 
+const useStyles = makeStyles(theme => ({
+  formCtLb: {
+    '@media (max-width: 768px)': {
+      marginTop: theme.spacing(3),
+      marginBottom: theme.spacing(3),
+    },
+  },
+}));
+
 function ByMnemonic(props) {
   const { setLoading, setAccount, setStep, history } = props;
   const [password, setPassword] = useState('');
@@ -43,90 +52,89 @@ function ByMnemonic(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   async function gotoLogin(e) {
-    e.preventDefault()
+    e.preventDefault();
 
-    const phrase = valueInput.trim()
+    const phrase = valueInput.trim();
 
     if (!phrase) {
       enqueueSnackbar('Please input recovery phrase or key.', { variant: 'error' });
-      return
+      return;
     }
 
     if (!password) {
       enqueueSnackbar('Please input new password.', { variant: 'error' });
-      return
+      return;
     }
 
     setLoading(true);
     // setTimeout(async () => {
-      try {
-        let privateKey = phrase;
-        let address;
-        let mode = 0;
-        if (wallet.isMnemonic(phrase)) {
-          const recoveryAccount = wallet.getAccountFromMneomnic(phrase);
-          ({ privateKey, address } = recoveryAccount);
-          mode = 1;
-        } else {
-          try {
-            address = wallet.getAddressFromPrivateKey(privateKey);
-          } catch (err) {
-            err.showMessage = 'Invalid recovery phrase.'
-            throw err
-          }
+    try {
+      let privateKey = phrase;
+      let address;
+      let mode = 0;
+      if (wallet.isMnemonic(phrase)) {
+        const recoveryAccount = wallet.getAccountFromMneomnic(phrase);
+        ({ privateKey, address } = recoveryAccount);
+        mode = 1;
+      } else {
+        try {
+          address = wallet.getAddressFromPrivateKey(privateKey);
+        } catch (err) {
+          err.showMessage = 'Invalid recovery phrase.';
+          throw err;
         }
-        // console.log('getAddressFromPrivateKey', privateKey);
-
-        const tweb3 = getWeb3()
-        const acc = tweb3.wallet.importAccount(privateKey);
-        // tweb3.wallet.defaultAccount = address;
-
-        // check if account is a regular address
-        if (!tweb3.utils.isRegularAccount(acc.address)) {
-          const m = 'The recovery phrase is for a bank account. LoveLock only accepts regular (non-bank) account.'
-          const error = new Error(m);
-          error.showMessage = m
-          throw error
-        }
-
-        const token = tweb3.wallet.createRegularAccount();
-        grantAccessToken(address, token.address, isRemember)
-          .then(({ returnValue }) => {
-            tweb3.wallet.importAccount(token.privateKey);
-            const keyObject = encode(phrase, password);
-            const storage = isRemember ? localStorage : sessionStorage;
-            // save token account
-            storage.sessionData = codec
-              .encode({
-                contract: process.env.REACT_APP_CONTRACT,
-                tokenAddress: token.address,
-                tokenKey: token.privateKey,
-                expireAfter: returnValue,
-              })
-              .toString('base64');
-            // save main account
-            savetoLocalStorage({ address, mode, keyObject });
-            const account = {
-              address,
-              privateKey,
-              tokenAddress: token.address,
-              tokenKey: token.privateKey,
-              cipher: password,
-              encryptedData: keyObject,
-              mode,
-              mnemonic: mode === 1 ? phrase : '',
-            };
-            setAccount(account);
-            setLoading(false);
-            history.push('/');
-          });
-      } catch (error) {
-        console.warn(error);
-        const m = error.showMessage || `An error occurred: ${error.message || 'unknown'}`;
-        enqueueSnackbar(m, { variant: 'error' });
-        setLoading(false);
       }
-      // setLoading(false);
+      // console.log('getAddressFromPrivateKey', privateKey);
+
+      const tweb3 = getWeb3();
+      const acc = tweb3.wallet.importAccount(privateKey);
+      // tweb3.wallet.defaultAccount = address;
+
+      // check if account is a regular address
+      if (!tweb3.utils.isRegularAccount(acc.address)) {
+        const m = 'The recovery phrase is for a bank account. LoveLock only accepts regular (non-bank) account.';
+        const error = new Error(m);
+        error.showMessage = m;
+        throw error;
+      }
+
+      const token = tweb3.wallet.createRegularAccount();
+      grantAccessToken(address, token.address, isRemember).then(({ returnValue }) => {
+        tweb3.wallet.importAccount(token.privateKey);
+        const keyObject = encode(phrase, password);
+        const storage = isRemember ? localStorage : sessionStorage;
+        // save token account
+        storage.sessionData = codec
+          .encode({
+            contract: process.env.REACT_APP_CONTRACT,
+            tokenAddress: token.address,
+            tokenKey: token.privateKey,
+            expireAfter: returnValue,
+          })
+          .toString('base64');
+        // save main account
+        savetoLocalStorage({ address, mode, keyObject });
+        const account = {
+          address,
+          privateKey,
+          tokenAddress: token.address,
+          tokenKey: token.privateKey,
+          cipher: password,
+          encryptedData: keyObject,
+          mode,
+          mnemonic: mode === 1 ? phrase : '',
+        };
+        setAccount(account);
+        setLoading(false);
+        history.push('/');
+      });
+    } catch (error) {
+      console.warn(error);
+      const m = error.showMessage || `An error occurred: ${error.message || 'unknown'}`;
+      enqueueSnackbar(m, { variant: 'error' });
+      setLoading(false);
+    }
+    // setLoading(false);
     //}, 100);
   }
 
@@ -149,6 +157,7 @@ function ByMnemonic(props) {
     } else history.goBack();
   }
 
+  const classes = useStyles();
   return (
     <form onSubmit={gotoLogin}>
       <TextField
@@ -190,12 +199,13 @@ function ByMnemonic(props) {
           />
         }
         label="Remember me for 30 days"
+        className={classes.formCtLb}
       />
       <DivControlBtnKeystore>
-        <ButtonPro color="primary" onClick={loginWithPrivatekey}>
+        <ButtonPro color="primary" className="backBtn" onClick={loginWithPrivatekey}>
           Back
         </ButtonPro>
-        <ButtonPro variant="contained" color="primary" type="submit">
+        <ButtonPro variant="contained" color="primary" className="nextBtn" type="submit">
           Recover
         </ButtonPro>
       </DivControlBtnKeystore>

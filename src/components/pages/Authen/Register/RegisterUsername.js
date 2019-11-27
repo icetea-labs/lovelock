@@ -36,6 +36,9 @@ const useStyles = makeStyles(theme => ({
   },
   avatarBox: {
     marginTop: theme.spacing(1),
+    '@media (max-width: 768px)': {
+      marginTop: theme.spacing(3),
+    },
   },
   avatar: {
     width: 100,
@@ -168,7 +171,7 @@ function RegisterUsername(props) {
           const displayname = `${firstname} ${lastname}`;
 
           // setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
-          const tweb3 = getWeb3()
+          const tweb3 = getWeb3();
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
 
@@ -186,11 +189,11 @@ function RegisterUsername(props) {
               opts
             )
           );
-          let avatarUrl
+          let avatarUrl;
           if (avatarData) {
             const setAva = saveFileToIpfs(avatarData).then(hash => {
-              avatarUrl = process.env.REACT_APP_IPFS + hash
-              setTagsInfo({ avatar: hash }, opts)
+              avatarUrl = process.env.REACT_APP_IPFS + hash;
+              setTagsInfo({ avatar: hash }, opts);
             });
             registerInfo.push(setAva);
           }
@@ -218,16 +221,15 @@ function RegisterUsername(props) {
 
           // save to browser password manager
           if (window.PasswordCredential) {
-            const credData = { id: username, password, name: displayname }
+            const credData = { id: username, password, name: displayname };
             if (avatarUrl) {
               credData.iconURL = avatarUrl;
             }
             const cred = new window.PasswordCredential(credData);
 
             // If error, just warn to console because this feature is not essential
-            navigator.credentials.store(cred).catch(console.warn)
+            navigator.credentials.store(cred).catch(console.warn);
           }
-
         } catch (error) {
           console.error(error);
           const message = `An error has occured. Detail:${error}`;
@@ -290,7 +292,7 @@ function RegisterUsername(props) {
           ]}
           margin="dense"
           value={username}
-          inputProps={{ autoComplete: "username" }}
+          inputProps={{ autoComplete: 'username' }}
         />
         <FlexBox>
           <TextValidator
@@ -331,7 +333,7 @@ function RegisterUsername(props) {
           errorMessages={['This field is required']}
           margin="dense"
           value={password}
-          inputProps={{ autoComplete: "new-password" }}
+          inputProps={{ autoComplete: 'new-password' }}
         />
         <TextValidator
           label="Repeat password"
@@ -345,7 +347,7 @@ function RegisterUsername(props) {
           errorMessages={['Password mismatch', 'This field is required']}
           margin="dense"
           value={rePassword}
-          inputProps={{ autoComplete: "new-password" }}
+          inputProps={{ autoComplete: 'new-password' }}
         />
         <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
@@ -402,9 +404,11 @@ function RegisterUsername(props) {
         <DivControlBtnKeystore>
           <div>
             <span>Already had an account?</span>
-            <LinkPro onClick={gotoLogin}>Login</LinkPro>
+            <LinkPro className="alreadyAcc" onClick={gotoLogin}>
+              Login
+            </LinkPro>
           </div>
-          <ButtonPro type="submit">
+          <ButtonPro type="submit" className="nextBtn">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
           </ButtonPro>
@@ -433,7 +437,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actionGlobal.setLoading(value));
     },
     setIsRemember: value => {
-      window.localStorage['remember'] = value ? '1' : '0'
+      window.localStorage['remember'] = value ? '1' : '0';
       dispatch(actionCreate.setIsRemember(value));
     },
   };
