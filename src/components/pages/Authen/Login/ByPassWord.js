@@ -25,6 +25,21 @@ import { useRemember } from '../../../../helper/hooks';
 const useStyles = makeStyles(theme => ({
   avatar: {
     marginTop: theme.spacing(1),
+    '@media (max-width: 768px)': {
+      marginTop: theme.spacing(3),
+    },
+  },
+  inputPassForm: {
+    '@media (max-width: 768px)': {
+      marginTop: theme.spacing(3),
+      marginBottom: theme.spacing(3),
+    },
+  },
+  formCtLb: {
+    '@media (max-width: 768px)': {
+      marginTop: theme.spacing(3),
+      marginBottom: theme.spacing(3),
+    },
   },
 }));
 
@@ -152,7 +167,7 @@ function ByPassWord(props) {
           <TextField label="Username" value={state.username} disabled autoComplete="username" />
         </Grid>
       </Grid>
-      <ValidatorForm onSubmit={gotoLogin}>
+      <ValidatorForm onSubmit={gotoLogin} className={classes.inputPassForm}>
         <TextValidator
           label="Password"
           fullWidth
@@ -177,10 +192,13 @@ function ByPassWord(props) {
             />
           }
           label="Remember me for 30 days"
+          className={classes.formCtLb}
         />
         <DivControlBtnKeystore>
           <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>
-          <ButtonPro type="submit">Login</ButtonPro>
+          <ButtonPro type="submit" className="nextBtn">
+            Login
+          </ButtonPro>
         </DivControlBtnKeystore>
       </ValidatorForm>
     </>
