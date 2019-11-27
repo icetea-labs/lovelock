@@ -29,26 +29,7 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
   self.setMemories(memories);
 };
 
-exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
-  const sender = msg.sender;
-  const [memo, memories] = self.getMemory(memoIndex);
-
-  const comments = self.getMemory(memoIndex)[0].comments;
-  const owner = [comments[cmtNo].sender, memo.sender, memo.receiver];
-
-  expect(owner.includes(sender), "Can't delete comment. You must be owner.");
-
-  // delete comments.cmtNo;
-  const newCmt = comments.splice(cmtNo, 1);
-
-  // const log = { ...newCmt };
-  // self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);
-
-  // save memories
-  self.setMemories(memories);
-};
-
-function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, pro, proposes] = []) {
+function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
   if (info.date == null) {
     info.date = block.timestamp;
   } else {
@@ -57,32 +38,32 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, p
     }
   }
 
-  if (!pro || !proposes) {
-    [pro, proposes] = self.getPropose(lockIndex);
+  if (!lock || !locks) {
+    [lock, locks] = self.getLock(lockIndex);
   }
 
-  expectProposeOwners(pro, 'Cannot add memory');
+  expectLockOwners(lock, 'Cannot add memory');
   const sender = msg.sender;
   const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
 
   //new memories
-  if (sender === pro.sender) {
-    memory.receiver = pro.receiver;
+  if (sender === lock.sender) {
+    memory.receiver = lock.receiver;
   } else {
-    memory.receiver = pro.sender;
+    memory.receiver = lock.sender;
   }
 
   const memories = self.getMemories();
   const memIndex = memories.push(memory) - 1;
   self.setMemories(memories);
-  pro.memoIndex.push(memIndex);
+  lock.memoIndex.push(memIndex);
 
   if (isFirstMemory) {
-    pro.memoryRelationIndex = memIndex;
+    lock.memoryRelationIndex = memIndex;
   }
 
-  // save the proposes
-  self.setProposes(proposes);
+  // save the locks
+  self.setLocks(locks);
 
   //emit Event
   const log = { ...memory, id: memIndex };
@@ -92,7 +73,7 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, p
 // ========== GET DATA ==================
 exports.apiGetMemoriesByLock = (self, lockIndex, collectionId) => {
   // const memoryPro = self.getP2m()[proIndex] || [];
-  const memoryPro = getDataByIndex(self.getProposes(), lockIndex)['memoIndex'];
+  const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
   const memories = self.getMemories();
 
   let resp = memoryPro.reduce((res, index) => {
@@ -140,7 +121,7 @@ function _addInfoToMems(memories, self) {
     if (mem.receiver === mem.sender) {
       tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
-      let lock = getDataByIndex(self.getProposes(), mem.lockIndex);
+      let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
       const tmpBotInfo = {};
       tmpBotInfo.avatar = lock.bot_info.botAva;
       tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
@@ -157,3 +138,25 @@ function _addInfoToMems(memories, self) {
   });
   return res;
 }
+// ========== DELETE DATA ==================
+exports.apiDeleteMemory = (self, memoIndex) => {
+
+};
+exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
+  const sender = msg.sender;
+  const [memo, memories] = self.getMemory(memoIndex);
+
+  const comments = self.getMemory(memoIndex)[0].comments;
+  const owner = [comments[cmtNo].sender, memo.sender, memo.receiver, ...self.getAdmins()];
+
+  expect(owner.includes(sender), "Can't delete comment. You must be owner.");
+
+  // delete comments.cmtNo;
+  const newCmt = comments.splice(cmtNo, 1);
+
+  // const log = { ...newCmt };
+  // self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);
+
+  // save memories
+  self.setMemories(memories);
+};

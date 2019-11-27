@@ -46,16 +46,16 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   );
   s_info.date = s_info.date ?? block.timestamp;
 
-  let pendingPropose = {};
+  let pendingLock = {};
   if (isCrush) {
-    pendingPropose = { status: LOCK_STATUS_ACCEPTED, type: LOCK_TYPE_CRUSH };
+    pendingLock = { status: LOCK_STATUS_ACCEPTED, type: LOCK_TYPE_CRUSH };
   } else if (isJournal) {
-    pendingPropose = { status: LOCK_STATUS_ACCEPTED, type: LOCK_TYPE_JOURNAL };
+    pendingLock = { status: LOCK_STATUS_ACCEPTED, type: LOCK_TYPE_JOURNAL };
   } else {
-    pendingPropose = { status: LOCK_STATUS_PENDING, type: LOCK_TYPE_COUPLE };
+    pendingLock = { status: LOCK_STATUS_PENDING, type: LOCK_TYPE_COUPLE };
   }
 
-  pendingPropose = {
+  pendingLock = {
     coverImg: s_info.hash?.[0] ?? '',
     isPrivate,
     sender,
@@ -69,20 +69,20 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
     contributors: [],
     bot_info,
     memoryRelationIndex: '',
-    ...pendingPropose,
+    ...pendingLock,
   };
 
-  //new pending propose
-  const proposes = self.getProposes();
-  const index = proposes.push(pendingPropose) - 1;
-  self.setProposes(proposes);
+  //new pending lock
+  const locks = self.getLocks();
+  const index = locks.push(pendingLock) - 1;
+  self.setLocks(locks);
 
   // create the first memory for auto-accepted lock
-  if (pendingPropose.status === LOCK_STATUS_ACCEPTED) {
+  if (pendingLock.status === LOCK_STATUS_ACCEPTED) {
     apiCreateMemory(self, index, false, '', { hash: [] }, [true]);
   }
 
-  // map address to propose
+  // map address to lock
   const a2p = self.getA2p();
   if (!a2p[sender]) a2p[sender] = [];
   a2p[sender].push(index);
@@ -93,8 +93,8 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   }
   self.setA2p(a2p);
   //emit Event
-  const log = { ...pendingPropose, id: index };
-  self.emitEvent('createPropose', { by: sender, log }, ['by']);
+  const log = { ...pendingLock, id: index };
+  self.emitEvent('createLock', { by: sender, log }, ['by']);
   return index;
 };
 exports.apiAcceptLock = (self, lockIndex, r_content) => {
@@ -107,55 +107,55 @@ exports.apiCancelLock = (self, lockIndex, r_content) => {
 exports.apiLikeLock = (self, lockIndex, type) => {
   const sender = msg.sender;
 
-  const [pro, proposes] = self.getPropose(lockIndex);
-  if (pro.likes[sender]) {
-    delete pro.likes[sender];
+  const [lock, locks] = self.getLock(lockIndex);
+  if (lock.likes[sender]) {
+    delete lock.likes[sender];
   } else {
-    pro.likes[sender] = { type };
+    lock.likes[sender] = { type };
   }
-  // save proposes
-  self.setProposes(proposes);
+  // save locks
+  self.setLocks(locks);
 
-  return pro.likes || [];
+  return lock.likes || [];
 };
 exports.apiChangeLockImg = (self, index, imgHash) => {
-  const [pro, proposes] = self.getPropose(index);
+  const [lock, locks] = self.getLock(index);
   const sender = msg.sender;
-  expect(sender === pro.receiver || sender === pro.sender, 'Permission deny. Can not change.');
+  expect(sender === lock.receiver || sender === lock.sender, 'Permission deny. Can not change.');
 
-  pro.coverImg = imgHash;
-  // save proposes
-  self.setProposes(proposes);
+  lock.coverImg = imgHash;
+  // save locks
+  self.setLocks(locks);
   //emit Event
-  const log = { ...pro, id: index };
+  const log = { ...lock, id: index };
   self.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
 };
 exports.apiFollowLock = (self, lockIndex) => {
   const sender = msg.sender;
-  const [pro, proposes] = self.getPropose(lockIndex);
+  const [lock, locks] = self.getLock(lockIndex);
   const afl = self.getAFL();
   if (!afl[sender]) afl[sender] = [];
-  const index = pro.follows.indexOf(sender);
+  const index = lock.follows.indexOf(sender);
   if (index !== -1) {
     // unfollowLock
-    pro.follows.splice(index, 1);
+    lock.follows.splice(index, 1);
     afl[sender].splice(afl[sender].indexOf(lockIndex), 1);
   } else {
     //  followLock
-    pro.follows.push(sender);
+    lock.follows.push(sender);
     afl[sender].push(lockIndex);
   }
   // set map address follow lock
   self.setAFL(afl);
 
-  // save proposes
-  self.setProposes(proposes);
+  // save locks
+  self.setLocks(locks);
   return sender;
 };
 exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
-  const [pro, proposes] = self.getPropose(lockIndex);
-  expect(pro.type === LOCK_TYPE_JOURNAL, 'Only support Journal.');
-  expectProposeOwners(pro);
+  const [lock, locks] = self.getLock(lockIndex);
+  expect(lock.type === LOCK_TYPE_JOURNAL, 'Only support Journal.');
+  expectLockOwners(lock);
   const Schema = Joi.array().items(
     Joi.string()
       .max(43)
@@ -163,68 +163,68 @@ exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
   );
   contributors = validate(contributors, Schema);
   contributors = contributors.filter(addr => {
-    return pro.contributors.indexOf(addr) === -1;
+    return lock.contributors.indexOf(addr) === -1;
   });
-  pro.contributors = pro.contributors.concat(contributors);
+  lock.contributors = lock.contributors.concat(contributors);
   // add follow lock
   const afl = self.getAFL();
   contributors.forEach(addr => {
-    const index = pro.follows.indexOf(addr);
+    const index = lock.follows.indexOf(addr);
     if (index === -1) {
       //  followLock
-      pro.follows.push(addr);
+      lock.follows.push(addr);
       afl[addr].push(lockIndex);
     }
   });
   self.setAFL(afl);
-  // save proposes
-  self.setProposes(proposes);
+  // save locks
+  self.setLocks(locks);
   return contributors;
 };
 exports.apiRemoveContributorsToLock = (self, lockIndex, contributors) => {
-  const [pro, proposes] = self.getPropose(lockIndex);
-  expectProposeOwners(pro);
-  pro.contributors = pro.contributors.filter(addr => {
+  const [lock, locks] = self.getLock(lockIndex);
+  expectLockOwners(lock);
+  lock.contributors = lock.contributors.filter(addr => {
     return contributors.indexOf(addr) === -1;
   });
-  // save proposes
-  self.setProposes(proposes);
+  // save locks
+  self.setLocks(locks);
   return contributors;
 };
 //private function
 function _confirmLock(self, index, r_content, status, saveFlag) {
   const sender = msg.sender;
-  const [pro, proposes] = self.getPropose(index);
-  // status: pending: 0, accept_propose: 1, cancel_propose: 2
+  const [lock, locks] = self.getLock(index);
+  // status: pending: 0, accept_lock: 1, cancel_lock: 2
   switch (status) {
     case LOCK_STATUS_ACCEPTED:
-      expect(sender === pro.receiver, "Can't accept propose. You must be receiver.");
+      expect(sender === lock.receiver, "Can't accept lock. You must be receiver.");
       break;
     case LOCK_STATUS_DENIED:
-      expectProposeOwners(pro, "You can't cancel propose.");
+      expectLockOwners(lock, "You can't cancel lock.");
       break;
   }
-  Object.assign(pro, { r_content, status });
+  Object.assign(lock, { r_content, status });
 
   if (saveFlag) {
-    self.setProposes(proposes);
+    self.setLocks(locks);
   }
 
   //emit Event
-  const log = { ...pro, id: index };
+  const log = { ...lock, id: index };
   self.emitEvent('confirmLock', { by: sender, log }, ['by']);
 
-  return [pro, proposes];
+  return [lock, locks];
 }
 
 // ========== GET DATA ==================
 exports.apiGetLocksByAddress = (self, addr) => {
-  const locks = self.getProposes();
+  const locks = self.getLocks();
   const locksIndex = self.getA2p()[addr] || [];
   return _prepareData(locks, locksIndex);
 };
 exports.apiGetFollowingLocksByAddress = (self, addr) => {
-  const locks = self.getProposes();
+  const locks = self.getLocks();
   const locksIndex = self.getAFL()[addr] || [];
   return _prepareData(locks, locksIndex);
 };
@@ -262,18 +262,18 @@ function _prepareData(locks, locksIndex) {
   return resp;
 }
 // exports.apiGetLockByIndex = (self, index) => {
-//   const [pro] = self.getPropose(index);
+//   const [lock] = self.getLock(index);
 //   // let resp = [];
-//   // if (pro && pro.isPrivate) {
-//   //   expectProposeOwners(pro, "Can't get propose.");
+//   // if (lock && lock.isPrivate) {
+//   //   expectLockOwners(lock, "Can't get lock.");
 //   // }
-//   const newLock = _addTopInfoToLocks([pro], [pro.id]);
+//   const newLock = _addTopInfoToLocks([lock], [lock.id]);
 //   // resp.push(newLock[0]);
 //   return newLock;
 // };
 exports.apiGetDetailLock = (self, index) => {
-  const [pro] = self.getPropose(index);
-  const newLock = _addTopInfoToLocks([pro]);
+  const [lock] = self.getLock(index);
+  const newLock = _addTopInfoToLocks([lock]);
   return newLock;
 };
 exports.apiGetLocksForFeed = (self, addr) => {
@@ -358,3 +358,14 @@ function _addTopInfoToLocks(locks) {
   });
   return resp;
 }
+
+// ========== DELETE DATA ==================
+exports.apiDeleteLock = (self, lockIndex) => {
+  const sender = msg.sender;
+  const [lock, locks] = self.getLock(lockIndex);
+
+  expect(owner.includes(sender), 'You must be in admin group.');
+
+  // save memories
+  self.getLocks(memories);
+};
