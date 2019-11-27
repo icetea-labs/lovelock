@@ -16,7 +16,6 @@ export const actionTypes = {
 export const setLikeTopInfo = data => ({ type: actionTypes.SET_LIKE_TOPINFO, data });
 export const setTopInfo = data => ({ type: actionTypes.SET_TOPINFO, data });
 export const setLocks = data => ({ type: actionTypes.SET_LOCKS, data });
-// export const addPropose = data => ({ type: actionTypes.ADD_LOCK, data });
 export const confirmLock = data => ({ type: actionTypes.CONFIRM_LOCK, data });
-export const setCurrentPropose = data => ({ type: actionTypes.SET_CURRENT_LOCK, data });
+export const setCurrentLock = data => ({ type: actionTypes.SET_CURRENT_LOCK, data });
 export const setMemory = data => ({ type: actionTypes.SET_MEMORY, data });

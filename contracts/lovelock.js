@@ -1,6 +1,6 @@
 const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
-const { expectProposeOwners, getDataByIndex } = require('./helper.js');
+const { expectLockOwners, getDataByIndex } = require('./helper.js');
 const {
   apiCreateLock,
   apiAcceptLock,
@@ -16,6 +16,7 @@ const {
   apiGetLocksByAddress,
   apiGetLocksForFeed,
   apiGetDataForMypage,
+  apiDeleteLock,
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
@@ -24,6 +25,7 @@ const {
   apiGetMemoriesByLock,
   apiGetMemoriesByRange,
   apiGetMemoriesByListMemIndex,
+  apiDeleteMemory,
   apiDeleteComment,
 } = require('./apiMemory.js');
 const { importState, exportState, migrateState } = require('./migration.js')(this);
@@ -33,11 +35,23 @@ class LoveLock {
   // crush bot
   @view botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
 
-  @view getProposes = () => this.getState('proposes', []);
-  setProposes = value => this.setState('proposes', value);
-  getPropose = index => {
-    const proposes = this.getProposes();
-    return [getDataByIndex(proposes, index), proposes];
+  constructor(account) {
+    const owner = this.getOnwer();
+    if (account) {
+      owner.push(account);
+    } else {
+      owner.push(msg.sender);
+    }
+    this.setOnwer(owner);
+  }
+  @view getOnwer = () => this.getState('ownerContract', []);
+  setOnwer = value => this.setState('ownerContract', value);
+
+  @view getLocks = () => this.getState('locks', []);
+  setLocks = value => this.setState('locks', value);
+  getLock = index => {
+    const locks = this.getLocks();
+    return [getDataByIndex(locks, index), locks];
   };
   // function getMemory(index, defaultValue) {
   //   return this.getState([‘memories’, index], defaultValue)
@@ -46,10 +60,10 @@ class LoveLock {
   //   return this.invokeState([‘memories’], [], ‘push’, memo)
   // }
   // function saveLock(index, lock) {
-  //   return this.setState([‘proposes’, index], lock)
+  //   return this.setState([‘locks’, index], lock)
   // }
   // function saveLockName(index, name) {
-  //   return this.setState([‘proposes’, index, ‘name’], name)
+  //   return this.setState([‘locks’, index, ‘name’], name)
   // }
   // setState([‘locks’, index], oldLock => Object.assign({}, oldLock || {}, { name: ‘thi’, age: 1 }))
   @view getMemories = () => this.getState('memories', []);
@@ -59,17 +73,17 @@ class LoveLock {
     return [getDataByIndex(memories, index), memories];
   };
 
-  // mapping: address to propose
+  // mapping: address to lock
   // 1:n { 'address':[1,2,3...] }
   @view getA2p = () => this.getState('a2p', {});
   setA2p = value => this.setState('a2p', value);
 
-  // mapping: propose to memory
+  // mapping: lock to memory
   // 1:n  { 'proindex':[1,2,3...] }
   // @view getP2m = () => this.getState('p2m', {});
   // setP2m = value => this.setState('p2m', value);
 
-  // mapping: memory to propose
+  // mapping: memory to lock
   // 1:1  { 'memoryindex':'proindex' }
   // @view getM2p = () => this.getState('m2p', {});
   // setM2p = value => this.setState('m2p', value);
@@ -87,20 +101,20 @@ class LoveLock {
   @view getFollowed = () => this.getState('followed', {});
   setFollowed = value => this.setState('followed', value);
 
-  @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
+  @transaction createLock(s_content: string, receiver: address, s_info = {}, bot_info): number {
     const self = this;
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);
   }
-  @transaction acceptPropose(index: number, r_content: string) {
+  @transaction acceptLock(index: number, r_content: string) {
     const self = this;
     return apiAcceptLock(self, index, r_content);
   }
-  @transaction cancelPropose(index: number, r_content: string) {
+  @transaction cancelLock(index: number, r_content: string) {
     const self = this;
     return apiCancelLock(self, index, r_content);
   }
   // create like for memory: type -> 0:unlike, 1:like, 2:love
-  @transaction addLikePropose(index: number, type: number) {
+  @transaction addLikeLock(index: number, type: number) {
     const self = this;
     return apiLikeLock(self, index, type);
   }
@@ -120,7 +134,7 @@ class LoveLock {
     const self = this;
     return apiChangeLockImg(self, index, imgHash);
   }
-  @view getProposeByAddress(addr: address) {
+  @view getLockByAddress(addr: address) {
     const self = this;
     return apiGetLocksByAddress(self, addr);
   }
@@ -128,15 +142,15 @@ class LoveLock {
     const self = this;
     return apiGetDetailLock(self, index);
   }
-  @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
-  @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;
+  @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
+  @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
   @view getLocksForFeed = (addr: address) => {
     const self = this;
     return apiGetLocksForFeed(self, addr);
   };
   @view getMaxLocksIndex = () => {
-    const proposes = this.getProposes();
-    return proposes.length - 1;
+    const locks = this.getLocks();
+    return locks.length - 1;
   };
   // =========== MEMORY ================
   // info { img:Array, location:string, date:string }
@@ -154,12 +168,7 @@ class LoveLock {
     const self = this;
     return apiCommentMemory(self, memoIndex, content, info);
   }
-  //delete comment
-  @transaction deleteComment(index: number, cmtNo: number) {
-    const self = this;
-    return apiDeleteComment(self, index, cmtNo);
-  }
-  @view getMemoriesByProIndex(lockIndex: number, collectionId: ?number) {
+  @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number) {
     const self = this;
     return apiGetMemoriesByLock(self, lockIndex, collectionId);
   }
@@ -175,7 +184,7 @@ class LoveLock {
   @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
   // =========== COLLECTION ================
   @view getLockCollections(lockIndex: number) {
-    const [lock] = this.getPropose(lockIndex);
+    const [lock] = this.getLock(lockIndex);
 
     // Note: the collection is not sorted by ID, client should sort if desired
     return lock.collections || [];
@@ -199,8 +208,8 @@ class LoveLock {
   };
 
   @transaction addLockCollection(lockIndex: number, collectionData): number {
-    const [lock, locks] = this.getPropose(lockIndex);
-    expectProposeOwners(lock);
+    const [lock, locks] = this.getLock(lockIndex);
+    expectLockOwners(lock);
 
     const cols = (lock.collections = lock.collections || []);
     const MAX_COLLECTION_PER_LOCK = 5;
@@ -227,14 +236,14 @@ class LoveLock {
     lock.nextCollectionId++;
     cols.push(collectionData);
 
-    this.setProposes(locks);
+    this.setLocks(locks);
 
     return collectionData.id;
   }
 
   @transaction setLockCollection(lockIndex: number, collectionId: number, collectionData) {
-    const [lock, locks] = this.getPropose(lockIndex);
-    expectProposeOwners(lock);
+    const [lock, locks] = this.getLock(lockIndex);
+    expectLockOwners(lock);
 
     collectionData = validate(
       collectionData,
@@ -280,7 +289,7 @@ class LoveLock {
       throw new Error(`Collection id ${collectionId} does not exist in lock ${lockIndex}`);
     }
 
-    this.setProposes(locks);
+    this.setLocks(locks);
   }
   // =========== OTHER ================
   @transaction followPerson(address: address) {
@@ -330,5 +339,57 @@ class LoveLock {
 
   @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
     return migrateState(fromContract, overwrite);
+  }
+  // ========== DELETE DATA  =============
+  @view getAdmins = () => this.getState('admins', []);
+  setAdmins = value => this.setState('admins', value);
+
+  @transaction addAdmins(accounts) {
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    accounts = validate(accounts, schema);
+    if (this.getOnwer().includes(msg.sender)) {
+      let admins = this.getAdmins();
+      admins = admins.concat(accounts);
+      this.setAdmins(admins);
+    } else {
+      throw new Error(`You must be owner contract`);
+    }
+    return accounts;
+  }
+
+  @transaction removeAdmins(accounts) {
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    accounts = validate(accounts, schema);
+    if (this.getOnwer().includes(msg.sender)) {
+      let admins = this.getAdmins();
+      admins = admins.filter(addr => {
+        return accounts.indexOf(addr) === -1;
+      });
+      this.setAdmins(admins);
+    } else {
+      throw new Error(`You must be owner contract`);
+    }
+    return accounts;
+  }
+
+  @transaction deleteLock(lockindex: number) {
+    const self = this;
+    return apiDeleteLock(self, lockindex);
+  }
+  @transaction deleteMemory(memIndex: number) {
+    const self = this;
+    return apiDeleteMemory(self, memIndex);
+  }
+  @transaction deleteComment(memIndex: number, cmtNo: number) {
+    const self = this;
+    return apiDeleteComment(self, memIndex, cmtNo);
   }
 }

@@ -91,10 +91,10 @@ const useStyles = makeStyles(theme => ({
       // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
     },
   },
-  avatar: {
-    margin: 10,
+  jsxAvatar: {
     width: 46,
     height: 46,
+    marginRight: 10,
     backgroundColor: '#fff',
   },
   friReqTitle: {
@@ -459,7 +459,7 @@ function Header(props) {
       {friReqList.map(({ id, avatar, name }) => (
         <StyledMenuItem className={classes.friReqStyle} key={id}>
           <ListItemAvatar>
-            <AvatarPro alt="avatar" src={avatar} className={classes.avatar} />
+            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
           </ListItemAvatar>
           <ListItemText primary={name} className={classes.friReqName} />
           <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
@@ -618,7 +618,7 @@ function Header(props) {
                 </div> */}
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                  <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
+                  <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
                   <Typography className={classes.title} noWrap>
                     {displayName}
                   </Typography>

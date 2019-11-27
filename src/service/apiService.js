@@ -29,8 +29,8 @@ const APIService = {
     return lockForFeed;
   },
   getDetailLock: async index => {
-    const propose = await callView('getDetailLock', [index]);
-    const proInfo = propose[0] || {};
+    const lock = await callView('getDetailLock', [index]);
+    const proInfo = lock[0] || {};
 
     // add basic extra info
     proInfo.index = index;
@@ -41,8 +41,8 @@ const APIService = {
 
     return proInfo;
   },
-  getMemoriesByProIndex: async (lockIndex, validCollectionId) => {
-    const memorydata = await callView('getMemoriesByProIndex', [lockIndex, validCollectionId]);
+  getMemoriesByLockIndex: async (lockIndex, validCollectionId) => {
+    const memorydata = await callView('getMemoriesByLockIndex', [lockIndex, validCollectionId]);
     return addInfoToMems(memorydata, true);
   },
 };

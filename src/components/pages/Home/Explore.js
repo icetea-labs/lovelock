@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { rem } from '../../elements/StyledUtils';
+import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
 import * as actions from '../../../store/actions';
@@ -12,27 +12,6 @@ const RightBoxMemories = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
   @media (max-width: 768px) {
     padding-left: 0;
-  }
-`;
-const ProposeWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-  .proposeColumn {
-    &--left {
-      width: 30%;
-    }
-    &--right {
-      width: 70%;
-    }
-  }
-  @media (max-width: 768px) {
-    display: block;
-    .proposeColumn {
-      width: 100%;
-      &--left {
-        display: none;
-      }
-    }
   }
 `;
 
@@ -75,7 +54,7 @@ function Explore(props) {
       //     </RightBox>
       //   </FlexWidthBox>
       // </FlexBox>
-      <ProposeWrapper>
+      <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftContainer loading={loading} />
         </div>
@@ -84,7 +63,7 @@ function Explore(props) {
             <MemoryContainer memorydata={[]} />
           </RightBoxMemories>
         </div>
-      </ProposeWrapper>
+      </LeftBoxWrapper>
     )
   );
 }

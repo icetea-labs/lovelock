@@ -22,7 +22,7 @@ import {
   loadMemCacheAPI,
   decodeImg,
   getJsonFromIpfs,
-  makeProposeName,
+  makeLockName,
   signalPrerenderDone,
   smartFetchIpfsJson,
 } from '../../../helper';
@@ -411,7 +411,7 @@ function MemoryContent(props) {
     signalPrerenderDone();
 
     const title = `${blogInfo.title} - A story on Lovelock`;
-    const desc = makeProposeName(propose);
+    const desc = makeLockName(propose);
     let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url;
     if (!img) {
       img = propose.coverImg

@@ -151,8 +151,8 @@ const Copyright = styled.div`
 
 class LandingPage extends PureComponent {
   render() {
-    const isPropose = window.location.pathname.indexOf('/lock/') === 0;
-    return !isPropose ? (
+    const isLock = window.location.pathname.indexOf('/lock/') === 0;
+    return !isLock ? (
       <>
         <OutBox>
           <SplitLeft>

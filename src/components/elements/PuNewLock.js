@@ -11,6 +11,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
+import WarningIcon from '@material-ui/icons/Warning';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+
 import * as actions from '../../store/actions';
 import { getAliasContract } from '../../service/tweb3';
 import { saveFileToIpfs, saveBufferToIpfs, tryStringifyJson, getTagsInfo } from '../../helper';
@@ -172,7 +175,27 @@ const PreviewContainter = styled.div`
 const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
-
+const WarningPass = styled.div`
+  .warningSnackbar {
+    background-color: #fe7;
+    box-shadow: none;
+    margin-top: 8px;
+    /* max-width: 400px; */
+  }
+  .warningMessage {
+    display: flex;
+    align-items: center;
+  }
+  .warningIcon {
+    margin-right: 16px;
+    color: #d90;
+  }
+  .warningText {
+    color: #333;
+    font-style: italic;
+    font-size: 1.1em;
+  }
+`;
 class PuNewLock extends React.Component {
   constructor(props) {
     super(props);
@@ -410,7 +433,7 @@ class PuNewLock extends React.Component {
     this.dialogShown = value;
   };
 
-  async createPropose(partner, promiseStm, date, file) {
+  async createLock(partner, promiseStm, date, file) {
     const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
     let botAva = '';
@@ -469,7 +492,7 @@ class PuNewLock extends React.Component {
         }
 
         const info = { date, hash };
-        return await sendTransaction(this.props, 'createPropose', promiseStm, partner, info, botInfo);
+        return await sendTransaction(this.props, 'createLock', promiseStm, partner, info, botInfo);
       };
 
       const result = await ensureToken(this.props, uploadThenSendTx);
@@ -522,7 +545,7 @@ class PuNewLock extends React.Component {
           close={close}
           onKeyEsc={this.onKeyEsc}
           confirm={() => {
-            this.createPropose(partner, promiseStm, date, file);
+            this.createLock(partner, promiseStm, date, file);
           }}
         >
           {!checked && (
@@ -607,6 +630,19 @@ class PuNewLock extends React.Component {
             hasParentDialog
             onDialogToggle={this.onDialogToggle}
           />
+          <WarningPass>
+            <SnackbarContent
+              className="warningSnackbar"
+              message={
+                <span className="warningMessage">
+                  <WarningIcon className="warningIcon" />
+                  <span className="warningText">
+                    This locks will be public. Private locks are not yet supported for this beta version.
+                  </span>
+                </span>
+              }
+            />
+          </WarningPass>
         </CommonDialog>
         {isOpenCrop && (
           <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />

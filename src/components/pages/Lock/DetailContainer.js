@@ -5,8 +5,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
-import { rem } from '../../elements/StyledUtils';
-import { callView, makeProposeName } from '../../../helper';
+import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
+import { callView, makeLockName } from '../../../helper';
+
 import { useTx } from '../../../helper/hooks';
 import TopContrainer from './TopContainer';
 import LeftContainer from './LeftContainer';
@@ -29,27 +30,6 @@ const ShadowBox = styled.div`
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;
-  }
-`;
-const ProposeWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-  .proposeColumn {
-    &--left {
-      width: 30%;
-    }
-    &--right {
-      width: 70%;
-    }
-  }
-  @media (max-width: 768px) {
-    display: block;
-    .proposeColumn {
-      width: 100%;
-      &--left {
-        display: none;
-      }
-    }
   }
 `;
 
@@ -139,7 +119,7 @@ export default function DetailContainer(props) {
   };
 
   const renderHelmet = () => {
-    const title = makeProposeName(proposeInfo, 'Lovelock - ');
+    const title = makeLockName(proposeInfo, 'Lovelock - ');
     const desc = proposeInfo.s_content;
     const coverImg = proposeInfo.coverImg
       ? process.env.REACT_APP_IPFS + proposeInfo.coverImg
@@ -164,7 +144,7 @@ export default function DetailContainer(props) {
         </ShadowBox>
       </BannerContainer>
 
-      <ProposeWrapper>
+      <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftContainer proIndex={proIndex} loading={loading} />
         </div>
@@ -177,7 +157,7 @@ export default function DetailContainer(props) {
             isContributor={isContributor}
           />
         </div>
-      </ProposeWrapper>
+      </LeftBoxWrapper>
 
       {proposeInfo && renderHelmet()}
     </>
