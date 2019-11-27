@@ -1,6 +1,6 @@
 const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
-const { expectLockOwners, getDataByIndex } = require('./helper.js');
+const { expectLockOwners, getDataByIndex, expectOwner, expectAdmin, expectUserApproved } = require('./helper.js');
 const {
   apiCreateLock,
   apiAcceptLock,
@@ -36,16 +36,16 @@ class LoveLock {
   @view botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
 
   constructor(account) {
-    const owner = this.getOnwer();
+    const owner = this.getOwner();
     if (account) {
       owner.push(account);
     } else {
       owner.push(msg.sender);
     }
-    this.setOnwer(owner);
+    this.setOwner(owner);
   }
-  @view getOnwer = () => this.getState('ownerContract', []);
-  setOnwer = value => this.setState('ownerContract', value);
+  @view getOwner = () => this.getState('ownerContract', []);
+  setOwner = value => this.setState('ownerContract', value);
 
   @view getLocks = () => this.getState('locks', []);
   setLocks = value => this.setState('locks', value);
@@ -93,35 +93,43 @@ class LoveLock {
 
   @transaction createLock(s_content: string, receiver: address, s_info = {}, bot_info): number {
     const self = this;
+    expectUserApproved(self);
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);
   }
   @transaction acceptLock(index: number, r_content: string) {
     const self = this;
+    expectUserApproved(self);
     return apiAcceptLock(self, index, r_content);
   }
   @transaction cancelLock(index: number, r_content: string) {
     const self = this;
+    expectUserApproved(self);
     return apiCancelLock(self, index, r_content);
   }
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLikeLock(index: number, type: number) {
     const self = this;
+    expectUserApproved(self);
     return apiLikeLock(self, index, type);
   }
   @transaction followLock(index: number) {
     const self = this;
+    expectUserApproved(self);
     return apiFollowLock(self, index);
   }
   @transaction addContributorsToLock(index: number, contributors = []) {
     const self = this;
+    expectUserApproved(self);
     return apiAddContributorsToLock(self, index, contributors);
   }
   @transaction removeContributorsToLock(index: number, contributors = []) {
     const self = this;
+    expectUserApproved(self);
     return apiRemoveContributorsToLock(self, index, contributors);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
     const self = this;
+    expectUserApproved(self);
     return apiChangeLockImg(self, index, imgHash);
   }
   @view getLockByAddress(addr: address) {
@@ -146,16 +154,19 @@ class LoveLock {
   // info { img:Array, location:string, date:string }
   @transaction addMemory(lockIndex: number, isPrivate: boolean, content: string, info) {
     const self = this;
+    expectUserApproved(self);
     return apiCreateMemory(self, lockIndex, isPrivate, content, info);
   }
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const self = this;
+    expectUserApproved(self);
     return apiLikeMemory(self, memoIndex, type);
   }
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
     const self = this;
+    expectUserApproved(self);
     return apiCommentMemory(self, memoIndex, content, info);
   }
   @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number) {
@@ -200,7 +211,7 @@ class LoveLock {
   @transaction addLockCollection(lockIndex: number, collectionData): number {
     const [lock, locks] = this.getLock(lockIndex);
     expectLockOwners(lock);
-
+    expectUserApproved(this);
     const cols = (lock.collections = lock.collections || []);
     const MAX_COLLECTION_PER_LOCK = 5;
     if (cols.length >= MAX_COLLECTION_PER_LOCK) {
@@ -234,6 +245,7 @@ class LoveLock {
   @transaction setLockCollection(lockIndex: number, collectionId: number, collectionData) {
     const [lock, locks] = this.getLock(lockIndex);
     expectLockOwners(lock);
+    expectUserApproved(this);
 
     collectionData = validate(
       collectionData,
@@ -283,6 +295,7 @@ class LoveLock {
   }
   // =========== OTHER ================
   @transaction followPerson(address: address) {
+    expectUserApproved(this);
     const sender = msg.sender;
     const following = this.getFollowing();
     const followed = this.getFollowed();
@@ -335,51 +348,92 @@ class LoveLock {
   setAdmins = value => this.setState('admins', value);
 
   @transaction addAdmins(accounts) {
+    expectOwner(this);
     const schema = Joi.array().items(
       Joi.string()
         .max(43)
         .min(43)
     );
     accounts = validate(accounts, schema);
-    if (this.getOnwer().includes(msg.sender)) {
-      let admins = this.getAdmins();
-      admins = admins.concat(accounts);
-      this.setAdmins(admins);
-    } else {
-      throw new Error(`You must be owner contract`);
-    }
+    let admins = this.getAdmins();
+    accounts = accounts.filter(addr => {
+      return !admins.includes(addr);
+    });
+    admins = admins.concat(accounts);
+    this.setAdmins(admins);
+    // auto add into users
+    this.addUsers(accounts);
     return accounts;
   }
 
   @transaction removeAdmins(accounts) {
+    expectOwner(this);
     const schema = Joi.array().items(
       Joi.string()
         .max(43)
         .min(43)
     );
     accounts = validate(accounts, schema);
-    if (this.getOnwer().includes(msg.sender)) {
-      let admins = this.getAdmins();
-      admins = admins.filter(addr => {
-        return accounts.indexOf(addr) === -1;
-      });
-      this.setAdmins(admins);
-    } else {
-      throw new Error(`You must be owner contract`);
-    }
+    let admins = this.getAdmins();
+    admins = admins.filter(addr => {
+      return !accounts.includes(addr);
+    });
+    this.setAdmins(admins);
     return accounts;
   }
 
   @transaction deleteLock(lockindex: number) {
     const self = this;
+    expectAdmin(self);
     return apiDeleteLock(self, lockindex);
   }
   @transaction deleteMemory(memIndex: number) {
     const self = this;
+    expectAdmin(self);
     return apiDeleteMemory(self, memIndex);
   }
   @transaction deleteComment(memIndex: number, cmtNo: number) {
     const self = this;
     return apiDeleteComment(self, memIndex, cmtNo);
+  }
+  // ========== USER APPROVED =============
+  @view getUsers = () => this.getState('users', []);
+  setUsers = value => this.setState('users', value);
+
+  @transaction addUsers(_users) {
+    expectAdmin(this);
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    _users = validate(_users, schema);
+    let users = this.getUsers();
+    users = users.filter(addr => {
+      return !_users.includes(addr);
+    });
+    users = users.concat(_users);
+    this.setUsers(users);
+    return _users;
+  }
+
+  @transaction removeUsers(_users) {
+    expectAdmin(this);
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    _users = validate(_users, schema);
+    let users = this.getUsers();
+    users = users.filter(addr => {
+      return _users.indexOf(addr) === -1;
+    });
+    this.setUsers(users);
+    return _users;
+  }
+  @view isUserApproved(user: address) {
+    const users = this.getUsers();
+    return users.includes(user);
   }
 }

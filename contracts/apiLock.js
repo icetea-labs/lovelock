@@ -354,10 +354,7 @@ function _addTopInfoToLocks(locks) {
 // ========== DELETE DATA ==================
 exports.apiDeleteLock = (self, lockIndex) => {
   const sender = msg.sender;
-  const owner = self.getOnwer();
-  expect(owner.includes(sender), 'You must be in admin group.');
   let [lock, locks] = self.getLock(lockIndex);
-  // const locks = self.getLocks();
   const lockSender = lock.sender;
   const lockReceiver = lock.receiver;
   const isJournal = sender === lockReceiver;

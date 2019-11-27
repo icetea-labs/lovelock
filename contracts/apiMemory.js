@@ -141,8 +141,6 @@ function _addInfoToMems(memories, self) {
 // ========== DELETE DATA ==================
 exports.apiDeleteMemory = (self, memIndex) => {
   const sender = msg.sender;
-  const owner = self.getOnwer();
-  expect(owner.includes(sender), 'You must be in admin group.');
   let [mem, mems] = self.getMemory(memIndex);
   // remove memoIndex in lock
   const locks = self.getLocks();
