@@ -83,15 +83,15 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   }
 
   // map address to lock
-  const a2p = self.getA2p();
-  if (!a2p[sender]) a2p[sender] = [];
-  a2p[sender].push(index);
+  const a2l = self.getA2l();
+  if (!a2l[sender]) a2l[sender] = [];
+  a2l[sender].push(index);
 
   if (!isJournal && !isCrush) {
-    if (!a2p[receiver]) a2p[receiver] = [];
-    a2p[receiver].push(index);
+    if (!a2l[receiver]) a2l[receiver] = [];
+    a2l[receiver].push(index);
   }
-  self.setA2p(a2p);
+  self.setA2l(a2l);
   //emit Event
   const log = { ...pendingLock, id: index };
   self.emitEvent('createLock', { by: sender, log }, ['by']);
@@ -220,15 +220,15 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
 // ========== GET DATA ==================
 exports.apiGetLocksByAddress = (self, addr) => {
   const locks = self.getLocks();
-  const locksIndex = self.getA2p()[addr] || [];
+  const locksIndex = self.getA2l()[addr] || [];
   return _prepareData(locks, locksIndex);
 };
-exports.apiGetFollowingLocksByAddress = (self, addr) => {
+exports.apiGetLocksFollowingByAddress = (self, addr) => {
   const locks = self.getLocks();
   const locksIndex = self.getAFL()[addr] || [];
   return _prepareData(locks, locksIndex);
 };
-exports.apiGetFollowingPersionLocksByAddress = (self, addr) => {
+exports.apiGetLocksFollowingPersionByAddress = (self, addr) => {
   const followingAddr = self.getFollowing()[addr] || [];
   let resp = followingAddr.reduce((res, addr) => {
     let lock = exports.apiGetLocksByAddress(self, addr);
@@ -261,26 +261,17 @@ function _prepareData(locks, locksIndex) {
   resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
   return resp;
 }
-// exports.apiGetLockByIndex = (self, index) => {
-//   const [lock] = self.getLock(index);
-//   // let resp = [];
-//   // if (lock && lock.isPrivate) {
-//   //   expectLockOwners(lock, "Can't get lock.");
-//   // }
-//   const newLock = _addTopInfoToLocks([lock], [lock.id]);
-//   // resp.push(newLock[0]);
-//   return newLock;
-// };
 exports.apiGetDetailLock = (self, index) => {
   const [lock] = self.getLock(index);
+  if (lock.deletedBy) throw new Error(`Lock is deleted by ${lock.deletedBy}`);
   const newLock = _addTopInfoToLocks([lock]);
   return newLock;
 };
 exports.apiGetLocksForFeed = (self, addr) => {
   let resp = [];
   const ownerLocks = exports.apiGetLocksByAddress(self, addr);
-  const followLocks = exports.apiGetFollowingLocksByAddress(self, addr);
-  const followPersionLocks = exports.apiGetFollowingPersionLocksByAddress(self, addr);
+  const followLocks = exports.apiGetLocksFollowingByAddress(self, addr);
+  const followPersionLocks = exports.apiGetLocksFollowingPersionByAddress(self, addr);
   // get locks ID
   const ownerLocksId = ownerLocks.map(lock => lock.id);
   const followLocksId = followLocks
@@ -308,6 +299,7 @@ function _addLeftInfoToLocks(locks, ownerLocksId = []) {
   const ctAlias = loadContract('system.alias');
   let resp = [];
   locks.forEach(lock => {
+    if (lock && lock.deletedBy) return;
     let tmp = {};
     if (lock.type === LOCK_TYPE_JOURNAL) {
       tmp.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
@@ -362,10 +354,39 @@ function _addTopInfoToLocks(locks) {
 // ========== DELETE DATA ==================
 exports.apiDeleteLock = (self, lockIndex) => {
   const sender = msg.sender;
-  const [lock, locks] = self.getLock(lockIndex);
-
+  const owner = self.getOnwer();
   expect(owner.includes(sender), 'You must be in admin group.');
+  let [lock, locks] = self.getLock(lockIndex);
+  // const locks = self.getLocks();
+  const lockSender = lock.sender;
+  const lockReceiver = lock.receiver;
+  const isJournal = sender === lockReceiver;
+  const isCrush = lockReceiver === self.botAddress;
 
+  // remove in map address to lock
+  const a2l = self.getA2l();
+  if (a2l[lockSender].indexOf(lockIndex) !== -1) a2l[lockSender].splice(a2l[lockSender].indexOf(lockIndex), 1);
+  if (!isJournal && !isCrush) {
+    a2l[lockReceiver].splice(a2l[lockReceiver].indexOf(lockIndex), 1);
+  }
+  // remove in map follow
+  const afl = self.getAFL();
+  lock.follows.forEach(addr => {
+    afl[addr].splice(afl[addr].indexOf(lockIndex), 1);
+  });
+  // remove memories in lock
+  const mems = self.getMemories();
+  lock.memoIndex.forEach(memIndex => {
+    mems[memIndex] = { deletedBy: sender };
+  });
+  locks[lockIndex] = { deletedBy: sender };
+
+  //save map
+  self.setA2l(a2l);
+  self.setAFL(afl);
   // save memories
-  self.getLocks(memories);
+  self.setMemories(mems);
+  // save locks
+  self.setLocks(locks);
+  return lockIndex;
 };

@@ -10,8 +10,8 @@ const {
   apiAddContributorsToLock,
   apiRemoveContributorsToLock,
   apiChangeLockImg,
-  apiGetFollowingPersionLocksByAddress,
-  apiGetFollowingLocksByAddress,
+  apiGetLocksFollowingPersionByAddress,
+  apiGetLocksFollowingByAddress,
   apiGetDetailLock,
   apiGetLocksByAddress,
   apiGetLocksForFeed,
@@ -47,8 +47,8 @@ class LoveLock {
   @view getOnwer = () => this.getState('ownerContract', []);
   setOnwer = value => this.setState('ownerContract', value);
 
-  @view getLocks = () => this.getState('locks', []);
-  setLocks = value => this.setState('locks', value);
+  @view getLocks = () => this.getState('locks', []);
+  setLocks = value => this.setState('locks', value);
   getLock = index => {
     const locks = this.getLocks();
     return [getDataByIndex(locks, index), locks];
@@ -75,18 +75,8 @@ class LoveLock {
 
   // mapping: address to lock
   // 1:n { 'address':[1,2,3...] }
-  @view getA2p = () => this.getState('a2p', {});
-  setA2p = value => this.setState('a2p', value);
-
-  // mapping: lock to memory
-  // 1:n  { 'proindex':[1,2,3...] }
-  // @view getP2m = () => this.getState('p2m', {});
-  // setP2m = value => this.setState('p2m', value);
-
-  // mapping: memory to lock
-  // 1:1  { 'memoryindex':'proindex' }
-  // @view getM2p = () => this.getState('m2p', {});
-  // setM2p = value => this.setState('m2p', value);
+  @view getA2l = () => this.getState('a2l', {});
+  setA2l = value => this.setState('a2l', value);
 
   // mapp address -> following locks.
   // 1:n  { 'address':[lockIndex1, lockIndex2,...] }
@@ -320,8 +310,8 @@ class LoveLock {
   }
   @view getFollowedPerson = (addr: address) => this.getFollowed()[addr] || [];
   @view getFollowingPerson = (addr: address) => this.getFollowing()[addr] || [];
-  @view getFollowingLocksByAddress = (addr: address) => apiGetFollowingLocksByAddress(this, addr);
-  @view getFollowingPersionLocksByAddress = (addr: address) => apiGetFollowingPersionLocksByAddress(this, addr);
+  @view getLocksFollowingByAddress = (addr: address) => apiGetLocksFollowingByAddress(this, addr);
+  @view getLocksFollowingPersionByAddress = (addr: address) => apiGetLocksFollowingPersionByAddress(this, addr);
 
   @view getDataForMypage(addr: address) {
     const self = this;
