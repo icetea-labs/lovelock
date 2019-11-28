@@ -139,9 +139,22 @@ function _addInfoToMems(memories, self) {
   return res;
 }
 // ========== DELETE DATA ==================
-exports.apiDeleteMemory = (self, memoIndex) => {
-
+exports.apiDeleteMemory = (self, memIndex) => {
+  const sender = msg.sender;
+  let [mem, mems] = self.getMemory(memIndex);
+  // remove memoIndex in lock
+  const locks = self.getLocks();
+  const { lockIndex } = mem;
+  locks[lockIndex].memoIndex.splice(locks[lockIndex].memoIndex.indexOf(memIndex), 1);
+  // save locks
+  self.setLocks(locks);
+  // delete mem
+  mems[memIndex] = { deletedBy: sender };
+  // save memories
+  self.setMemories(mems);
+  return memIndex;
 };
+
 exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
