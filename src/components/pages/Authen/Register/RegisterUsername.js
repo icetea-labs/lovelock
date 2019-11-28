@@ -16,7 +16,15 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import getWeb3 from '../../../../service/tweb3';
-import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
+import {
+  isAliasRegistered,
+  wallet,
+  registerAlias,
+  setTagsInfo,
+  saveFileToIpfs,
+  applyRotation,
+  imageResize,
+} from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import { AvatarPro } from '../../../elements';
 // import ImageCrop from '../../../elements/ImageCrop';
@@ -191,7 +199,9 @@ function RegisterUsername(props) {
           );
           let avatarUrl;
           if (avatarData) {
-            const setAva = saveFileToIpfs(avatarData).then(hash => {
+            const newFile = await applyRotation(avatarData[0], 1, 500);
+            const saveFile = imageResize(avatarData[0], newFile);
+            const setAva = saveFileToIpfs(saveFile).then(hash => {
               avatarUrl = process.env.REACT_APP_IPFS + hash;
               setTagsInfo({ avatar: hash }, opts);
             });
