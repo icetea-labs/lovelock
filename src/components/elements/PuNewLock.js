@@ -16,7 +16,14 @@ import SnackbarContent from '@material-ui/core/SnackbarContent';
 
 import * as actions from '../../store/actions';
 import { getAliasContract } from '../../service/tweb3';
-import { saveFileToIpfs, saveBufferToIpfs, tryStringifyJson, getTagsInfo } from '../../helper';
+import {
+  saveFileToIpfs,
+  saveBufferToIpfs,
+  tryStringifyJson,
+  getTagsInfo,
+  applyRotation,
+  imageResize,
+} from '../../helper';
 import { ensureToken, sendTransaction } from '../../helper/hooks';
 import AddInfoMessage from './AddInfoMessage';
 import CommonDialog from './CommonDialog';
@@ -483,7 +490,9 @@ class PuNewLock extends React.Component {
         setLoading(true);
 
         if (cropFile) {
-          botAva = await saveFileToIpfs(cropFile);
+          const newFile = await applyRotation(cropFile[0], 1, 500);
+          const saveFile = imageResize(cropFile[0], newFile);
+          botAva = await saveFileToIpfs(saveFile);
           botInfo.botAva = botAva;
         }
 
