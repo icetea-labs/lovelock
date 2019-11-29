@@ -98,7 +98,7 @@ const SupportSite = styled.div`
 `;
 
 function LeftContainer(props) {
-  const { locks, setLocks, setNewLock, confirmLock, topInfo, proIndex, address, history, loading, isGuest } = props;
+  const { locks, setLocks, setNewLock, confirmLock, topInfo, proIndex, address, history, loading, isGuest, closeMobileMenu } = props;
 
   const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
@@ -166,8 +166,8 @@ function LeftContainer(props) {
   }
 
   function newLock() {
-    // setStep('new');
     setNewLock(true);
+    if (closeMobileMenu) closeMobileMenu();
   }
 
   function selectPending(lockIndex) {
