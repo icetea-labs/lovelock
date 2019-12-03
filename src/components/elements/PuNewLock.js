@@ -497,7 +497,14 @@ class PuNewLock extends React.Component {
         }
 
         if (file) {
-          hash = await saveBufferToIpfs(file);
+          if (file[0].byteLength > 2097152) {
+            const message = `Input file is over 2MB. Please choose file under 2MB.`;
+            enqueueSnackbar(message, { variant: 'error' });
+            setLoading(false);
+            return;
+          } else {
+            hash = await saveBufferToIpfs(file);
+          }
         }
 
         const info = { date, hash };
@@ -507,12 +514,12 @@ class PuNewLock extends React.Component {
       const result = await ensureToken(this.props, uploadThenSendTx);
 
       // this.timeoutHanle2 = setTimeout(() => {
-      //  if (result) {
+       if (result) {
       message = 'Your lock sent successfully.';
       enqueueSnackbar(message, { variant: 'success' });
       setLoading(false);
       close();
-      //  }
+       }
       // }, 50);
     } catch (err) {
       console.error(err);

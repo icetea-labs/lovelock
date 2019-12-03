@@ -163,6 +163,7 @@ function LeftContainer(props) {
       url += `/collection/${collectionId}`;
     }
     history.push(url);
+    window.scrollTo(0, 0);
   }
 
   function newLock() {

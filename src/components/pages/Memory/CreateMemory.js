@@ -436,6 +436,14 @@ export default function CreateMemory(props) {
       return;
     }
 
+    for (let i = 0; i < filesBuffer.length; i++) {
+      if (filesBuffer[i].byteLength > 2097152) {
+        const message = `File in ${i + 1} position is over 2MB. Please choose file under 2MB.`;
+        enqueueSnackbar(message, { variant: 'error' });
+        return;
+      }
+    }
+    
     const content = blogData || memoryContent;
 
     let params = [];
