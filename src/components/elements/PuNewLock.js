@@ -23,6 +23,7 @@ import {
   getTagsInfo,
   applyRotation,
   imageResize,
+  handleError,
 } from '../../helper';
 import { ensureToken, sendTransaction } from '../../helper/hooks';
 import AddInfoMessage from './AddInfoMessage';
@@ -443,20 +444,18 @@ class PuNewLock extends React.Component {
   async createLock(partner, promiseStm, date, file) {
     const { setLoading, enqueueSnackbar, close } = this.props;
     const { firstname, lastname, cropFile, checked, botReply } = this.state;
-    let botAva = '';
     let hash = [];
-    let message = '';
 
     // this.timeoutHanle1 = setTimeout(async () => {
     try {
       if (!partner) {
-        message = 'Please choose your partner.';
+        const message = 'Please choose your partner.';
         enqueueSnackbar(message, { variant: 'error' });
         setLoading(false);
         return;
       }
       if (!promiseStm) {
-        message = 'Please input your lock.';
+        const message = 'Please input your lock.';
         enqueueSnackbar(message, { variant: 'error' });
         return;
       }
@@ -464,36 +463,34 @@ class PuNewLock extends React.Component {
       let botInfo;
       if (checked) {
         if (!firstname) {
-          message = 'Please enter your crush first name.';
+          const message = 'Please enter your crush first name.';
           enqueueSnackbar(message, { variant: 'error' });
           return;
         }
         if (!lastname) {
-          message = 'Please enter your crush last name.';
+          const message = 'Please enter your crush last name.';
           enqueueSnackbar(message, { variant: 'error' });
           return;
         }
         if (!cropFile) {
-          message = 'Please choose avatar of your crush.';
+          const message = 'Please choose avatar of your crush.';
           enqueueSnackbar(message, { variant: 'error' });
           return;
         }
         if (!botReply) {
-          message = 'Please enter the reply from your crush.';
+          const message = 'Please enter the reply from your crush.';
           enqueueSnackbar(message, { variant: 'error' });
           return;
         }
         botInfo = { firstname, lastname, botReply };
       }
-
       const uploadThenSendTx = async () => {
         setLoading(true);
 
         if (cropFile) {
           const newFile = await applyRotation(cropFile[0], 1, 500);
           const saveFile = imageResize(cropFile[0], newFile);
-          botAva = await saveFileToIpfs(saveFile);
-          botInfo.botAva = botAva;
+          botInfo.botAva = await saveFileToIpfs(saveFile);
         }
 
         if (file) {
@@ -514,17 +511,16 @@ class PuNewLock extends React.Component {
       const result = await ensureToken(this.props, uploadThenSendTx);
 
       // this.timeoutHanle2 = setTimeout(() => {
-       if (result) {
-      message = 'Your lock sent successfully.';
-      enqueueSnackbar(message, { variant: 'success' });
-      setLoading(false);
-      close();
-       }
+      if (result) {
+        const message = 'Your lock sent successfully.';
+        enqueueSnackbar(message, { variant: 'success' });
+        setLoading(false);
+        close();
+      }
       // }, 50);
     } catch (err) {
-      console.error(err);
-      message = 'an error occurred while sending, please check the inner exception for details';
-      enqueueSnackbar(message, { variant: 'error' });
+      const msg = handleError(err, 'sending newlock');
+      enqueueSnackbar(msg, { variant: 'error' });
       setLoading(false);
     }
     // }, 100);

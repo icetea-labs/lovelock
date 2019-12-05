@@ -5,9 +5,11 @@ import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
 
 import * as actions from '../../../store/actions';
 import { useTx } from '../../../helper/hooks';
+import { handleError } from '../../../helper';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -64,7 +66,7 @@ function MemoryActionButton(props) {
     numLike, // Lock-level number of likes
     isMyLike, // Lock-level isMyLike
   } = props;
-
+  const { enqueueSnackbar } = useSnackbar();
   const isAuto = memoryType === 1 && isDetailScreen;
 
   const address = useSelector(state => state.account.address);
@@ -105,11 +107,16 @@ function MemoryActionButton(props) {
 
   async function handleLike() {
     const LOVE = 1; // like, love, wow, etc.
-    tx.sendCommit('addLike', memoryIndex, LOVE).then(({ returnValue: likes }) => {
-      const newNumLike = Object.keys(likes).length;
-      const newIsMyLike = !!likes[address];
-      setLikeData(newNumLike, newIsMyLike);
-    });
+    tx.sendCommit('addLike', memoryIndex, LOVE)
+      .then(({ returnValue: likes }) => {
+        const newNumLike = Object.keys(likes).length;
+        const newIsMyLike = !!likes[address];
+        setLikeData(newNumLike, newIsMyLike);
+      })
+      .catch(err => {
+        const msg = handleError(err);
+        enqueueSnackbar(msg, { variant: 'error' });
+      });
   }
 
   const classes = useStyles();
