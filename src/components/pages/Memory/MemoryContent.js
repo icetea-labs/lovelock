@@ -150,6 +150,16 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     margin: '0 auto',
   },
+  memorySender: {
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
+  memoryReceiver: {
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
 }));
 
 const setMemoryCollection = (propose, memory) => {
@@ -535,15 +545,21 @@ function MemoryContent(props) {
   const renderTitleMem = mem => {
     return (
       <>
-        <a href={`/mypage/${mem.sender}`} style={{ color: 'inherit' }}>
+        <a href={`/mypage/${mem.sender}`} style={{ color: 'inherit' }} className={classes.memorySender}>
           {mem.name}
         </a>
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />
-            <a href={`/mypage/${mem.receiver}`} style={{ color: 'inherit' }}>
-              {mem.r_tags['display-name']}
-            </a>
+            {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
+              <p style={{ color: 'inherit' }}>
+                {mem.r_tags['display-name']}
+              </p>
+            ) : (
+              <a href={`/mypage/${mem.receiver}`} style={{ color: 'inherit' }} className={classes.memoryReceiver}>
+                {mem.r_tags['display-name']}
+              </a>
+            )}
           </>
         )}
       </>

@@ -200,7 +200,7 @@ function ChangeProfile(props) {
           if (cropFile) {
             const newFile = await applyRotation(cropFile[0], orient, 500);
             const saveFile = imageResize(cropFile[0], newFile);
-            
+
             const saveAvatar = saveFileToIpfs(saveFile).then(hash => {
               accountInfo.avatar = hash;
               if (avatar !== hash) {
@@ -380,7 +380,9 @@ function ChangeProfile(props) {
                   </RightProfile>
                 </FlexBox>
                 <DivControlBtnKeystore justify="center">
-                  <ButtonPro type="submit">Save change</ButtonPro>
+                  <ButtonPro type="submit" className="nextBtn">
+                    Save change
+                  </ButtonPro>
                 </DivControlBtnKeystore>
               </ValidatorForm>
             </ShadowBoxAuthen>

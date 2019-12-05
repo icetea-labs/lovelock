@@ -28,7 +28,7 @@ const BannerContainer = styled.div`
 const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
-  background: #ffffff;
+  background: linear-gradient(340deg, #8dc1fe, #ad76ff);
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;

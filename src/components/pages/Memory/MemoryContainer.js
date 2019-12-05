@@ -80,8 +80,8 @@ function MemoryContainer(props) {
 
   function fetchMoreListItems() {
     for (let i = 5; i < memorydata.length; i += 5) {
-      setLimit(limit + 5);
       setIsFetching(false);
+      setLimit(limit + 5);
     }
   }
 

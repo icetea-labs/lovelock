@@ -16,7 +16,14 @@ import SnackbarContent from '@material-ui/core/SnackbarContent';
 
 import * as actions from '../../store/actions';
 import { getAliasContract } from '../../service/tweb3';
-import { saveFileToIpfs, saveBufferToIpfs, tryStringifyJson, getTagsInfo } from '../../helper';
+import {
+  saveFileToIpfs,
+  saveBufferToIpfs,
+  tryStringifyJson,
+  getTagsInfo,
+  applyRotation,
+  imageResize,
+} from '../../helper';
 import { ensureToken, sendTransaction } from '../../helper/hooks';
 import AddInfoMessage from './AddInfoMessage';
 import CommonDialog from './CommonDialog';
@@ -483,12 +490,21 @@ class PuNewLock extends React.Component {
         setLoading(true);
 
         if (cropFile) {
-          botAva = await saveFileToIpfs(cropFile);
+          const newFile = await applyRotation(cropFile[0], 1, 500);
+          const saveFile = imageResize(cropFile[0], newFile);
+          botAva = await saveFileToIpfs(saveFile);
           botInfo.botAva = botAva;
         }
 
         if (file) {
-          hash = await saveBufferToIpfs(file);
+          if (file[0].byteLength > 2097152) {
+            const message = `Input file is over 2MB. Please choose file under 2MB.`;
+            enqueueSnackbar(message, { variant: 'error' });
+            setLoading(false);
+            return;
+          } else {
+            hash = await saveBufferToIpfs(file);
+          }
         }
 
         const info = { date, hash };
@@ -498,12 +514,12 @@ class PuNewLock extends React.Component {
       const result = await ensureToken(this.props, uploadThenSendTx);
 
       // this.timeoutHanle2 = setTimeout(() => {
-      //  if (result) {
+       if (result) {
       message = 'Your lock sent successfully.';
       enqueueSnackbar(message, { variant: 'success' });
       setLoading(false);
       close();
-      //  }
+       }
       // }, 50);
     } catch (err) {
       console.error(err);

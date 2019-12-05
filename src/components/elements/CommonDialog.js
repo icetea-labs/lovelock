@@ -32,10 +32,8 @@ const Container = styled.div`
   transition: opacity 0.6s ease-in;
   opacity: 0;
   @media (max-width: 624px) {
-    width: ${props => (props.hasParentDialog ? '90%' : '100%')};;
-    min-width: 300px;
-    max-height: 95vh;
-    max-width: 95%;
+    width: 100%;
+    border-radius: 0;
   }
 `;
 
@@ -64,6 +62,9 @@ const PuTitle = styled.div`
   .material-icons {
     cursor: pointer;
     color: white;
+  }
+  @media (max-width: 624px) {
+    border-radius: 0;
   }
 `;
 
