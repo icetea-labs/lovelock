@@ -20,6 +20,7 @@ import {
   saveFileToIpfs,
   applyRotation,
   imageResize,
+  handleError,
 } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
@@ -327,9 +328,15 @@ function TopContrainer(props) {
 
   function handerLike() {
     try {
-      tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1).then(() => {
-        getNumTopLikes();
-      });
+      tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1)
+        .then(() => {
+          getNumTopLikes();
+        })
+        .catch(err => {
+          getNumTopLikes();
+          const msg = handleError(err, 'sendding like lock');
+          enqueueSnackbar(msg, { variant: 'error' });
+        });
 
       let { isMyLike, numLike } = topInfo;
       if (isMyLike) {
@@ -340,18 +347,23 @@ function TopContrainer(props) {
       isMyLike = !isMyLike;
       const newTopInfo = { ...topInfo, numLike, isMyLike };
       setTopInfo(newTopInfo);
-    } catch (error) {
-      console.error(error);
-      const message = `An error occurred, please try again later`;
-      enqueueSnackbar(message, { variant: 'error' });
+    } catch (err) {
+      const msg = handleError(err, 'sendding like lock');
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   }
 
   function handerFollow() {
     try {
-      tx.sendCommit('followLock', topInfo.index, { tokenAddress, address }).then(() => {
-        getNumTopFollow();
-      });
+      tx.sendCommit('followLock', topInfo.index, { tokenAddress, address })
+        .then(() => {
+          getNumTopFollow();
+        })
+        .catch(err => {
+          getNumTopFollow();
+          const msg = handleError(err, 'sendding follow lock');
+          enqueueSnackbar(msg, { variant: 'error' });
+        });
 
       let { numFollow, isMyFollow } = topInfo;
       if (isMyFollow) {
@@ -362,10 +374,9 @@ function TopContrainer(props) {
       isMyFollow = !isMyFollow;
       const newTopInfo = { ...topInfo, numFollow, isMyFollow };
       setTopInfo(newTopInfo);
-    } catch (error) {
-      console.error(error);
-      const message = `An error occurred, please try again later`;
-      enqueueSnackbar(message, { variant: 'error' });
+    } catch (err) {
+      const msg = handleError(err, 'sendding follow lock');
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   }
 
@@ -374,20 +385,20 @@ function TopContrainer(props) {
       return;
     callView('getLikeByMemoIndex', [topInfo.memoryRelationIndex]).then(data => {
       const { numLike, isMyLike } = serialLikeData(data);
-      if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
-        const newTopInfo = { ...topInfo, numLike, isMyLike };
-        setTopInfo(newTopInfo);
-      }
+      // if (topInfo.numLike !== numLike || topInfo.isMyLike !== isMyLike) {
+      const newTopInfo = { ...topInfo, numLike, isMyLike };
+      setTopInfo(newTopInfo);
+      // }
     });
   }
 
   function getNumTopFollow() {
     callView('getFollowByLockIndex', [topInfo.index]).then(data => {
       const { numFollow, isMyFollow } = serialFollowData(data);
-      if (topInfo.numFollow !== numFollow || topInfo.isMyLike !== isMyFollow) {
-        const newTopInfo = { ...topInfo, numFollow, isMyFollow };
-        setTopInfo(newTopInfo);
-      }
+      // if (topInfo.numFollow !== numFollow || topInfo.isMyLike !== isMyFollow) {
+      const newTopInfo = { ...topInfo, numFollow, isMyFollow };
+      setTopInfo(newTopInfo);
+      // }
     });
   }
   function serialLikeData(likes) {

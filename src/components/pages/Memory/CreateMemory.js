@@ -14,7 +14,14 @@ import BlogModal from '../../elements/BlogModal';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveToIpfs, saveFileToIpfs, saveBufferToIpfs, encodeWithPublicKey, sendTxUtil } from '../../../helper';
+import {
+  saveToIpfs,
+  saveFileToIpfs,
+  saveBufferToIpfs,
+  encodeWithPublicKey,
+  sendTxUtil,
+  handleError,
+} from '../../../helper';
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
@@ -443,7 +450,7 @@ export default function CreateMemory(props) {
         return;
       }
     }
-    
+
     const content = blogData || memoryContent;
 
     let params = [];
@@ -483,9 +490,8 @@ export default function CreateMemory(props) {
       resetValue();
     } catch (err) {
       setGLoading(false);
-      const message = `An error has occured, you can try again later: ${err.message}`;
+      const message = handleError(err, 'sending memory');
       enqueueSnackbar(message, { variant: 'error' });
-      console.error(err);
     }
   }
 

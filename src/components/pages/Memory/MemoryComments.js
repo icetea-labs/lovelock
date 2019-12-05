@@ -7,7 +7,7 @@ import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import { useSnackbar } from 'notistack';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
-import { callView, getTagsInfo, diffTime, TimeWithFormat } from '../../../helper';
+import { callView, getTagsInfo, diffTime, TimeWithFormat, handleError } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 // import * as actions from '../../../store/actions';
 
@@ -165,7 +165,14 @@ export default function MemoryComments(props) {
   async function newComment() {
     if (!comment) return;
 
-    await tx.sendCommit('addComment', memoryIndex, comment, '');
+    tx.sendCommit('addComment', memoryIndex, comment, '')
+      .then(e => {
+        console.log('go', e);
+      })
+      .catch(err => {
+        const message = handleError(err, 'sending comment');
+        enqueueSnackbar(message, { variant: 'error' });
+      });
 
     myFormRef.current && myFormRef.current.reset();
     setComment('');
