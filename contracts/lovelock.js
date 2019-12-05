@@ -337,10 +337,12 @@ class LoveLock {
   }
 
   @transaction importState(data, overwrite: ?boolean = false) {
+    expectOwner(this);
     return importState(data, overwrite);
   }
 
   @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
+    expectOwner(this);
     return migrateState(fromContract, overwrite);
   }
   // ========== DELETE DATA  =============

@@ -111,6 +111,7 @@ export default function MemoryComments(props) {
   const { handleNumberComment, memoryIndex, textInput } = props;
 
   const tx = useTx();
+  const classes = useStyles();
 
   const avatar = useSelector(state => state.account.avatar);
   const address = useSelector(state => state.account.address);
@@ -182,106 +183,107 @@ export default function MemoryComments(props) {
     setShowComments(comments);
     setNumHidencmt(0);
   }
-
-  const classes = useStyles();
+  async function deleteComment(item, indexKey) {
+    const owner = [item.sender, memory[0].sender, memory[0].receiver];
+    let cmtIndex = 0;
+    if (numHidencmt > 0) {
+      cmtIndex = indexKey + numHidencmt;
+    } else {
+      cmtIndex = indexKey;
+    }
+    if (!owner.includes(address)) {
+      const message = `Permission deny, you can not delete this comment.`;
+      enqueueSnackbar(message, { variant: 'error' });
+    } else {
+      await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
+      loadData(memoryIndex).then(respComment => {
+        if (respComment.length > numComment) {
+          const numMore = respComment.length - numComment;
+          setNumHidencmt(numMore);
+          setShowComments(respComment.slice(numMore));
+        } else {
+          setShowComments(respComment);
+        }
+        setComments(respComment);
+        handleNumberComment(respComment.length);
+      });
+    }
+  }
   // console.log('showComments', showComments);
+  const renderViewMore = (
+    <Grid item>
+      <Link onClick={viewMoreComment} className={classes.linkViewMore}>
+        View {numHidencmt} more comments
+      </Link>
+    </Grid>
+  );
+  const renderComments = (
+    <>
+      {showComments.map((item, indexKey) => {
+        return (
+          <Grid item key={indexKey} className={classes.commentRow}>
+            <Grid container wrap="nowrap" spacing={1} alignItems="flex-start">
+              <Grid item>
+                <AvatarPro alt="img" className={classes.avatarContentComment} hash={item.avatar} />
+              </Grid>
+              <Grid item sx={10}>
+                <Typography margin="dense" className={classes.contentComment}>
+                  <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
+                  <span> {item.content}</span>
+                </Typography>
+
+                <ArrowTooltip title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}>
+                  <Typography margin="dense" className={classes.timeComment}>
+                    {diffTime(item.timestamp)}
+                  </Typography>
+                </ArrowTooltip>
+              </Grid>
+              <Grid item sx={2}>
+                <DeleteForeverIcon className={classes.deleteIc} onClick={() => deleteComment(item, indexKey)} />
+              </Grid>
+            </Grid>
+          </Grid>
+        );
+      })}
+    </>
+  );
+  const renderPostComment = (
+    <Grid container wrap="nowrap" component="form" ref={myFormRef}>
+      <Grid item>
+        <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
+      </Grid>
+      <Grid item classes={{ root: classes.btBox }}>
+        <TextField
+          fullWidth
+          multiline
+          className={classes.postComment}
+          placeholder="Write a comment..."
+          margin="dense"
+          variant="outlined"
+          size="smail"
+          onChange={e => setComment(e.currentTarget.value)}
+          onKeyDown={onKeyDownPostComment}
+          InputProps={{
+            classes: {
+              notchedOutline: classes.notchedOutline,
+            },
+          }}
+          inputRef={textInput}
+        />
+      </Grid>
+    </Grid>
+  );
 
   return (
     <StyledCardActions className={classes.boxComment}>
       <Grid container direction="column" spacing={1}>
         <Grid item>
           <Grid container direction="column" spacing={2} className={classes.boxCommentContent}>
-            {numHidencmt > 0 && (
-              <Grid item>
-                <Link onClick={viewMoreComment} className={classes.linkViewMore}>
-                  View {numHidencmt} more comments
-                </Link>
-              </Grid>
-            )}
-            {showComments.map((item, indexKey) => {
-              return (
-                <Grid item key={indexKey} className={classes.commentRow}>
-                  <Grid container wrap="nowrap" spacing={1} alignItems="flex-start">
-                    <Grid item>
-                      <AvatarPro alt="img" className={classes.avatarContentComment} hash={item.avatar} />
-                    </Grid>
-                    <Grid item sx={10}>
-                      <Typography margin="dense" className={classes.contentComment}>
-                        <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
-                        <span> {item.content}</span>
-                      </Typography>
-
-                      <ArrowTooltip
-                        title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}
-                      >
-                        <Typography margin="dense" className={classes.timeComment}>
-                          {diffTime(item.timestamp)}
-                        </Typography>
-                      </ArrowTooltip>
-                    </Grid>
-                    <Grid item sx={2}>
-                      <DeleteForeverIcon
-                        className={classes.deleteIc}
-                        onClick={async () => {
-                          const owner = [item.sender, memory[0].sender, memory[0].receiver];
-                          let cmtIndex = 0;
-                          if (numHidencmt > 0) {
-                            cmtIndex = indexKey + numHidencmt;
-                          } else {
-                            cmtIndex = indexKey;
-                          }
-                          if (!owner.includes(address)) {
-                            const message = `Permission deny, you can not delete this comment.`;
-                            enqueueSnackbar(message, { variant: 'error' });
-                          } else {
-                            await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
-                            loadData(memoryIndex).then(respComment => {
-                              if (respComment.length > numComment) {
-                                const numMore = respComment.length - numComment;
-                                setNumHidencmt(numMore);
-                                setShowComments(respComment.slice(numMore));
-                              } else {
-                                setShowComments(respComment);
-                              }
-                              setComments(respComment);
-                              handleNumberComment(respComment.length);
-                            });
-                          }
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-              );
-            })}
+            {numHidencmt > 0 && renderViewMore}
+            {renderComments}
           </Grid>
         </Grid>
-        <Grid item>
-          <Grid container wrap="nowrap" component="form" ref={myFormRef}>
-            <Grid item>
-              <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
-            </Grid>
-            <Grid item classes={{ root: classes.btBox }}>
-              <TextField
-                fullWidth
-                multiline
-                className={classes.postComment}
-                placeholder="Write a comment..."
-                margin="dense"
-                variant="outlined"
-                size="smail"
-                onChange={e => setComment(e.currentTarget.value)}
-                onKeyDown={onKeyDownPostComment}
-                InputProps={{
-                  classes: {
-                    notchedOutline: classes.notchedOutline,
-                  },
-                }}
-                inputRef={textInput}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
+        <Grid item>{renderPostComment}</Grid>
       </Grid>
     </StyledCardActions>
   );
