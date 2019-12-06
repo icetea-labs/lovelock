@@ -164,6 +164,7 @@ function LeftContainer(props) {
     }
     history.push(url);
     window.scrollTo(0, 0);
+    if (closeMobileMenu) closeMobileMenu();
   }
 
   function newLock() {

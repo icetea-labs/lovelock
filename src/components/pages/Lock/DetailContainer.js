@@ -182,13 +182,13 @@ export default function DetailContainer(props) {
           <TextField
             autoFocus
             required
-            onChange={e => setColName(e.target.value)}
+            onChange={e => setColName(e.target.value.normalize())}
             label="Collection name"
             type="text"
             autoComplete="off"
           />
           <TextField
-            onChange={e => setColDesc(e.target.value)}
+            onChange={e => setColDesc(e.target.value.normalize())}
             label="Description"
             type="text"
             style={{ marginTop: 16 }}

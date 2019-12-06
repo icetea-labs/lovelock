@@ -204,7 +204,7 @@ export default function CreateMemory(props) {
     } else {
       setDisableShare(true);
     }
-    setMemoryContent(value);
+    setMemoryContent(value.normalize());
     // setInitialBlogContent(makeDefaultBlogContent(value))
   }
   function handleChangePrivacy(event) {

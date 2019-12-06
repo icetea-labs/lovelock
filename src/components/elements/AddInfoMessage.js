@@ -244,6 +244,11 @@ const useStyles = makeStyles(theme => ({
       borderTop: '1px solid #dadde1',
     },
   },
+  blogItem: {
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
+  },
 }));
 
 function MaterialUIPickers(props) {
@@ -442,7 +447,7 @@ export default function AddInfoMessage(props) {
             </ActionItem>
           </Grid>
           {onBlogClick && (
-            <Grid item onClick={onBlogClick} xs={12} sm="auto" className={classes.actionItem}>
+            <Grid item onClick={onBlogClick} xs={12} sm="auto" className={classes.blogItem}>
               <ActionItem>
                 <div className="icon-upload">
                   <i className="material-icons">menu_book</i>
