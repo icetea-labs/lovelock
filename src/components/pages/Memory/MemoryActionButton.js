@@ -107,16 +107,21 @@ function MemoryActionButton(props) {
 
   async function handleLike() {
     const LOVE = 1; // like, love, wow, etc.
-    tx.sendCommit('addLike', memoryIndex, LOVE)
-      .then(({ returnValue: likes }) => {
-        const newNumLike = Object.keys(likes).length;
-        const newIsMyLike = !!likes[address];
-        setLikeData(newNumLike, newIsMyLike);
-      })
-      .catch(err => {
-        const msg = handleError(err);
-        enqueueSnackbar(msg, { variant: 'error' });
-      });
+    try {
+      tx.sendCommit('addLike', memoryIndex, LOVE)
+        .then(({ returnValue: likes }) => {
+          const newNumLike = Object.keys(likes).length;
+          const newIsMyLike = !!likes[address];
+          setLikeData(newNumLike, newIsMyLike);
+        })
+        .catch(error => {
+          const msg = handleError(error, 'sending like memory');
+          enqueueSnackbar(msg, { variant: 'error' });
+        });
+    } catch (error) {
+      const msg = handleError(error, 'sending like memory');
+      enqueueSnackbar(msg, { variant: 'error' });
+    }
   }
 
   const classes = useStyles();
