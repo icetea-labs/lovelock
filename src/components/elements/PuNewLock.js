@@ -287,14 +287,14 @@ class PuNewLock extends React.Component {
   partnerChange = e => {
     const val = e.target.value;
     this.setState({
-      partner: val,
+      partner: val.normalize(),
     });
   };
 
   promiseStmChange = e => {
     const val = e.target.value;
     this.setState({
-      promiseStm: val,
+      promiseStm: val.normalize(),
     });
   };
 
@@ -381,7 +381,7 @@ class PuNewLock extends React.Component {
     const key = event.currentTarget.name;
     const val = event.currentTarget.value;
 
-    this.setState({ [key]: val });
+    this.setState({ [key]: val.normalize() });
   };
 
   handleImageChange = event => {
@@ -499,9 +499,8 @@ class PuNewLock extends React.Component {
             enqueueSnackbar(message, { variant: 'error' });
             setLoading(false);
             return;
-          } else {
-            hash = await saveBufferToIpfs(file);
           }
+          hash = await saveBufferToIpfs(file);
         }
 
         const info = { date, hash };

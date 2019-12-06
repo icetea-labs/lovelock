@@ -268,7 +268,7 @@ export default function MemoryComments(props) {
           margin="dense"
           variant="outlined"
           size="smail"
-          onChange={e => setComment(e.currentTarget.value)}
+          onChange={e => setComment(e.currentTarget.value.normalize())}
           onKeyDown={onKeyDownPostComment}
           InputProps={{
             classes: {
