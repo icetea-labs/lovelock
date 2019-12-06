@@ -286,14 +286,14 @@ class PuNewLock extends React.Component {
   partnerChange = e => {
     const val = e.target.value;
     this.setState({
-      partner: val,
+      partner: val.normalize(),
     });
   };
 
   promiseStmChange = e => {
     const val = e.target.value;
     this.setState({
-      promiseStm: val,
+      promiseStm: val.normalize(),
     });
   };
 
@@ -380,7 +380,7 @@ class PuNewLock extends React.Component {
     const key = event.currentTarget.name;
     const val = event.currentTarget.value;
 
-    this.setState({ [key]: val });
+    this.setState({ [key]: val.normalize() });
   };
 
   handleImageChange = event => {
@@ -514,12 +514,12 @@ class PuNewLock extends React.Component {
       const result = await ensureToken(this.props, uploadThenSendTx);
 
       // this.timeoutHanle2 = setTimeout(() => {
-       if (result) {
-      message = 'Your lock sent successfully.';
-      enqueueSnackbar(message, { variant: 'success' });
-      setLoading(false);
-      close();
-       }
+      if (result) {
+        message = 'Your lock sent successfully.';
+        enqueueSnackbar(message, { variant: 'success' });
+        setLoading(false);
+        close();
+      }
       // }, 50);
     } catch (err) {
       console.error(err);

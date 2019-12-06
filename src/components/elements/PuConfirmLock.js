@@ -32,14 +32,14 @@ class PuConfirmLock extends React.Component {
   messageAcceptChange = e => {
     const val = e.target.value;
     this.setState({
-      messageAccept: val,
+      messageAccept: val.normalize(),
     });
   };
 
   messageDenyChange = e => {
     const val = e.target.value;
     this.setState({
-      messageDeny: val,
+      messageDeny: val.normalize(),
     });
   };
 
