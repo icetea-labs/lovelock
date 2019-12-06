@@ -37,13 +37,14 @@ class LoveLock {
 
   constructor(account) {
     const owner = this.getOwner();
-    if (account) {
-      owner.push(account);
-    } else {
-      owner.push(msg.sender);
+    if (!account) {
+      account = msg.sender;
     }
+    owner.push(account);
     this.setOwner(owner);
+    this.addAdmins([account]);
   }
+
   @view getOwner = () => this.getState('ownerContract', []);
   setOwner = value => this.setState('ownerContract', value);
 
@@ -53,19 +54,7 @@ class LoveLock {
     const locks = this.getLocks();
     return [getDataByIndex(locks, index), locks];
   };
-  // function getMemory(index, defaultValue) {
-  //   return this.getState([‘memories’, index], defaultValue)
-  // }
-  // function pushMemory(memo) {
-  //   return this.invokeState([‘memories’], [], ‘push’, memo)
-  // }
-  // function saveLock(index, lock) {
-  //   return this.setState([‘locks’, index], lock)
-  // }
-  // function saveLockName(index, name) {
-  //   return this.setState([‘locks’, index, ‘name’], name)
-  // }
-  // setState([‘locks’, index], oldLock => Object.assign({}, oldLock || {}, { name: ‘thi’, age: 1 }))
+
   @view getMemories = () => this.getState('memories', []);
   setMemories = value => this.setState('memories', value);
   getMemory = index => {
@@ -337,10 +326,12 @@ class LoveLock {
   }
 
   @transaction importState(data, overwrite: ?boolean = false) {
+    expectOwner(this);
     return importState(data, overwrite);
   }
 
   @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
+    expectOwner(this);
     return migrateState(fromContract, overwrite);
   }
   // ========== DELETE DATA  =============
@@ -362,7 +353,7 @@ class LoveLock {
     admins = admins.concat(accounts);
     this.setAdmins(admins);
     // auto add into users
-    this.addUsers(accounts);
+    // this.addUsers(accounts);
     return accounts;
   }
 

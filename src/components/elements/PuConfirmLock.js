@@ -3,9 +3,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
+
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { sendTxWithAuthen } from '../../helper/hooks';
+import { handleError } from '../../helper';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -53,8 +55,9 @@ class PuConfirmLock extends React.Component {
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      const msg = handleError(err, 'sendding accept lock');
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   }
 
@@ -69,8 +72,9 @@ class PuConfirmLock extends React.Component {
         enqueueSnackbar(errMessage, { variant: 'info' });
         close();
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      const msg = handleError(err, 'sendding deny lock');
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   }
 

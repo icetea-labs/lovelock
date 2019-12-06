@@ -666,3 +666,13 @@ export function imageResize(oldFile, newFile) {
   const saveFile = [parseFile];
   return saveFile;
 }
+export function handleError(err, action) {
+  console.error(err);
+  let msg = `An error occurred while ${action}`;
+  if (typeof err !== 'object') return msg;
+  const fail = (err.deliver_tx && err.deliver_tx.code) || (err.check_tx && err.check_tx.code);
+  if (fail) {
+    msg = err.deliver_tx.log || err.check_tx.log;
+  }
+  return msg;
+}
