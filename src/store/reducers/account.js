@@ -25,8 +25,8 @@ const initialState = {
       if (!isExpired) {
         resp.tokenKey = codec.toString(token.tokenKey);
         getWeb3().wallet.importAccount(resp.tokenKey);
+        resp.tokenAddress = token.tokenAddress;
       }
-      resp.tokenAddress = token.tokenAddress;
       resp.expireAfter = token.expireAfter;
     }
 
