@@ -7,8 +7,8 @@ import { setNeedAuth as actionSetNeedAuth } from '../store/actions/account';
 // use for 'remember me' checkbox
 export function useRemember() {
   const [value, _setValue] = useState(window.localStorage['remember'] !== '0');
-  const setValue = value => {
-    const boolValue = !!value;
+  const setValue = val => {
+    const boolValue = !!val;
     _setValue(boolValue);
     window.localStorage['remember'] = boolValue ? '1' : '0';
   };
@@ -34,13 +34,13 @@ export function useTx({ privacy, address } = {}) {
   const make = m => (method, ...params) => {
     const send = ms[method](...params)[m];
     if (key) {
-      console.log(m, method, params);
+      console.log('with key', m, method, params);
       return send(opts);
     }
 
     return new Promise((resolve, reject) => {
       const sendTx = () => {
-        console.log(m, method, params);
+        console.log('with authen', m, method, params);
         return send(opts)
           .then(resolve)
           .catch(reject);
