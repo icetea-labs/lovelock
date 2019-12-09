@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 // import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
+import CloseIcon from '@material-ui/icons/Close';
+import IconButton from '@material-ui/core/IconButton';
 // import { PersistGate } from 'redux-persist/lib/integration/react';
 
 import { Helmet } from 'react-helmet';
@@ -122,11 +124,23 @@ const theme = createMuiTheme({
   },
 });
 
+// add action to all snackbars
+const notistackRef = React.createRef();
+const onClickDismiss = key => () => {
+  notistackRef.current.closeSnackbar(key);
+};
+
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
       {/* <PersistGate loading={<GlobaLoading />} persistor={persistor}> */}
       <SnackbarProvider
+        ref={notistackRef}
+        action={key => (
+          <IconButton onClick={onClickDismiss(key)}>
+            <CloseIcon />
+          </IconButton>
+        )}
         preventDuplicate
         autoHideDuration={3000}
         maxSnack={2}
