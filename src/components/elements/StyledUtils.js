@@ -304,6 +304,7 @@ export const ShadowBoxAuthen = styled.div`
     padding: 10px 20px;
     box-sizing: border-box;
     height: 815px;
+    border-radius: 0;
   }
   @media (min-width: 624px) {
     min-width: ${rem(400)};
