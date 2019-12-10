@@ -7,6 +7,7 @@ import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { getAlias } from '../../helper';
 import { useTx } from '../../helper/hooks';
+import ReadMore from '../elements/ReaMore';
 
 const ImgView = styled.div`
   margin: 20px 0 20px;
@@ -18,7 +19,7 @@ const PageView = styled.div`
   text-overflow: ellipsis;
   display: -webkit-box;
   line-height: 16px;
-  -webkit-line-clamp: 4; /* Write the number of lines you want to be displayed */
+  /* -webkit-line-clamp: 4; Write the number of lines you want to be displayed */
   -webkit-box-orient: vertical;
 `;
 
@@ -68,13 +69,25 @@ function PuNotifyLock(props) {
 
       if (result) {
         const message = 'Your locks has been removed.';
-        enqueueSnackbar(message, { variant: 'info' });
+        enqueueSnackbar(message, { variant: 'info', preventDuplicate: true });
         close();
       }
     } catch (error) {
       console.error(error);
     }
   }
+
+  // useEffect(() => {
+  //   console.log('mounted width - ', window.getComputedStyle(this.wrapper).getPropertyValue('width'));
+  // }, []);
+
+  // function getWrapperWidth() {
+  //   if (this.wrapper) {
+  //     console.log('get wrapper width', window.getComputedStyle(this.wrapper).getPropertyValue('width'));
+  //   } else {
+  //     console.log('get wrapper - no wrapper');
+  //   }
+  // }
 
   return (
     <>
@@ -94,7 +107,13 @@ function PuNotifyLock(props) {
           <ImgView>
             {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
           </ImgView>
-          <PageView>{content}</PageView>
+          <PageView>
+            {content.length > 200 ? (
+              <ReadMore text={content} numberOfLines={4} lineHeight={1.4} showLessButton readMoreCharacterLimit={200} />
+            ) : (
+              content
+            )}
+          </PageView>
         </CommonDialog>
       ) : (
         <CommonDialog title="Lock alert" okText="Accept" confirm={accept} cancelText="Deny" cancel={deny} close={close}>
@@ -105,7 +124,13 @@ function PuNotifyLock(props) {
           <ImgView>
             {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
           </ImgView>
-          <PageView>{content}</PageView>
+          <PageView>
+            {content.length > 200 ? (
+              <ReadMore text={content} numberOfLines={4} lineHeight={1.4} showLessButton readMoreCharacterLimit={200} />
+            ) : (
+              content
+            )}
+          </PageView>
         </CommonDialog>
       )}
     </>
