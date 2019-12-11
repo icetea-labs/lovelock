@@ -494,12 +494,6 @@ class PuNewLock extends React.Component {
         }
 
         if (file) {
-          if (file[0].byteLength > 2097152) {
-            const message = `Input file is over 2MB. Please choose file under 2MB.`;
-            enqueueSnackbar(message, { variant: 'error' });
-            setLoading(false);
-            return;
-          }
           hash = await saveBufferToIpfs(file);
         }
 
