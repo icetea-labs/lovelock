@@ -11,6 +11,7 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
+import ReadMore from '../../elements/ReaMore';
 
 import {
   callView,
@@ -151,8 +152,7 @@ const WarrperChatBox = styled(FlexBox)`
   }
   .rightContent {
     text-align: right;
-  }
-  p {
+    background-image: linear-gradient(337deg, #ad76ff, #8dc1fe);
     display: block;
     padding: ${rem(11)} ${rem(14)};
     font-size: ${rem(12)};
@@ -161,7 +161,16 @@ const WarrperChatBox = styled(FlexBox)`
     border-radius: 10px;
     margin-top: 10px;
     box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
-    background-image: -webkit-linear-gradient(113deg, #76a8ff, #8df6fe);
+  }
+  .lockView {
+    display: block;
+    padding: ${rem(11)} ${rem(14)};
+    font-size: ${rem(12)};
+    /* line-height: ${rem(18)}; */
+    color: #ffffff;
+    border-radius: 10px;
+    margin-top: 10px;
+    box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
     background-image: linear-gradient(337deg, #76a8ff, #8df6fe);
   }
   @media (max-width: 768px) {
@@ -612,7 +621,21 @@ function TopContrainer(props) {
                   </span>
                 </div>
               )}
-              {loading ? <Skeleton height={40} width="100%" /> : <p>{topInfo.s_content}</p>}
+              {loading ? (
+                <Skeleton height={40} width="100%" />
+              ) : topInfo.s_content.length > 150 ? (
+                <div className="lockView">
+                  <ReadMore
+                    text={topInfo.s_content}
+                    numberOfLines={4}
+                    lineHeight={1.6}
+                    showLessButton
+                    readMoreCharacterLimit={150}
+                  />
+                </div>
+              ) : (
+                <div className="lockView">{topInfo.s_content}</div>
+              )}
             </div>
           </div>
         )}
@@ -626,7 +649,21 @@ function TopContrainer(props) {
                   <span className="user_name color-violet">{topInfo.r_name}</span>
                 </div>
               )}
-              {loading ? <Skeleton height={40} width="100%" /> : <p className="rightContent">{topInfo.r_content}</p>}
+              {loading ? (
+                <Skeleton height={40} width="100%" />
+              ) : topInfo.r_content.length > 150 ? (
+                <div className="rightContent">
+                  <ReadMore
+                    text={topInfo.r_content}
+                    numberOfLines={4}
+                    lineHeight={1.6}
+                    showLessButton
+                    readMoreCharacterLimit={150}
+                  />
+                </div>
+              ) : (
+                <div className="rightContent">{topInfo.r_content}</div>
+              )}
             </div>
             <div className="user_photo ">
               {loading ? (

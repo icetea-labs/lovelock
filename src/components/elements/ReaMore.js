@@ -75,11 +75,11 @@ export default class ReadMore extends Component {
   };
 
   getActionButton = ({ showingAll, showLessButton }) => {
+    const buttonText = showingAll ? SHOW_LESS_TEXT : SHOW_MORE_TEXT;
+
     if (showingAll && !showLessButton) {
       return;
     }
-
-    const buttonText = showingAll ? SHOW_LESS_TEXT : SHOW_MORE_TEXT;
 
     return (
       <button onClick={this.toggleReadMore} className="read-more__button">
@@ -89,13 +89,13 @@ export default class ReadMore extends Component {
   };
 
   render() {
-    const { text, readMoreCharacterLimit, showLessButton, numberOfLines, lineHeight } = this.props;
+    const { text, readMoreCharacterLimit, showLessButton, numberOfLines, lineHeight, isTopContainer } = this.props;
 
     // console.log(numberOfLines, lineHeight, numberOfLines * lineHeight);
     // const maxHeight = numberOfLines * lineHeight;
     const style = {
       lineHeight,
-    //   maxHeight: `${maxHeight}em`,
+      //   maxHeight: `${maxHeight}em`,
     };
     const { showingAll } = this.state;
     const textToDisplay = this.getText({ showingAll, text, readMoreCharacterLimit, numberOfLines });
