@@ -21,6 +21,10 @@ const PageView = styled.div`
   line-height: 16px;
   /* -webkit-line-clamp: 4; Write the number of lines you want to be displayed */
   -webkit-box-orient: vertical;
+  .read-more__button {
+    font-size: 14px;
+  }
+
 `;
 
 const useStyles = makeStyles(() => ({
