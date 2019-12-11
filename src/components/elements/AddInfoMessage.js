@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import ZoomImage from './AutoZoomImage';
 import ImageCrop from './ImageCrop';
+import { applyRotation, imageResize } from '../../helper';
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -338,7 +339,10 @@ export default function AddInfoMessage(props) {
 
   async function acceptCrop(e) {
     closeCrop();
-    const arrFiles = Array.from(e.cropFile);
+    const cropFile = e.cropFile[0];
+    const newFile = await applyRotation(cropFile, 1, 1000);
+    const saveFile = imageResize(cropFile, newFile);
+    const arrFiles = Array.from(saveFile);
     fromFiletToBuffer(arrFiles);
   }
 

@@ -166,7 +166,7 @@ const WarrperChatBox = styled(FlexBox)`
     display: block;
     padding: ${rem(11)} ${rem(14)};
     font-size: ${rem(12)};
-    /* line-height: ${rem(18)}; */
+    line-height: ${rem(18)};
     color: #ffffff;
     border-radius: 10px;
     margin-top: 10px;

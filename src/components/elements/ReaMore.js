@@ -89,7 +89,7 @@ export default class ReadMore extends Component {
   };
 
   render() {
-    const { text, readMoreCharacterLimit, showLessButton, numberOfLines, lineHeight, isTopContainer } = this.props;
+    const { text, readMoreCharacterLimit, showLessButton, numberOfLines, lineHeight } = this.props;
 
     // console.log(numberOfLines, lineHeight, numberOfLines * lineHeight);
     // const maxHeight = numberOfLines * lineHeight;
