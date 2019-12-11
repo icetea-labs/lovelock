@@ -1,4 +1,7 @@
 import React from 'react';
+import Hash from 'ipfs-only-hash';
+import IpfsHttpClient from 'ipfs-http-client';
+import createHash from 'create-hash';
 import { ecc, codec, AccountType } from '@iceteachain/common';
 import moment from 'moment';
 import * as bip39 from 'bip39';
@@ -206,19 +209,72 @@ export async function getAccountInfo(address) {
     throw err;
   }
 }
-
+function readFileAsync(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
 export async function saveToIpfs(files) {
   if (!files || !files.length) return [];
   // simple upload
   let ipfsId = [];
-  console.log('saveToIpfs', files);
-
+  const isBuffer = Buffer.isBuffer(files[0]);
   if (files.length !== 1) {
     files = files.map(f => ({ content: f }));
   }
+  console.log('files', files);
+  let contentBuffer = files;
+  if (!isBuffer) {
+    const data = [];
+    for (let i = 0; i < files.length; i++) {
+      data.push(readFileAsync(files[i]));
+    }
+    contentBuffer = await Promise.all(data);
+  }
+  // get hash and sign
+  let preHash = [];
+  for (let i = 0; i < contentBuffer.length; i++) {
+    let buffer = '';
+    if (files.length !== 1) {
+      buffer = Buffer.from(contentBuffer[i].content);
+    } else {
+      buffer = Buffer.from(contentBuffer[i]);
+    }
+    preHash.push(Hash.of(buffer));
+  }
+  preHash = await Promise.all(preHash);
+  const signs = {};
+  const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
+  const token = codec.decode(Buffer.from(sessionData, 'base64'));
+  const tokenKey = codec.toString(token.tokenKey);
+  const pubkey = ecc.toPublicKey(tokenKey);
 
+  // console.log('token', tokenKey);
+  preHash.forEach(ipfsHash => {
+    // console.log('hash', ipfsHash);
+    const time = Date.now();
+    const hash32bytes = ecc.stableHashObject(ipfsHash + time);
+    const sign = ecc.sign(hash32bytes, tokenKey).signature;
+    signs[ipfsHash] = { sign: codec.toDataString(sign), time };
+  });
+  // console.log('signs', signs);
+  const signature = JSON.stringify({ signs, pubkey });
+
+  const newIpfs = IpfsHttpClient({
+    host: process.env.REACT_APP_IPFS_HOST,
+    port: process.env.REACT_APP_IPFS_PORT,
+    protocol: process.env.REACT_APP_IPFS_PROTOCOL,
+    headers: {
+      Authorization: `Bearer ${signature}`,
+    },
+  });
   try {
-    const results = await ipfs.add([...files]);
+    const results = await newIpfs.add([...contentBuffer]);
     ipfsId = results.map(el => {
       return el.hash;
     });
