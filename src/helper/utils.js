@@ -248,22 +248,27 @@ export async function saveToIpfs(files) {
     preHash.push(Hash.of(buffer));
   }
   preHash = await Promise.all(preHash);
-  const signs = {};
+  // const signs = {};
   const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
   const token = codec.decode(Buffer.from(sessionData, 'base64'));
   const tokenKey = codec.toString(token.tokenKey);
-  const pubkey = ecc.toPublicKey(tokenKey);
+  const pubkeySigner = ecc.toPublicKey(tokenKey);
+  let user = localStorage.getItem('user') || sessionStorage.getItem('user');
+  user = JSON.parse(user);
+  const from = user.address;
 
   // console.log('token', tokenKey);
-  preHash.forEach(ipfsHash => {
-    // console.log('hash', ipfsHash);
-    const time = Date.now();
-    const hash32bytes = ecc.stableHashObject(ipfsHash + time);
-    const sign = ecc.sign(hash32bytes, tokenKey).signature;
-    signs[ipfsHash] = { sign: codec.toDataString(sign), time };
+  let ipfsHash = '';
+  preHash.forEach(hash => {
+    ipfsHash = ipfsHash.concat(hash);
   });
+  // console.log('ipfsHash', ipfsHash);
+  const time = Date.now();
+  const hash32bytes = ecc.stableHashObject(ipfsHash + time);
+  const sign = ecc.sign(hash32bytes, tokenKey).signature;
+  const signs = { sign: codec.toDataString(sign), time, pubkeySigner, from };
   // console.log('signs', signs);
-  const signature = JSON.stringify({ signs, pubkey });
+  const signature = JSON.stringify(signs);
 
   const newIpfs = IpfsHttpClient({
     host: process.env.REACT_APP_IPFS_HOST,
