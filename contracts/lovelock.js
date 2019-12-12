@@ -98,22 +98,22 @@ class LoveLock {
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLikeLock(index: number, type: number) {
     const self = this;
-    expectUserApproved(self);
+    // expectUserApproved(self);
     return apiLikeLock(self, index, type);
   }
   @transaction followLock(index: number) {
     const self = this;
-    expectUserApproved(self);
+    // expectUserApproved(self);
     return apiFollowLock(self, index);
   }
   @transaction addContributorsToLock(index: number, contributors = []) {
     const self = this;
-    expectUserApproved(self);
+    // expectUserApproved(self);
     return apiAddContributorsToLock(self, index, contributors);
   }
   @transaction removeContributorsToLock(index: number, contributors = []) {
     const self = this;
-    expectUserApproved(self);
+    // expectUserApproved(self);
     return apiRemoveContributorsToLock(self, index, contributors);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
@@ -149,7 +149,7 @@ class LoveLock {
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const self = this;
-    expectUserApproved(self);
+    // expectUserApproved(self);
     return apiLikeMemory(self, memoIndex, type);
   }
   // create comment for memory
@@ -284,7 +284,7 @@ class LoveLock {
   }
   // =========== OTHER ================
   @transaction followPerson(address: address) {
-    expectUserApproved(this);
+    // expectUserApproved(this);
     const sender = msg.sender;
     const following = this.getFollowing();
     const followed = this.getFollowed();
