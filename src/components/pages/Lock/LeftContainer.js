@@ -7,6 +7,7 @@ import { getContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
 import { callView, showSubscriptionError } from '../../../helper';
 import Icon from '../../elements/Icon';
+
 import { LinkPro } from '../../elements/Button';
 import { Lock } from '../../elements';
 import PuConfirmLock from '../../elements/PuConfirmLock';
@@ -89,6 +90,7 @@ const SupportSite = styled.div`
   align-items: center;
   justify-content: center;
   width: auto;
+  color: #90949c;
   a {
     color: inherit;
     &:hover {
@@ -278,19 +280,18 @@ function LeftContainer(props) {
         </ShadowBox>
         <SupportSite>
           <p>
-            Powered by&nbsp;
-            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-              Icetea Platform
-            </a>
-          </p>
-          <p>
-            Contact:&nbsp;
             <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
-              info@icetea.io
+              Email
             </a>
             &nbsp;ー&nbsp;
             <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
-              Icetea Vietnam
+              Telegram
+            </a>
+          </p>
+          <p>
+            Powered by&nbsp;
+            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+              Icetea Platform
             </a>
           </p>
         </SupportSite>

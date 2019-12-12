@@ -50,6 +50,9 @@ const useStyles = makeStyles(() => ({
   copyAddress: {
     '& .MuiInputBase-input.Mui-disabled': {
       cursor: 'pointer !important',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
     },
   },
 }));
