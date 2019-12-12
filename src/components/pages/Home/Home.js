@@ -46,6 +46,7 @@ const ActionForm = styled.div`
 `;
 
 const ShadowBox = styled.div`
+  margin-top: ${rem(95)};
   padding: ${rem(30)};
   border-radius: 10px;
   background: #f5f5f8;
@@ -55,19 +56,31 @@ const ShadowBox = styled.div`
 const FooterWapper = styled.div`
   height: 20px;
   line-height: 20px;
-  background: #fff;
+  padding-top: 30px;
+  /* background: #fff; */
   width: 100%;
   color: #737373;
-  display: flex;
   font-size: 12px;
   font-weight: 300px;
   border-top: 1px solid #e6ecf0;
   justify-content: center;
-  padding: 8px 0;
-  position: fixed;
-  bottom: 0;
+  /* position: fixed; */
   left: 0;
   z-index: 1;
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+    display: none;
+  }
+`;
+const DownInfo = styled.div`
+  height: 20px;
+  width: 100%;
+  color: #737373;
+  font-size: 12px;
+  font-weight: 300px;
+  border-top: 1px solid #e6ecf0;
+  justify-content: center;
+  left: 0;
   @media (max-width: 768px) {
     justify-content: flex-start;
     display: none;
@@ -101,7 +114,9 @@ function Home(props) {
 
   useEffect(() => {
     let cancel = false;
-    fetchData(cancel);
+    if (address) {
+      fetchData(cancel);
+    }
     return () => {
       cancel = true;
     };
@@ -145,7 +160,7 @@ function Home(props) {
           <div>
             <img src="/static/img/plant.svg" alt="plant" />
             <div className="emptyTitle">
-              <h1>You have no locks yet.</h1>
+              <h1>You have no lock yet.</h1>
             </div>
             <div className="emptySubTitle">
               <h2>Locks are the way you connect and share memories with your loved ones.</h2>
@@ -161,6 +176,37 @@ function Home(props) {
           </div>
         </RightBox>
       </ShadowBox>
+      <FooterWapper>
+        <SupportSite className="upInfo">
+          <p>
+            Powered by&nbsp;
+            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+              Icetea Platform.
+            </a>
+          </p>
+          <p>
+            &nbsp;
+            <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
+              Trada Technology&nbsp;
+            </a>
+            &copy; 2019
+          </p>
+        </SupportSite>
+      </FooterWapper>
+      <DownInfo>
+        <SupportSite>
+          <p>
+            Need support? Contact us via&nbsp;
+            <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+              Email
+            </a>
+            &nbsp;or&nbsp;
+            <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
+              Telegram.
+            </a>
+          </p>
+        </SupportSite>
+      </DownInfo>
     </FlexWidthBox>
   );
   const isRegistered = !!address;
@@ -184,40 +230,6 @@ function Home(props) {
           ) : (
             <FlexBox wrap="wrap" justify="center">
               {renderHomeEmptyPropose}
-              <FooterWapper>
-                <SupportSite>
-                  <p>
-                    Powered by&nbsp;
-                    <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-                      Icetea Platform
-                    </a>
-                  </p>
-                  <p className="footRight">
-                    &copy; 2019&nbsp;
-                    <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
-                      Trada Technology
-                    </a>
-                  </p>
-                </SupportSite>
-                <SupportSite>
-                  <div className="footRight">
-                    <p>
-                      Email:&nbsp;
-                      <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
-                        info@icetea.io
-                      </a>
-                    </p>
-                  </div>
-                  <div className="footRight">
-                    <p>
-                      Telegram:&nbsp;
-                      <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
-                        Icetea Vietnam
-                      </a>
-                    </p>
-                  </div>
-                </SupportSite>
-              </FooterWapper>
             </FlexBox>
           )}
         </>
