@@ -60,7 +60,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
     isPrivate,
     sender,
     s_content,
-    s_info: { date: s_info.date, loveName: '' }, // no need hash
+    s_info: { date: s_info.date, lockName: '' }, // no need hash
     receiver,
     r_content: '',
     r_info: '',
@@ -97,12 +97,12 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   self.emitEvent('createLock', { by: sender, log }, ['by']);
   return index;
 };
-exports.apiChangeLoveName = (self, lockIndex, loveName) => {
+exports.apiChangeLockName = (self, lockIndex, lockName) => {
   const [lock, locks] = self.getLock(lockIndex);
   expectLockOwners(lock);
-  Object.assign(lock, { s_info: { ...lock.s_info, loveName } });
+  Object.assign(lock, { s_info: { ...lock.s_info, lockName } });
   self.setLocks(locks);
-  return { lockIndex, loveName };
+  return { lockIndex, lockName };
 };
 exports.apiAcceptLock = (self, lockIndex, r_content) => {
   const ret = _confirmLock(self, lockIndex, r_content, LOCK_STATUS_ACCEPTED);

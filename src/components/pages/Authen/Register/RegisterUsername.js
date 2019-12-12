@@ -185,7 +185,16 @@ function RegisterUsername(props) {
 
           const registerInfo = [];
           const opts = { address };
-          registerInfo.push(registerAlias(username, address));
+          let avatarUrl;
+          if (avatarData) {
+            const newFile = await applyRotation(avatarData[0], 1, 500);
+            const saveFile = imageResize(avatarData[0], newFile);
+            const setAva = saveFileToIpfs(saveFile).then(hash => {
+              avatarUrl = process.env.REACT_APP_IPFS + hash;
+              setTagsInfo({ avatar: hash }, opts);
+            });
+            registerInfo.push(setAva);
+          }
           registerInfo.push(
             setTagsInfo(
               {
@@ -197,16 +206,7 @@ function RegisterUsername(props) {
               opts
             )
           );
-          let avatarUrl;
-          if (avatarData) {
-            const newFile = await applyRotation(avatarData[0], 1, 500);
-            const saveFile = imageResize(avatarData[0], newFile);
-            const setAva = saveFileToIpfs(saveFile).then(hash => {
-              avatarUrl = process.env.REACT_APP_IPFS + hash;
-              setTagsInfo({ avatar: hash }, opts);
-            });
-            registerInfo.push(setAva);
-          }
+          registerInfo.push(registerAlias(username, address));
           await Promise.all(registerInfo);
 
           const newAccount = {
@@ -359,12 +359,8 @@ function RegisterUsername(props) {
           value={rePassword}
           inputProps={{ autoComplete: 'new-password' }}
         />
-        <Box display="flex" className={classes.avatarBox}>
+        {/* <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
-          {/* <div>
-            <AvatarPro src={avatar} className={classes.avatar} />
-            <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
-          </div> */}
           <PreviewContainter>
             <div className="upload_img">
               <AvatarPro src={avatar} className={classes.avatar} />
@@ -380,7 +376,7 @@ function RegisterUsername(props) {
               </div>
             </div>
           </PreviewContainter>
-        </Box>
+        </Box> */}
         <div>
           <FormControlLabel
             control={
