@@ -7,6 +7,7 @@ import { getContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
 import { callView, showSubscriptionError } from '../../../helper';
 import Icon from '../../elements/Icon';
+
 import { LinkPro } from '../../elements/Button';
 import { Lock } from '../../elements';
 import PuConfirmLock from '../../elements/PuConfirmLock';
@@ -81,6 +82,7 @@ const CollectionBox = styled.div`
 `;
 
 const SupportSite = styled.div`
+  position: absolute;
   display: block;
   padding-top: 1rem;
   line-height: 18px;
@@ -88,6 +90,7 @@ const SupportSite = styled.div`
   align-items: center;
   justify-content: center;
   width: auto;
+  color: #90949c;
   a {
     color: inherit;
     &:hover {
@@ -98,7 +101,19 @@ const SupportSite = styled.div`
 `;
 
 function LeftContainer(props) {
-  const { locks, setLocks, setNewLock, confirmLock, topInfo, proIndex, address, history, loading, isGuest, closeMobileMenu } = props;
+  const {
+    locks,
+    setLocks,
+    setNewLock,
+    confirmLock,
+    topInfo,
+    proIndex,
+    address,
+    history,
+    loading,
+    isGuest,
+    closeMobileMenu,
+  } = props;
 
   const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
@@ -262,21 +277,24 @@ function LeftContainer(props) {
           {!isGuest && renderFollowingLocks(locks, address)}
           <div className="title">Collection</div>
           <CollectionBox>{renderCollections(collections)}</CollectionBox>
-          <SupportSite>
-            <p>
-              Email:&nbsp;
-              <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
-                info@icetea.io
-              </a>
-            </p>
-            <p>
-              Telegram:&nbsp;
-              <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
-                Icetea Vietnam
-              </a>
-            </p>
-          </SupportSite>
         </ShadowBox>
+        <SupportSite>
+          <p>
+            <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+              Email
+            </a>
+            &nbsp;ー&nbsp;
+            <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
+              Telegram
+            </a>
+          </p>
+          <p>
+            Powered by&nbsp;
+            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+              Icetea Platform
+            </a>
+          </p>
+        </SupportSite>
       </LeftBox>
       {step === 'pending' && (
         <PuNotifyLock
