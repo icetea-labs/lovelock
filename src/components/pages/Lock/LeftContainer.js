@@ -98,6 +98,9 @@ const SupportSite = styled.div`
       text-decoration: underline;
     }
   }
+  @media (max-width: 768px) {
+    padding-left: 2rem;
+  }
 `;
 
 function LeftContainer(props) {
@@ -284,7 +287,7 @@ function LeftContainer(props) {
               Email
             </a>
             &nbsp;ー&nbsp;
-            <a href="https://t.me/iceteachain" target="_blank" rel="noopener noreferrer">
+            <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
               Telegram
             </a>
           </p>
