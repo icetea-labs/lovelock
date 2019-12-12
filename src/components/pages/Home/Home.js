@@ -187,6 +187,12 @@ function Home(props) {
               <FooterWapper>
                 <SupportSite>
                   <p>
+                    Powered by&nbsp;
+                    <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+                      Icetea Platform
+                    </a>
+                  </p>
+                  <p className="footRight">
                     &copy; 2019&nbsp;
                     <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
                       Trada Technology
