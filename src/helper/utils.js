@@ -262,7 +262,7 @@ export async function saveToIpfs(files) {
   preHash.forEach(hash => {
     ipfsHash = ipfsHash.concat(hash);
   });
-  // console.log('ipfsHash', ipfsHash);
+  console.log('ipfsHash', ipfsHash);
   const time = Date.now();
   const hash32bytes = ecc.stableHashObject(ipfsHash + time);
   const sign = ecc.sign(hash32bytes, tokenKey).signature;

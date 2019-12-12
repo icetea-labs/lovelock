@@ -1,5 +1,5 @@
 /* eslint-disable no-alert */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
@@ -7,9 +7,13 @@ import { ecc } from '@iceteachain/common';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import ContactMailIcon from '@material-ui/icons/ContactMail';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import RotateRightIcon from '@material-ui/icons/RotateRight';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import {
   getAliasAndTags,
@@ -42,6 +46,11 @@ const useStyles = makeStyles(() => ({
   rightRotate: {
     float: 'right',
     color: '#8250c8',
+  },
+  copyAddress: {
+    '& .MuiInputBase-input.Mui-disabled': {
+      cursor: 'pointer !important',
+    },
   },
 }));
 
@@ -116,7 +125,15 @@ const RightProfile = styled.div`
   padding: 10px;
   margin: 5px;
 `;
-
+const BoxName = styled.div`
+  display: flex;
+  & > :first-child {
+    margin-right: 10px;
+  }
+  @media (max-width: 599.95px) {
+    display: block;
+  }
+`;
 function ChangeProfile(props) {
   const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth, privateKey } = props;
   const [firstname, setFirstname] = useState({ old: '', new: '' });
@@ -335,6 +352,34 @@ function ChangeProfile(props) {
                     )}
                   </PreviewContainter>
                   <RightProfile>
+                    <Tooltip title="Click copy address to clipboard" aria-label="clipboard">
+                      <TextValidator
+                        className={classes.copyAddress}
+                        label="Address"
+                        name="address"
+                        margin="normal"
+                        disabled
+                        onClick={() => {
+                          const dummy = document.createElement('textarea');
+                          document.body.appendChild(dummy);
+                          dummy.value = address;
+                          dummy.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(dummy);
+                          const message = 'Copied';
+                          enqueueSnackbar(message, { variant: 'info' });
+                        }}
+                        value={address}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <ContactMailIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Tooltip>
+
                     <TextValidator
                       label="Username"
                       fullWidth
@@ -356,27 +401,36 @@ function ChangeProfile(props) {
                       margin="dense"
                       value={username}
                       disabled={isRegistered}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccountCircle />
+                          </InputAdornment>
+                        ),
+                      }}
                     />
-                    <TextValidator
-                      label="First Name"
-                      fullWidth
-                      onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
-                      name="firstname"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      margin="normal"
-                      value={firstname.new}
-                    />
-                    <TextValidator
-                      label="Last Name"
-                      fullWidth
-                      onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
-                      name="lastname"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      margin="normal"
-                      value={lastname.new}
-                    />
+                    <BoxName>
+                      <TextValidator
+                        label="First Name"
+                        fullWidth
+                        onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
+                        name="firstname"
+                        validators={['required']}
+                        errorMessages={['This field is required']}
+                        margin="normal"
+                        value={firstname.new}
+                      />
+                      <TextValidator
+                        label="Last Name"
+                        fullWidth
+                        onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
+                        name="lastname"
+                        validators={['required']}
+                        errorMessages={['This field is required']}
+                        margin="normal"
+                        value={lastname.new}
+                      />
+                    </BoxName>
                   </RightProfile>
                 </FlexBox>
                 <DivControlBtnKeystore justify="center">
