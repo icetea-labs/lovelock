@@ -393,6 +393,17 @@ class LoveLock {
 
   @transaction addUsers(_users) {
     expectAdmin(this);
+    if (!Array.isArray(_users)) {
+      _users = [_users];
+    }
+
+    _users = _users.map(user => {
+      if (!isValidAddress(user)) {
+        user = convertAliasToAddress(user);
+      }
+      return user;
+    });
+
     const schema = Joi.array().items(
       Joi.string()
         .max(43)
@@ -410,6 +421,16 @@ class LoveLock {
 
   @transaction removeUsers(_users) {
     expectAdmin(this);
+    if (!Array.isArray(_users)) {
+      _users = [_users];
+    }
+
+    _users = _users.map(user => {
+      if (!isValidAddress(user)) {
+        user = convertAliasToAddress(user);
+      }
+      return user;
+    });
     const schema = Joi.array().items(
       Joi.string()
         .max(43)
@@ -427,4 +448,13 @@ class LoveLock {
     const users = this.getUsers();
     return users.includes(user);
   }
+}
+const ctAlias = loadContract('system.alias');
+function convertAliasToAddress(alias) {
+  const aliasObj = ctAlias.query.invokeView(alias) || {};
+  let resp = {};
+  Object.entries(aliasObj).forEach(([key, value]) => {
+    resp = value;
+  });
+  return resp.address || '';
 }
