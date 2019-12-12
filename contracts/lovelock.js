@@ -3,6 +3,7 @@ const Joi = require('@hapi/joi');
 const { expectLockOwners, getDataByIndex, expectOwner, expectAdmin, expectUserApproved } = require('./helper.js');
 const {
   apiCreateLock,
+  apiChangeLoveName,
   apiAcceptLock,
   apiCancelLock,
   apiFollowLock,
@@ -84,6 +85,11 @@ class LoveLock {
     const self = this;
     expectUserApproved(self);
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);
+  }
+  @transaction changeLoveName(index: number, loveName: string) {
+    const self = this;
+    expectUserApproved(self);
+    return apiChangeLoveName(self, index, loveName);
   }
   @transaction acceptLock(index: number, r_content: string) {
     const self = this;

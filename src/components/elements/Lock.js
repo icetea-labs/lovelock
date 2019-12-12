@@ -40,11 +40,14 @@ function Lock(props) {
 
   const getInfo = item => {
     const prefix = item.receiver === address ? 's' : 'r';
-
     switch (item.type) {
       case 2:
         return {
-          name: address === item.sender ? 'My Journal' : item['s_tags']['display-name'],
+          name: item.s_info.loveName
+            ? item.s_info.loveName
+            : address === item.sender
+            ? 'My Journal'
+            : item['s_tags']['display-name'],
           nick: 'journal',
           icon: 'waves',
           avatar: item.s_tags.avatar,
