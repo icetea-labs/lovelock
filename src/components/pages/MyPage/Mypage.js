@@ -179,8 +179,8 @@ function Mypage(props) {
             </CoverBox>
             <NavbarBox>
               <div className="proLike">
-                <Button>Timeline</Button>
-                <Button>Photos</Button>
+                {/* <Button>Timeline</Button> */}
+                {/* <Button>Photos</Button> */}
                 <Button onClick={handerFollow} className={classes.btLikeFollow}>
                   {myPageInfo.isMyFollow ? (
                     <>
