@@ -413,6 +413,7 @@ function Header(props) {
         </ListItemIcon>
         <ListItemText primary="Update Profile" />
       </StyledMenuItem>
+      <Divider />
       <StyledMenuItem
         onClick={() => {
           handleShowphrase();
@@ -424,7 +425,7 @@ function Header(props) {
         </ListItemIcon>
         <ListItemText primary="View recovery phrase" />
       </StyledMenuItem>
-      <StyledMenuItem
+      {/* <StyledMenuItem
         onClick={() => {
           props.history.push('/register');
           handleMenuClose();
@@ -434,9 +435,9 @@ function Header(props) {
           <AddIcon />
         </ListItemIcon>
         <ListItemText primary="Create New Account" />
-      </StyledMenuItem>
-      <Divider />
-      <StyledMenuItem
+      </StyledMenuItem> */}
+
+      {/* <StyledMenuItem
         onClick={() => {
           props.history.push('/login');
           handleMenuClose();
@@ -446,7 +447,7 @@ function Header(props) {
           <ExitToAppIcon />
         </ListItemIcon>
         <ListItemText primary="Change Account" />
-      </StyledMenuItem>
+      </StyledMenuItem> */}
     </StyledMenu>
   );
 

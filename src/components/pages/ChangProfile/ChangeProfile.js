@@ -50,6 +50,9 @@ const useStyles = makeStyles(() => ({
   copyAddress: {
     '& .MuiInputBase-input.Mui-disabled': {
       cursor: 'pointer !important',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
     },
   },
 }));
@@ -352,34 +355,6 @@ function ChangeProfile(props) {
                     )}
                   </PreviewContainter>
                   <RightProfile>
-                    <Tooltip title="Click copy address to clipboard" aria-label="clipboard">
-                      <TextValidator
-                        className={classes.copyAddress}
-                        label="Address"
-                        name="address"
-                        margin="normal"
-                        disabled
-                        onClick={() => {
-                          const dummy = document.createElement('textarea');
-                          document.body.appendChild(dummy);
-                          dummy.value = address;
-                          dummy.select();
-                          document.execCommand('copy');
-                          document.body.removeChild(dummy);
-                          const message = 'Copied';
-                          enqueueSnackbar(message, { variant: 'info' });
-                        }}
-                        value={address}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <ContactMailIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Tooltip>
-
                     <TextValidator
                       label="Username"
                       fullWidth
@@ -431,6 +406,34 @@ function ChangeProfile(props) {
                         value={lastname.new}
                       />
                     </BoxName>
+                    <Tooltip title="Click to copy address to clipboard" aria-label="clipboard">
+                      <TextValidator
+                        className={classes.copyAddress}
+                        fullWidth
+                        label="Address"
+                        name="address"
+                        margin="normal"
+                        disabled
+                        onClick={() => {
+                          const dummy = document.createElement('textarea');
+                          document.body.appendChild(dummy);
+                          dummy.value = address;
+                          dummy.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(dummy);
+                          const message = 'Copied';
+                          enqueueSnackbar(message, { variant: 'info' });
+                        }}
+                        value={address}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <ContactMailIcon />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Tooltip>
                   </RightProfile>
                 </FlexBox>
                 <DivControlBtnKeystore justify="center">

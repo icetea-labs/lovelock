@@ -415,14 +415,14 @@ class PuNewLock extends React.Component {
   };
 
   createJournal = () => {
-    const { locks, enqueueSnackbar } = this.props;
+    // const { locks, enqueueSnackbar } = this.props;
     let message = '';
-    for (let i = 0; i < locks.length; i++) {
-      if (locks[i].sender === locks[i].receiver) {
-        message = 'You already had a journal and cannot create one more.';
-        enqueueSnackbar(message, { variant: 'error' });
-      }
-    }
+    // for (let i = 0; i < locks.length; i++) {
+    //   if (locks[i].sender === locks[i].receiver) {
+    //     message = 'You already had a journal and cannot create one more.';
+    //     enqueueSnackbar(message, { variant: 'error' });
+    //   }
+    // }
 
     if (message) {
       this.closeJournal();
