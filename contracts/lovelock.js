@@ -427,4 +427,22 @@ class LoveLock {
     const users = this.getUsers();
     return users.includes(user);
   }
+  // ========== Authorized IPFS APPROVED =============
+  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
+    const self = this;
+    expectUserApproved(self, { from: mainAddress });
+    // check tokenAddress is token on mainaddress.
+    const ctDid = loadContract('system.did');
+    const tokens = ctDid.query.invokeView(mainAddress).tokens || {};
+    if (tokens[contract]) {
+      const tokesOnContract = Object.keys(tokens[contract]);
+      if (tokesOnContract.includes(tokenAddress)) {
+        const { expireAfter } = tokens[contract][tokenAddress];
+        if (expireAfter - Date.now() >= 60 * 1000) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
