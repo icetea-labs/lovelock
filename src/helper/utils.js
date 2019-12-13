@@ -237,7 +237,7 @@ export async function saveToIpfs(files) {
     contentBuffer = await Promise.all(data);
   }
   // get hash and sign
-  let preHash = [];
+  const preHash = [];
   for (let i = 0; i < contentBuffer.length; i++) {
     let buffer = '';
     if (files.length !== 1) {
@@ -247,7 +247,7 @@ export async function saveToIpfs(files) {
     }
     preHash.push(Hash.of(buffer));
   }
-  preHash = await Promise.all(preHash);
+  const fileHashes = await Promise.all(preHash);
   // const signs = {};
   const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
   const token = codec.decode(Buffer.from(sessionData, 'base64'));
@@ -262,11 +262,12 @@ export async function saveToIpfs(files) {
   preHash.forEach(hash => {
     ipfsHash = ipfsHash.concat(hash);
   });
-  console.log('ipfsHash', ipfsHash);
+
   const time = Date.now();
-  const hash32bytes = ecc.stableHashObject(ipfsHash + time);
+  const hash32bytes = ecc.stableHashObject({ from, time, fileHashes });
   const sign = ecc.sign(hash32bytes, tokenKey).signature;
   const signs = { sign: codec.toDataString(sign), time, pubkeySigner, from };
+
   // console.log('signs', signs);
   const signature = JSON.stringify(signs);
 
