@@ -9,7 +9,7 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
-import { TimeWithFormat, smartFetchIpfsJson, makeLockName } from '../../../helper';
+import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone } from '../../../helper';
 // import { fetchAltFirstIpfsJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
@@ -107,7 +107,7 @@ export function BlogView(props) {
   }
 
   const renderHelmet = blogInfo => {
-    // signalPrerenderDone();
+    signalPrerenderDone();
     const blogMeta = blogInfo.meta;
 
     const title = `${blogMeta.title} - A story on Lovelock`;
