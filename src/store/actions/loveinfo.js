@@ -9,6 +9,7 @@ export const actionTypes = {
   CONFIRM_LOCK: 'CONFIRM_LOCK',
   SET_CURRENT_LOCK: 'SET_CURRENT_LOCK',
   SET_MEMORY: 'SET_MEMORY',
+  SET_BLOG_VIEW: 'SET_BLOG_VIEW',
 };
 /*
  * action creators
@@ -19,3 +20,4 @@ export const setLocks = data => ({ type: actionTypes.SET_LOCKS, data });
 export const confirmLock = data => ({ type: actionTypes.CONFIRM_LOCK, data });
 export const setCurrentLock = data => ({ type: actionTypes.SET_CURRENT_LOCK, data });
 export const setMemory = data => ({ type: actionTypes.SET_MEMORY, data });
+export const setBlogView = data => ({ type: actionTypes.SET_BLOG_VIEW, data });

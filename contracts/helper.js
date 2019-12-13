@@ -19,10 +19,11 @@ exports.expectAdmin = (self, message = 'Permission denied') => {
   expect(admins.includes(msg.sender), errmsg);
 };
 //private function
-exports.expectUserApproved = (self, message = 'Permission denied') => {
-  const errmsg = message + '. You are not approved to use the app yet.';
+exports.expectUserApproved = (self, opts) => {
+  opts = Object.assign({ message: 'Permission denied', from: msg.sender }, opts);
+  const errmsg = opts.message + '. You are not approved to use the app yet.';
   const users = self.getUsers();
-  expect(users.includes(msg.sender), errmsg);
+  expect(users.includes(opts.from), errmsg);
 };
 //private function
 exports.getDataByIndex = (array, index) => {

@@ -4,6 +4,7 @@ const initialState = {
   locks: [],
   memories: [],
   topInfo: {},
+  blogView: {},
 };
 const loveinfo = (state = initialState, action) => {
   switch (action.type) {
@@ -28,6 +29,8 @@ const loveinfo = (state = initialState, action) => {
       return { ...state, locks: [...newLocks] };
     case actionTypes.SET_MEMORY:
       return { ...state, memories: action.data };
+    case actionTypes.SET_BLOG_VIEW:
+      return { ...state, blogView: action.data };
     default:
       return state;
   }
