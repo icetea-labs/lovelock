@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core/styles';
-import { AvatarPro } from './AvatarPro';
+// import { makeStyles } from '@material-ui/core/styles';
+// import { AvatarPro } from './AvatarPro';
 
 const ImgWrap = styled.div`
   width: 120px;
@@ -16,17 +16,17 @@ const ContainerWrap = styled.div`
   display: block;
 `;
 
-const useStyles = makeStyles(() => ({
-  avatar: {
-    width: 120,
-    height: 120,
-  },
-}));
+// const useStyles = makeStyles(() => ({
+//   avatar: {
+//     width: 120,
+//     height: 120,
+//   },
+// }));
 
 export default function RotateImg(props) {
   const { src, rotation } = props;
 
-  const classes = useStyles();
+  // const classes = useStyles();
 
   return (
     <ContainerWrap>

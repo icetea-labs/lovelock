@@ -1,7 +1,6 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
 import IpfsHttpClient from 'ipfs-http-client';
-import createHash from 'create-hash';
 import { ecc, codec, AccountType } from '@iceteachain/common';
 import moment from 'moment';
 import * as bip39 from 'bip39';

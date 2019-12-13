@@ -4,9 +4,9 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
-import CameraAltIcon from '@material-ui/icons/CameraAlt';
+// import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import Box from '@material-ui/core/Box';
+// import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import WarningIcon from '@material-ui/icons/Warning';
@@ -26,7 +26,7 @@ import {
   imageResize,
 } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
-import { AvatarPro } from '../../../elements';
+// import { AvatarPro } from '../../../elements';
 // import ImageCrop from '../../../elements/ImageCrop';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -54,54 +54,54 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const PreviewContainter = styled.div`
-  display: flex;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  font-size: 14px;
-  cursor: pointer;
-  .upload_img input[type='file'] {
-    font-size: 100px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-  .upload_img {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    cursor: pointer;
-    &:hover .changeImg {
-      display: block;
-    }
-  }
-  .changeImg {
-    cursor: pointer;
-    position: absolute;
-    display: none;
-    width: 100px;
-    height: 50px;
-    top: 50px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    font-size: 80%;
-    line-height: 2;
-    overflow: hidden;
-    border-bottom-left-radius: 600px;
-    border-bottom-right-radius: 600px;
-  }
-  .fileInput {
-    width: 120px;
-    height: 50px;
-    padding: 2px;
-    cursor: pointer;
-  }
-`;
+// const PreviewContainter = styled.div`
+//   display: flex;
+//   flex-direction: row;
+//   -webkit-box-pack: justify;
+//   font-size: 14px;
+//   cursor: pointer;
+//   .upload_img input[type='file'] {
+//     font-size: 100px;
+//     position: absolute;
+//     left: 0;
+//     top: 0;
+//     opacity: 0;
+//     cursor: pointer;
+//   }
+//   .upload_img {
+//     position: relative;
+//     overflow: hidden;
+//     display: inline-block;
+//     cursor: pointer;
+//     &:hover .changeImg {
+//       display: block;
+//     }
+//   }
+//   .changeImg {
+//     cursor: pointer;
+//     position: absolute;
+//     display: none;
+//     width: 100px;
+//     height: 50px;
+//     top: 50px;
+//     left: 0;
+//     right: 0;
+//     text-align: center;
+//     background-color: rgba(0, 0, 0, 0.5);
+//     color: #fff;
+//     font-size: 80%;
+//     line-height: 2;
+//     overflow: hidden;
+//     border-bottom-left-radius: 600px;
+//     border-bottom-right-radius: 600px;
+//   }
+//   .fileInput {
+//     width: 120px;
+//     height: 50px;
+//     padding: 2px;
+//     cursor: pointer;
+//   }
+// `;
 
 const WarningPass = styled.div`
   .warningSnackbar {
@@ -260,17 +260,17 @@ function RegisterUsername(props) {
     history.push('/login');
   }
 
-  function handleImageChange(event) {
-    event.preventDefault();
-    const orFiles = Array.from(event.target.files);
+  // function handleImageChange(event) {
+  //   event.preventDefault();
+  //   const orFiles = Array.from(event.target.files);
 
-    if (orFiles.length > 0) {
-      setOriginFile(orFiles);
-      setIsOpenCrop(true);
-    } else {
-      setIsOpenCrop(false);
-    }
-  }
+  //   if (orFiles.length > 0) {
+  //     setOriginFile(orFiles);
+  //     setIsOpenCrop(true);
+  //   } else {
+  //     setIsOpenCrop(false);
+  //   }
+  // }
 
   // function closeCrop() {
   //   setIsOpenCrop(false);

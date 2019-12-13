@@ -26,8 +26,8 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
-import AddIcon from '@material-ui/icons/Add';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+// import AddIcon from '@material-ui/icons/Add';
+// import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
