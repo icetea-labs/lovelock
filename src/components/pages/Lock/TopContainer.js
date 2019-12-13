@@ -212,25 +212,37 @@ const SummaryCard = styled.div`
       margin-left: 7px;
       margin-bottom: 12px;
     }
-    .summaryCongrat {
-      text-align: center;
-      margin: 7px 0 0 7px;
-      height: 36px;
-      border-radius: 18px;
-      background-color: #fdf0f6;
-      font-size: 12px;
-      font-weight: 500;
-      color: #87198d;
-      .congratContent {
-        padding: 12px;
-      }
-    }
   }
   .proLike {
     display: flex;
     height: 50px;
     padding: 8px 0;
     box-sizing: border-box;
+  }
+`;
+
+const SummaryCongrat = styled.div`
+  text-align: center;
+  align-items: center;
+  margin-top: -40px;
+  height: 36px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #87198d;
+  .congratContent {
+    padding: 12px;
+  }
+  .summaryCongrat {
+    display: inline-block;
+    border-radius: 18px;
+    background-color: #fdf0f6;
+    width: 50%;
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+  @media (max-width: 768px) {
+    margin-top: 0;
   }
 `;
 
@@ -553,7 +565,6 @@ function TopContrainer(props) {
                 {diffDate > 0 && (diffDate === 1 ? `${diffDate} day` : `${diffDate} days`)}
               </span>
             </div>
-            <HolidayEvent day={topInfo.s_date} />
           </div>
         ) : (
           <div className="journalTitle">JOURNAL</div>
@@ -602,6 +613,11 @@ function TopContrainer(props) {
         </div>
       </SummaryCard>
       {/* isJournal={topInfo.isJournal} */}
+      {!topInfo.isJournal && (
+        <SummaryCongrat>
+          <HolidayEvent day={topInfo.s_date} />
+        </SummaryCongrat>
+      )}
       <WarrperChatBox>
         {topInfo.s_content && (
           <div className="proposeMes">
