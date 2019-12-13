@@ -1,5 +1,5 @@
 /* eslint-disable no-alert */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';

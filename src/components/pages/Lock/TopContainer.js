@@ -533,7 +533,10 @@ function TopContrainer(props) {
             </div>
           </CardMedia>
         ) : (
-          <CardMedia className={classes.media} image={process.env.REACT_APP_IPFS + topInfo.coverImg}>
+          <CardMedia
+            className={classes.media}
+            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
+          >
             <div className="showChangeImg">
               <div>{buttonChange}</div>
             </div>
