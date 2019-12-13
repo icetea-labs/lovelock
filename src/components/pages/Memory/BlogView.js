@@ -78,7 +78,7 @@ export function BlogView(props) {
             throw err;
           });
       }
-      console.log('mem', mem);
+      // console.log('mem', mem);
       // set to redux
       setBlogView(mem);
       setMemory(mems);
@@ -120,12 +120,13 @@ export function BlogView(props) {
     };
     const desc = makeLockName(propose);
     console.log('desc', desc);
-    const img = blogMeta.coverPhoto && blogMeta.coverPhoto.url;
-    // if (!img) {
-    //   img = propose.coverImg
-    //     ? process.env.REACT_APP_IPFS + propose.coverImg
-    //     : `${process.env.PUBLIC_URL}/static/img/share.jpg`;
-    // }
+    let img = blogMeta.coverPhoto && blogMeta.coverPhoto.url;
+    if (!img) {
+      img = propose.coverImg
+        ? process.env.REACT_APP_IPFS + propose.coverImg
+        : `${process.env.PUBLIC_URL}/static/img/share.jpg`;
+    }
+
     return (
       <Helmet>
         <title>{title}</title>
