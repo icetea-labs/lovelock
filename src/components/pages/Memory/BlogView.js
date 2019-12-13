@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
 import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
-import { TimeWithFormat, smartFetchIpfsJson } from '../../../helper';
+import { TimeWithFormat, smartFetchIpfsJson, makeLockName } from '../../../helper';
 // import { fetchAltFirstIpfsJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
@@ -65,11 +66,11 @@ export function BlogView(props) {
   async function fetchData() {
     console.log('fetchData blogview', paramMemIndex);
     APIService.getMemoriesByListMemIndex([paramMemIndex]).then(async mems => {
-      // console.log('mems', mems);
       const signal = false;
       const mem = mems[0];
       if (mem.info.blog) {
         const blogData = JSON.parse(mem.content);
+        mem.meta = blogData.meta;
         mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: mem.info.date })
           .then(d => d.json)
           .catch(err => {
@@ -77,6 +78,7 @@ export function BlogView(props) {
             throw err;
           });
       }
+      console.log('mem', mem);
       // set to redux
       setBlogView(mem);
       setMemory(mems);
@@ -104,6 +106,37 @@ export function BlogView(props) {
     setNumComment(number);
   }
 
+  const renderHelmet = blogInfo => {
+    // signalPrerenderDone();
+    const blogMeta = blogInfo.meta;
+
+    const title = `${blogMeta.title} - A story on Lovelock`;
+    const { sender, receiver } = blogInfo;
+    const propose = {
+      sender,
+      receiver,
+      s_name: blogInfo.s_tags['display-name'],
+      r_name: blogInfo.r_tags['display-name'],
+    };
+    const desc = makeLockName(propose);
+    console.log('desc', desc);
+    const img = blogMeta.coverPhoto && blogMeta.coverPhoto.url;
+    // if (!img) {
+    //   img = propose.coverImg
+    //     ? process.env.REACT_APP_IPFS + propose.coverImg
+    //     : `${process.env.PUBLIC_URL}/static/img/share.jpg`;
+    // }
+    return (
+      <Helmet>
+        <title>{title}</title>
+        <meta property="og:title" content={title} />
+        <meta property="og:type" content="article" />
+        <meta name="description" content={desc} />
+        <meta property="og:image" content={img} />
+        <meta property="og:description" content={desc} />
+      </Helmet>
+    );
+  };
   return (
     // <div
     //   style={{
@@ -115,6 +148,7 @@ export function BlogView(props) {
     //   {content && <Editor initContent={content} read_only />}
     // </div>
     <>
+      {blogView && blogView.meta && blogView.meta.title && renderHelmet(blogView)}
       {Object.keys(blogView).length > 0 && (
         <BlogModal
           open
