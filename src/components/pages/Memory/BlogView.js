@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
 }));
 export function BlogView(props) {
   const { match, setMemory, setBlogView, blogView } = props;
-  const paramMemIndex = parseInt(match.params.hash, 10);
+  const paramMemIndex = parseInt(match.params.index, 10);
   // const [content, setContent] = useState(null);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
