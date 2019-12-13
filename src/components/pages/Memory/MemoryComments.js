@@ -199,7 +199,7 @@ export default function MemoryComments(props) {
       cmtIndex = indexKey;
     }
     if (!owner.includes(address)) {
-      const message = `Permission deny, you can not delete this comment.`;
+      const message = `You cannot delete this comment.`;
       enqueueSnackbar(message, { variant: 'error' });
     } else {
       await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
