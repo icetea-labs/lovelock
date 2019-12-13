@@ -335,12 +335,15 @@ function MemoryContent(props) {
 
   function openMemory(memoryId) {
     setOpenModal(true);
-    window.history.pushState({}, '', `?memory=${memoryId}`);
+    // console.log('window.location', window.location);
+    const pathname = `/blog/${memoryId}`;
+    window.history.pushState(null, '', pathname);
   }
 
   function closeMemory() {
     setOpenModal(false);
-    window.history.pushState({}, '', window.location.pathname);
+    const pathname = `/lock/${memory.lockIndex}`;
+    window.history.pushState({}, '', pathname);
   }
 
   const [currentImage, setCurrentImage] = useState(0);
@@ -552,9 +555,7 @@ function MemoryContent(props) {
           <>
             <ArrowRightIcon color="primary" />
             {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
-              <p style={{ color: 'inherit' }}>
-                {mem.r_tags['display-name']}
-              </p>
+              <p style={{ color: 'inherit' }}>{mem.r_tags['display-name']}</p>
             ) : (
               <a href={`/mypage/${mem.receiver}`} style={{ color: 'inherit' }} className={classes.memoryReceiver}>
                 {mem.r_tags['display-name']}

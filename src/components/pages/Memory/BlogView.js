@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
+import { withRouter } from 'react-router-dom';
 
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
@@ -28,13 +29,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export function BlogView(props) {
-  const { match, setLocks, setMemory, setBlogView, blogView } = props;
+  const { match, setMemory, setBlogView, blogView } = props;
   const paramMemIndex = parseInt(match.params.hash, 10);
   // const [content, setContent] = useState(null);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
-  const [isOpenModal, setOpenModal] = useState(true);
-  const [loading, setLoading] = useState(true);
+  // const [isOpenModal, setOpenModal] = useState(true);
+  // const [loading, setLoading] = useState(true);
   // useEffect(() => {
   //   const abort = new AbortController();
 
@@ -62,6 +63,7 @@ export function BlogView(props) {
   }, []);
 
   async function fetchData() {
+    console.log('fetchData blogview', paramMemIndex);
     APIService.getMemoriesByListMemIndex([paramMemIndex]).then(async mems => {
       // console.log('mems', mems);
       const signal = false;
@@ -80,12 +82,12 @@ export function BlogView(props) {
       setMemory(mems);
     });
     // setOpenModal(true);
-    setLoading(false);
+    // setLoading(false);
   }
 
   function closeMemory() {
-    // setOpenModal(false);
-    // window.history.pushState({}, '', window.location.pathname);
+    // console.log('window', blogView);
+    props.history.push(`/lock/${blogView.lockIndex}`);
   }
 
   const textInput = useRef('');
@@ -115,7 +117,7 @@ export function BlogView(props) {
     <>
       {Object.keys(blogView).length > 0 && (
         <BlogModal
-          open={isOpenModal}
+          open
           title={
             <MemoryTitle
               sender={blogView.s_tags['display-name']}
@@ -153,15 +155,11 @@ export function BlogView(props) {
 // export default props => BlogView({ ...props, });
 const mapStateToProps = state => {
   return {
-    address: state.account.address,
     blogView: state.loveinfo.blogView,
   };
 };
 const mapDispatchToProps = dispatch => {
   return {
-    setLocks: value => {
-      dispatch(actions.setLocks(value));
-    },
     setBlogView: value => {
       dispatch(actions.setBlogView(value));
     },
@@ -173,4 +171,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(BlogView);
+)(withRouter(BlogView));
