@@ -252,7 +252,7 @@ class PuNewLock extends React.Component {
 
     try {
       const result = await getAliasContract()
-        .methods.query(escapedValue)
+        .methods.query(`account.${escapedValue}`)
         .call();
       people = Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
