@@ -69,6 +69,18 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     }
   }
 
+  // add user
+  if (config.USER_ADDRESS) {
+    console.log('Adding user ' + config.USER_ADDRESS);
+    try {
+      const newContract = tweb3.contract(r);
+      await newContract.methods.addUsers([config.USER_ADDRESS]).sendCommit({ from: account.address });
+      console.log('User added.');
+    } catch (e) {
+      console.log('Fail to add user: ', e.message);
+    }
+  }
+
   // update .env
   config.REACT_APP_CONTRACT = r.address;
   fs.writeFileSync(envPath, envfile.stringifySync(config));
