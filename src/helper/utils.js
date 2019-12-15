@@ -44,8 +44,27 @@ export function waitForHtmlTags(
   }
 }
 
-export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
-  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json());
+export function ensureHashUrl(url, gateway = ipfsGateway) {
+  return url.indexOf(':') < 0 ? gateway + url : url
+}
+
+export function resolveBlogHashUrls(json, gateway) {
+  if (!json || !json.blocks || !json.blocks.length) {
+    return json
+  }
+  const blocks = json.blocks
+  for (const b of blocks) {
+    if (b.type === 'image' &&
+      b.data.url &&
+      b.data.url.indexOf(':') < 0) {
+      b.data.url = ensureHashUrl(b.data.url, gateway)
+    }
+  }
+  return json
+}
+
+export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
+  return fetch(gateway + hash, signal ? { signal } : undefined).then(r => resolveBlogHashUrls(r.json(), gateway))
 }
 
 export function fetchJsonWithFallback(
@@ -73,7 +92,7 @@ export function fetchJsonWithFallback(
       fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
         .then(response => response.json())
         .then(json => {
-          resolve({ json, gateway: fallbackGateway });
+          resolve({ json: resolveBlogHashUrls(json, fallbackGateway), gateway: fallbackGateway });
           abortMain && mainController.abort();
         })
         .catch(err => {
@@ -98,7 +117,7 @@ export function fetchJsonWithFallback(
         return response.json();
       })
       .then(json => {
-        resolve({ json: json, gateway: mainGateway });
+        resolve({ json: resolveBlogHashUrls(json, mainGateway), gateway: mainGateway });
         if (abortFallback) {
           clearTimeout(timeoutId);
           secondController && secondController.abort();
@@ -479,8 +498,8 @@ export function HolidayEvent(props) {
           {diffYear === 1 ? (
             <span>{`You have been together for ${diffYear} year.`}</span>
           ) : (
-            <span>{`You have been together for ${diffYear} years.`}</span>
-          )}
+              <span>{`You have been together for ${diffYear} years.`}</span>
+            )}
         </div>
       </div>
     );
@@ -493,8 +512,8 @@ export function HolidayEvent(props) {
           {diffMonth === 1 ? (
             <span>{`You have been together for ${diffMonth} month.`}</span>
           ) : (
-            <span>{`You have been together for ${diffMonth} months.`}</span>
-          )}
+              <span>{`You have been together for ${diffMonth} months.`}</span>
+            )}
         </div>
       </div>
     );

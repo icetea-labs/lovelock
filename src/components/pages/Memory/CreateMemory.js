@@ -319,7 +319,7 @@ export default function CreateMemory(props) {
         const bufs = await Promise.all(Object.values(images));
         const hashes = await saveToIpfs(bufs);
         Object.keys(images).forEach((blockIndex, index) => {
-          blocks[blockIndex].data.url = process.env.REACT_APP_IPFS + hashes[index];
+          blocks[blockIndex].data.url = /* process.env.REACT_APP_IPFS + */ hashes[index];
         });
       }
 
