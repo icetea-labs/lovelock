@@ -14,6 +14,8 @@ import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone }
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
+window.prerenderReady = false;
+
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
@@ -64,7 +66,6 @@ export function BlogView(props) {
   }, []);
 
   async function fetchData() {
-    console.log('fetchData blogview', paramMemIndex);
     APIService.getMemoriesByListMemIndex([paramMemIndex]).then(async mems => {
       const signal = false;
       const mem = mems[0];
