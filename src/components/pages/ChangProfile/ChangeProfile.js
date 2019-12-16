@@ -48,11 +48,12 @@ const useStyles = makeStyles(() => ({
     color: '#8250c8',
   },
   copyAddress: {
-    '& .MuiInputBase-input.Mui-disabled': {
+    '& .MuiInputBase-input': {
       cursor: 'pointer !important',
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
+      color: 'rgba(0, 0, 0, 0.38)',
     },
   },
 }));
@@ -413,7 +414,8 @@ function ChangeProfile(props) {
                         label="Address"
                         name="address"
                         margin="normal"
-                        disabled
+                        // disabled
+                        readonly
                         onClick={() => {
                           const dummy = document.createElement('textarea');
                           document.body.appendChild(dummy);
@@ -428,7 +430,7 @@ function ChangeProfile(props) {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <ContactMailIcon />
+                              <ContactMailIcon style={{ color: 'rgba(0, 0, 0, 0.38)' }} />
                             </InputAdornment>
                           ),
                         }}
