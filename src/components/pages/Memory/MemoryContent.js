@@ -13,6 +13,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
+import styled from 'styled-components';
 
 import * as actions from '../../../store/actions';
 import {
@@ -25,7 +26,7 @@ import {
   makeLockName,
   signalPrerenderDone,
   smartFetchIpfsJson,
-  ensureHashUrl
+  ensureHashUrl,
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -34,6 +35,25 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
+
+const Copyright = styled.div`
+  display: flex;
+  line-height: 60px;
+  justify-content: center;
+  clear: both;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 70px;
+  max-width: 740px;
+  border-top: 1px solid #e1e1e1;
+  color: rgba(0, 0, 0, 0.54);
+  a {
+    color: inherit;
+    &:hover {
+      color: #8250c8;
+    }
+  }
+`;
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -216,16 +236,17 @@ function MemoryContent(props) {
         const blogData = JSON.parse(memory.content);
         mem = { ...memory };
         mem.meta = blogData.meta;
-        const fetchedData = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
-          .catch(err => {
+        const fetchedData = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date }).catch(
+          err => {
             if (err.name === 'AbortError') return;
             throw err;
-          });
+          }
+        );
         if (fetchedData) {
-          mem.blogContent = fetchedData.json
+          mem.blogContent = fetchedData.json;
           // set blog coverPhoto to full path
           if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
-            mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, fetchedData.gateway)
+            mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, fetchedData.gateway);
           }
         }
       } else if (memory.isPrivate) {
@@ -510,6 +531,14 @@ function MemoryContent(props) {
                 />
               )}
             </div>
+            <Copyright>
+              <p>
+                Powered by&nbsp;
+                <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+                  Icetea Platform
+                </a>
+              </p>
+            </Copyright>
           </BlogModal>
         )}
       </>

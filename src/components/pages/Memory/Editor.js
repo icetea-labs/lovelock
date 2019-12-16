@@ -3,9 +3,10 @@ import Dante from 'Dante2';
 import { withStyles } from '@material-ui/core/styles';
 import mediumZoom from 'medium-zoom';
 import Input from '@material-ui/core/Input';
-import { DividerBlockConfig } from "Dante2/package/es/components/blocks/divider";
-import { waitForHtmlTags } from '../../../helper'
-import throttle from 'lodash/throttle'
+import { DividerBlockConfig } from 'Dante2/package/es/components/blocks/divider';
+import throttle from 'lodash/throttle';
+
+import { waitForHtmlTags } from '../../../helper';
 
 const font =
   '"jaf-bernino-sans", "Open Sans", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
@@ -16,7 +17,7 @@ const styles = {
     padding: '0 5%',
     '@media (max-width: 768px)': {
       padding: '0 24px',
-    }
+    },
   },
   titleText: {
     fontFamily: font,
@@ -35,19 +36,18 @@ const styles = {
 };
 
 class Editor extends React.Component {
-
   titleText = React.createRef();
   subtitleText = React.createRef();
 
   componentDidMount() {
     if (this.props.read_only) {
-      waitForHtmlTags('.graf-image', mediumZoom)
+      waitForHtmlTags('.graf-image', mediumZoom);
       waitForHtmlTags('.sectionLayout--fullWidth', images => {
         // zoom fullsize image
-        this.resizeImages(images)
-        this.resizeEventHandler = throttle(() => this.resizeImages(images), 300)
-        window.addEventListener('resize', this.resizeEventHandler, { passive: true })
-      })
+        this.resizeImages(images);
+        this.resizeEventHandler = throttle(() => this.resizeImages(images), 300);
+        window.addEventListener('resize', this.resizeEventHandler, { passive: true });
+      });
     } else {
       const titleInput = this.titleText.current;
       // for some reason, could not set this through react
@@ -58,73 +58,73 @@ class Editor extends React.Component {
       // for some reason, could not set this through react
       subtitleText.style.letterSpacing = '-0.54px';
 
-      waitForHtmlTags('.sectionLayout--fullWidth', this.resizeImages) // resize draft images
+      waitForHtmlTags('.sectionLayout--fullWidth', this.resizeImages); // resize draft images
 
       // resize added images
-      this.resizeEventHandler = throttle(() => this.resizeImages(), 1000)
-      window.addEventListener('resize', this.resizeEventHandler, { passive: true })
+      this.resizeEventHandler = throttle(() => this.resizeImages(), 1000);
+      window.addEventListener('resize', this.resizeEventHandler, { passive: true });
     }
   }
 
   componentWillUnmount() {
-    this.resizeEventHandler && window.removeEventListener('resize', this.resizeEventHandler)
+    this.resizeEventHandler && window.removeEventListener('resize', this.resizeEventHandler);
   }
 
   resizeImages = (images, url) => {
-    images = images || document.querySelectorAll('.sectionLayout--fullWidth')
-    if (!images || !images.length) return
+    images = images || document.querySelectorAll('.sectionLayout--fullWidth');
+    if (!images || !images.length) return;
 
-    const dw = document.documentElement.clientWidth
-    const pw = document.querySelector('.postContent').clientWidth
+    const dw = document.documentElement.clientWidth;
+    const pw = document.querySelector('.postContent').clientWidth;
     images.forEach(i => {
       if (!url || i.querySelector(`img[src='${url}']`)) {
-        i.style.width = dw + 'px'
-        i.style.marginLeft = String((pw - dw) / 2) + 'px'
+        i.style.width = `${dw}px`;
+        i.style.marginLeft = `${String((pw - dw) / 2)}px`;
       }
-    })
-  }
+    });
+  };
 
   resetImage = url => {
-    const images = document.querySelectorAll('.sectionLayout--fullWidth')
+    const images = document.querySelectorAll('.sectionLayout--fullWidth');
     images.forEach(i => {
       if (i.querySelector(`img[src='${url}']`)) {
-        i.style.width = ''
-        i.style.marginLeft = ''
+        i.style.width = '';
+        i.style.marginLeft = '';
       }
-    })
-  }
+    });
+  };
 
   configWidgets = () => {
-    const widgets = [ ...Dante.defaultProps.widgets ];
+    const widgets = [...Dante.defaultProps.widgets];
     const imgBlock = widgets[0];
 
     // remove the border when item is selected in view mode
     imgBlock.selected_class = this.props.read_only ? 'is-selected' : 'is-selected is-mediaFocused';
     imgBlock.selectedFn = block => {
-      const { direction, url } = block.getData().toJS()
+      const { direction, url } = block.getData().toJS();
       switch (direction) {
-        case "left":
-          !this.props.read_only && this.resetImage(url)
-          return "graf--layoutOutsetLeft";
+        case 'left':
+          !this.props.read_only && this.resetImage(url);
+          return 'graf--layoutOutsetLeft';
 
-        case "center":
-          !this.props.read_only && this.resetImage(url)
-          return "";
+        case 'center':
+          !this.props.read_only && this.resetImage(url);
+          return '';
 
-        case "wide":
-          !this.props.read_only && setTimeout(() => this.resizeImages(null, url), 100)
-          return "sectionLayout--fullWidth";
+        case 'wide':
+          !this.props.read_only && setTimeout(() => this.resizeImages(null, url), 100);
+          return 'sectionLayout--fullWidth';
 
-        case "fill":
-          !this.props.read_only && this.resetImage(url)
-          return "graf--layoutFillWidth";
+        case 'fill':
+          !this.props.read_only && this.resetImage(url);
+          return 'graf--layoutFillWidth';
 
         default:
-          return "";
+          return '';
       }
-    }
+    };
 
-    widgets.push(DividerBlockConfig())
+    widgets.push(DividerBlockConfig());
 
     return widgets;
   };
