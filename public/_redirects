@@ -1,3 +1,8 @@
-http://lovelock.icetea.io/* https://lovelock.icetea.io/:splat 301!
-https://lovelock.netlify.com/* https://lovelock.icetea.io/:splat 301!
+http://lovelock.one/* https://lovelock.one/:splat 301!
+http://www.lovelock.one/* https://lovelock.one/:splat 301!
+https://www.lovelock.one/* https://lovelock.one/:splat 301!
+http://lovelock.icetea.io/* https://lovelock.one/:splat 301!
+https://lovelock.icetea.io/* https://lovelock.one/:splat 301!
+http://lovelock.netlify.com/* https://lovelock.one/:splat 301!
+https://lovelock.netlify.com/* https://lovelock.one/:splat 301!
 /*    /index.html   200
