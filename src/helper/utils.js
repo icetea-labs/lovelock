@@ -44,8 +44,27 @@ export function waitForHtmlTags(
   }
 }
 
-export function fetchIpfsJson(hash, { url = ipfsGateway, signal } = {}) {
-  return fetch(url + hash, signal ? { signal } : undefined).then(r => r.json());
+export function ensureHashUrl(url, gateway = ipfsGateway) {
+  return url.indexOf(':') < 0 ? gateway + url : url
+}
+
+export function resolveBlogHashUrls(json, gateway) {
+  if (!json || !json.blocks || !json.blocks.length) {
+    return json
+  }
+  const blocks = json.blocks
+  for (const b of blocks) {
+    if (b.type === 'image' &&
+      b.data.url &&
+      b.data.url.indexOf(':') < 0) {
+      b.data.url = ensureHashUrl(b.data.url, gateway)
+    }
+  }
+  return json
+}
+
+export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
+  return fetch(gateway + hash, signal ? { signal } : undefined).then(r => resolveBlogHashUrls(r.json(), gateway))
 }
 
 export function fetchJsonWithFallback(
@@ -73,7 +92,7 @@ export function fetchJsonWithFallback(
       fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
         .then(response => response.json())
         .then(json => {
-          resolve({ json, gateway: fallbackGateway });
+          resolve({ json: resolveBlogHashUrls(json, fallbackGateway), gateway: fallbackGateway });
           abortMain && mainController.abort();
         })
         .catch(err => {
@@ -98,7 +117,7 @@ export function fetchJsonWithFallback(
         return response.json();
       })
       .then(json => {
-        resolve({ json: json, gateway: mainGateway });
+        resolve({ json: resolveBlogHashUrls(json, mainGateway), gateway: mainGateway });
         if (abortFallback) {
           clearTimeout(timeoutId);
           secondController && secondController.abort();
@@ -200,14 +219,10 @@ export function tryStringifyJson(p, replacer = undefined, space = 2) {
   }
 }
 
-export async function getAccountInfo(address) {
-  try {
-    const info = await getWeb3().getAccountInfo(address);
-    return info;
-  } catch (err) {
-    throw err;
-  }
+export function getAccountInfo(address) {
+  return getWeb3().getAccountInfo(address);
 }
+
 function readFileAsync(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -218,15 +233,18 @@ function readFileAsync(file) {
     reader.readAsArrayBuffer(file);
   });
 }
+
 export async function saveToIpfs(files) {
   if (!files || !files.length) return [];
+
   // simple upload
-  let ipfsId = [];
   const isBuffer = Buffer.isBuffer(files[0]);
   if (files.length !== 1) {
     files = files.map(f => ({ content: f }));
   }
-  console.log('files', files);
+
+  console.log('files', files.length);
+
   let contentBuffer = files;
   if (!isBuffer) {
     const data = [];
@@ -235,6 +253,7 @@ export async function saveToIpfs(files) {
     }
     contentBuffer = await Promise.all(data);
   }
+
   // get hash and sign
   const preHash = [];
   for (let i = 0; i < contentBuffer.length; i++) {
@@ -246,6 +265,7 @@ export async function saveToIpfs(files) {
     }
     preHash.push(Hash.of(buffer));
   }
+
   const fileHashes = await Promise.all(preHash);
   // const signs = {};
   const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
@@ -255,12 +275,6 @@ export async function saveToIpfs(files) {
   let user = localStorage.getItem('user') || sessionStorage.getItem('user');
   user = JSON.parse(user);
   const from = user.address;
-
-  // console.log('token', tokenKey);
-  let ipfsHash = '';
-  preHash.forEach(hash => {
-    ipfsHash = ipfsHash.concat(hash);
-  });
 
   const time = Date.now();
   const hash32bytes = ecc.stableHashObject({ from, time, fileHashes });
@@ -278,21 +292,17 @@ export async function saveToIpfs(files) {
       Authorization: `Bearer ${signature}`,
     },
   });
-  try {
-    const results = await newIpfs.add([...contentBuffer]);
-    ipfsId = results.map(el => {
+
+  return newIpfs.add([...contentBuffer]).then(results => {
+    return results.map(el => {
       return el.hash;
-    });
-  } catch (e) {
-    console.error(e);
-  }
-  return ipfsId;
+    })
+  })
 }
 
 // upload one file
-export async function saveFileToIpfs(files) {
-  const ipfsId = await saveToIpfs(files);
-  return ipfsId[0];
+export function saveFileToIpfs(files) {
+  return saveToIpfs(files).then(ids => ids[0])
 }
 
 /**
@@ -323,6 +333,7 @@ export async function saveBufferToIpfs(files, opts = {}) {
     }
   } catch (e) {
     console.error(e);
+    throw e
   }
   return ipfsId;
 }
@@ -370,7 +381,7 @@ function getImageDimensions(file) {
   });
 }
 
-export function IsJsonString(str) {
+export function isJsonString(str) {
   try {
     JSON.parse(str);
   } catch (e) {
@@ -479,8 +490,8 @@ export function HolidayEvent(props) {
           {diffYear === 1 ? (
             <span>{`You have been together for ${diffYear} year.`}</span>
           ) : (
-            <span>{`You have been together for ${diffYear} years.`}</span>
-          )}
+              <span>{`You have been together for ${diffYear} years.`}</span>
+            )}
         </div>
       </div>
     );
@@ -493,8 +504,8 @@ export function HolidayEvent(props) {
           {diffMonth === 1 ? (
             <span>{`You have been together for ${diffMonth} month.`}</span>
           ) : (
-            <span>{`You have been together for ${diffMonth} months.`}</span>
-          )}
+              <span>{`You have been together for ${diffMonth} months.`}</span>
+            )}
         </div>
       </div>
     );

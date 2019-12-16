@@ -9,10 +9,12 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
-import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone } from '../../../helper';
+import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
 // import { fetchAltFirstIpfsJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
+
+window.prerenderReady = false;
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -59,36 +61,47 @@ export function BlogView(props) {
   const classes = useStyles();
 
   useEffect(() => {
-    fetchData();
+    const abort = new AbortController();
+
+    fetchData(abort.signal);
+
+    return () => {
+      abort.abort();
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function fetchData() {
-    console.log('fetchData blogview', paramMemIndex);
+  async function fetchData(signal) {
     APIService.getMemoriesByListMemIndex([paramMemIndex]).then(async mems => {
-      const signal = false;
       const mem = mems[0];
       if (mem.info.blog) {
         const blogData = JSON.parse(mem.content);
         mem.meta = blogData.meta;
-        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: mem.info.date })
-          .then(d => d.json)
+        const { json, gateway } = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: mem.info.date })
           .catch(err => {
             if (err.name === 'AbortError') return;
             throw err;
           });
+        mem.blogContent = json
+
+        // set blog coverPhoto to full path
+        if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
+          mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway)
+        }
+
+        // save to redux
+        setBlogView(mem);
+        setMemory(mems);
+      } else {
+        // not a blog, redirect to lock screen
+        closeMemory()
       }
-      // console.log('mem', mem);
-      // set to redux
-      setBlogView(mem);
-      setMemory(mems);
     });
-    // setOpenModal(true);
-    // setLoading(false);
   }
 
   function closeMemory() {
-    // console.log('window', blogView);
+    // console.log('blogView', blogView);
     props.history.push(`/lock/${blogView.lockIndex}`);
   }
 

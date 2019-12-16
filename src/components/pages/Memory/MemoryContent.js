@@ -25,6 +25,7 @@ import {
   makeLockName,
   signalPrerenderDone,
   smartFetchIpfsJson,
+  ensureHashUrl
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -215,12 +216,18 @@ function MemoryContent(props) {
         const blogData = JSON.parse(memory.content);
         mem = { ...memory };
         mem.meta = blogData.meta;
-        mem.blogContent = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
-          .then(d => d.json)
+        const fetchedData = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date })
           .catch(err => {
             if (err.name === 'AbortError') return;
             throw err;
           });
+        if (fetchedData) {
+          mem.blogContent = fetchedData.json
+          // set blog coverPhoto to full path
+          if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
+            mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, fetchedData.gateway)
+          }
+        }
       } else if (memory.isPrivate) {
         const memCache = await loadMemCacheAPI(memory.id);
         if (memCache) {
