@@ -63,6 +63,7 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     try {
       const newContract = tweb3.contract(r);
       await newContract.methods.migrateState(oldAddress, true).sendCommit({ from: account.address });
+      await newContract.methods.addAdmins([account.address]).sendCommit({ from: account.address });
       console.log('Data migration finished.');
     } catch (e) {
       console.log('Fail to migrate data: ', e.message);

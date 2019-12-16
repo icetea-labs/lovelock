@@ -9,7 +9,7 @@ exports.expectLockOwners = (lock, message = 'Permission denied') => {
 //private function
 exports.expectOwner = (self, message = 'Permission denied') => {
   const errmsg = message + '. You must be owner.';
-  const owner = self.getOwner();
+  const owner = self.deployedBy;
   expect(owner.includes(msg.sender), errmsg);
 };
 //private function

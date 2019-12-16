@@ -37,17 +37,17 @@ class LoveLock {
   @view botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
 
   constructor(account) {
-    const owner = this.getOwner();
+    // const owner = this.getOwner();
     if (!account) {
       account = msg.sender;
     }
-    owner.push(account);
-    this.setOwner(owner);
+    // owner.push(account);
+    // this.setOwner(owner);
     this.addAdmins([account]);
   }
 
-  @view getOwner = () => this.getState('ownerContract', []);
-  setOwner = value => this.setState('ownerContract', value);
+  // @view getOwner = () => this.getState('ownerContract', []);
+  // setOwner = value => this.setState('ownerContract', value);
 
   @view getLocks = () => this.getState('locks', []);
   setLocks = value => this.setState('locks', value);
