@@ -3,9 +3,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
-import CommonDialog from '../../elements/CommonDialog';
+
+import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
-import { sendTxWithAuthen } from '../../../helper/hooks';
+import { sendTxWithAuthen } from '../../helper/hooks';
+import { handleError } from '../../helper';
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -20,7 +22,7 @@ function TextFieldMultiLine(props) {
   return <TextField className={classes.textMulti} {...props} />;
 }
 
-class PromiseConfirm extends React.Component {
+class PuConfirmLock extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,14 +34,14 @@ class PromiseConfirm extends React.Component {
   messageAcceptChange = e => {
     const val = e.target.value;
     this.setState({
-      messageAccept: val,
+      messageAccept: val.normalize(),
     });
   };
 
   messageDenyChange = e => {
     const val = e.target.value;
     this.setState({
-      messageDeny: val,
+      messageDeny: val.normalize(),
     });
   };
 
@@ -47,21 +49,22 @@ class PromiseConfirm extends React.Component {
     const { index, enqueueSnackbar, close } = this.props;
 
     try {
-      const result = await sendTxWithAuthen(this.props, 'acceptPropose', index, message);
+      const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
         const errMessage = 'Your lock has been confirmed.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      const msg = handleError(err, 'sendding accept lock');
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   }
 
   async messageDeny(message) {
     const { index, enqueueSnackbar, close } = this.props;
     try {
-      const result = await sendTxWithAuthen(this.props, 'cancelPropose', index, message);
+      const result = await sendTxWithAuthen(this.props, 'cancelLock', index, message);
 
       if (result) {
         // window.alert('Success');
@@ -69,8 +72,9 @@ class PromiseConfirm extends React.Component {
         enqueueSnackbar(errMessage, { variant: 'info' });
         close();
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      const msg = handleError(err, 'sendding deny lock');
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   }
 
@@ -128,7 +132,7 @@ class PromiseConfirm extends React.Component {
   }
 }
 
-PromiseConfirm.defaultProps = {
+PuConfirmLock.defaultProps = {
   isDeny: false,
   index: -1,
   send() {},
@@ -142,8 +146,7 @@ const mapStateToProps = state => {
     tokenKey: state.account.tokenKey,
   };
 };
-
 export default connect(
   mapStateToProps,
   null
-)(withSnackbar(PromiseConfirm));
+)(withSnackbar(PuConfirmLock));

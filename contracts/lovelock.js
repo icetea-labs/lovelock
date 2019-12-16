@@ -1,15 +1,23 @@
 const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
-const { expectProposeOwners, getDataByIndex } = require('./helper.js');
+const { expectLockOwners, getDataByIndex, expectOwner, expectAdmin, expectUserApproved } = require('./helper.js');
 const {
   apiCreateLock,
+  apiChangeLockName,
   apiAcceptLock,
   apiCancelLock,
   apiFollowLock,
   apiLikeLock,
-  apiGetLockByAddress,
-  apiGetLockByIndex,
+  apiAddContributorsToLock,
+  apiRemoveContributorsToLock,
   apiChangeLockImg,
+  apiGetLocksFollowingPersionByAddress,
+  apiGetLocksFollowingByAddress,
+  apiGetDetailLock,
+  apiGetLocksByAddress,
+  apiGetLocksForFeed,
+  apiGetDataForMypage,
+  apiDeleteLock,
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
@@ -17,23 +25,35 @@ const {
   apiCommentMemory,
   apiGetMemoriesByLock,
   apiGetMemoriesByRange,
+  apiGetMemoriesByListMemIndex,
+  apiDeleteMemory,
+  apiDeleteComment,
 } = require('./apiMemory.js');
-const {
-  importState,
-  exportState,
-  migrateState
-} = require('./migration.js')(this)
+const { importState, exportState, migrateState } = require('./migration.js')(this);
 
 @contract
 class LoveLock {
   // crush bot
   @view botAddress = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn';
 
-  @view getProposes = () => this.getState('proposes', []);
-  setProposes = value => this.setState('proposes', value);
-  getPropose = index => {
-    const proposes = this.getProposes();
-    return [getDataByIndex(proposes, index), proposes];
+  constructor(account) {
+    const owner = this.getOwner();
+    if (!account) {
+      account = msg.sender;
+    }
+    owner.push(account);
+    this.setOwner(owner);
+    this.addAdmins([account]);
+  }
+
+  @view getOwner = () => this.getState('ownerContract', []);
+  setOwner = value => this.setState('ownerContract', value);
+
+  @view getLocks = () => this.getState('locks', []);
+  setLocks = value => this.setState('locks', value);
+  getLock = index => {
+    const locks = this.getLocks();
+    return [getDataByIndex(locks, index), locks];
   };
 
   @view getMemories = () => this.getState('memories', []);
@@ -43,91 +63,108 @@ class LoveLock {
     return [getDataByIndex(memories, index), memories];
   };
 
-  // mapping: address to propose
+  // mapping: address to lock
   // 1:n { 'address':[1,2,3...] }
-  @view getA2p = () => this.getState('a2p', {});
-  setA2p = value => this.setState('a2p', value);
+  @view getA2l = () => this.getState('a2l', {});
+  setA2l = value => this.setState('a2l', value);
 
-  // mapping: person to person
-  // 1:n { 'address':[address1,address2,address3...] }
-  @view getAFA = () => this.getState('afa', {});
-  setAFA = value => this.setState('afa', value);
-  // mapping: propose to memory
-  // 1:n  { 'proindex':[1,2,3...] }
-  // @view getP2m = () => this.getState('p2m', {});
-  // setP2m = value => this.setState('p2m', value);
-
-  // mapping: memory to propose
-  // 1:1  { 'memoryindex':'proindex' }
-  // @view getM2p = () => this.getState('m2p', {});
-  // setM2p = value => this.setState('m2p', value);
-
-  // mapping follow: save locks index that address following
+  // mapp address -> following locks.
   // 1:n  { 'address':[lockIndex1, lockIndex2,...] }
-  // @view getAFL = () => this.getState('afl', {});
-  // setAFL = value => this.setState('afl', value);
+  @view getAFL = () => this.getState('afl', {});
+  setAFL = value => this.setState('afl', value);
 
-  // mapping follow: save addresses following lock
-  // 1:n  { 'lockIndex':[address1, address2...] }
-  // @view getLFA = () => this.getState('lfa', {});
-  // setLFA = value => this.setState('lfa', value);
+  // mapping: person -> other person
+  // 1:n { 'address':[address1,address2,address3...] }
+  @view getFollowing = () => this.getState('following', {});
+  setFollowing = value => this.setState('following', value);
 
-  // mapping follow: save address following other address
-  // 1:n  { 'address':[address1, address1,...] }
+  @view getFollowed = () => this.getState('followed', {});
+  setFollowed = value => this.setState('followed', value);
 
-  @transaction createPropose(s_content: string, receiver: address, s_info = {}, bot_info): number {
+  @transaction createLock(s_content: string, receiver: address, s_info = {}, bot_info): number {
     const self = this;
+    expectUserApproved(self);
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);
   }
-  @transaction acceptPropose(index: number, r_content: string) {
+  @transaction changeLockName(index: number, lockName: string) {
     const self = this;
+    expectUserApproved(self);
+    return apiChangeLockName(self, index, lockName);
+  }
+  @transaction acceptLock(index: number, r_content: string) {
+    const self = this;
+    expectUserApproved(self);
     return apiAcceptLock(self, index, r_content);
   }
-  @transaction cancelPropose(index: number, r_content: string) {
+  @transaction cancelLock(index: number, r_content: string) {
     const self = this;
+    expectUserApproved(self);
     return apiCancelLock(self, index, r_content);
   }
   // create like for memory: type -> 0:unlike, 1:like, 2:love
-  @transaction addLikePropose(index: number, type: number) {
+  @transaction addLikeLock(index: number, type: number) {
     const self = this;
+    // expectUserApproved(self);
     return apiLikeLock(self, index, type);
   }
   @transaction followLock(index: number) {
     const self = this;
+    // expectUserApproved(self);
     return apiFollowLock(self, index);
+  }
+  @transaction addContributorsToLock(index: number, contributors = []) {
+    const self = this;
+    // expectUserApproved(self);
+    return apiAddContributorsToLock(self, index, contributors);
+  }
+  @transaction removeContributorsToLock(index: number, contributors = []) {
+    const self = this;
+    // expectUserApproved(self);
+    return apiRemoveContributorsToLock(self, index, contributors);
   }
   @transaction changeCoverImg(index: number, imgHash: string) {
     const self = this;
+    expectUserApproved(self);
     return apiChangeLockImg(self, index, imgHash);
   }
-  @view getProposeByAddress(address: ?address) {
+  @view getLockByAddress(addr: address) {
     const self = this;
-    return apiGetLockByAddress(self, address);
+    return apiGetLocksByAddress(self, addr);
   }
-  @view getProposeByIndex(index: number) {
+  @view getDetailLock(index: number) {
     const self = this;
-    return apiGetLockByIndex(self, index);
+    return apiGetDetailLock(self, index);
   }
-  @view getLikeByProIndex = (index: number) => this.getPropose(index)[0].likes;
-  @view getFollowByLockIndex = (index: number) => this.getPropose(index)[0].follows;
-
+  @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
+  @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
+  @view getLocksForFeed = (addr: address) => {
+    const self = this;
+    return apiGetLocksForFeed(self, addr);
+  };
+  @view getMaxLocksIndex = () => {
+    const locks = this.getLocks();
+    return locks.length - 1;
+  };
   // =========== MEMORY ================
   // info { img:Array, location:string, date:string }
   @transaction addMemory(lockIndex: number, isPrivate: boolean, content: string, info) {
     const self = this;
+    expectUserApproved(self);
     return apiCreateMemory(self, lockIndex, isPrivate, content, info);
   }
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const self = this;
+    // expectUserApproved(self);
     return apiLikeMemory(self, memoIndex, type);
   }
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
     const self = this;
+    expectUserApproved(self);
     return apiCommentMemory(self, memoIndex, content, info);
   }
-  @view getMemoriesByProIndex(lockIndex: number, collectionId: ?number) {
+  @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number) {
     const self = this;
     return apiGetMemoriesByLock(self, lockIndex, collectionId);
   }
@@ -135,11 +172,15 @@ class LoveLock {
     const self = this;
     return apiGetMemoriesByRange(self, start, end);
   }
+  @view getMemoriesByListMemIndex(listMemIndex) {
+    const self = this;
+    return apiGetMemoriesByListMemIndex(self, listMemIndex);
+  }
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
   @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
   // =========== COLLECTION ================
   @view getLockCollections(lockIndex: number) {
-    const [lock] = this.getPropose(lockIndex);
+    const [lock] = this.getLock(lockIndex);
 
     // Note: the collection is not sorted by ID, client should sort if desired
     return lock.collections || [];
@@ -163,9 +204,9 @@ class LoveLock {
   };
 
   @transaction addLockCollection(lockIndex: number, collectionData): number {
-    const [lock, locks] = this.getPropose(lockIndex);
-    expectProposeOwners(lock);
-
+    const [lock, locks] = this.getLock(lockIndex);
+    expectLockOwners(lock);
+    expectUserApproved(this);
     const cols = (lock.collections = lock.collections || []);
     const MAX_COLLECTION_PER_LOCK = 5;
     if (cols.length >= MAX_COLLECTION_PER_LOCK) {
@@ -191,14 +232,15 @@ class LoveLock {
     lock.nextCollectionId++;
     cols.push(collectionData);
 
-    this.setProposes(locks);
+    this.setLocks(locks);
 
     return collectionData.id;
   }
 
   @transaction setLockCollection(lockIndex: number, collectionId: number, collectionData) {
-    const [lock, locks] = this.getPropose(lockIndex);
-    expectProposeOwners(lock);
+    const [lock, locks] = this.getLock(lockIndex);
+    expectLockOwners(lock);
+    expectUserApproved(this);
 
     collectionData = validate(
       collectionData,
@@ -244,30 +286,199 @@ class LoveLock {
       throw new Error(`Collection id ${collectionId} does not exist in lock ${lockIndex}`);
     }
 
-    this.setProposes(locks);
+    this.setLocks(locks);
   }
   // =========== OTHER ================
-  @transaction setFlowPerson(address: ?address) {
+  @transaction followPerson(address: address) {
+    // expectUserApproved(this);
     const sender = msg.sender;
-    const afp = this.getAFA();
+    const following = this.getFollowing();
+    const followed = this.getFollowed();
+    if (!following[sender]) following[sender] = [];
+    const index = following[sender].indexOf(address);
+    if (index !== -1) {
+      // unfollowLock
+      following[sender].splice(index, 1);
+    } else {
+      //  followLock
+      following[sender].push(address);
+    }
+    if (!followed[address]) followed[address] = [];
+    const index2 = followed[address].indexOf(sender);
+    if (index2 !== -1) {
+      // unfollowLock
+      followed[address].splice(index2, 1);
+    } else {
+      //  followLock
+      followed[address].push(sender);
+    }
 
-    if (!afp[sender]) afp[sender] = [];
-    afp[sender].push(address);
-    if (!afp[address]) afp[address] = [];
-    afp[address].push(sender);
-    this.setAFA(afp);
+    this.setFollowing(following);
+    this.setFollowed(followed);
+  }
+  @view getFollowedPerson = (addr: address) => this.getFollowed()[addr] || [];
+  @view getFollowingPerson = (addr: address) => this.getFollowing()[addr] || [];
+  @view getLocksFollowingByAddress = (addr: address) => apiGetLocksFollowingByAddress(this, addr);
+  @view getLocksFollowingPersionByAddress = (addr: address) => apiGetLocksFollowingPersionByAddress(this, addr);
+
+  @view getDataForMypage(addr: address) {
+    const self = this;
+    return apiGetDataForMypage(self, addr);
   }
 
   // ========== DATA MIGRATION =============
   @view exportState() {
-    return exportState()
+    return exportState();
   }
 
-  @transaction importState(data, overwrite: ?bool = false) {
-    return importState(data, overwrite)
+  @transaction importState(data, overwrite: ?boolean = false) {
+    expectOwner(this);
+    return importState(data, overwrite);
   }
 
-  @transaction migrateState(fromContract: address, overwrite: ?bool = false) {
-    return migrateState(fromContract, overwrite)
+  @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
+    expectOwner(this);
+    return migrateState(fromContract, overwrite);
   }
+  // ========== DELETE DATA  =============
+  @view getAdmins = () => this.getState('admins', []);
+  setAdmins = value => this.setState('admins', value);
+
+  @transaction addAdmins(accounts) {
+    expectOwner(this);
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    accounts = validate(accounts, schema);
+    let admins = this.getAdmins();
+    accounts = accounts.filter(addr => {
+      return !admins.includes(addr);
+    });
+    admins = admins.concat(accounts);
+    this.setAdmins(admins);
+    // auto add into users
+    // this.addUsers(accounts);
+    return accounts;
+  }
+
+  @transaction removeAdmins(accounts) {
+    expectOwner(this);
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    accounts = validate(accounts, schema);
+    let admins = this.getAdmins();
+    admins = admins.filter(addr => {
+      return !accounts.includes(addr);
+    });
+    this.setAdmins(admins);
+    return accounts;
+  }
+
+  @transaction deleteLock(lockindex: number) {
+    const self = this;
+    expectAdmin(self);
+    return apiDeleteLock(self, lockindex);
+  }
+  @transaction deleteMemory(memIndex: number) {
+    const self = this;
+    expectAdmin(self);
+    return apiDeleteMemory(self, memIndex);
+  }
+  @transaction deleteComment(memIndex: number, cmtNo: number) {
+    const self = this;
+    return apiDeleteComment(self, memIndex, cmtNo);
+  }
+  // ========== USER APPROVED =============
+  @view getUsers = () => this.getState('users', []);
+  setUsers = value => this.setState('users', value);
+
+  @transaction addUsers(_users) {
+    expectAdmin(this);
+    if (!Array.isArray(_users)) {
+      _users = [_users];
+    }
+
+    _users = _users.map(user => {
+      if (!isValidAddress(user)) {
+        user = convertAliasToAddress(user);
+      }
+      return user;
+    });
+
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    _users = validate(_users, schema);
+    let users = this.getUsers();
+    users = users.filter(addr => {
+      return !_users.includes(addr);
+    });
+    users = users.concat(_users);
+    this.setUsers(users);
+    return _users;
+  }
+
+  @transaction removeUsers(_users) {
+    expectAdmin(this);
+    if (!Array.isArray(_users)) {
+      _users = [_users];
+    }
+
+    _users = _users.map(user => {
+      if (!isValidAddress(user)) {
+        user = convertAliasToAddress(user);
+      }
+      return user;
+    });
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+    _users = validate(_users, schema);
+    let users = this.getUsers();
+    users = users.filter(addr => {
+      return _users.indexOf(addr) === -1;
+    });
+    this.setUsers(users);
+    return _users;
+  }
+  @view isUserApproved(user: address) {
+    const users = this.getUsers();
+    return users.includes(user);
+  }
+  // ========== Authorized IPFS APPROVED =============
+  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
+    const self = this;
+    expectUserApproved(self, { from: mainAddress });
+    // check tokenAddress is token on mainaddress.
+    const ctDid = loadContract('system.did');
+    const tokens = ctDid.query.invokeView(mainAddress).tokens || {};
+    if (tokens[contract]) {
+      const tokesOnContract = Object.keys(tokens[contract]);
+      if (tokesOnContract.includes(tokenAddress)) {
+        const { expireAfter } = tokens[contract][tokenAddress];
+        if (expireAfter - Date.now() >= 60 * 1000) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}
+const ctAlias = loadContract('system.alias');
+function convertAliasToAddress(alias) {
+  const aliasObj = ctAlias.query.invokeView(alias) || {};
+  let resp = {};
+  Object.entries(aliasObj).forEach(([key, value]) => {
+    resp = value;
+  });
+  return resp.address || '';
 }

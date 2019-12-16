@@ -28,14 +28,12 @@ const Container = styled.div`
   transform: translate(-50%, -50%);
   overflow-x: hidden;
   overflow-y: auto;
-  z-index: ${props => (props.ensureTopLevel ? '2001' : (props.hasParentDialog ? '1102' : '1101'))};
+  z-index: ${props => (props.ensureTopLevel ? '2001' : props.hasParentDialog ? '1102' : '1101')};
   transition: opacity 0.6s ease-in;
   opacity: 0;
   @media (max-width: 624px) {
-    width: ${props => (props.hasParentDialog ? '90%' : '100%')};;
-    min-width: 300px;
-    max-height: 95vh;
-    max-width: 95%;
+    width: 100%;
+    border-radius: 0;
   }
 `;
 
@@ -65,6 +63,9 @@ const PuTitle = styled.div`
     cursor: pointer;
     color: white;
   }
+  @media (max-width: 624px) {
+    border-radius: 0;
+  }
 `;
 
 const ContWrap = styled.div`
@@ -77,6 +78,12 @@ const Action = styled.div`
     margin: 48px 0 16px;
     justify-content: center;
     display: flex;
+    @media (min-width: 320px) and (max-width: 623px) {
+      .nextBtn {
+        width: 100%;
+        height: 50px;
+      }
+    }
     button {
       min-width: 128px;
       line-height: 34px;
@@ -121,7 +128,7 @@ class CommonDialog extends React.Component {
     this.oldBodyOverflow = style.overflow;
     style.overflow = 'hidden';
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflow = 'visible');
+      document.querySelectorAll('.cdialog-container').forEach(e => (e.style.overflow = 'visible'));
       this.containerRef.current && (this.containerRef.current.style.overflowY = 'auto');
     }
   }
@@ -133,7 +140,7 @@ class CommonDialog extends React.Component {
     document.body.style.overflow = this.oldBodyOverflow;
 
     if (hasParentDialog) {
-      document.querySelectorAll('.cdialog-container').forEach(e => e.style.overflowY = 'auto');
+      document.querySelectorAll('.cdialog-container').forEach(e => (e.style.overflowY = 'auto'));
     }
   }
 
@@ -188,11 +195,11 @@ class CommonDialog extends React.Component {
             <Action>
               <div className="actionConfirm">
                 {cancelText && cancel && (
-                  <LinkPro className="deny" onClick={cancel}>
+                  <LinkPro className="deny nextBtn" onClick={cancel}>
                     {cancelText}
                   </LinkPro>
                 )}
-                <ButtonPro className="send" onClick={confirm}>
+                <ButtonPro className="nextBtn send " onClick={confirm}>
                   {typeof okText !== 'function' ? okText : okText()}
                 </ButtonPro>
               </div>

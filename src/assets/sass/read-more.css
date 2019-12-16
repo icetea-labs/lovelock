@@ -1,0 +1,32 @@
+.read-more__button {
+    display: inline;
+    background-color: transparent;
+    outline: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    font-family: 'Montserrat';
+    cursor: pointer;
+    color: #8250c8;
+  }
+  
+  .read-more__button:hover {
+    text-decoration: underline;
+  }
+  
+  .read-more__text--hide {
+   max-height: 0;
+   font-size: 0;
+   opacity: 0;
+  }
+  
+  .read-more__text--show {
+    max-height: 10em;
+    opacity: 1;
+    font-size: inherit;
+  }
+  
+  .read-more__text--remaining {
+    transition: opacity 240ms ease;
+  }

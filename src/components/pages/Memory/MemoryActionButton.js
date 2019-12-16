@@ -5,9 +5,11 @@ import CommentIcon from '@material-ui/icons/Comment';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
 
-import { setLikeTopInfo } from '../../../store/actions';
+import * as actions from '../../../store/actions';
 import { useTx } from '../../../helper/hooks';
+import { handleError } from '../../../helper';
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -57,17 +59,18 @@ function MemoryActionButton(props) {
     memoryType,
     memoryLikes,
     memoryIndex,
+    isDetailScreen,
     handerShowComment,
     numComment,
     setLikeTopInfo,
     numLike, // Lock-level number of likes
     isMyLike, // Lock-level isMyLike
   } = props;
-
-  const isAuto = memoryType === 1;
+  const { enqueueSnackbar } = useSnackbar();
+  const isAuto = memoryType === 1 && isDetailScreen;
 
   const address = useSelector(state => state.account.address);
-  const tx = useTx()
+  const tx = useTx();
 
   const [memoryNumLike, setMemoryNumLike] = useState(0);
   const [memoryIsMyLike, setMemoryIsMyLike] = useState(false);
@@ -103,12 +106,22 @@ function MemoryActionButton(props) {
   }, [memoryType, memoryLikes, address, isAuto]);
 
   async function handleLike() {
-    const LOVE = 1 // like, love, wow, etc.
-    tx.sendCommit('addLike', memoryIndex, LOVE).then(({ returnValue : likes }) => {
-      const newNumLike = Object.keys(likes).length
-      const newIsMyLike = !!likes[address]
-      setLikeData(newNumLike, newIsMyLike);
-    })
+    const LOVE = 1; // like, love, wow, etc.
+    try {
+      tx.sendCommit('addLike', memoryIndex, LOVE)
+        .then(({ returnValue: likes }) => {
+          const newNumLike = Object.keys(likes).length;
+          const newIsMyLike = !!likes[address];
+          setLikeData(newNumLike, newIsMyLike);
+        })
+        .catch(error => {
+          const msg = handleError(error, 'sending like memory');
+          enqueueSnackbar(msg, { variant: 'error' });
+        });
+    } catch (error) {
+      const msg = handleError(error, 'sending like memory');
+      enqueueSnackbar(msg, { variant: 'error' });
+    }
   }
 
   const classes = useStyles();
@@ -116,19 +129,19 @@ function MemoryActionButton(props) {
     <StyledCardActions className={classes.acctionsBt}>
       <Button className={classes.button} onClick={handleLike}>
         {realLikeData.isMyLike ? (
-          <React.Fragment>
+          <>
             <FavoriteIcon fontSize="small" color="primary" className={classes.rightIcon} />
             <Typography component="span" variant="body2" color="primary">
               {realLikeData.numLike ? ` ${realLikeData.numLike}` : ''}
             </Typography>
-          </React.Fragment>
+          </>
         ) : (
-          <React.Fragment>
+          <>
             <FavoriteBorderIcon fontSize="small" className={classes.rightIcon} />
             <Typography component="span" variant="body2">
               {realLikeData.numLike ? ` ${realLikeData.numLike}` : ''}
             </Typography>
-          </React.Fragment>
+          </>
         )}
       </Button>
 
@@ -149,18 +162,17 @@ function MemoryActionButton(props) {
 }
 
 const mapStateToProps = state => {
-  const top = state.loveinfo.topInfo;
   return {
-    numLike: top.numLike,
-    isMyLike: top.isMyLike,
+    numLike: state.loveinfo.topInfo.numLike,
+    isMyLike: state.loveinfo.topInfo.isMyLike,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     setLikeTopInfo: value => {
-      dispatch(setLikeTopInfo(value));
-    }
+      dispatch(actions.setLikeTopInfo(value));
+    },
   };
 };
 

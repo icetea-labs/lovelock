@@ -1,41 +1,36 @@
 import { actionTypes } from '../actions/loveinfo';
 
 const initialState = {
-  proposes: [],
+  locks: [],
   memories: [],
   topInfo: {},
+  blogView: {},
 };
 const loveinfo = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_TOPINFO:
-      return Object.assign({}, state, {
-        topInfo: action.data,
-      });
+      return { ...state, topInfo: action.data };
     case actionTypes.SET_LIKE_TOPINFO:
-      return Object.assign({}, state, {
-        topInfo: Object.assign({}, state.topInfo, action.data),
-      });
-    case actionTypes.SET_PROPOSE:
-      return Object.assign({}, state, {
-        proposes: action.data,
-      });
-    case actionTypes.ADD_PROPOSE:
+      return { ...state, topInfo: { ...state.topInfo, ...action.data } };
+    case actionTypes.SET_LOCKS:
+      return { ...state, locks: action.data };
+    case actionTypes.ADD_LOCK:
       // eslint-disable-next-line no-case-declarations
-      const isAdd = state.proposes.filter(item => item.id === action.data.id);
-      return isAdd.length > 0 ? state : Object.assign({}, state, { proposes: [...state.proposes, action.data] });
-    case actionTypes.CONFIRM_PROPOSE:
+      const isAdd = state.locks.filter(item => item.id === action.data.id);
+      return isAdd.length > 0 ? state : { ...state, locks: [...state.locks, action.data] };
+    case actionTypes.CONFIRM_LOCK:
       // eslint-disable-next-line no-case-declarations
-      const newProposes = state.proposes.map(el => {
+      const newLocks = state.locks.map(el => {
         if (action.data.id === el.id) {
-          return Object.assign({}, el, action.data);
+          return { ...el, ...action.data };
         }
         return el;
       });
-      return Object.assign({}, state, { proposes: [...newProposes] });
+      return { ...state, locks: [...newLocks] };
     case actionTypes.SET_MEMORY:
-      return Object.assign({}, state, {
-        memories: action.data,
-      });
+      return { ...state, memories: action.data };
+    case actionTypes.SET_BLOG_VIEW:
+      return { ...state, blogView: action.data };
     default:
       return state;
   }

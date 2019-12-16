@@ -15,18 +15,17 @@ body {
   background: #e9ebee;
   font-size: rem(14);
 }
-textarea:focus,
-input:focus {
-  outline: none;
+
+input,
+textarea {
+  &:focus {
+    outline: none;
+  }
+
+  @media (max-width: 624px) {
+    font-size: 1rem !important;
+  }
 }
-// a {
-//   // color: #4a90e2;
-//   text-decoration: none;
-//   // font-family: DINPro-Medium;
-// }
-// a:hover {
-//   text-decoration: underline;
-// }
 
 .medium-zoom-overlay {
   z-index: 9999;
@@ -76,10 +75,10 @@ input.dante-menu-input {
 }
 
 .iframeContainer {
-  position: relative; 
-  padding-bottom: 56.25%; 
-  height: 0; 
-  overflow: hidden; 
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
   max-width: 100%;
 }
 .iframeContainer iframe {
@@ -116,4 +115,37 @@ input.dante-menu-input {
   color: #8250c8;
   line-height: 27px;
   transform:rotate(-45deg);
+}
+
+@media (max-width: 1200px) {
+  .graf--layoutOutsetLeft {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .graf--h2  {
+    font-size: 40px !important;
+    line-height: 45px !important;
+  }
+
+  .graf--h3  {
+    font-size: 35px !important;
+    line-height: 38px !important;
+  }
+
+  .graf--h4 {
+    font-size: 24px !important;
+    line-height: 35px !important;
+  }
+
+  .graf--p {
+    font-size: 16px !important;
+  }
+
+  .graf--blockquote {
+    margin-left: -10px !important;
+    padding-left: 10px !important;
+  }
 }

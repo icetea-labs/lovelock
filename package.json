@@ -24,6 +24,7 @@
     "hdkey": "^1.1.1",
     "idb-keyval": "^3.2.0",
     "ipfs-http-client": "^39.0.2",
+    "ipfs-only-hash": "^1.0.2",
     "keythereum": "github:TradaTech/keythereum",
     "medium-zoom": "^1.0.4",
     "moment": "^2.24.0",
@@ -100,6 +101,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.16.0",
+    "eslint-plugin-react-hooks": "^2.3.0",
     "prettier": "^1.17.1",
     "react-scripts": "^3.2.0"
   }

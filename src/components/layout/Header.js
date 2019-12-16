@@ -26,19 +26,20 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
-import AddIcon from '@material-ui/icons/Add';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+// import AddIcon from '@material-ui/icons/Add';
+// import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
-import { AvatarPro } from '../elements/AvatarPro';
+import { AvatarPro } from '../elements';
+import PuNewLock from '../elements/PuNewLock';
 import GetKeyToAuthen from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getTagsInfo } from '../../helper';
-import LeftContainer from "../pages/Propose/Detail/LeftContainer";
+import LeftContainer from '../pages/Lock/LeftContainer';
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
@@ -90,10 +91,10 @@ const useStyles = makeStyles(theme => ({
       // background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
     },
   },
-  avatar: {
-    margin: 10,
+  jsxAvatar: {
     width: 46,
     height: 46,
+    marginRight: 10,
     backgroundColor: '#fff',
   },
   friReqTitle: {
@@ -219,9 +220,9 @@ const useStyles = makeStyles(theme => ({
     '@media (max-width: 768px)': {
       display: 'block',
       cursor: 'pointer',
-      margin: '0 25px 0 30px'
-    }
-  }
+      margin: '0 25px 0 30px',
+    },
+  },
 }));
 
 const StyledMenu = withStyles({
@@ -304,6 +305,7 @@ function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
+  const isNewLock = useSelector(state => state.globalData.isNewLock);
   const mnemonic = useSelector(state => state.account.mnemonic);
   const privateKey = useSelector(state => state.account.privateKey);
   const mode = useSelector(state => state.account.mode);
@@ -319,8 +321,9 @@ function Header(props) {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const lockIndexText = props.match.params.index;
-  const lockIndexInt = parseInt(lockIndexText, 10)
-  const lockIndex = (isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt)) ? undefined : lockIndexInt
+  const lockIndexInt = parseInt(lockIndexText, 10);
+  const lockIndex =
+    isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
   function handleProfileMenuOpen(event) {
     setAnchorElMenu(event.currentTarget);
@@ -357,6 +360,12 @@ function Header(props) {
 
   function handeExplore() {
     props.history.push('/explore');
+  }
+  function handeNewLock() {
+    dispatch(actions.setNewLock(true));
+  }
+  function closePopup() {
+    dispatch(actions.setNewLock(false));
   }
   function handleShowphrase() {
     dispatch(actions.setNeedAuth(true));
@@ -404,6 +413,7 @@ function Header(props) {
         </ListItemIcon>
         <ListItemText primary="Update Profile" />
       </StyledMenuItem>
+      <Divider />
       <StyledMenuItem
         onClick={() => {
           handleShowphrase();
@@ -415,7 +425,7 @@ function Header(props) {
         </ListItemIcon>
         <ListItemText primary="View recovery phrase" />
       </StyledMenuItem>
-      <StyledMenuItem
+      {/* <StyledMenuItem
         onClick={() => {
           props.history.push('/register');
           handleMenuClose();
@@ -425,9 +435,9 @@ function Header(props) {
           <AddIcon />
         </ListItemIcon>
         <ListItemText primary="Create New Account" />
-      </StyledMenuItem>
-      <Divider />
-      <StyledMenuItem
+      </StyledMenuItem> */}
+
+      {/* <StyledMenuItem
         onClick={() => {
           props.history.push('/login');
           handleMenuClose();
@@ -437,7 +447,7 @@ function Header(props) {
           <ExitToAppIcon />
         </ListItemIcon>
         <ListItemText primary="Change Account" />
-      </StyledMenuItem>
+      </StyledMenuItem> */}
     </StyledMenu>
   );
 
@@ -450,7 +460,7 @@ function Header(props) {
       {friReqList.map(({ id, avatar, name }) => (
         <StyledMenuItem className={classes.friReqStyle} key={id}>
           <ListItemAvatar>
-            <AvatarPro alt="avatar" src={avatar} className={classes.avatar} />
+            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
           </ListItemAvatar>
           <ListItemText primary={name} className={classes.friReqName} />
           <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
@@ -485,23 +495,23 @@ function Header(props) {
             <ListItemText
               primary={
                 // eslint-disable-next-line react/jsx-wrap-multilines
-                <React.Fragment>
+                <>
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
                   </Typography>
                   {' sent you a promise'}
-                </React.Fragment>
+                </>
               }
               secondary={
                 // eslint-disable-next-line react/jsx-wrap-multilines
-                <React.Fragment>
+                <>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
                     {promise}
                   </Typography>
                   <Typography component="span" variant="body2">
                     {time}
                   </Typography>
-                </React.Fragment>
+                </>
               }
             />
           </ListItem>
@@ -525,7 +535,7 @@ function Header(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      { /* <MenuItem>
+      {/* <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="primary">
             <GroupIcon />
@@ -540,7 +550,7 @@ function Header(props) {
           </Badge>
         </IconButton>
         <p>Notifications</p>
-      </MenuItem> */ }
+      </MenuItem> */}
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           aria-label="profile settings"
@@ -551,6 +561,16 @@ function Header(props) {
           <AccountCircle />
         </IconButton>
         <p>Profile</p>
+      </MenuItem>
+      <MenuItem onClick={handeNewLock}>
+        <IconButton
+          aria-label="explore post of other users"
+          aria-controls="primary-search-explore-menu"
+          color="inherit"
+        >
+          <ExploreIcon />
+        </IconButton>
+        <p>Create</p>
       </MenuItem>
       <MenuItem onClick={handeExplore}>
         <IconButton
@@ -568,7 +588,7 @@ function Header(props) {
   return (
     <div>
       <div className={classes.grow}>
-        <StyledAppBar position="static" color="inherit" className={classes.AppBar + ' main-appbar'}>
+        <StyledAppBar position="static" color="inherit" className={`${classes.AppBar} main-appbar`}>
           <StyledToolbar>
             <MenuIcon
               fontSize="large"
@@ -576,14 +596,14 @@ function Header(props) {
               onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
             />
             <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
-              <LeftContainer proIndex={lockIndex} />
+              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} />
             </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
               <span>LoveLock</span>
             </StyledLogo>
             {address && (
-              <React.Fragment>
+              <>
                 {/* <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
@@ -599,11 +619,16 @@ function Header(props) {
                 </div> */}
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
-                  <AvatarPro alt="avatar" hash={avatarRedux} className={classes.avatar} />
+                  <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
                   <Typography className={classes.title} noWrap>
                     {displayName}
                   </Typography>
                   <ExpandMoreIcon className={classes.expandMore} />
+                </Button>
+                <Button className={classes.sectionDesktop} onClick={handeNewLock}>
+                  <Typography className={classes.title} noWrap>
+                    Create
+                  </Typography>
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeExplore}>
                   <Typography className={classes.title} noWrap>
@@ -647,7 +672,7 @@ function Header(props) {
                     <MoreIcon />
                   </IconButton>
                 </div>
-              </React.Fragment>
+              </>
             )}
           </StyledToolbar>
         </StyledAppBar>
@@ -657,6 +682,7 @@ function Header(props) {
       {friReqMenu}
       {notiList}
       {needAuth && <GetKeyToAuthen />}
+      {isNewLock && <PuNewLock close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );

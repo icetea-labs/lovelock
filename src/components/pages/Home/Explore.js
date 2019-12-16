@@ -1,53 +1,89 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
-import LeftContainer from '../Propose/Detail/LeftContainer';
-import { callView } from '../../../helper';
+import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
+import LeftContainer from '../Lock/LeftContainer';
 import MemoryContainer from '../Memory/MemoryContainer';
+import * as actions from '../../../store/actions';
 
-const RightBox = styled.div`
-  padding: 0 ${rem(15)} ${rem(45)} ${rem(45)};
+import APIService from '../../../service/apiService';
+
+const RightBoxMemories = styled.div`
+  padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
 `;
 
 function Explore(props) {
-  // const [loading, setLoading] = useState(true);
-  const [memoByRange, setMemoByRange] = useState([]);
-  const { address } = props;
-
+  const { address, setLocks, setMemory } = props;
+  const [loading, setLoading] = useState(true);
+  // const [users, isLoading, error, retry] = useAPI('getLocksForFeed', [address]);
   useEffect(() => {
-    loadMemory();
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadMemory() {
-    const getMemoriesByRange = await callView('getMemoriesByRange', [0, 100000]);
-    setMemoByRange(getMemoriesByRange);
+  async function fetchData() {
+    APIService.getLocksForFeed(address).then(resp => {
+      // set to redux
+      setLocks(resp.locks);
+
+      const memoIndex = resp.locks.reduce((tmp, lock) => {
+        return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
+      }, []);
+      // console.log('memoIndex', memoIndex);
+      memoIndex.length > 0 &&
+        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+          // set to redux
+          setMemory(mems);
+        });
+      setLoading(false);
+    });
   }
 
   return (
     address && (
-      <FlexBox wrap="wrap">
-        <FlexWidthBox width="30%">
-          <LeftContainer />
-        </FlexWidthBox>
-        <FlexWidthBox width="70%">
-          <RightBox>
-            <MemoryContainer memorydata={memoByRange} />
-          </RightBox>
-        </FlexWidthBox>
-      </FlexBox>
+      // <FlexBox wrap="wrap">
+      //   <FlexWidthBox width="30%">
+      //     <LeftContainer loading={loading} />
+      //   </FlexWidthBox>
+      //   <FlexWidthBox width="70%">
+      //     <RightBox>
+      //       <MemoryContainer memorydata={[]} />
+      //     </RightBox>
+      //   </FlexWidthBox>
+      // </FlexBox>
+      <LeftBoxWrapper>
+        <div className="proposeColumn proposeColumn--left">
+          <LeftContainer loading={loading} />
+        </div>
+        <div className="proposeColumn proposeColumn--right">
+          <RightBoxMemories>
+            <MemoryContainer memorydata={[]} />
+          </RightBoxMemories>
+        </div>
+      </LeftBoxWrapper>
     )
   );
 }
 
 const mapStateToProps = state => {
-  const { account } = state;
   return {
-    address: account.address,
+    address: state.account.address,
   };
 };
-
+const mapDispatchToProps = dispatch => {
+  return {
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+  };
+};
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Explore);

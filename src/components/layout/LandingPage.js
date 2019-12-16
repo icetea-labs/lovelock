@@ -70,7 +70,7 @@ const LoveLockQuote = styled.div`
     top: -40px;
     left: -40px;
     position: absolute;
-    color: rgba(255,255,255,.5)
+    color: rgba(255, 255, 255, 0.5);
   }
 `;
 
@@ -151,14 +151,15 @@ const Copyright = styled.div`
 
 class LandingPage extends PureComponent {
   render() {
-    const isPropose = window.location.pathname.indexOf('/lock/') === 0;
-    return !isPropose ? (
-      <React.Fragment>
+    const isLock = window.location.pathname.indexOf('/lock/') === 0;
+    return !isLock ? (
+      <>
         <OutBox>
           <SplitLeft>
             <SplitContentLeft>
               <LoveLockQuote>
-                  An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting. Keep to yourself or share with close friends.
+                An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting. Keep to
+                yourself or share with close friends.
               </LoveLockQuote>
             </SplitContentLeft>
           </SplitLeft>
@@ -200,7 +201,7 @@ class LandingPage extends PureComponent {
             </div>
           </Copyright>
         </FooterWapper>
-      </React.Fragment>
+      </>
     ) : (
       <div />
     );

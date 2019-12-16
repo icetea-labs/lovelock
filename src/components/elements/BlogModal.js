@@ -22,6 +22,9 @@ const useStyles = makeStyles(theme => ({
     top: 0,
     width: '100%',
     outline: 'none',
+    '@media (max-width: 768px)': {
+      padding: '32px 0 80px',
+    },
   },
   title: {
     flexGrow: 1,
@@ -46,22 +49,22 @@ const useStyles = makeStyles(theme => ({
     maxWidth: 1200,
     minHeight: 48,
     width: '100%',
-    margin: '0 auto'
+    margin: '0 auto',
   },
   postBody: {
     marginTop: 24, // this is suitable for banner-photo post
   },
   subtitle: {
     fontSize: '0.8em',
-    color: theme.palette.text.hint
+    color: theme.palette.text.hint,
   },
   back: {
     margin: theme.spacing(1),
     marginRight: theme.spacing(4),
     color: theme.palette.text.secondary,
     '&:hover': {
-      color: theme.palette.text.primary
-    }
+      color: theme.palette.text.primary,
+    },
   },
 }));
 
@@ -71,46 +74,46 @@ export default function BlogModal(props) {
   } else {
     document.body.style.overflow = 'auto';
   }
-  
+
   const classes = useStyles();
 
   return (
-      <CSSTransition in={props.open} timeout={{ enter: 1100, exit: 440 }} classNames='memory-modal' unmountOnExit>
-        <div className={classes.wrapper}>
-          <div className={classes.paper}>
-            <div className={classes.topbar}>
+    <CSSTransition in={props.open} timeout={{ enter: 1100, exit: 440 }} classNames="memory-modal" unmountOnExit>
+      <div className={classes.wrapper}>
+        <div className={classes.paper}>
+          <div className={classes.topbar}>
             <AppBar className={classes.appbar}>
-            <Toolbar  className={classes.toolbar}>
-              <div className={classes.title}>
-                <Typography variant="h6">{props.title}</Typography>
-                {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
-              </div>
-              {props.handlePreview && (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      onChange={e => props.handlePreview(e.target.checked)}
-                    />
-                  }
-                  label={<Typography component="div"><Box color="primary.main">{props.previewText || 'Preview'}</Box></Typography>}
-                />
-              )}
-              {props.handleSumit && (
-                  <Button variant="contained" color='primary' onClick={props.handleSumit}>
+              <Toolbar className={classes.toolbar}>
+                <div className={classes.title}>
+                  <Typography variant="h6">{props.title}</Typography>
+                  {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+                </div>
+                {props.handlePreview && (
+                  <FormControlLabel
+                    control={<Switch onChange={e => props.handlePreview(e.target.checked)} />}
+                    label={
+                      <Typography component="div">
+                        <Box color="primary.main">{props.previewText || 'Preview'}</Box>
+                      </Typography>
+                    }
+                  />
+                )}
+                {props.handleSumit && (
+                  <Button variant="contained" color="primary" onClick={props.handleSumit}>
                     Publish
                   </Button>
                 )}
-                <Button className={classes.back} onClick={props.handleClose}>
-                  {props.closeText || <i className="material-icons">close</i>}
-                </Button>
-            </Toolbar>
+                {props.handleClose && (
+                  <Button className={classes.back} onClick={props.handleClose}>
+                    {props.closeText || <i className="material-icons">close</i>}
+                  </Button>
+                )}
+              </Toolbar>
             </AppBar>
-            </div>
-            <div className={classes.postBody}>
-              {props.children}
-            </div>
           </div>
+          <div className={classes.postBody}>{props.children}</div>
         </div>
-      </CSSTransition>
+      </div>
+    </CSSTransition>
   );
 }

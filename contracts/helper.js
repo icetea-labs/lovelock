@@ -1,7 +1,29 @@
 //private function
-exports.expectProposeOwners = (propose, message = 'Permission denied') => {
-  const errmsg = message + ': You must be owner of the lock.';
-  expect(msg.sender === propose.receiver || msg.sender === propose.sender, errmsg);
+exports.expectLockOwners = (lock, message = 'Permission denied') => {
+  const errmsg = message + '. You must be owner of the lock.';
+  expect(
+    msg.sender === lock.receiver || msg.sender === lock.sender || lock.contributors.indexOf(msg.sender) !== -1,
+    errmsg
+  );
+};
+//private function
+exports.expectOwner = (self, message = 'Permission denied') => {
+  const errmsg = message + '. You must be owner.';
+  const owner = self.getOwner();
+  expect(owner.includes(msg.sender), errmsg);
+};
+//private function
+exports.expectAdmin = (self, message = 'Permission denied') => {
+  const errmsg = message + '. You must be user admin.';
+  const admins = self.getAdmins();
+  expect(admins.includes(msg.sender), errmsg);
+};
+//private function
+exports.expectUserApproved = (self, opts) => {
+  opts = Object.assign({ message: 'Permission denied', from: msg.sender }, opts);
+  const errmsg = opts.message + '. You are not approved to use the app yet.';
+  const users = self.getUsers();
+  expect(users.includes(opts.from), errmsg);
 };
 //private function
 exports.getDataByIndex = (array, index) => {

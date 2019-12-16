@@ -11,15 +11,26 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
-import * as actions from '../../../store/actions';
-import { getAliasContract } from '../../../service/tweb3';
-import { saveFileToIpfs, saveBufferToIpfs, tryStringifyJson, getTagsInfo } from '../../../helper';
-import { ensureToken, sendTransaction } from '../../../helper/hooks';
-import AddInfoMessage from '../../elements/AddInfoMessage';
-import CommonDialog from '../../elements/CommonDialog';
-import { FlexBox } from '../../elements/StyledUtils';
-import ImageCrop from '../../elements/ImageCrop';
-import { AvatarPro } from '../../elements';
+import WarningIcon from '@material-ui/icons/Warning';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+
+import * as actions from '../../store/actions';
+import { getAliasContract } from '../../service/tweb3';
+import {
+  saveFileToIpfs,
+  saveBufferToIpfs,
+  tryStringifyJson,
+  getTagsInfo,
+  applyRotation,
+  imageResize,
+  handleError,
+} from '../../helper';
+import { ensureToken, sendTransaction } from '../../helper/hooks';
+import AddInfoMessage from './AddInfoMessage';
+import CommonDialog from './CommonDialog';
+import { FlexBox } from './StyledUtils';
+import ImageCrop from './ImageCrop';
+import { AvatarPro } from './AvatarPro';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -172,7 +183,27 @@ const PreviewContainter = styled.div`
 const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
-
+const WarningPass = styled.div`
+  .warningSnackbar {
+    background-color: #fe7;
+    box-shadow: none;
+    margin-top: 8px;
+    /* max-width: 400px; */
+  }
+  .warningMessage {
+    display: flex;
+    align-items: center;
+  }
+  .warningIcon {
+    margin-right: 16px;
+    color: #d90;
+  }
+  .warningText {
+    color: #333;
+    font-style: italic;
+    font-size: 1.1em;
+  }
+`;
 class PuNewLock extends React.Component {
   constructor(props) {
     super(props);
@@ -206,7 +237,7 @@ class PuNewLock extends React.Component {
   };
 
   async getSuggestions(value) {
-    let escapedValue = this.escapeRegexCharacters(value.trim());
+    let escapedValue = this.escapeRegexCharacters(value.trim().toLowerCase());
 
     if (escapedValue.length < 3) {
       this.setState({ suggestions: [] });
@@ -220,7 +251,9 @@ class PuNewLock extends React.Component {
     const peopleAva = [];
 
     try {
-      const result = await getAliasContract().methods.query(escapedValue).call()
+      const result = await getAliasContract()
+        .methods.query(`account.${escapedValue}`)
+        .call();
       people = Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
         return { nick, address: result[key].address };
@@ -254,14 +287,14 @@ class PuNewLock extends React.Component {
   partnerChange = e => {
     const val = e.target.value;
     this.setState({
-      partner: val,
+      partner: val.normalize(),
     });
   };
 
   promiseStmChange = e => {
     const val = e.target.value;
     this.setState({
-      promiseStm: val,
+      promiseStm: val.normalize(),
     });
   };
 
@@ -348,7 +381,7 @@ class PuNewLock extends React.Component {
     const key = event.currentTarget.name;
     const val = event.currentTarget.value;
 
-    this.setState({ [key]: val });
+    this.setState({ [key]: val.normalize() });
   };
 
   handleImageChange = event => {
@@ -382,14 +415,14 @@ class PuNewLock extends React.Component {
   };
 
   createJournal = () => {
-    const { proposes, enqueueSnackbar } = this.props;
+    // const { locks, enqueueSnackbar } = this.props;
     let message = '';
-    for (let i = 0; i < proposes.length; i++) {
-      if (proposes[i].sender === proposes[i].receiver) {
-        message = 'You already had a journal and cannot create one more.';
-        enqueueSnackbar(message, { variant: 'error' });
-      }
-    }
+    // for (let i = 0; i < locks.length; i++) {
+    //   if (locks[i].sender === locks[i].receiver) {
+    //     message = 'You already had a journal and cannot create one more.';
+    //     enqueueSnackbar(message, { variant: 'error' });
+    //   }
+    // }
 
     if (message) {
       this.closeJournal();
@@ -398,95 +431,92 @@ class PuNewLock extends React.Component {
     }
   };
 
-  async createPropose(partner, promiseStm, date, file) {
-    const { setLoading, enqueueSnackbar, close } = this.props;
-    const { firstname, lastname, cropFile, checked, botReply } = this.state;
-    let botAva = '';
-    let hash = [];
-    let message = '';
-
-    //this.timeoutHanle1 = setTimeout(async () => {
-      try {
-        if (!partner) {
-          message = 'Please choose your partner.';
-          enqueueSnackbar(message, { variant: 'error' });
-          setLoading(false);
-          return;
-        }
-        if (!promiseStm) {
-          message = 'Please input your lock.';
-          enqueueSnackbar(message, { variant: 'error' });
-          return;
-        }
-
-        let botInfo;
-        if (checked) {
-          if (!firstname) {
-            message = 'Please enter your crush first name.';
-            enqueueSnackbar(message, { variant: 'error' });
-            return;
-          }
-          if (!lastname) {
-            message = 'Please enter your crush last name.';
-            enqueueSnackbar(message, { variant: 'error' });
-            return;
-          }
-          if (!cropFile) {
-            message = 'Please choose avatar of your crush.';
-            enqueueSnackbar(message, { variant: 'error' });
-            return;
-          }
-          if (!botReply) {
-            message = 'Please enter the reply from your crush.';
-            enqueueSnackbar(message, { variant: 'error' });
-            return;
-          }
-          botInfo = { firstname, lastname, botReply };
-        }
-
-        const uploadThenSendTx = async () => {
-          setLoading(true);
-
-          if (cropFile) {
-            botAva = await saveFileToIpfs(cropFile);
-            botInfo.botAva = botAva
-          }
-
-          if (file) {
-            hash = await saveBufferToIpfs(file);
-          }
-  
-          const info = { date, hash };
-          return await sendTransaction(this.props, 'createPropose', promiseStm, partner, info, botInfo)
-        }
-
-        const result = await ensureToken(this.props, uploadThenSendTx)
-
-        //this.timeoutHanle2 = setTimeout(() => {
-        //  if (result) {
-            message = 'Your lock sent successfully.';
-            enqueueSnackbar(message, { variant: 'success' });
-            setLoading(false);
-            close();
-        //  }
-        //}, 50);
-      } catch (err) {
-        console.error(err);
-        message = 'an error occurred while sending, please check the inner exception for details';
-        enqueueSnackbar(message, { variant: 'error' });
-        setLoading(false);
-      }
-    //}, 100);
-  }
-
   onKeyEsc = () => {
     if (!this.dialogShown && !this.state.isJournal) {
-      this.props.close()
+      this.props.close();
     }
-  }
+  };
 
   onDialogToggle = value => {
-    this.dialogShown = value
+    this.dialogShown = value;
+  };
+
+  async createLock(partner, promiseStm, date, file) {
+    const { setLoading, enqueueSnackbar, close } = this.props;
+    const { firstname, lastname, cropFile, checked, botReply } = this.state;
+    let hash = [];
+
+    // this.timeoutHanle1 = setTimeout(async () => {
+    try {
+      if (!partner) {
+        const message = 'Please choose your partner.';
+        enqueueSnackbar(message, { variant: 'error' });
+        setLoading(false);
+        return;
+      }
+      if (!promiseStm) {
+        const message = 'Please input your lock.';
+        enqueueSnackbar(message, { variant: 'error' });
+        return;
+      }
+
+      let botInfo;
+      if (checked) {
+        if (!firstname) {
+          const message = 'Please enter your crush first name.';
+          enqueueSnackbar(message, { variant: 'error' });
+          return;
+        }
+        if (!lastname) {
+          const message = 'Please enter your crush last name.';
+          enqueueSnackbar(message, { variant: 'error' });
+          return;
+        }
+        if (!cropFile) {
+          const message = 'Please choose avatar of your crush.';
+          enqueueSnackbar(message, { variant: 'error' });
+          return;
+        }
+        if (!botReply) {
+          const message = 'Please enter the reply from your crush.';
+          enqueueSnackbar(message, { variant: 'error' });
+          return;
+        }
+        botInfo = { firstname, lastname, botReply };
+      }
+      const uploadThenSendTx = async () => {
+        setLoading(true);
+
+        if (cropFile) {
+          const newFile = await applyRotation(cropFile[0], 1, 500);
+          const saveFile = imageResize(cropFile[0], newFile);
+          botInfo.botAva = await saveFileToIpfs(saveFile);
+        }
+
+        if (file) {
+          hash = await saveBufferToIpfs(file);
+        }
+
+        const info = { date, hash };
+        return await sendTransaction(this.props, 'createLock', promiseStm, partner, info, botInfo);
+      };
+
+      const result = await ensureToken(this.props, uploadThenSendTx);
+
+      // this.timeoutHanle2 = setTimeout(() => {
+      if (result) {
+        const message = 'Your lock sent successfully.';
+        enqueueSnackbar(message, { variant: 'success' });
+        setLoading(false);
+        close();
+      }
+      // }, 50);
+    } catch (err) {
+      const msg = handleError(err, 'sending newlock');
+      enqueueSnackbar(msg, { variant: 'error' });
+      setLoading(false);
+    }
+    // }, 100);
   }
 
   render() {
@@ -509,18 +539,18 @@ class PuNewLock extends React.Component {
       placeholder: '@partner',
       value,
       onChange: this.onPartnerChange,
-      autoFocus: true
+      autoFocus: true,
     };
 
     return (
-      <React.Fragment>
+      <>
         <CommonDialog
           title="New Lock"
           okText={() => this.state.okText || 'Send'}
           close={close}
           onKeyEsc={this.onKeyEsc}
           confirm={() => {
-            this.createPropose(partner, promiseStm, date, file);
+            this.createLock(partner, promiseStm, date, file);
           }}
         >
           {!checked && (
@@ -605,8 +635,23 @@ class PuNewLock extends React.Component {
             hasParentDialog
             onDialogToggle={this.onDialogToggle}
           />
+          <WarningPass>
+            <SnackbarContent
+              className="warningSnackbar"
+              message={
+                <span className="warningMessage">
+                  <WarningIcon className="warningIcon" />
+                  <span className="warningText">
+                    This locks will be public. Private locks are not yet supported for this beta version.
+                  </span>
+                </span>
+              }
+            />
+          </WarningPass>
         </CommonDialog>
-        {isOpenCrop && <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />}
+        {isOpenCrop && (
+          <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />
+        )}
         {isJournal && (
           <CommonDialog
             title="Journal"
@@ -622,7 +667,7 @@ class PuNewLock extends React.Component {
             </TagTitle>
           </CommonDialog>
         )}
-      </React.Fragment>
+      </>
     );
   }
 }
@@ -634,7 +679,7 @@ Promise.defaultProps = {
 
 const mapStateToProps = state => {
   return {
-    proposes: state.loveinfo.proposes,
+    locks: state.loveinfo.locks,
     address: state.account.address,
     tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,
@@ -646,10 +691,9 @@ const mapDispatchToProps = dispatch => {
     setLoading: value => {
       dispatch(actions.setLoading(value));
     },
-    dispatch
+    dispatch,
   };
 };
-
 export default connect(
   mapStateToProps,
   mapDispatchToProps

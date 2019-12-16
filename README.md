@@ -1,3 +1,11 @@
+<h1 align="center">
+  <a href="https://lovelock.icetea.io"><img width="650px" src="https://lovelock.icetea.io/static/img/share.jpg" alt="Lovelock logo" /></a>
+</h1>
+
+<h3 align="center">Lovelock - Cherish Your Intimate Memories</h3>
+
+> An secure place to store and celebrate your meaningful memories. Safe, clutterless, and lasting. Keep to yourself or share with close friends. https://lovelock.icetea.io
+
 ## Setup
 
 ### 1. Install
@@ -13,6 +21,12 @@ If you want to use local Icetea node (easier for debugging).
 
 #### To use the local node:
 
+Setting this in the `.env` file:
+```
+REACT_APP_RPC=ws://localhost:26657/websocket
+```
+
+Then start icetea node.
 `icetea start`
 
 For help, type `icetea -h`.

@@ -4,9 +4,9 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
-import CameraAltIcon from '@material-ui/icons/CameraAlt';
+// import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import Box from '@material-ui/core/Box';
+// import Box from '@material-ui/core/Box';
 import { useSnackbar } from 'notistack';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import WarningIcon from '@material-ui/icons/Warning';
@@ -16,9 +16,17 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import getWeb3 from '../../../../service/tweb3';
-import { isAliasRegistered, wallet, registerAlias, setTagsInfo, saveFileToIpfs } from '../../../../helper';
+import {
+  isAliasRegistered,
+  wallet,
+  registerAlias,
+  setTagsInfo,
+  saveFileToIpfs,
+  applyRotation,
+  imageResize,
+} from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
-import { AvatarPro } from '../../../elements';
+// import { AvatarPro } from '../../../elements';
 // import ImageCrop from '../../../elements/ImageCrop';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -36,6 +44,9 @@ const useStyles = makeStyles(theme => ({
   },
   avatarBox: {
     marginTop: theme.spacing(1),
+    '@media (max-width: 768px)': {
+      marginTop: theme.spacing(3),
+    },
   },
   avatar: {
     width: 100,
@@ -43,61 +54,60 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const PreviewContainter = styled.div`
-  padding: 10px 0 0 0;
-  display: flex;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  font-size: 14px;
-  cursor: pointer;
-  .upload_img input[type='file'] {
-    font-size: 100px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-  .upload_img {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    cursor: pointer;
-    &:hover .changeImg {
-      display: block;
-    }
-  }
-  .changeImg {
-    cursor: pointer;
-    position: absolute;
-    display: none;
-    width: 100px;
-    height: 50px;
-    top: 50px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    font-size: 80%;
-    line-height: 2;
-    overflow: hidden;
-    border-bottom-left-radius: 600px;
-    border-bottom-right-radius: 600px;
-  }
-  .fileInput {
-    width: 120px;
-    height: 50px;
-    padding: 2px;
-    cursor: pointer;
-  }
-`;
+// const PreviewContainter = styled.div`
+//   display: flex;
+//   flex-direction: row;
+//   -webkit-box-pack: justify;
+//   font-size: 14px;
+//   cursor: pointer;
+//   .upload_img input[type='file'] {
+//     font-size: 100px;
+//     position: absolute;
+//     left: 0;
+//     top: 0;
+//     opacity: 0;
+//     cursor: pointer;
+//   }
+//   .upload_img {
+//     position: relative;
+//     overflow: hidden;
+//     display: inline-block;
+//     cursor: pointer;
+//     &:hover .changeImg {
+//       display: block;
+//     }
+//   }
+//   .changeImg {
+//     cursor: pointer;
+//     position: absolute;
+//     display: none;
+//     width: 100px;
+//     height: 50px;
+//     top: 50px;
+//     left: 0;
+//     right: 0;
+//     text-align: center;
+//     background-color: rgba(0, 0, 0, 0.5);
+//     color: #fff;
+//     font-size: 80%;
+//     line-height: 2;
+//     overflow: hidden;
+//     border-bottom-left-radius: 600px;
+//     border-bottom-right-radius: 600px;
+//   }
+//   .fileInput {
+//     width: 120px;
+//     height: 50px;
+//     padding: 2px;
+//     cursor: pointer;
+//   }
+// `;
 
 const WarningPass = styled.div`
   .warningSnackbar {
     background-color: #fe7;
     box-shadow: none;
-    margin-top: 24px;
+    margin-top: 8px;
     max-width: 400px;
   }
   .warningMessage {
@@ -169,13 +179,22 @@ function RegisterUsername(props) {
           const displayname = `${firstname} ${lastname}`;
 
           // setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
-          const tweb3 = getWeb3()
+          const tweb3 = getWeb3();
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
 
           const registerInfo = [];
           const opts = { address };
-          registerInfo.push(registerAlias(username, address));
+          let avatarUrl;
+          if (avatarData) {
+            const newFile = await applyRotation(avatarData[0], 1, 500);
+            const saveFile = imageResize(avatarData[0], newFile);
+            const setAva = saveFileToIpfs(saveFile).then(hash => {
+              avatarUrl = process.env.REACT_APP_IPFS + hash;
+              setTagsInfo({ avatar: hash }, opts);
+            });
+            registerInfo.push(setAva);
+          }
           registerInfo.push(
             setTagsInfo(
               {
@@ -187,14 +206,7 @@ function RegisterUsername(props) {
               opts
             )
           );
-          let avatarUrl
-          if (avatarData) {
-            const setAva = saveFileToIpfs(avatarData).then(hash => {
-              avatarUrl = process.env.REACT_APP_IPFS + hash
-              setTagsInfo({ avatar: hash }, opts)
-            });
-            registerInfo.push(setAva);
-          }
+          registerInfo.push(registerAlias(username, address));
           await Promise.all(registerInfo);
 
           const newAccount = {
@@ -219,16 +231,15 @@ function RegisterUsername(props) {
 
           // save to browser password manager
           if (window.PasswordCredential) {
-            const credData = { id: username, password, name: displayname }
+            const credData = { id: username, password, name: displayname };
             if (avatarUrl) {
               credData.iconURL = avatarUrl;
             }
             const cred = new window.PasswordCredential(credData);
 
             // If error, just warn to console because this feature is not essential
-            navigator.credentials.store(cred).catch(console.warn)
+            navigator.credentials.store(cred).catch(console.warn);
           }
-
         } catch (error) {
           console.error(error);
           const message = `An error has occured. Detail:${error}`;
@@ -249,17 +260,17 @@ function RegisterUsername(props) {
     history.push('/login');
   }
 
-  function handleImageChange(event) {
-    event.preventDefault();
-    const orFiles = Array.from(event.target.files);
+  // function handleImageChange(event) {
+  //   event.preventDefault();
+  //   const orFiles = Array.from(event.target.files);
 
-    if (orFiles.length > 0) {
-      setOriginFile(orFiles);
-      setIsOpenCrop(true);
-    } else {
-      setIsOpenCrop(false);
-    }
-  }
+  //   if (orFiles.length > 0) {
+  //     setOriginFile(orFiles);
+  //     setIsOpenCrop(true);
+  //   } else {
+  //     setIsOpenCrop(false);
+  //   }
+  // }
 
   // function closeCrop() {
   //   setIsOpenCrop(false);
@@ -273,7 +284,7 @@ function RegisterUsername(props) {
 
   const classes = useStyles();
   return (
-    <React.Fragment>
+    <>
       <ValidatorForm onSubmit={gotoNext}>
         <TextValidator
           label="Username"
@@ -291,7 +302,7 @@ function RegisterUsername(props) {
           ]}
           margin="dense"
           value={username}
-          inputProps={{ autoComplete: "username" }}
+          inputProps={{ autoComplete: 'username' }}
         />
         <FlexBox>
           <TextValidator
@@ -332,7 +343,7 @@ function RegisterUsername(props) {
           errorMessages={['This field is required']}
           margin="dense"
           value={password}
-          inputProps={{ autoComplete: "new-password" }}
+          inputProps={{ autoComplete: 'new-password' }}
         />
         <TextValidator
           label="Repeat password"
@@ -346,14 +357,10 @@ function RegisterUsername(props) {
           errorMessages={['Password mismatch', 'This field is required']}
           margin="dense"
           value={rePassword}
-          inputProps={{ autoComplete: "new-password" }}
+          inputProps={{ autoComplete: 'new-password' }}
         />
-        <Box display="flex" className={classes.avatarBox}>
+        {/* <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
-          {/* <div>
-            <AvatarPro src={avatar} className={classes.avatar} />
-            <input className="fileInput" type="file" onChange={handleImageChange} accept="image/*" />
-          </div> */}
           <PreviewContainter>
             <div className="upload_img">
               <AvatarPro src={avatar} className={classes.avatar} />
@@ -369,7 +376,7 @@ function RegisterUsername(props) {
               </div>
             </div>
           </PreviewContainter>
-        </Box>
+        </Box> */}
         <div>
           <FormControlLabel
             control={
@@ -403,16 +410,18 @@ function RegisterUsername(props) {
         <DivControlBtnKeystore>
           <div>
             <span>Already had an account?</span>
-            <LinkPro onClick={gotoLogin}>Login</LinkPro>
+            <LinkPro className="alreadyAcc" onClick={gotoLogin}>
+              Login
+            </LinkPro>
           </div>
-          <ButtonPro type="submit">
+          <ButtonPro type="submit" className="nextBtn">
             Next
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
           </ButtonPro>
         </DivControlBtnKeystore>
       </ValidatorForm>
       {/* {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} />} */}
-    </React.Fragment>
+    </>
   );
 }
 
@@ -434,7 +443,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actionGlobal.setLoading(value));
     },
     setIsRemember: value => {
-      window.localStorage['remember'] = value ? '1' : '0'
+      window.localStorage['remember'] = value ? '1' : '0';
       dispatch(actionCreate.setIsRemember(value));
     },
   };

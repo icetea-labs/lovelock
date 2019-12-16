@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
-import { FlexBox, FlexWidthBox, rem } from '../../elements/StyledUtils';
+import { connect, useDispatch } from 'react-redux';
+import { FlexBox, FlexWidthBox, rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
-import { callView } from '../../../helper';
-import * as actions from '../../../store/actions';
-import PuNewLock from '../Propose/PuNewLock';
+import LeftContainer from '../Lock/LeftContainer';
+import MemoryContainer from '../Memory/MemoryContainer';
 import LandingPage from '../../layout/LandingPage';
+import * as actions from '../../../store/actions';
+import APIService from '../../../service/apiService';
+
+const RightBoxMemories = styled.div`
+  padding: 0 0 ${rem(45)} ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
+`;
 
 const RightBox = styled.div`
   text-align: center;
@@ -38,56 +46,116 @@ const ActionForm = styled.div`
 `;
 
 const ShadowBox = styled.div`
+  margin-top: ${rem(95)};
   padding: ${rem(30)};
   border-radius: 10px;
   background: #f5f5f8;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  @media (max-width: 768px) {
+    margin-top: 0;
+    height: 125%;
+  }
+`;
+
+const FooterWapper = styled.div`
+  height: 20px;
+  line-height: 20px;
+  padding-top: 30px;
+  /* background: #fff; */
+  width: 100%;
+  color: #737373;
+  font-size: 12px;
+  font-weight: 300px;
+  border-top: 1px solid #e6ecf0;
+  justify-content: center;
+  /* position: fixed; */
+  left: 0;
+  z-index: 1;
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+    display: none;
+  }
+`;
+const DownInfo = styled.div`
+  height: 20px;
+  width: 100%;
+  color: #737373;
+  font-size: 12px;
+  font-weight: 300px;
+  border-top: 1px solid #e6ecf0;
+  justify-content: center;
+  left: 0;
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+    display: none;
+  }
+`;
+
+const SupportSite = styled.div`
+  display: flex;
+  margin: 3px 0;
+  line-height: 18px;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  a {
+    color: inherit;
+    &:hover {
+      color: #8250c8;
+      text-decoration: underline;
+    }
+  }
+  .footRight {
+    margin-left: 15px;
+  }
 `;
 
 function Home(props) {
-  const [openPromise, setOpenPromise] = useState(false);
-  const { address, history } = props;
-  const [homePropose, setHomePropose] = useState(null);
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
+  const { setLocks, setMemory, address, locks, history } = props;
+  // const [locks, setlocks] = useState(null);
 
   useEffect(() => {
-    loadAcceptPropose();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
-
-  function loadAcceptPropose() {
+    let cancel = false;
     if (address) {
-      callView('getProposeByAddress', [address]).then(proposes => {
-        setHomePropose(proposes || []);
-      });
+      fetchData(cancel);
     }
+    return () => {
+      cancel = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function fetchData(cancel) {
+    console.log('fetchData');
+    APIService.getLocksForFeed(address).then(resp => {
+      // set to redux
+      setLocks(resp.locks);
+      if (cancel) return;
+      const memoIndex = resp.locks.reduce((tmp, lock) => {
+        return tmp.concat(lock.memoIndex);
+      }, []);
+      // console.log('memoIndex', memoIndex);
+      memoIndex.length > 0 &&
+        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
+          // set to redux
+          setMemory(mems);
+        });
+      setLoading(false);
+    });
   }
-
-  useEffect(() => {
-    if (homePropose && homePropose.length > 0) {
-      const pro = homePropose.filter(item => item.status === 1);
-      let index;
-      if (pro.length > 0) {
-        index = pro[0].id;
-      } else {
-        index = homePropose[0].id;
-      }
-      history.push(`/lock/${index}`);
-    }
-  }, [homePropose, history]);
-
   function openPopup() {
-    setOpenPromise(true);
+    dispatch(actions.setNewLock(true));
   }
 
   function openExplore() {
     history.push('/explore');
   }
 
-  function closePopup() {
-    setOpenPromise(false);
-    loadAcceptPropose();
-  }
+  // function closePopup() {
+  //   fetchData();
+  // }
 
   const renderHomeEmptyPropose = (
     <FlexWidthBox>
@@ -96,7 +164,7 @@ function Home(props) {
           <div>
             <img src="/static/img/plant.svg" alt="plant" />
             <div className="emptyTitle">
-              <h1>You have no locks yet.</h1>
+              <h1>You have no lock yet.</h1>
             </div>
             <div className="emptySubTitle">
               <h2>Locks are the way you connect and share memories with your loved ones.</h2>
@@ -112,14 +180,65 @@ function Home(props) {
           </div>
         </RightBox>
       </ShadowBox>
-      {openPromise && <PuNewLock close={closePopup} />}
+      <FooterWapper>
+        <SupportSite className="upInfo">
+          <p>
+            Powered by&nbsp;
+            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+              Icetea Platform.
+            </a>
+          </p>
+          <p>
+            &nbsp;
+            <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
+              Trada Technology&nbsp;
+            </a>
+            &copy; 2019
+          </p>
+        </SupportSite>
+      </FooterWapper>
+      <DownInfo>
+        <SupportSite>
+          <p>
+            Need support? Contact us via&nbsp;
+            <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+              Email
+            </a>
+            &nbsp;or&nbsp;
+            <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
+              Telegram.
+            </a>
+          </p>
+        </SupportSite>
+      </DownInfo>
     </FlexWidthBox>
   );
-
-  return address ? (
-    <FlexBox wrap="wrap" justify="center">
-      {homePropose && homePropose.length < 1 && renderHomeEmptyPropose}
-    </FlexBox>
+  const isRegistered = !!address;
+  const isHaveLocks = locks.length > 0;
+  // console.log('render home', isHaveLocks, '---', loading, '---->', locks);
+  return isRegistered ? (
+    <>
+      {!loading && (
+        <>
+          {isHaveLocks ? (
+            <LeftBoxWrapper>
+              <div className="proposeColumn proposeColumn--left">
+                <LeftContainer loading={loading} />
+              </div>
+              <div className="proposeColumn proposeColumn--right">
+                <RightBoxMemories>
+                  <MemoryContainer memorydata={[]} />
+                </RightBoxMemories>
+              </div>
+            </LeftBoxWrapper>
+          ) : (
+            <FlexBox wrap="wrap" justify="center">
+              {renderHomeEmptyPropose}
+            </FlexBox>
+          )}
+        </>
+      )}
+    </>
   ) : (
     <LandingPage />
   );
@@ -128,10 +247,21 @@ function Home(props) {
 const mapStateToProps = state => {
   return {
     address: state.account.address,
+    locks: state.loveinfo.locks,
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return {
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
+    },
+    setMemory: value => {
+      dispatch(actions.setMemory(value));
+    },
+  };
+};
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Home);

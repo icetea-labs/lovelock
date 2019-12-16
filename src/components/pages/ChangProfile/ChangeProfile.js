@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
@@ -6,16 +7,30 @@ import { ecc } from '@iceteachain/common';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import ContactMailIcon from '@material-ui/icons/ContactMail';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
+import RotateRightIcon from '@material-ui/icons/RotateRight';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
+import Tooltip from '@material-ui/core/Tooltip';
 
-import { getAliasAndTags, setTagsInfo, saveFileToIpfs, isAliasRegistered, registerAlias } from '../../../helper';
+import {
+  getAliasAndTags,
+  setTagsInfo,
+  saveFileToIpfs,
+  isAliasRegistered,
+  registerAlias,
+  applyRotation,
+  imageResize,
+} from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
 import * as actionAccount from '../../../store/actions/account';
 import * as actionCreate from '../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox, LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../elements/StyledUtils';
 import { HeaderAuthen } from '../../elements/Common';
-import { AvatarPro } from '../../elements';
+import { AvatarPro, ArrowTooltip } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
 import RotationImg from '../../elements/RotationImg';
 
@@ -24,14 +39,41 @@ const useStyles = makeStyles(() => ({
     width: 120,
     height: 120,
   },
+  leftRotate: {
+    float: 'left',
+    color: '#8250c8',
+  },
+  rightRotate: {
+    float: 'right',
+    color: '#8250c8',
+  },
+  copyAddress: {
+    '& .MuiInputBase-input': {
+      cursor: 'pointer !important',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      color: 'rgba(0, 0, 0, 0.38)',
+    },
+  },
 }));
 
 const BoxAuthenCus = styled(BoxAuthen)`
   top: 30px;
 `;
 
+const RotateImage = styled.div`
+  input {
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(332deg, #b276ff, #fe8dc3);
+    color: #fff;
+  }
+`;
+
 const PreviewContainter = styled.div`
-  display: flex;
+  display: block;
   flex-direction: row;
   -webkit-box-pack: justify;
   padding: 20px 0 0 0;
@@ -46,6 +88,7 @@ const PreviewContainter = styled.div`
     cursor: pointer;
   }
   .upload_img {
+    height: 120px;
     position: relative;
     overflow: hidden;
     display: inline-block;
@@ -86,7 +129,15 @@ const RightProfile = styled.div`
   padding: 10px;
   margin: 5px;
 `;
-
+const BoxName = styled.div`
+  display: flex;
+  & > :first-child {
+    margin-right: 10px;
+  }
+  @media (max-width: 599.95px) {
+    display: block;
+  }
+`;
 function ChangeProfile(props) {
   const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth, privateKey } = props;
   const [firstname, setFirstname] = useState({ old: '', new: '' });
@@ -136,61 +187,6 @@ function ChangeProfile(props) {
     };
   }, [address]);
 
-  const applyRotation = (file, orientation) =>
-    new Promise(resolve => {
-      const maxWidth = 250;
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const url = reader.result;
-
-        const image = new Image();
-
-        image.onload = () => {
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-
-          let { width, height } = image;
-
-          const [outputWidth, outputHeight] = orientation >= 5 && orientation <= 8 ? [height, width] : [width, height];
-
-          const scale = outputWidth > maxWidth ? maxWidth / outputWidth : 1;
-
-          width *= scale;
-          height *= scale;
-
-          // set proper canvas dimensions before transform & export
-          canvas.width = outputWidth * scale;
-          canvas.height = outputHeight * scale;
-
-          // transform context before drawing image
-          switch (orientation) {
-            case 3:
-              context.transform(-1, 0, 0, -1, width, height);
-              break;
-            case 6:
-              context.transform(0, -1, 1, 0, 0, width);
-              break;
-            case 8:
-              context.transform(0, 1, -1, 0, height, 0);
-              break;
-            default:
-              break;
-          }
-
-          // draw image
-          context.drawImage(image, 0, 0, width, height);
-
-          // export base64
-          resolve(canvas.toDataURL('image/jpeg'));
-        };
-
-        image.src = url;
-      };
-
-      reader.readAsDataURL(file);
-    });
-
   async function saveChange() {
     if (isRegistered ? !tokenKey : !privateKey) {
       setNeedAuth(true);
@@ -223,19 +219,9 @@ function ChangeProfile(props) {
             orient = 8;
           }
           if (cropFile) {
-            const newFile = await applyRotation(cropFile[0], orient);
-            const { name, type } = cropFile[0];
-            const byteString = atob(newFile.split(',')[1]);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-              ia[i] = byteString.charCodeAt(i);
-            }
-            const blob = new Blob([ia], { type });
-            const parseFile = new File([blob], name, { type });
-            const saveFile = [parseFile];
+            const newFile = await applyRotation(cropFile[0], orient, 500);
+            const saveFile = imageResize(cropFile[0], newFile);
 
-            // console.log('saveFile', saveFile);
             const saveAvatar = saveFileToIpfs(saveFile).then(hash => {
               accountInfo.avatar = hash;
               if (avatar !== hash) {
@@ -280,7 +266,11 @@ function ChangeProfile(props) {
   function handleImageChange(event) {
     event.preventDefault();
     const orFiles = Array.from(event.target.files);
-
+    // if (orFiles[0].size > 2097152) {
+    //   const message = `File size must under 2MB.`;
+    //   enqueueSnackbar(message, { variant: 'error' });
+    //   return;
+    // }
     if (orFiles.length > 0) {
       setOriginFile(orFiles);
       setIsOpenCrop(true);
@@ -338,11 +328,7 @@ function ChangeProfile(props) {
                     <div className="upload_img">
                       {cropFile ? (
                         // <AvatarPro src={avatar} className={classes.avatar} />
-                        <div>
-                          <RotationImg src={avatar} rotation={rotation} />
-                          <input onClick={rotateleft} type="button" value="left" />
-                          <input onClick={rotateRight} type="button" value="right" />
-                        </div>
+                        <RotationImg src={avatar} rotation={rotation} />
                       ) : (
                         <AvatarPro hash={avatar} className={classes.avatar} />
                       )}
@@ -357,6 +343,17 @@ function ChangeProfile(props) {
                         <CameraAltIcon />
                       </div>
                     </div>
+                    {cropFile && (
+                      <RotateImage>
+                        <ArrowTooltip title="Rotate Left">
+                          <RotateLeftIcon onClick={rotateleft} className={classes.leftRotate} />
+                        </ArrowTooltip>
+
+                        <ArrowTooltip title="Rotate Right">
+                          <RotateRightIcon onClick={rotateRight} className={classes.rightRotate} />
+                        </ArrowTooltip>
+                      </RotateImage>
+                    )}
                   </PreviewContainter>
                   <RightProfile>
                     <TextValidator
@@ -380,31 +377,71 @@ function ChangeProfile(props) {
                       margin="dense"
                       value={username}
                       disabled={isRegistered}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccountCircle />
+                          </InputAdornment>
+                        ),
+                      }}
                     />
-                    <TextValidator
-                      label="First Name"
-                      fullWidth
-                      onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
-                      name="firstname"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      margin="normal"
-                      value={firstname.new}
-                    />
-                    <TextValidator
-                      label="Last Name"
-                      fullWidth
-                      onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
-                      name="lastname"
-                      validators={['required']}
-                      errorMessages={['This field is required']}
-                      margin="normal"
-                      value={lastname.new}
-                    />
+                    <BoxName>
+                      <TextValidator
+                        label="First Name"
+                        fullWidth
+                        onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
+                        name="firstname"
+                        validators={['required']}
+                        errorMessages={['This field is required']}
+                        margin="normal"
+                        value={firstname.new}
+                      />
+                      <TextValidator
+                        label="Last Name"
+                        fullWidth
+                        onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
+                        name="lastname"
+                        validators={['required']}
+                        errorMessages={['This field is required']}
+                        margin="normal"
+                        value={lastname.new}
+                      />
+                    </BoxName>
+                    <Tooltip title="Click to copy address to clipboard" aria-label="clipboard">
+                      <TextValidator
+                        className={classes.copyAddress}
+                        fullWidth
+                        label="Address"
+                        name="address"
+                        margin="normal"
+                        // disabled
+                        readOnly
+                        onClick={() => {
+                          const dummy = document.createElement('textarea');
+                          document.body.appendChild(dummy);
+                          dummy.value = address;
+                          dummy.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(dummy);
+                          const message = 'Copied';
+                          enqueueSnackbar(message, { variant: 'info' });
+                        }}
+                        value={address}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <ContactMailIcon style={{ color: 'rgba(0, 0, 0, 0.38)' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Tooltip>
                   </RightProfile>
                 </FlexBox>
                 <DivControlBtnKeystore justify="center">
-                  <ButtonPro type="submit">Save change</ButtonPro>
+                  <ButtonPro type="submit" className="nextBtn">
+                    Save change
+                  </ButtonPro>
                 </DivControlBtnKeystore>
               </ValidatorForm>
             </ShadowBoxAuthen>

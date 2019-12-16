@@ -233,19 +233,30 @@ export const DivControlBtnKeystore = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: ${props => props.justify || 'space-between'};
-  padding: 20px 0 0 0;
+  padding: 10px 0 0 0;
   font-size: 14px;
   @media (min-width: 320px) and (max-width: 623px) {
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    height: 70px;
+    height: 100px;
+    /* padding: 0 0 100px 0; */
     .previous-button {
       order: 1;
     }
     .download-keystore {
       order: 0;
       margin-top: 20px;
+    }
+    .nextBtn {
+      width: 100%;
+      height: 50px;
+    }
+    .backBtn {
+      width: 100%;
+      height: 50px;
+      margin-bottom: 16px;
+      background: linear-gradient(332deg, #fe8dc3, #b276ff);
     }
   }
 `;
@@ -270,11 +281,15 @@ export const BoxAuthen = styled.div`
   }
   @media (max-width: 768px) {
     width: 100%;
+    top: 0;
+    /* max-height: inherit; */
   }
   .btRegister {
     padding-top: 20px;
     text-align: center;
-    /* font-size: ${rem(12)}; */
+    @media (min-width: 320px) and (max-width: 623px) {
+      margin: 20px 0;
+    }
   }
 `;
 export const ShadowBoxAuthen = styled.div`
@@ -286,10 +301,33 @@ export const ShadowBoxAuthen = styled.div`
   padding: ${rem(40)} ${rem(54)};
   @media (min-width: 320px) and (max-width: 623px) {
     box-shadow: none;
-    padding: 5px 20px;
+    padding: 10px 20px;
     box-sizing: border-box;
+    height: 815px;
+    border-radius: 0;
   }
   @media (min-width: 624px) {
     min-width: ${rem(400)};
+  }
+`;
+export const LeftBoxWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
+  .proposeColumn {
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: block;
+    .proposeColumn {
+      width: 100%;
+      &--left {
+        display: none;
+      }
+    }
   }
 `;

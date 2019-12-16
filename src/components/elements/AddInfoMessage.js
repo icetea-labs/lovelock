@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import ZoomImage from './AutoZoomImage';
 import ImageCrop from './ImageCrop';
+import { applyRotation, imageResize } from '../../helper';
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -36,7 +37,7 @@ const ActionItem = styled.div`
   display: inline-block;
   position: relative;
   overflow: hidden;
-  background: #f5f6f7;
+  /* background: #f5f6f7; */
   border-radius: 18px;
   height: 32px;
   line-height: 32px;
@@ -45,6 +46,10 @@ const ActionItem = styled.div`
   cursor: pointer;
   :hover {
     background: #ebedf0;
+  }
+  @media (max-width: 599.95px) {
+    width: 100%;
+    font-size: 14px;
   }
   input {
     cursor: pointer;
@@ -69,9 +74,9 @@ const ActionItem = styled.div`
 const DateBox = styled.div`
   height: 32px;
   line-height: 32px;
-  width: 100px;
+  width: 115px;
   color: #8250c8;
-  background: #f5f6f7;
+  /* background: #f5f6f7; */
   border-radius: 18px;
   padding: 0 15px 0 10px;
   position: relative;
@@ -79,13 +84,21 @@ const DateBox = styled.div`
   :hover {
     background: #ebedf0;
   }
+  @media (max-width: 599.95px) {
+    width: 100%;
+    font-size: 14px;
+  }
   cursor: pointer;
   input {
     cursor: pointer;
-    text-align: right;
     z-index: 2;
+    padding-left: 35px;
     font-size: 13px;
     color: #8250c8;
+    @media (max-width: 599.95px) {
+      width: 100%;
+      font-size: 14px !important;
+    }
   }
   .icon-datetime {
     display: flex;
@@ -224,9 +237,19 @@ const useStyles = makeStyles(theme => ({
   },
   btnRow: {
     [theme.breakpoints.down('xs')]: {
-      margin: '16px 0'
-    }
-  }
+      margin: '16px 0',
+    },
+  },
+  actionItem: {
+    [theme.breakpoints.down('xs')]: {
+      borderTop: '1px solid #dadde1',
+    },
+  },
+  blogItem: {
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
+  },
 }));
 
 function MaterialUIPickers(props) {
@@ -245,9 +268,9 @@ export default function AddInfoMessage(props) {
   const [originFile, setOriginFile] = useState('');
 
   const setIsOpenCrop = value => {
-    onDialogToggle && onDialogToggle(value)
-    _setIsOpenCrop(value)
-  }
+    onDialogToggle && onDialogToggle(value);
+    _setIsOpenCrop(value);
+  };
 
   useEffect(() => {
     if (files.length === 0) {
@@ -316,7 +339,10 @@ export default function AddInfoMessage(props) {
 
   async function acceptCrop(e) {
     closeCrop();
-    const arrFiles = Array.from(e.cropFile);
+    const cropFile = e.cropFile[0];
+    const newFile = await applyRotation(cropFile, 1, 1000);
+    const saveFile = imageResize(cropFile, newFile);
+    const arrFiles = Array.from(saveFile);
     fromFiletToBuffer(arrFiles);
   }
 
@@ -385,9 +411,12 @@ export default function AddInfoMessage(props) {
       )}
       <InfoBox grayLayout={grayLayout}>
         <Grid container spacing={3} alignItems="center" justify="flex-end" className={classes.btnRow}>
-          <Grid item xs={12} sm='auto'>
+          <Grid item xs={12} sm="auto" className={classes.actionItem}>
             <DateBox>
               <div className="icon-datetime">
+                <i className="material-icons" style={{ paddingLeft: 12 }}>
+                  event
+                </i>
                 <MaterialUIPickers
                   autoOk
                   clearable={false}
@@ -396,15 +425,14 @@ export default function AddInfoMessage(props) {
                   format="dd/MM/yyyy"
                   disableFuture
                   onChange={handleDateChange}
-                  onOpen={() => (onDialogToggle && onDialogToggle(true))}
-                  onClose={() => (onDialogToggle && onDialogToggle(false))}
+                  onOpen={() => onDialogToggle && onDialogToggle(true)}
+                  onClose={() => onDialogToggle && onDialogToggle(false)}
                   style={{ paddingTop: 2 }}
                 />
-                <i className="material-icons" style={{ paddingLeft : 12 }}>event</i>
               </div>
             </DateBox>
           </Grid>
-          <Grid item xs={12} sm='auto'>
+          <Grid item xs={12} sm="auto" className={classes.actionItem}>
             <ActionItem>
               <div className="icon-upload">
                 <i className="material-icons">insert_photo</i>
@@ -422,18 +450,26 @@ export default function AddInfoMessage(props) {
               />
             </ActionItem>
           </Grid>
-          {onBlogClick && <Grid item onClick={onBlogClick} xs={12} sm='auto'>
-            <ActionItem>
+          {onBlogClick && (
+            <Grid item onClick={onBlogClick} xs={12} sm="auto" className={classes.blogItem}>
+              <ActionItem>
                 <div className="icon-upload">
                   <i className="material-icons">menu_book</i>
                   <div>Blog</div>
                 </div>
-            </ActionItem>
-          </Grid>}
+              </ActionItem>
+            </Grid>
+          )}
         </Grid>
       </InfoBox>
       {isOpenCrop && (
-        <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare hasParentDialog={hasParentDialog} />
+        <ImageCrop
+          close={closeCrop}
+          accept={acceptCrop}
+          originFile={originFile}
+          isViewSquare
+          hasParentDialog={hasParentDialog}
+        />
       )}
     </Container>
   );

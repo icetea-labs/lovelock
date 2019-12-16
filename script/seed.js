@@ -138,7 +138,7 @@ const blogParams = [JSON.stringify({
 
         // create the lock
         const pIndex = await makeLove({
-            method: 'createPropose',
+            method: 'createLock',
             from: fromAccount
         }, `Create lock from ${sender} to ${receiver}`, toAccount, {
             hash: ['QmcPqy322d4hzGKHY7etwm57dx3SWCE2mQRxFZ2LqtKvJc']
@@ -147,7 +147,7 @@ const blogParams = [JSON.stringify({
 
         // now, accept it
         await makeLove({
-            method: 'acceptPropose',
+            method: 'acceptLock',
             from: toAccount
         }, pIndex, `${receiver} accepts ${sender}`)
 
@@ -214,9 +214,9 @@ const blogParams = [JSON.stringify({
         // print the URL
         console.log(`http://localhost:3000/lock/${pIndex}`)
 
-        // create a pending propose
+        // create a pending Lock
         await makeLove({
-            method: 'createPropose',
+            method: 'createLock',
             from: fromAccount
         }, 'I sent, why nobody replies?', toAccount, {
             hash: ['QmcPqy322d4hzGKHY7etwm57dx3SWCE2mQRxFZ2LqtKvJc']
@@ -224,7 +224,7 @@ const blogParams = [JSON.stringify({
 
         // another
         await makeLove({
-            method: 'createPropose',
+            method: 'createLock',
             from: toAccount
         }, 'I received this, what the heck?', fromAccount, {
             hash: ['QmeoAAKbzsvL6qvajiiRJcCNpNoKzGmYyPXcSxHcktbJbU']
@@ -232,7 +232,7 @@ const blogParams = [JSON.stringify({
 
         // a journal
         await makeLove({
-            method: 'createPropose',
+            method: 'createLock',
             from: fromAccount
         }, 'This is a great blog...', fromAccount, {
             hash: ['QmUUgcmsxqEV5Y82HTtusxxDxrrtJ4PWr33ChChW7Sv38U']
@@ -241,7 +241,7 @@ const blogParams = [JSON.stringify({
         // a crush
         const crushAccount = 'teat02kspncvd39pg0waz8v5g0wl6gqus56m36l36sn'
         await makeLove({
-            method: 'createPropose',
+            method: 'createLock',
             from: fromAccount
         }, 'I love so!', crushAccount, {
             hash: ['Qmc8bacYd4iNmvo4ojmZaGADH4qWVNNdEppMgt13T8yqsQ']

@@ -9,13 +9,16 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { withRouter } from 'react-router-dom';
 
-import { getWeb3, grantAccessToken} from '../../service/tweb3';
+import { getWeb3, grantAccessToken } from '../../service/tweb3';
 import * as actions from '../../store/actions';
 // import { wallet, decode, savetoLocalStorage } from '../../helper';
 import { wallet, decode } from '../../helper';
-import { useRemember } from '../../helper/hooks'
+import { useRemember } from '../../helper/hooks';
 import CommonDialog from '../elements/CommonDialog';
 // import { encode } from '../../helper/encode';
+
+const LOGIN_BY_PRIVATEKEY = 0;
+const LOGIN_BY_MNEMONIC = 1;
 
 function PasswordPrompt(props) {
   const [password, setPassword] = useState('');
@@ -25,12 +28,12 @@ function PasswordPrompt(props) {
   const addressRedux = useSelector(state => state.account.address);
   const [isRemember, setIsRemember] = useRemember();
 
-  let credLoading = useRef(false)
-  const [autoPassFailed, _setAutoPassFailed] = useState(false)
+  let credLoading = useRef(false);
+  const [autoPassFailed, _setAutoPassFailed] = useState(false);
   const setAutoPassFailed = () => {
-    _setAutoPassFailed(true)
-    credLoading.current = false
-  }
+    _setAutoPassFailed(true);
+    credLoading.current = false;
+  };
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -38,27 +41,30 @@ function PasswordPrompt(props) {
     setPathName(window.location.pathname);
     setNeedAuth(false);
     props.history.push('/register');
-    return null
+    return null;
   }
-  
+
   if (!autoPassFailed && !credLoading.current && window.PasswordCredential) {
-    credLoading.current = true
-    navigator.credentials.get({
-      password: true,
-      mediation: 'silent'
-    }).then(cred => {
-      // because we use silent mediation
-      // it only goes here if we have 01 saved pass
-      if (cred && cred.password) {
-        confirm(cred.password, true)
-      } else {
-        setAutoPassFailed()
-      }
-    }).catch(err => {
-      setAutoPassFailed()
-      console.warn(err)
-    })
-}
+    credLoading.current = true;
+    navigator.credentials
+      .get({
+        password: true,
+        mediation: 'silent',
+      })
+      .then(cred => {
+        // because we use silent mediation
+        // it only goes here if we have 01 saved pass
+        if (cred && cred.password) {
+          confirm(cred.password, true);
+        } else {
+          setAutoPassFailed();
+        }
+      })
+      .catch(err => {
+        setAutoPassFailed();
+        console.warn(err);
+      });
+  }
 
   function setLoading(value) {
     dispatch(actions.setLoading(value));
@@ -92,79 +98,86 @@ function PasswordPrompt(props) {
       }
       setLoading(true);
       //setTimeout(() => {
-        try {
-          const decodeOutput = decode(decryptPass, encryptedData);
-          let mode = 0;
-          let privateKey;
-          let address;
-          if (wallet.isMnemonic(decodeOutput)) {
-            const account = wallet.getAccountFromMneomnic(decodeOutput);
-            ({ privateKey, address } = account);
-            mode = 1;
-          } else {
-            privateKey = decodeOutput;
-            address = wallet.getAddressFromPrivateKey(privateKey);
-          }
-
-          const tweb3 = getWeb3()
-          tweb3.wallet.importAccount(privateKey);
-
-          const token = tweb3.wallet.createRegularAccount();
-          grantAccessToken(address, token.address, isRemember)
-            .then(({ returnValue }) => {
-              tweb3.wallet.importAccount(token.privateKey);
-              // const keyObject = encode(privateKey, decryptPass);
-              const storage = isRemember ? localStorage : sessionStorage;
-              // save token account
-              storage.sessionData = codec
-                .encode({
-                  contract: process.env.REACT_APP_CONTRACT,
-                  tokenAddress: token.address,
-                  tokenKey: token.privateKey,
-                  expireAfter: returnValue,
-                })
-                .toString('base64');
-              // re-save main account
-              // savetoLocalStorage(address, keyObject);
-              const account = {
-                address,
-                privateKey,
-                mnemonic: mode === 1 ? decodeOutput : '',
-                mode,
-                tokenAddress: token.address,
-                tokenKey: token.privateKey,
-                cipher: decryptPass,
-              };
-              setAccount(account);
-
-              //setTimeout(() => {
-                close();
-                if (typeof needAuth === 'function') {
-                  needAuth()
-                }
-              //}, 50);
-            });
-        } catch (error) {
-          if (isAuto) {
-            setAutoPassFailed()
-          } else {
-            console.error(error);
-            const message = 'Your password is invalid. Please try again.';
-            enqueueSnackbar(message, { variant: 'error' });
-          }
-        } finally {
-          setLoading(false);
+      try {
+        const decodeOutput = decode(decryptPass, encryptedData);
+        let mode = LOGIN_BY_PRIVATEKEY;
+        let privateKey;
+        let address;
+        if (wallet.isMnemonic(decodeOutput)) {
+          const account = wallet.getAccountFromMneomnic(decodeOutput);
+          ({ privateKey, address } = account);
+          mode = LOGIN_BY_MNEMONIC;
+        } else {
+          privateKey = decodeOutput;
+          address = wallet.getAddressFromPrivateKey(privateKey);
         }
+
+        const tweb3 = getWeb3();
+        tweb3.wallet.importAccount(privateKey);
+
+        const token = tweb3.wallet.createRegularAccount();
+        grantAccessToken(address, token.address, isRemember).then(({ returnValue }) => {
+          tweb3.wallet.importAccount(token.privateKey);
+          // const keyObject = encode(privateKey, decryptPass);
+          const storage = isRemember ? localStorage : sessionStorage;
+          // save token account
+          storage.sessionData = codec
+            .encode({
+              contract: process.env.REACT_APP_CONTRACT,
+              tokenAddress: token.address,
+              tokenKey: token.privateKey,
+              expireAfter: returnValue,
+            })
+            .toString('base64');
+          // re-save main account
+          // savetoLocalStorage(address, keyObject);
+          const account = {
+            address,
+            privateKey,
+            mnemonic: mode === LOGIN_BY_MNEMONIC ? decodeOutput : '',
+            mode,
+            tokenAddress: token.address,
+            tokenKey: token.privateKey,
+            cipher: decryptPass,
+          };
+          setAccount(account);
+
+          //setTimeout(() => {
+          close();
+          if (typeof needAuth === 'function') {
+            needAuth();
+          }
+          //}, 50);
+        });
+      } catch (error) {
+        if (isAuto) {
+          setAutoPassFailed();
+        } else {
+          console.error(error);
+          const message = 'Your password is invalid. Please try again.';
+          enqueueSnackbar(message, { variant: 'error' });
+        }
+      } finally {
+        setLoading(false);
+      }
       //}, 100);
     }
   }
 
   function handleConfirm() {
-    confirm(password)
+    confirm(password);
   }
 
-  return ((!credLoading.current || autoPassFailed) && needAuth) ? (
-    <CommonDialog title="Password Confirm" okText="Confirm" close={close} confirm={handleConfirm} onKeyReturn hasParentDialog ensureTopLevel>
+  return (!credLoading.current || autoPassFailed) && needAuth ? (
+    <CommonDialog
+      title="Password Confirm"
+      okText="Confirm"
+      close={close}
+      confirm={handleConfirm}
+      onKeyReturn
+      hasParentDialog
+      ensureTopLevel
+    >
       <TextField
         id="Password"
         label="Password"

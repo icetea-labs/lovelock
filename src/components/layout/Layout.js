@@ -30,11 +30,13 @@ const BoxContent = styled.div`
 `;
 const Content = styled(BoxContent)`
   margin-top: ${rem(30)};
+  @media (max-width: 768px) {
+    margin-top: 0;
+  }
 `;
 
 const Layout = ({ children }) => (
   <Container>
-    <Header />
     <Content> {children} </Content>
     {/* <Footer /> */}
   </Container>
