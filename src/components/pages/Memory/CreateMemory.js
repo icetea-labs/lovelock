@@ -229,6 +229,7 @@ export default function CreateMemory(props) {
 
   function onChangeDate(value) {
     setMemoDate(value);
+    !grayLayout && setGrayLayout(true);
   }
 
   function onChangeMedia(value) {
@@ -238,6 +239,7 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setFilesBuffer(value);
+    !grayLayout && setGrayLayout(true);
   }
 
   function extractBlogInfo(content) {
