@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import styled from 'styled-components';
 
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
@@ -15,6 +16,25 @@ import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
 window.prerenderReady = false;
+
+const Copyright = styled.div`
+  display: flex;
+  line-height: 60px;
+  justify-content: center;
+  clear: both;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 70px;
+  max-width: 740px;
+  border-top: 1px solid #e1e1e1;
+  color: rgba(0, 0, 0, 0.54);
+  a {
+    color: inherit;
+    &:hover {
+      color: #8250c8;
+    }
+  }
+`;
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -78,16 +98,18 @@ export function BlogView(props) {
       if (mem.info.blog) {
         const blogData = JSON.parse(mem.content);
         mem.meta = blogData.meta;
-        const { json, gateway } = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: mem.info.date })
-          .catch(err => {
-            if (err.name === 'AbortError') return;
-            throw err;
-          });
-        mem.blogContent = json
+        const { json, gateway } = await smartFetchIpfsJson(blogData.blogHash, {
+          signal,
+          timestamp: mem.info.date,
+        }).catch(err => {
+          if (err.name === 'AbortError') return;
+          throw err;
+        });
+        mem.blogContent = json;
 
         // set blog coverPhoto to full path
         if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
-          mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway)
+          mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway);
         }
 
         // save to redux
@@ -95,7 +117,7 @@ export function BlogView(props) {
         setMemory(mems);
       } else {
         // not a blog, redirect to lock screen
-        closeMemory()
+        closeMemory();
       }
     });
   }
@@ -132,7 +154,6 @@ export function BlogView(props) {
       r_name: blogInfo.r_tags['display-name'],
     };
     const desc = makeLockName(propose);
-    console.log('desc', desc);
     let img = blogMeta.coverPhoto && blogMeta.coverPhoto.url;
     if (!img) {
       img = propose.coverImg
@@ -166,6 +187,7 @@ export function BlogView(props) {
       {Object.keys(blogView).length > 0 && (
         <BlogModal
           open
+          handleClose={closeMemory}
           title={
             <MemoryTitle
               sender={blogView.s_tags['display-name']}
@@ -194,6 +216,14 @@ export function BlogView(props) {
               />
             )}
           </div>
+          <Copyright>
+            <p>
+              Powered by&nbsp;
+              <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+                Icetea Platform
+              </a>
+            </p>
+          </Copyright>
         </BlogModal>
       )}
     </>
