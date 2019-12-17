@@ -197,6 +197,14 @@ const useStyles = makeStyles(theme => ({
       alignItems: 'centrer',
     },
   },
+  btDropDown: {
+    display: 'none',
+    minWidth: '32px',
+    [theme.breakpoints.up('md')]: {
+      display: 'flex',
+      alignItems: 'centrer',
+    },
+  },
   avataDisplay: {
     margin: 10,
     width: 46,
@@ -645,7 +653,7 @@ function Header(props) {
                     Explore
                   </Typography>
                 </Button>
-                <Button className={classes.sectionDesktop} onClick={handeExpandMore}>
+                <Button className={classes.btDropDown} onClick={handeExpandMore}>
                   <ArrowDropDownIcon className={classes.expandMore} />
                 </Button>
 

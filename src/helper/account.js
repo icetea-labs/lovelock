@@ -63,13 +63,15 @@ export async function getTagsInfo(address) {
     });
 }
 export async function isApproved(address, tokenAddress) {
-  console.log('address', address, '-', tokenAddress, '-', process.env.REACT_APP_CONTRACT);
-  if (!tokenAddress) return true;
+  // console.log('address', address, '-', tokenAddress, '-', process.env.REACT_APP_CONTRACT);
   return ctMethods
     .isAuthorized(address, tokenAddress, process.env.REACT_APP_CONTRACT)
     .call()
     .then(resp => {
       return resp;
+    })
+    .catch(() => {
+      return false;
     });
 }
 
