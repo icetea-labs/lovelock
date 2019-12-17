@@ -114,6 +114,13 @@ export const TagTitle = styled.div`
   }
 `;
 
+const InfoText = styled.span`
+  font-size: 12px;
+  font-weight: 400;
+  color: #808899;
+  padding-left: 5px;
+`;
+
 const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
@@ -555,7 +562,10 @@ class PuNewLock extends React.Component {
         >
           {!checked && (
             <div>
-              <TagTitle>Tag your partner</TagTitle>
+              <TagTitle>
+                <span>Tag your partner</span>
+                <InfoText>(or tag yourself to create a journal)</InfoText>
+              </TagTitle>
               <Autosuggest
                 id="suggestPartner"
                 suggestions={suggestions}
@@ -640,18 +650,12 @@ class PuNewLock extends React.Component {
               className="warningSnackbar"
               message={
                 isApproved ? (
-                  <>
-                    <span className="warningMessage">
-                      <WarningIcon className="warningIcon" />
-                      <span className="warningText">To create a blog, create a lock with yourself.</span>
+                  <span className="warningMessage">
+                    <WarningIcon className="warningIcon" />
+                    <span className="warningText">
+                      This locks will be public. Private locks are not yet supported for this beta version.
                     </span>
-                    <span className="warningMessage">
-                      <WarningIcon className="warningIcon" />
-                      <span className="warningText">
-                        This locks will be public. Private locks are not yet supported for this beta version.
-                      </span>
-                    </span>
-                  </>
+                  </span>
                 ) : (
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
