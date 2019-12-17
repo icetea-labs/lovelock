@@ -45,26 +45,24 @@ export function waitForHtmlTags(
 }
 
 export function ensureHashUrl(url, gateway = ipfsGateway) {
-  return url.indexOf(':') < 0 ? gateway + url : url
+  return url.indexOf(':') < 0 ? gateway + url : url;
 }
 
 export function resolveBlogHashUrls(json, gateway) {
   if (!json || !json.blocks || !json.blocks.length) {
-    return json
+    return json;
   }
-  const blocks = json.blocks
+  const blocks = json.blocks;
   for (const b of blocks) {
-    if (b.type === 'image' &&
-      b.data.url &&
-      b.data.url.indexOf(':') < 0) {
-      b.data.url = ensureHashUrl(b.data.url, gateway)
+    if (b.type === 'image' && b.data.url && b.data.url.indexOf(':') < 0) {
+      b.data.url = ensureHashUrl(b.data.url, gateway);
     }
   }
-  return json
+  return json;
 }
 
 export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
-  return fetch(gateway + hash, signal ? { signal } : undefined).then(r => resolveBlogHashUrls(r.json(), gateway))
+  return fetch(gateway + hash, signal ? { signal } : undefined).then(r => resolveBlogHashUrls(r.json(), gateway));
 }
 
 export function fetchJsonWithFallback(
@@ -243,8 +241,6 @@ export async function saveToIpfs(files) {
     files = files.map(f => ({ content: f }));
   }
 
-  console.log('files', files.length);
-
   let contentBuffer = files;
   if (!isBuffer) {
     const data = [];
@@ -296,13 +292,13 @@ export async function saveToIpfs(files) {
   return newIpfs.add([...contentBuffer]).then(results => {
     return results.map(el => {
       return el.hash;
-    })
-  })
+    });
+  });
 }
 
 // upload one file
 export function saveFileToIpfs(files) {
-  return saveToIpfs(files).then(ids => ids[0])
+  return saveToIpfs(files).then(ids => ids[0]);
 }
 
 /**
@@ -333,7 +329,7 @@ export async function saveBufferToIpfs(files, opts = {}) {
     }
   } catch (e) {
     console.error(e);
-    throw e
+    throw e;
   }
   return ipfsId;
 }
@@ -490,8 +486,8 @@ export function HolidayEvent(props) {
           {diffYear === 1 ? (
             <span>{`You have been together for ${diffYear} year.`}</span>
           ) : (
-              <span>{`You have been together for ${diffYear} years.`}</span>
-            )}
+            <span>{`You have been together for ${diffYear} years.`}</span>
+          )}
         </div>
       </div>
     );
@@ -504,8 +500,8 @@ export function HolidayEvent(props) {
           {diffMonth === 1 ? (
             <span>{`You have been together for ${diffMonth} month.`}</span>
           ) : (
-              <span>{`You have been together for ${diffMonth} months.`}</span>
-            )}
+            <span>{`You have been together for ${diffMonth} months.`}</span>
+          )}
         </div>
       </div>
     );
@@ -741,6 +737,7 @@ export function imageResize(oldFile, newFile) {
 export function handleError(err, action) {
   console.error(err);
   let msg = `An error occurred while ${action}`;
+  if (err.response && err.response.status === 401) msg = 'Permission denied. You are not approved to use the app yet.';
   if (typeof err !== 'object') return msg;
   const fail = (err.deliver_tx && err.deliver_tx.code) || (err.check_tx && err.check_tx.code);
   if (fail) {

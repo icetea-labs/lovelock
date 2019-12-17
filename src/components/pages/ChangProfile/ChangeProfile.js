@@ -23,6 +23,7 @@ import {
   registerAlias,
   applyRotation,
   imageResize,
+  handleError,
 } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -255,7 +256,7 @@ function ChangeProfile(props) {
           }
         } catch (error) {
           console.error(error);
-          const message = `An error occurred, please try again later`;
+          const message = handleError(error, 'change profile');
           enqueueSnackbar(message, { variant: 'error' });
         }
         setLoading(false);

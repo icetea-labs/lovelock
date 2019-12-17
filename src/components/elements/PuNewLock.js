@@ -639,12 +639,18 @@ class PuNewLock extends React.Component {
             <SnackbarContent
               className="warningSnackbar"
               message={
-                <span className="warningMessage">
-                  <WarningIcon className="warningIcon" />
-                  <span className="warningText">
-                    This locks will be public. Private locks are not yet supported for this beta version.
+                <>
+                  <span className="warningMessage">
+                    <WarningIcon className="warningIcon" />
+                    <span className="warningText">To create a blog, create a lock with yourself.</span>
                   </span>
-                </span>
+                  <span className="warningMessage">
+                    <WarningIcon className="warningIcon" />
+                    <span className="warningText">
+                      This locks will be public. Private locks are not yet supported for this beta version.
+                    </span>
+                  </span>
+                </>
               }
             />
           </WarningPass>
