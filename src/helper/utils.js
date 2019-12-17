@@ -737,7 +737,8 @@ export function imageResize(oldFile, newFile) {
 export function handleError(err, action) {
   console.error(err);
   let msg = `An error occurred while ${action}`;
-  if (err.response && err.response.status === 401) msg = 'Permission denied. You are not approved to use the app yet.';
+  if (err.response && err.response.status === 401)
+    msg = 'You are not approved to create content. Please contact an administrator to unlock your account first.';
   if (typeof err !== 'object') return msg;
   const fail = (err.deliver_tx && err.deliver_tx.code) || (err.check_tx && err.check_tx.code);
   if (fail) {

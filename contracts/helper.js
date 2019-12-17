@@ -21,7 +21,8 @@ exports.expectAdmin = (self, message = 'Permission denied') => {
 //private function
 exports.expectUserApproved = (self, opts) => {
   opts = Object.assign({ message: 'Permission denied', from: msg.sender }, opts);
-  const errmsg = opts.message + '. You are not approved to use the app yet.';
+  const errmsg =
+    'You are not approved to create content. Please contact an administrator to unlock your account first.'; //opts.message + '. You are not approved to use the app yet.';
   const users = self.getUsers();
   expect(users.includes(opts.from), errmsg);
 };

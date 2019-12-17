@@ -142,7 +142,7 @@ ReactDOM.render(
           </IconButton>
         )}
         preventDuplicate
-        autoHideDuration={3000}
+        autoHideDuration={7000}
         maxSnack={2}
         anchorOrigin={{
           vertical: 'top',
