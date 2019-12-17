@@ -26,9 +26,8 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
-// import AddIcon from '@material-ui/icons/Add';
-// import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import { Link, withRouter } from 'react-router-dom';
@@ -92,8 +91,8 @@ const useStyles = makeStyles(theme => ({
     },
   },
   jsxAvatar: {
-    width: 46,
-    height: 46,
+    width: 40,
+    height: 40,
     marginRight: 10,
     backgroundColor: '#fff',
   },
@@ -309,6 +308,7 @@ function Header(props) {
   const mnemonic = useSelector(state => state.account.mnemonic);
   const privateKey = useSelector(state => state.account.privateKey);
   const mode = useSelector(state => state.account.mode);
+  const address = useSelector(state => state.account.address);
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -325,10 +325,12 @@ function Header(props) {
   const lockIndex =
     isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
-  function handleProfileMenuOpen(event) {
+  function handeOpenMypage() {
+    props.history.push(`/mypage/${address}`);
+  }
+  function handeExpandMore(event) {
     setAnchorElMenu(event.currentTarget);
   }
-
   function handleMobileMenuClose() {
     setMobileMoreAnchorEl(null);
   }
@@ -374,7 +376,7 @@ function Header(props) {
   function closeShowMnemonic() {
     setShowPhrase(false);
   }
-  const address = useSelector(state => state.account.address);
+
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
@@ -494,7 +496,6 @@ function Header(props) {
             </ListItemAvatar>
             <ListItemText
               primary={
-                // eslint-disable-next-line react/jsx-wrap-multilines
                 <>
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
@@ -503,7 +504,6 @@ function Header(props) {
                 </>
               }
               secondary={
-                // eslint-disable-next-line react/jsx-wrap-multilines
                 <>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
                     {promise}
@@ -551,7 +551,7 @@ function Header(props) {
         </IconButton>
         <p>Notifications</p>
       </MenuItem> */}
-      <MenuItem onClick={handleProfileMenuOpen}>
+      <MenuItem onClick={handeOpenMypage}>
         <IconButton
           aria-label="profile settings"
           aria-controls="primary-search-profile-menu"
@@ -560,7 +560,7 @@ function Header(props) {
         >
           <AccountCircle />
         </IconButton>
-        <p>Profile</p>
+        <p>MyPage</p>
       </MenuItem>
       <MenuItem onClick={handeNewLock}>
         <IconButton
@@ -568,7 +568,7 @@ function Header(props) {
           aria-controls="primary-search-explore-menu"
           color="inherit"
         >
-          <ExploreIcon />
+          <AddIcon />
         </IconButton>
         <p>Create</p>
       </MenuItem>
@@ -581,6 +581,17 @@ function Header(props) {
           <ExploreIcon />
         </IconButton>
         <p>Explore</p>
+      </MenuItem>
+      <MenuItem onClick={handeExpandMore}>
+        <IconButton
+          aria-label="profile settings"
+          aria-controls="primary-search-profile-menu"
+          aria-haspopup="true"
+          color="inherit"
+        >
+          <ArrowDropDownIcon />
+        </IconButton>
+        <p>More</p>
       </MenuItem>
     </Menu>
   );
@@ -618,12 +629,11 @@ function Header(props) {
                   />
                 </div> */}
                 <div className={classes.grow} />
-                <Button className={classes.sectionDesktop} onClick={handleProfileMenuOpen}>
+                <Button className={classes.sectionDesktop} onClick={handeOpenMypage}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
                   <Typography className={classes.title} noWrap>
                     {displayName}
                   </Typography>
-                  <ExpandMoreIcon className={classes.expandMore} />
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>
@@ -635,6 +645,10 @@ function Header(props) {
                     Explore
                   </Typography>
                 </Button>
+                <Button className={classes.sectionDesktop} onClick={handeExpandMore}>
+                  <ArrowDropDownIcon className={classes.expandMore} />
+                </Button>
+
                 {/* <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
