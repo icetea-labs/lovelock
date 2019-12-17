@@ -114,7 +114,6 @@ function Home(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const { setLocks, setMemory, address, locks, history } = props;
-  // const [locks, setlocks] = useState(null);
 
   useEffect(() => {
     let cancel = false;
@@ -128,7 +127,6 @@ function Home(props) {
   }, []);
 
   async function fetchData(cancel) {
-    console.log('fetchData');
     APIService.getLocksForFeed(address).then(resp => {
       // set to redux
       setLocks(resp.locks);
@@ -145,6 +143,7 @@ function Home(props) {
       setLoading(false);
     });
   }
+
   function openPopup() {
     dispatch(actions.setNewLock(true));
   }
@@ -152,10 +151,6 @@ function Home(props) {
   function openExplore() {
     history.push('/explore');
   }
-
-  // function closePopup() {
-  //   fetchData();
-  // }
 
   const renderHomeEmptyPropose = (
     <FlexWidthBox>

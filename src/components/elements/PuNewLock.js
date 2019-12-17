@@ -114,6 +114,13 @@ export const TagTitle = styled.div`
   }
 `;
 
+const InfoText = styled.span`
+  font-size: 12px;
+  font-weight: 400;
+  color: #808899;
+  padding-left: 5px;
+`;
+
 const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
@@ -520,7 +527,7 @@ class PuNewLock extends React.Component {
   }
 
   render() {
-    const { close } = this.props;
+    const { close, isApproved } = this.props;
     const {
       partner,
       promiseStm,
@@ -555,7 +562,10 @@ class PuNewLock extends React.Component {
         >
           {!checked && (
             <div>
-              <TagTitle>Tag your partner</TagTitle>
+              <TagTitle>
+                <span>Tag your partner</span>
+                <InfoText>(or tag yourself to create a journal)</InfoText>
+              </TagTitle>
               <Autosuggest
                 id="suggestPartner"
                 suggestions={suggestions}
@@ -639,12 +649,22 @@ class PuNewLock extends React.Component {
             <SnackbarContent
               className="warningSnackbar"
               message={
-                <span className="warningMessage">
-                  <WarningIcon className="warningIcon" />
-                  <span className="warningText">
-                    This locks will be public. Private locks are not yet supported for this beta version.
+                isApproved ? (
+                  <span className="warningMessage">
+                    <WarningIcon className="warningIcon" />
+                    <span className="warningText">
+                      This locks will be public. Private locks are not yet supported for this beta version.
+                    </span>
                   </span>
-                </span>
+                ) : (
+                  <span className="warningMessage">
+                    <WarningIcon className="warningIcon" />
+                    <span className="warningText">
+                      Please contact customer support to unlock your account before you can update profile and post
+                      contents.
+                    </span>
+                  </span>
+                )
               }
             />
           </WarningPass>
@@ -681,8 +701,8 @@ const mapStateToProps = state => {
   return {
     locks: state.loveinfo.locks,
     address: state.account.address,
-    tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,
+    isApproved: state.account.isApproved,
   };
 };
 

@@ -14,6 +14,8 @@ import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import RotateRightIcon from '@material-ui/icons/RotateRight';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import Tooltip from '@material-ui/core/Tooltip';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import WarningIcon from '@material-ui/icons/Warning';
 
 import {
   getAliasAndTags,
@@ -23,6 +25,7 @@ import {
   registerAlias,
   applyRotation,
   imageResize,
+  handleError,
 } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -138,8 +141,39 @@ const BoxName = styled.div`
     display: block;
   }
 `;
+const WarningPass = styled.div`
+  .warningSnackbar {
+    background-color: #fe7;
+    box-shadow: none;
+    margin-top: 8px;
+    /* max-width: 400px; */
+  }
+  .warningMessage {
+    display: flex;
+    align-items: center;
+  }
+  .warningIcon {
+    margin-right: 16px;
+    color: #d90;
+  }
+  .warningText {
+    color: #333;
+    font-style: italic;
+    font-size: 1.1em;
+  }
+`;
 function ChangeProfile(props) {
-  const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth, privateKey } = props;
+  const {
+    setLoading,
+    setAccount,
+    history,
+    address,
+    tokenAddress,
+    isApproved,
+    tokenKey,
+    setNeedAuth,
+    privateKey,
+  } = props;
   const [firstname, setFirstname] = useState({ old: '', new: '' });
   const [lastname, setLastname] = useState({ old: '', new: '' });
   const [avatar, setAvatar] = useState('');
@@ -255,7 +289,7 @@ function ChangeProfile(props) {
           }
         } catch (error) {
           console.error(error);
-          const message = `An error occurred, please try again later`;
+          const message = handleError(error, 'change profile');
           enqueueSnackbar(message, { variant: 'error' });
         }
         setLoading(false);
@@ -321,7 +355,23 @@ function ChangeProfile(props) {
         <LayoutAuthen key={1}>
           <BoxAuthenCus>
             <ShadowBoxAuthen>
-              <HeaderAuthen title="Change Profile" />
+              <HeaderAuthen title="Change Profile" isActive />
+              {!isApproved && (
+                <WarningPass>
+                  <SnackbarContent
+                    className="warningSnackbar"
+                    message={
+                      <span className="warningMessage">
+                        <WarningIcon className="warningIcon" />
+                        <span className="warningText">
+                          Please contact customer support to unlock your account before you can update profile and post
+                          contents.
+                        </span>
+                      </span>
+                    }
+                  />
+                </WarningPass>
+              )}
               <ValidatorForm onSubmit={saveChange}>
                 <FlexBox>
                   <PreviewContainter>
@@ -457,6 +507,7 @@ const mapStateToProps = state => {
   return {
     address: state.account.address,
     privateKey: state.account.privateKey,
+    isApproved: state.account.isApproved,
     tokenKey: state.account.tokenKey,
     tokenAddress: state.account.tokenAddress,
   };

@@ -456,8 +456,9 @@ class LoveLock {
   }
   // ========== Authorized IPFS APPROVED =============
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
-    const self = this;
-    expectUserApproved(self, { from: mainAddress });
+    // expectUserApproved(self, { from: mainAddress });
+    const users = this.getUsers();
+    if (!users.includes(mainAddress)) return false;
     // check tokenAddress is token on mainaddress.
     const ctDid = loadContract('system.did');
     const tokens = ctDid.query.invokeView(mainAddress).tokens || {};
