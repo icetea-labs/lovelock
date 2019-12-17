@@ -45,6 +45,10 @@ const APIService = {
     const memorydata = await callView('getMemoriesByLockIndex', [lockIndex, validCollectionId]);
     return addInfoToMems(memorydata, true);
   },
+  isAuthorized: async (mainAddress, tokenAddress) => {
+    const isAuthorized = await callView('isAuthorized', [mainAddress, tokenAddress, process.env.REACT_APP_CONTRACT]);
+    return isAuthorized;
+  },
 };
 
 export default APIService;

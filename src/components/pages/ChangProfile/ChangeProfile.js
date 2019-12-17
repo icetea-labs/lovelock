@@ -14,6 +14,8 @@ import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import RotateRightIcon from '@material-ui/icons/RotateRight';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import Tooltip from '@material-ui/core/Tooltip';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import WarningIcon from '@material-ui/icons/Warning';
 
 import {
   getAliasAndTags,
@@ -137,6 +139,27 @@ const BoxName = styled.div`
   }
   @media (max-width: 599.95px) {
     display: block;
+  }
+`;
+const WarningPass = styled.div`
+  .warningSnackbar {
+    background-color: #fe7;
+    box-shadow: none;
+    margin-top: 8px;
+    /* max-width: 400px; */
+  }
+  .warningMessage {
+    display: flex;
+    align-items: center;
+  }
+  .warningIcon {
+    margin-right: 16px;
+    color: #d90;
+  }
+  .warningText {
+    color: #333;
+    font-style: italic;
+    font-size: 1.1em;
   }
 `;
 function ChangeProfile(props) {
@@ -322,7 +345,18 @@ function ChangeProfile(props) {
         <LayoutAuthen key={1}>
           <BoxAuthenCus>
             <ShadowBoxAuthen>
-              <HeaderAuthen title="Change Profile" />
+              <HeaderAuthen title="Change Profile" isActive />
+              <WarningPass>
+                <SnackbarContent
+                  className="warningSnackbar"
+                  message={
+                    <span className="warningMessage">
+                      <WarningIcon className="warningIcon" />
+                      <span className="warningText">Please contact an administrator to unlock your account first.</span>
+                    </span>
+                  }
+                />
+              </WarningPass>
               <ValidatorForm onSubmit={saveChange}>
                 <FlexBox>
                   <PreviewContainter>
