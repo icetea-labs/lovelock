@@ -1,7 +1,8 @@
-import { getAliasContract, getDidContract } from '../service/tweb3';
+import { getAliasContract, getDidContract, getContract } from '../service/tweb3';
 
 const aliasMethods = getAliasContract().methods;
 const didMethods = getDidContract().methods;
+const ctMethods = getContract().methods;
 const cache = {};
 
 export async function getAlias(address) {
@@ -11,15 +12,16 @@ export async function getAlias(address) {
   const listAlias = await aliasMethods.byAddress(address).call();
   const alias = Array.isArray(listAlias) ? listAlias[0] : listAlias;
 
+  let shortAlias = '';
   if (alias) {
-    const shortAlias = alias.replace('account.', '');
+    shortAlias = alias.replace('account.', '');
     item.alias = shortAlias;
-    return shortAlias;
   }
+  return shortAlias;
 }
 
 export function isAliasRegistered(alias) {
-  return aliasMethods.resolve('account.' + alias).call();
+  return aliasMethods.resolve(`account.${alias}`).call();
 }
 
 export function registerAlias(username, address) {
@@ -35,16 +37,16 @@ export function registerAlias(username, address) {
 }
 
 export function setTagsInfo(tags, opts) {
-  const address = opts.address;
+  const { address } = opts;
   const options = { from: address };
   if (opts.tokenAddress) options.signers = opts.tokenAddress;
 
   return didMethods
     .setTag(address, tags)
     .sendCommit(options)
-    .then(r => {
+    .then(() => {
       const item = cache[address] || (cache[address] = {});
-      item.tags = Object.assign({}, item.tags || {}, tags);
+      item.tags = { ...(item.tags || {}), ...tags };
       return item.tags;
     });
 }
@@ -60,7 +62,18 @@ export async function getTagsInfo(address) {
       return tags;
     });
 }
+export async function isApproved(address, tokenAddress) {
+  return ctMethods
+    .isAuthorized(address, tokenAddress, process.env.REACT_APP_CONTRACT)
+    .call()
+    .then(resp => {
+      return resp;
+    });
+}
 
 export function getAliasAndTags(address) {
   return Promise.all([getAlias(address), getTagsInfo(address)]);
+}
+export function getAuthenAndTags(address, tokenAddress) {
+  return Promise.all([getTagsInfo(address), isApproved(address, tokenAddress)]);
 }

@@ -38,7 +38,7 @@ import PuNewLock from '../elements/PuNewLock';
 import GetKeyToAuthen from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getTagsInfo } from '../../helper';
+import { getAuthenAndTags } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import LandingPage from './LandingPage';
 
@@ -375,6 +375,7 @@ function Header(props) {
     setShowPhrase(false);
   }
   const address = useSelector(state => state.account.address);
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
   const avatarRedux = useSelector(state => state.account.avatar);
@@ -383,9 +384,8 @@ function Header(props) {
     async function fetchData() {
       try {
         if (address) {
-          const reps = await getTagsInfo(address);
-          const name = reps['display-name'] || '';
-          dispatch(actions.setAccount({ displayName: name, avatar: reps.avatar }));
+          const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
+          dispatch(actions.setAccount({ displayName: tags['display-name'] || '', avatar: tags.avatar, isApproved }));
         }
       } catch (e) {
         console.error(e);

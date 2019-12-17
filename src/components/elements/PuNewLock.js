@@ -520,7 +520,7 @@ class PuNewLock extends React.Component {
   }
 
   render() {
-    const { close } = this.props;
+    const { close, isApproved } = this.props;
     const {
       partner,
       promiseStm,
@@ -639,18 +639,28 @@ class PuNewLock extends React.Component {
             <SnackbarContent
               className="warningSnackbar"
               message={
-                <>
-                  <span className="warningMessage">
-                    <WarningIcon className="warningIcon" />
-                    <span className="warningText">To create a blog, create a lock with yourself.</span>
-                  </span>
+                isApproved ? (
+                  <>
+                    <span className="warningMessage">
+                      <WarningIcon className="warningIcon" />
+                      <span className="warningText">To create a blog, create a lock with yourself.</span>
+                    </span>
+                    <span className="warningMessage">
+                      <WarningIcon className="warningIcon" />
+                      <span className="warningText">
+                        This locks will be public. Private locks are not yet supported for this beta version.
+                      </span>
+                    </span>
+                  </>
+                ) : (
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
                     <span className="warningText">
-                      This locks will be public. Private locks are not yet supported for this beta version.
+                      Please contact customer support to unlock your account before you can update profile and post
+                      contents.
                     </span>
                   </span>
-                </>
+                )
               }
             />
           </WarningPass>
@@ -687,8 +697,8 @@ const mapStateToProps = state => {
   return {
     locks: state.loveinfo.locks,
     address: state.account.address,
-    tokenAddress: state.account.tokenAddress,
     tokenKey: state.account.tokenKey,
+    isApproved: state.account.isApproved,
   };
 };
 

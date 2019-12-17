@@ -163,7 +163,17 @@ const WarningPass = styled.div`
   }
 `;
 function ChangeProfile(props) {
-  const { setLoading, setAccount, history, address, tokenAddress, tokenKey, setNeedAuth, privateKey } = props;
+  const {
+    setLoading,
+    setAccount,
+    history,
+    address,
+    tokenAddress,
+    isApproved,
+    tokenKey,
+    setNeedAuth,
+    privateKey,
+  } = props;
   const [firstname, setFirstname] = useState({ old: '', new: '' });
   const [lastname, setLastname] = useState({ old: '', new: '' });
   const [avatar, setAvatar] = useState('');
@@ -346,17 +356,22 @@ function ChangeProfile(props) {
           <BoxAuthenCus>
             <ShadowBoxAuthen>
               <HeaderAuthen title="Change Profile" isActive />
-              <WarningPass>
-                <SnackbarContent
-                  className="warningSnackbar"
-                  message={
-                    <span className="warningMessage">
-                      <WarningIcon className="warningIcon" />
-                      <span className="warningText">Please contact an administrator to unlock your account first.</span>
-                    </span>
-                  }
-                />
-              </WarningPass>
+              {!isApproved && (
+                <WarningPass>
+                  <SnackbarContent
+                    className="warningSnackbar"
+                    message={
+                      <span className="warningMessage">
+                        <WarningIcon className="warningIcon" />
+                        <span className="warningText">
+                          Please contact customer support to unlock your account before you can update profile and post
+                          contents.
+                        </span>
+                      </span>
+                    }
+                  />
+                </WarningPass>
+              )}
               <ValidatorForm onSubmit={saveChange}>
                 <FlexBox>
                   <PreviewContainter>
@@ -492,6 +507,7 @@ const mapStateToProps = state => {
   return {
     address: state.account.address,
     privateKey: state.account.privateKey,
+    isApproved: state.account.isApproved,
     tokenKey: state.account.tokenKey,
     tokenAddress: state.account.tokenAddress,
   };
