@@ -63,6 +63,8 @@ export async function getTagsInfo(address) {
     });
 }
 export async function isApproved(address, tokenAddress) {
+  console.log('address', address, '-', tokenAddress, '-', process.env.REACT_APP_CONTRACT);
+  if (!tokenAddress) return true;
   return ctMethods
     .isAuthorized(address, tokenAddress, process.env.REACT_APP_CONTRACT)
     .call()

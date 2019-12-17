@@ -85,7 +85,6 @@ function Mypage(props) {
 
   let paramAddress = match.params.address;
   if (!paramAddress) paramAddress = address;
-  console.log('paramAddress', address === paramAddress);
   // setLoading(false);
 
   useEffect(() => {
