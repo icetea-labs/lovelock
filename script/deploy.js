@@ -3,7 +3,7 @@ const fs = require('fs');
 const { toPkey } = require('./mnemonic');
 const { transpile } = require('@iceteachain/sunseed');
 const { IceteaWeb3 } = require('@iceteachain/web3');
-const { toKeyString } = require('@iceteachain/common').codec
+const { toKeyString } = require('@iceteachain/common').codec;
 
 const { mode, envPath } = require('./mode');
 
@@ -47,7 +47,7 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     account = tweb3.wallet.importAccount(pkey);
   } else {
     account = tweb3.wallet.createBankAccount();
-    console.log('New private key created: ' + toKeyString(account.privateKey))
+    console.log('New private key created: ' + toKeyString(account.privateKey));
   }
 
   console.log(`Deploying from ${account.address}...`);
@@ -74,10 +74,11 @@ const src = fs.readFileSync('./contracts/lovelock.js');
 
   // add user
   if (config.USER_ADDRESS) {
-    console.log('Adding user ' + config.USER_ADDRESS);
+    const users = config.USER_ADDRESS.split(',');
+    console.log('Adding user ' + users);
     try {
       const newContract = tweb3.contract(r);
-      await newContract.methods.addUsers([config.USER_ADDRESS]).sendCommit({ from: account.address });
+      await newContract.methods.addUsers(users).sendCommit({ from: account.address });
       console.log('User added.');
     } catch (e) {
       console.log('Fail to add user: ', e.message);
