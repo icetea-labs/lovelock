@@ -105,7 +105,8 @@ function Mypage(props) {
     getData();
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [paramAddress]);
+
   async function fetchData() {
     APIService.getLocksForFeed(paramAddress).then(resp => {
       // set to redux
