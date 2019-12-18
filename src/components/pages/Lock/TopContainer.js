@@ -636,7 +636,7 @@ function TopContrainer(props) {
               ) : (
                 <div className="name_time">
                   {/* <span className="user_name color-violet">{topInfo.s_name}</span> */}
-                  <Link href={`/${topInfo.sender}`} className="user_name color-violet">{`${topInfo.s_name}`}</Link>
+                  <Link href={`/u/${topInfo.sender}`} className="user_name color-violet">{`${topInfo.s_name}`}</Link>
                   <span className="sinceDate">・</span>
                   <span className="time color-gray">
                     <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
@@ -669,7 +669,7 @@ function TopContrainer(props) {
               ) : (
                 <div className="name_time" style={{ width: '100%', textAlign: 'right' }}>
                   {/* <span className="user_name color-violet">{topInfo.r_name}</span> */}
-                  <Link href={`/${topInfo.receiver}`} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
+                  <Link href={`/u/${topInfo.receiver}`} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
                 </div>
               )}
               {loading ? (

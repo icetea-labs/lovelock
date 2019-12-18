@@ -334,7 +334,7 @@ function Header(props) {
     isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
   function handeOpenMypage() {
-    props.history.push(`/${address}`);
+    props.history.push(`/u/${address}`);
   }
   function handeExpandMore(event) {
     setAnchorElMenu(event.currentTarget);

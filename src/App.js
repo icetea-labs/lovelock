@@ -36,12 +36,12 @@ function App(props) {
 
           <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
-          <RouteWithLayout layout={HomeLayout} exact path="/:address" component={Mypage} />
           <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
           <RouteWithLayout layout={HomeLayout} exact path="/blog/:index" component={BLogView} />
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
+          <RouteWithLayout layout={HomeLayout} exact path="/u/:address" component={Mypage} />
           <RouteWithoutLayout component={NotFound} />
         </Switch>
       </Router>

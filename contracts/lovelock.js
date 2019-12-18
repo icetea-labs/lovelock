@@ -493,6 +493,11 @@ class LoveLock {
     }
     return false;
   }
+
+  @view isUserApproved(mainAddress: address) {
+    const users = this.getUsers();
+    return users.includes(mainAddress);
+  }
 }
 const ctAlias = loadContract('system.alias');
 function convertAliasToAddress(alias) {
