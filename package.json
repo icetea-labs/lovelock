@@ -32,6 +32,7 @@
     "node-vibrant": "^3.1.4",
     "notistack": "^0.9.0",
     "prismjs": "^1.17.1",
+    "qrcode.react": "^1.0.0",
     "rc-notification": "^3.3.1",
     "rc-queue-anim": "^1.8.2",
     "react": "^16.11.0",
