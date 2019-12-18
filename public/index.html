@@ -30,10 +30,13 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145477800-2"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
+    function gtag() {dataLayer.push(arguments);}
     gtag('js', new Date());
-
-    gtag('config', 'UA-145477800-2');
+    window.trackPageView = function (page_path) {
+      gtag('config', 'UA-145477800-2', {
+        'page_path': page_path
+      })
+    }
   </script>
 </body>
 

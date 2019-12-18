@@ -15,9 +15,14 @@ import BLogView from './components/pages/Memory/BlogView';
 import Mypage from './components/pages/MyPage';
 
 function RouteWithLayout({ layout, component, ...rest }) {
+  window.trackPageView(rest.location.pathname);
   return (
     <Route {...rest} render={props => React.createElement(layout, props, React.createElement(component, props))} />
   );
+}
+function RouteWithoutLayout({ component, ...rest }) {
+  window.trackPageView(rest.location.pathname);
+  return <Route {...rest} render={props => React.createElement(component, props)} />;
 }
 
 function App(props) {
@@ -26,8 +31,8 @@ function App(props) {
     <div className="App">
       <Router>
         <Switch>
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/register" component={Register} />
+          <RouteWithoutLayout exact path="/login" component={Login} />
+          <RouteWithoutLayout exact path="/register" component={Register} />
 
           <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
@@ -37,7 +42,7 @@ function App(props) {
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
-          <Route component={NotFound} />
+          <RouteWithoutLayout component={NotFound} />
         </Switch>
       </Router>
       {isLoading && <GlobaLoading />}
