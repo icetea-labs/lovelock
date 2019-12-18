@@ -83,13 +83,13 @@ function Mypage(props) {
     isMyFollow: false,
   });
 
-  let paramAddress = match.params.address;
-  if (!paramAddress) paramAddress = address;
+  let paramAliasOrAddr = match.params.address;
+  if (!paramAliasOrAddr) paramAliasOrAddr = address;
   // setLoading(false);
 
   useEffect(() => {
-    async function getData() {
-      callView('getDataForMypage', [paramAddress]).then(data => {
+    async function getDataMypage() {
+      callView('getDataForMypage', [paramAliasOrAddr]).then(data => {
         const info = {};
         info.avatar = data[0].avatar;
         info.username = data[0].username;
@@ -102,13 +102,13 @@ function Mypage(props) {
       });
     }
 
-    getData();
-    fetchData();
+    getDataMypage();
+    fetchDataLocksMemoies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paramAddress]);
+  }, [paramAliasOrAddr]);
 
-  async function fetchData() {
-    APIService.getLocksForFeed(paramAddress).then(resp => {
+  async function fetchDataLocksMemoies() {
+    APIService.getLocksForFeed(paramAliasOrAddr).then(resp => {
       // set to redux
       setLocks(resp.locks);
 
@@ -134,7 +134,7 @@ function Mypage(props) {
   }
 
   function getNumTopFollow(_numFollow, _isMyFollow) {
-    callView('getFollowedPerson', [paramAddress]).then(data => {
+    callView('getFollowedPerson', [paramAliasOrAddr]).then(data => {
       const { numFollow, isMyFollow } = serialFollowData(data);
       if (_numFollow !== numFollow || _isMyFollow !== isMyFollow) {
         setMyPageInfo({ ...myPageInfo, numFollow, isMyFollow });
@@ -153,7 +153,7 @@ function Mypage(props) {
       isMyFollow = !isMyFollow;
       setMyPageInfo({ ...myPageInfo, numFollow, isMyFollow });
 
-      tx.sendCommit('followPerson', paramAddress, { tokenAddress, address }).then(() => {
+      tx.sendCommit('followPerson', paramAliasOrAddr, { tokenAddress, address }).then(() => {
         getNumTopFollow(numFollow, isMyFollow);
       });
     } catch (error) {
@@ -162,6 +162,13 @@ function Mypage(props) {
       enqueueSnackbar(message, { variant: 'error' });
     }
   }
+
+  if (myPageInfo && myPageInfo.username) {
+    const pathname = `/${myPageInfo.username}`;
+    window.history.pushState(null, '', pathname);
+    window.trackPageView(window.location.pathname);
+  }
+
   return (
     <div>
       <BannerContainer>
@@ -206,7 +213,10 @@ function Mypage(props) {
       </BannerContainer>
       <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
-          <LeftContainer loading={loading} isGuest={address !== paramAddress} />
+          <LeftContainer
+            loading={loading}
+            isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
+          />
         </div>
         <div className="proposeColumn proposeColumn--right">
           <RightBoxMemories>
