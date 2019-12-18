@@ -137,9 +137,13 @@ class LoveLock {
   }
   @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
-  @view getLocksForFeed = (addr: address) => {
+  @view getLocksForFeed = (addOrAlias: string) => {
     const self = this;
-    return apiGetLocksForFeed(self, addr);
+    let address = addOrAlias;
+    if (!isValidAddress(addOrAlias)) {
+      address = convertAliasToAddress(addOrAlias);
+    }
+    return apiGetLocksForFeed(self, address);
   };
   @view getMaxLocksIndex = () => {
     const locks = this.getLocks();
@@ -289,7 +293,11 @@ class LoveLock {
     this.setLocks(locks);
   }
   // =========== OTHER ================
-  @transaction followPerson(address: address) {
+  @transaction followPerson(addOrAlias: string) {
+    let address = addOrAlias;
+    if (!isValidAddress(addOrAlias)) {
+      address = convertAliasToAddress(addOrAlias);
+    }
     // expectUserApproved(this);
     const sender = msg.sender;
     const following = this.getFollowing();
@@ -316,14 +324,26 @@ class LoveLock {
     this.setFollowing(following);
     this.setFollowed(followed);
   }
-  @view getFollowedPerson = (addr: address) => this.getFollowed()[addr] || [];
+
+  @view getFollowedPerson = (addOrAlias: string) => {
+    let address = addOrAlias;
+    if (!isValidAddress(addOrAlias)) {
+      address = convertAliasToAddress(addOrAlias);
+    }
+    return this.getFollowed()[address] || [];
+  };
+
   @view getFollowingPerson = (addr: address) => this.getFollowing()[addr] || [];
   @view getLocksFollowingByAddress = (addr: address) => apiGetLocksFollowingByAddress(this, addr);
   @view getLocksFollowingPersionByAddress = (addr: address) => apiGetLocksFollowingPersionByAddress(this, addr);
 
-  @view getDataForMypage(addr: address) {
+  @view getDataForMypage(addOrAlias: string) {
     const self = this;
-    return apiGetDataForMypage(self, addr);
+    let address = addOrAlias;
+    if (!isValidAddress(addOrAlias)) {
+      address = convertAliasToAddress(addOrAlias);
+    }
+    return apiGetDataForMypage(self, address);
   }
 
   // ========== DATA MIGRATION =============
@@ -472,6 +492,11 @@ class LoveLock {
       }
     }
     return false;
+  }
+
+  @view isUserApproved(mainAddress: address) {
+    const users = this.getUsers();
+    return users.includes(mainAddress);
   }
 }
 const ctAlias = loadContract('system.alias');

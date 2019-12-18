@@ -148,7 +148,7 @@ export function fetchAltFirstIpfsJson(hash, options = {}) {
 
 export function smartFetchIpfsJson(hash, options = {}) {
   let func = fetchMainFirstIpfsJson;
-  if (options.timestamp && Date.now() - options.timestamp > 1000 * 60 * 1000) {
+  if (options.timestamp && Date.now() - options.timestamp > 100000 * 60 * 1000) {
     func = fetchAltFirstIpfsJson;
   }
   return func(hash, options);

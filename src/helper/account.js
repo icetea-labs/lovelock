@@ -62,10 +62,10 @@ export async function getTagsInfo(address) {
       return tags;
     });
 }
-export async function isApproved(address, tokenAddress) {
+export async function isApproved(address) {
   // console.log('address', address, '-', tokenAddress, '-', process.env.REACT_APP_CONTRACT);
   return ctMethods
-    .isAuthorized(address, tokenAddress, process.env.REACT_APP_CONTRACT)
+    .isUserApproved(address)
     .call()
     .then(resp => {
       return resp;
@@ -78,6 +78,6 @@ export async function isApproved(address, tokenAddress) {
 export function getAliasAndTags(address) {
   return Promise.all([getAlias(address), getTagsInfo(address)]);
 }
-export function getAuthenAndTags(address, tokenAddress) {
-  return Promise.all([getTagsInfo(address), isApproved(address, tokenAddress)]);
+export function getAuthenAndTags(address) {
+  return Promise.all([getTagsInfo(address), isApproved(address)]);
 }

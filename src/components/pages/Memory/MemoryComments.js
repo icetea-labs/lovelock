@@ -235,7 +235,7 @@ export default function MemoryComments(props) {
               </Grid>
               <Grid item sx={10}>
                 <Typography margin="dense" className={classes.contentComment}>
-                  <Link to="/" className={classes.linkUserName}>{`${item.nick}`}</Link>
+                  <Link href={`/u/${item.sender}`} className={classes.linkUserName}>{`${item.nick}`}</Link>
                   <span> {item.content}</span>
                 </Typography>
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect, useDispatch } from 'react-redux';
+import { useSnackbar } from 'notistack';
 import { FlexBox, FlexWidthBox, rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
 import LeftContainer from '../Lock/LeftContainer';
@@ -8,6 +9,8 @@ import MemoryContainer from '../Memory/MemoryContainer';
 import LandingPage from '../../layout/LandingPage';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
+import { showSubscriptionError } from '../../../helper';
+import { getContract } from '../../../service/tweb3';
 
 const RightBoxMemories = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -114,6 +117,7 @@ function Home(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const { setLocks, setMemory, address, locks, history } = props;
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     let cancel = false;
@@ -152,62 +156,86 @@ function Home(props) {
     history.push('/explore');
   }
 
-  const renderHomeEmptyPropose = (
-    <FlexWidthBox>
-      <ShadowBox>
-        <RightBox>
-          <div>
-            <img src="/static/img/plant.svg" alt="plant" />
-            <div className="emptyTitle">
-              <h1>You have no lock yet.</h1>
+  function watchCreatePropose(signal) {
+    const filter = {};
+    return getContract().events.allEvents(filter, async (error, result) => {
+      if (error) {
+        showSubscriptionError(error, enqueueSnackbar);
+      } else {
+        const repsNew = result.filter(({ eventName }) => {
+          return eventName === 'createLock';
+        });
+
+        if (
+          repsNew.length > 0 &&
+          (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
+        ) {
+          fetchData(signal);
+        }
+      }
+    });
+  }
+
+  const renderHomeEmptyPropose = () => {
+    watchCreatePropose();
+
+    return (
+      <FlexWidthBox>
+        <ShadowBox>
+          <RightBox>
+            <div>
+              <img src="/static/img/plant.svg" alt="plant" />
+              <div className="emptyTitle">
+                <h1>You have no lock yet.</h1>
+              </div>
+              <div className="emptySubTitle">
+                <h2>Locks are the way you connect and share memories with your loved ones.</h2>
+              </div>
+              <ActionForm>
+                <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                  Create first lock
+                </ButtonPro>
+              </ActionForm>
+              <LinkPro className="btn_add_promise" onClick={openExplore}>
+                or explore others&apos;
+              </LinkPro>
             </div>
-            <div className="emptySubTitle">
-              <h2>Locks are the way you connect and share memories with your loved ones.</h2>
-            </div>
-            <ActionForm>
-              <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                Create first lock
-              </ButtonPro>
-            </ActionForm>
-            <LinkPro className="btn_add_promise" onClick={openExplore}>
-              or explore others&apos;
-            </LinkPro>
-          </div>
-        </RightBox>
-      </ShadowBox>
-      <FooterWapper>
-        <SupportSite className="upInfo">
-          <p>
-            Powered by&nbsp;
-            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-              Icetea Platform.
-            </a>
-          </p>
-          <p>
-            &nbsp;
-            <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
-              Trada Technology&nbsp;
-            </a>
-            &copy; 2019
-          </p>
-        </SupportSite>
-      </FooterWapper>
-      <DownInfo>
-        <SupportSite>
-          <p>
-            Need support? Contact us via&nbsp;
-            <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
-              Email
-            </a>
-            &nbsp;or&nbsp;
-            <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
-              Telegram.
-            </a>
-          </p>
-        </SupportSite>
-      </DownInfo>
-    </FlexWidthBox>
-  );
+          </RightBox>
+        </ShadowBox>
+        <FooterWapper>
+          <SupportSite className="upInfo">
+            <p>
+              Powered by&nbsp;
+              <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+                Icetea Platform.
+              </a>
+            </p>
+            <p>
+              &nbsp;
+              <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
+                Trada Technology&nbsp;
+              </a>
+              &copy; 2019
+            </p>
+          </SupportSite>
+        </FooterWapper>
+        <DownInfo>
+          <SupportSite>
+            <p>
+              Need support? Contact us via&nbsp;
+              <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+                Email
+              </a>
+              &nbsp;or&nbsp;
+              <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
+                Telegram.
+              </a>
+            </p>
+          </SupportSite>
+        </DownInfo>
+      </FlexWidthBox>
+    );
+  };
   const isRegistered = !!address;
   const isHaveLocks = locks.length > 0;
   // console.log('render home', isHaveLocks, '---', loading, '---->', locks);
@@ -228,7 +256,7 @@ function Home(props) {
             </LeftBoxWrapper>
           ) : (
             <FlexBox wrap="wrap" justify="center">
-              {renderHomeEmptyPropose}
+              {renderHomeEmptyPropose()}
             </FlexBox>
           )}
         </>

@@ -505,6 +505,7 @@ class PuNewLock extends React.Component {
         }
 
         const info = { date, hash };
+
         return await sendTransaction(this.props, 'createLock', promiseStm, partner, info, botInfo);
       };
 
@@ -702,6 +703,7 @@ const mapStateToProps = state => {
     locks: state.loveinfo.locks,
     address: state.account.address,
     tokenKey: state.account.tokenKey,
+    tokenAddress: state.account.tokenAddress,
     isApproved: state.account.isApproved,
   };
 };

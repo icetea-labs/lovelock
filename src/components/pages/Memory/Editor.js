@@ -40,6 +40,7 @@ class Editor extends React.Component {
   subtitleText = React.createRef();
 
   componentDidMount() {
+    window.trackPageView(window.location.pathname);
     if (this.props.read_only) {
       waitForHtmlTags('.graf-image', mediumZoom);
       waitForHtmlTags('.sectionLayout--fullWidth', images => {

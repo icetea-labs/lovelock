@@ -56,6 +56,8 @@ export function useTx({ privacy, address } = {}) {
 }
 
 export function sendTransaction({ address, tokenAddress }, funcName, ...params) {
+  console.log('address, tokenAddress', address, tokenAddress);
+  console.log('funcName, params', funcName, params);
   return sendTxUtil(funcName, params, { address, tokenAddress });
 }
 
