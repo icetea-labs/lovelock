@@ -584,7 +584,7 @@ function MemoryContent(props) {
   const renderTitleMem = mem => {
     return (
       <>
-        <a href={`/mypage/${mem.sender}`} style={{ color: 'inherit' }} className={classes.memorySender}>
+        <a href={`/${mem.sender}`} style={{ color: 'inherit' }} className={classes.memorySender}>
           {mem.name}
         </a>
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
@@ -593,7 +593,7 @@ function MemoryContent(props) {
             {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
               <p style={{ color: 'inherit' }}>{mem.r_tags['display-name']}</p>
             ) : (
-              <a href={`/mypage/${mem.receiver}`} style={{ color: 'inherit' }} className={classes.memoryReceiver}>
+              <a href={`/${mem.receiver}`} style={{ color: 'inherit' }} className={classes.memoryReceiver}>
                 {mem.r_tags['display-name']}
               </a>
             )}

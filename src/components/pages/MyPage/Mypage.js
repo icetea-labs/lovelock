@@ -125,6 +125,7 @@ function Mypage(props) {
       setLoading(false);
     });
   }
+
   function serialFollowData(follow) {
     if (!follow) return { numFollow: 0, isMyFollow: false };
     const isMyFollow = follow.includes(address);

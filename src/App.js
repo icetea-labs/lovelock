@@ -36,7 +36,7 @@ function App(props) {
 
           <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
           <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
-          <RouteWithLayout layout={HomeLayout} exact path="/mypage/:address" component={Mypage} />
+          <RouteWithLayout layout={HomeLayout} exact path="/:address" component={Mypage} />
           <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
           <RouteWithLayout layout={HomeLayout} exact path="/blog/:index" component={BLogView} />
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
