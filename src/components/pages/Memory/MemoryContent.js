@@ -366,6 +366,7 @@ function MemoryContent(props) {
     // console.log('window.location', window.location);
     const pathname = `/blog/${memoryId}`;
     window.history.pushState(null, '', pathname);
+    window.trackPageView(window.location.pathname);
   }
 
   function closeMemory() {

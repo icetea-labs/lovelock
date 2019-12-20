@@ -22,6 +22,8 @@ console.log(`Load RPC endpoint from ${envPath}`);
 const config = envfile.parseFileSync(envPath);
 const endpoint = config.REACT_APP_RPC;
 
+const contractAlias = (mode === 'one' ? 'contract.lovelock' : 'contract.lovelockdev')
+
 // load source file
 const src = fs.readFileSync('./contracts/lovelock.js');
 
@@ -59,17 +61,14 @@ const src = fs.readFileSync('./contracts/lovelock.js');
   console.log(`Contract created: ${r.address}`);
 
   // migrate data
-  const oldAddress = config.REACT_APP_CONTRACT.trim();
-  if (oldAddress) {
-    console.log('Trying to migrate data from ' + oldAddress);
-    try {
-      const newContract = tweb3.contract(r);
-      await newContract.methods.migrateState(oldAddress, true).sendCommit({ from: account.address });
-      await newContract.methods.addAdmins([account.address]).sendCommit({ from: account.address });
-      console.log('Data migration finished.');
-    } catch (e) {
-      console.log('Fail to migrate data: ', e.message);
-    }
+  console.log('Trying to migrate data from ' + contractAlias);
+  try {
+    const newContract = tweb3.contract(r);
+    await newContract.methods.migrateState(contractAlias, true).sendCommit({ from: account.address });
+    await newContract.methods.addAdmins([account.address]).sendCommit({ from: account.address });
+    console.log('Data migration finished.');
+  } catch (e) {
+    console.log('Fail to migrate data: ', e.message);
   }
 
   // add user
@@ -85,10 +84,10 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     }
   }
 
-  // update .env
-  config.REACT_APP_CONTRACT = r.address;
-  fs.writeFileSync(envPath, envfile.stringifySync(config));
-  console.log(`New contract address was updated to ${envPath}.`);
+  // old contract is alias, re-register alias
+  await tweb3.contract('system.alias').methods.register(contractAlias.split('.')[1], r.address, true).sendCommit({ from: account.address });
+  console.log(`New contract is registered to alias ${contractAlias}`)
+
 
   process.exit(0);
 })();
