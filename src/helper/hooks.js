@@ -28,20 +28,21 @@ export function useTx({ privacy, address } = {}) {
   const key = useSelector(state => state.account[keyName]);
   const from = useSelector(state => state.account.address);
   const signers = useSelector(state => state.account.tokenAddress);
-  const opts = { from, signers };
+  const defaultOpts = { from, signers };
   const dispatch = useDispatch();
 
   const make = m => (method, ...params) => {
     const send = ms[method](...params)[m];
     if (key) {
       console.log('with key', m, method, params);
-      return send(opts);
+      return send(defaultOpts);
     }
 
     return new Promise((resolve, reject) => {
-      const sendTx = () => {
+      const sendTx = opts => {
         console.log('with authen', m, method, params);
-        return send(opts)
+        const sendOpts = opts ? { from: opts.address, signers: opts.tokenAddress } : defaultOpts
+        return send(sendOpts)
           .then(resolve)
           .catch(reject);
       };
@@ -68,8 +69,8 @@ export function sendTxWithAuthen({ tokenKey, address, tokenAddress, dispatch }, 
   }
 
   return new Promise((resolve, reject) => {
-    const sendTx = () => {
-      return sendTxUtil(funcName, params, { address, tokenAddress })
+    const sendTx = opts => {
+      return sendTxUtil(funcName, params, opts || { address, tokenAddress })
         .then(resolve)
         .catch(reject);
     };
@@ -86,8 +87,8 @@ export function ensureToken({ tokenKey, dispatch }, callback) {
   }
 
   return new Promise((resolve, reject) => {
-    const wrap = () => {
-      return callback()
+    const wrap = opts => {
+      return callback(opts)
         .then(resolve)
         .catch(reject);
     };

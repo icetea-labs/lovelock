@@ -491,7 +491,7 @@ class PuNewLock extends React.Component {
         }
         botInfo = { firstname, lastname, botReply };
       }
-      const uploadThenSendTx = async () => {
+      const uploadThenSendTx = async  opts => {
         setLoading(true);
 
         if (cropFile) {
@@ -506,7 +506,7 @@ class PuNewLock extends React.Component {
 
         const info = { date, hash };
 
-        return await sendTransaction(this.props, 'createLock', promiseStm, partner, info, botInfo);
+        return await sendTransaction(opts || this.props, 'createLock', promiseStm, partner, info, botInfo);
       };
 
       const result = await ensureToken(this.props, uploadThenSendTx);
