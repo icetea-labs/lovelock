@@ -159,13 +159,13 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
 
-  const comments = self.getMemory(memoIndex)[0].comments;
-  const owner = [comments[cmtNo].sender, memo.sender, memo.receiver, ...self.getAdmins()];
+  const comments = memo.comments;
+  const owners = [comments[cmtNo].sender, memo.sender, memo.receiver];
 
-  expect(owner.includes(sender), "Can't delete comment. You must be owner.");
+  expect(owners.includes(sender) || self.getAdmins().includes(sender), "You cannot delete this comment.");
 
   // delete comments.cmtNo;
-  const newCmt = comments.splice(cmtNo, 1);
+  comments.splice(cmtNo, 1);
 
   // const log = { ...newCmt };
   // self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);

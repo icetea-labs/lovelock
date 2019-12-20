@@ -32,7 +32,7 @@ export const grantAccessToken = (mainAddress, tokenAddress, remember, sendType =
     const did = getDidContract().methods;
     const expire = remember ? process.env.REACT_APP_TIME_EXPIRE : process.env.REACT_APP_DEFAULT_TIME_EXPIRE;
 
-    const method = did.grantAccessToken(mainAddress, [CONTRACT, 'system.did'], tokenAddress, +expire)
+    const method = did.grantAccessToken(mainAddress, [process.env.REACT_APP_CONTRACT, 'system.did'], tokenAddress, +expire)
     return method[sendType]({ from: mainAddress })
 }
 
