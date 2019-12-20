@@ -33,6 +33,7 @@
     function gtag() {dataLayer.push(arguments);}
     gtag('js', new Date());
     window.trackPageView = function (page_path) {
+      // console.log('window',page_path)
       gtag('config', 'UA-145477800-2', {
         'page_path': page_path
       })
