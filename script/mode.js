@@ -5,7 +5,7 @@ mode = mode.trim().toLocaleLowerCase()
 // determine path to .env file
 let envPath
 if (mode) {
-  if (mode === 'prod') {
+  if (mode === 'prod' || mode === 'one') {
     envPath = '.env.production'
   } else if (mode === 'dev') {
     envPath = '.env.development'

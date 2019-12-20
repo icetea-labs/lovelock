@@ -356,7 +356,7 @@ class LoveLock {
     return importState(data, overwrite);
   }
 
-  @transaction migrateState(fromContract: address, overwrite: ?boolean = false) {
+  @transaction migrateState(fromContract: string, overwrite: ?boolean = false) {
     expectOwner(this);
     return migrateState(fromContract, overwrite);
   }

@@ -6,7 +6,7 @@ const contracts = {}
 const MAIN_URL = process.env.REACT_APP_RPC
 const WS_URL = process.env.REACT_APP_WS_RPC
 const HTTP_URL = process.env.REACT_APP_HTTP_RPC
-const CONTRACT = process.env.REACT_APP_CONTRACT
+let CONTRACT = process.env.REACT_APP_CONTRACT
 
 export const getWeb3 = (url = MAIN_URL) => {
     if (!instances[url]) {
@@ -35,5 +35,15 @@ export const grantAccessToken = (mainAddress, tokenAddress, remember, sendType =
     const method = did.grantAccessToken(mainAddress, [CONTRACT, 'system.did'], tokenAddress, +expire)
     return method[sendType]({ from: mainAddress })
 }
+
+// ensure contract address
+(() => {
+    const contract = process.env.REACT_APP_CONTRACT
+    if (contract.indexOf('.') < 0) return
+    getAliasContract().methods.resolve(contract).call().then(c => {
+        CONTRACT = c
+        contracts[contract] = contracts[c] = getWeb3().contract(c)
+    })
+})()
 
 export default getWeb3;
