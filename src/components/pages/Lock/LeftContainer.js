@@ -127,9 +127,15 @@ function LeftContainer(props) {
   useEffect(() => {
     const signal = {};
 
-    watchCreatePropose(signal);
+    // event subription require resolve alias -> addr, so we need to wait a bit
+    const timeout = window.setTimeout(() => {
+      watchCreatePropose(signal);
+    }, 5000)
 
-    return () => (signal.cancel = true);
+    return () => {
+      signal.cancel = true
+      window.clearTimeout(timeout)
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function watchCreatePropose(signal) {

@@ -478,20 +478,18 @@ class LoveLock {
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
-    if (!users.includes(mainAddress)) return false;
-    // check tokenAddress is token on mainaddress.
-    const ctDid = loadContract('system.did');
-    const tokens = ctDid.query.invokeView(mainAddress).tokens || {};
-    if (tokens[contract]) {
-      const tokesOnContract = Object.keys(tokens[contract]);
-      if (tokesOnContract.includes(tokenAddress)) {
-        const { expireAfter } = tokens[contract][tokenAddress];
-        if (expireAfter - Date.now() >= 60 * 1000) {
-          return true;
-        }
-      }
+    if (!users.includes(mainAddress)) {
+      return false;
     }
-    return false;
+
+    // check tokenAddress is token on mainaddress.
+    const ctDid = loadContract('system.did')
+    try {
+      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to: contract })
+      return true
+    } catch (e) {
+      return false
+    }
   }
 
   @view isUserApproved(mainAddress: address) {

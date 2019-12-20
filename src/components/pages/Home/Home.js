@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { connect, useDispatch } from 'react-redux';
 import { useSnackbar } from 'notistack';
@@ -119,22 +119,33 @@ function Home(props) {
   const { setLocks, setMemory, address, locks, history } = props;
   const { enqueueSnackbar } = useSnackbar();
 
+  const timeout = useRef()
+
   useEffect(() => {
     let cancel = false;
     if (address) {
-      fetchData(cancel);
+      fetchData(cancel)
     }
     return () => {
       cancel = true;
+      if (timeout.current) {
+        window.clearTimeout(timeout.current)
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchData(cancel) {
-    APIService.getLocksForFeed(address).then(resp => {
+    return APIService.getLocksForFeed(address).then(resp => {
       // set to redux
       setLocks(resp.locks);
       if (cancel) return;
+
+      if (!resp.locks.length) {
+        // event subription require resolve alias -> addr, so we need to wait a bit
+        timeout.current = window.setTimeout(watchCreatePropose, 5000)
+      }
+
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return tmp.concat(lock.memoIndex);
       }, []);
@@ -177,8 +188,6 @@ function Home(props) {
   }
 
   const renderHomeEmptyPropose = () => {
-    watchCreatePropose();
-
     return (
       <FlexWidthBox>
         <ShadowBox>
