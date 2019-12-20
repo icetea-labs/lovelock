@@ -1,6 +1,6 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
-import IpfsHttpClient from 'ipfs-http-client';
+import { ipfs, createIpfsClient } from '../service/ipfs';
 import { ecc, codec, AccountType } from '@iceteachain/common';
 import moment from 'moment';
 import * as bip39 from 'bip39';
@@ -8,7 +8,6 @@ import HDKey from 'hdkey';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
 import { getWeb3, getContract } from '../service/tweb3';
-import ipfs from '../service/ipfs';
 import { decodeTx, decode } from './decode';
 
 const paths = 'm’/44’/349’/0’/0';
@@ -280,14 +279,7 @@ export async function saveToIpfs(files) {
   // console.log('signs', signs);
   const signature = JSON.stringify(signs);
 
-  const newIpfs = IpfsHttpClient({
-    host: process.env.REACT_APP_IPFS_HOST,
-    port: process.env.REACT_APP_IPFS_PORT,
-    protocol: process.env.REACT_APP_IPFS_PROTOCOL,
-    headers: {
-      Authorization: `Bearer ${signature}`,
-    },
-  });
+  const newIpfs = createIpfsClient(signature)
 
   return newIpfs.add([...contentBuffer]).then(results => {
     return results.map(el => {
