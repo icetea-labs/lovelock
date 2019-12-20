@@ -457,7 +457,7 @@ export default function CreateMemory(props) {
     const content = blogData || memoryContent;
 
     let params = [];
-    const uploadThenSendTx = async () => {
+    const uploadThenSendTx = async opts => {
       setGLoading(true);
 
       if (privacy && !blogData) {
@@ -477,7 +477,7 @@ export default function CreateMemory(props) {
         if (blogData) info.blog = true;
         params = [proIndex, !!privacy, content, info];
       }
-      return await sendTxUtil('addMemory', params, { address, tokenAddress });
+      return await sendTxUtil('addMemory', params, opts || { address, tokenAddress });
     };
 
     try {

@@ -34,7 +34,7 @@ import { Link, withRouter } from 'react-router-dom';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
-import GetKeyToAuthen from './PasswordPrompt';
+import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getAuthenAndTags } from '../../helper';
@@ -703,7 +703,7 @@ function Header(props) {
       {renderMenu}
       {friReqMenu}
       {notiList}
-      {needAuth && <GetKeyToAuthen />}
+      {needAuth && <PasswordPrompt />}
       {isNewLock && <PuNewLock close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
