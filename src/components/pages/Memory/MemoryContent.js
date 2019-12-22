@@ -14,6 +14,7 @@ import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
 import styled from 'styled-components';
+import Linkify from 'react-linkify';
 
 import * as actions from '../../../store/actions';
 import {
@@ -485,8 +486,8 @@ function MemoryContent(props) {
             renderLockEventMemory()
           )
         ) : (
-          <Typography variant="body1" style={{ whiteSpace: 'pre-line' }} component="div">
-            {!isBlog && memoryDecrypted.content}
+          <Typography variant="body1" style={{ whiteSpace: 'pre-line', overflowWrap: 'break-word' }} component="div">
+            {!isBlog && <Linkify>{memoryDecrypted.content}</Linkify>}
             {isBlog && blogInfo.title && (
               <BlogShowcase
                 classes={classes}
