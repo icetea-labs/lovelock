@@ -475,7 +475,7 @@ class LoveLock {
     return users.includes(user);
   }
   // ========== Authorized IPFS APPROVED =============
-  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
+  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
     if (!users.includes(mainAddress)) {
@@ -485,6 +485,9 @@ class LoveLock {
     // check tokenAddress is token on mainaddress.
     const ctDid = loadContract('system.did')
     try {
+      if (contract.includes('.')) {
+        contract = convertAliasToAddress(contract)
+      }
       ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to: contract })
       return true
     } catch (e) {
@@ -499,10 +502,5 @@ class LoveLock {
 }
 const ctAlias = loadContract('system.alias');
 function convertAliasToAddress(alias) {
-  const aliasObj = ctAlias.query.invokeView(alias) || {};
-  let resp = {};
-  Object.entries(aliasObj).forEach(([key, value]) => {
-    resp = value;
-  });
-  return resp.address || '';
+  return ctAlias.resolve.invokeView(alias) || ''
 }
