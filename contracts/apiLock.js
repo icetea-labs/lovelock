@@ -205,10 +205,12 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
   // status: pending: 0, accept_lock: 1, cancel_lock: 2
   switch (status) {
     case LOCK_STATUS_ACCEPTED:
-      expect(sender === lock.receiver, "Can't accept lock. You must be receiver.");
+      expect(sender === lock.receiver, "Cannot accept lock. You must be receiver.");
+      expect(lock.status === LOCK_STATUS_PENDING, "This lock is no longer pending and cannot be accepted.");
       break;
     case LOCK_STATUS_DENIED:
-      expectLockOwners(lock, "You can't cancel lock.");
+      expectLockOwners(lock, "You cannot cancel lock.");
+      expect(lock.status === LOCK_STATUS_PENDING, "This lock is no longer pending and cannot be denied.")
       break;
   }
   Object.assign(lock, { r_content, status });

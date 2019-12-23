@@ -34,7 +34,7 @@ Deploy Lovelock contract:
 npm run deploy
 ```
 
-Generate some seed data (optional).
+Generate some seed data (optional):
 
 `npm run seed` then import the outputted private key for testing (use __Forgot Password__ screen to import).
 
