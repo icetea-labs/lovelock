@@ -1,8 +1,8 @@
-<h1 align="center">
+<h1>
   <a href="https://lovelock.icetea.io"><img width="650px" src="https://lovelock.icetea.io/static/img/share.jpg" alt="Lovelock logo" /></a>
 </h1>
 
-<h3 align="center">Lovelock - Cherish Your Intimate Memories</h3>
+<h3>Lovelock - Cherish Your Intimate Memories</h3>
 
 > An secure place to store and celebrate your meaningful memories. Safe, clutterless, and lasting. Keep to yourself or share with close friends. https://lovelock.icetea.io
 
@@ -12,39 +12,31 @@
 
 - Rename `.env.example` to `.env`
 - `npm i`
-
-If you want to use local Icetea node (easier for debugging).
-- `npm i -g ndb TradaTech/icetea`
+- `npm i -g TradaTech/icetea TradaTech/ipfs-proxy`
 - `icetea init`
 
-### 2. Connect to Icetea Node
+### 2. Start to Icetea and IPFS node
 
-#### To use the local node:
-
-Setting this in the `.env` file:
-```
-REACT_APP_RPC=ws://localhost:26657/websocket
+Start an Icetea Node:
+```sh
+icetea start
 ```
 
-Then start icetea node.
-`icetea start`
-
-For help, type `icetea -h`.
-
-#### To use the public node:
-
-Setting this in the `.env` file:
-```
-REACT_APP_RPC=wss://rpc.icetea.io/websocket
+Start a fake IPFS node for testing:
+```sh
+ipfslocal
 ```
 
 ### 3. Deploy contracts
 
-- `npm run deploy` (this will load and update `.env`)
+Deploy Lovelock contract:
+```
+npm run deploy
+```
 
-> Deploying contracts will make the app uses the new contracts, thus all existing data will be lost. Only deploying at the first time you install Icetea, when the contracts' sources were changed, or after you reset the local Icetea Node.
+Generate some seed data (optional).
 
-To create some seed data: `npm run seed` then import the outputted private key for testing (use __Forgot Password__ screen to import).
+`npm run seed` then import the outputted private key for testing (use __Forgot Password__ screen to import).
 
 ### 4. Start the app
 
