@@ -42,6 +42,7 @@ function App(props) {
           <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
           <RouteWithLayout layout={HomeLayout} exact path="/exception" component={Exception} />
           <RouteWithLayout layout={HomeLayout} exact path="/u/:address" component={Mypage} />
+          <RouteWithLayout layout={HomeLayout} exact path="/:address" component={Mypage} />
           <RouteWithoutLayout component={NotFound} />
         </Switch>
       </Router>

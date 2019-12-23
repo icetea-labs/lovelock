@@ -378,7 +378,7 @@ function TopContrainer(props) {
 
   function handerFollow() {
     try {
-      tx.sendCommit('followLock', topInfo.index, { tokenAddress, address })
+      tx.sendCommit('followLock', topInfo.index)
         .then(() => {
           getNumTopFollow();
         })
@@ -474,6 +474,7 @@ function TopContrainer(props) {
         const newFile = await applyRotation(cropFile[0], 1, 1200);
         const saveFile = imageResize(cropFile[0], newFile);
 
+        // TODO: combine in single operation
         const hash = await saveFileToIpfs(saveFile);
         const result = await tx.sendCommit('changeCoverImg', proIndex, hash);
         if (result) {

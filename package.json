@@ -57,7 +57,8 @@
     "deploy:all": "node script/deploy.js && node script/deploy.js prod",
     "deploy:prod": "node script/deploy.js prod",
     "deploy:one": "node script/deploy.js one",
-    "seed": "node script/seed.js"
+    "seed": "node script/seed.js",
+    "unlock": "node script/unlock.js"
   },
   "eslintConfig": {
     "extends": "react-app",

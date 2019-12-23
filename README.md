@@ -42,6 +42,8 @@ Generate some seed data (optional):
 
 - `npm start`
 
+> __Note__: New users need to be unlocked before they can post contents. To unlock a user, run `npm run unlock [usernameOrAddress]`
+
 ## How to use the app
 
 The app allow users to create `locks` (i.e. relationship, connection) with others. It is 1-1 relationship. A lock is a timeline between 2 people (often lovers/couple). Then each can post memories onto it (text status, photo, blog).
