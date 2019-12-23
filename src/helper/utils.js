@@ -266,20 +266,18 @@ export async function saveToIpfs(files) {
   const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
   const token = codec.decode(Buffer.from(sessionData, 'base64'));
   const tokenKey = codec.toString(token.tokenKey);
-  const pubkeySigner = ecc.toPublicKey(tokenKey);
+  const pubkey = ecc.toPublicKey(tokenKey);
   let user = localStorage.getItem('user') || sessionStorage.getItem('user');
   user = JSON.parse(user);
   const from = user.address;
+  const app = process.env.REACT_APP_CONTRACT
 
   const time = Date.now();
-  const hash32bytes = ecc.stableHashObject({ from, time, fileHashes });
-  const sign = ecc.sign(hash32bytes, tokenKey).signature;
-  const signs = { sign: codec.toDataString(sign), time, pubkeySigner, from };
+  const hash32bytes = ecc.stableHashObject({ app, fileHashes, from, time });
+  const signature = ecc.sign(hash32bytes, tokenKey).signature;
+  const authData = JSON.stringify({ app, from, pubkey, sign: codec.toDataString(signature), time });
 
-  // console.log('signs', signs);
-  const signature = JSON.stringify(signs);
-
-  const newIpfs = createIpfsClient(signature)
+  const newIpfs = createIpfsClient(authData)
 
   return newIpfs.add([...contentBuffer]).then(results => {
     return results.map(el => {
