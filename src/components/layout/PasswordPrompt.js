@@ -154,7 +154,7 @@ function PasswordPrompt(props) {
           setAutoPassFailed();
         } else {
           console.error(error);
-          const message = 'Your password is invalid. Please try again.';
+          const message = 'The password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
         }
       } finally {
