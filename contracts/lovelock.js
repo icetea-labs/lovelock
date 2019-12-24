@@ -413,6 +413,63 @@ class LoveLock {
     const self = this;
     return apiDeleteComment(self, memIndex, cmtNo);
   }
+
+  // ==== EDITOR CHOICE (for Explore menu) ===
+  @view getChoices = () => this.getState('choices', []);
+  setChoices = value => this.setState('choices', value);
+
+  @transaction addChoices(_choices) {
+    expectAdmin(this);
+
+    if (!Array.isArray(_choices)) {
+      _choices = [_choices];
+    }
+
+    const schema = Joi.array().items(
+      Joi.number().min(0).integer()
+    );
+
+    _choices = validate(_choices, schema);
+
+    const oldChoices = this.getChoices();
+
+    // merge the two array, use Set to remove duplicaton
+    const newChoices = [...new Set([...oldChoices, ..._choices])]
+
+    // save new choices
+    this.setChoices(newChoices)
+
+    // return nothing
+  }
+
+  @transaction removeChoices(_choices) {
+    expectAdmin(this);
+
+    expectAdmin(this);
+
+    if (!Array.isArray(_choices)) {
+      _choices = [_choices];
+    }
+
+    const schema = Joi.array().items(
+      Joi.number().min(0).integer()
+    );
+
+    _choices = validate(_choices, schema);
+
+
+    const oldChoices = this.getChoices();
+
+    const newChoices = oldChoices.filter(i => !_choices.includes(i));
+
+    this.setChoices(newChoices)
+  }
+
+  @view isEditorChosen(memoIndex: number): boolean {
+    const choices = this.getChoices();
+    return choices.includes(memoIndex);
+  }
+
   // ========== USER APPROVED =============
   @view getUsers = () => this.getState('users', []);
   setUsers = value => this.setState('users', value);
