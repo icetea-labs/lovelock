@@ -505,7 +505,7 @@ export default function CreateMemory(props) {
         },
         uploadThenSendTx
       )
-      const result = await submitPromise()
+      const result = await submitPromise
       onMemoryAdded(result.returnValue, params);
       resetValue();
     } catch (err) {

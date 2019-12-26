@@ -242,13 +242,14 @@ function LeftContainer(props) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLocks;
     });
+    const hasPending = Boolean(newLocks.find(l => l.status = 0))
     return (
       <>
         <div className="title">{!isGuest ? 'My lock' : 'Public lock'} </div>
         <div>
           <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
-        {!isGuest && (
+        {!isGuest && hasPending && (
           <>
             <div className="title">Pending lock</div>
             <div>

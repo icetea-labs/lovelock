@@ -42,7 +42,7 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
     [lock, locks] = self.getLock(lockIndex);
   }
 
-  expectLockOwners(lock, 'Cannot add memory');
+  expectLockContributors(lock, 'Only lock contributors can add memory.');
   const sender = msg.sender;
   const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
 
@@ -138,14 +138,55 @@ function _addInfoToMems(memories, self) {
   });
   return res;
 }
+
+exports.apiEditMemory = (self, memIndex, content, info) => {
+  const [mem, mems] = self.getMemory(memIndex);
+
+  expect(msg.sender === mem.sender, 'Only author can edit memory.')
+
+  if (content != null) {
+    expect(typeof content === 'string', 'Type of content must be string.')
+    mem.content = content
+  }
+
+  if (info != null) {
+    const { hash, date } = info
+    if (hash != null) {
+      expect(Array.isArray(hash), 'info.hash must be an array.')
+      hash.forEach(h => {
+        if (typeof h !== 'string') {
+          throw new Error('info.hash members must be strings.')
+        }
+      })
+
+      mem.info.hash = hash
+    }
+
+    if (date != null) {
+      expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
+      mem.info.date = date
+    }
+  }
+  
+  // save memories
+  self.setMemories(mems)
+
+  return mem
+}
+
 // ========== DELETE DATA ==================
 exports.apiDeleteMemory = (self, memIndex) => {
   const sender = msg.sender;
-  let [mem, mems] = self.getMemory(memIndex);
+  const [mem, mems] = self.getMemory(memIndex);
+
   // remove memoIndex in lock
   const locks = self.getLocks();
-  const { lockIndex } = mem;
-  locks[lockIndex].memoIndex.splice(locks[lockIndex].memoIndex.indexOf(memIndex), 1);
+  const lockIndex = mem.lockIndex;
+
+  const lock = locks[lockIndex]
+  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.") 
+
+  lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
   // save locks
   self.setLocks(locks);
   // delete mem
