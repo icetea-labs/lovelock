@@ -25,19 +25,9 @@ function Explore(props) {
   }, []);
 
   async function fetchData() {
-    APIService.getLocksForFeed(address).then(resp => {
+    APIService.getChoiceMemories().then(mems => {
       // set to redux
-      setLocks(resp.locks);
-
-      const memoIndex = resp.locks.reduce((tmp, lock) => {
-        return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
-      }, []);
-      // console.log('memoIndex', memoIndex);
-      memoIndex.length > 0 &&
-        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
-          // set to redux
-          setMemory(mems);
-        });
+      setMemory(mems);
       setLoading(false);
     });
   }

@@ -431,6 +431,15 @@ class LoveLock {
   @view getChoices = () => this.getState('choices', []);
   setChoices = value => this.setState('choices', value);
 
+  @view getChoiceMemories = () => {
+    const choices = this.getState('choices', [])
+    if (!choices || !choices.length) {
+      return []
+    }
+
+    return apiGetMemoriesByListMemIndex(this, choices)
+  }
+
   @transaction addChoices(_choices) {
     expectAdmin(this);
 

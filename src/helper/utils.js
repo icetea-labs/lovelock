@@ -549,7 +549,7 @@ export function diffTime(time) {
     relativeTime: {
       future: 'in %s',
       past: '%s ago',
-      s: '%d secs',
+      s: '%d sec',
       ss: '%d secs',
       m: 'a minute',
       mm: '%d minutes',
