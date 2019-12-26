@@ -510,7 +510,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`3 days left to ${diffDate + 3} day anniversary.`}</span>
+          <span>{`3 days left to ${diffDate + 3} days anniversary.`}</span>
         </div>
       </div>
     );
@@ -519,7 +519,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`2 days left to ${diffDate + 2} day anniversary.`}</span>
+          <span>{`2 days left to ${diffDate + 2} days anniversary.`}</span>
         </div>
       </div>
     );
@@ -528,7 +528,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`1 days left to ${diffDate + 1} day anniversary.`}</span>
+          <span>{`1 day left to ${diffDate + 1} days anniversary.`}</span>
         </div>
       </div>
     );
