@@ -85,9 +85,14 @@ const src = fs.readFileSync('./contracts/lovelock.js');
   }
 
   // old contract is alias, re-register alias
-  await tweb3.contract('system.alias').methods.register(contractAlias.split('.')[1], r.address, true).sendCommit({ from: account.address });
-  console.log(`New contract is registered to alias ${contractAlias}`)
-
+  try {
+    console.log(`Regiser new contract to alias ${contractAlias}`)
+    await tweb3.contract('system.alias').methods.register(contractAlias.split('.')[1], r.address, true).sendCommit({ from: account.address });
+    console.log('Alias registered.')
+  } catch (e) {
+    console.log('Fail to register alias: ', e.message)
+    console.log(`You need to register ${r.address} to ${contractAlias} manually.`)
+  }
 
   process.exit(0);
 })();
