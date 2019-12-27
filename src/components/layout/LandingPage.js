@@ -23,7 +23,7 @@ const SplitLeft = styled.div`
   background-size: cover;
   background-image: url('/static/img/landing.svg');
   @media (max-width: 768px) {
-    height: 50%;
+    height: 40%;
     width: 100%;
   }
 `;
@@ -39,9 +39,9 @@ const SplitRight = styled.div`
   right: 0;
   background-color: #fff;
   @media (max-width: 768px) {
-    height: 50%;
+    height: 65%;
     width: 100%;
-    top: 50%;
+    top: 40%;
   }
 `;
 
@@ -64,6 +64,12 @@ const LoveLockQuote = styled.div`
   line-height: 1.45;
   color: #ffffff;
   position: relative;
+  @media (max-width: 414px) {
+    font-size: 16px;
+    .more {
+      display: none;
+    }
+  }
   ::before {
     content: open-quote;
     font-size: 80px;
@@ -158,8 +164,8 @@ class LandingPage extends PureComponent {
           <SplitLeft>
             <SplitContentLeft>
               <LoveLockQuote>
-                An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting. Keep to
-                yourself or share with close friends.
+                An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting.<span className="more"> Keep to
+                yourself or share with close friends.</span>
               </LoveLockQuote>
             </SplitContentLeft>
           </SplitLeft>
