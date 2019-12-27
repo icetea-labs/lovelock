@@ -15,15 +15,13 @@ import WarningIcon from '@material-ui/icons/Warning';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 
 import * as actions from '../../store/actions';
-import { getAliasContract } from '../../service/tweb3';
 import {
   saveFileToIpfs,
   saveBufferToIpfs,
-  tryStringifyJson,
-  getTagsInfo,
   applyRotation,
   imageResize,
   handleError,
+  getUserSuggestions
 } from '../../helper';
 import { ensureToken, sendTransaction } from '../../helper/hooks';
 import AddInfoMessage from './AddInfoMessage';
@@ -244,58 +242,15 @@ class PuNewLock extends React.Component {
   };
 
   async getSuggestions(value) {
-    let escapedValue = this.escapeRegexCharacters(value.trim().toLowerCase());
-
-    if (escapedValue.length < 3) {
-      this.setState({ suggestions: [] });
-      return;
-    }
-
-    let people = [];
-    escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-    const regex = new RegExp(`\\b${escapedValue}`, 'i');
-
-    const peopleAva = [];
-
-    try {
-      const result = await getAliasContract()
-        .methods.query(`account.${escapedValue}`)
-        .call();
-      people = Object.keys(result).map(key => {
-        const nick = key.substring(key.indexOf('.') + 1);
-        return { nick, address: result[key].address };
-      });
-    } catch (err) {
-      console.error(tryStringifyJson(err));
-    }
-
-    // people = people.filter(person => person.address !== props.address);
-    people = people.filter(person => regex.test(this.getSuggestionValue(person)));
-    people = people.slice(0, 10);
-    for (let i = 0; i < people.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      const resp = await getTagsInfo(people[i].address);
-      if (resp && resp.avatar) {
-        peopleAva.push(resp.avatar);
-      }
-    }
-    for (let i = 0; i < people.length; i++) {
-      Object.assign(people[i], { avatar: peopleAva[i] });
-    }
+    const users = await getUserSuggestions(value);
+    
     this.setState({
-      suggestions: people,
+      suggestions: users,
     });
   }
-
+  
   getSuggestionValue = suggestion => {
     return `@${suggestion.nick}`;
-  };
-
-  partnerChange = e => {
-    const val = e.target.value;
-    this.setState({
-      partner: val.normalize(),
-    });
   };
 
   promiseStmChange = e => {
@@ -303,10 +258,6 @@ class PuNewLock extends React.Component {
     this.setState({
       promiseStm: val.normalize(),
     });
-  };
-
-  escapeRegexCharacters = str => {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
 
   renderSuggestion = (suggestion, { query }) => {

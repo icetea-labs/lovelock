@@ -7,8 +7,9 @@ import * as bip39 from 'bip39';
 import HDKey from 'hdkey';
 import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
-import { getWeb3, getContract } from '../service/tweb3';
+import { getWeb3, getContract, getAliasContract } from '../service/tweb3';
 import { decodeTx, decode } from './decode';
+import { getTagsInfo } from "./account";
 
 const paths = 'm’/44’/349’/0’/0';
 
@@ -735,4 +736,49 @@ export function handleError(err, action) {
     msg = err.deliver_tx.log || err.check_tx.log;
   }
   return msg;
+}
+
+export async function getUserSuggestions(value) {
+  let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
+  
+  if (escapedValue.length < 3) {
+    return [];
+  }
+  
+  let people = [];
+  escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
+  const regex = new RegExp(`\\b${escapedValue}`, 'i');
+  
+  const peopleAva = [];
+  
+  try {
+    const result = await getAliasContract()
+    .methods.query(`account.${escapedValue}`)
+    .call();
+    people = Object.keys(result).map(key => {
+      const nick = key.substring(key.indexOf('.') + 1);
+      return { nick, address: result[key].address };
+    });
+  } catch (err) {
+    console.error(tryStringifyJson(err));
+  }
+  
+  people = people.filter(person => regex.test(`@${person.nick}`));
+  people = people.slice(0, 10);
+  for (let i = 0; i < people.length; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    const resp = await getTagsInfo(people[i].address);
+    if (resp && resp.avatar) {
+      peopleAva.push(resp.avatar);
+    }
+  }
+  for (let i = 0; i < people.length; i++) {
+    Object.assign(people[i], { avatar: peopleAva[i] });
+  }
+
+  return people;
+}
+
+function escapeRegexCharacters(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
