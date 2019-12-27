@@ -99,31 +99,31 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
 };
 
 exports.apiEditLock = (self, lockIndex, data, contributors) => {
-  expect(data && contributors, 'You must provide updated data and/or contributors.')
+  expect(data || contributors, 'You must provide updated data and/or contributors.')
 
   const [lock, locks] = self.getLock(lockIndex);
   expectLockOwners(lock);
 
   if (data) {
-    if (data.lockName) {
+    if (data.lockName != null) {
       lock.s_info.lockName = data.lockName
     }
-    if (data.message) {
+    if (data.message != null) {
       if (msg.sender === lock.sender) {
         lock.s_content = data.message
       } else if (msg.sender === lock.receiver) {
         lock.r_content = data.message
       }
     }
-    if (data.date) {
+    if (data.date != null) {
       lock.s_info.date = data.date
     }
-    if (data.coverImg) {
+    if (data.coverImg != null) {
       lock.coverImg = data.coverImg
     }
   }
 
-  if (contributors) {
+  if (contributors != null) {
     contributors.forEach(c => {
       if (typeof c !== 'string' || c.length !== 43) {
         throw new Error('Contributors contain invalid address.')
