@@ -30,7 +30,8 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
   },
   wrapper: {
-    overflow: 'auto',
+    overflowX: 'hidden',
+    overflowY: 'auto',
     zIndex: '1000',
     position: 'fixed',
     top: 0,
