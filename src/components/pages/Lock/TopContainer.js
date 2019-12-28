@@ -30,6 +30,8 @@ import * as actions from '../../../store/actions';
 import { FlexBox, rem } from '../../elements/StyledUtils';
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
+import IconButton from "@material-ui/core/IconButton";
+import EditLockModal from "../../elements/EditLockModal";
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -121,6 +123,7 @@ const WarrperChatBox = styled(FlexBox)`
     overflow: hidden;
   }
   .name_time {
+    position: relative;
     .user_name {
       font-weight: 600;
       text-transform: capitalize;
@@ -130,6 +133,19 @@ const WarrperChatBox = styled(FlexBox)`
     .time {
       font-size: ${rem(12)};
       color: #8f8f8f;
+    }
+    .edit_icon {
+      margin-left: 5px;
+      position: absolute;
+      top: -5px;
+      &--right {
+        margin-left: -30px;
+      }
+      i {
+        font-size: 14px;
+        position: absolute;
+        color: mediumpurple;
+      }
     }
   }
   .content_detail {
@@ -321,14 +337,14 @@ const useStyles = makeStyles(theme => ({
 
 function TopContrainer(props) {
   const { proIndex, topInfo, setTopInfo, setGLoading } = props;
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
   const address = useSelector(state => state.account.address);
   const tx = useTx();
-
+  const isSender = topInfo.sender === address;
+  const isReceiver = topInfo.receiver === address;
   const [loading, setLoading] = useState(true);
+  const [isEditLockModalOpened, setIsEditLockModalOpened] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const diffDate = summaryDayCal(topInfo.s_date);
-
   const needUpdate = !topInfo || proIndex !== topInfo.index;
 
   useEffect(() => {
@@ -532,6 +548,15 @@ function TopContrainer(props) {
   //     </TopContainerBox>
   //   );
   // }
+  
+  const renderEditLockIcon = (isRight = false) => (
+    <IconButton
+      className={`edit_icon ${isRight ? 'edit_icon--right' : ''}`}
+      onClick={() => setIsEditLockModalOpened(true)}
+    >
+      <i className="material-icons">edit</i>
+    </IconButton>
+  );
 
   return (
     <TopContainerBox>
@@ -642,6 +667,7 @@ function TopContrainer(props) {
                   <span className="time color-gray">
                     <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
                   </span>
+                  {isSender && renderEditLockIcon()}
                 </div>
               )}
               {loading ? (
@@ -669,7 +695,7 @@ function TopContrainer(props) {
                 <Skeleton height={12} width="60%" />
               ) : (
                 <div className="name_time" style={{ width: '100%', textAlign: 'right' }}>
-                  {/* <span className="user_name color-violet">{topInfo.r_name}</span> */}
+                  {isReceiver && renderEditLockIcon(true)}
                   <Link href={`/u/${topInfo.receiver}`} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
                 </div>
               )}
@@ -700,6 +726,14 @@ function TopContrainer(props) {
         )}
       </WarrperChatBox>
       {isOpenCrop && <ImageCrop close={closeCrop} accept={acceptCrop} originFile={originFile} isViewSquare />}
+      {isEditLockModalOpened && (
+        <EditLockModal
+          close={() => setIsEditLockModalOpened(false)}
+          topInfo={topInfo}
+          isSender={isSender}
+          isReceiver={isReceiver}
+        />
+      )}
     </TopContainerBox>
   );
 }

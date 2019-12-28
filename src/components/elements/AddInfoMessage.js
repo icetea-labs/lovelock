@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Grid from '@material-ui/core/Grid';
-import DateFnsUtils from '@date-io/date-fns';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
@@ -11,6 +9,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import ZoomImage from './AutoZoomImage';
 import ImageCrop from './ImageCrop';
 import { applyRotation, imageResize } from '../../helper';
+import CustomDatePicker from "./CustomDatePicker";
 
 const Container = styled.div``;
 // const ImgList = styled.div`
@@ -71,47 +70,6 @@ const ActionItem = styled.div`
     padding: 0 20px;
   }
 `;
-const DateBox = styled.div`
-  height: 32px;
-  line-height: 32px;
-  width: 115px;
-  color: #8250c8;
-  /* background: #f5f6f7; */
-  border-radius: 18px;
-  padding: 0 15px 0 10px;
-  position: relative;
-  z-index: 0;
-  :hover {
-    background: #ebedf0;
-  }
-  @media (max-width: 599.95px) {
-    width: 100%;
-    font-size: 14px;
-  }
-  cursor: pointer;
-  input {
-    cursor: pointer;
-    z-index: 2;
-    padding-left: 35px;
-    font-size: 13px;
-    color: #8250c8;
-    @media (max-width: 599.95px) {
-      width: 100%;
-      font-size: 14px !important;
-    }
-  }
-  .icon-datetime {
-    display: flex;
-    align-items: center;
-  }
-  i {
-    position: absolute;
-    left: 5px;
-    top: 4px;
-    z-index: 1;
-  }
-`;
-
 const ImgUploadPreview = styled.div`
   height: 100%;
   overflow: hidden;
@@ -251,14 +209,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
 }));
-
-function MaterialUIPickers(props) {
-  return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <DatePicker {...props} />
-    </MuiPickersUtilsProvider>
-  );
-}
 
 export default function AddInfoMessage(props) {
   const { files, date, isCreatePro, onBlogClick, hasParentDialog, onDialogToggle } = props;
@@ -412,25 +362,11 @@ export default function AddInfoMessage(props) {
       <InfoBox grayLayout={grayLayout}>
         <Grid container spacing={3} alignItems="center" justify="flex-end" className={classes.btnRow}>
           <Grid item xs={12} sm="auto" className={classes.actionItem}>
-            <DateBox>
-              <div className="icon-datetime">
-                <i className="material-icons" style={{ paddingLeft: 12 }}>
-                  event
-                </i>
-                <MaterialUIPickers
-                  autoOk
-                  clearable={false}
-                  showTodayButton
-                  value={date}
-                  format="dd/MM/yyyy"
-                  disableFuture
-                  onChange={handleDateChange}
-                  onOpen={() => onDialogToggle && onDialogToggle(true)}
-                  onClose={() => onDialogToggle && onDialogToggle(false)}
-                  style={{ paddingTop: 2 }}
-                />
-              </div>
-            </DateBox>
+            <CustomDatePicker
+              date={date}
+              handleDateChange={handleDateChange}
+              onDialogToggle={onDialogToggle}
+            />
           </Grid>
           <Grid item xs={12} sm="auto" className={classes.actionItem}>
             <ActionItem>
