@@ -3,11 +3,12 @@ import './assets/sass/common.scss';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-import { GlobaLoading } from './components/elements';
+import GlobaLoading from './components/elements/GlobaLoading';
 
 // import { HomeLayout } from './components/layout/Layout';
 const HomeLayout = lazy(() => import(
     /* webpackChunkName: "home_layout" */
+    /* webpackPreload: true */
   './components/layout/Layout'
 ));
 
@@ -31,6 +32,7 @@ const Register = lazy(() => import(
 // import DetailContainer from './components/pages/Lock/DetailContainer';
 const DetailContainer = lazy(() => import(
   /* webpackChunkName: "detail_container" */
+  /* webpackPreload: true */
   './components/pages/Lock/DetailContainer'
 ));
 
@@ -55,6 +57,7 @@ const Explore = lazy(() => import(
 // import BLogView from './components/pages/Memory/BlogView';
 const BLogView = lazy(() => import(
   /* webpackChunkName: "blog_view" */
+  /* webpackPreload: true */
   './components/pages/Memory/BlogView'
 ));
 
@@ -80,7 +83,7 @@ function App(props) {
   return (
     <div className="App">
       <Router>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<GlobaLoading />}>
         <Switch>
           <RouteWithoutLayout exact path="/login" component={Login} />
           <RouteWithoutLayout exact path="/register" component={Register} />
