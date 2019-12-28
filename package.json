@@ -58,7 +58,8 @@
     "deploy:prod": "node script/deploy.js prod",
     "deploy:one": "node script/deploy.js one",
     "seed": "node script/seed.js",
-    "unlock": "node script/unlock.js"
+    "unlock": "node script/unlock.js",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
     "extends": "react-app",

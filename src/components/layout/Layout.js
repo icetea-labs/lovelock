@@ -57,4 +57,4 @@ const LandingLayout = ({ children }) => (
   </React.Fragment>
 );
 export { HomeLayout, Layout, LandingLayout };
-export default Layout;
+export default HomeLayout;
