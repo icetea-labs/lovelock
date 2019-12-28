@@ -15,11 +15,6 @@ import * as serviceWorker from './serviceWorker';
 // import { persistor, store } from './store';
 import { store } from './store';
 
-import(
-  /* webpackChunkName: "tweb3" */
-  './service/tweb3'
-).then(m => m.ensureContract())
-
 // const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
   palette: {

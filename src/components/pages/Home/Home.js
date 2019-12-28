@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect, useDispatch } from 'react-redux';
 import { useSnackbar } from 'notistack';
@@ -10,7 +10,7 @@ import LandingPage from '../../layout/LandingPage';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import { showSubscriptionError } from '../../../helper';
-import { getContract } from '../../../service/tweb3';
+import { ensureContract } from '../../../service/tweb3';
 
 const RightBoxMemories = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -119,36 +119,36 @@ function Home(props) {
   const { setLocks, setMemory, address, locks, history } = props;
   const { enqueueSnackbar } = useSnackbar();
 
-  const timeout = useRef()
-
   useEffect(() => {
-    let cancel = false;
+    const signal = {}
     if (address) {
-      fetchData(cancel)
+      fetchData(signal)
     }
     return () => {
-      cancel = true;
-      if (timeout.current) {
-        window.clearTimeout(timeout.current)
+      signal.cancel = true
+      if (signal.sub && signal.sub.unsubscribe) {
+        signal.sub.unsubscribe()
+        delete signal.sub
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function fetchData(cancel) {
+  async function fetchData(signal) {
     return APIService.getLocksForFeed(address).then(resp => {
       // set to redux
       setLocks(resp.locks);
-      if (cancel) return;
+      if (signal.cancel) return;
 
-      if (!resp.locks.length) {
-        // event subription require resolve alias -> addr, so we need to wait a bit
-        timeout.current = window.setTimeout(watchCreatePropose, 5000)
-      }
+      // Don't need to subscribe when no lock, because LeftContainer already do that
+      !resp.locks.length && ensureContract().then(c => {
+        signal.sub = watchCreatePropose(c, signal)
+      })
 
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return tmp.concat(lock.memoIndex);
       }, []);
+
       // console.log('memoIndex', memoIndex);
       memoIndex.length > 0 &&
         APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
@@ -167,9 +167,11 @@ function Home(props) {
     history.push('/explore');
   }
 
-  function watchCreatePropose(signal) {
+  function watchCreatePropose(contract, signal) {
     const filter = {};
-    return getContract().events.allEvents(filter, async (error, result) => {
+    return contract.events.allEvents(filter, async (error, result) => {
+      if (signal.cancel) return
+
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
@@ -181,7 +183,8 @@ function Home(props) {
           repsNew.length > 0 &&
           (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
         ) {
-          fetchData(signal);
+          // navigate to the created lock (this should unsub the watch via useEffect)
+          props.history.push(`/lock/${repsNew[0].eventData.log.id}`);
         }
       }
     });

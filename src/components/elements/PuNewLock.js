@@ -495,7 +495,7 @@ class PuNewLock extends React.Component {
     } = this.state;
 
     const inputProps = {
-      placeholder: '@partner',
+      placeholder: 'username',
       value,
       onChange: this.onPartnerChange,
       autoFocus: true,
@@ -515,8 +515,8 @@ class PuNewLock extends React.Component {
           {!checked && (
             <div>
               <TagTitle>
-                <span>Tag your partner</span>
-                <InfoText>(or tag yourself to create a journal)</InfoText>
+                <span>Lock with</span>
+                <InfoText>(Lock with yourself to create a journal)</InfoText>
               </TagTitle>
               <Autosuggest
                 id="suggestPartner"

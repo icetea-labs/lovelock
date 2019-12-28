@@ -8,7 +8,7 @@ import GlobaLoading from './components/elements/GlobaLoading';
 // import { HomeLayout } from './components/layout/Layout';
 const HomeLayout = lazy(() => import(
     /* webpackChunkName: "home_layout" */
-    /* webpackPreload: true */
+    /* webpackPrefetch: true */
   './components/layout/Layout'
 ));
 
@@ -32,7 +32,7 @@ const Register = lazy(() => import(
 // import DetailContainer from './components/pages/Lock/DetailContainer';
 const DetailContainer = lazy(() => import(
   /* webpackChunkName: "detail_container" */
-  /* webpackPreload: true */
+  /* webpackPrefetch: true */
   './components/pages/Lock/DetailContainer'
 ));
 
@@ -57,7 +57,7 @@ const Explore = lazy(() => import(
 // import BLogView from './components/pages/Memory/BlogView';
 const BLogView = lazy(() => import(
   /* webpackChunkName: "blog_view" */
-  /* webpackPreload: true */
+  /* webpackPrefetch: true */
   './components/pages/Memory/BlogView'
 ));
 
@@ -83,21 +83,22 @@ function App(props) {
   return (
     <div className="App">
       <Router>
-      <Suspense fallback={<GlobaLoading />}>
-        <Switch>
-          <RouteWithoutLayout exact path="/login" component={Login} />
-          <RouteWithoutLayout exact path="/register" component={Register} />
+        <Suspense fallback={<GlobaLoading />}>
+          <Switch>
+            <RouteWithoutLayout exact path="/login" component={Login} />
+            <RouteWithoutLayout exact path="/register" component={Register} />
+            <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
 
-          <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
-          <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
-          <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
-          <RouteWithLayout layout={HomeLayout} exact path="/blog/:index" component={BLogView} />
-          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
-          <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
-          <RouteWithLayout layout={HomeLayout} exact path="/u/:address" component={Mypage} />
-          <RouteWithLayout layout={HomeLayout} exact path="/:address" component={Mypage} />
-          <RouteWithoutLayout component={NotFound} />
-        </Switch>
+            <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
+            <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
+            <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
+            <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
+            <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
+            <RouteWithLayout layout={HomeLayout} exact path="/u/:address" component={Mypage} />
+            <RouteWithoutLayout exact path='/notfound' component={NotFound} />
+            <RouteWithLayout layout={HomeLayout} exact path="/:address" component={Mypage} />
+            <RouteWithoutLayout component={NotFound} />
+          </Switch>
         </Suspense>
       </Router>
       {isLoading && <GlobaLoading />}

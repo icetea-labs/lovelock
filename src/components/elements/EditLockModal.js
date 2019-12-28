@@ -130,7 +130,7 @@ export default function EditLockModal(props) {
   return (
     <CommonDialog
       title={topInfo.isJournal ? 'Edit Journal' : 'Edit Lock'}
-      okText="Edit"
+      okText="Save"
       close={props.close}
       confirm={editLock}
     >
@@ -144,6 +144,7 @@ export default function EditLockModal(props) {
             name="displayName"
             variant="outlined"
             value={displayName}
+            autoFocus
           />
         )}
   

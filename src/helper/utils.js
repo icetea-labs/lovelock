@@ -729,7 +729,7 @@ export function handleError(err, action) {
   console.error(err);
   let msg = `An error occurred while ${action}`;
   if (err.response && err.response.status === 401)
-    msg = 'You are not approved to create content. Please contact an administrator to unlock your account first.';
+    msg = 'You are not approved to create content. Please contact customer support to unlock your account first.';
   if (typeof err !== 'object') return msg;
   const fail = (err.deliver_tx && err.deliver_tx.code) || (err.check_tx && err.check_tx.code);
   if (fail) {
@@ -740,43 +740,44 @@ export function handleError(err, action) {
 
 export async function getUserSuggestions(value) {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
-  
+  // remove the first @ if it is there
+  escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1)
   if (escapedValue.length < 3) {
     return [];
   }
-  
-  let people = [];
-  escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-  const regex = new RegExp(`\\b${escapedValue}`, 'i');
-  
-  const peopleAva = [];
-  
-  try {
-    const result = await getAliasContract()
-    .methods.query(`account.${escapedValue}`)
-    .call();
-    people = Object.keys(result).map(key => {
-      const nick = key.substring(key.indexOf('.') + 1);
-      return { nick, address: result[key].address };
-    });
-  } catch (err) {
-    console.error(tryStringifyJson(err));
-  }
-  
-  people = people.filter(person => regex.test(`@${person.nick}`));
-  people = people.slice(0, 10);
-  for (let i = 0; i < people.length; i++) {
-    // eslint-disable-next-line no-await-in-loop
-    const resp = await getTagsInfo(people[i].address);
-    if (resp && resp.avatar) {
-      peopleAva.push(resp.avatar);
-    }
-  }
-  for (let i = 0; i < people.length; i++) {
-    Object.assign(people[i], { avatar: peopleAva[i] });
-  }
 
-  return people;
+  const regexText = `\^account\\..*${escapedValue}`
+  const regex = new RegExp(regexText);
+  
+  let people = await getAliasContract()
+    .methods.query(regex)
+    .call()
+    .then(result => {
+      return Object.keys(result).map(key => {
+        const nick = key.substring(key.indexOf('.') + 1);
+        return { nick, address: result[key].address };
+      });
+    })
+    .catch(err => {
+      console.warn(err)
+      return []
+    })
+
+  if (!people.length) return []
+  people = people.slice(0, 10);
+
+  return Promise.all(people.reduce((ps, p) => {
+    ps.push(getTagsInfo(p.address).then(tag => {
+      p.avatar = tag.avatar
+    }))
+    return ps
+  }, []))
+  .then(() => people)
+  .catch(err => {
+    console.warn(err)
+    return []
+  })
+
 }
 
 function escapeRegexCharacters(str) {

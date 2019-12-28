@@ -38,11 +38,13 @@ export const grantAccessToken = (mainAddress, tokenAddress, remember, sendType =
 
 // ensure contract address
 export const ensureContract = () => {
-    const contract = process.env.REACT_APP_CONTRACT
-    if (contract.indexOf('.') < 0) return
-    getAliasContract().methods.resolve(contract).call().then(c => {
+    const contract = CONTRACT
+    if (contract.indexOf('.') < 0) return Promise.resolve(getContract(contract))
+    return getAliasContract().methods.resolve(contract).call().then(c => {
         CONTRACT = c
-        contracts[contract] = contracts[c] = getWeb3().contract(c)
+        const contractObject = getWeb3().contract(c)
+        contracts[contract] = contracts[c] = contractObject
+        return contractObject
     })
 }
 

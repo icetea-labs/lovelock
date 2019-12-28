@@ -59,14 +59,19 @@ export default function DetailContainer(props) {
   useEffect(() => {
     let cancel = false;
     if (isNaN(proIndex) || invalidCollectionId) {
-      history.push('/notFound');
+      history.push('/notfound');
     } else {
       callView('getMaxLocksIndex').then(async maxIndex => {
         if (proIndex > maxIndex) {
-          history.push('/notFound');
+          history.push('/notfound');
+          return
         } else {
           APIService.getDetailLock(proIndex).then(lock => {
             if (cancel) return;
+            if (lock.status !== 1) {
+              history.push('/notfound')
+              return
+            }
             setProposeInfo(lock);
             dispatch(actions.setTopInfo(lock));
           });
@@ -163,8 +168,6 @@ export default function DetailContainer(props) {
     </>
   );
 
-  const renderNotFound = () => <>{history.push('/notFound')}</>;
-
   if (proposeInfo) {
     isOwner = address === proposeInfo.sender || address === proposeInfo.receiver;
     isContributor = proposeInfo.contributors.indexOf(address) !== -1;
@@ -175,7 +178,7 @@ export default function DetailContainer(props) {
 
   return (
     <>
-      {proposeInfo && <>{isOwner || isView ? renderDetailPropose() : renderNotFound()}</>}
+      {proposeInfo && proposeInfo.status === 1 && (isOwner || isView) && renderDetailPropose()}
       {/* {pageErr && renderNotFound()} */}
       {dialogVisible && (
         <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>

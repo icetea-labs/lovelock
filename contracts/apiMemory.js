@@ -42,6 +42,7 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
     [lock, locks] = self.getLock(lockIndex);
   }
 
+  expect(lock.status === 1, 'Cannot add memory to a pending lock.')
   expectLockContributors(lock, 'Only lock contributors can add memory.');
   const sender = msg.sender;
   const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
