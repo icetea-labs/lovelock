@@ -13,7 +13,7 @@
   <meta name="msapplication-TileColor" content="#8250c8">
   <meta name="theme-color" content="#8250c8">
   <script>
-    if (!('caches' in window) || !('AbortController' in window)) {
+    if (!('AbortController' in window)) {
       window.location.href = "/unsupported.html"
     }
   </script>
@@ -26,19 +26,6 @@
 
 <body>
   <div id="root"></div>
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145477800-2"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {dataLayer.push(arguments);}
-    gtag('js', new Date());
-    window.trackPageView = function (page_path) {
-      // console.log('window',page_path)
-      gtag('config', 'UA-145477800-2', {
-        'page_path': page_path
-      })
-    }
-  </script>
 </body>
 
 </html>

@@ -68,13 +68,13 @@ const Mypage = lazy(() => import(
 ));
 
 function RouteWithLayout({ layout, component, ...rest }) {
-  window.trackPageView(rest.location.pathname);
+  window.trackPageView && window.trackPageView(rest.location.pathname);
   return (
     <Route {...rest} render={props => React.createElement(layout, props, React.createElement(component, props))} />
   );
 }
 function RouteWithoutLayout({ component, ...rest }) {
-  window.trackPageView(rest.location.pathname);
+  window.trackPageView && window.trackPageView(rest.location.pathname);
   return <Route {...rest} render={props => React.createElement(component, props)} />;
 }
 
