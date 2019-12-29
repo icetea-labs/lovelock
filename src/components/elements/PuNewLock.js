@@ -495,7 +495,7 @@ class PuNewLock extends React.Component {
     } = this.state;
 
     const inputProps = {
-      placeholder: 'username',
+      placeholder: "type some letters to search",
       value,
       onChange: this.onPartnerChange,
       autoFocus: true,
