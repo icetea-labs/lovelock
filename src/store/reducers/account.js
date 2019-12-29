@@ -1,6 +1,5 @@
-import { codec } from '@iceteachain/common';
+import { decode as codecDecode, toString as codecToString } from '@iceteachain/common/src/codec';
 import { actionTypes } from '../actions/account';
-import getWeb3 from '../../service/tweb3';
 
 const initialState = {
   needAuth: false,
@@ -21,11 +20,18 @@ const initialState = {
     const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
 
     if (sessionData) {
-      const token = codec.decode(Buffer.from(sessionData, 'base64'));
-      const isExpired = process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
-      if (!isExpired) {
-        resp.tokenKey = codec.toString(token.tokenKey);
-        getWeb3().wallet.importAccount(resp.tokenKey);
+      const token = codecDecode(Buffer.from(sessionData, 'base64'));
+      const expiredSoon = process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
+      if (!expiredSoon) {
+        resp.tokenKey = codecToString(token.tokenKey);
+        import(
+          /* webpackChunkName: "tweb3" */
+          /* webpackPreload: true */
+          '../../service/tweb3'
+        ).then(({ getWeb3 }) => {
+          getWeb3().wallet.importAccount(token.tokenKey);
+        })
+
         resp.tokenAddress = token.tokenAddress;
       }
       resp.expireAfter = token.expireAfter;
