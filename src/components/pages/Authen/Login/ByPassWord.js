@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { codec } from '@iceteachain/common';
+import { encode as codecEncode } from '@iceteachain/common/src/codec';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { makeStyles } from '@material-ui/core/styles';
 import { useSnackbar } from 'notistack';
@@ -109,8 +109,7 @@ function ByPassWord(props) {
             const keyObject = encode(privateKey, password);
             const storage = isRemember ? localStorage : sessionStorage;
             // save token account
-            storage.sessionData = codec
-              .encode({
+            storage.sessionData = codecEncode({
                 contract: process.env.REACT_APP_CONTRACT,
                 tokenAddress: token.address,
                 tokenKey: token.privateKey,

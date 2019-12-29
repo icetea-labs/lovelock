@@ -166,9 +166,6 @@ export default function MemoryComments(props) {
     if (!comment) return;
 
     tx.sendCommit('addComment', memoryIndex, comment, '')
-      .then(e => {
-        console.log('go', e);
-      })
       .catch(err => {
         const message = handleError(err, 'sending comment');
         enqueueSnackbar(message, { variant: 'error' });

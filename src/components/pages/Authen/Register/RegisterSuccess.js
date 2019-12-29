@@ -7,7 +7,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import { codec } from '@iceteachain/common';
+import { encode as codecEncode } from '@iceteachain/common/src/codec';
 
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
@@ -112,8 +112,7 @@ function RegisterSuccess(props) {
           const keyObject = encode(mnemonic, password);
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
-          storage.sessionData = codec
-            .encode({
+          storage.sessionData = codecEncode({
               contract: process.env.REACT_APP_CONTRACT,
               tokenAddress: token.address,
               tokenKey: token.privateKey,

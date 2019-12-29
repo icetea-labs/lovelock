@@ -1,15 +1,39 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
 import { ipfs, createIpfsClient } from '../service/ipfs';
-import { ecc, codec, AccountType } from '@iceteachain/common';
+import { toPublicKey, stableHashObject, sign, toPubKeyAndAddress, toPubKeyAndAddressBuffer } from '@iceteachain/common/src/ecc';
+import { 
+  decode as codecDecode,
+  toString as codecToString,
+  toDataString as codecToDataString,
+  toKeyBuffer as codecToKeyBuffer,
+  toKeyString as codecToKeyString,
+  isAddressType as codecIsAddressType,
+ } from '@iceteachain/common/src/codec';
+import { AccountType } from '@iceteachain/common/src/enum';
+
+
 import moment from 'moment';
-import * as bip39 from 'bip39';
+import {
+  generateMnemonic,
+  validateMnemonic,
+  mnemonicToSeedSync,
+} from 'bip39';
 import HDKey from 'hdkey';
-import eccrypto from 'eccrypto';
+// import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
 import { getWeb3, getContract, getAliasContract } from '../service/tweb3';
 import { decodeTx, decode } from './decode';
 import { getTagsInfo } from "./account";
+
+// because we do not support private locks/memoris yet
+// let's use a fake eccrypto
+// we will review things later when we enable private locks/memories
+const eccrypto = {
+  derive: function() {
+    return 0
+  }
+}
 
 const paths = 'm’/44’/349’/0’/0';
 
@@ -265,18 +289,18 @@ export async function saveToIpfs(files) {
   const fileHashes = await Promise.all(preHash);
   // const signs = {};
   const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
-  const token = codec.decode(Buffer.from(sessionData, 'base64'));
-  const tokenKey = codec.toString(token.tokenKey);
-  const pubkey = ecc.toPublicKey(tokenKey);
+  const token = codecDecode(Buffer.from(sessionData, 'base64'));
+  const tokenKey = codecToString(token.tokenKey);
+  const pubkey = toPublicKey(tokenKey);
   let user = localStorage.getItem('user') || sessionStorage.getItem('user');
   user = JSON.parse(user);
   const from = user.address;
   const app = process.env.REACT_APP_CONTRACT
 
   const time = Date.now();
-  const hash32bytes = ecc.stableHashObject({ app, fileHashes, from, time });
-  const signature = ecc.sign(hash32bytes, tokenKey).signature;
-  const authData = JSON.stringify({ app, from, pubkey, sign: codec.toDataString(signature), time });
+  const hash32bytes = stableHashObject({ app, fileHashes, from, time });
+  const signature = sign(hash32bytes, tokenKey).signature;
+  const authData = JSON.stringify({ app, from, pubkey, sign: codecToDataString(signature), time });
 
   const newIpfs = createIpfsClient(authData)
 
@@ -579,8 +603,8 @@ export async function generateSharedKey(privateKeyA, publicKeyB) {
   if (cachesharekey[objkey]) {
     key = cachesharekey[objkey];
   } else {
-    const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
-    key = codec.toString(sharekey);
+    const sharekey = await eccrypto.derive(codecToKeyBuffer(privateKeyA), codecToKeyBuffer(publicKeyB));
+    key = codecToString(sharekey);
     cachesharekey = { [objkey]: key };
   }
   return key;
@@ -604,10 +628,10 @@ export async function decodeWithPublicKey(data, privateKeyA, publicKeyB, encode 
 export const wallet = {
   createAccountWithMneomnic(nemon, index = 0) {
     let mnemonic = nemon;
-    if (!mnemonic) mnemonic = bip39.generateMnemonic();
+    if (!mnemonic) mnemonic = generateMnemonic();
 
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
-    const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
+    const { address, publicKey } = toPubKeyAndAddress(privateKey);
 
     return { mnemonic, privateKey, publicKey, address };
   },
@@ -616,16 +640,16 @@ export const wallet = {
     let pkey;
     let found;
     let resp;
-    if (!mnemonic) mnemonic = bip39.generateMnemonic();
+    if (!mnemonic) mnemonic = generateMnemonic();
     const hdkey = this.getHdKeyFromMnemonic(mnemonic);
     for (let i = 0; !found; i++) {
       if (i > 100) {
         // there must be something wrong, because the ratio of regular account is 50%
         throw new Error('Too many tries deriving regular account from seed.');
       }
-      pkey = codec.toKeyString(hdkey.deriveChild(i).privateKey);
-      const { address, publicKey } = ecc.toPubKeyAndAddress(pkey);
-      found = codec.isAddressType(address, type);
+      pkey = codecToKeyString(hdkey.deriveChild(i).privateKey);
+      const { address, publicKey } = toPubKeyAndAddress(pkey);
+      found = codecIsAddressType(address, type);
       resp = { mnemonic, privateKey: pkey, publicKey, address };
     }
     return resp;
@@ -633,13 +657,13 @@ export const wallet = {
   getPrivateKeyFromMnemonic(mnemonic, index = 0) {
     const hdkey = this.getHdKeyFromMnemonic(mnemonic);
     const { privateKey } = hdkey.deriveChild(index);
-    return codec.toKeyString(privateKey);
+    return codecToKeyString(privateKey);
   },
   getHdKeyFromMnemonic(mnemonic) {
     if (!this.isMnemonic(mnemonic)) {
       throw new Error('wrong mnemonic format');
     }
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    const seed = mnemonicToSeedSync(mnemonic);
     const hdkey = HDKey.fromMasterSeed(seed).derive(paths);
     return hdkey;
   },
@@ -652,15 +676,15 @@ export const wallet = {
   },
   getPrivateKeyFromKeyStore(keyStore, password) {
     const account = decode(password, keyStore);
-    const privateKey = codec.toString(account.privateKey);
+    const privateKey = codecToString(account.privateKey);
     return privateKey;
   },
   getAddressFromPrivateKey(privateKey) {
-    const { address } = ecc.toPubKeyAndAddressBuffer(privateKey);
+    const { address } = toPubKeyAndAddressBuffer(privateKey);
     return address;
   },
   isMnemonic(mnemonic) {
-    return !!bip39.validateMnemonic(mnemonic);
+    return !!validateMnemonic(mnemonic);
   },
 };
 
