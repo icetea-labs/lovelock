@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 import { Helmet } from 'react-helmet';
 import * as serviceWorker from './serviceWorker';
-// import { GlobaLoading } from './components/elements';
+import { SimpleLoading } from './components/elements/GlobaLoading';
 // import { persistor, store } from './store';
 import { store } from './store';
 
@@ -155,7 +155,7 @@ ReactDOM.render(
           horizontal: 'right',
         }}
       >
-        <Suspense fallback={<div>loading...</div>}>
+        <Suspense fallback={<SimpleLoading />}>
           <App />
         </Suspense>
       </SnackbarProvider>

@@ -4,7 +4,7 @@ import lazy from "react-lazy-with-preload";
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-import GlobaLoading from './components/elements/GlobaLoading';
+import { SimpleLoading, GlobaLoading } from './components/elements/GlobaLoading';
 
 // import LandingPage from './components/layout/LandingPage';
 const LandingPage = lazy(() => import(
@@ -102,7 +102,7 @@ function App(props) {
   return (
     <div className="App">
       <Router>
-        <Suspense fallback={<GlobaLoading />}>
+        <Suspense fallback={<SimpleLoading />}>
           <Switch>
             <RouteWithoutLayout exact path="/login" component={Login} />
             <RouteWithoutLayout exact path="/register" component={Register} />
