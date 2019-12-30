@@ -1,5 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import './assets/sass/common.scss';
+import lazy from "react-lazy-with-preload";
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
@@ -84,8 +85,11 @@ function RouteWithoutLayout({ component, ...rest }) {
 
 function RouteHome(props) {
   window.trackPageView && window.trackPageView(props.location.pathname);
-  if (!props.address) {
-    return <Route {...props} render={props => React.createElement(LandingPage, props)} />;
+  if (!props.hasAddress) {
+    const r = <Route {...props} render={props => React.createElement(LandingPage, props)} />;
+    Register.preload()
+    Login.preload()
+    return r
   }
 
   return (
@@ -104,7 +108,7 @@ function App(props) {
             <RouteWithoutLayout exact path="/register" component={Register} />
             <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
 
-            <RouteHome exact path="/" />
+            <RouteHome hasAddress={!!props.address} exact path="/" />
             <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
             <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
             <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
