@@ -19,7 +19,6 @@ window.prerenderReady = false;
 
 // import PasswordPrompt from '../../layout/PasswordPrompt';
 const PasswordPrompt = lazy(() => import(
-  /* webpackPrefetch: true */
   /* webpackChunkName: "home" */
   '../../layout/PasswordPrompt'
 ));

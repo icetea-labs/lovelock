@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Montserrat:500,600&display=swap&subset=vietnamese');
-
 $base-size: 16;
 @function rem($target, $context: $base-size) {
   @return ($target / $context) * 1rem;

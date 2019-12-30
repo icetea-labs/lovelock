@@ -5,10 +5,15 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import GlobaLoading from './components/elements/GlobaLoading';
 
+// import LandingPage from './components/layout/LandingPage';
+const LandingPage = lazy(() => import(
+  /* webpackChunkName: "landing" */
+'./components/layout/LandingPage'
+));
+
 // import { HomeLayout } from './components/layout/Layout';
 const HomeLayout = lazy(() => import(
     /* webpackChunkName: "home_layout" */
-    /* webpackPrefetch: true */
   './components/layout/Layout'
 ));
 
@@ -32,7 +37,6 @@ const Register = lazy(() => import(
 // import DetailContainer from './components/pages/Lock/DetailContainer';
 const DetailContainer = lazy(() => import(
   /* webpackChunkName: "detail_container" */
-  /* webpackPrefetch: true */
   './components/pages/Lock/DetailContainer'
 ));
 
@@ -57,7 +61,6 @@ const Explore = lazy(() => import(
 // import BLogView from './components/pages/Memory/BlogView';
 const BLogView = lazy(() => import(
   /* webpackChunkName: "blog_view" */
-  /* webpackPrefetch: true */
   './components/pages/Memory/BlogView'
 ));
 
@@ -73,9 +76,21 @@ function RouteWithLayout({ layout, component, ...rest }) {
     <Route {...rest} render={props => React.createElement(layout, props, React.createElement(component, props))} />
   );
 }
+
 function RouteWithoutLayout({ component, ...rest }) {
   window.trackPageView && window.trackPageView(rest.location.pathname);
   return <Route {...rest} render={props => React.createElement(component, props)} />;
+}
+
+function RouteHome(props) {
+  window.trackPageView && window.trackPageView(props.location.pathname);
+  if (!props.address) {
+    return <Route {...props} render={props => React.createElement(LandingPage, props)} />;
+  }
+
+  return (
+    <Route {...props} render={props => React.createElement(HomeLayout, props, React.createElement(Home, props))} />
+  );
 }
 
 function App(props) {
@@ -89,7 +104,7 @@ function App(props) {
             <RouteWithoutLayout exact path="/register" component={Register} />
             <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
 
-            <RouteWithLayout layout={HomeLayout} exact path="/" component={Home} />
+            <RouteHome exact path="/" />
             <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
             <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
             <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />

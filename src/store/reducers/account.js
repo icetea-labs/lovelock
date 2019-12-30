@@ -26,7 +26,6 @@ const initialState = {
         resp.tokenKey = codecToString(token.tokenKey);
         import(
           /* webpackChunkName: "tweb3" */
-          /* webpackPreload: true */
           '../../service/tweb3'
         ).then(({ getWeb3 }) => {
           getWeb3().wallet.importAccount(token.tokenKey);
