@@ -367,7 +367,7 @@ function MemoryContent(props) {
     // console.log('window.location', window.location);
     const pathname = `/blog/${memoryId}`;
     window.history.pushState(null, '', pathname);
-    window.trackPageView(window.location.pathname);
+    window.trackPageView && window.trackPageView(window.location.pathname);
   }
 
   function closeMemory() {
@@ -607,7 +607,7 @@ function MemoryContent(props) {
 
   return (
     <>
-      <Card key={memoryDecrypted.index} className={classes.card}>
+      <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
         <CardHeader
           avatar={<AvatarPro alt="img" hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem(memoryDecrypted)}

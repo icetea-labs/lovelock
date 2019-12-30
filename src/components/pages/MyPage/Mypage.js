@@ -73,7 +73,6 @@ function Mypage(props) {
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
   const address = useSelector(state => state.account.address);
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
   const [loading, setLoading] = useState(true);
   const [myPageInfo, setMyPageInfo] = useState({
     avatar: '',
@@ -83,8 +82,7 @@ function Mypage(props) {
     isMyFollow: false,
   });
 
-  let paramAliasOrAddr = match.params.address;
-  if (!paramAliasOrAddr) paramAliasOrAddr = address;
+  const paramAliasOrAddr = match.params.address || address;
   // setLoading(false);
 
   useEffect(() => {
@@ -153,7 +151,7 @@ function Mypage(props) {
       isMyFollow = !isMyFollow;
       setMyPageInfo({ ...myPageInfo, numFollow, isMyFollow });
 
-      tx.sendCommit('followPerson', paramAliasOrAddr, { tokenAddress, address }).then(() => {
+      tx.sendCommit('followPerson', paramAliasOrAddr).then(() => {
         getNumTopFollow(numFollow, isMyFollow);
       });
     } catch (error) {

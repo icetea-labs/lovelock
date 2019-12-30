@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { getContract } from '../../../service/tweb3';
+import { ensureContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
 import { callView, showSubscriptionError } from '../../../helper';
 import Icon from '../../elements/Icon';
@@ -126,21 +126,25 @@ function LeftContainer(props) {
 
   useEffect(() => {
     const signal = {};
-
-    // event subription require resolve alias -> addr, so we need to wait a bit
-    const timeout = window.setTimeout(() => {
-      watchCreatePropose(signal);
-    }, 5000)
+    let sub
+    ensureContract().then(c => {
+      sub = watchCreatePropose(c, signal)
+    })
 
     return () => {
       signal.cancel = true
-      window.clearTimeout(timeout)
+      if (sub && sub.unsubscribe) {
+        sub.unsubscribe()
+        sub = undefined
+      }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function watchCreatePropose(signal) {
+  function watchCreatePropose(contract, signal) {
     const filter = {};
-    return getContract().events.allEvents(filter, async (error, result) => {
+    return contract.events.allEvents(filter, async (error, result) => {
+      if (signal && signal.cancel) return
+
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
@@ -242,13 +246,14 @@ function LeftContainer(props) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLocks;
     });
+    const hasPending = Boolean(newLocks.find(l => l.status === 0))
     return (
       <>
         <div className="title">{!isGuest ? 'My lock' : 'Public lock'} </div>
         <div>
           <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
-        {!isGuest && (
+        {!isGuest && hasPending && (
           <>
             <div className="title">Pending lock</div>
             <div>

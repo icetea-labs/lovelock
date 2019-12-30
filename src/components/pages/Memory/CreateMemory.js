@@ -304,36 +304,47 @@ export default function CreateMemory(props) {
     const combined = combineContent();
     const { blocks } = combined;
     if (validateEditorContent()) {
-      const images = blocks.reduce((collector, b, i) => {
-        if (
-          b.type === 'image' &&
-          b.data.url &&
-          (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
-        ) {
-          collector[i] = fetch(b.data.url)
-            .then(r => r.arrayBuffer())
-            .then(Buffer.from);
-        }
-        return collector;
-      }, {});
+      const uploadThenSendTx = async opts => {
+        const images = blocks.reduce((collector, b, i) => {
+          if (
+            b.type === 'image' &&
+            b.data.url &&
+            (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
+          ) {
+            collector[i] = fetch(b.data.url)
+              .then(r => r.arrayBuffer())
+              .then(Buffer.from);
+          }
+          return collector;
+        }, {});
 
-      if (Object.keys(images).length) {
-        const bufs = await Promise.all(Object.values(images));
-        const hashes = await saveToIpfs(bufs);
-        Object.keys(images).forEach((blockIndex, index) => {
-          blocks[blockIndex].data.url = /* process.env.REACT_APP_IPFS + */ hashes[index];
+        if (Object.keys(images).length) {
+          const bufs = await Promise.all(Object.values(images));
+          const hashes = await saveToIpfs(bufs);
+          Object.keys(images).forEach((blockIndex, index) => {
+            blocks[blockIndex].data.url = /* process.env.REACT_APP_IPFS + */ hashes[index];
+          });
+        }
+
+        const buffer = Buffer.from(JSON.stringify(combined));
+        const submitContent = await saveFileToIpfs([buffer]);
+
+        const meta = extractBlogInfo(combined);
+        const blogData = JSON.stringify({
+          meta,
+          blogHash: submitContent,
         });
+
+        return handleShareMemory(blogData, opts);
       }
 
-      const buffer = Buffer.from(JSON.stringify(combined));
-      const submitContent = await saveFileToIpfs([buffer]);
-
-      const meta = extractBlogInfo(combined);
-      const blogData = JSON.stringify({
-        meta,
-        blogHash: submitContent,
-      });
-      await handleShareMemory(blogData);
+      await ensureToken(
+        {
+          tokenKey: privacy ? privateKey : tokenKey,
+          dispatch,
+        },
+        uploadThenSendTx
+      )
 
       // Clean up
       blogBody = null;
@@ -438,19 +449,24 @@ export default function CreateMemory(props) {
     }
   }
 
-  async function handleShareMemory(blogData) {
+  async function handleShareMemory(blogData, blogTokenOpts) {
+
+    // NOTE: blogData is undefined for regular post, and object for blog post
+
     if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }
 
-    for (let i = 0; i < filesBuffer.length; i++) {
-      const max10M = 1048576 * 10;
-      if (filesBuffer[i].byteLength > max10M) {
-        const message = `File in ${i + 1} position is over 10MB. Please choose file under 10MB.`;
-        enqueueSnackbar(message, { variant: 'error' });
-        return;
+    if (!blogData) {
+      for (let i = 0; i < filesBuffer.length; i++) {
+        const max10M = 1048576 * 10;
+        if (filesBuffer[i].byteLength > max10M) {
+          const message = `Image at ${i + 1} position is over 10MB. Please choose smaller image.`;
+          enqueueSnackbar(message, { variant: 'error' });
+          return;
+        }
       }
     }
 
@@ -477,18 +493,19 @@ export default function CreateMemory(props) {
         if (blogData) info.blog = true;
         params = [proIndex, !!privacy, content, info];
       }
-      return await sendTxUtil('addMemory', params, opts || { address, tokenAddress });
+      return sendTxUtil('addMemory', params, opts || { address, tokenAddress });
     };
 
     try {
-      const result = await ensureToken(
+      // if it is a blog post, ensureToken at submitEditor already
+      const submitPromise = blogData ? uploadThenSendTx(blogTokenOpts) : ensureToken(
         {
           tokenKey: privacy ? privateKey : tokenKey,
           dispatch,
         },
         uploadThenSendTx
-      );
-
+      )
+      const result = await submitPromise
       onMemoryAdded(result.returnValue, params);
       resetValue();
     } catch (err) {

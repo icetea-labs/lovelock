@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import { ecc } from '@iceteachain/common';
+import { toPubKeyAndAddress } from '@iceteachain/common/src/ecc'
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
@@ -267,7 +267,7 @@ function ChangeProfile(props) {
 
           if (!isRegistered) {
             if (privateKey) {
-              const { publicKey } = ecc.toPubKeyAndAddress(privateKey);
+              const { publicKey } = toPubKeyAndAddress(privateKey);
               tags['pub-key'] = publicKey;
               listSetTags.push(registerAlias(username, address));
             } else {

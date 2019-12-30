@@ -1,14 +1,39 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
 import { ipfs, createIpfsClient } from '../service/ipfs';
-import { ecc, codec, AccountType } from '@iceteachain/common';
+import { toPublicKey, stableHashObject, sign, toPubKeyAndAddress, toPubKeyAndAddressBuffer } from '@iceteachain/common/src/ecc';
+import { 
+  decode as codecDecode,
+  toString as codecToString,
+  toDataString as codecToDataString,
+  toKeyBuffer as codecToKeyBuffer,
+  toKeyString as codecToKeyString,
+  isAddressType as codecIsAddressType,
+ } from '@iceteachain/common/src/codec';
+import { AccountType } from '@iceteachain/common/src/enum';
+
+
 import moment from 'moment';
-import * as bip39 from 'bip39';
+import {
+  generateMnemonic,
+  validateMnemonic,
+  mnemonicToSeedSync,
+} from 'bip39';
 import HDKey from 'hdkey';
-import eccrypto from 'eccrypto';
+// import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
-import { getWeb3, getContract } from '../service/tweb3';
+import { getWeb3, getContract, getAliasContract } from '../service/tweb3';
 import { decodeTx, decode } from './decode';
+import { getTagsInfo } from "./account";
+
+// because we do not support private locks/memoris yet
+// let's use a fake eccrypto
+// we will review things later when we enable private locks/memories
+const eccrypto = {
+  derive: function() {
+    return 0
+  }
+}
 
 const paths = 'm’/44’/349’/0’/0';
 
@@ -264,22 +289,20 @@ export async function saveToIpfs(files) {
   const fileHashes = await Promise.all(preHash);
   // const signs = {};
   const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
-  const token = codec.decode(Buffer.from(sessionData, 'base64'));
-  const tokenKey = codec.toString(token.tokenKey);
-  const pubkeySigner = ecc.toPublicKey(tokenKey);
+  const token = codecDecode(Buffer.from(sessionData, 'base64'));
+  const tokenKey = codecToString(token.tokenKey);
+  const pubkey = toPublicKey(tokenKey);
   let user = localStorage.getItem('user') || sessionStorage.getItem('user');
   user = JSON.parse(user);
   const from = user.address;
+  const app = process.env.REACT_APP_CONTRACT
 
   const time = Date.now();
-  const hash32bytes = ecc.stableHashObject({ from, time, fileHashes });
-  const sign = ecc.sign(hash32bytes, tokenKey).signature;
-  const signs = { sign: codec.toDataString(sign), time, pubkeySigner, from };
+  const hash32bytes = stableHashObject({ app, fileHashes, from, time });
+  const signature = sign(hash32bytes, tokenKey).signature;
+  const authData = JSON.stringify({ app, from, pubkey, sign: codecToDataString(signature), time });
 
-  // console.log('signs', signs);
-  const signature = JSON.stringify(signs);
-
-  const newIpfs = createIpfsClient(signature)
+  const newIpfs = createIpfsClient(authData)
 
   return newIpfs.add([...contentBuffer]).then(results => {
     return results.map(el => {
@@ -512,7 +535,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`3 days left to ${diffDate + 3} day anniversary.`}</span>
+          <span>{`3 days left to ${diffDate + 3} days anniversary.`}</span>
         </div>
       </div>
     );
@@ -521,7 +544,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`2 days left to ${diffDate + 2} day anniversary.`}</span>
+          <span>{`2 days left to ${diffDate + 2} days anniversary.`}</span>
         </div>
       </div>
     );
@@ -530,7 +553,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`1 days left to ${diffDate + 1} day anniversary.`}</span>
+          <span>{`1 day left to ${diffDate + 1} days anniversary.`}</span>
         </div>
       </div>
     );
@@ -551,7 +574,7 @@ export function diffTime(time) {
     relativeTime: {
       future: 'in %s',
       past: '%s ago',
-      s: '%d secs',
+      s: '%d sec',
       ss: '%d secs',
       m: 'a minute',
       mm: '%d minutes',
@@ -580,8 +603,8 @@ export async function generateSharedKey(privateKeyA, publicKeyB) {
   if (cachesharekey[objkey]) {
     key = cachesharekey[objkey];
   } else {
-    const sharekey = await eccrypto.derive(codec.toKeyBuffer(privateKeyA), codec.toKeyBuffer(publicKeyB));
-    key = codec.toString(sharekey);
+    const sharekey = await eccrypto.derive(codecToKeyBuffer(privateKeyA), codecToKeyBuffer(publicKeyB));
+    key = codecToString(sharekey);
     cachesharekey = { [objkey]: key };
   }
   return key;
@@ -605,10 +628,10 @@ export async function decodeWithPublicKey(data, privateKeyA, publicKeyB, encode 
 export const wallet = {
   createAccountWithMneomnic(nemon, index = 0) {
     let mnemonic = nemon;
-    if (!mnemonic) mnemonic = bip39.generateMnemonic();
+    if (!mnemonic) mnemonic = generateMnemonic();
 
     const privateKey = this.getPrivateKeyFromMnemonic(mnemonic, index);
-    const { address, publicKey } = ecc.toPubKeyAndAddress(privateKey);
+    const { address, publicKey } = toPubKeyAndAddress(privateKey);
 
     return { mnemonic, privateKey, publicKey, address };
   },
@@ -617,16 +640,16 @@ export const wallet = {
     let pkey;
     let found;
     let resp;
-    if (!mnemonic) mnemonic = bip39.generateMnemonic();
+    if (!mnemonic) mnemonic = generateMnemonic();
     const hdkey = this.getHdKeyFromMnemonic(mnemonic);
     for (let i = 0; !found; i++) {
       if (i > 100) {
         // there must be something wrong, because the ratio of regular account is 50%
         throw new Error('Too many tries deriving regular account from seed.');
       }
-      pkey = codec.toKeyString(hdkey.deriveChild(i).privateKey);
-      const { address, publicKey } = ecc.toPubKeyAndAddress(pkey);
-      found = codec.isAddressType(address, type);
+      pkey = codecToKeyString(hdkey.deriveChild(i).privateKey);
+      const { address, publicKey } = toPubKeyAndAddress(pkey);
+      found = codecIsAddressType(address, type);
       resp = { mnemonic, privateKey: pkey, publicKey, address };
     }
     return resp;
@@ -634,13 +657,13 @@ export const wallet = {
   getPrivateKeyFromMnemonic(mnemonic, index = 0) {
     const hdkey = this.getHdKeyFromMnemonic(mnemonic);
     const { privateKey } = hdkey.deriveChild(index);
-    return codec.toKeyString(privateKey);
+    return codecToKeyString(privateKey);
   },
   getHdKeyFromMnemonic(mnemonic) {
     if (!this.isMnemonic(mnemonic)) {
       throw new Error('wrong mnemonic format');
     }
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    const seed = mnemonicToSeedSync(mnemonic);
     const hdkey = HDKey.fromMasterSeed(seed).derive(paths);
     return hdkey;
   },
@@ -653,15 +676,15 @@ export const wallet = {
   },
   getPrivateKeyFromKeyStore(keyStore, password) {
     const account = decode(password, keyStore);
-    const privateKey = codec.toString(account.privateKey);
+    const privateKey = codecToString(account.privateKey);
     return privateKey;
   },
   getAddressFromPrivateKey(privateKey) {
-    const { address } = ecc.toPubKeyAndAddressBuffer(privateKey);
+    const { address } = toPubKeyAndAddressBuffer(privateKey);
     return address;
   },
   isMnemonic(mnemonic) {
-    return !!bip39.validateMnemonic(mnemonic);
+    return !!validateMnemonic(mnemonic);
   },
 };
 
@@ -730,11 +753,57 @@ export function handleError(err, action) {
   console.error(err);
   let msg = `An error occurred while ${action}`;
   if (err.response && err.response.status === 401)
-    msg = 'You are not approved to create content. Please contact an administrator to unlock your account first.';
+    msg = 'You are not approved to create content. Please contact customer support to unlock your account first.';
   if (typeof err !== 'object') return msg;
   const fail = (err.deliver_tx && err.deliver_tx.code) || (err.check_tx && err.check_tx.code);
   if (fail) {
     msg = err.deliver_tx.log || err.check_tx.log;
   }
   return msg;
+}
+
+export async function getUserSuggestions(value) {
+  let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
+  // remove the first @ if it is there
+  escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1)
+  if (escapedValue.length < 3) {
+    return [];
+  }
+
+  const regexText = `\^account\\..*${escapedValue}`
+  const regex = new RegExp(regexText);
+  
+  let people = await getAliasContract()
+    .methods.query(regex)
+    .call()
+    .then(result => {
+      return Object.keys(result).map(key => {
+        const nick = key.substring(key.indexOf('.') + 1);
+        return { nick, address: result[key].address };
+      });
+    })
+    .catch(err => {
+      console.warn(err)
+      return []
+    })
+
+  if (!people.length) return []
+  people = people.slice(0, 10);
+
+  return Promise.all(people.reduce((ps, p) => {
+    ps.push(getTagsInfo(p.address).then(tag => {
+      p.avatar = tag.avatar
+    }))
+    return ps
+  }, []))
+  .then(() => people)
+  .catch(err => {
+    console.warn(err)
+    return []
+  })
+
+}
+
+function escapeRegexCharacters(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

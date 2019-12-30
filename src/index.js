@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -9,14 +9,17 @@ import IconButton from '@material-ui/core/IconButton';
 // import { PersistGate } from 'redux-persist/lib/integration/react';
 
 import { Helmet } from 'react-helmet';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
-// import { GlobaLoading } from './components/elements';
+import { SimpleLoading } from './components/elements/GlobaLoading';
 // import { persistor, store } from './store';
 import { store } from './store';
 
-import { ensureContract } from './service/tweb3'
-ensureContract()
+// import App from './App';
+const App = lazy(() => import(
+  /* webpackChunkName: "app" */
+  /* webpackPreload: true */
+'./App'
+));
 
 // const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
@@ -152,7 +155,9 @@ ReactDOM.render(
           horizontal: 'right',
         }}
       >
-        <App />
+        <Suspense fallback={<SimpleLoading />}>
+          <App />
+        </Suspense>
       </SnackbarProvider>
       {/* </PersistGate> */}
     </Provider>

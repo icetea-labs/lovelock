@@ -45,6 +45,10 @@ const APIService = {
     const memorydata = await callView('getMemoriesByLockIndex', [lockIndex, validCollectionId]);
     return addInfoToMems(memorydata, true);
   },
+  getChoiceMemories: async () => {
+    const memorydata = await callView('getChoiceMemories');
+    return addInfoToMems(memorydata);
+  },
 };
 
 export default APIService;

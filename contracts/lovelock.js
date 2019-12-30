@@ -1,8 +1,9 @@
 const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
-const { expectLockOwners, getDataByIndex, expectOwner, expectAdmin, expectUserApproved } = require('./helper.js');
+const { expectLockOwners, expectLockContributors, getDataByIndex, expectOwner, expectAdmin, expectUserApproved } = require('./helper.js');
 const {
   apiCreateLock,
+  apiEditLock,
   apiChangeLockName,
   apiAcceptLock,
   apiCancelLock,
@@ -21,6 +22,7 @@ const {
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
+  apiEditMemory,
   apiLikeMemory,
   apiCommentMemory,
   apiGetMemoriesByLock,
@@ -85,6 +87,11 @@ class LoveLock {
     const self = this;
     expectUserApproved(self);
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);
+  }
+  @transaction editLock(lockIndex: number, data, contributors) {
+    const self = this;
+    expectUserApproved(self)
+    return apiEditLock(self, lockIndex, data, contributors)
   }
   @transaction changeLockName(index: number, lockName: string) {
     const self = this;
@@ -156,6 +163,12 @@ class LoveLock {
     expectUserApproved(self);
     return apiCreateMemory(self, lockIndex, isPrivate, content, info);
   }
+  @transaction editMemory(memIndex: number, content: string, info) {
+    const self = this;
+    expectUserApproved(self);
+    return apiEditMemory(self, memIndex, content, info);
+  }
+
   // create like for memory: type -> 0:unlike, 1:like, 2:love
   @transaction addLike(memoIndex: number, type: number) {
     const self = this;
@@ -209,7 +222,7 @@ class LoveLock {
 
   @transaction addLockCollection(lockIndex: number, collectionData): number {
     const [lock, locks] = this.getLock(lockIndex);
-    expectLockOwners(lock);
+    expectLockContributors(lock);
     expectUserApproved(this);
     const cols = (lock.collections = lock.collections || []);
     const MAX_COLLECTION_PER_LOCK = 5;
@@ -243,7 +256,7 @@ class LoveLock {
 
   @transaction setLockCollection(lockIndex: number, collectionId: number, collectionData) {
     const [lock, locks] = this.getLock(lockIndex);
-    expectLockOwners(lock);
+    expectLockContributors(lock);
     expectUserApproved(this);
 
     collectionData = validate(
@@ -413,6 +426,72 @@ class LoveLock {
     const self = this;
     return apiDeleteComment(self, memIndex, cmtNo);
   }
+
+  // ==== EDITOR CHOICE (for Explore menu) ===
+  @view getChoices = () => this.getState('choices', []);
+  setChoices = value => this.setState('choices', value);
+
+  @view getChoiceMemories = () => {
+    const choices = this.getState('choices', [])
+    if (!choices || !choices.length) {
+      return []
+    }
+
+    return apiGetMemoriesByListMemIndex(this, choices)
+  }
+
+  @transaction addChoices(_choices) {
+    expectAdmin(this);
+
+    if (!Array.isArray(_choices)) {
+      _choices = [_choices];
+    }
+
+    const schema = Joi.array().items(
+      Joi.number().min(0).integer()
+    );
+
+    _choices = validate(_choices, schema);
+
+    const oldChoices = this.getChoices();
+
+    // merge the two array, use Set to remove duplicaton
+    const newChoices = [...new Set([...oldChoices, ..._choices])]
+
+    // save new choices
+    this.setChoices(newChoices)
+
+    // return nothing
+  }
+
+  @transaction removeChoices(_choices) {
+    expectAdmin(this);
+
+    expectAdmin(this);
+
+    if (!Array.isArray(_choices)) {
+      _choices = [_choices];
+    }
+
+    const schema = Joi.array().items(
+      Joi.number().min(0).integer()
+    );
+
+    _choices = validate(_choices, schema);
+
+
+    const oldChoices = this.getChoices();
+
+    const newChoices = oldChoices.filter(i => !_choices.includes(i));
+
+    this.setChoices(newChoices)
+  }
+
+  @view isEditorChosen(memoIndex: number): boolean {
+    const choices = this.getChoices();
+    return choices.includes(memoIndex);
+  }
+
   // ========== USER APPROVED =============
   @view getUsers = () => this.getState('users', []);
   setUsers = value => this.setState('users', value);
@@ -474,8 +553,10 @@ class LoveLock {
     const users = this.getUsers();
     return users.includes(user);
   }
+
   // ========== Authorized IPFS APPROVED =============
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
+    
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
     if (!users.includes(mainAddress)) {
@@ -483,12 +564,11 @@ class LoveLock {
     }
 
     // check tokenAddress is token on mainaddress.
+
     const ctDid = loadContract('system.did')
     try {
-      if (contract.includes('.')) {
-        contract = convertAliasToAddress(contract)
-      }
-      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to: contract })
+      const to = contract.includes('.') ? convertAliasToAddress(contract) : contract
+      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to })
       return true
     } catch (e) {
       return false
@@ -500,7 +580,11 @@ class LoveLock {
     return users.includes(mainAddress);
   }
 }
-const ctAlias = loadContract('system.alias');
+
 function convertAliasToAddress(alias) {
+  const ctAlias = loadContract('system.alias');
+  if (!alias.startsWith('account.') && !alias.startsWith('contract.')) {
+    alias = 'account.' + alias
+  }
   return ctAlias.resolve.invokeView(alias) || ''
 }

@@ -97,13 +97,53 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   self.emitEvent('createLock', { by: sender, log }, ['by']);
   return index;
 };
+
+exports.apiEditLock = (self, lockIndex, data, contributors) => {
+  expect(data || contributors, 'You must provide updated data and/or contributors.')
+
+  const [lock, locks] = self.getLock(lockIndex);
+  expectLockOwners(lock);
+
+  if (data) {
+    if (data.lockName != null) {
+      lock.s_info.lockName = data.lockName
+    }
+    if (data.message != null) {
+      if (msg.sender === lock.sender) {
+        lock.s_content = data.message
+      } else if (msg.sender === lock.receiver) {
+        lock.r_content = data.message
+      }
+    }
+    if (data.date != null) {
+      lock.s_info.date = data.date
+    }
+    if (data.coverImg != null) {
+      lock.coverImg = data.coverImg
+    }
+  }
+
+  if (contributors != null) {
+    contributors.forEach(c => {
+      if (typeof c !== 'string' || c.length !== 43) {
+        throw new Error('Contributors contain invalid address.')
+      }
+    })
+    lock.contributors = contributors
+  }
+
+  self.setLocks(locks);
+  return lock;
+}
+
 exports.apiChangeLockName = (self, lockIndex, lockName) => {
   const [lock, locks] = self.getLock(lockIndex);
   expectLockOwners(lock);
-  Object.assign(lock, { s_info: { ...lock.s_info, lockName } });
+  lock.s_info.lockName = lockName
   self.setLocks(locks);
   return { lockIndex, lockName };
 };
+
 exports.apiAcceptLock = (self, lockIndex, r_content) => {
   const ret = _confirmLock(self, lockIndex, r_content, LOCK_STATUS_ACCEPTED);
   apiCreateMemory(self, lockIndex, false, '', { hash: [] }, [true, ...ret]);
@@ -137,6 +177,7 @@ exports.apiChangeLockImg = (self, index, imgHash) => {
   const log = { ...lock, id: index };
   self.emitEvent('changeCoverImg', { by: sender, log }, ['by']);
 };
+
 exports.apiFollowLock = (self, lockIndex) => {
   const sender = msg.sender;
   const [lock, locks] = self.getLock(lockIndex);
@@ -159,6 +200,7 @@ exports.apiFollowLock = (self, lockIndex) => {
   self.setLocks(locks);
   return sender;
 };
+
 exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
   const [lock, locks] = self.getLock(lockIndex);
   expect(lock.type === LOCK_TYPE_JOURNAL, 'Only support Journal.');
@@ -188,6 +230,7 @@ exports.apiAddContributorsToLock = (self, lockIndex, contributors) => {
   self.setLocks(locks);
   return contributors;
 };
+
 exports.apiRemoveContributorsToLock = (self, lockIndex, contributors) => {
   const [lock, locks] = self.getLock(lockIndex);
   expectLockOwners(lock);
@@ -198,6 +241,7 @@ exports.apiRemoveContributorsToLock = (self, lockIndex, contributors) => {
   self.setLocks(locks);
   return contributors;
 };
+
 //private function
 function _confirmLock(self, index, r_content, status, saveFlag) {
   const sender = msg.sender;
@@ -205,10 +249,12 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
   // status: pending: 0, accept_lock: 1, cancel_lock: 2
   switch (status) {
     case LOCK_STATUS_ACCEPTED:
-      expect(sender === lock.receiver, "Can't accept lock. You must be receiver.");
+      expect(sender === lock.receiver, "Cannot accept lock. You must be receiver.");
+      expect(lock.status === LOCK_STATUS_PENDING, "This lock is no longer pending and cannot be accepted.");
       break;
     case LOCK_STATUS_DENIED:
-      expectLockOwners(lock, "You can't cancel lock.");
+      expectLockOwners(lock, "You cannot cancel lock.");
+      expect(lock.status === LOCK_STATUS_PENDING, "This lock is no longer pending and cannot be denied.")
       break;
   }
   Object.assign(lock, { r_content, status });

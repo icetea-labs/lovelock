@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
@@ -16,6 +16,12 @@ import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
 window.prerenderReady = false;
+
+// import PasswordPrompt from '../../layout/PasswordPrompt';
+const PasswordPrompt = lazy(() => import(
+  /* webpackChunkName: "home" */
+  '../../layout/PasswordPrompt'
+));
 
 const Copyright = styled.div`
   display: flex;
@@ -52,7 +58,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export function BlogView(props) {
-  const { match, setMemory, setBlogView, blogView } = props;
+  const { match, setMemory, setBlogView, blogView, needAuth } = props;
   const paramMemIndex = parseInt(match.params.index, 10);
   // const [content, setContent] = useState(null);
   const [showComment, setShowComment] = useState(true);
@@ -226,6 +232,7 @@ export function BlogView(props) {
           </Copyright>
         </BlogModal>
       )}
+      {needAuth && <PasswordPrompt />}
     </>
   );
 }
@@ -234,6 +241,7 @@ export function BlogView(props) {
 const mapStateToProps = state => {
   return {
     blogView: state.loveinfo.blogView,
+    needAuth: state.account.needAuth
   };
 };
 const mapDispatchToProps = dispatch => {

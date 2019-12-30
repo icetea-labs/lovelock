@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSnackbar } from 'notistack';
-import { codec } from '@iceteachain/common';
+import { encode as codecEncode } from '@iceteachain/common/src/codec';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -121,8 +121,7 @@ function PasswordPrompt(props) {
           // const keyObject = encode(privateKey, decryptPass);
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
-          storage.sessionData = codec
-            .encode({
+          storage.sessionData = codecEncode({
               contract: process.env.REACT_APP_CONTRACT,
               tokenAddress: token.address,
               tokenKey: token.privateKey,
@@ -154,7 +153,7 @@ function PasswordPrompt(props) {
           setAutoPassFailed();
         } else {
           console.error(error);
-          const message = 'Your password is invalid. Please try again.';
+          const message = 'The password is invalid. Please try again.';
           enqueueSnackbar(message, { variant: 'error' });
         }
       } finally {

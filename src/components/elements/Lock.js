@@ -43,8 +43,8 @@ function Lock(props) {
     switch (item.type) {
       case 2:
         return {
-          name: item.s_info.loveName
-            ? item.s_info.loveName
+          name: item.s_info.lockName
+            ? item.s_info.lockName
             : address === item.sender
             ? 'My Journal'
             : item['s_tags']['display-name'],

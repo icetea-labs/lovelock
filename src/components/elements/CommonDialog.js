@@ -179,11 +179,11 @@ class CommonDialog extends React.Component {
   };
 
   render() {
-    const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog } = this.props;
+    const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog, ensureTopLevel } = this.props;
     return (
       <>
         <Backdrop className="cdialog-backdrop" key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
-        <Container className="cdialog-container" key={2} hasParentDialog={hasParentDialog} ref={this.containerRef}>
+        <Container className="cdialog-container" key={2} hasParentDialog={hasParentDialog} ensureTopLevel={ensureTopLevel} ref={this.containerRef}>
           <PuTitle>
             <span className="title">{title}</span>
             <IconButton onClick={close}>

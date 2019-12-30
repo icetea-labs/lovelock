@@ -2,13 +2,22 @@
 exports.expectLockOwners = (lock, message = 'Permission denied') => {
   const errmsg = message + '. You must be owner of the lock.';
   expect(
-    msg.sender === lock.receiver || msg.sender === lock.sender || lock.contributors.indexOf(msg.sender) !== -1,
+    msg.sender === lock.receiver || msg.sender === lock.sender,
     errmsg
   );
 };
+
+exports.expectLockContributors = (lock, message = 'Permission denied') => {
+  const errmsg = message + '. You must be owner or contributor of the lock.';
+  expect(
+    msg.sender === lock.receiver || msg.sender === lock.sender || lock.contributors.includes(msg.sender),
+    errmsg
+  );
+};
+
 //private function
 exports.expectOwner = (self, message = 'Permission denied') => {
-  const errmsg = message + '. You must be owner.';
+  const errmsg = message + '. You must be the contract owner.';
   const owner = self.deployedBy;
   expect(owner.includes(msg.sender), errmsg);
 };

@@ -34,13 +34,16 @@ Deploy Lovelock contract:
 npm run deploy
 ```
 
-Generate some seed data (optional).
+After deploying the new contract, change `PKEY` value in your `.env` with the `private key` exported from the command.
 
+Generate some seed data (optional):
 `npm run seed` then import the outputted private key for testing (use __Forgot Password__ screen to import).
 
 ### 4. Start the app
 
 - `npm start`
+
+> __Note__: New users need to be unlocked before they can post contents. To unlock a user, run `npm run unlock [usernameOrAddress]`
 
 ## How to use the app
 

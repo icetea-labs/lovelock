@@ -46,6 +46,8 @@ const NotFoundContainer = styled.div`
   }
   .guide {
     font-size: 14pt;
+    line-height: 1.3;
+    text-align: center;
     position: absolute;
     top: 75vh;
     left: 50%;
