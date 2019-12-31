@@ -32,6 +32,7 @@ const Container = styled.div`
   transition: opacity 0.6s ease-in;
   opacity: 0;
   @media (max-width: 624px) {
+    max-height: calc(100vh - 56px);
     width: 100%;
     border-radius: 0;
   }

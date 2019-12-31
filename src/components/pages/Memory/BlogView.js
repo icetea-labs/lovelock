@@ -15,8 +15,6 @@ import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone, 
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
-window.prerenderReady = false;
-
 // import PasswordPrompt from '../../layout/PasswordPrompt';
 const PasswordPrompt = lazy(() => import(
   /* webpackChunkName: "home" */
