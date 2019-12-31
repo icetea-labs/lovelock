@@ -13,6 +13,14 @@ body {
   font-size: rem(14);
 }
 
+a {
+  color: #8250c8;
+}
+
+a.underline:hover {
+  text-decoration: underline;
+}
+
 input,
 textarea {
   &:focus {

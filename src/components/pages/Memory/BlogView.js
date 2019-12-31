@@ -123,7 +123,10 @@ export function BlogView(props) {
         // not a blog, redirect to lock screen
         closeMemory();
       }
-    });
+    }).catch(err => {
+      console.error(err)
+      closeMemory()
+    })
   }
 
   function closeMemory() {
