@@ -16,7 +16,7 @@ const RightBoxMemories = styled.div`
 `;
 
 function Explore(props) {
-  const { address, setLocks, setMemory } = props;
+  const { address, setMemory } = props;
   const [loading, setLoading] = useState(true);
   // const [users, isLoading, error, retry] = useAPI('getLocksForFeed', [address]);
   useEffect(() => {
@@ -33,7 +33,7 @@ function Explore(props) {
   }
 
   return (
-    address && (
+    // address && (
       // <FlexBox wrap="wrap">
       //   <FlexWidthBox width="30%">
       //     <LeftContainer loading={loading} />
@@ -54,26 +54,26 @@ function Explore(props) {
           </RightBoxMemories>
         </div>
       </LeftBoxWrapper>
-    )
+    //)
   );
 }
 
-const mapStateToProps = state => {
-  return {
-    address: state.account.address,
-  };
-};
+// const mapStateToProps = state => {
+//   return {
+//     address: state.account.address,
+//   };
+// };
 const mapDispatchToProps = dispatch => {
   return {
-    setLocks: value => {
-      dispatch(actions.setLocks(value));
-    },
+    // setLocks: value => {
+    //   dispatch(actions.setLocks(value));
+    // },
     setMemory: value => {
       dispatch(actions.setMemory(value));
     },
   };
 };
 export default connect(
-  mapStateToProps,
+  null, //mapStateToProps,
   mapDispatchToProps
 )(Explore);

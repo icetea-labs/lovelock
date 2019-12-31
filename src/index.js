@@ -14,6 +14,12 @@ import { SimpleLoading } from './components/elements/GlobaLoading';
 // import { persistor, store } from './store';
 import { store } from './store';
 
+(function(p){
+  if (/^\/blog\/\d+\/?$/.test(p) || /^\/lock\/\d+(\/|$)/.test(p)) {
+    window.prerenderReady = false;
+  }
+})(window.location.pathname)
+
 // import App from './App';
 const App = lazy(() => import(
   /* webpackChunkName: "app" */
@@ -179,4 +185,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-serviceWorker.unregister();
+serviceWorker.register();

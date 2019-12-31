@@ -18,8 +18,6 @@ import APIService from '../../../service/apiService';
 
 import CommonDialog from '../../elements/CommonDialog';
 
-window.prerenderReady = false;
-
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
 `;
