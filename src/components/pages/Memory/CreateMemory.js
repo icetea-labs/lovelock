@@ -6,7 +6,6 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
-// import cloneDeep from 'lodash/cloneDeep';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Editor from './Editor';
 import BlogModal from '../../elements/BlogModal';
@@ -25,8 +24,6 @@ import {
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import MemoryTitle from './MemoryTitle';
-
-// import { getDraft, setDraft, delDraft } from '../../../helper/draft';
 import { delDraft } from '../../../helper/draft';
 
 let blogBody = null;
@@ -57,8 +54,14 @@ const ShadowBox = styled.div`
   border-radius: 5px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  &.edit-mode {
+    padding: 0;
+  }
   @media (max-width: 768px) {
     padding: 16px;
+    &.edit-mode {
+      padding: 0;
+    }
   }
 `;
 const useStyles = makeStyles(theme => ({
@@ -137,15 +140,15 @@ const BootstrapTextField = withStyles(theme => ({
     fontSize: 16,
     paddingLeft: theme.spacing(1),
     borderColor: '#8250c8',
-    // background: 'red',
   },
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
+  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection, memory } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
+  const editMode = !!memory;
 
   const avatar = useSelector(state => state.account.avatar);
   const rName = useSelector(state => state.account.r_name);
@@ -156,16 +159,14 @@ export default function CreateMemory(props) {
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  const [filesBuffer, setFilesBuffer] = useState([]);
-  const [memoryContent, setMemoryContent] = useState('');
-  const [grayLayout, setGrayLayout] = useState(false);
-
-  const [memoDate, setMemoDate] = useState(new Date());
+  const [filesBuffer, setFilesBuffer] = useState(editMode ? memory.info.hash : []);
+  const [memoryContent, setMemoryContent] = useState(editMode ? memory.content : '');
+  const [memoDate, setMemoDate] = useState(editMode ? memory.info.date : new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
   const [disableShare, setDisableShare] = useState(true);
   const [isOpenModal, setOpenModal] = useState(false);
-
+  const [grayLayout, setGrayLayout] = useState(false);
   const [blogSubtitle, setBlogSubtitle] = useState('');
   const [blogTitle, setBlogTitle] = useState('');
   const [previewOn, setPreviewOn] = useState(false);
@@ -177,6 +178,7 @@ export default function CreateMemory(props) {
   const componentRef = useRef();
 
   useEffect(() => {
+    if (editMode) return;
     resetValue();
   }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -191,7 +193,7 @@ export default function CreateMemory(props) {
   }
 
   function memoryOnFocus() {
-    !grayLayout && setGrayLayout(true);
+    handleSetGrayLayout();
   }
 
   function clickLayout(e) {
@@ -229,7 +231,7 @@ export default function CreateMemory(props) {
 
   function onChangeDate(value) {
     setMemoDate(value);
-    !grayLayout && setGrayLayout(true);
+    handleSetGrayLayout();
   }
 
   function onChangeMedia(value) {
@@ -239,6 +241,11 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setFilesBuffer(value);
+    handleSetGrayLayout();
+  }
+  
+  function handleSetGrayLayout() {
+    if(editMode) return;
     !grayLayout && setGrayLayout(true);
   }
 
@@ -450,49 +457,68 @@ export default function CreateMemory(props) {
   }
 
   async function handleShareMemory(blogData, blogTokenOpts) {
-
     // NOTE: blogData is undefined for regular post, and object for blog post
-
     if (!blogData && !memoryContent && !filesBuffer) {
       const message = 'Please enter memory content or add a photo.';
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }
-
+    
+    let bufferImages = [];
+    let srcImages = [];
+    
     if (!blogData) {
+      const max10M = 1048576 * 10;
+      
       for (let i = 0; i < filesBuffer.length; i++) {
-        const max10M = 1048576 * 10;
-        if (filesBuffer[i].byteLength > max10M) {
+        const fileByteLength = filesBuffer[i].byteLength;
+        
+        if (!fileByteLength) {
+          const imageParts = filesBuffer[i].src.split('/');
+          srcImages.push(imageParts[3]);
+          continue;
+        }
+        
+        if (fileByteLength > max10M) {
           const message = `Image at ${i + 1} position is over 10MB. Please choose smaller image.`;
           enqueueSnackbar(message, { variant: 'error' });
           return;
         }
+  
+        bufferImages.push(filesBuffer[i]);
       }
     }
 
     const content = blogData || memoryContent;
-
     let params = [];
+
     const uploadThenSendTx = async opts => {
       setGLoading(true);
+      
+      let newContent = content;
+      let newImageHashes = [];
+      let info = {};
 
       if (privacy && !blogData) {
         // TODO: support private blog
-        const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
-        const info = { hash };
-        addMemoTimestamp(info);
-        addCollectionId(info);
-        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
+        newContent = await encodeWithPublicKey(content, privateKey, publicKey);
+        newContent = JSON.stringify(newContent);
+        newImageHashes = await saveBufferToIpfs(bufferImages, { privateKey, publicKey });
       } else {
-        const hash = !blogData && (await saveBufferToIpfs(filesBuffer));
-        const info = {};
-        info.hash = hash || [];
-        addMemoTimestamp(info);
-        addCollectionId(info);
+        newImageHashes = !blogData && (await saveBufferToIpfs(bufferImages));
         if (blogData) info.blog = true;
-        params = [proIndex, !!privacy, content, info];
       }
+  
+      info.hash = newImageHashes ? srcImages.concat(newImageHashes) : srcImages;
+      addMemoTimestamp(info);
+      addCollectionId(info);
+      
+      if (editMode) {
+        params = [proIndex, newContent, info];
+        return sendTxUtil('editMemory', params, opts || { address, tokenAddress });
+      }
+  
+      params = [proIndex, !!privacy, newContent, info];
       return sendTxUtil('addMemory', params, opts || { address, tokenAddress });
     };
 
@@ -506,8 +532,8 @@ export default function CreateMemory(props) {
         uploadThenSendTx
       )
       const result = await submitPromise
-      onMemoryAdded(result.returnValue, params);
       resetValue();
+      onMemoryAdded(result.returnValue, params);
     } catch (err) {
       setGLoading(false);
       const message = handleError(err, 'sending memory');
@@ -591,7 +617,7 @@ export default function CreateMemory(props) {
     <>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
       <CreatePost grayLayout={grayLayout} ref={componentRef}>
-        <ShadowBox>
+        <ShadowBox className={`${editMode ? 'edit-mode' : ''}`}>
           <Grid container direction="column">
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
@@ -619,12 +645,12 @@ export default function CreateMemory(props) {
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
-                onBlogClick={() => {
+                onBlogClick={editMode ? false : () => {
                   setOpenModal(true);
                 }}
               />
             </Grid>
-            {grayLayout && (
+            {(grayLayout || editMode) && (
               <Grid classes={{ root: classes.btBox }}>
                 <div className={classes.rightBtBox}>
                   <Select
@@ -639,9 +665,7 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                   >
                     <option value={0}>Public</option>
-                    <option value={1} disabled>
-                      Private
-                    </option>
+                    <option value={1} disabled>Private</option>
                   </Select>
                   <Select
                     native
@@ -664,13 +688,13 @@ export default function CreateMemory(props) {
                 </div>
                 <ButtonPro
                   type="submit"
-                  isGrayout={disableShare}
+                  isGrayout={editMode ? false : disableShare}
                   onClick={() => {
                     handleShareMemory();
                   }}
                   className={classes.btShare}
                 >
-                  Post
+                  {editMode ? 'Save' : 'Post'}
                 </ButtonPro>
               </Grid>
             )}
