@@ -35,6 +35,7 @@
     "react-dom": "^16.11.0",
     "react-helmet": "^5.2.1",
     "react-images": "^1.0.0",
+    "react-lazy-with-preload": "^1.0.0",
     "react-lazyload": "^2.6.2",
     "react-linkify": "^1.0.0-alpha",
     "react-material-ui-form-validator": "^2.0.9",

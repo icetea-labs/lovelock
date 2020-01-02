@@ -22,10 +22,6 @@ const RightBoxMemories = styled.div`
 const RightBox = styled.div`
   text-align: center;
   padding: ${rem(30)};
-  img {
-    width: 200px;
-    height: 200px;
-  }
   h1,
   h2 {
     text-align: center;
@@ -41,6 +37,14 @@ const RightBox = styled.div`
     font-size: 18px;
     line-height: 24px;
     margin: 16px auto;
+  }
+  img {
+    max-width: 158px;
+  }
+  @media (max-width: 768px) {
+    img {
+      width: 25vw;
+    }
   }
 `;
 
@@ -163,8 +167,9 @@ function Home(props) {
     dispatch(actions.setNewLock(true));
   }
 
-  function openExplore() {
-    history.push('/explore');
+  function openLink(event) {
+    event.preventDefault()
+    history.push(event.currentTarget.getAttribute('route'));
   }
 
   function watchCreatePropose(contract, signal) {
@@ -198,18 +203,23 @@ function Home(props) {
             <div>
               <img src="/static/img/plant.svg" alt="plant" />
               <div className="emptyTitle">
-                <h1>You have no lock yet.</h1>
+                <h1>You have no lock</h1>
               </div>
               <div className="emptySubTitle">
-                <h2>Locks are the way you connect and share memories with your loved ones.</h2>
+                <h2>
+                  <span>Create locks to connect and share memories with your loved ones. </span>
+                  <a href="#" className="underline" route="/blog/54" onClick={openLink}>
+                    Learn more...
+                  </a>
+                </h2>
               </div>
               <ActionForm>
                 <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                  Create first lock
+                  Create First Lock
                 </ButtonPro>
               </ActionForm>
-              <LinkPro className="btn_add_promise" onClick={openExplore}>
-                or explore others&apos;
+              <LinkPro className="btn_add_promise" route="/explore" onClick={openLink}>
+                Explore Notable Blogs
               </LinkPro>
             </div>
           </RightBox>

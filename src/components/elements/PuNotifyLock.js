@@ -72,8 +72,8 @@ function PuNotifyLock(props) {
       const result = await tx.sendCommit('cancelLock', index, 'no');
 
       if (result) {
-        const message = 'Your locks has been removed.';
-        enqueueSnackbar(message, { variant: 'info', preventDuplicate: true });
+        const message = 'Lock canceled.';
+        enqueueSnackbar(message, { variant: 'success', preventDuplicate: true });
         close();
       }
     } catch (error) {

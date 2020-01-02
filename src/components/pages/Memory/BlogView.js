@@ -15,11 +15,8 @@ import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone, 
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
-window.prerenderReady = false;
-
 // import PasswordPrompt from '../../layout/PasswordPrompt';
 const PasswordPrompt = lazy(() => import(
-  /* webpackPrefetch: true */
   /* webpackChunkName: "home" */
   '../../layout/PasswordPrompt'
 ));
@@ -126,7 +123,10 @@ export function BlogView(props) {
         // not a blog, redirect to lock screen
         closeMemory();
       }
-    });
+    }).catch(err => {
+      console.error(err)
+      closeMemory()
+    })
   }
 
   function closeMemory() {

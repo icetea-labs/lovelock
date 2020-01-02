@@ -266,47 +266,47 @@ const StyledMenuItem = withStyles(theme => ({
   },
 }))(MenuItem);
 
-const friReqList = [
-  {
-    id: 0,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Huy Hoang',
-  },
-  {
-    id: 1,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'MyMy',
-  },
-  {
-    id: 2,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Luong Hoa',
-  },
-];
+// const friReqList = [
+//   {
+//     id: 0,
+//     avatar: 'https://i.pravatar.cc/300',
+//     name: 'Huy Hoang',
+//   },
+//   {
+//     id: 1,
+//     avatar: 'https://i.pravatar.cc/300',
+//     name: 'MyMy',
+//   },
+//   {
+//     id: 2,
+//     avatar: 'https://i.pravatar.cc/300',
+//     name: 'Luong Hoa',
+//   },
+// ];
 
-const notifiList = [
-  {
-    id: 0,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Huy Hoang',
-    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-    time: 'just now',
-  },
-  {
-    id: 1,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'MyMy',
-    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-    time: 'just now',
-  },
-  {
-    id: 2,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Thi Truong',
-    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-    time: 'just now',
-  },
-];
+// const notifiList = [
+//   {
+//     id: 0,
+//     avatar: 'https://i.pravatar.cc/300',
+//     name: 'Huy Hoang',
+//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+//     time: 'just now',
+//   },
+//   {
+//     id: 1,
+//     avatar: 'https://i.pravatar.cc/300',
+//     name: 'MyMy',
+//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+//     time: 'just now',
+//   },
+//   {
+//     id: 2,
+//     avatar: 'https://i.pravatar.cc/300',
+//     name: 'Thi Truong',
+//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+//     time: 'just now',
+//   },
+// ];
 
 function Header(props) {
   const dispatch = useDispatch();
@@ -461,76 +461,76 @@ function Header(props) {
     </StyledMenu>
   );
 
-  const friReqMenu = (
-    <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
-      <StyledMenuItem className={classes.friReqStyle}>
-        <ListItemText primary="Friend Request" className={classes.friReqTitle} />
-        <ListItemText align="right" primary="Setting" className={classes.friReqSetting} />
-      </StyledMenuItem>
-      {friReqList.map(({ id, avatar, name }) => (
-        <StyledMenuItem className={classes.friReqStyle} key={id}>
-          <ListItemAvatar>
-            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
-          </ListItemAvatar>
-          <ListItemText primary={name} className={classes.friReqName} />
-          <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
-          <ListItemText primary="DELETE" />
-        </StyledMenuItem>
-      ))}
-      <StyledMenuItem className={classes.friReqStyle}>
-        <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
-      </StyledMenuItem>
-    </StyledMenu>
-  );
+  // const friReqMenu = (
+  //   <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
+  //     <StyledMenuItem className={classes.friReqStyle}>
+  //       <ListItemText primary="Friend Request" className={classes.friReqTitle} />
+  //       <ListItemText align="right" primary="Setting" className={classes.friReqSetting} />
+  //     </StyledMenuItem>
+  //     {friReqList.map(({ id, avatar, name }) => (
+  //       <StyledMenuItem className={classes.friReqStyle} key={id}>
+  //         <ListItemAvatar>
+  //           <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
+  //         </ListItemAvatar>
+  //         <ListItemText primary={name} className={classes.friReqName} />
+  //         <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
+  //         <ListItemText primary="DELETE" />
+  //       </StyledMenuItem>
+  //     ))}
+  //     <StyledMenuItem className={classes.friReqStyle}>
+  //       <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
+  //     </StyledMenuItem>
+  //   </StyledMenu>
+  // );
 
-  const notiList = (
-    <StyledMenu
-      id="notifi-menu"
-      anchorEl={anchorElNoti}
-      keepMounted
-      open={Boolean(anchorElNoti)}
-      onClose={handleNotiClose}
-    >
-      <StyledMenuItem className={classes.friReqStyle}>
-        <ListItemText primary="Notification" className={classes.friReqTitle} />
-        <ListItemText align="right" primary="Mark all read" className={classes.friReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.friReqConfirm} />
-      </StyledMenuItem>
-      {notifiList.map(({ id, avatar, name, promise, time }) => (
-        <List className={classes.listNoti} component="nav" key={id}>
-          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
-            <ListItemAvatar>
-              <AvatarPro alt="Remy Sharp" src={avatar} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <>
-                  <Typography component="span" variant="body2" color="textPrimary">
-                    {name}
-                  </Typography>
-                  {' sent you a promise'}
-                </>
-              }
-              secondary={
-                <>
-                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {promise}
-                  </Typography>
-                  <Typography component="span" variant="body2">
-                    {time}
-                  </Typography>
-                </>
-              }
-            />
-          </ListItem>
-          <Divider variant="inset" />
-        </List>
-      ))}
-      <StyledMenuItem className={classes.friReqStyle}>
-        <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
-      </StyledMenuItem>
-    </StyledMenu>
-  );
+  // const notiList = (
+  //   <StyledMenu
+  //     id="notifi-menu"
+  //     anchorEl={anchorElNoti}
+  //     keepMounted
+  //     open={Boolean(anchorElNoti)}
+  //     onClose={handleNotiClose}
+  //   >
+  //     <StyledMenuItem className={classes.friReqStyle}>
+  //       <ListItemText primary="Notification" className={classes.friReqTitle} />
+  //       <ListItemText align="right" primary="Mark all read" className={classes.friReqConfirm} />
+  //       <ListItemText align="center" primary="Setting" className={classes.friReqConfirm} />
+  //     </StyledMenuItem>
+  //     {notifiList.map(({ id, avatar, name, promise, time }) => (
+  //       <List className={classes.listNoti} component="nav" key={id}>
+  //         <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+  //           <ListItemAvatar>
+  //             <AvatarPro alt="Remy Sharp" src={avatar} />
+  //           </ListItemAvatar>
+  //           <ListItemText
+  //             primary={
+  //               <>
+  //                 <Typography component="span" variant="body2" color="textPrimary">
+  //                   {name}
+  //                 </Typography>
+  //                 {' sent you a promise'}
+  //               </>
+  //             }
+  //             secondary={
+  //               <>
+  //                 <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+  //                   {promise}
+  //                 </Typography>
+  //                 <Typography component="span" variant="body2">
+  //                   {time}
+  //                 </Typography>
+  //               </>
+  //             }
+  //           />
+  //         </ListItem>
+  //         <Divider variant="inset" />
+  //       </List>
+  //     ))}
+  //     <StyledMenuItem className={classes.friReqStyle}>
+  //       <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
+  //     </StyledMenuItem>
+  //   </StyledMenu>
+  // );
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const renderMobileMenu = (
@@ -701,10 +701,10 @@ function Header(props) {
       </div>
       {renderMobileMenu}
       {renderMenu}
-      {friReqMenu}
-      {notiList}
+      {/* friReqMenu */}
+      {/* notiList */}
       {needAuth && <PasswordPrompt />}
-      {isNewLock && <PuNewLock close={closePopup} />}
+      {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );
