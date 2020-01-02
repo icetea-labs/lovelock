@@ -25,7 +25,6 @@ const CollectionIndicator = styled.div`
 
 export default function RightContainer(props) {
   const { proIndex, collectionId, handleNewCollection, isOwner, isContributor } = props;
-  // const [memoByProIndex, setMemoByProIndex] = useState([]);
   const [changed, setChanged] = useState(false);
   const address = useSelector(state => state.account.address);
   const collections = useSelector(state => state.loveinfo.topInfo.collections);
@@ -41,16 +40,13 @@ export default function RightContainer(props) {
     let cancel = false;
 
     if (cancel) return;
+    
     setLoading(true);
-
+  
     APIService.getMemoriesByLockIndex(proIndex, validCollectionId).then(mems => {
-      // set to redux
       dispatch(actions.setMemory(mems));
-
-      // setTimeout(() => {
       if (cancel) return;
       setLoading(false);
-      // }, 50);
     });
 
     return () => (cancel = true);
@@ -82,7 +78,13 @@ export default function RightContainer(props) {
           handleNewCollection={handleNewCollection}
         />
       )}
-      <MemoryContainer proIndex={proIndex} collectionId={validCollectionId} memorydata={[]} loading={loading} />
+      <MemoryContainer
+        collectionId={validCollectionId}
+        memorydata={[]}
+        loading={loading}
+        onMemoryAdded={refresh}
+        handleNewCollection={handleNewCollection}
+      />
     </RightBox>
   );
 }

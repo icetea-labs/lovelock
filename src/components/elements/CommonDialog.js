@@ -180,6 +180,9 @@ class CommonDialog extends React.Component {
 
   render() {
     const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog, ensureTopLevel } = this.props;
+    const haveCancelButton = cancelText && cancel;
+    const haveConfirmButton = okText && confirm;
+    
     return (
       <>
         <Backdrop className="cdialog-backdrop" key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
@@ -192,18 +195,22 @@ class CommonDialog extends React.Component {
           </PuTitle>
           <ContWrap>
             {children}
-            <Action>
-              <div className="actionConfirm">
-                {cancelText && cancel && (
-                  <LinkPro className="deny nextBtn" onClick={cancel}>
-                    {cancelText}
-                  </LinkPro>
-                )}
-                <ButtonPro className="nextBtn send " onClick={confirm}>
-                  {typeof okText !== 'function' ? okText : okText()}
-                </ButtonPro>
-              </div>
-            </Action>
+            {(haveCancelButton || haveConfirmButton) && (
+              <Action>
+                <div className="actionConfirm">
+                  {haveCancelButton && (
+                    <LinkPro className="deny nextBtn" onClick={cancel}>
+                      {cancelText}
+                    </LinkPro>
+                  )}
+                  {haveConfirmButton && (
+                    <ButtonPro className="nextBtn send " onClick={confirm}>
+                      {typeof okText !== 'function' ? okText : okText()}
+                    </ButtonPro>
+                  )}
+                </div>
+              </Action>
+            )}
           </ContWrap>
         </Container>
       </>

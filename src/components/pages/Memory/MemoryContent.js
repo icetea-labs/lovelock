@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
+import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
@@ -36,6 +36,8 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
+import CommonDialog from "../../elements/CommonDialog";
+import CreateMemory from "./CreateMemory";
 
 const Copyright = styled.div`
   display: flex;
@@ -208,7 +210,7 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, propose } = props;
+  const { memory, setNeedAuth, propose, proIndex, onMemoryAdded, handleNewCollection } = props;
   setMemoryCollection(propose, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -216,15 +218,16 @@ function MemoryContent(props) {
   const address = useSelector(state => state.account.address);
   const rName = useSelector(state => state.account.r_name);
   const sName = useSelector(state => state.account.s_name);
-  // const propose = useSelector(state => state.loveinfo.propose);
-
+  const collections = useSelector(state => state.loveinfo.topInfo.collections);
+  
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
-  // const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
+  const [actionMenu, setActionMenu] = useState(null);
+  const [isEditOpened, setIsEditOpened] = useState(false);
   const classes = useStyles();
 
   useEffect(() => {
@@ -604,7 +607,20 @@ function MemoryContent(props) {
       </>
     );
   };
-
+  
+  function openActionMenu(event) {
+    setActionMenu(event.currentTarget);
+  }
+  
+  function closeActionMenu() {
+    setActionMenu(null);
+  }
+  
+  function openEditMemoryModal() {
+    closeActionMenu();
+    setIsEditOpened(true);
+  }
+  
   return (
     <>
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
@@ -613,15 +629,38 @@ function MemoryContent(props) {
           title={renderTitleMem(memoryDecrypted)}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
-            <IconButton aria-label="settings">
+            <IconButton aria-label="settings" onClick={openActionMenu}>
               <MoreVertIcon />
             </IconButton>
           }
         />
+        <Menu
+          anchorEl={actionMenu}
+          open={Boolean(actionMenu)}
+          onClose={closeActionMenu}
+          disableScrollLock={true}
+        >
+          <MenuItem onClick={openEditMemoryModal}>Edit</MenuItem>
+        </Menu>
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
         {isUnlock && renderActionBt()}
         {showComment && renderComments()}
+        {isEditOpened && (
+          <CommonDialog
+            title={'Edit Memory'}
+            close={() => setIsEditOpened(false)}
+          >
+            <CreateMemory
+              proIndex={proIndex}
+              collectionId={memoryDecrypted.collection ? memoryDecrypted.collection.id : null}
+              collections={collections}
+              onMemoryAdded={onMemoryAdded}
+              handleNewCollection={handleNewCollection}
+              memory={memoryDecrypted}
+            />
+          </CommonDialog>
+        )}
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
