@@ -219,7 +219,7 @@ function MemoryContent(props) {
   const rName = useSelector(state => state.account.r_name);
   const sName = useSelector(state => state.account.s_name);
   const collections = useSelector(state => state.loveinfo.topInfo.collections);
-  
+
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
@@ -634,14 +634,18 @@ function MemoryContent(props) {
             </IconButton>
           }
         />
-        <Menu
-          anchorEl={actionMenu}
-          open={Boolean(actionMenu)}
-          onClose={closeActionMenu}
-          disableScrollLock={true}
-        >
-          <MenuItem onClick={openEditMemoryModal}>Edit</MenuItem>
-        </Menu>
+        
+        {!memory.info.blog && (
+          <Menu
+            anchorEl={actionMenu}
+            open={Boolean(actionMenu)}
+            onClose={closeActionMenu}
+            disableScrollLock={true}
+          >
+            <MenuItem onClick={openEditMemoryModal}>Edit</MenuItem>
+          </Menu>
+        )}
+        
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
         {isUnlock && renderActionBt()}
