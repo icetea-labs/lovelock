@@ -207,7 +207,7 @@ function LeftContainer(props) {
 
   function eventConfirmLock(data) {
     confirmLock(data.log);
-    if (address === data.log.sender) {
+    if (address === data.log.sender && data.log.status === 1) {
       const message = 'Your lock request has been accepted.';
       enqueueSnackbar(message, { variant: 'info' });
     }

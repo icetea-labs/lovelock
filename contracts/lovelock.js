@@ -83,7 +83,7 @@ class LoveLock {
   @view getFollowed = () => this.getState('followed', {});
   setFollowed = value => this.setState('followed', value);
 
-  @transaction createLock(s_content: string, receiver: address, s_info = {}, bot_info): number {
+  @transaction createLock(s_content: string, receiver: ?address, s_info = {}, bot_info): number {
     const self = this;
     expectUserApproved(self);
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);

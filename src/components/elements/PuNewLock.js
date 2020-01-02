@@ -8,7 +8,8 @@ import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { withSnackbar } from 'notistack';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import WarningIcon from '@material-ui/icons/Warning';
@@ -30,6 +31,27 @@ import { FlexBox } from './StyledUtils';
 import ImageCrop from './ImageCrop';
 import { AvatarPro } from './AvatarPro';
 
+const textByLockTypes = {
+  lock: {
+    messageLabel: 'Your Message',
+    messagePlaceholder: 'Say something to your partner…',
+    okButton: 'Send',
+    sent: 'Lock sent'
+  },
+  crush: {
+    messageLabel: 'Your Message',
+    messagePlaceholder: 'Express yourself to your crush…',
+    okButton: 'Create',
+    sent: 'Lock created'
+  },
+  journal: {
+    messageLabel: 'Journal Description',
+    messagePlaceholder: 'My Amazing Blog',
+    okButton: 'Create',
+    sent: 'Journal created'
+  }
+}
+
 const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
@@ -46,7 +68,8 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1),
   },
   devidePrm: {
-    marginBottom: '12px',
+    marginTop: '1rem',
+    marginBottom: '1rem',
   },
   avatar: {
     width: 100,
@@ -58,7 +81,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const CustCheckbox = withStyles({
+const ColoredRadio = withStyles({
   root: {
     color: '#fe8dc3',
     '&$checked': {
@@ -66,7 +89,7 @@ const CustCheckbox = withStyles({
     },
   },
   checked: {},
-})(props => <Checkbox color="default" {...props} />);
+})(props => <Radio color="default" {...props} />);
 
 function TextFieldPlaceholder(props) {
   const classes = useStyles();
@@ -107,16 +130,8 @@ export const TagTitle = styled.div`
   .highlight {
     color: #8250c8;
   }
-  .prmContent {
-    margin-top: 8px;
+  &.prmContent {
   }
-`;
-
-const InfoText = styled.span`
-  font-size: 12px;
-  font-weight: 400;
-  color: #808899;
-  padding-left: 5px;
 `;
 
 const PreviewContainter = styled.div`
@@ -219,7 +234,7 @@ class PuNewLock extends React.Component {
       file: '',
       value: '',
       suggestions: [],
-      checked: false,
+      lockType: 'lock',
       cropFile: '',
       isOpenCrop: false,
       avatar: '/static/img/no-avatar.jpg',
@@ -286,21 +301,21 @@ class PuNewLock extends React.Component {
     const name = newValue.substring(1);
     const { address } = this.props;
     const { suggestions } = this.state;
-    let add = '';
+    let addr = '';
     if (suggestions) {
       const seletedItem = suggestions.filter(item => item.nick === name);
       if (seletedItem && seletedItem.length > 0) {
-        add = seletedItem[0].address;
+        addr = seletedItem[0].address;
       }
     }
-    if (add === address) {
+    if (addr === address) {
       this.setState({
         isJournal: true,
       });
     }
     this.setState({
       value: newValue,
-      partner: add,
+      partner: addr,
     });
   };
 
@@ -317,17 +332,17 @@ class PuNewLock extends React.Component {
   handleCheckChange = e => {
     document.activeElement.blur();
 
-    const check = e.target.checked;
+    const lockType = e.target.value;
 
-    if (check) {
+    if (lockType === 'lock') {
       this.setState({
-        checked: check,
+        lockType,
         okText: 'Create',
         partner: process.env.REACT_APP_BOT_LOVER,
       });
     } else {
       this.setState({
-        checked: false,
+        lockType,
         okText: 'Send',
         value: '',
         partner: '',
@@ -373,20 +388,11 @@ class PuNewLock extends React.Component {
   };
 
   createJournal = () => {
-    // const { locks, enqueueSnackbar } = this.props;
-    let message = '';
-    // for (let i = 0; i < locks.length; i++) {
-    //   if (locks[i].sender === locks[i].receiver) {
-    //     message = 'You already had a journal and cannot create one more.';
-    //     enqueueSnackbar(message, { variant: 'error' });
-    //   }
-    // }
-
-    if (message) {
-      this.closeJournal();
-    } else {
-      this.setState({ isJournal: false });
-    }
+    this.setState({
+      value: '',
+      lockType: 'journal',
+      isJournal: false 
+    });
   };
 
   onKeyEsc = () => {
@@ -399,27 +405,36 @@ class PuNewLock extends React.Component {
     this.dialogShown = value;
   };
 
-  async createLock(partner, promiseStm, date, file) {
+  async createLock() {
     const { setLoading, enqueueSnackbar, close } = this.props;
-    const { firstname, lastname, cropFile, checked, botReply } = this.state;
+    const { 
+      promiseStm, 
+      date, 
+      file, 
+      firstname, 
+      lastname, 
+      cropFile, 
+      lockType, 
+      lockName,
+      botReply 
+    } = this.state;
+
+    let partner = this.state.partner
     let hash = [];
+    let botInfo
 
-    // this.timeoutHanle1 = setTimeout(async () => {
+    console.log(this.state)
+
     try {
-      if (!partner) {
-        const message = 'Please choose your partner.';
-        enqueueSnackbar(message, { variant: 'error' });
-        setLoading(false);
-        return;
-      }
-      if (!promiseStm) {
-        const message = 'Please input your lock.';
-        enqueueSnackbar(message, { variant: 'error' });
-        return;
-      }
-
-      let botInfo;
-      if (checked) {
+      if (lockType === 'lock') {
+        if (!partner) {
+          const message = 'Please choose your partner.';
+          enqueueSnackbar(message, { variant: 'error' });
+          setLoading(false);
+          return;
+        }
+      } else if (lockType === 'crush') {
+        partner = process.env.REACT_APP_BOT_LOVER
         if (!firstname) {
           const message = 'Please enter your crush first name.';
           enqueueSnackbar(message, { variant: 'error' });
@@ -441,7 +456,19 @@ class PuNewLock extends React.Component {
           return;
         }
         botInfo = { firstname, lastname, botReply };
+      } else if (lockType === 'journal') {
+        partner = null
+      } else {
+        enqueueSnackbar('Invalid lock type.', { variant: 'error' });
+        return;
       }
+
+      if (!promiseStm) {
+        const message = 'Please input ' + this.getMessage('messageLabel')
+        enqueueSnackbar(message, { variant: 'error' });
+        return;
+      }
+
       const uploadThenSendTx = async  opts => {
         setLoading(true);
 
@@ -455,27 +482,33 @@ class PuNewLock extends React.Component {
           hash = await saveBufferToIpfs(file);
         }
 
-        const info = { date, hash };
+        const info = { date, hash, lockName };
 
         return await sendTransaction(opts || this.props, 'createLock', promiseStm, partner, info, botInfo);
       };
 
       const result = await ensureToken(this.props, uploadThenSendTx);
 
-      // this.timeoutHanle2 = setTimeout(() => {
       if (result) {
-        const message = 'Your lock sent successfully.';
-        enqueueSnackbar(message, { variant: 'success' });
+        enqueueSnackbar(this.getMessage('sent'), { variant: 'success' });
         setLoading(false);
         close();
+
+        // redirect to the new lock
+        this.props.history.push('/lock/' + result.returnValue)
       }
-      // }, 50);
+
     } catch (err) {
-      const msg = handleError(err, 'sending newlock');
+      console.log(err)
+      const msg = handleError(err, 'creating new lock.');
       enqueueSnackbar(msg, { variant: 'error' });
       setLoading(false);
     }
-    // }, 100);
+  }
+
+  getMessage(id) {
+    const lockType = this.state.lockType
+    return textByLockTypes[lockType][id]
   }
 
   render() {
@@ -487,7 +520,7 @@ class PuNewLock extends React.Component {
       file,
       suggestions,
       value,
-      checked,
+      lockType,
       isOpenCrop,
       avatar,
       originFile,
@@ -498,26 +531,41 @@ class PuNewLock extends React.Component {
       placeholder: "type some letters to search",
       value,
       onChange: this.onPartnerChange,
-      autoFocus: true,
     };
 
     return (
       <>
         <CommonDialog
           title="New Lock"
-          okText={() => this.state.okText || 'Send'}
+          okText={this.getMessage('okButton')}
           close={close}
           onKeyEsc={this.onKeyEsc}
           confirm={() => {
-            this.createLock(partner, promiseStm, date, file);
+            this.createLock();
           }}
         >
-          {!checked && (
+          <TagTitle className="prmContent">Lock with</TagTitle>
+
+          <RadioGroup value={lockType} onChange={this.handleCheckChange} row>
+            <FormControlLabel
+              control={<ColoredRadio />}
+              value="lock"
+              label="Other member"
+            />
+            <FormControlLabel
+              control={<ColoredRadio />}
+              value="crush"
+              label="Your own crush"
+            />
+            <FormControlLabel
+              control={<ColoredRadio />}
+              value="journal"
+              label="Create a journal"
+            />
+          </RadioGroup>
+
+          {lockType === 'lock' && (
             <div>
-              <TagTitle>
-                <span>Lock with</span>
-                <InfoText>(Lock with yourself to create a journal)</InfoText>
-              </TagTitle>
               <Autosuggest
                 id="suggestPartner"
                 suggestions={suggestions}
@@ -529,11 +577,19 @@ class PuNewLock extends React.Component {
               />
             </div>
           )}
-          <FormControlLabel
-            control={<CustCheckbox checked={checked} onChange={this.handleCheckChange} value="checked" />}
-            label="or create your own crush"
-          />
-          {checked && (
+
+          {lockType === 'journal' && (
+            <div>
+              <TextFieldPlaceholder
+                label="Journal Name"
+                fullWidth
+                onChange={this.handleUsername}
+                name="lockName"
+              />
+            </div>
+              )}
+
+          {lockType === 'crush' && (
             <FlexBox>
               <PreviewContainter>
                 <div className="upload_img">
@@ -578,10 +634,10 @@ class PuNewLock extends React.Component {
             </FlexBox>
           )}
           <DividerCus />
-          <TagTitle className="prmContent">Your Message</TagTitle>
+          <TagTitle className="prmContent">{this.getMessage('messageLabel')}</TagTitle>
           <TextFieldMultiLine
             id="outlined-multiline-static"
-            placeholder={checked ? 'Express yourself to your crush…' : 'Say something to your partner…'}
+            placeholder={this.getMessage('messagePlaceholder')}
             multiline
             fullWidth
             rows="4"
@@ -605,7 +661,7 @@ class PuNewLock extends React.Component {
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
                     <span className="warningText">
-                      This locks will be public. Private locks are not yet supported for this beta version.
+                      This lock will be public. Private locks will be supported soon.
                     </span>
                   </span>
                 ) : (

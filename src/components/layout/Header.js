@@ -704,7 +704,7 @@ function Header(props) {
       {/* friReqMenu */}
       {/* notiList */}
       {needAuth && <PasswordPrompt />}
-      {isNewLock && <PuNewLock close={closePopup} />}
+      {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );
