@@ -652,6 +652,7 @@ class PuNewLock extends React.Component {
             isCreatePro
             hasParentDialog
             onDialogToggle={this.onDialogToggle}
+            photoButtonText="Cover"
           />
           <WarningPass>
             <SnackbarContent

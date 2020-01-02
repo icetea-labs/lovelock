@@ -211,7 +211,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro, onBlogClick, hasParentDialog, onDialogToggle } = props;
+  const { files, date, isCreatePro, onBlogClick, hasParentDialog, onDialogToggle, photoButtonText } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
   const [isOpenCrop, _setIsOpenCrop] = useState(false);
@@ -372,7 +372,7 @@ export default function AddInfoMessage(props) {
             <ActionItem>
               <div className="icon-upload">
                 <i className="material-icons">insert_photo</i>
-                <div>Photo</div>
+                <div>{photoButtonText || 'Photo'}</div>
               </div>
               <input
                 accept={isCreatePro ? 'image/jpeg,image/png' : 'image/jpeg,image/png,image/gif'}

@@ -163,7 +163,7 @@ function Mypage(props) {
 
   if (myPageInfo && myPageInfo.username) {
     const pathname = `/u/${myPageInfo.username}`;
-    window.history.pushState(null, '', pathname);
+    window.history.replaceState(null, '', pathname);
   }
 
   return (
