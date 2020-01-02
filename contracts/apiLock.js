@@ -116,6 +116,9 @@ exports.apiEditLock = (self, lockIndex, data, contributors) => {
     if (data.lockName != null) {
       lock.s_info.lockName = data.lockName
     }
+  
+    expect(data.message !== '', 'Message is required.');
+    
     if (data.message != null) {
       if (msg.sender === lock.sender) {
         lock.s_content = data.message
