@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { memoryList, proposeInfo, loading } = props;
+  const { memoryList, proposeInfo, loading, onMemoryAdded, handleNewCollection } = props;
   const [memorydata, setMemorydata] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
   const [limit, setLimit] = useState(5);
@@ -87,7 +87,16 @@ function MemoryContainer(props) {
 
   const renderMemory = () => {
     return memorydata.slice(0, limit).map((memory, index) => {
-      return <MemoryContent key={index} proIndex={memory.proIndex} memory={memory} propose={proposeInfo} />;
+      return (
+        <MemoryContent
+          key={index}
+          proIndex={memory.id}
+          memory={memory}
+          propose={proposeInfo}
+          onMemoryAdded={onMemoryAdded}
+          handleNewCollection={handleNewCollection}
+        />
+      );
     });
   };
 

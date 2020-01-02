@@ -226,9 +226,13 @@ export default function AddInfoMessage(props) {
     if (files.length === 0) {
       setPicPreview([]);
     } else {
-      const arrFiles = files;
-      const urlFiles = arrFiles.map(file => {
-        const src = window.URL.createObjectURL(new Blob([file]));
+      const urlFiles = files.map(file => {
+        let src = '';
+        if (file.src) {
+          src = file.src;
+        } else {
+          src = window.URL.createObjectURL(new Blob([file]));
+        }
         return { file, src };
       });
       setPicPreview(urlFiles);

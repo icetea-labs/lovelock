@@ -30,27 +30,7 @@ import CommonDialog from './CommonDialog';
 import { FlexBox } from './StyledUtils';
 import ImageCrop from './ImageCrop';
 import { AvatarPro } from './AvatarPro';
-
-const textByLockTypes = {
-  lock: {
-    messageLabel: 'Your Message',
-    messagePlaceholder: 'Say something to your partner…',
-    okButton: 'Send',
-    sent: 'Lock sent'
-  },
-  crush: {
-    messageLabel: 'Your Message',
-    messagePlaceholder: 'Express yourself to your crush…',
-    okButton: 'Create',
-    sent: 'Lock created'
-  },
-  journal: {
-    messageLabel: 'Journal Description',
-    messagePlaceholder: 'My Amazing Blog',
-    okButton: 'Create',
-    sent: 'Journal created'
-  }
-}
+import appConstants from "../../helper/constants";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -391,7 +371,7 @@ class PuNewLock extends React.Component {
     this.setState({
       value: '',
       lockType: 'journal',
-      isJournal: false 
+      isJournal: false
     });
   };
 
@@ -407,23 +387,21 @@ class PuNewLock extends React.Component {
 
   async createLock() {
     const { setLoading, enqueueSnackbar, close } = this.props;
-    const { 
-      promiseStm, 
-      date, 
-      file, 
-      firstname, 
-      lastname, 
-      cropFile, 
-      lockType, 
+    const {
+      promiseStm,
+      date,
+      file,
+      firstname,
+      lastname,
+      cropFile,
+      lockType,
       lockName,
-      botReply 
+      botReply
     } = this.state;
 
     let partner = this.state.partner
     let hash = [];
     let botInfo
-
-    console.log(this.state)
 
     try {
       if (lockType === 'lock') {
@@ -507,8 +485,8 @@ class PuNewLock extends React.Component {
   }
 
   getMessage(id) {
-    const lockType = this.state.lockType
-    return textByLockTypes[lockType][id]
+    const lockType = this.state.lockType;
+    return appConstants.textByLockTypes[lockType][id];
   }
 
   render() {

@@ -151,7 +151,7 @@ exports.apiEditMemory = (self, memIndex, content, info) => {
   }
 
   if (info != null) {
-    const { hash, date } = info
+    const { hash, date, collectionId } = info
     if (hash != null) {
       expect(Array.isArray(hash), 'info.hash must be an array.')
       hash.forEach(h => {
@@ -166,6 +166,11 @@ exports.apiEditMemory = (self, memIndex, content, info) => {
     if (date != null) {
       expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
       mem.info.date = date
+    }
+  
+    if (collectionId != null) {
+      expect(typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId), 'info.collectionId must be a valid number.')
+      mem.info.collectionId = collectionId
     }
   }
   
@@ -185,7 +190,7 @@ exports.apiDeleteMemory = (self, memIndex) => {
   const lockIndex = mem.lockIndex;
 
   const lock = locks[lockIndex]
-  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.") 
+  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
 
   lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
   // save locks
