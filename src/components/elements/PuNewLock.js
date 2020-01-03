@@ -647,7 +647,7 @@ class PuNewLock extends React.Component {
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
                     <span className="warningText">
-                      Please contact customer support to unlock your account before you can update profile and post
+                      Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post
                       contents.
                     </span>
                   </span>

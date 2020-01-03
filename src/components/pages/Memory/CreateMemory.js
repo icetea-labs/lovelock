@@ -678,7 +678,7 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="collection" id="outlined-collection" />}
                   >
                     <option value="">(No collection)</option>
-                    {collections.map(c => (
+                    {(collections || []).map(c => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>

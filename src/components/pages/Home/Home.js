@@ -41,6 +41,19 @@ const RightBox = styled.div`
   img {
     max-width: 158px;
   }
+  .note {
+    padding: 12px 12px 12px 20px;
+    background-color: #fe7;
+    line-height: 1.4;
+    text-align: left;
+    margin-top: -1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 6px;
+    h5 {
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
+  }
   @media (max-width: 768px) {
     img {
       width: 25vw;
@@ -201,6 +214,11 @@ function Home(props) {
         <ShadowBox>
           <RightBox>
             <div>
+              <div className="note">
+                <h5>ACCOUNT ACTIVATION REQUIRED</h5>
+                <span>LoveLock is in beta and not yet open to public. Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation your account before you can post contents.</span>
+              </div>
+
               <img src="/static/img/plant.svg" alt="plant" />
               <div className="emptyTitle">
                 <h1>You have no lock</h1>
