@@ -230,6 +230,8 @@ function MemoryContent(props) {
   const [actionMenu, setActionMenu] = useState(null);
   const [isEditOpened, setIsEditOpened] = useState(false);
   const classes = useStyles();
+  
+  const isEditable = !memory.info.blog && memory.type !== appConstants.memoryTypes.systemGenerated;
 
   useEffect(() => {
     let cancel = false;
@@ -638,7 +640,7 @@ function MemoryContent(props) {
           }
         />
         
-        {(!memory.info.blog && memory.type !== appConstants.memoryTypes.systemGenerated) && (
+        {isEditable && (
           <Menu
             anchorEl={actionMenu}
             open={Boolean(actionMenu)}
