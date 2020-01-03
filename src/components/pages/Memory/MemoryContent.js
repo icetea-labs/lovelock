@@ -38,6 +38,7 @@ import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
 import CommonDialog from "../../elements/CommonDialog";
 import CreateMemory from "./CreateMemory";
+import appConstants from "../../../helper/constants";
 
 const Copyright = styled.div`
   display: flex;
@@ -618,7 +619,9 @@ function MemoryContent(props) {
   
   function openEditMemoryModal() {
     closeActionMenu();
-    setIsEditOpened(true);
+    setTimeout(() => {
+      setIsEditOpened(true);
+    }, 0);
   }
   
   return (
@@ -635,12 +638,14 @@ function MemoryContent(props) {
           }
         />
         
-        {!memory.info.blog && (
+        {(!memory.info.blog && memory.type !== appConstants.memoryTypes.systemGenerated) && (
           <Menu
             anchorEl={actionMenu}
             open={Boolean(actionMenu)}
             onClose={closeActionMenu}
-            disableScrollLock={true}
+            getContentAnchorEl={null}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
           >
             <MenuItem onClick={openEditMemoryModal}>Edit</MenuItem>
           </Menu>

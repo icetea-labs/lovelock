@@ -19,6 +19,10 @@ const appConstants = {
       sent: 'Journal created'
     }
   },
+  memoryTypes: {
+    systemGenerated: 1,
+    manualGenerated: 0,
+  }
 };
 
 export default appConstants;
