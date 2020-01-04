@@ -26,6 +26,7 @@ import {
   applyRotation,
   imageResize,
   handleError,
+  copyToClipboard
 } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -466,14 +467,7 @@ function ChangeProfile(props) {
                         // disabled
                         readOnly
                         onClick={() => {
-                          const dummy = document.createElement('textarea');
-                          document.body.appendChild(dummy);
-                          dummy.value = address;
-                          dummy.select();
-                          document.execCommand('copy');
-                          document.body.removeChild(dummy);
-                          const message = 'Copied';
-                          enqueueSnackbar(message, { variant: 'info' });
+                          copyToClipboard(address, enqueueSnackbar)
                         }}
                         value={address}
                         InputProps={{

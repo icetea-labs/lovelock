@@ -807,3 +807,13 @@ export async function getUserSuggestions(value) {
 function escapeRegexCharacters(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+export function copyToClipboard(text, enqueueSnackbar) {
+  const dummy = document.createElement('textarea');
+  document.body.appendChild(dummy);
+  dummy.value = text;
+  dummy.select();
+  document.execCommand('copy');
+  document.body.removeChild(dummy);
+  enqueueSnackbar && enqueueSnackbar('Copied', { variant: 'success' });
+}

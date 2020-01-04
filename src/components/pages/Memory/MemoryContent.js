@@ -28,6 +28,7 @@ import {
   signalPrerenderDone,
   smartFetchIpfsJson,
   ensureHashUrl,
+  copyToClipboard
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -228,6 +229,7 @@ function MemoryContent(props) {
   const [isOpenModal, setOpenModal] = useState(false);
   const [actionMenu, setActionMenu] = useState(null);
   const [isEditOpened, setIsEditOpened] = useState(false);
+  const [permLink, setPermLink] = useState();
   const classes = useStyles();
 
   useEffect(() => {
@@ -616,16 +618,22 @@ function MemoryContent(props) {
     setActionMenu(null);
   }
   
-  function openEditMemoryModal() {
+  function openEditPostModal() {
     closeActionMenu();
     setIsEditOpened(true);
+  }
+
+  function openPermLinkModal() {
+    const link = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${memory.id}`
+    closeActionMenu();
+    setPermLink(link);
   }
   
   return (
     <>
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
         <CardHeader
-          avatar={<AvatarPro alt="img" hash={memoryDecrypted['s_tags'].avatar} />}
+          avatar={<AvatarPro alt={memoryDecrypted['s_tags']['display-name']} hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem(memoryDecrypted)}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
@@ -635,16 +643,15 @@ function MemoryContent(props) {
           }
         />
         
-        {!memory.info.blog && (
-          <Menu
-            anchorEl={actionMenu}
-            open={Boolean(actionMenu)}
-            onClose={closeActionMenu}
-            disableScrollLock={true}
-          >
-            <MenuItem onClick={openEditMemoryModal}>Edit</MenuItem>
-          </Menu>
-        )}
+        <Menu
+          anchorEl={actionMenu}
+          open={Boolean(actionMenu)}
+          onClose={closeActionMenu}
+          disableScrollLock={true}
+        >
+          <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
+          <MenuItem onClick={openEditPostModal}>Edit {memory.info.blog ? 'Blog Post' : 'Memory'}</MenuItem>
+        </Menu>
         
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
@@ -652,7 +659,7 @@ function MemoryContent(props) {
         {showComment && renderComments()}
         {isEditOpened && (
           <CommonDialog
-            title={'Edit Memory'}
+            title='Edit Memory'
             close={() => setIsEditOpened(false)}
           >
             <CreateMemory
@@ -663,6 +670,21 @@ function MemoryContent(props) {
               handleNewCollection={handleNewCollection}
               memory={memoryDecrypted}
             />
+          </CommonDialog>
+        )}
+        {permLink && (
+          <CommonDialog
+            title='Permanent Link'
+            cancelText='Close'
+            cancel={() => setPermLink(null)}
+            close={() => setPermLink(null)}
+          >
+            <span>{permLink}</span>
+            <a style={{ paddingLeft: 10 }}
+              href="#"
+              title='Click to copy to clipboard'
+              onClick={e => copyToClipboard(permLink, enqueueSnackbar)}
+            >Copy</a>
           </CommonDialog>
         )}
       </Card>
