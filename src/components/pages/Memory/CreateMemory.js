@@ -17,7 +17,7 @@ import {
   saveToIpfs,
   saveFileToIpfs,
   saveBufferToIpfs,
-  encodeWithPublicKey,
+  // encodeWithPublicKey,
   sendTxUtil,
   handleError,
 } from '../../../helper';
@@ -148,19 +148,24 @@ export default function CreateMemory(props) {
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
+
   const editMode = !!memory;
+  const editBlogData = memory && memory.info && memory.info.blog && JSON.parse(memory.content)
 
   const avatar = useSelector(state => state.account.avatar);
   const rName = useSelector(state => state.account.r_name);
   const sName = useSelector(state => state.account.s_name);
   const privateKey = useSelector(state => state.account.privateKey);
-  const publicKey = useSelector(state => state.loveinfo.topInfo.r_publicKey);
+  // const publicKey = useSelector(state => state.loveinfo.topInfo.r_publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  const [filesBuffer, setFilesBuffer] = useState(editMode ? memory.info.hash : []);
-  const [memoryContent, setMemoryContent] = useState(editMode ? memory.content : '');
+  const [filesBuffer, setFilesBuffer] = useState(editBlogData ? 
+    (editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url ? [editBlogData.meta.coverPhoto.url] : []) 
+    : (editMode ? memory.info.hash : []));
+  const [memoryContent, setMemoryContent] = useState(editBlogData ? editBlogData.meta.title : (editMode ? memory.content : ''));
+
   const [memoDate, setMemoDate] = useState(editMode ? memory.info.date : new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
@@ -172,6 +177,7 @@ export default function CreateMemory(props) {
   const [previewOn, setPreviewOn] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
+  const showError = e => enqueueSnackbar(e, { variant: 'error' })
 
   // Is this component display as "compact" version (e.g. on mobile)
   const isCompact = useMediaQuery(theme => theme.breakpoints.down('xs'));
@@ -249,6 +255,12 @@ export default function CreateMemory(props) {
     !grayLayout && setGrayLayout(true);
   }
 
+  function mergeEdittingBlogData() {
+    if (!editBlogData) return
+    Object.assign(editBlogData.meta, { title: memoryContent })
+    return editBlogData
+  }
+
   function extractBlogInfo(content) {
     let firstImg;
     let firstLine;
@@ -302,8 +314,8 @@ export default function CreateMemory(props) {
       })
       .catch(err => {
         setGLoading(false);
-        const message = `An error has occured, you can try again later: ${err.message}`;
-        enqueueSnackbar(message, { variant: 'error' });
+        console.error(err)
+        showError(`An error has occured, you can try again later: ${err.message}`);
       });
   }
 
@@ -337,10 +349,10 @@ export default function CreateMemory(props) {
         const submitContent = await saveFileToIpfs([buffer]);
 
         const meta = extractBlogInfo(combined);
-        const blogData = JSON.stringify({
+        const blogData = {
           meta,
           blogHash: submitContent,
-        });
+        };
 
         return handleShareMemory(blogData, opts);
       }
@@ -359,8 +371,7 @@ export default function CreateMemory(props) {
       setBlogSubtitle('');
       delDraft();
     } else {
-      const message = 'Please enter memory content.';
-      enqueueSnackbar(message, { variant: 'error' });
+      showError('Please enter memory content.');
     }
   }
 
@@ -444,6 +455,7 @@ export default function CreateMemory(props) {
   }
 
   function addCollectionId(info) {
+    console.log(postCollectionId)
     const colId = +postCollectionId;
     if (postCollectionId !== '' && typeof colId === 'number' && !isNaN(colId)) {
       info.collectionId = colId;
@@ -456,60 +468,103 @@ export default function CreateMemory(props) {
     }
   }
 
+  function getBlogCoverSize() {
+    const img = document.querySelector('.edit-mode .imgContent img.medium-zoom-image')
+    return {
+      width: img.naturalWidth,
+      height: img.naturalHeight
+    }
+  }
+
   async function handleShareMemory(blogData, blogTokenOpts) {
-    // NOTE: blogData is undefined for regular post, and object for blog post
-    if (!blogData && !memoryContent && !filesBuffer) {
-      const message = 'Please enter memory content or add a photo.';
-      enqueueSnackbar(message, { variant: 'error' });
-      return;
+
+    // NOTE: blogData is undefined for regular post, and is an object for blog post
+
+    if (!blogData && !memoryContent && (!filesBuffer || !filesBuffer.length)) {
+      return showError('Please enter memory content or add a photo.')
+    }
+
+    if (blogData && (!blogData.meta || !blogData.meta.title)) {
+      return showError('Blog title cannot be empty.')
+    }
+
+    if (privacy) {
+      return showError('Private memory is not currently supported.')
     }
     
-    let bufferImages = [];
-    let srcImages = [];
+    const bufferImages = [];
+    const srcImages = [];
     
-    if (!blogData) {
+    if (filesBuffer && filesBuffer.length) {
+
+      if (filesBuffer.length > 5) {
+        return showError('Choose maximum of 5 photos. Memories deserve the best pictures.')
+      }
+
       const max10M = 1048576 * 10;
       
       for (let i = 0; i < filesBuffer.length; i++) {
         const fileByteLength = filesBuffer[i].byteLength;
         
+        // without fileByteLength => it must be an existing image
+        // that is, an fully http/https URL or a blob: one
         if (!fileByteLength) {
-          const imageParts = filesBuffer[i].src.split('/');
-          srcImages.push(imageParts[3]);
+          // get the hash part and push to srcImages
+          const imageParts = (filesBuffer[i].src || filesBuffer[i]).split('/');
+          srcImages.push(imageParts.pop());
           continue;
         }
         
         if (fileByteLength > max10M) {
           const message = `Image at ${i + 1} position is over 10MB. Please choose smaller image.`;
-          enqueueSnackbar(message, { variant: 'error' });
-          return;
+          return showError(message);
         }
   
         bufferImages.push(filesBuffer[i]);
       }
     }
 
-    const content = blogData || memoryContent;
-    let params = [];
-
+    let params = []
     const uploadThenSendTx = async opts => {
       setGLoading(true);
       
-      let newContent = content;
       let newImageHashes = [];
-      let info = {};
 
-      if (privacy && !blogData) {
-        // TODO: support private blog
-        newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        newContent = JSON.stringify(newContent);
-        newImageHashes = await saveBufferToIpfs(bufferImages, { privateKey, publicKey });
-      } else {
-        newImageHashes = !blogData && (await saveBufferToIpfs(bufferImages));
+      // NOTE: currently, we don't support private message, so comment out 'privacy' stuff
+      // for review later
+
+      // if (privacy && !blogData) { // TODO: support private blog
+      //   newContent = await encodeWithPublicKey(content, privateKey, publicKey);
+      //   newContent = JSON.stringify(newContent);
+      //   newImageHashes = await saveBufferToIpfs(bufferImages, { privateKey, publicKey });
+      // } else {
+
+        if (bufferImages.length) {
+          newImageHashes = await saveBufferToIpfs(bufferImages)
+        }
+
+        const info = { hash: [] };
         if (blogData) info.blog = true;
-      }
+
+      //}
+
+      let newContent = memoryContent;
+      const allImages = newImageHashes ? srcImages.concat(newImageHashes) : srcImages;
   
-      info.hash = newImageHashes ? srcImages.concat(newImageHashes) : srcImages;
+      if (blogData) {
+        // If it is an old image, we do not need to update cover photo
+        if (newImageHashes && newImageHashes.length) {
+          blogData.meta = blogData.meta || {}
+          blogData.meta.coverPhoto = blogData.meta.coverPhoto || {}
+          blogData.meta.coverPhoto.url = allImages[0]
+          Object.assign(blogData.meta.coverPhoto, getBlogCoverSize())
+        } else if (!srcImages.length) {
+          delete blogData.meta.coverPhoto
+        }
+        newContent = JSON.stringify(blogData)
+      } else {
+        info.hash = allImages
+      }
       addMemoTimestamp(info);
       addCollectionId(info);
       
@@ -537,7 +592,7 @@ export default function CreateMemory(props) {
     } catch (err) {
       setGLoading(false);
       const message = handleError(err, 'sending memory');
-      enqueueSnackbar(message, { variant: 'error' });
+      showError(message);
     }
   }
 
@@ -568,6 +623,14 @@ export default function CreateMemory(props) {
       ],
       entityMap: {},
     };
+  }
+
+  function getPlaceholder() {
+    if (editMode) {
+      return editBlogData ? 'Enter post title' : 'Enter memory content'
+    }
+
+    return grayLayout ? 'Describe your memory' : 'Add a new memory…'
   }
 
   // function urlToBase64(url) {
@@ -621,9 +684,9 @@ export default function CreateMemory(props) {
           <Grid container direction="column">
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
-                <Grid item>
+                {!editMode && <Grid item>
                   <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
-                </Grid>
+                </Grid>}
                 <Grid item xs={12}>
                   <BootstrapTextField
                     rows={3}
@@ -631,7 +694,7 @@ export default function CreateMemory(props) {
                     fullWidth
                     multiline
                     value={memoryContent}
-                    placeholder={grayLayout ? 'Describe your memory' : 'Add a new memory…'}
+                    placeholder={getPlaceholder()}
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
                   />
@@ -640,6 +703,9 @@ export default function CreateMemory(props) {
             </Grid>
             <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
+                hasParentDialog
+                photoButtonText = {editBlogData ? 'Change Cover' : 'Photo'}
+                coverPhotoMode = {!!editBlogData}
                 files={filesBuffer}
                 date={memoDate}
                 grayLayout={grayLayout}
@@ -690,7 +756,7 @@ export default function CreateMemory(props) {
                   type="submit"
                   isGrayout={editMode ? false : disableShare}
                   onClick={() => {
-                    handleShareMemory();
+                    handleShareMemory(mergeEdittingBlogData());
                   }}
                   className={classes.btShare}
                 >

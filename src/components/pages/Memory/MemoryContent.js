@@ -629,9 +629,31 @@ function MemoryContent(props) {
   }
 
   function openPermLinkModal() {
-    const link = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${memory.id}`
     closeActionMenu();
+    const url = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${memory.id}`
+    const link = { url }
+    if (memory.info.blog) {
+      link.title = memoryDecrypted.meta.title
+      link.text = link.title
+    } else {
+      link.text = memory.content
+    }
+
     setPermLink(link);
+  }
+
+  function trySharePermLink() {
+    // Share API is only supported on modern MOBILE browser and Mac Safari
+    navigator.share && navigator.share(permLink)
+    .catch(err => {
+      if (err.name !== 'AbortError') {
+        console.error('Error sharing', err)
+        enqueueSnackbar('Error sharing: ' + err.messsage, { variant: 'error' })
+      }
+    });
+
+    // close the dialog
+    setPermLink(null)
   }
   
   return (
@@ -658,7 +680,8 @@ function MemoryContent(props) {
             transformOrigin={{ vertical: "top", horizontal: "left" }}
           >
             <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
-            <MenuItem onClick={openEditPostModal}>Edit {memory.info.blog ? 'Blog Post' : 'Memory'}</MenuItem>
+            <MenuItem onClick={openEditPostModal}>{memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}</MenuItem>
+            {memory.info.blog && <MenuItem>Edit Blog Content</MenuItem>}
           </Menu>
         )}
         
@@ -668,7 +691,7 @@ function MemoryContent(props) {
         {showComment && renderComments()}
         {isEditOpened && (
           <CommonDialog
-            title='Edit Memory'
+            title={memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}
             close={() => setIsEditOpened(false)}
           >
             <CreateMemory
@@ -684,16 +707,16 @@ function MemoryContent(props) {
         {permLink && (
           <CommonDialog
             title='Permanent Link'
-            cancelText='Close'
-            cancel={() => setPermLink(null)}
+            cancelText={navigator.share ? 'Share' : 'Close'}
+            cancel={trySharePermLink}
+            okText='Copy'
+            confirm={() => {
+              copyToClipboard(permLink.url, enqueueSnackbar)
+              setPermLink(null)
+            }}
             close={() => setPermLink(null)}
           >
-            <span>{permLink}</span>
-            <a style={{ paddingLeft: 10 }}
-              href="#"
-              title='Click to copy to clipboard'
-              onClick={e => copyToClipboard(permLink, enqueueSnackbar)}
-            >Copy</a>
+            {permLink.url}
           </CommonDialog>
         )}
       </Card>

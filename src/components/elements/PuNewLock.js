@@ -627,7 +627,7 @@ class PuNewLock extends React.Component {
             date={date}
             onChangeDate={this.onChangeDate}
             onChangeMedia={this.onChangeMedia}
-            isCreatePro
+            coverPhotoMode
             hasParentDialog
             onDialogToggle={this.onDialogToggle}
             photoButtonText="Cover"
