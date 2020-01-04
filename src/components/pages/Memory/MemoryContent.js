@@ -39,6 +39,7 @@ import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
 import CommonDialog from "../../elements/CommonDialog";
 import CreateMemory from "./CreateMemory";
+import appConstants from "../../../helper/constants";
 
 const Copyright = styled.div`
   display: flex;
@@ -231,6 +232,8 @@ function MemoryContent(props) {
   const [isEditOpened, setIsEditOpened] = useState(false);
   const [permLink, setPermLink] = useState();
   const classes = useStyles();
+  
+  const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
 
   useEffect(() => {
     let cancel = false;
@@ -620,7 +623,9 @@ function MemoryContent(props) {
   
   function openEditPostModal() {
     closeActionMenu();
-    setIsEditOpened(true);
+    setTimeout(() => {
+      setIsEditOpened(true);
+    }, 0);
   }
 
   function openPermLinkModal() {
@@ -643,15 +648,19 @@ function MemoryContent(props) {
           }
         />
         
-        <Menu
-          anchorEl={actionMenu}
-          open={Boolean(actionMenu)}
-          onClose={closeActionMenu}
-          disableScrollLock={true}
-        >
-          <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
-          <MenuItem onClick={openEditPostModal}>Edit {memory.info.blog ? 'Blog Post' : 'Memory'}</MenuItem>
-        </Menu>
+        {isEditable && (
+          <Menu
+            anchorEl={actionMenu}
+            open={Boolean(actionMenu)}
+            onClose={closeActionMenu}
+            getContentAnchorEl={null}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
+          >
+            <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
+            <MenuItem onClick={openEditPostModal}>Edit {memory.info.blog ? 'Blog Post' : 'Memory'}</MenuItem>
+          </Menu>
+        )}
         
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
