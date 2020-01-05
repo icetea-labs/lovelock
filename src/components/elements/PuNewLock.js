@@ -563,6 +563,7 @@ class PuNewLock extends React.Component {
                 fullWidth
                 onChange={this.handleUsername}
                 name="lockName"
+                inputProps={{ maxLength: 28 }}
               />
             </div>
               )}

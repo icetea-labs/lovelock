@@ -170,6 +170,7 @@ export default function EditLockModal(props) {
             variant="outlined"
             value={displayName}
             autoFocus
+            inputProps={{ maxLength: 28 }}
           />
         )}
   
