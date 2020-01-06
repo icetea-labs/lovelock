@@ -17,9 +17,6 @@ const EditLock = styled.div`
     &__name {
       margin-bottom: 25px;
     }
-    &__message {
-    
-    }
     &__date {
       display: flex;
       justify-content: flex-end;

@@ -11,11 +11,10 @@ import { withRouter } from 'react-router-dom';
 
 import { getWeb3, grantAccessToken } from '../../service/tweb3';
 import * as actions from '../../store/actions';
-// import { wallet, decode, savetoLocalStorage } from '../../helper';
 import { wallet, decode } from '../../helper';
 import { useRemember } from '../../helper/hooks';
 import CommonDialog from '../elements/CommonDialog';
-// import { encode } from '../../helper/encode';
+import { LinkPro } from "../elements/Button";
 
 const LOGIN_BY_PRIVATEKEY = 0;
 const LOGIN_BY_MNEMONIC = 1;
@@ -166,6 +165,11 @@ function PasswordPrompt(props) {
   function handleConfirm() {
     confirm(password);
   }
+  
+  function goToForgotPassScreen() {
+    props.history.push('/login');
+    dispatch(actions.setStep('two'));
+  }
 
   return (!credLoading.current || autoPassFailed) && needAuth ? (
     <CommonDialog
@@ -188,6 +192,9 @@ function PasswordPrompt(props) {
         type="password"
         autoComplete="current-password"
       />
+      <div>
+        <LinkPro onClick={goToForgotPassScreen}>Forgot password?</LinkPro>
+      </div>
       <FormControlLabel
         control={
           <Checkbox
