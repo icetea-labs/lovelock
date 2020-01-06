@@ -1,39 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
-import { useHistory } from 'react-router-dom';
-
-import Chip from '@material-ui/core/Chip';
-import CollectionsIcon from '@material-ui/icons/Collections';
-import { rem } from '../../elements/StyledUtils';
-import MemoryContainer from '../Memory/MemoryContainer';
-import CreateMemory from '../Memory/CreateMemory';
+import MemoryList from '../Memory/MemoryList';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
-const RightBox = styled.div`
-  padding: 0 0 ${rem(45)} ${rem(45)};
-  @media (max-width: 768px) {
-    padding-left: 0;
-  }
-`;
-
-const CollectionIndicator = styled.div`
-  margin-bottom: ${rem(16)};
-`;
-
 export default function RightContainer(props) {
-  const { proIndex, collectionId, handleNewCollection, isOwner, isContributor } = props;
-  const [changed, setChanged] = useState(false);
-  const address = useSelector(state => state.account.address);
-  const collections = useSelector(state => state.loveinfo.topInfo.collections);
-  const currentCol = !collections || collectionId == null ? '' : collections.find(c => c.id === collectionId);
+  const { proIndex, collectionId } = props;
+
+  const reduxCollections = useSelector(state => state.loveinfo.topInfo.collections);
+  const collections = collectionId == null ? null : reduxCollections
+  const currentCol = collections == null ? '' : collections.find(c => c.id === collectionId);
   const collectionName = currentCol == null ? '' : currentCol.name;
   const validCollectionId = collectionName ? collectionId : null;
+
+  const [changed, setChanged] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const history = useHistory();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -58,33 +41,13 @@ export default function RightContainer(props) {
   }
 
   return (
-    <RightBox>
-      {collectionName && (
-        <CollectionIndicator>
-          <Chip
-            color="primary"
-            label={collectionName}
-            icon={<CollectionsIcon />}
-            onDelete={() => history.push(`/lock/${proIndex}`)}
-          />
-        </CollectionIndicator>
-      )}
-      {address && (isOwner || isContributor) && (
-        <CreateMemory
-          proIndex={proIndex}
-          collectionId={validCollectionId}
-          collections={collections}
-          onMemoryAdded={refresh}
-          handleNewCollection={handleNewCollection}
-        />
-      )}
-      <MemoryContainer
-        collectionId={validCollectionId}
-        memorydata={[]}
-        loading={loading}
-        onMemoryAdded={refresh}
-        handleNewCollection={handleNewCollection}
-      />
-    </RightBox>
+    <MemoryList 
+      {...props}
+      onMemoryChanged={refresh}
+      loading={loading}
+      collections={collections}
+      collectionId={validCollectionId}
+      collectionName={collectionName}
+    />
   );
 }

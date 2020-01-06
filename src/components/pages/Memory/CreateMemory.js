@@ -7,15 +7,11 @@ import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import Editor from './Editor';
-import BlogModal from '../../elements/BlogModal';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
 import {
-  saveToIpfs,
-  saveFileToIpfs,
   saveBufferToIpfs,
   // encodeWithPublicKey,
   sendTxUtil,
@@ -23,10 +19,6 @@ import {
 } from '../../../helper';
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
-import MemoryTitle from './MemoryTitle';
-import { delDraft } from '../../../helper/draft';
-
-let blogBody = null;
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -144,7 +136,7 @@ const BootstrapTextField = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection, memory } = props;
+  const { onMemoryChanged, proIndex, collectionId, collections, handleNewCollection, memory, openBlogEditor } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -153,8 +145,6 @@ export default function CreateMemory(props) {
   const editBlogData = memory && memory.info && memory.info.blog && JSON.parse(memory.content)
 
   const avatar = useSelector(state => state.account.avatar);
-  const rName = useSelector(state => state.account.r_name);
-  const sName = useSelector(state => state.account.s_name);
   const privateKey = useSelector(state => state.account.privateKey);
   // const publicKey = useSelector(state => state.loveinfo.topInfo.r_publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
@@ -170,11 +160,7 @@ export default function CreateMemory(props) {
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
   const [disableShare, setDisableShare] = useState(true);
-  const [isOpenModal, setOpenModal] = useState(false);
   const [grayLayout, setGrayLayout] = useState(false);
-  const [blogSubtitle, setBlogSubtitle] = useState('');
-  const [blogTitle, setBlogTitle] = useState('');
-  const [previewOn, setPreviewOn] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
   const showError = e => enqueueSnackbar(e, { variant: 'error' })
@@ -213,7 +199,6 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setMemoryContent(value.normalize());
-    // setInitialBlogContent(makeDefaultBlogContent(value))
   }
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
@@ -261,201 +246,7 @@ export default function CreateMemory(props) {
     return editBlogData
   }
 
-  function extractBlogInfo(content) {
-    let firstImg;
-    let firstLine;
-
-    const { blocks } = content;
-
-    let b;
-    for (b of blocks) {
-      if (!firstImg) {
-        if (b.type === 'image') {
-          firstImg = b.data;
-        } else if (b.type === 'video') {
-          // get the video thumbnail
-          const data = b.data && b.data.embed_data;
-          if (data) {
-            firstImg = {
-              width: data.get('width'),
-              height: data.get('height'),
-              url: data.get('thumbnail_url'),
-            };
-            if (firstImg.url) {
-              firstImg.url = firstImg.url.replace('hqdefault.jpg', 'maxresdefault.jpg');
-            }
-          }
-        }
-      }
-      if (!firstLine) {
-        firstLine = b.text || '';
-        if (firstLine.length > 69) {
-          firstLine = `${firstLine.slice(0, 69)}…`;
-        }
-      }
-      if (firstImg && firstLine) break;
-    }
-
-    return {
-      title: firstLine,
-      coverPhoto: firstImg && {
-        width: firstImg.width,
-        height: firstImg.height,
-        url: firstImg.url,
-      },
-    };
-  }
-
-  function onSubmitEditor() {
-    setGLoading(true);
-    submitEditor()
-      .then(() => {
-        setGLoading(false);
-      })
-      .catch(err => {
-        setGLoading(false);
-        console.error(err)
-        showError(`An error has occured, you can try again later: ${err.message}`);
-      });
-  }
-
-  async function submitEditor() {
-    const combined = combineContent();
-    const { blocks } = combined;
-    if (validateEditorContent()) {
-      const uploadThenSendTx = async opts => {
-        const images = blocks.reduce((collector, b, i) => {
-          if (
-            b.type === 'image' &&
-            b.data.url &&
-            (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
-          ) {
-            collector[i] = fetch(b.data.url)
-              .then(r => r.arrayBuffer())
-              .then(Buffer.from);
-          }
-          return collector;
-        }, {});
-
-        if (Object.keys(images).length) {
-          const bufs = await Promise.all(Object.values(images));
-          const hashes = await saveToIpfs(bufs);
-          Object.keys(images).forEach((blockIndex, index) => {
-            blocks[blockIndex].data.url = /* process.env.REACT_APP_IPFS + */ hashes[index];
-          });
-        }
-
-        const buffer = Buffer.from(JSON.stringify(combined));
-        const submitContent = await saveFileToIpfs([buffer]);
-
-        const meta = extractBlogInfo(combined);
-        const blogData = {
-          meta,
-          blogHash: submitContent,
-        };
-
-        return handleShareMemory(blogData, opts);
-      }
-
-      await ensureToken(
-        {
-          tokenKey: privacy ? privateKey : tokenKey,
-          dispatch,
-        },
-        uploadThenSendTx
-      )
-
-      // Clean up
-      blogBody = null;
-      setBlogTitle('');
-      setBlogSubtitle('');
-      delDraft();
-    } else {
-      showError('Please enter memory content.');
-    }
-  }
-
-  function validateEditorContent() {
-    const { blocks } = combineContent();
-    let i;
-    for (i in blocks) {
-      if (blocks[i].text.trim() !== '') {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // function isNonemptyBlog(body) {
-  //   if (!body || !body.blocks || !body.blocks.length) return false
-  //   if (body.blocks.length > 1) return true
-  //   const b = body.blocks[0]
-  //   if (b.text ||
-  //     b.type === 'image' ||
-  //     b.type === 'video' ||
-  //     b.type === 'embed') {
-  //       return true
-  //     }
-
-  //   return false
-  // }
-
-  function onChangeEditorBody(editor) {
-    blogBody = editor.emitSerializedOutput();
-  }
-
-  function onPreviewSwitched(checked) {
-    setPreviewOn(checked);
-  }
-
-  function combineContent() {
-    if (!blogBody) {
-      // generate a empty body
-      blogBody = makeDefaultBlogContent('');
-    }
-    const body = blogBody;
-
-    const title = blogTitle;
-    const h1 = title && {
-      data: {},
-      depth: 0,
-      entityRanges: [],
-      inlineStyleRanges: [],
-      key: 'blok0',
-      text: title,
-      type: 'header-one',
-    };
-    const subtitle = blogSubtitle;
-    const h3 = subtitle && {
-      data: {},
-      depth: 0,
-      entityRanges: [],
-      inlineStyleRanges: [],
-      key: 'blok1',
-      text: subtitle,
-      type: 'header-three',
-    };
-
-    if (!h1 && !h3) return body; // nothing to merge
-
-    const combined = { ...body };
-    combined.blocks = [...combined.blocks];
-    if (h3) combined.blocks.unshift(h3);
-    if (h1) combined.blocks.unshift(h1);
-
-    return combined;
-  }
-
-  function closeEditorModal() {
-    setOpenModal(false);
-    setGrayLayout(false);
-
-    // ensure next time open in edit mode
-    setPreviewOn(false);
-  }
-
   function addCollectionId(info) {
-    console.log(postCollectionId)
     const colId = +postCollectionId;
     if (postCollectionId !== '' && typeof colId === 'number' && !isNaN(colId)) {
       info.collectionId = colId;
@@ -578,8 +369,7 @@ export default function CreateMemory(props) {
     };
 
     try {
-      // if it is a blog post, ensureToken at submitEditor already
-      const submitPromise = blogData ? uploadThenSendTx(blogTokenOpts) : ensureToken(
+      const submitPromise = ensureToken(
         {
           tokenKey: privacy ? privateKey : tokenKey,
           dispatch,
@@ -588,7 +378,7 @@ export default function CreateMemory(props) {
       )
       const result = await submitPromise
       resetValue();
-      onMemoryAdded(result.returnValue, params);
+      onMemoryChanged && onMemoryChanged({ editMode: editMode, index: result.returnValue, params });
     } catch (err) {
       setGLoading(false);
       const message = handleError(err, 'sending memory');
@@ -605,24 +395,6 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
-    setOpenModal(false);
-  }
-
-  function makeDefaultBlogContent(text) {
-    return {
-      blocks: [
-        {
-          data: {},
-          depth: 0,
-          entityRanges: [],
-          inlineStyleRanges: [],
-          key: 'blok2',
-          text,
-          type: 'unstyled',
-        },
-      ],
-      entityMap: {},
-    };
   }
 
   function getPlaceholder() {
@@ -633,49 +405,6 @@ export default function CreateMemory(props) {
     return grayLayout ? 'Describe your memory' : 'Add a new memory…'
   }
 
-  // function urlToBase64(url) {
-  //   return fetch(url)
-  //     .then(r => r.blob())
-  //     .then(blob => {
-  //       return new Promise((resolve, reject) => {
-  //         const reader = new FileReader();
-  //         reader.addEventListener('load', () => {
-  //           resolve(reader.result);
-  //         });
-  //         reader.addEventListener('error', reject);
-  //         reader.readAsDataURL(blob);
-  //       });
-  //     });
-  // }
-
-  // function cloneForIdbSave(content) {
-  //   return JSON.parse(JSON.stringify(content))
-  // }
-
-  async function saveDraft(context, content) {
-    // if (isNonemptyBlog(content)) {
-    //   // we need to change image from blob:// to base64
-    //   const body = cloneForIdbSave(content);
-    //   const blocks = body.blocks;
-    //   const images = blocks.reduce((collector, b, i) => {
-    //     if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
-    //       collector[i] = urlToBase64(b.data.url);
-    //     }
-    //     return collector;
-    //   }, {});
-    //   if (Object.keys(images).length) {
-    //     const base64Array = await Promise.all(Object.values(images));
-    //     Object.keys(images).forEach((blockIndex, index) => {
-    //       blocks[blockIndex].data.url = base64Array[index];
-    //     });
-    //   }
-    //   setDraft({
-    //     body,
-    //     title: blogTitle,
-    //     subtitle: blogSubtitle,
-    //   });
-    // }
-  }
   return (
     <>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
@@ -712,7 +441,8 @@ export default function CreateMemory(props) {
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
                 onBlogClick={editMode ? false : () => {
-                  setOpenModal(true);
+                  setGrayLayout(false)
+                  openBlogEditor()
                 }}
               />
             </Grid>
@@ -764,30 +494,6 @@ export default function CreateMemory(props) {
                 </ButtonPro>
               </Grid>
             )}
-            <BlogModal
-              open={isOpenModal}
-              handleClose={closeEditorModal}
-              handleSumit={onSubmitEditor}
-              handlePreview={onPreviewSwitched}
-              closeText="Cancel"
-              title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeEditorModal} />}
-            >
-              {!previewOn && (
-                <Editor
-                  initContent={blogBody || makeDefaultBlogContent(memoryContent)}
-                  title={blogTitle}
-                  onTitleChange={setBlogTitle}
-                  subtitle={blogSubtitle}
-                  onSubtitleChange={setBlogSubtitle}
-                  saveOptions={{
-                    interval: 1500, // save draft everytime user stop typing for 1.5 seconds
-                    save_handler: saveDraft,
-                  }}
-                  onChange={onChangeEditorBody}
-                />
-              )}
-              {previewOn && <Editor initContent={combineContent()} read_only />}
-            </BlogModal>
           </Grid>
         </ShadowBox>
       </CreatePost>

@@ -31,7 +31,7 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 
 function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
   if (info.date == null) {
-    info.date = block.timestamp;
+    info = { ...info, date: block.timestamp }
   } else {
     if (typeof info.date !== 'number' || !Number.isInteger(info.date) || info.date < 0) {
       throw new Error('info.date must be a timestamp (integer).');

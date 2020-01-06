@@ -99,8 +99,8 @@ export default function BlogModal(props) {
                     }
                   />
                 )}
-                {props.handleSumit && (
-                  <Button variant="contained" color="primary" onClick={props.handleSumit}>
+                {props.handleSubmit && (
+                  <Button variant="contained" color="primary" onClick={props.handleSubmit}>
                     Publish
                   </Button>
                 )}

@@ -41,25 +41,6 @@ import CommonDialog from "../../elements/CommonDialog";
 import CreateMemory from "./CreateMemory";
 import appConstants from "../../../helper/constants";
 
-const Copyright = styled.div`
-  display: flex;
-  line-height: 60px;
-  justify-content: center;
-  clear: both;
-  width: 100%;
-  margin: 0 auto;
-  margin-top: 70px;
-  max-width: 740px;
-  border-top: 1px solid #e1e1e1;
-  color: rgba(0, 0, 0, 0.54);
-  a {
-    color: inherit;
-    &:hover {
-      color: #8250c8;
-    }
-  }
-`;
-
 const useStylesFacebook = makeStyles({
   root: {
     position: 'relative',
@@ -212,15 +193,13 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, propose, proIndex, onMemoryAdded, handleNewCollection } = props;
+  const { memory, setNeedAuth, propose, proIndex, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
   setMemoryCollection(propose, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
-  const rName = useSelector(state => state.account.r_name);
-  const sName = useSelector(state => state.account.s_name);
-  const collections = useSelector(state => state.loveinfo.topInfo.collections);
+  const collections = propose.collections
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
@@ -234,6 +213,7 @@ function MemoryContent(props) {
   const classes = useStyles();
   
   const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
+  const isMyPost = address === memory.sender
 
   useEffect(() => {
     let cancel = false;
@@ -513,8 +493,8 @@ function MemoryContent(props) {
             handleClose={closeMemory}
             title={
               <MemoryTitle
-                sender={sName || memoryDecrypted.s_tags['display-name']}
-                receiver={rName || memoryDecrypted.r_tags['display-name']}
+                sender={memoryDecrypted.s_tags['display-name']}
+                receiver={memoryDecrypted.r_tags['display-name']}
                 handleClose={closeMemory}
               />
             }
@@ -541,14 +521,6 @@ function MemoryContent(props) {
                 />
               )}
             </div>
-            <Copyright>
-              <p>
-                Powered by&nbsp;
-                <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-                  Icetea Platform
-                </a>
-              </p>
-            </Copyright>
           </BlogModal>
         )}
       </>
@@ -628,6 +600,11 @@ function MemoryContent(props) {
     }, 0);
   }
 
+  function openEditBlogContent() {
+    closeActionMenu();
+    openBlogEditor(memoryDecrypted)
+  }
+
   function openPermLinkModal() {
     closeActionMenu();
     const url = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${memory.id}`
@@ -680,8 +657,8 @@ function MemoryContent(props) {
             transformOrigin={{ vertical: "top", horizontal: "left" }}
           >
             <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
-            <MenuItem onClick={openEditPostModal}>{memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}</MenuItem>
-            {memory.info.blog && <MenuItem>Edit Blog Content</MenuItem>}
+            {isMyPost && <MenuItem onClick={openEditPostModal}>{memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}</MenuItem>}
+            {isMyPost && memory.info.blog && <MenuItem onClick={openEditBlogContent}>Edit Blog Content</MenuItem>}
           </Menu>
         )}
         
@@ -698,7 +675,7 @@ function MemoryContent(props) {
               proIndex={proIndex}
               collectionId={memoryDecrypted.collection ? memoryDecrypted.collection.id : null}
               collections={collections}
-              onMemoryAdded={onMemoryAdded}
+              onMemoryChanged={onMemoryChanged}
               handleNewCollection={handleNewCollection}
               memory={memoryDecrypted}
             />
