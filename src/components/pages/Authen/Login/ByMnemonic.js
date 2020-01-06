@@ -11,13 +11,12 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import { wallet, savetoLocalStorage } from '../../../../helper';
-import { ButtonPro } from '../../../elements/Button';
+import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
-
 import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
 
@@ -45,7 +44,6 @@ const useStyles = makeStyles(theme => ({
 function ByMnemonic(props) {
   const { setLoading, setAccount, setStep, history } = props;
   const [password, setPassword] = useState('');
-  const [valueInput, setValueInput] = useState('');
   const [rePassErr] = useState('');
   const [isRemember, setIsRemember] = useRemember();
 
@@ -54,7 +52,7 @@ function ByMnemonic(props) {
   async function gotoLogin(e) {
     e.preventDefault();
 
-    const phrase = valueInput.trim();
+    const phrase = props.recoveryPhase.trim();
 
     if (!phrase) {
       enqueueSnackbar('Please input recovery phrase or key.', { variant: 'error' });
@@ -144,7 +142,7 @@ function ByMnemonic(props) {
 
   function handleMnemonic(event) {
     const value = event.target.value.trim();
-    setValueInput(value);
+    props.setRecoveryPhase(value);
   }
 
   function loginWithPrivatekey() {
@@ -157,6 +155,7 @@ function ByMnemonic(props) {
   }
 
   const classes = useStyles();
+  
   return (
     <form onSubmit={gotoLogin}>
       <TextField
@@ -173,7 +172,9 @@ function ByMnemonic(props) {
         helperText={rePassErr}
         error={rePassErr !== ''}
         autoFocus
+        value={props.recoveryPhase}
       />
+      <LinkPro onClick={() => props.setIsQRCodeActive(true)}>Scan QR Code</LinkPro>
       <TextField
         id="rePassword"
         label="New Password"

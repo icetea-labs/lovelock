@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import QueueAnim from 'rc-queue-anim';
@@ -9,6 +9,7 @@ import ByMnemonic from './ByMnemonic';
 import ByPassWord from './ByPassWord';
 import { LinkPro } from '../../../elements/Button';
 import * as actionCreate from '../../../../store/actions/create';
+import ScanQRCodeModal from "../../../elements/ScanQRCodeModal";
 
 const styles = () => ({
   //   button: {
@@ -19,11 +20,14 @@ const styles = () => ({
 
 function Login(props) {
   const { history, setStep, step } = props;
-
+  const [isQRCodeActive, setIsQRCodeActive] = useState(false);
+  const [recoveryPhase, setRecoveryPhase] = useState('');
+  
   function gotoRegister() {
     setStep('one');
     history.push('/register');
   }
+  
   return (
     <div>
       <QueueAnim delay={200} type={['top', 'bottom']}>
@@ -32,7 +36,13 @@ function Login(props) {
             <ShadowBoxAuthen>
               <HeaderAuthen title="Sign In" />
               {step === 'one' && <ByPassWord />}
-              {step === 'two' && <ByMnemonic />}
+              {step === 'two' && (
+                <ByMnemonic
+                  setIsQRCodeActive={setIsQRCodeActive}
+                  recoveryPhase={recoveryPhase}
+                  setRecoveryPhase={setRecoveryPhase}
+                />
+              )}
               <div className="btRegister">
                 <span>No account yet?</span>
                 <LinkPro onClick={gotoRegister}>Register</LinkPro>
@@ -41,6 +51,12 @@ function Login(props) {
           </BoxAuthen>
         </LayoutAuthen>
       </QueueAnim>
+      {isQRCodeActive && (
+        <ScanQRCodeModal
+          setIsQRCodeActive={setIsQRCodeActive}
+          setRecoveryPhase={setRecoveryPhase}
+        />
+      )}
     </div>
   );
 }
