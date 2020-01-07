@@ -119,10 +119,10 @@ function _addInfoToMems(memories, self) {
     tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
     tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
     //LOCK_TYPE_JOURNAL
+    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
     if (mem.receiver === mem.sender) {
       tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
-      let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
       const tmpBotInfo = {};
       tmpBotInfo.avatar = lock.bot_info.botAva;
       tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
@@ -130,7 +130,7 @@ function _addInfoToMems(memories, self) {
     } else {
       tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
     }
-    return { ...mem, ...tmpMem };
+    return { ...mem, ...tmpMem, lock };
   }, []);
 
   // sort descending by mem id;

@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { memoryList, proposeInfo, loading, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
+  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
   const [memorydata, setMemorydata] = useState([]);
   const arrayLoadin = [{}, {}, {}, {}];
   const [limit, setLimit] = useState(5);
@@ -92,7 +92,6 @@ function MemoryContainer(props) {
           key={index}
           proIndex={memory.id}
           memory={memory}
-          propose={proposeInfo}
           onMemoryChanged={onMemoryChanged}
           openBlogEditor={openBlogEditor}
           handleNewCollection={handleNewCollection}
@@ -106,7 +105,6 @@ function MemoryContainer(props) {
 
 const mapStateToProps = state => {
   return {
-    proposeInfo: state.loveinfo.topInfo,
     memoryList: state.loveinfo.memories,
     privateKey: state.account.privateKey,
   };

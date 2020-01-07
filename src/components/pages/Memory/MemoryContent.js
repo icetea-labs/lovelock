@@ -13,7 +13,6 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
-import styled from 'styled-components';
 import Linkify from 'react-linkify';
 
 import * as actions from '../../../store/actions';
@@ -169,10 +168,10 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const setMemoryCollection = (propose, memory) => {
+const setMemoryCollection = (lock, memory) => {
   const cid = memory.info.collectionId;
   if (cid != null) {
-    const cs = propose.collections || [];
+    const cs = lock.collections || [];
     memory.collection = cs.find(c => c.id === cid);
   }
 };
@@ -193,13 +192,13 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, propose, proIndex, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
-  setMemoryCollection(propose, memory);
+  const { memory, setNeedAuth, proIndex, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
+  setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
-  const collections = propose.collections
+  const collections = memory.lock.collections
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
@@ -268,7 +267,7 @@ function MemoryContent(props) {
       abort.abort();
       cancel = true;
     };
-  }, [memory, memory.showDetail, memory.info.blog, propose]);
+  }, [memory, memory.showDetail, memory.info.blog, memory.lock]);
 
   function FacebookProgress() {
     const classesFb = useStylesFacebook();
@@ -442,11 +441,11 @@ function MemoryContent(props) {
     signalPrerenderDone();
 
     const title = `${blogInfo.title} - A story on Lovelock`;
-    const desc = makeLockName(propose);
+    const desc = makeLockName(memory.lock);
     let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url;
     if (!img) {
-      img = propose.coverImg
-        ? process.env.REACT_APP_IPFS + propose.coverImg
+      img = memory.lock.coverImg
+        ? process.env.REACT_APP_IPFS + memory.lock.coverImg
         : `${process.env.PUBLIC_URL}/static/img/share.jpg`;
     }
     return (
@@ -675,7 +674,10 @@ function MemoryContent(props) {
               proIndex={proIndex}
               collectionId={memoryDecrypted.collection ? memoryDecrypted.collection.id : null}
               collections={collections}
-              onMemoryChanged={onMemoryChanged}
+              onMemoryChanged={data => {
+                setIsEditOpened(false)
+                onMemoryChanged && onMemoryChanged(data)
+              }}
               handleNewCollection={handleNewCollection}
               memory={memoryDecrypted}
             />

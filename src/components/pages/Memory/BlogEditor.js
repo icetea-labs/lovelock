@@ -48,8 +48,6 @@ export default function BlogEditor(props) {
     const tokenKey = useSelector(state => state.account.tokenKey);
     const address = useSelector(state => state.account.address);
 
-    const topInfo = useSelector(state => state.loveinfo.topInfo)
-
     const dispatch = useDispatch()
 
     const { enqueueSnackbar } = useSnackbar();
@@ -73,7 +71,7 @@ export default function BlogEditor(props) {
         const info = { blog: true, hash: [] }
         const content = JSON.stringify(blogData)
 
-        const params = [topInfo.index, false, content, info]
+        const params = [memory.lockIndex, false, content, info]
         return sendTxUtil('addMemory', params, opts)
             .then(r => {
                 handleClose()
@@ -170,7 +168,10 @@ export default function BlogEditor(props) {
             handleSubmit={handleSubmit}
             handlePreview={setPreviewOn}
             closeText="Cancel"
-            title={<MemoryTitle sender={topInfo.s_name} receiver={topInfo.r_name} handleClose={handleClose} />}
+            title={<MemoryTitle 
+                sender={memory ? memory.s_tags['display-name'] : ''} 
+                receiver={memory ? memory.r_tags['display-name'] : ''} 
+                handleClose={handleClose} />}
         >
             {!previewOn && (
                 <Editor

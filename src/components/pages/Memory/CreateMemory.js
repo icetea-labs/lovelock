@@ -146,7 +146,6 @@ export default function CreateMemory(props) {
 
   const avatar = useSelector(state => state.account.avatar);
   const privateKey = useSelector(state => state.account.privateKey);
-  // const publicKey = useSelector(state => state.loveinfo.topInfo.r_publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
@@ -479,7 +478,7 @@ export default function CreateMemory(props) {
                         {c.name}
                       </option>
                     ))}
-                    <option value="add">(+) New Collection</option>
+                    {handleNewCollection && <option value="add">(+) New Collection</option>}
                   </Select>
                 </div>
                 <ButtonPro
