@@ -359,7 +359,7 @@ export default function CreateMemory(props) {
       addCollectionId(info);
       
       if (editMode) {
-        params = [proIndex, newContent, info];
+        params = [memory.id, newContent, info];
         return sendTxUtil('editMemory', params, opts || { address, tokenAddress });
       }
   

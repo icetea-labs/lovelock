@@ -57,30 +57,10 @@ const useStyles = makeStyles(theme => ({
 export function BlogView(props) {
   const { match, setMemory, setBlogView, blogView, needAuth } = props;
   const paramMemIndex = parseInt(match.params.index, 10);
-  // const [content, setContent] = useState(null);
+
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
-  // const [isOpenModal, setOpenModal] = useState(true);
-  // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   const abort = new AbortController();
 
-  //   hash &&
-  //     fetchAltFirstIpfsJson(hash, { signal: abort.signal })
-  //       .then(({ json }) => {
-  //         if (!abort.signal.aborted) {
-  //           setContent(json);
-  //         }
-  //       })
-  //       .catch(err => {
-  //         if (err.name === 'AbortError') return;
-  //         throw err;
-  //       });
-
-  //   return () => {
-  //     abort.abort();
-  //   };
-  // }, [hash]);
   const classes = useStyles();
 
   useEffect(() => {
@@ -121,8 +101,7 @@ export function BlogView(props) {
 
       } else {
         // not a blog, redirect to memory screen
-        // props.history.push(`/memory/${paramMemIndex}`);
-        closeMemory(mem.lockIndex)
+        props.history.push(`/memory/${paramMemIndex}`);
       }
     }).catch(err => {
       console.error(err)

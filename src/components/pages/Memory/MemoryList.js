@@ -26,6 +26,7 @@ const CollectionIndicator = styled.div`
 export default function MemoryList(props) {
   const {
       proIndex,
+      pinIndex,
       collectionId,
       collectionName,
       collections,
@@ -71,8 +72,8 @@ export default function MemoryList(props) {
         />
       )}
       <MemoryContainer
-        memorydata={[]}
         loading={loading}
+        pinIndex={pinIndex}
         onMemoryChanged={onMemoryChanged}
         openBlogEditor={setEdittingMemory}
         handleNewCollection={handleNewCollection}

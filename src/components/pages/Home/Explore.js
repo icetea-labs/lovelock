@@ -10,6 +10,10 @@ import APIService from '../../../service/apiService';
 function Explore(props) {
   const { setMemory } = props;
   const [loading, setLoading] = useState(true);
+
+  const indexParam = Number(props.match.params.index)
+  const pinIndex = (indexParam > 0 && Number.isInteger(indexParam)) ? indexParam : null
+
   
   const [changed, setChanged] = useState(false);
 
@@ -23,7 +27,7 @@ function Explore(props) {
   }, [changed]);
 
   async function fetchData() {
-    APIService.getChoiceMemories().then(mems => {
+    APIService.getChoiceMemories(pinIndex).then(mems => {
       // set to redux
       setMemory(mems);
       setLoading(false);
@@ -38,6 +42,7 @@ function Explore(props) {
         <div className="proposeColumn proposeColumn--right">
           <MemoryList 
             {...props}
+            pinIndex={pinIndex}
             onMemoryChanged={refresh}
             loading={loading}
           />

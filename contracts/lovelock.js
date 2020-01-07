@@ -431,9 +431,13 @@ class LoveLock {
   @view getChoices = () => this.getState('choices', []);
   setChoices = value => this.setState('choices', value);
 
-  @view getChoiceMemories = () => {
-    const choices = this.getState('choices', [])
-    if (!choices || !choices.length) {
+  @view getChoiceMemories = extra => {
+    let choices = this.getState('choices', [])
+    if (extra != null ) {
+      choices = choices.concat(extra)
+    }
+
+    if (!choices.length) {
       return []
     }
 

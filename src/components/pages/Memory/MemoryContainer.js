@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Skeleton from '@material-ui/lab/Skeleton';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
 
 import useInfiniteScroll from '../../elements/useInfiniteScroll';
 
@@ -22,40 +24,54 @@ const useStyles = makeStyles(theme => ({
     position: 'relative',
     overflow: 'hidden',
   },
+  seealso: {
+    paddingTop: 32,
+    paddingBottom: 24
+  },
+  divider: {
+    marginBottom: 12
+  }
 }));
 
 function MemoryContainer(props) {
-  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
-  const [memorydata, setMemorydata] = useState([]);
+  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor, pinIndex } = props;
   const arrayLoadin = [{}, {}, {}, {}];
   const [limit, setLimit] = useState(5);
   const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreListItems);
 
   const classes = useStyles();
-  useEffect(() => {
-    let cancel = false;
 
-    async function prepareMemory(_cancel) {
-      const newMemoryList = [];
+  let pinMemory = null
+  const memorydata = prepareMemory();
+  const showPin = pinMemory != null && !pinMemory.info.blog
+  const hasPost = Boolean(memorydata && memorydata.length)
 
-      let hasViewDetail = false;
-      for (let i = 0; i < memoryList.length; i++) {
-        const obj = memoryList[i];
-        if (obj.info.blog && obj.showDetail) hasViewDetail = true;
-        newMemoryList.push(obj);
-      }
-      if (_cancel) return;
-      setMemorydata(newMemoryList);
+  function prepareMemory() {
+    if (!memoryList) {
+      return []
+    }
 
-      if (!hasViewDetail) {
-        signalPrerenderDone();
+    const newMemoryList = [];
+
+    for (let i = 0; i < memoryList.length; i++) {
+      const obj = memoryList[i];
+      if (obj.id === pinIndex) {
+        obj.showDetail = true
+        pinMemory = obj
+        if (obj.info.blog) {
+          newMemoryList.push(obj)
+        }
+      } else {
+        newMemoryList.push(obj)
       }
     }
 
-    prepareMemory(cancel);
+    if (pinMemory == null || !pinMemory.info.blog) {
+      signalPrerenderDone();
+    }
 
-    return () => (cancel = true);
-  }, [memoryList]); // eslint-disable-line react-hooks/exhaustive-deps
+    return newMemoryList
+  } 
 
   const Loading = () => {
     return arrayLoadin.map((item, index) => {
@@ -86,18 +102,38 @@ function MemoryContainer(props) {
   }
 
   const renderMemory = () => {
-    return memorydata.slice(0, limit).map((memory, index) => {
-      return (
-        <MemoryContent
-          key={index}
-          proIndex={memory.id}
-          memory={memory}
-          onMemoryChanged={onMemoryChanged}
-          openBlogEditor={openBlogEditor}
-          handleNewCollection={handleNewCollection}
-        />
-      );
-    });
+    return (
+      <>
+        {showPin && (
+          <MemoryContent
+            key={0}
+            memory={pinMemory}
+            onMemoryChanged={onMemoryChanged}
+            openBlogEditor={openBlogEditor}
+            handleNewCollection={handleNewCollection}
+          />
+        )}
+
+        {showPin && hasPost && (
+          <div className={classes.seealso}>
+            <Divider className={classes.divider} />
+            <Typography variant="h5">
+              See also
+            </Typography>
+          </div>
+        )}
+
+        {memorydata.slice(0, limit).map((memory, index) => (
+          <MemoryContent
+            key={index + 1}
+            memory={memory}
+            onMemoryChanged={onMemoryChanged}
+            openBlogEditor={openBlogEditor}
+            handleNewCollection={handleNewCollection}
+          />
+        ))}
+    </>
+    )
   };
 
   return <div>{loading ? Loading() : renderMemory()}</div>;

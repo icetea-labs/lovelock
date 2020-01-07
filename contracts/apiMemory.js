@@ -104,6 +104,9 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
 exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
   const memories = self.getMemories();
 
+  // remove duplicate
+  listMemIndex = [... new Set(listMemIndex)]
+
   const mems = listMemIndex.map(index => {
     return { ...getDataByIndex(memories, index), id: index };
   });

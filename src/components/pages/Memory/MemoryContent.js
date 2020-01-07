@@ -192,7 +192,7 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, proIndex, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
+  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -671,7 +671,6 @@ function MemoryContent(props) {
             close={() => setIsEditOpened(false)}
           >
             <CreateMemory
-              proIndex={proIndex}
               collectionId={memoryDecrypted.collection ? memoryDecrypted.collection.id : null}
               collections={collections}
               onMemoryChanged={data => {
