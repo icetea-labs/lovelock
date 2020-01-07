@@ -18,6 +18,9 @@ import APIService from '../../../service/apiService';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
+  @media (max-width: 768px) {
+    margin: .4rem;
+  }
 `;
 
 const ShadowBox = styled.div`
