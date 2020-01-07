@@ -693,7 +693,7 @@ function MemoryContent(props) {
             }}
             close={() => setPermLink(null)}
           >
-            {permLink.url}
+            <a className='underline' href={permLink.url}>{permLink.url}</a>
           </CommonDialog>
         )}
       </Card>

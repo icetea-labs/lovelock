@@ -69,6 +69,7 @@ export function waitForHtmlTags(
 }
 
 export function ensureHashUrl(url, gateway = ipfsGateway) {
+  gateway = ipfsGateway // the alt gateway does not always work for image, so always use primary gateway
   return url.indexOf(':') < 0 ? gateway + url : url;
 }
 

@@ -12,7 +12,7 @@ import MemoryTitle from './MemoryTitle'
 
 import * as actions from '../../../store/actions';
 
-const showError = console.error
+import { useSnackbar } from 'notistack';
 
 // It is ok for blogBody to be at module level
 // because we never edit/create 2 blog posts at the same time
@@ -51,6 +51,9 @@ export default function BlogEditor(props) {
     const topInfo = useSelector(state => state.loveinfo.topInfo)
 
     const dispatch = useDispatch()
+
+    const { enqueueSnackbar } = useSnackbar();
+    const showError = e => enqueueSnackbar(e, { variant: 'error' })
 
     function setBlogTitle(title) {
         blogTitle = title || ''
