@@ -48,6 +48,10 @@ export default function BlogEditor(props) {
     const tokenKey = useSelector(state => state.account.tokenKey);
     const address = useSelector(state => state.account.address);
 
+    const topInfo = useSelector(state => state.loveinfo.topInfo)
+    const senderName = memory && memory.s_tags ? memory.s_tags['display-name'] : (topInfo ? topInfo.s_name : '')
+    const receiverName = memory && memory.r_tags ? memory.r_tags['display-name'] : (topInfo ? topInfo.r_name : '')
+
     const dispatch = useDispatch()
 
     const { enqueueSnackbar } = useSnackbar();
@@ -169,8 +173,8 @@ export default function BlogEditor(props) {
             handlePreview={setPreviewOn}
             closeText="Cancel"
             title={<MemoryTitle 
-                sender={memory ? memory.s_tags['display-name'] : ''} 
-                receiver={memory ? memory.r_tags['display-name'] : ''} 
+                sender={senderName} 
+                receiver={receiverName} 
                 handleClose={handleClose} />}
         >
             {!previewOn && (
