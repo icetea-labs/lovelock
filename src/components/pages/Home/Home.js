@@ -215,7 +215,7 @@ function Home(props) {
             <div>
               {!isApproved && <div className="note">
                 <h5>ACCOUNT ACTIVATION REQUIRED</h5>
-                <span>LoveLock is in beta and not yet open to public. Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation your account before you can post contents.</span>
+                <span>LoveLock is in beta and not yet open to public. Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post contents.</span>
               </div>}
 
               <img src="/static/img/plant.svg" alt="plant" />

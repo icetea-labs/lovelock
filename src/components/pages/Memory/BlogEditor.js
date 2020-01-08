@@ -51,6 +51,7 @@ export default function BlogEditor(props) {
     const topInfo = useSelector(state => state.loveinfo.topInfo)
     const senderName = memory && memory.s_tags ? memory.s_tags['display-name'] : (topInfo ? topInfo.s_name : '')
     const receiverName = memory && memory.r_tags ? memory.r_tags['display-name'] : (topInfo ? topInfo.r_name : '')
+    const lockIndex = memory && memory.lockIndex != null ? memory.lockIndex : topInfo.index
 
     const dispatch = useDispatch()
 
@@ -75,7 +76,7 @@ export default function BlogEditor(props) {
         const info = { blog: true, hash: [] }
         const content = JSON.stringify(blogData)
 
-        const params = [memory.lockIndex, false, content, info]
+        const params = [lockIndex, false, content, info]
         return sendTxUtil('addMemory', params, opts)
             .then(r => {
                 handleClose()
