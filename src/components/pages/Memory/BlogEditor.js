@@ -49,9 +49,10 @@ export default function BlogEditor(props) {
     const address = useSelector(state => state.account.address);
 
     const topInfo = useSelector(state => state.loveinfo.topInfo)
-    const senderName = memory && memory.s_tags ? memory.s_tags['display-name'] : (topInfo ? topInfo.s_name : '')
-    const receiverName = memory && memory.r_tags ? memory.r_tags['display-name'] : (topInfo ? topInfo.r_name : '')
-    const lockIndex = memory && memory.lockIndex != null ? memory.lockIndex : topInfo.index
+    const editMode = memory != null && memory.lockIndex != null
+    const senderName = editMode ? memory.s_tags['display-name'] : (topInfo ? topInfo.s_name : '')
+    const receiverName = editMode ? memory.r_tags['display-name'] : (topInfo ? topInfo.r_name : '')
+    const lockIndex = editMode ? memory.lockIndex : topInfo.index
 
     const dispatch = useDispatch()
 
@@ -76,11 +77,12 @@ export default function BlogEditor(props) {
         const info = { blog: true, hash: [] }
         const content = JSON.stringify(blogData)
 
-        const params = [lockIndex, false, content, info]
-        return sendTxUtil('addMemory', params, opts)
+        const method = editMode ? 'editMemory' : 'addMemory'
+        const params = editMode ? [memory.id, content, null] : [lockIndex, false, content, info]
+        return sendTxUtil(method, params, opts)
             .then(r => {
                 handleClose()
-                onMemoryChanged && onMemoryChanged({ editMode: false, index: r.returnValue, params });
+                onMemoryChanged && onMemoryChanged({ editMode, index: r.returnValue, params });
                 return r
             })
             .catch(err => {
@@ -151,6 +153,10 @@ export default function BlogEditor(props) {
                 const submitContent = await saveFileToIpfs([buffer]);
 
                 const meta = blog.extractMeta(combined);
+                // keep old meta if user customized it
+                if (editMode && memory.meta) {
+                    Object.assign(meta, memory.meta)
+                }
                 const blogData = {
                     meta,
                     blogHash: submitContent,
