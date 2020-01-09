@@ -113,6 +113,17 @@ export default function BlogEditor(props) {
         dispatch(actions.setLoading(value));
     }
 
+    function removeDraft(keyToDel, hide) {
+        if (keyToDel) {
+            if (drafts && drafts.length) {
+                const dr = drafts.filter(d => d.key !== keyToDel)
+                setDrafts(dr)
+            }
+            delDraft(keyToDel)
+        }
+        hide && hideDrafts()
+    }
+
     function sendBlogPost(blogData, opts) {
         const info = { blog: true, hash: [] }
         const content = JSON.stringify(blogData)
@@ -121,13 +132,7 @@ export default function BlogEditor(props) {
         const params = editMode ? [memory.id, content, null] : [lockIndex, false, content, info]
         return sendTxUtil(method, params, opts)
             .then(r => {
-                if (draftKey) {
-                    if (drafts && drafts.length) {
-                        const dr = drafts.filter(d => d.key !== draftKey)
-                        setDrafts(dr)
-                    }
-                    delDraft(draftKey)
-                }
+                removeDraft(draftKey)
                 handleClose()
                 onMemoryChanged && onMemoryChanged({ editMode, index: r.returnValue, params });
                 return r
@@ -143,8 +148,8 @@ export default function BlogEditor(props) {
         // Clean up
         blogMemory = null;
         blogBody = null;
-        setBlogTitle('');
-        setBlogSubtitle('');
+        blogTitle = ''
+        blogSubtitle = ''
         draftKey = null
 
         // ensure next time open in edit mode & diff draft key
@@ -263,7 +268,7 @@ export default function BlogEditor(props) {
                           }
                          />
                     <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="delete">
+                    <IconButton onClick={() => removeDraft(key, true)} edge="end" aria-label="delete">
                         <DeleteIcon />
                     </IconButton>
                     </ListItemSecondaryAction>
