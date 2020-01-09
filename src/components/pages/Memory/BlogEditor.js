@@ -1,18 +1,40 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
+import { makeStyles } from '@material-ui/core/styles';
 
 import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError } from '../../../helper'
 import { ensureToken } from '../../../helper/hooks'
-import { delDraft } from '../../../helper/draft'
+import { loadAllDrafts, saveDraft, delDraft } from '../../../helper/draft'
 import * as blog from '../../../helper/blog'
 
 import Editor from './Editor'
 import BlogModal from '../../elements/BlogModal'
 import MemoryTitle from './MemoryTitle'
 
+import Menu from '@material-ui/core/Menu';
+import ListItem from '@material-ui/core/ListItem';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import Divider from '@material-ui/core/Divider';
+import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
+
 import * as actions from '../../../store/actions';
 
 import { useSnackbar } from 'notistack';
+
+const useStyles = makeStyles(theme => ({
+    menuItem: {
+        width: '100%',
+        maxWidth: 480,
+    },
+    inline: {
+        display: 'inline',
+    },
+}))
+
 
 // It is ok for blogBody to be at module level
 // because we never edit/create 2 blog posts at the same time
@@ -21,6 +43,7 @@ let blogBody = null
 let blogTitle = ''
 let blogSubtitle = ''
 let blogMemory = null
+let draftKey = null
 
 function onChangeBlogBody(editor) {
     blogBody = editor.emitSerializedOutput();
@@ -33,6 +56,8 @@ export default function BlogEditor(props) {
     const [, updateState] = React.useState();
     const forceUpdate = useCallback(() => updateState({}), []);
 
+    const classes = useStyles();
+
     if (memory && memory.blogContent && memory !== blogMemory) {
         blogMemory = memory
 
@@ -43,6 +68,7 @@ export default function BlogEditor(props) {
     }
 
     const [previewOn, setPreviewOn] = useState(false)
+    const [drafts, setDrafts] = useState()
 
     const tokenAddress = useSelector(state => state.account.tokenAddress);
     const tokenKey = useSelector(state => state.account.tokenKey);
@@ -53,6 +79,20 @@ export default function BlogEditor(props) {
     const senderName = editMode ? memory.s_tags['display-name'] : (topInfo ? topInfo.s_name : '')
     const receiverName = editMode ? memory.r_tags['display-name'] : (topInfo ? topInfo.r_name : '')
     const lockIndex = editMode ? memory.lockIndex : topInfo.index
+
+    const [actionMenu, setActionMenu] = useState(null);
+
+    useEffect(() => {
+        loadAllDrafts().then(setDrafts)
+    }, [])
+
+    function showDrafts(event) {
+      setActionMenu(event.currentTarget);
+    }
+    
+    function hideDrafts() {
+      setActionMenu(null);
+    }
 
     const dispatch = useDispatch()
 
@@ -81,6 +121,13 @@ export default function BlogEditor(props) {
         const params = editMode ? [memory.id, content, null] : [lockIndex, false, content, info]
         return sendTxUtil(method, params, opts)
             .then(r => {
+                if (draftKey) {
+                    if (drafts && drafts.length) {
+                        const dr = drafts.filter(d => d.key !== draftKey)
+                        setDrafts(dr)
+                    }
+                    delDraft(draftKey)
+                }
                 handleClose()
                 onMemoryChanged && onMemoryChanged({ editMode, index: r.returnValue, params });
                 return r
@@ -98,9 +145,9 @@ export default function BlogEditor(props) {
         blogBody = null;
         setBlogTitle('');
         setBlogSubtitle('');
-        delDraft();
+        draftKey = null
 
-        // ensure next time open in edit mode
+        // ensure next time open in edit mode & diff draft key
         setPreviewOn(false)
 
         onClose()
@@ -172,12 +219,96 @@ export default function BlogEditor(props) {
         }
     }
 
+    function loadDraft(key, title, subtitle, body) {
+        if (draftKey !== key) {
+            draftKey = key // this let next draft save to save to the right key
+            blogBody = body
+            blogSubtitle = subtitle || ''
+            blogTitle = title || ''
+        }
+        hideDrafts()
+    }
+
+    function showNotSupport() {
+        enqueueSnackbar('This feature is not supported on current version.', { variant: 'info' })
+    }
+
+    function renderDrafts() {
+        const hasDraft = Boolean(drafts && drafts.length)
+        return (
+          <Menu
+            anchorEl={actionMenu}
+            open={Boolean(actionMenu)}
+            onClose={hideDrafts}
+            getContentAnchorEl={null}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
+          >
+              {hasDraft && drafts.map(({key, timestamp, title, subtitle, body}) => (
+                <ListItem key={key} button className={classes.menuItem} onClick={() => loadDraft(key, title, subtitle, body)}>
+                    <ListItemText 
+                        primary={title}
+                        secondary={
+                            <React.Fragment>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                className={classes.inline}
+                                color="textPrimary"
+                              >
+                                {new Date(timestamp).toLocaleString()}
+                              </Typography>
+                              {subtitle ? ` — ${subtitle}` : ''}
+                            </React.Fragment>
+                          }
+                         />
+                    <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="delete">
+                        <DeleteIcon />
+                    </IconButton>
+                    </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            {hasDraft && <Divider />}
+            <ListItem onClick={showNotSupport} button className={classes.menuItem}>
+              <ListItemText primary="Export" />
+            </ListItem>
+            <ListItem onClick={showNotSupport} button className={classes.menuItem}>
+              <ListItemText primary="Import" />
+            </ListItem>
+          </Menu>
+        )
+    }
+
+    async function autoSaveDraft(context, content) {
+        if (editMode) return
+        const body = await blog.prepareForExport(content)
+        if (body) {
+            const now = Date.now()
+            if (!draftKey) {
+                draftKey = 'draft_' + now
+            }
+            const item = { body, title: blogTitle, subtitle: blogSubtitle, timestamp: now }
+            saveDraft(draftKey, item)
+                .then(() => {
+                    const dr = (drafts || []).reduce((ds, d) => {
+                        if (d.key !== draftKey) {
+                            ds.push(d)
+                        }
+                        return ds
+                    }, [{ key: draftKey, ...item }])
+                    setDrafts(dr)
+                })
+        }
+    }
+
     return (
         <BlogModal
             open={!!memory}
             handleClose={handleClose}
             handleSubmit={handleSubmit}
             handlePreview={setPreviewOn}
+            drafts={{ renderDrafts, showDrafts, hideDrafts }}
             closeText="Cancel"
             title={<MemoryTitle 
                 sender={senderName} 
@@ -192,8 +323,8 @@ export default function BlogEditor(props) {
                     subtitle={blogSubtitle}
                     onSubtitleChange={setBlogSubtitle}
                     saveOptions={{
-                        interval: 1500, // save draft everytime user stop typing for 1.5 seconds
-                        save_handler: blog.saveDraft,
+                        interval: 1500, // top typing for 1.5 secs
+                        save_handler: autoSaveDraft,
                     }}
                     onChange={onChangeBlogBody}
                 />

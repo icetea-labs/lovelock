@@ -150,41 +150,60 @@ export function validate(combined) {
     return false;
 }
 
-// export function hasContent(body) {
-//   if (!body || !body.blocks || !body.blocks.length) return false
-//   if (body.blocks.length > 1) return true
-//   const b = body.blocks[0]
-//   if (b.text ||
-//     b.type === 'image' ||
-//     b.type === 'video' ||
-//     b.type === 'embed') {
-//       return true
-//     }
+function hasContent(body) {
+  if (!body || !body.blocks || !body.blocks.length) return false
+  if (body.blocks.length > 1) return true
+  const b = body.blocks[0]
+  if (b.text ||
+    b.type === 'image' ||
+    b.type === 'video' ||
+    b.type === 'embed') {
+      return true
+    }
 
-//   return false
-// }
+  return false
+}
 
-export async function saveDraft(context, content) {
-    // if (blog.hasContent(content)) {
-    //   // we need to change image from blob:// to base64
-    //   const body = cloneForIdbSave(content);
-    //   const blocks = body.blocks;
-    //   const images = blocks.reduce((collector, b, i) => {
-    //     if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
-    //       collector[i] = urlToBase64(b.data.url);
-    //     }
-    //     return collector;
-    //   }, {});
-    //   if (Object.keys(images).length) {
-    //     const base64Array = await Promise.all(Object.values(images));
-    //     Object.keys(images).forEach((blockIndex, index) => {
-    //       blocks[blockIndex].data.url = base64Array[index];
-    //     });
-    //   }
-    //   setDraft({
-    //     body,
-    //     title: blogTitle,
-    //     subtitle: blogSubtitle,
-    //   });
-    // }
+function urlToBase64(url) {
+return fetch(url)
+    .then(r => r.blob())
+    .then(blob => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+        resolve(reader.result);
+        });
+        reader.addEventListener('error', reject);
+        reader.readAsDataURL(blob);
+    });
+    });
+}
+
+function cloneForIdbSave(content) {
+    return JSON.parse(JSON.stringify(content))
+}
+
+// make the content suitable for exporting/saving as draft
+export async function prepareForExport(content) {
+    if (!hasContent(content)) return null
+
+    const body = cloneForIdbSave(content);
+    const blocks = body.blocks;
+
+    // we need to change image from blob:// to base64
+
+    const images = blocks.reduce((collector, b, i) => {
+        if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
+        collector[i] = urlToBase64(b.data.url);
+        }
+        return collector;
+    }, {});
+    if (Object.keys(images).length) {
+        const base64Array = await Promise.all(Object.values(images));
+        Object.keys(images).forEach((blockIndex, index) => {
+        blocks[blockIndex].data.url = base64Array[index];
+        });
+    }
+
+    return body
 }
