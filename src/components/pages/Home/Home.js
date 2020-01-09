@@ -5,19 +5,12 @@ import { useSnackbar } from 'notistack';
 import { FlexBox, FlexWidthBox, rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import { LinkPro, ButtonPro } from '../../elements/Button';
 import LeftContainer from '../Lock/LeftContainer';
-import MemoryContainer from '../Memory/MemoryContainer';
+import MemoryList from '../Memory/MemoryList';
 import LandingPage from '../../layout/LandingPage';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import { showSubscriptionError } from '../../../helper';
 import { ensureContract } from '../../../service/tweb3';
-
-const RightBoxMemories = styled.div`
-  padding: 0 0 ${rem(45)} ${rem(45)};
-  @media (max-width: 768px) {
-    padding-left: 0;
-  }
-`;
 
 const RightBox = styled.div`
   text-align: center;
@@ -40,6 +33,19 @@ const RightBox = styled.div`
   }
   img {
     max-width: 158px;
+  }
+  .note {
+    padding: 12px 12px 12px 20px;
+    background-color: #fe7;
+    line-height: 1.4;
+    text-align: left;
+    margin-top: -1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 6px;
+    h5 {
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
   }
   @media (max-width: 768px) {
     img {
@@ -120,8 +126,14 @@ const SupportSite = styled.div`
 function Home(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const { setLocks, setMemory, address, locks, history } = props;
+  const { setLocks, setMemory, address, locks, history, isApproved } = props;
   const { enqueueSnackbar } = useSnackbar();
+
+  const [changed, setChanged] = useState(false);
+
+  function refresh() {
+    setChanged(c => !c);
+  }
 
   useEffect(() => {
     const signal = {}
@@ -136,7 +148,7 @@ function Home(props) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [changed]);
 
   async function fetchData(signal) {
     return APIService.getLocksForFeed(address).then(resp => {
@@ -201,6 +213,11 @@ function Home(props) {
         <ShadowBox>
           <RightBox>
             <div>
+              {!isApproved && <div className="note">
+                <h5>ACCOUNT ACTIVATION REQUIRED</h5>
+                <span>LoveLock is in beta and not yet open to public. Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post contents.</span>
+              </div>}
+
               <img src="/static/img/plant.svg" alt="plant" />
               <div className="emptyTitle">
                 <h1>You have no lock</h1>
@@ -271,9 +288,11 @@ function Home(props) {
                 <LeftContainer loading={loading} />
               </div>
               <div className="proposeColumn proposeColumn--right">
-                <RightBoxMemories>
-                  <MemoryContainer memorydata={[]} />
-                </RightBoxMemories>
+                <MemoryList 
+                  {...props}
+                  onMemoryChanged={refresh}
+                  loading={loading}
+                />
               </div>
             </LeftBoxWrapper>
           ) : (
@@ -293,6 +312,7 @@ const mapStateToProps = state => {
   return {
     address: state.account.address,
     locks: state.loveinfo.locks,
+    isApproved: state.account.isApproved,
   };
 };
 

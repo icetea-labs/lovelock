@@ -9,22 +9,20 @@ import { useSnackbar } from 'notistack';
 
 import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
-import MemoryContainer from '../Memory/MemoryContainer';
+import MemoryList from '../Memory/MemoryList';
 import { AvatarPro } from '../../elements';
 import { callView } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
-const RightBoxMemories = styled.div`
-  padding: 0 0 ${rem(45)} ${rem(45)};
-  @media (max-width: 768px) {
-    padding-left: 0;
-  }
-`;
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
+  @media (max-width: 768px) {
+    margin: .4rem;
+  }
 `;
+
 const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
@@ -83,7 +81,12 @@ function Mypage(props) {
   });
 
   const paramAliasOrAddr = match.params.address || address;
-  // setLoading(false);
+  
+  const [changed, setChanged] = useState(false);
+
+  function refresh() {
+    setChanged(c => !c);
+  }
 
   useEffect(() => {
     async function getDataMypage() {
@@ -101,11 +104,15 @@ function Mypage(props) {
     }
 
     getDataMypage();
-    fetchDataLocksMemoies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paramAliasOrAddr]);
 
-  async function fetchDataLocksMemoies() {
+  useEffect(() => {
+    fetchDataLocksMemories()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changed])
+
+  async function fetchDataLocksMemories() {
     APIService.getLocksForFeed(paramAliasOrAddr).then(resp => {
       // set to redux
       setLocks(resp.locks);
@@ -163,7 +170,7 @@ function Mypage(props) {
 
   if (myPageInfo && myPageInfo.username) {
     const pathname = `/u/${myPageInfo.username}`;
-    window.history.pushState(null, '', pathname);
+    window.history.replaceState(null, '', pathname);
   }
 
   return (
@@ -216,9 +223,11 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          <RightBoxMemories>
-            <MemoryContainer memorydata={[]} />
-          </RightBoxMemories>
+          <MemoryList 
+            {...props}
+            onMemoryChanged={refresh}
+            loading={loading}
+          />
         </div>
       </LeftBoxWrapper>
     </div>

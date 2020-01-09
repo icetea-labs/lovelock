@@ -6,30 +6,19 @@ import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
-// import cloneDeep from 'lodash/cloneDeep';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import Editor from './Editor';
-import BlogModal from '../../elements/BlogModal';
 
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
 import {
-  saveToIpfs,
-  saveFileToIpfs,
   saveBufferToIpfs,
-  encodeWithPublicKey,
+  // encodeWithPublicKey,
   sendTxUtil,
   handleError,
 } from '../../../helper';
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
-import MemoryTitle from './MemoryTitle';
-
-// import { getDraft, setDraft, delDraft } from '../../../helper/draft';
-import { delDraft } from '../../../helper/draft';
-
-let blogBody = null;
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -57,8 +46,14 @@ const ShadowBox = styled.div`
   border-radius: 5px;
   background: #fff;
   box-shadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)';
+  &.edit-mode {
+    padding: 0;
+  }
   @media (max-width: 768px) {
     padding: 16px;
+    &.edit-mode {
+      padding: 0;
+    }
   }
 `;
 const useStyles = makeStyles(theme => ({
@@ -137,46 +132,44 @@ const BootstrapTextField = withStyles(theme => ({
     fontSize: 16,
     paddingLeft: theme.spacing(1),
     borderColor: '#8250c8',
-    // background: 'red',
   },
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryAdded, proIndex, collectionId, collections, handleNewCollection } = props;
+  const { onMemoryChanged, proIndex, collectionId, collections, handleNewCollection, memory, openBlogEditor } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
 
+  const editMode = !!memory;
+  const editBlogData = memory && memory.info && memory.info.blog && JSON.parse(memory.content)
+
   const avatar = useSelector(state => state.account.avatar);
-  const rName = useSelector(state => state.account.r_name);
-  const sName = useSelector(state => state.account.s_name);
   const privateKey = useSelector(state => state.account.privateKey);
-  const publicKey = useSelector(state => state.loveinfo.topInfo.r_publicKey);
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  const [filesBuffer, setFilesBuffer] = useState([]);
-  const [memoryContent, setMemoryContent] = useState('');
-  const [grayLayout, setGrayLayout] = useState(false);
+  const [filesBuffer, setFilesBuffer] = useState(editBlogData ? 
+    (editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url ? [editBlogData.meta.coverPhoto.url] : []) 
+    : (editMode ? memory.info.hash : []));
+  const [memoryContent, setMemoryContent] = useState(editBlogData ? editBlogData.meta.title : (editMode ? memory.content : ''));
 
-  const [memoDate, setMemoDate] = useState(new Date());
+  const [memoDate, setMemoDate] = useState(editMode ? memory.info.date : new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
   const [disableShare, setDisableShare] = useState(true);
-  const [isOpenModal, setOpenModal] = useState(false);
-
-  const [blogSubtitle, setBlogSubtitle] = useState('');
-  const [blogTitle, setBlogTitle] = useState('');
-  const [previewOn, setPreviewOn] = useState(false);
+  const [grayLayout, setGrayLayout] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
+  const showError = e => enqueueSnackbar(e, { variant: 'error' })
 
   // Is this component display as "compact" version (e.g. on mobile)
   const isCompact = useMediaQuery(theme => theme.breakpoints.down('xs'));
   const componentRef = useRef();
 
   useEffect(() => {
+    if (editMode) return;
     resetValue();
   }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -191,7 +184,7 @@ export default function CreateMemory(props) {
   }
 
   function memoryOnFocus() {
-    !grayLayout && setGrayLayout(true);
+    handleSetGrayLayout();
   }
 
   function clickLayout(e) {
@@ -205,7 +198,6 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setMemoryContent(value.normalize());
-    // setInitialBlogContent(makeDefaultBlogContent(value))
   }
   function handleChangePrivacy(event) {
     setPrivacy(event.target.value);
@@ -229,7 +221,7 @@ export default function CreateMemory(props) {
 
   function onChangeDate(value) {
     setMemoDate(value);
-    !grayLayout && setGrayLayout(true);
+    handleSetGrayLayout();
   }
 
   function onChangeMedia(value) {
@@ -239,201 +231,18 @@ export default function CreateMemory(props) {
       setDisableShare(true);
     }
     setFilesBuffer(value);
+    handleSetGrayLayout();
+  }
+  
+  function handleSetGrayLayout() {
+    if(editMode) return;
     !grayLayout && setGrayLayout(true);
   }
 
-  function extractBlogInfo(content) {
-    let firstImg;
-    let firstLine;
-
-    const { blocks } = content;
-
-    let b;
-    for (b of blocks) {
-      if (!firstImg) {
-        if (b.type === 'image') {
-          firstImg = b.data;
-        } else if (b.type === 'video') {
-          // get the video thumbnail
-          const data = b.data && b.data.embed_data;
-          if (data) {
-            firstImg = {
-              width: data.get('width'),
-              height: data.get('height'),
-              url: data.get('thumbnail_url'),
-            };
-            if (firstImg.url) {
-              firstImg.url = firstImg.url.replace('hqdefault.jpg', 'maxresdefault.jpg');
-            }
-          }
-        }
-      }
-      if (!firstLine) {
-        firstLine = b.text || '';
-        if (firstLine.length > 69) {
-          firstLine = `${firstLine.slice(0, 69)}…`;
-        }
-      }
-      if (firstImg && firstLine) break;
-    }
-
-    return {
-      title: firstLine,
-      coverPhoto: firstImg && {
-        width: firstImg.width,
-        height: firstImg.height,
-        url: firstImg.url,
-      },
-    };
-  }
-
-  function onSubmitEditor() {
-    setGLoading(true);
-    submitEditor()
-      .then(() => {
-        setGLoading(false);
-      })
-      .catch(err => {
-        setGLoading(false);
-        const message = `An error has occured, you can try again later: ${err.message}`;
-        enqueueSnackbar(message, { variant: 'error' });
-      });
-  }
-
-  async function submitEditor() {
-    const combined = combineContent();
-    const { blocks } = combined;
-    if (validateEditorContent()) {
-      const uploadThenSendTx = async opts => {
-        const images = blocks.reduce((collector, b, i) => {
-          if (
-            b.type === 'image' &&
-            b.data.url &&
-            (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
-          ) {
-            collector[i] = fetch(b.data.url)
-              .then(r => r.arrayBuffer())
-              .then(Buffer.from);
-          }
-          return collector;
-        }, {});
-
-        if (Object.keys(images).length) {
-          const bufs = await Promise.all(Object.values(images));
-          const hashes = await saveToIpfs(bufs);
-          Object.keys(images).forEach((blockIndex, index) => {
-            blocks[blockIndex].data.url = /* process.env.REACT_APP_IPFS + */ hashes[index];
-          });
-        }
-
-        const buffer = Buffer.from(JSON.stringify(combined));
-        const submitContent = await saveFileToIpfs([buffer]);
-
-        const meta = extractBlogInfo(combined);
-        const blogData = JSON.stringify({
-          meta,
-          blogHash: submitContent,
-        });
-
-        return handleShareMemory(blogData, opts);
-      }
-
-      await ensureToken(
-        {
-          tokenKey: privacy ? privateKey : tokenKey,
-          dispatch,
-        },
-        uploadThenSendTx
-      )
-
-      // Clean up
-      blogBody = null;
-      setBlogTitle('');
-      setBlogSubtitle('');
-      delDraft();
-    } else {
-      const message = 'Please enter memory content.';
-      enqueueSnackbar(message, { variant: 'error' });
-    }
-  }
-
-  function validateEditorContent() {
-    const { blocks } = combineContent();
-    let i;
-    for (i in blocks) {
-      if (blocks[i].text.trim() !== '') {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // function isNonemptyBlog(body) {
-  //   if (!body || !body.blocks || !body.blocks.length) return false
-  //   if (body.blocks.length > 1) return true
-  //   const b = body.blocks[0]
-  //   if (b.text ||
-  //     b.type === 'image' ||
-  //     b.type === 'video' ||
-  //     b.type === 'embed') {
-  //       return true
-  //     }
-
-  //   return false
-  // }
-
-  function onChangeEditorBody(editor) {
-    blogBody = editor.emitSerializedOutput();
-  }
-
-  function onPreviewSwitched(checked) {
-    setPreviewOn(checked);
-  }
-
-  function combineContent() {
-    if (!blogBody) {
-      // generate a empty body
-      blogBody = makeDefaultBlogContent('');
-    }
-    const body = blogBody;
-
-    const title = blogTitle;
-    const h1 = title && {
-      data: {},
-      depth: 0,
-      entityRanges: [],
-      inlineStyleRanges: [],
-      key: 'blok0',
-      text: title,
-      type: 'header-one',
-    };
-    const subtitle = blogSubtitle;
-    const h3 = subtitle && {
-      data: {},
-      depth: 0,
-      entityRanges: [],
-      inlineStyleRanges: [],
-      key: 'blok1',
-      text: subtitle,
-      type: 'header-three',
-    };
-
-    if (!h1 && !h3) return body; // nothing to merge
-
-    const combined = { ...body };
-    combined.blocks = [...combined.blocks];
-    if (h3) combined.blocks.unshift(h3);
-    if (h1) combined.blocks.unshift(h1);
-
-    return combined;
-  }
-
-  function closeEditorModal() {
-    setOpenModal(false);
-    setGrayLayout(false);
-
-    // ensure next time open in edit mode
-    setPreviewOn(false);
+  function mergeEdittingBlogData() {
+    if (!editBlogData) return
+    Object.assign(editBlogData.meta, { title: memoryContent })
+    return editBlogData
   }
 
   function addCollectionId(info) {
@@ -449,56 +258,117 @@ export default function CreateMemory(props) {
     }
   }
 
+  function getBlogCoverSize() {
+    const img = document.querySelector('.edit-mode .imgContent img.medium-zoom-image')
+    return {
+      width: img.naturalWidth,
+      height: img.naturalHeight
+    }
+  }
+
   async function handleShareMemory(blogData, blogTokenOpts) {
 
-    // NOTE: blogData is undefined for regular post, and object for blog post
+    // NOTE: blogData is undefined for regular post, and is an object for blog post
 
-    if (!blogData && !memoryContent && !filesBuffer) {
-      const message = 'Please enter memory content or add a photo.';
-      enqueueSnackbar(message, { variant: 'error' });
-      return;
+    if (!blogData && !memoryContent && (!filesBuffer || !filesBuffer.length)) {
+      return showError('Please enter memory content or add a photo.')
     }
 
-    if (!blogData) {
+    if (blogData && (!blogData.meta || !blogData.meta.title)) {
+      return showError('Blog title cannot be empty.')
+    }
+
+    if (privacy) {
+      return showError('Private memory is not currently supported.')
+    }
+    
+    const bufferImages = [];
+    const srcImages = [];
+    
+    if (filesBuffer && filesBuffer.length) {
+
+      if (filesBuffer.length > 5) {
+        return showError('Choose maximum of 5 photos. Memories deserve the best pictures.')
+      }
+
+      const max10M = 1048576 * 10;
+      
       for (let i = 0; i < filesBuffer.length; i++) {
-        const max10M = 1048576 * 10;
-        if (filesBuffer[i].byteLength > max10M) {
-          const message = `Image at ${i + 1} position is over 10MB. Please choose smaller image.`;
-          enqueueSnackbar(message, { variant: 'error' });
-          return;
+        const fileByteLength = filesBuffer[i].byteLength;
+        
+        // without fileByteLength => it must be an existing image
+        // that is, an fully http/https URL or a blob: one
+        if (!fileByteLength) {
+          // get the hash part and push to srcImages
+          const imageParts = (filesBuffer[i].src || filesBuffer[i]).split('/');
+          srcImages.push(imageParts.pop());
+          continue;
         }
+        
+        if (fileByteLength > max10M) {
+          const message = `Image at ${i + 1} position is over 10MB. Please choose smaller image.`;
+          return showError(message);
+        }
+  
+        bufferImages.push(filesBuffer[i]);
       }
     }
 
-    const content = blogData || memoryContent;
-
-    let params = [];
+    let params = []
     const uploadThenSendTx = async opts => {
       setGLoading(true);
+      
+      let newImageHashes = [];
 
-      if (privacy && !blogData) {
-        // TODO: support private blog
-        const newContent = await encodeWithPublicKey(content, privateKey, publicKey);
-        const hash = await saveBufferToIpfs(filesBuffer, { privateKey, publicKey });
-        const info = { hash };
-        addMemoTimestamp(info);
-        addCollectionId(info);
-        params = [proIndex, !!privacy, JSON.stringify(newContent), info];
-      } else {
-        const hash = !blogData && (await saveBufferToIpfs(filesBuffer));
-        const info = {};
-        info.hash = hash || [];
-        addMemoTimestamp(info);
-        addCollectionId(info);
+      // NOTE: currently, we don't support private message, so comment out 'privacy' stuff
+      // for review later
+
+      // if (privacy && !blogData) { // TODO: support private blog
+      //   newContent = await encodeWithPublicKey(content, privateKey, publicKey);
+      //   newContent = JSON.stringify(newContent);
+      //   newImageHashes = await saveBufferToIpfs(bufferImages, { privateKey, publicKey });
+      // } else {
+
+        if (bufferImages.length) {
+          newImageHashes = await saveBufferToIpfs(bufferImages)
+        }
+
+        const info = { hash: [] };
         if (blogData) info.blog = true;
-        params = [proIndex, !!privacy, content, info];
+
+      //}
+
+      let newContent = memoryContent;
+      const allImages = newImageHashes ? srcImages.concat(newImageHashes) : srcImages;
+  
+      if (blogData) {
+        // If it is an old image, we do not need to update cover photo
+        if (newImageHashes && newImageHashes.length) {
+          blogData.meta = blogData.meta || {}
+          blogData.meta.coverPhoto = blogData.meta.coverPhoto || {}
+          blogData.meta.coverPhoto.url = allImages[0]
+          Object.assign(blogData.meta.coverPhoto, getBlogCoverSize())
+        } else if (!srcImages.length) {
+          delete blogData.meta.coverPhoto
+        }
+        newContent = JSON.stringify(blogData)
+      } else {
+        info.hash = allImages
       }
+      addMemoTimestamp(info);
+      addCollectionId(info);
+      
+      if (editMode) {
+        params = [memory.id, newContent, info];
+        return sendTxUtil('editMemory', params, opts || { address, tokenAddress });
+      }
+  
+      params = [proIndex, !!privacy, newContent, info];
       return sendTxUtil('addMemory', params, opts || { address, tokenAddress });
     };
 
     try {
-      // if it is a blog post, ensureToken at submitEditor already
-      const submitPromise = blogData ? uploadThenSendTx(blogTokenOpts) : ensureToken(
+      const submitPromise = ensureToken(
         {
           tokenKey: privacy ? privateKey : tokenKey,
           dispatch,
@@ -506,12 +376,12 @@ export default function CreateMemory(props) {
         uploadThenSendTx
       )
       const result = await submitPromise
-      onMemoryAdded(result.returnValue, params);
       resetValue();
+      onMemoryChanged && onMemoryChanged({ editMode: editMode, index: result.returnValue, params });
     } catch (err) {
       setGLoading(false);
       const message = handleError(err, 'sending memory');
-      enqueueSnackbar(message, { variant: 'error' });
+      showError(message);
     }
   }
 
@@ -524,80 +394,27 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
-    setOpenModal(false);
   }
 
-  function makeDefaultBlogContent(text) {
-    return {
-      blocks: [
-        {
-          data: {},
-          depth: 0,
-          entityRanges: [],
-          inlineStyleRanges: [],
-          key: 'blok2',
-          text,
-          type: 'unstyled',
-        },
-      ],
-      entityMap: {},
-    };
+  function getPlaceholder() {
+    if (editMode) {
+      return editBlogData ? 'Enter post title' : 'Enter memory content'
+    }
+
+    return grayLayout ? 'Describe your memory' : 'Add a new memory…'
   }
 
-  // function urlToBase64(url) {
-  //   return fetch(url)
-  //     .then(r => r.blob())
-  //     .then(blob => {
-  //       return new Promise((resolve, reject) => {
-  //         const reader = new FileReader();
-  //         reader.addEventListener('load', () => {
-  //           resolve(reader.result);
-  //         });
-  //         reader.addEventListener('error', reject);
-  //         reader.readAsDataURL(blob);
-  //       });
-  //     });
-  // }
-
-  // function cloneForIdbSave(content) {
-  //   return JSON.parse(JSON.stringify(content))
-  // }
-
-  async function saveDraft(context, content) {
-    // if (isNonemptyBlog(content)) {
-    //   // we need to change image from blob:// to base64
-    //   const body = cloneForIdbSave(content);
-    //   const blocks = body.blocks;
-    //   const images = blocks.reduce((collector, b, i) => {
-    //     if (b.type === 'image' && b.data.url && b.data.url.indexOf('blob:') === 0) {
-    //       collector[i] = urlToBase64(b.data.url);
-    //     }
-    //     return collector;
-    //   }, {});
-    //   if (Object.keys(images).length) {
-    //     const base64Array = await Promise.all(Object.values(images));
-    //     Object.keys(images).forEach((blockIndex, index) => {
-    //       blocks[blockIndex].data.url = base64Array[index];
-    //     });
-    //   }
-    //   setDraft({
-    //     body,
-    //     title: blogTitle,
-    //     subtitle: blogSubtitle,
-    //   });
-    // }
-  }
   return (
     <>
       <GrayLayout grayLayout={grayLayout} ref={layoutRef} onClick={clickLayout} />
       <CreatePost grayLayout={grayLayout} ref={componentRef}>
-        <ShadowBox>
+        <ShadowBox className={`${editMode ? 'edit-mode' : ''}`}>
           <Grid container direction="column">
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
-                <Grid item>
+                {!editMode && <Grid item>
                   <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
-                </Grid>
+                </Grid>}
                 <Grid item xs={12}>
                   <BootstrapTextField
                     rows={3}
@@ -605,7 +422,7 @@ export default function CreateMemory(props) {
                     fullWidth
                     multiline
                     value={memoryContent}
-                    placeholder={grayLayout ? 'Describe your memory' : 'Add a new memory…'}
+                    placeholder={getPlaceholder()}
                     onChange={memoryChange}
                     onFocus={memoryOnFocus}
                   />
@@ -614,17 +431,21 @@ export default function CreateMemory(props) {
             </Grid>
             <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
+                hasParentDialog
+                photoButtonText = {editBlogData ? 'Change Cover' : 'Photo'}
+                coverPhotoMode = {!!editBlogData}
                 files={filesBuffer}
                 date={memoDate}
                 grayLayout={grayLayout}
                 onChangeDate={onChangeDate}
                 onChangeMedia={onChangeMedia}
-                onBlogClick={() => {
-                  setOpenModal(true);
+                onBlogClick={editMode ? false : () => {
+                  setGrayLayout(false)
+                  openBlogEditor()
                 }}
               />
             </Grid>
-            {grayLayout && (
+            {(grayLayout || editMode) && (
               <Grid classes={{ root: classes.btBox }}>
                 <div className={classes.rightBtBox}>
                   <Select
@@ -639,9 +460,7 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="privacy" id="outlined-privacy" />}
                   >
                     <option value={0}>Public</option>
-                    <option value={1} disabled>
-                      Private
-                    </option>
+                    <option value={1} disabled>Private</option>
                   </Select>
                   <Select
                     native
@@ -654,50 +473,26 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="collection" id="outlined-collection" />}
                   >
                     <option value="">(No collection)</option>
-                    {collections.map(c => (
+                    {(collections || []).map(c => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
                     ))}
-                    <option value="add">(+) New Collection</option>
+                    {handleNewCollection && <option value="add">(+) New Collection</option>}
                   </Select>
                 </div>
                 <ButtonPro
                   type="submit"
-                  isGrayout={disableShare}
+                  isGrayout={editMode ? false : disableShare}
                   onClick={() => {
-                    handleShareMemory();
+                    handleShareMemory(mergeEdittingBlogData());
                   }}
                   className={classes.btShare}
                 >
-                  Post
+                  {editMode ? 'Save' : 'Post'}
                 </ButtonPro>
               </Grid>
             )}
-            <BlogModal
-              open={isOpenModal}
-              handleClose={closeEditorModal}
-              handleSumit={onSubmitEditor}
-              handlePreview={onPreviewSwitched}
-              closeText="Cancel"
-              title={<MemoryTitle sender={sName} receiver={rName} handleClose={closeEditorModal} />}
-            >
-              {!previewOn && (
-                <Editor
-                  initContent={blogBody || makeDefaultBlogContent(memoryContent)}
-                  title={blogTitle}
-                  onTitleChange={setBlogTitle}
-                  subtitle={blogSubtitle}
-                  onSubtitleChange={setBlogSubtitle}
-                  saveOptions={{
-                    interval: 1500, // save draft everytime user stop typing for 1.5 seconds
-                    save_handler: saveDraft,
-                  }}
-                  onChange={onChangeEditorBody}
-                />
-              )}
-              {previewOn && <Editor initContent={combineContent()} read_only />}
-            </BlogModal>
           </Grid>
         </ShadowBox>
       </CreatePost>

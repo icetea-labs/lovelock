@@ -10,14 +10,12 @@ import * as actions from '../../store/actions';
 import { useDispatch } from "react-redux";
 import APIService from "../../service/apiService";
 import { getAliasAndTags } from "../../helper";
+import appConstants from "../../helper/constants";
 
 const EditLock = styled.div`
   .edit-lock {
     &__name {
       margin-bottom: 25px;
-    }
-    &__message {
-    
     }
     &__date {
       display: flex;
@@ -41,10 +39,23 @@ export default function EditLockModal(props) {
   const [message, setMessage] = useState(originalMessage);
   const [date, setDate] = useState(originalDate);
   const [contributors, setContributors] = useState(originalContributors);
+  const [lockType, setLockType] = useState('lock');
   
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
+  
+  useEffect(() => {
+    let type = 'lock';
+  
+    if (topInfo.isCrush) {
+      type = 'crush';
+    } else if (topInfo.isJournal) {
+      type = 'journal';
+    }
+    
+    setLockType(type);
+  }, [topInfo.isCrush, topInfo.isJournal]);
   
   useEffect(() => {
     async function formatContributorList() {
@@ -67,6 +78,13 @@ export default function EditLockModal(props) {
   
   function editLock() {
     const editData = generateEditData();
+  
+    if (!message) {
+      const message = 'Please input ' + getMessage('messageLabel');
+      enqueueSnackbar(message, { variant: 'error' });
+      return;
+    }
+    
     const formattedContributors = contributors.map(contributor => {
       return contributor.address;
     });
@@ -127,6 +145,10 @@ export default function EditLockModal(props) {
     return isContributorsEdited;
   }
   
+  function getMessage(id) {
+    return appConstants.textByLockTypes[lockType][id];
+  }
+  
   return (
     <CommonDialog
       title={topInfo.isJournal ? 'Edit Journal' : 'Edit Lock'}
@@ -145,13 +167,14 @@ export default function EditLockModal(props) {
             variant="outlined"
             value={displayName}
             autoFocus
+            inputProps={{ maxLength: 28 }}
           />
         )}
   
         <TextField
-          label={"Your Message"}
+          label={getMessage('messageLabel')}
           className={"edit-lock__message"}
-          placeholder={topInfo.isCrush ? 'Express yourself to your crush…' : 'Say something to your partner…'}
+          placeholder={getMessage('messagePlaceholder')}
           multiline
           fullWidth
           rows="4"

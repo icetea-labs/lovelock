@@ -33,9 +33,8 @@ const Copyright = styled.div`
   border-top: 1px solid #e1e1e1;
   color: rgba(0, 0, 0, 0.54);
   a {
-    color: inherit;
     &:hover {
-      color: #8250c8;
+      text-decoration: underline;
     }
   }
 `;
@@ -58,30 +57,10 @@ const useStyles = makeStyles(theme => ({
 export function BlogView(props) {
   const { match, setMemory, setBlogView, blogView, needAuth } = props;
   const paramMemIndex = parseInt(match.params.index, 10);
-  // const [content, setContent] = useState(null);
+
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
-  // const [isOpenModal, setOpenModal] = useState(true);
-  // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   const abort = new AbortController();
 
-  //   hash &&
-  //     fetchAltFirstIpfsJson(hash, { signal: abort.signal })
-  //       .then(({ json }) => {
-  //         if (!abort.signal.aborted) {
-  //           setContent(json);
-  //         }
-  //       })
-  //       .catch(err => {
-  //         if (err.name === 'AbortError') return;
-  //         throw err;
-  //       });
-
-  //   return () => {
-  //     abort.abort();
-  //   };
-  // }, [hash]);
   const classes = useStyles();
 
   useEffect(() => {
@@ -119,9 +98,10 @@ export function BlogView(props) {
         // save to redux
         setBlogView(mem);
         setMemory(mems);
+
       } else {
-        // not a blog, redirect to lock screen
-        closeMemory();
+        // not a blog, redirect to memory screen
+        props.history.push(`/memory/${paramMemIndex}`);
       }
     }).catch(err => {
       console.error(err)
@@ -129,9 +109,9 @@ export function BlogView(props) {
     })
   }
 
-  function closeMemory() {
+  function closeMemory(lockIndex) {
     // console.log('blogView', blogView);
-    props.history.push(`/lock/${blogView.lockIndex}`);
+    props.history.push(`/lock/${lockIndex != null ? lockIndex : blogView.lockIndex}`);
   }
 
   const textInput = useRef('');
@@ -180,15 +160,6 @@ export function BlogView(props) {
     );
   };
   return (
-    // <div
-    //   style={{
-    //     backgroundColor: '#fdfdfd',
-    //     height: '100vh',
-    //     paddingTop: 40,
-    //   }}
-    // >
-    //   {content && <Editor initContent={content} read_only />}
-    // </div>
     <>
       {blogView && blogView.meta && blogView.meta.title && renderHelmet(blogView)}
       {Object.keys(blogView).length > 0 && (
@@ -226,7 +197,7 @@ export function BlogView(props) {
           <Copyright>
             <p>
               Powered by&nbsp;
-              <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+              <a href="https://icetea.io/" target="_blank" rel="noopener">
                 Icetea Platform
               </a>
             </p>

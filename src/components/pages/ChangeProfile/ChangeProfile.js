@@ -26,6 +26,7 @@ import {
   applyRotation,
   imageResize,
   handleError,
+  copyToClipboard
 } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -364,8 +365,7 @@ function ChangeProfile(props) {
                       <span className="warningMessage">
                         <WarningIcon className="warningIcon" />
                         <span className="warningText">
-                          Please contact customer support to unlock your account before you can update profile and post
-                          contents.
+                        Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can update profile.
                         </span>
                       </span>
                     }
@@ -467,14 +467,7 @@ function ChangeProfile(props) {
                         // disabled
                         readOnly
                         onClick={() => {
-                          const dummy = document.createElement('textarea');
-                          document.body.appendChild(dummy);
-                          dummy.value = address;
-                          dummy.select();
-                          document.execCommand('copy');
-                          document.body.removeChild(dummy);
-                          const message = 'Copied';
-                          enqueueSnackbar(message, { variant: 'info' });
+                          copyToClipboard(address, enqueueSnackbar)
                         }}
                         value={address}
                         InputProps={{

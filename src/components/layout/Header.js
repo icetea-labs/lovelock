@@ -12,9 +12,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Button from '@material-ui/core/Button';
 import ListItemText from '@material-ui/core/ListItemText';
-import List from '@material-ui/core/List';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItem from '@material-ui/core/ListItem';
+// import List from '@material-ui/core/List';
+// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+// import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
@@ -704,7 +704,7 @@ function Header(props) {
       {/* friReqMenu */}
       {/* notiList */}
       {needAuth && <PasswordPrompt />}
-      {isNewLock && <PuNewLock close={closePopup} />}
+      {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
     </div>
   );

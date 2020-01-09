@@ -10,6 +10,13 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
   // cache some variables
   const sender = msg.sender;
   const isPrivate = false;
+
+  // this should not needed because it waste state space
+  // but we put it here because the client is expected it!
+  if (receiver == null) {
+    receiver = sender
+  }
+
   const isJournal = sender === receiver;
   const isCrush = receiver === self.botAddress;
 
@@ -42,6 +49,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
       date: Joi.date()
         .timestamp()
         .raw(),
+      lockName: Joi.string()
     })
   );
   s_info.date = s_info.date ?? block.timestamp;
@@ -60,7 +68,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
     isPrivate,
     sender,
     s_content,
-    s_info: { date: s_info.date, lockName: '' }, // no need hash
+    s_info: { date: s_info.date, lockName: s_info.lockName || '' }, // no need hash
     receiver,
     r_content: '',
     r_info: '',
@@ -108,6 +116,9 @@ exports.apiEditLock = (self, lockIndex, data, contributors) => {
     if (data.lockName != null) {
       lock.s_info.lockName = data.lockName
     }
+  
+    expect(data.message !== '', 'Message is required.');
+    
     if (data.message != null) {
       if (msg.sender === lock.sender) {
         lock.s_content = data.message

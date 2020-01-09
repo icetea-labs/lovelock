@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, IconButton, Typography } from '@material-ui/core';
+import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
@@ -13,7 +13,6 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
-import styled from 'styled-components';
 import Linkify from 'react-linkify';
 
 import * as actions from '../../../store/actions';
@@ -28,6 +27,7 @@ import {
   signalPrerenderDone,
   smartFetchIpfsJson,
   ensureHashUrl,
+  copyToClipboard
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -36,25 +36,9 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
-
-const Copyright = styled.div`
-  display: flex;
-  line-height: 60px;
-  justify-content: center;
-  clear: both;
-  width: 100%;
-  margin: 0 auto;
-  margin-top: 70px;
-  max-width: 740px;
-  border-top: 1px solid #e1e1e1;
-  color: rgba(0, 0, 0, 0.54);
-  a {
-    color: inherit;
-    &:hover {
-      color: #8250c8;
-    }
-  }
-`;
+import CommonDialog from "../../elements/CommonDialog";
+import CreateMemory from "./CreateMemory";
+import appConstants from "../../../helper/constants";
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -184,10 +168,10 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const setMemoryCollection = (propose, memory) => {
+const setMemoryCollection = (lock, memory) => {
   const cid = memory.info.collectionId;
   if (cid != null) {
-    const cs = propose.collections || [];
+    const cs = lock.collections || [];
     memory.collection = cs.find(c => c.id === cid);
   }
 };
@@ -208,24 +192,27 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, propose } = props;
-  setMemoryCollection(propose, memory);
+  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
+  setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
-  const rName = useSelector(state => state.account.r_name);
-  const sName = useSelector(state => state.account.s_name);
-  // const propose = useSelector(state => state.loveinfo.propose);
+  const collections = memory.lock.collections
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
-  // const [memoryContent, setMemoryContent] = useState('');
   const [decoding, setDecoding] = useState(false);
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenModal, setOpenModal] = useState(false);
+  const [actionMenu, setActionMenu] = useState(null);
+  const [isEditOpened, setIsEditOpened] = useState(false);
+  const [permLink, setPermLink] = useState();
   const classes = useStyles();
+  
+  const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
+  const isMyPost = address === memory.sender
 
   useEffect(() => {
     let cancel = false;
@@ -280,7 +267,7 @@ function MemoryContent(props) {
       abort.abort();
       cancel = true;
     };
-  }, [memory, memory.showDetail, memory.info.blog, propose]);
+  }, [memory, memory.showDetail, memory.info.blog, memory.lock]);
 
   function FacebookProgress() {
     const classesFb = useStylesFacebook();
@@ -454,11 +441,11 @@ function MemoryContent(props) {
     signalPrerenderDone();
 
     const title = `${blogInfo.title} - A story on Lovelock`;
-    const desc = makeLockName(propose);
+    const desc = makeLockName(memory.lock);
     let img = blogInfo.coverPhoto && blogInfo.coverPhoto.url;
     if (!img) {
-      img = propose.coverImg
-        ? process.env.REACT_APP_IPFS + propose.coverImg
+      img = memory.lock.coverImg
+        ? process.env.REACT_APP_IPFS + memory.lock.coverImg
         : `${process.env.PUBLIC_URL}/static/img/share.jpg`;
     }
     return (
@@ -505,8 +492,8 @@ function MemoryContent(props) {
             handleClose={closeMemory}
             title={
               <MemoryTitle
-                sender={sName || memoryDecrypted.s_tags['display-name']}
-                receiver={rName || memoryDecrypted.r_tags['display-name']}
+                sender={memoryDecrypted.s_tags['display-name']}
+                receiver={memoryDecrypted.r_tags['display-name']}
                 handleClose={closeMemory}
               />
             }
@@ -533,14 +520,6 @@ function MemoryContent(props) {
                 />
               )}
             </div>
-            <Copyright>
-              <p>
-                Powered by&nbsp;
-                <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-                  Icetea Platform
-                </a>
-              </p>
-            </Copyright>
           </BlogModal>
         )}
       </>
@@ -604,24 +583,120 @@ function MemoryContent(props) {
       </>
     );
   };
+  
+  function openActionMenu(event) {
+    setActionMenu(event.currentTarget);
+  }
+  
+  function closeActionMenu() {
+    setActionMenu(null);
+  }
+  
+  function openEditPostModal() {
+    closeActionMenu();
+    setTimeout(() => {
+      setIsEditOpened(true);
+    }, 0);
+  }
 
+  function openEditBlogContent() {
+    closeActionMenu();
+    openBlogEditor(memoryDecrypted)
+  }
+
+  function openPermLinkModal() {
+    closeActionMenu();
+    const url = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${memory.id}`
+    const link = { url }
+    if (memory.info.blog) {
+      link.title = memoryDecrypted.meta.title
+      link.text = link.title
+    } else {
+      link.text = memory.content
+    }
+
+    setPermLink(link);
+  }
+
+  function trySharePermLink() {
+    // Share API is only supported on modern MOBILE browser and Mac Safari
+    navigator.share && navigator.share(permLink)
+    .catch(err => {
+      if (err.name !== 'AbortError') {
+        console.error('Error sharing', err)
+        enqueueSnackbar('Error sharing: ' + err.messsage, { variant: 'error' })
+      }
+    });
+
+    // close the dialog
+    setPermLink(null)
+  }
+  
   return (
     <>
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
         <CardHeader
-          avatar={<AvatarPro alt="img" hash={memoryDecrypted['s_tags'].avatar} />}
+          avatar={<AvatarPro alt={memoryDecrypted['s_tags']['display-name']} hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem(memoryDecrypted)}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
-            <IconButton aria-label="settings">
+            <IconButton aria-label="settings" onClick={openActionMenu}>
               <MoreVertIcon />
             </IconButton>
           }
         />
+        
+        {isEditable && (
+          <Menu
+            anchorEl={actionMenu}
+            open={Boolean(actionMenu)}
+            onClose={closeActionMenu}
+            getContentAnchorEl={null}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
+          >
+            <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
+            {isMyPost && <MenuItem onClick={openEditPostModal}>{memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}</MenuItem>}
+            {isMyPost && memory.info.blog && <MenuItem onClick={openEditBlogContent}>Edit Blog Content</MenuItem>}
+          </Menu>
+        )}
+        
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
         {isUnlock && renderActionBt()}
         {showComment && renderComments()}
+        {isEditOpened && (
+          <CommonDialog
+            title={memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}
+            close={() => setIsEditOpened(false)}
+          >
+            <CreateMemory
+              collectionId={memoryDecrypted.collection ? memoryDecrypted.collection.id : null}
+              collections={collections}
+              onMemoryChanged={data => {
+                setIsEditOpened(false)
+                onMemoryChanged && onMemoryChanged(data)
+              }}
+              handleNewCollection={handleNewCollection}
+              memory={memoryDecrypted}
+            />
+          </CommonDialog>
+        )}
+        {permLink && (
+          <CommonDialog
+            title='Permanent Link'
+            cancelText={navigator.share ? 'Share' : 'Close'}
+            cancel={trySharePermLink}
+            okText='Copy'
+            confirm={() => {
+              copyToClipboard(permLink.url, enqueueSnackbar)
+              setPermLink(null)
+            }}
+            close={() => setPermLink(null)}
+          >
+            <a className='underline' href={permLink.url}>{permLink.url}</a>
+          </CommonDialog>
+        )}
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (

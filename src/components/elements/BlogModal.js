@@ -4,6 +4,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Box from '@material-ui/core/Box';
@@ -99,11 +100,14 @@ export default function BlogModal(props) {
                     }
                   />
                 )}
-                {props.handleSumit && (
-                  <Button variant="contained" color="primary" onClick={props.handleSumit}>
+                {props.handleSubmit && (
+                  <Button variant="contained" color="primary" onClick={props.handleSubmit}>
                     Publish
                   </Button>
                 )}
+                {props.drafts && <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.drafts.showDrafts} style={{ marginLeft: 16 }}>
+                    Drafts
+                </Button>}
                 {props.handleClose && (
                   <Button className={classes.back} onClick={props.handleClose}>
                     {props.closeText || <i className="material-icons">close</i>}
@@ -112,6 +116,7 @@ export default function BlogModal(props) {
               </Toolbar>
             </AppBar>
           </div>
+          {props.drafts && props.drafts.renderDrafts && props.drafts.renderDrafts()}
           <div className={classes.postBody}>{props.children}</div>
         </div>
       </div>

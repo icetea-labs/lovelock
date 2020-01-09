@@ -31,7 +31,7 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 
 function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
   if (info.date == null) {
-    info.date = block.timestamp;
+    info = { ...info, date: block.timestamp }
   } else {
     if (typeof info.date !== 'number' || !Number.isInteger(info.date) || info.date < 0) {
       throw new Error('info.date must be a timestamp (integer).');
@@ -104,6 +104,9 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
 exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
   const memories = self.getMemories();
 
+  // remove duplicate
+  listMemIndex = [... new Set(listMemIndex)]
+
   const mems = listMemIndex.map(index => {
     return { ...getDataByIndex(memories, index), id: index };
   });
@@ -119,10 +122,10 @@ function _addInfoToMems(memories, self) {
     tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
     tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
     //LOCK_TYPE_JOURNAL
+    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
     if (mem.receiver === mem.sender) {
       tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
-      let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
       const tmpBotInfo = {};
       tmpBotInfo.avatar = lock.bot_info.botAva;
       tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
@@ -130,7 +133,7 @@ function _addInfoToMems(memories, self) {
     } else {
       tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
     }
-    return { ...mem, ...tmpMem };
+    return { ...mem, ...tmpMem, lock };
   }, []);
 
   // sort descending by mem id;
@@ -151,7 +154,7 @@ exports.apiEditMemory = (self, memIndex, content, info) => {
   }
 
   if (info != null) {
-    const { hash, date } = info
+    const { hash, date, collectionId } = info
     if (hash != null) {
       expect(Array.isArray(hash), 'info.hash must be an array.')
       hash.forEach(h => {
@@ -166,6 +169,11 @@ exports.apiEditMemory = (self, memIndex, content, info) => {
     if (date != null) {
       expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
       mem.info.date = date
+    }
+  
+    if (collectionId != null) {
+      expect(typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId), 'info.collectionId must be a valid number.')
+      mem.info.collectionId = collectionId
     }
   }
   
@@ -185,7 +193,7 @@ exports.apiDeleteMemory = (self, memIndex) => {
   const lockIndex = mem.lockIndex;
 
   const lock = locks[lockIndex]
-  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.") 
+  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
 
   lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
   // save locks

@@ -10,13 +10,8 @@ const cssFiles = fs.readdirSync('./build/static/css').filter(fn => fn.endsWith('
 // console.log(jsFiles)
 
 const PRELOAD_FILES = [
-    //'tweb3',
-    //'1', // tweb3 companion
     'app',
-    '20', // app companion
-    //'home_layout',
-    //'0', '2', '3', // home_layout companion
-    //'home'
+    '21', // app companion
 ]
 
 const preloadJsLinks = jsFiles.filter(fn => {

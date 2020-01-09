@@ -128,7 +128,11 @@ const WarrperChatBox = styled(FlexBox)`
       font-weight: 600;
       text-transform: capitalize;
       color: #8250c8;
-      width: 100%;
+      max-width: 34vw;
+      overflow-x: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: inline-block;
     }
     .time {
       font-size: ${rem(12)};
@@ -647,47 +651,46 @@ function TopContrainer(props) {
         </SummaryCongrat>
       )}
       <WarrperChatBox>
-        {topInfo.s_content && (
-          <div className="proposeMes">
-            <div className="user_photo fl">
-              {loading ? (
-                <Skeleton className={classes.avatar} />
-              ) : (
-                <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
-              )}
-            </div>
-            <div className="content_detail fl clearfix">
-              {loading ? (
-                <Skeleton height={12} width="60%" />
-              ) : (
-                <div className="name_time">
-                  {/* <span className="user_name color-violet">{topInfo.s_name}</span> */}
-                  <Link href={`/u/${topInfo.sender}`} className="user_name color-violet">{`${topInfo.s_name}`}</Link>
-                  <span className="sinceDate">・</span>
-                  <span className="time color-gray">
-                    <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
-                  </span>
-                  {isSender && renderEditLockIcon()}
-                </div>
-              )}
-              {loading ? (
-                <Skeleton height={40} width="100%" />
-              ) : topInfo.s_content.length > 150 ? (
-                <div className="lockView">
-                  <ReadMore
-                    text={topInfo.s_content}
-                    numberOfLines={4}
-                    lineHeight={1.6}
-                    showLessButton
-                    readMoreCharacterLimit={150}
-                  />
-                </div>
-              ) : (
-                <div className="lockView">{topInfo.s_content}</div>
-              )}
-            </div>
+        <div className="proposeMes">
+          <div className="user_photo fl">
+            {loading ? (
+              <Skeleton className={classes.avatar} />
+            ) : (
+              <AvatarPro alt="img" hash={topInfo.s_avatar} className={classes.avatar} />
+            )}
           </div>
-        )}
+          <div className="content_detail fl clearfix">
+            {loading ? (
+              <Skeleton height={12} width="60%" />
+            ) : (
+              <div className="name_time">
+                {/* <span className="user_name color-violet">{topInfo.s_name}</span> */}
+                <Link href={`/u/${topInfo.sender}`} className="user_name color-violet" title={topInfo.s_info.lockName || ''}>{`${topInfo.s_info.lockName || topInfo.s_name}`}</Link>
+                <span className="sinceDate">・</span>
+                <span className="time color-gray">
+                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
+                </span>
+                {isSender && renderEditLockIcon()}
+              </div>
+            )}
+            {loading ? (
+              <Skeleton height={40} width="100%" />
+            ) : topInfo.s_content.length > 150 ? (
+              <div className="lockView">
+                <ReadMore
+                  text={topInfo.s_content}
+                  numberOfLines={4}
+                  lineHeight={1.6}
+                  showLessButton
+                  readMoreCharacterLimit={150}
+                />
+              </div>
+            ) : (
+              <div className="lockView">{topInfo.s_content || ''}</div>
+            )}
+          </div>
+        </div>
+
         {topInfo.r_content && (
           <div className="proposeMes">
             <div className="content_detail clearfix">

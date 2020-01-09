@@ -68,7 +68,7 @@ const useStyles = makeStyles(theme => ({
     background: '#f5f6f7',
     padding: theme.spacing(0.8, 1.5),
     borderRadius: 20,
-    fontSize: 12,
+    fontSize: 13,
     '&:hover': {
       background: '#f1f1f1',
     },
@@ -187,19 +187,24 @@ export default function MemoryComments(props) {
     setShowComments(comments);
     setNumHidencmt(0);
   }
+
+  function canDelelte(item) {
+    return [item.sender, memory[0].sender, memory[0].receiver].includes(address)
+  }
+
   async function deleteComment(item, indexKey) {
-    const owner = [item.sender, memory[0].sender, memory[0].receiver];
     let cmtIndex = 0;
     if (numHidencmt > 0) {
       cmtIndex = indexKey + numHidencmt;
     } else {
       cmtIndex = indexKey;
     }
-    if (!owner.includes(address)) {
-      const message = `You cannot delete this comment.`;
+    if (!canDelelte(item)) {
+      const message = 'You cannot delete this comment.';
       enqueueSnackbar(message, { variant: 'error' });
     } else {
       await tx.sendCommit('deleteComment', memoryIndex, cmtIndex);
+      enqueueSnackbar('Deleted', { variant: 'success' });
       loadData(memoryIndex).then(respComment => {
         if (respComment.length > numComment) {
           const numMore = respComment.length - numComment;
@@ -213,6 +218,7 @@ export default function MemoryComments(props) {
       });
     }
   }
+
   // console.log('showComments', showComments);
   const renderViewMore = (
     <Grid item>
@@ -221,6 +227,7 @@ export default function MemoryComments(props) {
       </Link>
     </Grid>
   );
+
   const renderComments = (
     <>
       {showComments.map((item, indexKey) => {
@@ -242,9 +249,9 @@ export default function MemoryComments(props) {
                   </Typography>
                 </ArrowTooltip>
               </Grid>
-              <Grid item sx={2}>
+              {canDelelte(item) && <Grid item sx={2}>
                 <DeleteForeverIcon className={classes.deleteIc} onClick={() => deleteComment(item, indexKey)} />
-              </Grid>
+              </Grid>}
             </Grid>
           </Grid>
         );

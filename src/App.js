@@ -111,6 +111,7 @@ function App(props) {
             <RouteHome hasAddress={!!props.address} exact path="/" />
             <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />
             <RouteWithLayout layout={HomeLayout} exact path="/explore" component={Explore} />
+            <RouteWithLayout layout={HomeLayout} exact path="/memory/:index" component={Explore} />
             <RouteWithLayout layout={HomeLayout} exact path="/lock/:index" component={DetailContainer} />
             <RouteWithLayout layout={HomeLayout} exact path="/lock/:index/collection/:cid" component={DetailContainer} />
             <RouteWithLayout layout={HomeLayout} exact path="/u/:address" component={Mypage} />

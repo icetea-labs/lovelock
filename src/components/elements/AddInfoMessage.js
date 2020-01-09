@@ -8,7 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import ZoomImage from './AutoZoomImage';
 import ImageCrop from './ImageCrop';
-import { applyRotation, imageResize } from '../../helper';
+import { applyRotation, imageResize, ensureHashUrl } from '../../helper';
 import CustomDatePicker from "./CustomDatePicker";
 
 const Container = styled.div``;
@@ -211,7 +211,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function AddInfoMessage(props) {
-  const { files, date, isCreatePro, onBlogClick, hasParentDialog, onDialogToggle } = props;
+  const { files, date, coverPhotoMode, onBlogClick, hasParentDialog, onDialogToggle, photoButtonText } = props;
   const { grayLayout = true, onChangeMedia, onChangeDate } = props;
   const [picPreview, setPicPreview] = useState([]);
   const [isOpenCrop, _setIsOpenCrop] = useState(false);
@@ -226,11 +226,20 @@ export default function AddInfoMessage(props) {
     if (files.length === 0) {
       setPicPreview([]);
     } else {
-      const arrFiles = files;
-      const urlFiles = arrFiles.map(file => {
-        const src = window.URL.createObjectURL(new Blob([file]));
-        return { file, src };
+      const urlFiles = files.map(file => {
+        let src = '';
+        let needRevoke = false;
+        if (typeof file === 'string') {
+          src = ensureHashUrl(file)
+        } else if (file.src) {
+          src = file.src;
+        } else {
+          src = window.URL.createObjectURL(new Blob([file]));
+          needRevoke = true
+        }
+        return { needRevoke, src };
       });
+
       setPicPreview(urlFiles);
     }
   }, [files]);
@@ -316,10 +325,10 @@ export default function AddInfoMessage(props) {
           <div className="scrollWrap">
             <div className="scrollBody">
               <div className="scrollContent">
-                {picPreview.map(({ src }, index) => (
+                {picPreview.map(({ needRevoke, src }, index) => (
                   <div key={index} className="imgContent">
-                    <GridListTile className={isCreatePro ? classes.imgIsCreate : classes.img}>
-                      <ZoomImage src={src} alt="photo" adjust onLoad={() => URL.revokeObjectURL(src)} />
+                    <GridListTile className={coverPhotoMode ? classes.imgIsCreate : classes.img}>
+                      <ZoomImage src={src} alt="photo" adjust onLoad={() => (needRevoke && URL.revokeObjectURL(src))} />
                       <GridListTileBar
                         className={classes.titleBar}
                         style={{ background: 'none' }}
@@ -333,7 +342,7 @@ export default function AddInfoMessage(props) {
                     </GridListTile>
                   </div>
                 ))}
-                {!isCreatePro && (
+                {!coverPhotoMode && (
                   <AddMoreImg>
                     <div className="addImgBox">
                       <div className="btAddImg" rel="ignore">
@@ -372,17 +381,17 @@ export default function AddInfoMessage(props) {
             <ActionItem>
               <div className="icon-upload">
                 <i className="material-icons">insert_photo</i>
-                <div>Photo</div>
+                <div>{photoButtonText || 'Photo'}</div>
               </div>
               <input
-                accept={isCreatePro ? 'image/jpeg,image/png' : 'image/jpeg,image/png,image/gif'}
+                accept={coverPhotoMode ? 'image/jpeg,image/png' : 'image/jpeg,image/png,image/gif'}
                 title="Choose a file to upload"
                 className="fileInput"
                 role="button"
-                multiple={!isCreatePro}
+                multiple={!coverPhotoMode}
                 type="file"
                 value=""
-                onChange={isCreatePro ? handleImageChange : captureUploadFile}
+                onChange={coverPhotoMode ? handleImageChange : captureUploadFile}
               />
             </ActionItem>
           </Grid>

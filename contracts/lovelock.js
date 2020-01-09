@@ -83,7 +83,7 @@ class LoveLock {
   @view getFollowed = () => this.getState('followed', {});
   setFollowed = value => this.setState('followed', value);
 
-  @transaction createLock(s_content: string, receiver: address, s_info = {}, bot_info): number {
+  @transaction createLock(s_content: string, receiver: ?address, s_info = {}, bot_info): number {
     const self = this;
     expectUserApproved(self);
     return apiCreateLock(self, s_content, receiver, s_info, bot_info);
@@ -431,9 +431,13 @@ class LoveLock {
   @view getChoices = () => this.getState('choices', []);
   setChoices = value => this.setState('choices', value);
 
-  @view getChoiceMemories = () => {
-    const choices = this.getState('choices', [])
-    if (!choices || !choices.length) {
+  @view getChoiceMemories = extra => {
+    let choices = this.getState('choices', [])
+    if (extra != null ) {
+      choices = choices.concat(extra)
+    }
+
+    if (!choices.length) {
       return []
     }
 

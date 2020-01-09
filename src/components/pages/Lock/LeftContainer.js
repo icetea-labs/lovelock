@@ -118,7 +118,8 @@ function LeftContainer(props) {
     closeMobileMenu,
   } = props;
 
-  const collections = topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
+  const showCollection = proIndex != null
+  const collections = showCollection && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
@@ -207,7 +208,7 @@ function LeftContainer(props) {
 
   function eventConfirmLock(data) {
     confirmLock(data.log);
-    if (address === data.log.sender) {
+    if (address === data.log.sender && data.log.status === 1) {
       const message = 'Your lock request has been accepted.';
       enqueueSnackbar(message, { variant: 'info' });
     }
@@ -289,8 +290,8 @@ function LeftContainer(props) {
           )}
           {renderOwnerLocks(locks, address)}
           {!isGuest && renderFollowingLocks(locks, address)}
-          <div className="title">Collection</div>
-          <CollectionBox>{renderCollections(collections)}</CollectionBox>
+          {showCollection && <div className="title">Collection</div>}
+          {showCollection && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
         </ShadowBox>
         <SupportSite>
           <p>

@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
+import { LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
-import MemoryContainer from '../Memory/MemoryContainer';
+import MemoryList from '../Memory/MemoryList';
 import * as actions from '../../../store/actions';
 
 import APIService from '../../../service/apiService';
 
-const RightBoxMemories = styled.div`
-  padding: 0 0 ${rem(45)} ${rem(45)};
-  @media (max-width: 768px) {
-    padding-left: 0;
-  }
-`;
-
 function Explore(props) {
-  const { address, setMemory } = props;
+  const { setMemory } = props;
   const [loading, setLoading] = useState(true);
-  // const [users, isLoading, error, retry] = useAPI('getLocksForFeed', [address]);
+
+  const indexParam = Number(props.match.params.index)
+  const pinIndex = (indexParam > 0 && Number.isInteger(indexParam)) ? indexParam : null
+
+  
+  const [changed, setChanged] = useState(false);
+
+  function refresh() {
+    setChanged(c => !c);
+  }
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [changed]);
 
   async function fetchData() {
-    APIService.getChoiceMemories().then(mems => {
+    APIService.getChoiceMemories(pinIndex).then(mems => {
       // set to redux
       setMemory(mems);
       setLoading(false);
@@ -33,25 +35,17 @@ function Explore(props) {
   }
 
   return (
-    // address && (
-      // <FlexBox wrap="wrap">
-      //   <FlexWidthBox width="30%">
-      //     <LeftContainer loading={loading} />
-      //   </FlexWidthBox>
-      //   <FlexWidthBox width="70%">
-      //     <RightBox>
-      //       <MemoryContainer memorydata={[]} />
-      //     </RightBox>
-      //   </FlexWidthBox>
-      // </FlexBox>
       <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
           <LeftContainer loading={loading} />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          <RightBoxMemories>
-            <MemoryContainer memorydata={[]} />
-          </RightBoxMemories>
+          <MemoryList 
+            {...props}
+            pinIndex={pinIndex}
+            onMemoryChanged={refresh}
+            loading={loading}
+          />
         </div>
       </LeftBoxWrapper>
     //)
