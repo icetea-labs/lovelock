@@ -14,6 +14,8 @@ import { SimpleLoading } from './components/elements/GlobaLoading';
 // import { persistor, store } from './store';
 import { store } from './store';
 
+// we have to do it here because App component is lasily loaded
+// so cannot this kind of stuff there
 (function(p){
   if (/^\/blog\/\d+\/?$/.test(p) || /^\/lock\/\d+(\/|$)/.test(p)) {
     window.prerenderReady = false;
@@ -185,4 +187,17 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-serviceWorker.register();
+serviceWorker.register({
+  onUpdate: registration => {
+    const waitingServiceWorker = registration.waiting
+
+    if (waitingServiceWorker) {
+      // waitingServiceWorker.addEventListener("statechange", event => {
+      //   if (event.target.state === "activated") {
+      //     window.location.reload()
+      //   }
+      // });
+      waitingServiceWorker.postMessage({ type: "SKIP_WAITING" });
+    }
+  }
+});

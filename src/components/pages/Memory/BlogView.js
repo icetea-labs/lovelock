@@ -109,9 +109,8 @@ export function BlogView(props) {
     })
   }
 
-  function closeMemory(lockIndex) {
-    // console.log('blogView', blogView);
-    props.history.push(`/lock/${lockIndex != null ? lockIndex : blogView.lockIndex}`);
+  function closeMemory() {
+    props.history.push(`/lock/${blogView.lockIndex}`);
   }
 
   const textInput = useRef('');
