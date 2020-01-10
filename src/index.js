@@ -180,7 +180,7 @@ ReactDOM.render(
       <meta property="og:image" content={`${process.env.PUBLIC_URL}/static/img/share.jpg`} />
       <meta
         property="og:description"
-        content="A safe2 and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
+        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
       />
     </Helmet>
   </MuiThemeProvider>,
