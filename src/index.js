@@ -14,6 +14,8 @@ import { SimpleLoading } from './components/elements/GlobaLoading';
 // import { persistor, store } from './store';
 import { store } from './store';
 
+// we have to do it here because App component is lasily loaded
+// so cannot this kind of stuff there
 (function(p){
   if (/^\/blog\/\d+\/?$/.test(p) || /^\/lock\/\d+(\/|$)/.test(p)) {
     window.prerenderReady = false;
@@ -178,11 +180,24 @@ ReactDOM.render(
       <meta property="og:image" content={`${process.env.PUBLIC_URL}/static/img/share.jpg`} />
       <meta
         property="og:description"
-        content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
+        content="A safe2 and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
       />
     </Helmet>
   </MuiThemeProvider>,
   document.getElementById('root')
 );
 
-serviceWorker.register();
+serviceWorker.register({
+  onUpdate: registration => {
+    const waitingServiceWorker = registration.waiting
+
+    if (waitingServiceWorker) {
+      // waitingServiceWorker.addEventListener("statechange", event => {
+      //   if (event.target.state === "activated") {
+      //     window.location.reload()
+      //   }
+      // });
+      waitingServiceWorker.postMessage({ type: "SKIP_WAITING" });
+    }
+  }
+});
