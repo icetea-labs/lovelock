@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, connect } from 'react-redux';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 // import CardHeader from '@material-ui/core/CardHeader';
@@ -340,8 +340,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, topInfo, setTopInfo, setGLoading } = props;
-  const address = useSelector(state => state.account.address);
+  const { proIndex, address, topInfo, setTopInfo, setGLoading } = props;
   const tx = useTx();
   const isSender = topInfo.sender === address;
   const isReceiver = topInfo.receiver === address;
@@ -508,7 +507,7 @@ function TopContrainer(props) {
     }, 1);
   }
 
-  const buttonChange = (
+  const buttonChange = () => (
     <label htmlFor="outlined-button-file">
       <Button component="span" className={classes.btChange}>
         <PhotoCameraIcon className={classes.photoCameraIcon} />
@@ -562,28 +561,33 @@ function TopContrainer(props) {
     </IconButton>
   );
 
+  const canChangeCover = () => {
+    if (!address || !topInfo) return false
+    return isSender || isReceiver
+  }
+
   return (
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg}>
-            <div className="showChangeImg">
+            {canChangeCover() && <div className="showChangeImg">
               <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
                 Cancel
               </Button>
               <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
                 Apply
               </Button>
-            </div>
+            </div>}
           </CardMedia>
         ) : (
           <CardMedia
             className={classes.media}
             image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
           >
-            <div className="showChangeImg">
-              <div>{buttonChange}</div>
-            </div>
+            {canChangeCover() && <div className="showChangeImg">
+              <div>{buttonChange()}</div>
+            </div>}
           </CardMedia>
         )}
       </div>
@@ -743,6 +747,7 @@ function TopContrainer(props) {
 const mapStateToProps = state => {
   return {
     topInfo: state.loveinfo.topInfo,
+    address: state.account.address,
   };
 };
 
