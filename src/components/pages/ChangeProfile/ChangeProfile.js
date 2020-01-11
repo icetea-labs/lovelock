@@ -365,7 +365,7 @@ function ChangeProfile(props) {
                       <span className="warningMessage">
                         <WarningIcon className="warningIcon" />
                         <span className="warningText">
-                        Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can update profile.
+                        Please <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can update profile.
                         </span>
                       </span>
                     }

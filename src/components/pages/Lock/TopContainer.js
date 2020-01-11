@@ -566,6 +566,8 @@ function TopContrainer(props) {
     return isSender || isReceiver
   }
 
+  if (!topInfo || !topInfo.sender) return <div /> // loading...
+
   return (
     <TopContainerBox>
       <div className="top__coverimg">
@@ -583,7 +585,7 @@ function TopContrainer(props) {
         ) : (
           <CardMedia
             className={classes.media}
-            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
+            image={topInfo.coverImg && (process.env.REACT_APP_IPFS + topInfo.coverImg)}
           >
             {canChangeCover() && <div className="showChangeImg">
               <div>{buttonChange()}</div>

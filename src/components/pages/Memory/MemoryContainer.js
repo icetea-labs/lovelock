@@ -37,7 +37,7 @@ function MemoryContainer(props) {
   const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor, pinIndex } = props;
   const arrayLoadin = [{}, {}, {}, {}];
   const [limit, setLimit] = useState(5);
-  const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreListItems);
+  const [/* isFetching */, setIsFetching] = useInfiniteScroll(fetchMoreListItems);
 
   const classes = useStyles();
 

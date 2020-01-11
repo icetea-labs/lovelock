@@ -196,7 +196,7 @@ export function BlogView(props) {
           <Copyright>
             <p>
               Powered by&nbsp;
-              <a href="https://icetea.io/" target="_blank" rel="noopener">
+              <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
                 Icetea Platform
               </a>
             </p>

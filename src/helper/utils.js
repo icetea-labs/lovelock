@@ -771,7 +771,7 @@ export async function getUserSuggestions(value) {
     return [];
   }
 
-  const regexText = `\^account\\..*${escapedValue}`
+  const regexText = `^account\\..*${escapedValue}`
   const regex = new RegExp(regexText);
   
   let people = await getAliasContract()

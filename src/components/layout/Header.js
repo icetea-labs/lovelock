@@ -319,9 +319,9 @@ function Header(props) {
   const address = useSelector(state => state.account.address);
 
   const [showPhrase, setShowPhrase] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  // const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  const [anchorElNoti, setAnchorElNoti] = useState(null);
+  // const [anchorElNoti, setAnchorElNoti] = useState(null);
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
@@ -356,17 +356,17 @@ function Header(props) {
   //   setAnchorEl(event.currentTarget);
   // }
 
-  function handleFriReqClose() {
-    setAnchorEl(null);
-  }
+  // function handleFriReqClose() {
+  //   setAnchorEl(null);
+  // }
 
   // function handleNotiOpen(event) {
   //   setAnchorElNoti(event.currentTarget);
   // }
 
-  function handleNotiClose() {
-    setAnchorElNoti(null);
-  }
+  // function handleNotiClose() {
+  //   setAnchorElNoti(null);
+  // }
 
   function handeExplore() {
     props.history.push('/explore');
@@ -402,7 +402,7 @@ function Header(props) {
       }
     }
     fetchData();
-  }, [address, dispatch]);
+  }, [address, tokenAddress, dispatch]);
 
   const renderMenu = (
     <StyledMenu
