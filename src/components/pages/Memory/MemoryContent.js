@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem } from '@material-ui/core';
+import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem, Link } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
@@ -127,8 +127,7 @@ const useStyles = makeStyles(theme => ({
     lineHeight: 2,
   },
   relationshipName: {
-    textTransform: 'capitalize',
-    color: '#8250c8',
+    textTransform: 'capitalize'
   },
   card: {
     // maxWidth: 345,
@@ -156,16 +155,6 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     margin: '0 auto',
   },
-  memorySender: {
-    '&:hover': {
-      textDecoration: 'underline',
-    },
-  },
-  memoryReceiver: {
-    '&:hover': {
-      textDecoration: 'underline',
-    },
-  },
 }));
 
 const setMemoryCollection = (lock, memory) => {
@@ -192,7 +181,7 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
+  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -401,6 +390,32 @@ function MemoryContent(props) {
     );
   };
 
+  function renderLinkUser(isSender) {
+    const m = memoryDecrypted
+    if (!m) return
+
+    let u, name
+    if (isSender) {
+      u = m.sender
+      name = m.name
+    } else {
+      u = m.receiver
+      name = m.r_tags && m.r_tags['display-name']
+    }
+
+    if (!name) return <span>a crush</span>
+
+    return <Link 
+      href={`/u/${u}`}
+      className={classes.relationshipName}
+      onClick={e => {
+        e.preventDefault()
+        history.push(`/u/${u}`)
+      }}>
+      {name}
+    </Link>
+  }
+
   const renderLockEventMemory = () => {
     return (
       <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
@@ -409,13 +424,7 @@ function MemoryContent(props) {
         </div>
         <span>
           <span>Locked with </span>
-          {memoryDecrypted.r_tags && memoryDecrypted.r_tags['display-name'] ? (
-            <Typography component="span" className={classes.relationshipName}>
-              {memoryDecrypted.r_tags['display-name']}
-            </Typography>
-          ) : (
-            <span>a crush</span>
-          )}
+          {renderLinkUser(false)}
         </span>
       </Typography>
     );
@@ -428,9 +437,7 @@ function MemoryContent(props) {
           <WavesIcon color="primary" fontSize="large" />
         </div>
         <span>
-          <Typography component="span" className={classes.relationshipName}>
-            {memoryDecrypted.name}
-          </Typography>
+          {renderLinkUser(true)}
           <span> started the journal.</span>
         </span>
       </Typography>
@@ -562,12 +569,12 @@ function MemoryContent(props) {
 
   const { isUnlock } = memoryDecrypted;
 
-  const renderTitleMem = mem => {
+  const renderTitleMem = () => {
+    const mem = memoryDecrypted
     return (
       <>
-        <a href={`/u/${mem.sender}`} style={{ color: 'inherit' }} className={classes.memorySender}>
-          {mem.name}
-        </a>
+        {renderLinkUser(true)}
+
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />
@@ -637,7 +644,7 @@ function MemoryContent(props) {
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
         <CardHeader
           avatar={<AvatarPro alt={memoryDecrypted['s_tags']['display-name']} hash={memoryDecrypted['s_tags'].avatar} />}
-          title={renderTitleMem(memoryDecrypted)}
+          title={renderTitleMem()}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
             <IconButton aria-label="settings" onClick={openActionMenu}>

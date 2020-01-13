@@ -204,6 +204,11 @@ export default function CreateMemory(props) {
   }
 
   function collectionAdded(col) {
+    // console.log(col, collections)
+    if (collections) {
+      const old = collections.find(c => c.id === col.id)
+      !old && collections.push(col)
+    }
     setPostCollectionId(col.id);
   }
 

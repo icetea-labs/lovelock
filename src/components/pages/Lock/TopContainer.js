@@ -129,7 +129,7 @@ const WarrperChatBox = styled(FlexBox)`
       text-transform: capitalize;
       color: #8250c8;
       max-width: 34vw;
-      overflow-x: hidden;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       display: inline-block;
