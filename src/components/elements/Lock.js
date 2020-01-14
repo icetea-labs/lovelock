@@ -7,6 +7,8 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import { AvatarPro } from './AvatarPro';
 import Icon from './Icon';
 
+import { getShortName } from '../../helper/utils'
+
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(1),
@@ -39,32 +41,42 @@ function Lock(props) {
   const locksByStatus = locksData.filter(item => item.status === props.flag);
 
   const getInfo = item => {
+    const meOwner = address && (address === item.sender || address === item.receiver)
     const prefix = item.receiver === address ? 's' : 'r';
+    console.log(item)
     switch (item.type) {
-      case 2:
+      case 2: // journal
+        return {
+         name: item.s_info.lockName
+            ? item.s_info.lockName
+            : meOwner
+            ? 'My Journal'
+            : getShortName(item['s_tags']) + ' Journal',
+          nick: item.s_info.lockName ? ((meOwner ? 'my' : ('@' + item.s_alias)) + ' journal') : ('by @' + item.s_alias),
+          icon: 'waves',
+          avatar: item.coverPhoto || item.s_tags.avatar,
+        };
+      case 1: // crush
         return {
           name: item.s_info.lockName
             ? item.s_info.lockName
-            : address === item.sender
-            ? 'My Journal'
-            : item['s_tags']['display-name'],
-          nick: 'journal',
-          icon: 'waves',
-          avatar: item.s_tags.avatar,
-        };
-      case 1:
-        return {
-          name: item.bot_info['display-name'],
-          nick: 'crush',
+            : meOwner
+            ? item.bot_info['display-name']
+            : getShortName(item['s_tags']) + ' ❤️ ' + getShortName(item.bot_info),
+          nick: (meOwner ? 'my' : ('@' + item.s_alias)) + ' crush',
           icon: 'done',
-          avatar: item.bot_info.avatar,
+          avatar: item.coverPhoto || item.s_tags.avatar,
         };
       default:
         return {
-          name: item[`${prefix}_tags`]['display-name'],
-          nick: item[`${prefix}_alias`],
+          name: item.s_info.lockName
+            ? item.s_info.lockName
+            : meOwner
+            ? item[`${prefix}_tags`]['display-name']
+            : getShortName(item['s_tags']) + ' ❤️ ' + getShortName(item['r_tags']),
+          nick: (meOwner ? 'with ' : (item.s_alias + ' ❤️ ')) + item.r_alias,
           icon: 'done_all',
-          avatar: item[`${prefix}_tags`].avatar,
+          avatar: item.coverPhoto || item[`${prefix}_tags`].avatar
         };
     }
   };

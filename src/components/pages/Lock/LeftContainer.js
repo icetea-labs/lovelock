@@ -245,7 +245,7 @@ function LeftContainer(props) {
 
   function renderOwnerLocks(locks, myAddress) {
     const newLocks = locks.filter(lock => {
-      return lock.isMyLocks;
+      return lock.isMyLock;
     });
     const hasPending = Boolean(newLocks.find(l => l.status === 0))
     return (
@@ -267,7 +267,7 @@ function LeftContainer(props) {
   }
   function renderFollowingLocks(locks, myAddress) {
     const newLocks = locks.filter(lock => {
-      return !lock.isMyLocks;
+      return !lock.isMyLock;
     });
     return (
       <>

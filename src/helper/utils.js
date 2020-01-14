@@ -818,3 +818,9 @@ export function copyToClipboard(text, enqueueSnackbar) {
   document.body.removeChild(dummy);
   enqueueSnackbar && enqueueSnackbar('Copied', { variant: 'success' });
 }
+
+export function getShortName(tags) {
+  if (tags.firstname) return tags.firstname
+  if (tags.lastname) return tags.lastname
+  return tags['display-name'].split(' ')[0]
+}

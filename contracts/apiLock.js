@@ -368,6 +368,7 @@ function _addLeftInfoToLocks(locks, ownerLocksId = []) {
     if (lock.type === LOCK_TYPE_JOURNAL) {
       tmp.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
     } else if (lock.type === LOCK_TYPE_CRUSH) {
+      tmp.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
       const tmpBotInfo = {};
       tmpBotInfo.avatar = lock.bot_info.botAva;
       tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
@@ -375,17 +376,15 @@ function _addLeftInfoToLocks(locks, ownerLocksId = []) {
     } else {
       tmp.s_tags = ctDid.query.invokeView(lock.sender).tags || {};
       tmp.r_tags = ctDid.query.invokeView(lock.receiver).tags || {};
+    }
 
-      const s_alias = ctAlias.byAddress.invokeView(lock.sender);
-      tmp.s_alias = (s_alias || '').replace('account.', '');
-      const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
-      tmp.r_alias = (r_alias || '').replace('account.', '');
-    }
-    if (ownerLocksId.indexOf(lock.id) !== -1) {
-      tmp.isMyLocks = true;
-    } else {
-      tmp.isMyLocks = false;
-    }
+    const s_alias = ctAlias.byAddress.invokeView(lock.sender);
+    tmp.s_alias = (s_alias || '').replace('account.', '');
+    const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
+    tmp.r_alias = (r_alias || '').replace('account.', '');
+
+    tmp.isMyLock = ownerLocksId.includes(lock.id)
+
     resp.push({ ...lock, ...tmp });
   });
   return resp;

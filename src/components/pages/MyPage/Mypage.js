@@ -118,7 +118,7 @@ function Mypage(props) {
       setLocks(resp.locks);
 
       const memoIndex = resp.locks.reduce((tmp, lock) => {
-        return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
+        return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
       }, []);
       // console.log('memoIndex', memoIndex.length);
       memoIndex.length > 0 &&
