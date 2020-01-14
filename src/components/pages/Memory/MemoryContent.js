@@ -608,7 +608,9 @@ function MemoryContent(props) {
 
   function openEditBlogContent() {
     closeActionMenu();
-    openBlogEditor(memoryDecrypted)
+    setTimeout(() => {
+      openBlogEditor(memoryDecrypted)
+    }, 0);
   }
 
   function openPermLinkModal() {
@@ -622,7 +624,9 @@ function MemoryContent(props) {
       link.text = memory.content
     }
 
-    setPermLink(link);
+    setTimeout(() => {
+      setPermLink(link);
+    }, 0);
   }
 
   function trySharePermLink() {
