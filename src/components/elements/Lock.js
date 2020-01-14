@@ -43,7 +43,6 @@ function Lock(props) {
   const getInfo = item => {
     const meOwner = address && (address === item.sender || address === item.receiver)
     const prefix = item.receiver === address ? 's' : 'r';
-    console.log(item)
     switch (item.type) {
       case 2: // journal
         return {
@@ -54,7 +53,7 @@ function Lock(props) {
             : getShortName(item['s_tags']) + ' Journal',
           nick: item.s_info.lockName ? ((meOwner ? 'my' : ('@' + item.s_alias)) + ' journal') : ('by @' + item.s_alias),
           icon: 'waves',
-          avatar: item.coverPhoto || item.s_tags.avatar,
+          avatar: item.coverImg || item.s_tags.avatar,
         };
       case 1: // crush
         return {
@@ -65,7 +64,7 @@ function Lock(props) {
             : getShortName(item['s_tags']) + ' ❤️ ' + getShortName(item.bot_info),
           nick: (meOwner ? 'my' : ('@' + item.s_alias)) + ' crush',
           icon: 'done',
-          avatar: item.coverPhoto || item.s_tags.avatar,
+          avatar: item.coverImg || item.s_tags.avatar,
         };
       default:
         return {
@@ -76,7 +75,7 @@ function Lock(props) {
             : getShortName(item['s_tags']) + ' ❤️ ' + getShortName(item['r_tags']),
           nick: (meOwner ? 'with ' : (item.s_alias + ' ❤️ ')) + item.r_alias,
           icon: 'done_all',
-          avatar: item.coverPhoto || item[`${prefix}_tags`].avatar
+          avatar: item.coverImg || item[`${prefix}_tags`].avatar
         };
     }
   };
