@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, lazy } from 'react';
+import React, { useState, useEffect, lazy } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
@@ -11,11 +11,9 @@ import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
 import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
-// import { fetchAltFirstIpfsJson } from '../../../helper/utils';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
-// import PasswordPrompt from '../../layout/PasswordPrompt';
 const PasswordPrompt = lazy(() => import(
   /* webpackChunkName: "home" */
   '../../layout/PasswordPrompt'
@@ -113,7 +111,7 @@ export function BlogView(props) {
     props.history.push(`/lock/${blogView.lockIndex}`);
   }
 
-  const textInput = useRef('');
+  const textInput = React.createRef();
   function handerShowComment() {
     setShowComment(true);
     setTimeout(() => {

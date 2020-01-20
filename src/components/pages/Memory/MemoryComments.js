@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import { Grid, CardActions, TextField, Typography } from '@material-ui/core';
+import { Grid, CardActions, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import { useSnackbar } from 'notistack';
@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat, handleError } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
-// import * as actions from '../../../store/actions';
+import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
 
 const useStyles = makeStyles(theme => ({
   avatarComment: {
@@ -18,31 +18,9 @@ const useStyles = makeStyles(theme => ({
     width: 30,
     height: 30,
   },
-  buttonLike: {
-    fontSize: 10,
-    padding: theme.spacing(1),
-    cursor: 'pointer',
-  },
   avatarContentComment: {
     width: 30,
     height: 30,
-  },
-  postComment: {
-    [`& fieldset`]: {
-      borderRadius: 20,
-      background: 'transparent',
-    },
-    borderRadius: 20,
-    background: '#f5f6f7',
-    fontSize: 12,
-  },
-  notchedOutline: {
-    // borderWidth: '1px',
-    // borderColor: 'yellow !important',
-  },
-  notchedOutlineComment: {
-    borderWidth: '0px',
-    color: 'red',
   },
   linkUserName: {
     color: '#8250c8',
@@ -54,12 +32,6 @@ const useStyles = makeStyles(theme => ({
     color: '#8250c8',
     cursor: 'pointer',
     fontSize: 12,
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 1px',
-    transform: 'scale(0.5)',
-    color: '#fe8dc3',
   },
   boxComment: {
     borderTop: '1px solid #e1e1e1',
@@ -93,10 +65,7 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
   },
   btBox: {
-    // display: 'flex',
-    // minWidth: '100%',
     width: '100%',
-    // justifyContent: 'space-between',
   },
 }));
 
@@ -219,7 +188,6 @@ export default function MemoryComments(props) {
     }
   }
 
-  // console.log('showComments', showComments);
   const renderViewMore = (
     <Grid item>
       <Link onClick={viewMoreComment} className={classes.linkViewMore}>
@@ -264,22 +232,13 @@ export default function MemoryComments(props) {
         <AvatarPro alt="img" className={classes.avatarComment} hash={avatar} />
       </Grid>
       <Grid item classes={{ root: classes.btBox }}>
-        <TextField
-          fullWidth
-          multiline
-          className={classes.postComment}
+        <UserSuggestionTextarea
+          value={comment}
           placeholder="Write a comment..."
-          margin="dense"
-          variant="outlined"
-          size="small"
-          onChange={e => setComment(e.currentTarget.value.normalize())}
-          onKeyDown={onKeyDownPostComment}
-          InputProps={{
-            classes: {
-              notchedOutline: classes.notchedOutline,
-            },
-          }}
+          onChange={e => setComment(e.target.value.normalize())}
           inputRef={textInput}
+          onKeyDown={onKeyDownPostComment}
+          isInput
         />
       </Grid>
     </Grid>

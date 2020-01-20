@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem, Link } from '@material-ui/core';
@@ -130,11 +130,9 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'capitalize'
   },
   card: {
-    // maxWidth: 345,
     marginBottom: theme.spacing(3),
     boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
-    // boxShadow: 'none',
-    // border: '1px solid rgba(234, 236, 239, 0.7)',
+    overflow: 'initial'
   },
   media: {
     height: 350,
@@ -328,7 +326,7 @@ function MemoryContent(props) {
     setNumComment(number);
   }
 
-  const textInput = useRef('');
+  const textInput = React.createRef();
   function handerShowComment() {
     setShowComment(true);
     setTimeout(() => {
@@ -405,7 +403,7 @@ function MemoryContent(props) {
 
     if (!name) return <span>a crush</span>
 
-    return <Link 
+    return <Link
       href={`/u/${u}`}
       className={classes.relationshipName}
       onClick={e => {
