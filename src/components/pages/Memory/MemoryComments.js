@@ -5,11 +5,13 @@ import { Grid, CardActions, Typography } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import { useSnackbar } from 'notistack';
+import Linkify from 'react-linkify';
 
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat, handleError } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
+import UserLinkify from "../../elements/Common/UserLinkify";
 
 const useStyles = makeStyles(theme => ({
   avatarComment: {
@@ -208,7 +210,9 @@ export default function MemoryComments(props) {
               <Grid item sx={10}>
                 <Typography margin="dense" className={classes.contentComment}>
                   <Link href={`/u/${item.sender}`} className={classes.linkUserName}>{`${item.nick}`}</Link>
-                  <span> {item.content}</span>
+                  <UserLinkify content={item.content}>
+                    <Linkify>{item.content}</Linkify>
+                  </UserLinkify>
                 </Typography>
 
                 <ArrowTooltip title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}>
@@ -217,9 +221,11 @@ export default function MemoryComments(props) {
                   </Typography>
                 </ArrowTooltip>
               </Grid>
-              {canDelelte(item) && <Grid item sx={2}>
-                <DeleteForeverIcon className={classes.deleteIc} onClick={() => deleteComment(item, indexKey)} />
-              </Grid>}
+              {canDelelte(item) && (
+                <Grid item sx={2}>
+                  <DeleteForeverIcon className={classes.deleteIc} onClick={() => deleteComment(item, indexKey)} />
+                </Grid>
+              )}
             </Grid>
           </Grid>
         );

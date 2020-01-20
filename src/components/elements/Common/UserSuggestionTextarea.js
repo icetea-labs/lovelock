@@ -117,7 +117,7 @@ export default function UserSuggestionTextarea(props) {
         <Mention
           trigger="@"
           data={fetchUsers}
-          markup="@[__id__]"
+          markup="@[__id__-__display__]"
           renderSuggestion={renderSuggestion}
           style={{backgroundColor: '#e9e1f7', borderRadius: '2px'}}
           appendSpaceOnAdd

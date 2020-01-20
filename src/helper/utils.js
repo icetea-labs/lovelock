@@ -797,6 +797,7 @@ export async function getUserSuggestions(value, usernameKey = 'nick') {
   return Promise.all(people.reduce((ps, p) => {
     ps.push(getTagsInfo(p.address).then(tag => {
       p.avatar = tag.avatar
+      p.display = tag['display-name']
     }))
     return ps
   }, []))

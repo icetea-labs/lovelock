@@ -39,6 +39,7 @@ import BlogShowcase from './BlogShowcase';
 import CommonDialog from "../../elements/CommonDialog";
 import CreateMemory from "./CreateMemory";
 import appConstants from "../../../helper/constants";
+import UserLinkify from "../../elements/Common/UserLinkify";
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -469,6 +470,8 @@ function MemoryContent(props) {
     const isBlog = !!memoryDecrypted.info.blog;
     const blogInfo = memoryDecrypted.meta || {};
     const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
+    const postContent = memoryDecrypted.content;
+    
     return (
       <>
         {memoryDecrypted.type === 1 ? (
@@ -479,7 +482,11 @@ function MemoryContent(props) {
           )
         ) : (
           <Typography variant="body1" style={{ whiteSpace: 'pre-line', overflowWrap: 'break-word' }} component="div">
-            {!isBlog && <Linkify>{memoryDecrypted.content}</Linkify>}
+            {!isBlog && (
+              <UserLinkify content={postContent}>
+                <Linkify>{postContent}</Linkify>
+              </UserLinkify>
+            )}
             {isBlog && blogInfo.title && (
               <BlogShowcase
                 classes={classes}
@@ -530,6 +537,7 @@ function MemoryContent(props) {
       </>
     );
   };
+  
   const renderImgUnlock = () => {
     return (
       <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
@@ -724,11 +732,6 @@ function MemoryContent(props) {
     </>
   );
 }
-// const mapStateToProps = state => {
-//   return {
-//     privateKey: state.account.privateKey,
-//   };
-// };
 
 const mapDispatchToProps = dispatch => {
   return {
