@@ -368,7 +368,7 @@ function TopContrainer(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needUpdate]);
 
-  function handerLike() {
+  function handleLike() {
     try {
       tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1)
         .then(() => {
@@ -395,7 +395,7 @@ function TopContrainer(props) {
     }
   }
 
-  function handerFollow() {
+  function handleFollow() {
     try {
       tx.sendCommit('followLock', topInfo.index)
         .then(() => {
@@ -609,7 +609,7 @@ function TopContrainer(props) {
         )}
         <div className="proLike">
           <ArrowTooltip title="Follow">
-            <Button onClick={handerFollow} className={classes.btLikeFollow}>
+            <Button onClick={handleFollow} className={classes.btLikeFollow}>
               {topInfo.isMyFollow ? (
                 <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
@@ -630,7 +630,7 @@ function TopContrainer(props) {
             </Button>
           </ArrowTooltip>
           <ArrowTooltip title="Express feelings">
-            <Button onClick={handerLike} className={classes.btLikeFollow}>
+            <Button onClick={handleLike} className={classes.btLikeFollow}>
               {topInfo.isMyLike ? (
                 <>
                   <FavoriteIcon color="primary" className={classes.rightIcon} />

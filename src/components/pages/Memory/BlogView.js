@@ -112,7 +112,8 @@ export function BlogView(props) {
   }
 
   const textInput = React.createRef();
-  function handerShowComment() {
+  
+  function handleShowComment() {
     setShowComment(true);
     setTimeout(() => {
       if (textInput.current) {
@@ -175,7 +176,7 @@ export function BlogView(props) {
           <Editor initContent={blogView.blogContent} read_only />
           <div className={classes.editorComment}>
             <MemoryActionButton
-              handerShowComment={handerShowComment}
+              handleShowComment={handleShowComment}
               memoryLikes={blogView.likes}
               memoryIndex={blogView.id}
               memoryType={blogView.type}

@@ -328,7 +328,8 @@ function MemoryContent(props) {
   }
 
   const textInput = React.createRef();
-  function handerShowComment() {
+  
+  function handleShowComment() {
     setShowComment(true);
     setTimeout(() => {
       if (textInput.current) {
@@ -515,7 +516,7 @@ function MemoryContent(props) {
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
-                  handerShowComment={handerShowComment}
+                  handleShowComment={handleShowComment}
                   memoryLikes={memory.likes}
                   memoryIndex={memory.id}
                   memoryType={memory.type}
@@ -555,7 +556,7 @@ function MemoryContent(props) {
 
   const renderActionBt = () => (
     <MemoryActionButton
-      handerShowComment={handerShowComment}
+      handleShowComment={handleShowComment}
       memoryLikes={memory.likes}
       memoryIndex={memory.id}
       memoryType={memory.type}
