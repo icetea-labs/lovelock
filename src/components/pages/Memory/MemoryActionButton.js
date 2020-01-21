@@ -60,7 +60,7 @@ function MemoryActionButton(props) {
     memoryLikes,
     memoryIndex,
     isDetailScreen,
-    handerShowComment,
+    handleShowComment,
     numComment,
     setLikeTopInfo,
     numLike, // Lock-level number of likes
@@ -145,7 +145,7 @@ function MemoryActionButton(props) {
         )}
       </Button>
 
-      <Button className={classes.button} onClick={handerShowComment}>
+      <Button className={classes.button} onClick={handleShowComment}>
         <CommentIcon fontSize="small" className={classes.rightIcon} />
         <Typography component="span" variant="body2">
           {numComment}

@@ -147,7 +147,7 @@ function Mypage(props) {
     });
   }
 
-  function handerFollow() {
+  function handleFollow() {
     try {
       let { numFollow, isMyFollow } = myPageInfo;
       if (isMyFollow) {
@@ -193,7 +193,7 @@ function Mypage(props) {
               <div className="proLike">
                 {/* <Button>Timeline</Button> */}
                 {/* <Button>Photos</Button> */}
-                <Button onClick={handerFollow} className={classes.btLikeFollow}>
+                <Button onClick={handleFollow} className={classes.btLikeFollow}>
                   {myPageInfo.isMyFollow ? (
                     <>
                       <BookmarkIcon color="primary" className={classes.rightIcon} />
@@ -223,7 +223,7 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          <MemoryList 
+          <MemoryList
             {...props}
             onMemoryChanged={refresh}
             loading={loading}
