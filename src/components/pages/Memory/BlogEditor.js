@@ -227,7 +227,7 @@ export default function BlogEditor(props) {
     function loadDraft(key, title, subtitle, body) {
         if (draftKey !== key) {
             draftKey = key // this let next draft save to save to the right key
-            blogBody = body
+            blogBody = { ...body, _overwrite: true }
             blogSubtitle = subtitle || ''
             blogTitle = title || ''
         }
