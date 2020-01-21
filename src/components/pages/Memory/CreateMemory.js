@@ -13,12 +13,12 @@ import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
 import {
   saveBufferToIpfs,
-  // encodeWithPublicKey,
   sendTxUtil,
   handleError,
 } from '../../../helper';
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
+import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -127,14 +127,6 @@ const BootstrapInput = withStyles(theme => ({
   },
 }))(InputBase);
 
-const BootstrapTextField = withStyles(theme => ({
-  root: {
-    fontSize: 16,
-    paddingLeft: theme.spacing(1),
-    borderColor: '#8250c8',
-  },
-}))(InputBase);
-
 export default function CreateMemory(props) {
   const { onMemoryChanged, proIndex, collectionId, collections, handleNewCollection, memory, openBlogEditor } = props;
   const classes = useStyles(props);
@@ -150,8 +142,8 @@ export default function CreateMemory(props) {
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  const [filesBuffer, setFilesBuffer] = useState(editBlogData ? 
-    (editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url ? [editBlogData.meta.coverPhoto.url] : []) 
+  const [filesBuffer, setFilesBuffer] = useState(editBlogData ?
+    (editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url ? [editBlogData.meta.coverPhoto.url] : [])
     : (editMode ? memory.info.hash : []));
   const [memoryContent, setMemoryContent] = useState(editBlogData ? editBlogData.meta.title : (editMode ? memory.content : ''));
 
@@ -417,15 +409,13 @@ export default function CreateMemory(props) {
           <Grid container direction="column">
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
-                {!editMode && <Grid item>
-                  <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
-                </Grid>}
+                {!editMode && (
+                  <Grid item>
+                    <AvatarPro alt="img" hash={avatar} className={classes.avatar} />
+                  </Grid>
+                )}
                 <Grid item xs={12}>
-                  <BootstrapTextField
-                    rows={3}
-                    rowsMax={10}
-                    fullWidth
-                    multiline
+                  <UserSuggestionTextarea
                     value={memoryContent}
                     placeholder={getPlaceholder()}
                     onChange={memoryChange}
@@ -437,8 +427,8 @@ export default function CreateMemory(props) {
             <Grid style={{ paddingTop: grayLayout ? 24 : 0 }}>
               <AddInfoMessage
                 hasParentDialog
-                photoButtonText = {editBlogData ? 'Change Cover' : 'Photo'}
-                coverPhotoMode = {!!editBlogData}
+                photoButtonText={editBlogData ? 'Change Cover' : 'Photo'}
+                coverPhotoMode={!!editBlogData}
                 files={filesBuffer}
                 date={memoDate}
                 grayLayout={grayLayout}
