@@ -205,7 +205,7 @@ export function getQueryParam(name) {
 }
 
 export function makeLockName(p, prefix = '') {
-  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} ❤️ ${p.r_name}`);
+  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} & ${p.r_name}`);
 }
 
 export function callPure(funcName, params) {
