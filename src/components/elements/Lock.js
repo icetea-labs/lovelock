@@ -43,6 +43,9 @@ function Lock(props) {
   const getInfo = item => {
     const meOwner = address && (address === item.sender || address === item.receiver)
     const prefix = item.receiver === address ? 's' : 'r';
+    const sAlias = '@' + item.s_alias
+    const rAlias = '@' + item.r_alias
+
     switch (item.type) {
       case 2: // journal
         return {
@@ -51,7 +54,7 @@ function Lock(props) {
             : meOwner
             ? 'My Journal'
             : getShortName(item['s_tags']) + ' Journal',
-          nick: item.s_info.lockName ? ((meOwner ? 'my' : ('@' + item.s_alias)) + ' journal') : ('by @' + item.s_alias),
+          nick: item.s_info.lockName ? ((meOwner ? 'my' : sAlias) + ' journal') : ('by ' + sAlias),
           icon: 'waves',
           avatar: item.coverImg || item.s_tags.avatar,
         };
@@ -61,8 +64,8 @@ function Lock(props) {
             ? item.s_info.lockName
             : meOwner
             ? item.bot_info['display-name']
-            : getShortName(item['s_tags']) + ' ❤️ ' + getShortName(item.bot_info),
-          nick: (meOwner ? 'my' : ('@' + item.s_alias)) + ' crush',
+            : getShortName(item['s_tags']) + ' & ' + getShortName(item.bot_info),
+          nick: (meOwner ? 'my' : sAlias) + ' crush',
           icon: 'done',
           avatar: item.coverImg || item.s_tags.avatar,
         };
@@ -72,8 +75,8 @@ function Lock(props) {
             ? item.s_info.lockName
             : meOwner
             ? item[`${prefix}_tags`]['display-name']
-            : getShortName(item['s_tags']) + ' ❤️ ' + getShortName(item['r_tags']),
-          nick: (meOwner ? 'with ' : (item.s_alias + ' ❤️ ')) + item.r_alias,
+            : getShortName(item['s_tags']) + ' & ' + getShortName(item['r_tags']),
+          nick: (meOwner ? '' : sAlias) + '& ' + rAlias,
           icon: 'done_all',
           avatar: item.coverImg || item[`${prefix}_tags`].avatar
         };
