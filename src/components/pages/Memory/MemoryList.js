@@ -33,8 +33,10 @@ export default function MemoryList(props) {
       handleNewCollection, 
       isOwner, 
       isContributor, 
-      onMemoryChanged, 
-      loading } = props;
+      onMemoryChanged,
+      myPageRoute,
+      loading 
+    } = props;
 
   const [edittingMemory, setEdittingMemory] = useState(false)
 
@@ -77,6 +79,7 @@ export default function MemoryList(props) {
         onMemoryChanged={onMemoryChanged}
         openBlogEditor={setEdittingMemory}
         handleNewCollection={handleNewCollection}
+        myPageRoute={myPageRoute}
         history={history}
       />
     </RightBox>
