@@ -225,6 +225,7 @@ function Mypage(props) {
         <div className="proposeColumn proposeColumn--right">
           <MemoryList
             {...props}
+            myPageRoute
             onMemoryChanged={refresh}
             loading={loading}
           />

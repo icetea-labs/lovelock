@@ -180,7 +180,7 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, history } = props;
+  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -409,8 +409,10 @@ function MemoryContent(props) {
       href={`/u/${u}`}
       className={classes.relationshipName}
       onClick={e => {
-        e.preventDefault()
-        history.push(`/u/${u}`)
+        if (!myPageRoute) {
+          e.preventDefault()
+          history.push(`/u/${u}`)
+        }
       }}>
       {name}
     </Link>
