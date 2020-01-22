@@ -8,8 +8,7 @@ import APIService from '../../../service/apiService';
 export default function RightContainer(props) {
   const { proIndex, collectionId } = props;
 
-  const reduxCollections = useSelector(state => state.loveinfo.topInfo.collections);
-  const collections = collectionId == null ? null : reduxCollections
+  const collections = useSelector(state => state.loveinfo.topInfo.collections);
   const currentCol = collections == null ? '' : collections.find(c => c.id === collectionId);
   const collectionName = currentCol == null ? '' : currentCol.name;
   const validCollectionId = collectionName ? collectionId : null;

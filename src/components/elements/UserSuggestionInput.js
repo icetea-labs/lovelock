@@ -45,7 +45,7 @@ export default function UserSuggestionInput(props) {
     }
     
     fetchUsers();
-  }, [searchValue]);
+  }, [searchValue, props.contributors]);
   
   useEffect(() => {
     if (!open) {

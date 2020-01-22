@@ -2,7 +2,7 @@ import React from 'react';
 import Hash from 'ipfs-only-hash';
 import { ipfs, createIpfsClient } from '../service/ipfs';
 import { toPublicKey, stableHashObject, sign, toPubKeyAndAddress, toPubKeyAndAddressBuffer } from '@iceteachain/common/src/ecc';
-import { 
+import {
   decode as codecDecode,
   toString as codecToString,
   toDataString as codecToDataString,
@@ -763,7 +763,7 @@ export function handleError(err, action) {
   return msg;
 }
 
-export async function getUserSuggestions(value) {
+export async function getUserSuggestions(value, usernameKey = 'nick') {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
   // remove the first @ if it is there
   escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1)
@@ -771,7 +771,7 @@ export async function getUserSuggestions(value) {
     return [];
   }
 
-  const regexText = `\^account\\..*${escapedValue}`
+  const regexText = `^account\\..*${escapedValue}`
   const regex = new RegExp(regexText);
   
   let people = await getAliasContract()
@@ -780,7 +780,10 @@ export async function getUserSuggestions(value) {
     .then(result => {
       return Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
-        return { nick, address: result[key].address };
+        return {
+          [usernameKey]: nick,
+          address: result[key].address
+        };
       });
     })
     .catch(err => {
@@ -794,6 +797,7 @@ export async function getUserSuggestions(value) {
   return Promise.all(people.reduce((ps, p) => {
     ps.push(getTagsInfo(p.address).then(tag => {
       p.avatar = tag.avatar
+      p.display = tag['display-name']
     }))
     return ps
   }, []))
@@ -817,4 +821,10 @@ export function copyToClipboard(text, enqueueSnackbar) {
   document.execCommand('copy');
   document.body.removeChild(dummy);
   enqueueSnackbar && enqueueSnackbar('Copied', { variant: 'success' });
+}
+
+export function getShortName(tags) {
+  if (tags.firstname) return tags.firstname
+  if (tags.lastname) return tags.lastname
+  return tags['display-name'].split(' ')[0]
 }

@@ -77,6 +77,7 @@ export default function MemoryList(props) {
         onMemoryChanged={onMemoryChanged}
         openBlogEditor={setEdittingMemory}
         handleNewCollection={handleNewCollection}
+        history={history}
       />
     </RightBox>
   );

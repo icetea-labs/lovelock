@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem } from '@material-ui/core';
+import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem, Link } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Tooltip from '@material-ui/core/Tooltip';
 import LockIcon from '@material-ui/icons/Lock';
@@ -39,6 +39,7 @@ import BlogShowcase from './BlogShowcase';
 import CommonDialog from "../../elements/CommonDialog";
 import CreateMemory from "./CreateMemory";
 import appConstants from "../../../helper/constants";
+import UserLinkify from "../../elements/Common/UserLinkify";
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -127,15 +128,12 @@ const useStyles = makeStyles(theme => ({
     lineHeight: 2,
   },
   relationshipName: {
-    textTransform: 'capitalize',
-    color: '#8250c8',
+    textTransform: 'capitalize'
   },
   card: {
-    // maxWidth: 345,
     marginBottom: theme.spacing(3),
     boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
-    // boxShadow: 'none',
-    // border: '1px solid rgba(234, 236, 239, 0.7)',
+    overflow: 'initial'
   },
   media: {
     height: 350,
@@ -155,16 +153,6 @@ const useStyles = makeStyles(theme => ({
     maxWidth: 740,
     width: '100%',
     margin: '0 auto',
-  },
-  memorySender: {
-    '&:hover': {
-      textDecoration: 'underline',
-    },
-  },
-  memoryReceiver: {
-    '&:hover': {
-      textDecoration: 'underline',
-    },
   },
 }));
 
@@ -192,7 +180,7 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor } = props;
+  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -339,8 +327,9 @@ function MemoryContent(props) {
     setNumComment(number);
   }
 
-  const textInput = useRef('');
-  function handerShowComment() {
+  const textInput = React.createRef();
+  
+  function handleShowComment() {
     setShowComment(true);
     setTimeout(() => {
       if (textInput.current) {
@@ -401,6 +390,32 @@ function MemoryContent(props) {
     );
   };
 
+  function renderLinkUser(isSender) {
+    const m = memoryDecrypted
+    if (!m) return
+
+    let u, name
+    if (isSender) {
+      u = m.sender
+      name = m.name
+    } else {
+      u = m.receiver
+      name = m.r_tags && m.r_tags['display-name']
+    }
+
+    if (!name) return <span>a crush</span>
+
+    return <Link
+      href={`/u/${u}`}
+      className={classes.relationshipName}
+      onClick={e => {
+        e.preventDefault()
+        history.push(`/u/${u}`)
+      }}>
+      {name}
+    </Link>
+  }
+
   const renderLockEventMemory = () => {
     return (
       <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
@@ -409,13 +424,7 @@ function MemoryContent(props) {
         </div>
         <span>
           <span>Locked with </span>
-          {memoryDecrypted.r_tags && memoryDecrypted.r_tags['display-name'] ? (
-            <Typography component="span" className={classes.relationshipName}>
-              {memoryDecrypted.r_tags['display-name']}
-            </Typography>
-          ) : (
-            <span>a crush</span>
-          )}
+          {renderLinkUser(false)}
         </span>
       </Typography>
     );
@@ -428,9 +437,7 @@ function MemoryContent(props) {
           <WavesIcon color="primary" fontSize="large" />
         </div>
         <span>
-          <Typography component="span" className={classes.relationshipName}>
-            {memoryDecrypted.name}
-          </Typography>
+          {renderLinkUser(true)}
           <span> started the journal.</span>
         </span>
       </Typography>
@@ -464,6 +471,8 @@ function MemoryContent(props) {
     const isBlog = !!memoryDecrypted.info.blog;
     const blogInfo = memoryDecrypted.meta || {};
     const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
+    const postContent = memoryDecrypted.content;
+    
     return (
       <>
         {memoryDecrypted.type === 1 ? (
@@ -474,7 +483,11 @@ function MemoryContent(props) {
           )
         ) : (
           <Typography variant="body1" style={{ whiteSpace: 'pre-line', overflowWrap: 'break-word' }} component="div">
-            {!isBlog && <Linkify>{memoryDecrypted.content}</Linkify>}
+            {!isBlog && (
+              <UserLinkify content={postContent}>
+                <Linkify>{postContent}</Linkify>
+              </UserLinkify>
+            )}
             {isBlog && blogInfo.title && (
               <BlogShowcase
                 classes={classes}
@@ -503,7 +516,7 @@ function MemoryContent(props) {
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
-                  handerShowComment={handerShowComment}
+                  handleShowComment={handleShowComment}
                   memoryLikes={memory.likes}
                   memoryIndex={memory.id}
                   memoryType={memory.type}
@@ -525,6 +538,7 @@ function MemoryContent(props) {
       </>
     );
   };
+  
   const renderImgUnlock = () => {
     return (
       <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
@@ -542,7 +556,7 @@ function MemoryContent(props) {
 
   const renderActionBt = () => (
     <MemoryActionButton
-      handerShowComment={handerShowComment}
+      handleShowComment={handleShowComment}
       memoryLikes={memory.likes}
       memoryIndex={memory.id}
       memoryType={memory.type}
@@ -562,12 +576,12 @@ function MemoryContent(props) {
 
   const { isUnlock } = memoryDecrypted;
 
-  const renderTitleMem = mem => {
+  const renderTitleMem = () => {
+    const mem = memoryDecrypted
     return (
       <>
-        <a href={`/u/${mem.sender}`} style={{ color: 'inherit' }} className={classes.memorySender}>
-          {mem.name}
-        </a>
+        {renderLinkUser(true)}
+
         {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
           <>
             <ArrowRightIcon color="primary" />
@@ -601,7 +615,9 @@ function MemoryContent(props) {
 
   function openEditBlogContent() {
     closeActionMenu();
-    openBlogEditor(memoryDecrypted)
+    setTimeout(() => {
+      openBlogEditor(memoryDecrypted)
+    }, 0);
   }
 
   function openPermLinkModal() {
@@ -615,7 +631,9 @@ function MemoryContent(props) {
       link.text = memory.content
     }
 
-    setPermLink(link);
+    setTimeout(() => {
+      setPermLink(link);
+    }, 0);
   }
 
   function trySharePermLink() {
@@ -637,7 +655,7 @@ function MemoryContent(props) {
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
         <CardHeader
           avatar={<AvatarPro alt={memoryDecrypted['s_tags']['display-name']} hash={memoryDecrypted['s_tags'].avatar} />}
-          title={renderTitleMem(memoryDecrypted)}
+          title={renderTitleMem()}
           subheader={renderCardSubtitle(memoryDecrypted)}
           action={
             <IconButton aria-label="settings" onClick={openActionMenu}>
@@ -715,11 +733,6 @@ function MemoryContent(props) {
     </>
   );
 }
-// const mapStateToProps = state => {
-//   return {
-//     privateKey: state.account.privateKey,
-//   };
-// };
 
 const mapDispatchToProps = dispatch => {
   return {

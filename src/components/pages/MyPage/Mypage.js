@@ -118,7 +118,7 @@ function Mypage(props) {
       setLocks(resp.locks);
 
       const memoIndex = resp.locks.reduce((tmp, lock) => {
-        return lock.isMyLocks ? tmp.concat(lock.memoIndex) : tmp;
+        return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
       }, []);
       // console.log('memoIndex', memoIndex.length);
       memoIndex.length > 0 &&
@@ -147,7 +147,7 @@ function Mypage(props) {
     });
   }
 
-  function handerFollow() {
+  function handleFollow() {
     try {
       let { numFollow, isMyFollow } = myPageInfo;
       if (isMyFollow) {
@@ -193,7 +193,7 @@ function Mypage(props) {
               <div className="proLike">
                 {/* <Button>Timeline</Button> */}
                 {/* <Button>Photos</Button> */}
-                <Button onClick={handerFollow} className={classes.btLikeFollow}>
+                <Button onClick={handleFollow} className={classes.btLikeFollow}>
                   {myPageInfo.isMyFollow ? (
                     <>
                       <BookmarkIcon color="primary" className={classes.rightIcon} />
@@ -223,7 +223,7 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          <MemoryList 
+          <MemoryList
             {...props}
             onMemoryChanged={refresh}
             loading={loading}

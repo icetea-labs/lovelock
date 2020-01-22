@@ -126,7 +126,7 @@ const WarningPass = styled.div`
 `;
 
 function RegisterUsername(props) {
-  const { setStep, setLoading, setAccount, setIsRemember, setIsOpenCrop, setOriginFile, avatar, avatarData } = props;
+  const { setStep, setLoading, setAccount, setIsRemember, /* setIsOpenCrop, setOriginFile, avatar, */ avatarData } = props;
   const [username, setUsername] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, connect } from 'react-redux';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 // import CardHeader from '@material-ui/core/CardHeader';
@@ -129,7 +129,7 @@ const WarrperChatBox = styled(FlexBox)`
       text-transform: capitalize;
       color: #8250c8;
       max-width: 34vw;
-      overflow-x: hidden;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       display: inline-block;
@@ -340,8 +340,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, topInfo, setTopInfo, setGLoading } = props;
-  const address = useSelector(state => state.account.address);
+  const { proIndex, address, topInfo, setTopInfo, setGLoading } = props;
   const tx = useTx();
   const isSender = topInfo.sender === address;
   const isReceiver = topInfo.receiver === address;
@@ -369,7 +368,7 @@ function TopContrainer(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needUpdate]);
 
-  function handerLike() {
+  function handleLike() {
     try {
       tx.sendCommit('addLike', topInfo.memoryRelationIndex, 1)
         .then(() => {
@@ -396,7 +395,7 @@ function TopContrainer(props) {
     }
   }
 
-  function handerFollow() {
+  function handleFollow() {
     try {
       tx.sendCommit('followLock', topInfo.index)
         .then(() => {
@@ -508,7 +507,7 @@ function TopContrainer(props) {
     }, 1);
   }
 
-  const buttonChange = (
+  const buttonChange = () => (
     <label htmlFor="outlined-button-file">
       <Button component="span" className={classes.btChange}>
         <PhotoCameraIcon className={classes.photoCameraIcon} />
@@ -562,28 +561,35 @@ function TopContrainer(props) {
     </IconButton>
   );
 
+  const canChangeCover = () => {
+    if (!address || !topInfo) return false
+    return isSender || isReceiver
+  }
+
+  if (!topInfo || !topInfo.sender) return <div /> // loading...
+
   return (
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg}>
-            <div className="showChangeImg">
+            {canChangeCover() && <div className="showChangeImg">
               <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
                 Cancel
               </Button>
               <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
                 Apply
               </Button>
-            </div>
+            </div>}
           </CardMedia>
         ) : (
           <CardMedia
             className={classes.media}
-            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
+            image={topInfo.coverImg && (process.env.REACT_APP_IPFS + topInfo.coverImg)}
           >
-            <div className="showChangeImg">
-              <div>{buttonChange}</div>
-            </div>
+            {canChangeCover() && <div className="showChangeImg">
+              <div>{buttonChange()}</div>
+            </div>}
           </CardMedia>
         )}
       </div>
@@ -603,7 +609,7 @@ function TopContrainer(props) {
         )}
         <div className="proLike">
           <ArrowTooltip title="Follow">
-            <Button onClick={handerFollow} className={classes.btLikeFollow}>
+            <Button onClick={handleFollow} className={classes.btLikeFollow}>
               {topInfo.isMyFollow ? (
                 <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
@@ -624,7 +630,7 @@ function TopContrainer(props) {
             </Button>
           </ArrowTooltip>
           <ArrowTooltip title="Express feelings">
-            <Button onClick={handerLike} className={classes.btLikeFollow}>
+            <Button onClick={handleLike} className={classes.btLikeFollow}>
               {topInfo.isMyLike ? (
                 <>
                   <FavoriteIcon color="primary" className={classes.rightIcon} />
@@ -743,6 +749,7 @@ function TopContrainer(props) {
 const mapStateToProps = state => {
   return {
     topInfo: state.loveinfo.topInfo,
+    address: state.account.address,
   };
 };
 

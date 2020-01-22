@@ -492,8 +492,8 @@ class PuNewLock extends React.Component {
   render() {
     const { close, isApproved } = this.props;
     const {
-      partner,
-      promiseStm,
+      // partner,
+      // promiseStm,
       date,
       file,
       suggestions,
@@ -648,7 +648,7 @@ class PuNewLock extends React.Component {
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
                     <span className="warningText">
-                      Please <a className="underline" target="_blank" rel="noopener" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post
+                      Please <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post
                       contents.
                     </span>
                   </span>

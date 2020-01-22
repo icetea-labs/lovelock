@@ -112,7 +112,7 @@ class Editor extends React.Component {
           return '';
 
         case 'wide':
-          !this.props.read_only && setTimeout(() => this.resizeImages(null, url), 100);
+          !this.props.read_only && setTimeout(() => this.resizeImages(null, url), 0);
           return 'sectionLayout--fullWidth';
 
         case 'fill':
