@@ -22,7 +22,8 @@ const appConstants = {
   memoryTypes: {
     systemGenerated: 1,
     manualGenerated: 0,
-  }
+  },
+  memoryPageSize: 30
 };
 
 export default appConstants;

@@ -1,6 +1,7 @@
 exports.apiCreateMemory = (self, lockIndex, isPrivate, content, info = {}, opts = []) => {
   return _addMemory(self, lockIndex, isPrivate, content, info, [...opts]);
 };
+
 exports.apiLikeMemory = (self, memoIndex, type) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
@@ -17,6 +18,7 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
 
   return memo.likes || [];
 };
+
 exports.apiCommentMemory = (self, memoIndex, content, info) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
@@ -29,51 +31,8 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
   self.setMemories(memories);
 };
 
-function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
-  if (info.date == null) {
-    info = { ...info, date: block.timestamp }
-  } else {
-    if (typeof info.date !== 'number' || !Number.isInteger(info.date) || info.date < 0) {
-      throw new Error('info.date must be a timestamp (integer).');
-    }
-  }
-
-  if (!lock || !locks) {
-    [lock, locks] = self.getLock(lockIndex);
-  }
-
-  expect(lock.status === 1, 'Cannot add memory to a pending lock.')
-  expectLockContributors(lock, 'Only lock contributors can add memory.');
-  const sender = msg.sender;
-  const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
-
-  //new memories
-  if (sender === lock.sender) {
-    memory.receiver = lock.receiver;
-  } else {
-    memory.receiver = lock.sender;
-  }
-
-  const memories = self.getMemories();
-  const memIndex = memories.push(memory) - 1;
-  self.setMemories(memories);
-  lock.memoIndex.push(memIndex);
-
-  if (isFirstMemory) {
-    lock.memoryRelationIndex = memIndex;
-  }
-
-  // save the locks
-  self.setLocks(locks);
-
-  //emit Event
-  const log = { ...memory, id: memIndex };
-  self.emitEvent('addMemory', { by: msg.sender, log }, ['by']);
-  return memIndex;
-}
 // ========== GET DATA ==================
-exports.apiGetMemoriesByLock = (self, lockIndex, collectionId) => {
-  // const memoryPro = self.getP2m()[proIndex] || [];
+exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadAll) => {
   const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
   const memories = self.getMemories();
 
@@ -85,9 +44,11 @@ exports.apiGetMemoriesByLock = (self, lockIndex, collectionId) => {
     return res;
   }, []);
 
-  resp = _addInfoToMems(resp, self);
-  return resp;
+  resp = _getPaginatedMemories(resp, page, pageSize, loadAll);
+
+  return _addInfoToMems(resp, self);
 };
+
 exports.apiGetMemoriesByRange = (self, start, end) => {
   const allMem = self.getMemories();
   let i = 0;
@@ -101,47 +62,23 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
   }
   return res;
 };
-exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
+
+exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, loadAll) => {
   const memories = self.getMemories();
 
   // remove duplicate
   listMemIndex = [... new Set(listMemIndex)]
 
-  const mems = listMemIndex.map(index => {
+  let mems = listMemIndex.map(index => {
     return { ...getDataByIndex(memories, index), id: index };
   });
+
+  if (page !== false) {
+    mems = _getPaginatedMemories(mems, page, pageSize, loadAll);
+  }
+
   return _addInfoToMems(mems, self);
 };
-
-function _addInfoToMems(memories, self) {
-  const ctDid = loadContract('system.did');
-
-  let res = memories.map(mem => {
-    let tmpMem = {};
-    tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
-    tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
-    tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
-    //LOCK_TYPE_JOURNAL
-    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
-    if (mem.receiver === mem.sender) {
-      tmpMem.r_tags = {};
-    } else if (mem.receiver === self.botAddress) {
-      const tmpBotInfo = {};
-      tmpBotInfo.avatar = lock.bot_info.botAva;
-      tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
-      tmpMem.r_tags = { ...tmpBotInfo, ...lock.bot_info };
-    } else {
-      tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
-    }
-    return { ...mem, ...tmpMem, lock };
-  }, []);
-
-  // sort descending by mem id;
-  res = res.sort((a, b) => {
-    return b.id - a.id;
-  });
-  return res;
-}
 
 exports.apiEditMemory = (self, memIndex, content, info) => {
   const [mem, mems] = self.getMemory(memIndex);
@@ -170,13 +107,13 @@ exports.apiEditMemory = (self, memIndex, content, info) => {
       expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
       mem.info.date = date
     }
-  
+
     if (collectionId != null) {
       expect(typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId), 'info.collectionId must be a valid number.')
       mem.info.collectionId = collectionId
     }
   }
-  
+
   // save memories
   self.setMemories(mems)
 
@@ -223,3 +160,87 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   // save memories
   self.setMemories(memories);
 };
+
+function _addInfoToMems(memories, self) {
+  const ctDid = loadContract('system.did');
+
+  let res = memories.map(mem => {
+    let tmpMem = {};
+    tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
+    tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
+    tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
+    //LOCK_TYPE_JOURNAL
+    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
+    if (mem.receiver === mem.sender) {
+      tmpMem.r_tags = {};
+    } else if (mem.receiver === self.botAddress) {
+      const tmpBotInfo = {};
+      tmpBotInfo.avatar = lock.bot_info.botAva;
+      tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      tmpMem.r_tags = { ...tmpBotInfo, ...lock.bot_info };
+    } else {
+      tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
+    }
+    return { ...mem, ...tmpMem, lock };
+  }, []);
+
+  // sort descending by mem id;
+  res = res.sort((a, b) => {
+    return b.id - a.id;
+  });
+  return res;
+}
+
+function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
+  if (info.date == null) {
+    info = { ...info, date: block.timestamp }
+  } else {
+    if (typeof info.date !== 'number' || !Number.isInteger(info.date) || info.date < 0) {
+      throw new Error('info.date must be a timestamp (integer).');
+    }
+  }
+
+  if (!lock || !locks) {
+    [lock, locks] = self.getLock(lockIndex);
+  }
+
+  expect(lock.status === 1, 'Cannot add memory to a pending lock.')
+  expectLockContributors(lock, 'Only lock contributors can add memory.');
+  const sender = msg.sender;
+  const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
+
+  //new memories
+  if (sender === lock.sender) {
+    memory.receiver = lock.receiver;
+  } else {
+    memory.receiver = lock.sender;
+  }
+
+  const memories = self.getMemories();
+  const memIndex = memories.push(memory) - 1;
+  self.setMemories(memories);
+  lock.memoIndex.push(memIndex);
+
+  if (isFirstMemory) {
+    lock.memoryRelationIndex = memIndex;
+  }
+
+  // save the locks
+  self.setLocks(locks);
+
+  //emit Event
+  const log = { ...memory, id: memIndex };
+  self.emitEvent('addMemory', { by: msg.sender, log }, ['by']);
+  return memIndex;
+}
+
+function _getPaginatedMemories(memories, page, pageSize, loadAll) {
+  if (!memories.length) return [];
+
+  let from = (page - 1) * pageSize;
+  const to = page * pageSize;
+
+  if (loadAll) from = 0;
+
+  return memories.reverse().slice(from, to);
+}
