@@ -13,7 +13,6 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
-import Linkify from 'react-linkify';
 
 import * as actions from '../../../store/actions';
 import {
@@ -198,7 +197,7 @@ function MemoryContent(props) {
   const [isEditOpened, setIsEditOpened] = useState(false);
   const [permLink, setPermLink] = useState();
   const classes = useStyles();
-  
+
   const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
   const isMyPost = address === memory.sender
 
@@ -328,7 +327,7 @@ function MemoryContent(props) {
   }
 
   const textInput = React.createRef();
-  
+
   function handleShowComment() {
     setShowComment(true);
     setTimeout(() => {
@@ -474,7 +473,7 @@ function MemoryContent(props) {
     const blogInfo = memoryDecrypted.meta || {};
     const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
     const postContent = memoryDecrypted.content;
-    
+
     return (
       <>
         {memoryDecrypted.type === 1 ? (
@@ -486,9 +485,7 @@ function MemoryContent(props) {
         ) : (
           <Typography variant="body1" style={{ whiteSpace: 'pre-line', overflowWrap: 'break-word' }} component="div">
             {!isBlog && (
-              <UserLinkify content={postContent}>
-                <Linkify>{postContent}</Linkify>
-              </UserLinkify>
+              <UserLinkify content={postContent} />
             )}
             {isBlog && blogInfo.title && (
               <BlogShowcase
@@ -540,7 +537,7 @@ function MemoryContent(props) {
       </>
     );
   };
-  
+
   const renderImgUnlock = () => {
     return (
       <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
@@ -599,15 +596,15 @@ function MemoryContent(props) {
       </>
     );
   };
-  
+
   function openActionMenu(event) {
     setActionMenu(event.currentTarget);
   }
-  
+
   function closeActionMenu() {
     setActionMenu(null);
   }
-  
+
   function openEditPostModal() {
     closeActionMenu();
     setTimeout(() => {
@@ -651,7 +648,7 @@ function MemoryContent(props) {
     // close the dialog
     setPermLink(null)
   }
-  
+
   return (
     <>
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
@@ -665,7 +662,7 @@ function MemoryContent(props) {
             </IconButton>
           }
         />
-        
+
         {isEditable && (
           <Menu
             anchorEl={actionMenu}
@@ -680,7 +677,7 @@ function MemoryContent(props) {
             {isMyPost && memory.info.blog && <MenuItem onClick={openEditBlogContent}>Edit Blog Content</MenuItem>}
           </Menu>
         )}
-        
+
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
         {isUnlock && renderActionBt()}
