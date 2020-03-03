@@ -11,16 +11,12 @@ const useInfiniteScroll = callback => {
 
   useEffect(() => {
     if (!isFetching) return;
-    callback(() => {
-      console.log('called back');
-    });
-
+    callback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetching]);
 
   function handleScroll() {
-    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isFetching)
-      return;
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isFetching) return;
     setIsFetching(true);
   }
 

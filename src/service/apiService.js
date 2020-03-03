@@ -20,9 +20,9 @@ async function addInfoToMems(memorydata, isDetailScreen = false) {
 }
 
 const APIService = {
-  getMemoriesByListMemIndex: async arrayMem => {
-    const memorydata = await callView('getMemoriesByListMemIndex', [arrayMem]);
-    return addInfoToMems(memorydata);
+  getMemoriesByListMemIndex: async (arrayMem, page = false, pageSize = false, loadAll = false) => {
+    const memoryData = await callView('getMemoriesByListMemIndex', [arrayMem, page, pageSize, loadAll]);
+    return addInfoToMems(memoryData);
   },
   getLocksForFeed: async address => {
     const lockForFeed = await callView('getLocksForFeed', [address]);
@@ -41,13 +41,13 @@ const APIService = {
 
     return proInfo;
   },
-  getMemoriesByLockIndex: async (lockIndex, validCollectionId) => {
-    const memorydata = await callView('getMemoriesByLockIndex', [lockIndex, validCollectionId]);
-    return addInfoToMems(memorydata, true);
+  getMemoriesByLockIndex: async (lockIndex, validCollectionId, page, pageSize, loadAll) => {
+    const memoryData = await callView('getMemoriesByLockIndex', [lockIndex, validCollectionId, page, pageSize, loadAll]);
+    return addInfoToMems(memoryData, true);
   },
-  getChoiceMemories: async extra => {
-    const memorydata = await callView('getChoiceMemories', extra == null ? [] : [extra]);
-    return addInfoToMems(memorydata);
+  getChoiceMemories: async (extra, page, pageSize, loadAll) => {
+    const memoryData = await callView('getChoiceMemories', [extra, page, pageSize, loadAll]);
+    return addInfoToMems(memoryData);
   },
 };
 

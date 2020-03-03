@@ -1,6 +1,7 @@
 exports.apiCreateMemory = (self, lockIndex, isPrivate, content, info = {}, opts = []) => {
   return _addMemory(self, lockIndex, isPrivate, content, info, [...opts]);
 };
+
 exports.apiLikeMemory = (self, memoIndex, type) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
@@ -17,6 +18,7 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
 
   return memo.likes || [];
 };
+
 exports.apiCommentMemory = (self, memoIndex, content, info) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
@@ -28,6 +30,168 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
   // save memories
   self.setMemories(memories);
 };
+
+// ========== GET DATA ==================
+exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadAll) => {
+  const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
+  const memories = self.getMemories();
+
+  let resp = memoryPro.reduce((res, index) => {
+    let mem = getDataByIndex(memories, index);
+    if (collectionId == null || isNaN(collectionId) || mem.info.collectionId === collectionId) {
+      res.push({ ...mem, id: index });
+    }
+    return res;
+  }, []);
+
+  resp = _getPaginatedMemories(resp, page, pageSize, loadAll);
+
+  return _addInfoToMems(resp, self);
+};
+
+exports.apiGetMemoriesByRange = (self, start, end) => {
+  const allMem = self.getMemories();
+  let i = 0;
+  let res = [];
+
+  if (end > allMem.length) end = allMem.length;
+  for (i = start; i < end; i++) {
+    if (!allMem[i].isPrivate) {
+      res.push({ ...allMem[i], id: i });
+    }
+  }
+  return res;
+};
+
+exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, loadAll) => {
+  const memories = self.getMemories();
+
+  // remove duplicate
+  listMemIndex = [... new Set(listMemIndex)]
+
+  let mems = listMemIndex.map(index => {
+    return { ...getDataByIndex(memories, index), id: index };
+  });
+
+  if (page !== false) {
+    mems = _getPaginatedMemories(mems, page, pageSize, loadAll);
+  }
+
+  return _addInfoToMems(mems, self);
+};
+
+exports.apiEditMemory = (self, memIndex, content, info) => {
+  const [mem, mems] = self.getMemory(memIndex);
+
+  expect(msg.sender === mem.sender, 'Only author can edit memory.')
+
+  if (content != null) {
+    expect(typeof content === 'string', 'Type of content must be string.')
+    mem.content = content
+  }
+
+  if (info != null) {
+    const { hash, date, collectionId } = info
+    if (hash != null) {
+      expect(Array.isArray(hash), 'info.hash must be an array.')
+      hash.forEach(h => {
+        if (typeof h !== 'string') {
+          throw new Error('info.hash members must be strings.')
+        }
+      })
+
+      mem.info.hash = hash
+    }
+
+    if (date != null) {
+      expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
+      mem.info.date = date
+    }
+
+    if (collectionId != null) {
+      expect(typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId), 'info.collectionId must be a valid number.')
+      mem.info.collectionId = collectionId
+    }
+  }
+
+  // save memories
+  self.setMemories(mems)
+
+  return mem
+}
+
+// ========== DELETE DATA ==================
+exports.apiDeleteMemory = (self, memIndex) => {
+  const sender = msg.sender;
+  const [mem, mems] = self.getMemory(memIndex);
+
+  // remove memoIndex in lock
+  const locks = self.getLocks();
+  const lockIndex = mem.lockIndex;
+
+  const lock = locks[lockIndex]
+  const owners = [mem.sender, lock.sender, lock.receiver];
+  expect(owners.includes(sender) || self.getAdmins().includes(sender), "Only post author or lock owners can delete this post.");
+  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
+  
+  lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
+  // save locks
+  self.setLocks(locks);
+  // delete mem
+  mems[memIndex] = { deletedBy: sender };
+  // save memories
+  self.setMemories(mems);
+  return memIndex;
+};
+
+exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
+  const sender = msg.sender;
+  const [memo, memories] = self.getMemory(memoIndex);
+
+  const comments = memo.comments;
+  const owners = [comments[cmtNo].sender, memo.sender, memo.receiver];
+
+  expect(owners.includes(sender) || self.getAdmins().includes(sender), "You cannot delete this comment.");
+
+  // delete comments.cmtNo;
+  comments.splice(cmtNo, 1);
+
+  // const log = { ...newCmt };
+  // self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);
+
+  // save memories
+  self.setMemories(memories);
+};
+
+function _addInfoToMems(memories, self) {
+  const ctDid = loadContract('system.did');
+
+  let res = memories.map(mem => {
+    let tmpMem = {};
+    tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
+    tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
+    tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
+    //LOCK_TYPE_JOURNAL
+    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
+    if (mem.receiver === mem.sender) {
+      tmpMem.r_tags = {};
+    } else if (mem.receiver === self.botAddress) {
+      const tmpBotInfo = {};
+      tmpBotInfo.avatar = lock.bot_info.botAva;
+      tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
+      tmpMem.r_tags = { ...tmpBotInfo, ...lock.bot_info };
+    } else {
+      tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
+    }
+    return { ...mem, ...tmpMem, lock };
+  }, []);
+
+  // sort descending by mem id;
+  res = res.sort((a, b) => {
+    return b.id - a.id;
+  });
+  return res;
+}
 
 function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
   if (info.date == null) {
@@ -71,155 +235,17 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
   self.emitEvent('addMemory', { by: msg.sender, log }, ['by']);
   return memIndex;
 }
-// ========== GET DATA ==================
-exports.apiGetMemoriesByLock = (self, lockIndex, collectionId) => {
-  // const memoryPro = self.getP2m()[proIndex] || [];
-  const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
-  const memories = self.getMemories();
 
-  let resp = memoryPro.reduce((res, index) => {
-    let mem = getDataByIndex(memories, index);
-    if (collectionId == null || isNaN(collectionId) || mem.info.collectionId === collectionId) {
-      res.push({ ...mem, id: index });
-    }
-    return res;
-  }, []);
+function _getPaginatedMemories(memories, page, pageSize, loadAll) {
+  if (!memories.length) return [];
 
-  resp = _addInfoToMems(resp, self);
-  return resp;
-};
-exports.apiGetMemoriesByRange = (self, start, end) => {
-  const allMem = self.getMemories();
-  let i = 0;
-  let res = [];
-
-  if (end > allMem.length) end = allMem.length;
-  for (i = start; i < end; i++) {
-    if (!allMem[i].isPrivate) {
-      res.push({ ...allMem[i], id: i });
-    }
+  const sortedMemories = memories.reverse()
+  if (page == null || pageSize == null) {
+    return sortedMemories
   }
-  return res;
-};
-exports.apiGetMemoriesByListMemIndex = (self, listMemIndex) => {
-  const memories = self.getMemories();
 
-  // remove duplicate
-  listMemIndex = [... new Set(listMemIndex)]
+  const from = loadAll ? 0 : ((page - 1) * pageSize);
+  const to = page * pageSize;
 
-  const mems = listMemIndex.map(index => {
-    return { ...getDataByIndex(memories, index), id: index };
-  });
-  return _addInfoToMems(mems, self);
-};
-
-function _addInfoToMems(memories, self) {
-  const ctDid = loadContract('system.did');
-
-  let res = memories.map(mem => {
-    let tmpMem = {};
-    tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
-    tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
-    tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
-    //LOCK_TYPE_JOURNAL
-    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
-    if (mem.receiver === mem.sender) {
-      tmpMem.r_tags = {};
-    } else if (mem.receiver === self.botAddress) {
-      const tmpBotInfo = {};
-      tmpBotInfo.avatar = lock.bot_info.botAva;
-      tmpBotInfo['display-name'] = `${lock.bot_info.firstname} ${lock.bot_info.lastname}`;
-      tmpMem.r_tags = { ...tmpBotInfo, ...lock.bot_info };
-    } else {
-      tmpMem.r_tags = ctDid.query.invokeView(mem.receiver).tags || {};
-    }
-    return { ...mem, ...tmpMem, lock };
-  }, []);
-
-  // sort descending by mem id;
-  res = res.sort((a, b) => {
-    return b.id - a.id;
-  });
-  return res;
+  return sortedMemories.slice(from, to);
 }
-
-exports.apiEditMemory = (self, memIndex, content, info) => {
-  const [mem, mems] = self.getMemory(memIndex);
-
-  expect(msg.sender === mem.sender, 'Only author can edit memory.')
-
-  if (content != null) {
-    expect(typeof content === 'string', 'Type of content must be string.')
-    mem.content = content
-  }
-
-  if (info != null) {
-    const { hash, date, collectionId } = info
-    if (hash != null) {
-      expect(Array.isArray(hash), 'info.hash must be an array.')
-      hash.forEach(h => {
-        if (typeof h !== 'string') {
-          throw new Error('info.hash members must be strings.')
-        }
-      })
-
-      mem.info.hash = hash
-    }
-
-    if (date != null) {
-      expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
-      mem.info.date = date
-    }
-  
-    if (collectionId != null) {
-      expect(typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId), 'info.collectionId must be a valid number.')
-      mem.info.collectionId = collectionId
-    }
-  }
-  
-  // save memories
-  self.setMemories(mems)
-
-  return mem
-}
-
-// ========== DELETE DATA ==================
-exports.apiDeleteMemory = (self, memIndex) => {
-  const sender = msg.sender;
-  const [mem, mems] = self.getMemory(memIndex);
-
-  // remove memoIndex in lock
-  const locks = self.getLocks();
-  const lockIndex = mem.lockIndex;
-
-  const lock = locks[lockIndex]
-  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
-
-  lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
-  // save locks
-  self.setLocks(locks);
-  // delete mem
-  mems[memIndex] = { deletedBy: sender };
-  // save memories
-  self.setMemories(mems);
-  return memIndex;
-};
-
-exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
-  const sender = msg.sender;
-  const [memo, memories] = self.getMemory(memoIndex);
-
-  const comments = memo.comments;
-  const owners = [comments[cmtNo].sender, memo.sender, memo.receiver];
-
-  expect(owners.includes(sender) || self.getAdmins().includes(sender), "You cannot delete this comment.");
-
-  // delete comments.cmtNo;
-  comments.splice(cmtNo, 1);
-
-  // const log = { ...newCmt };
-  // self.emitEvent('deleteComment', { by: msg.sender, log }, ['by']);
-
-  // save memories
-  self.setMemories(memories);
-};
