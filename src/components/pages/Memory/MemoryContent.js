@@ -752,7 +752,7 @@ function MemoryContent(props) {
             cancel={closeConfirmDelete}
             close={closeConfirmDelete}
           >
-            <Typography>This cannot be undo. Continue?</Typography>
+            <Typography>This cannot be undone. Continue?</Typography>
           </CommonDialog>
         )}
       </Card>
