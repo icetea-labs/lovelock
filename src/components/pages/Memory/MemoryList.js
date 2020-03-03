@@ -7,10 +7,9 @@ import { useHistory } from 'react-router-dom';
 import Chip from '@material-ui/core/Chip';
 import CollectionsIcon from '@material-ui/icons/Collections';
 import { rem } from '../../elements/StyledUtils';
-import MemoryContainer from '../Memory/MemoryContainer';
-import CreateMemory from '../Memory/CreateMemory';
-
-import BlogEditor from "../Memory/BlogEditor";
+import MemoryContainer from './MemoryContainer';
+import CreateMemory from './CreateMemory';
+import BlogEditor from "./BlogEditor";
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -25,16 +24,19 @@ const CollectionIndicator = styled.div`
 
 export default function MemoryList(props) {
   const {
-      proIndex,
-      pinIndex,
-      collectionId,
-      collectionName,
-      collections,
-      handleNewCollection, 
-      isOwner, 
-      isContributor, 
-      onMemoryChanged, 
-      loading } = props;
+    proIndex,
+    pinIndex,
+    collectionId,
+    collectionName,
+    collections,
+    handleNewCollection,
+    isOwner,
+    isContributor,
+    onMemoryChanged,
+    myPageRoute,
+    loading,
+    nextPage
+  } = props;
 
   const [edittingMemory, setEdittingMemory] = useState(false)
 
@@ -46,7 +48,7 @@ export default function MemoryList(props) {
 
   return (
     <RightBox>
-      {address && <BlogEditor 
+      {address && <BlogEditor
         onMemoryChanged={onMemoryChanged}
         memory={edittingMemory}
         onClose={closeBlogEditor}
@@ -77,7 +79,9 @@ export default function MemoryList(props) {
         onMemoryChanged={onMemoryChanged}
         openBlogEditor={setEdittingMemory}
         handleNewCollection={handleNewCollection}
+        myPageRoute={myPageRoute}
         history={history}
+        nextPage={nextPage}
       />
     </RightBox>
   );

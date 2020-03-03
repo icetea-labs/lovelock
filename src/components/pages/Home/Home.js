@@ -11,6 +11,7 @@ import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import { showSubscriptionError } from '../../../helper';
 import { ensureContract } from '../../../service/tweb3';
+import appConstants from "../../../helper/constants";
 
 const RightBox = styled.div`
   text-align: center;
@@ -126,20 +127,33 @@ const SupportSite = styled.div`
 function Home(props) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const { setLocks, setMemory, address, locks, history, isApproved } = props;
-  const { enqueueSnackbar } = useSnackbar();
-
   const [changed, setChanged] = useState(false);
+  const [page, setPage] = useState(1);
+  const [noMoreMemories, setNoMoreMemories] = useState(false);
+
+  const { setLocks, setMemory, address, locks, history, isApproved, memoryList } = props;
+  const { enqueueSnackbar } = useSnackbar();
 
   function refresh() {
     setChanged(c => !c);
   }
 
   useEffect(() => {
-    const signal = {}
-    if (address) {
-      fetchData(signal)
-    }
+    const signal = {};
+    fetchMemories(signal);
+    return handleSignal(signal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+
+  useEffect(() => {
+    const signal = {};
+    fetchMemories(signal, true);
+    return handleSignal(signal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changed]);
+
+  function handleSignal(signal) {
     return () => {
       signal.cancel = true
       if (signal.sub && signal.sub.unsubscribe) {
@@ -147,10 +161,11 @@ function Home(props) {
         delete signal.sub
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changed]);
+  }
 
-  async function fetchData(signal) {
+  function fetchMemories(signal, loadAll = false) {
+    if (!address) return false;
+
     return APIService.getLocksForFeed(address).then(resp => {
       // set to redux
       setLocks(resp.locks);
@@ -165,13 +180,20 @@ function Home(props) {
         return tmp.concat(lock.memoIndex);
       }, []);
 
-      // console.log('memoIndex', memoIndex);
-      memoIndex.length > 0 &&
-        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
-          // set to redux
-          setMemory(mems);
+      if (memoIndex.length > 0) {
+        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadAll).then(result => {
+          if (!result.length) {
+            setNoMoreMemories(true);
+            setLoading(false);
+            return;
+          }
+
+          let memories = result;
+          if (!loadAll) memories = memoryList.concat(result);
+          setMemory(memories);
+          setLoading(false);
         });
-      setLoading(false);
+      }
     });
   }
 
@@ -207,17 +229,23 @@ function Home(props) {
     });
   }
 
+  function nextPage() {
+    if (noMoreMemories) return;
+    setPage(page + 1);
+  }
+
   const renderHomeEmptyPropose = () => {
     return (
       <FlexWidthBox>
         <ShadowBox>
           <RightBox>
             <div>
-              {!isApproved && <div className="note">
-                <h5>ACCOUNT ACTIVATION REQUIRED</h5>
-                <span>LoveLock is in beta and not yet open to public. Please <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post contents.</span>
-              </div>}
-
+              {!isApproved && (
+                <div className="note">
+                  <h5>ACCOUNT ACTIVATION REQUIRED</h5>
+                  <span>LoveLock is in beta and not yet open to public. Please <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post contents.</span>
+                </div>
+              )}
               <img src="/static/img/plant.svg" alt="plant" />
               <div className="emptyTitle">
                 <h1>You have no lock</h1>
@@ -225,7 +253,7 @@ function Home(props) {
               <div className="emptySubTitle">
                 <h2>
                   <span>Create locks to connect and share memories with your loved ones. </span>
-                  <a href="/blog/54" className="underline" route="/blog/54" onClick={openLink}>
+                  <a href="https://help.lovelock.one/" className="underline" target="_blank" rel="noopener noreferrer">
                     Learn more...
                   </a>
                 </h2>
@@ -277,7 +305,7 @@ function Home(props) {
   };
   const isRegistered = !!address;
   const isHaveLocks = locks.length > 0;
-  // console.log('render home', isHaveLocks, '---', loading, '---->', locks);
+
   return isRegistered ? (
     <>
       {!loading && (
@@ -288,10 +316,11 @@ function Home(props) {
                 <LeftContainer loading={loading} />
               </div>
               <div className="proposeColumn proposeColumn--right">
-                <MemoryList 
+                <MemoryList
                   {...props}
                   onMemoryChanged={refresh}
                   loading={loading}
+                  nextPage={nextPage}
                 />
               </div>
             </LeftBoxWrapper>
@@ -313,6 +342,7 @@ const mapStateToProps = state => {
     address: state.account.address,
     locks: state.loveinfo.locks,
     isApproved: state.account.isApproved,
+    memoryList: state.loveinfo.memories
   };
 };
 

@@ -13,7 +13,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
-import Linkify from 'react-linkify';
+import { useTx } from '../../../helper/hooks'
 
 import * as actions from '../../../store/actions';
 import {
@@ -180,7 +180,7 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, history } = props;
+  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -197,10 +197,13 @@ function MemoryContent(props) {
   const [actionMenu, setActionMenu] = useState(null);
   const [isEditOpened, setIsEditOpened] = useState(false);
   const [permLink, setPermLink] = useState();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const classes = useStyles();
-  
+
   const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
   const isMyPost = address === memory.sender
+
+  const tx = useTx()
 
   useEffect(() => {
     let cancel = false;
@@ -328,7 +331,7 @@ function MemoryContent(props) {
   }
 
   const textInput = React.createRef();
-  
+
   function handleShowComment() {
     setShowComment(true);
     setTimeout(() => {
@@ -409,8 +412,10 @@ function MemoryContent(props) {
       href={`/u/${u}`}
       className={classes.relationshipName}
       onClick={e => {
-        e.preventDefault()
-        history.push(`/u/${u}`)
+        if (!myPageRoute) {
+          e.preventDefault()
+          history.push(`/u/${u}`)
+        }
       }}>
       {name}
     </Link>
@@ -472,7 +477,7 @@ function MemoryContent(props) {
     const blogInfo = memoryDecrypted.meta || {};
     const isJournal = memoryDecrypted.sender === memoryDecrypted.receiver;
     const postContent = memoryDecrypted.content;
-    
+
     return (
       <>
         {memoryDecrypted.type === 1 ? (
@@ -484,9 +489,7 @@ function MemoryContent(props) {
         ) : (
           <Typography variant="body1" style={{ whiteSpace: 'pre-line', overflowWrap: 'break-word' }} component="div">
             {!isBlog && (
-              <UserLinkify content={postContent}>
-                <Linkify>{postContent}</Linkify>
-              </UserLinkify>
+              <UserLinkify content={postContent} />
             )}
             {isBlog && blogInfo.title && (
               <BlogShowcase
@@ -538,7 +541,7 @@ function MemoryContent(props) {
       </>
     );
   };
-  
+
   const renderImgUnlock = () => {
     return (
       <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
@@ -597,15 +600,15 @@ function MemoryContent(props) {
       </>
     );
   };
-  
+
   function openActionMenu(event) {
     setActionMenu(event.currentTarget);
   }
-  
+
   function closeActionMenu() {
     setActionMenu(null);
   }
-  
+
   function openEditPostModal() {
     closeActionMenu();
     setTimeout(() => {
@@ -636,6 +639,30 @@ function MemoryContent(props) {
     }, 0);
   }
 
+  function openConfirmDelete() {
+    closeActionMenu();
+    setTimeout(() => {
+      setConfirmDelete(true);
+    }, 0);
+  }
+
+  function closeConfirmDelete() {
+    setConfirmDelete(false)
+  }
+
+  function deleteMemory() {
+    tx.sendCommit('deleteMemory', memory.id)
+    .then(r => {
+      enqueueSnackbar('Memory deleted.', { variant: 'success' })
+      closeConfirmDelete()
+      onMemoryChanged({index: memory.id})
+    })
+    .catch(e => {
+      enqueueSnackbar(e.message, { variant: 'error' })
+      closeConfirmDelete()
+    })
+  }
+
   function trySharePermLink() {
     // Share API is only supported on modern MOBILE browser and Mac Safari
     navigator.share && navigator.share(permLink)
@@ -649,7 +676,7 @@ function MemoryContent(props) {
     // close the dialog
     setPermLink(null)
   }
-  
+
   return (
     <>
       <Card key={memoryDecrypted.id} data-id={memoryDecrypted.id} className={classes.card}>
@@ -663,7 +690,7 @@ function MemoryContent(props) {
             </IconButton>
           }
         />
-        
+
         {isEditable && (
           <Menu
             anchorEl={actionMenu}
@@ -676,9 +703,10 @@ function MemoryContent(props) {
             <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
             {isMyPost && <MenuItem onClick={openEditPostModal}>{memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}</MenuItem>}
             {isMyPost && memory.info.blog && <MenuItem onClick={openEditBlogContent}>Edit Blog Content</MenuItem>}
+            {isMyPost && <MenuItem onClick={openConfirmDelete}>{memory.info.blog ? 'Delete This Post' : 'Delete This Memory'}</MenuItem>}
           </Menu>
         )}
-        
+
         <CardContent>{isUnlock ? renderContentUnlock() : renderContentLocked()}</CardContent>
         {isUnlock && renderImgUnlock()}
         {isUnlock && renderActionBt()}
@@ -713,6 +741,18 @@ function MemoryContent(props) {
             close={() => setPermLink(null)}
           >
             <a className='underline' href={permLink.url}>{permLink.url}</a>
+          </CommonDialog>
+        )}
+        {confirmDelete && (
+          <CommonDialog
+            title='Sure to Delete?'
+            cancelText='Cancel'
+            okText="Yes, Let's Delete"
+            confirm={deleteMemory}
+            cancel={closeConfirmDelete}
+            close={closeConfirmDelete}
+          >
+            <Typography>This cannot be undo. Continue?</Typography>
           </CommonDialog>
         )}
       </Card>

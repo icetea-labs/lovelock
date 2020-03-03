@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import Card from '@material-ui/core/Card';
@@ -34,10 +34,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor, pinIndex, history } = props;
+  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor, pinIndex, myPageRoute, history, nextPage } = props;
   const arrayLoadin = [{}, {}, {}, {}];
-  const [limit, setLimit] = useState(5);
-  const [/* isFetching */, setIsFetching] = useInfiniteScroll(fetchMoreListItems);
+  const [/* isFetching */, setIsFetching] = useInfiniteScroll(fetchMoreMemories);
 
   const classes = useStyles();
 
@@ -71,7 +70,7 @@ function MemoryContainer(props) {
     }
 
     return newMemoryList
-  } 
+  }
 
   const Loading = () => {
     return arrayLoadin.map((item, index) => {
@@ -94,11 +93,9 @@ function MemoryContainer(props) {
     });
   };
 
-  function fetchMoreListItems() {
-    for (let i = 5; i < memorydata.length; i += 5) {
-      setIsFetching(false);
-      setLimit(limit + 5);
-    }
+  function fetchMoreMemories() {
+    setIsFetching(false);
+    nextPage();
   }
 
   const renderMemory = () => {
@@ -111,6 +108,7 @@ function MemoryContainer(props) {
             onMemoryChanged={onMemoryChanged}
             openBlogEditor={openBlogEditor}
             handleNewCollection={handleNewCollection}
+            myPageRoute={myPageRoute}
             history={history}
           />
         )}
@@ -124,17 +122,18 @@ function MemoryContainer(props) {
           </div>
         )}
 
-        {memorydata.slice(0, limit).map((memory, index) => (
+        {memorydata.map((memory, index) => (
           <MemoryContent
             key={index + 1}
             memory={memory}
             onMemoryChanged={onMemoryChanged}
             openBlogEditor={openBlogEditor}
             handleNewCollection={handleNewCollection}
+            myPageRoute={myPageRoute}
             history={history}
           />
         ))}
-    </>
+      </>
     )
   };
 

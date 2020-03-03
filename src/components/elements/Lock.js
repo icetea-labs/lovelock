@@ -76,7 +76,7 @@ function Lock(props) {
             : meOwner
             ? item[`${prefix}_tags`]['display-name']
             : getShortName(item['s_tags']) + ' & ' + getShortName(item['r_tags']),
-          nick: (meOwner ? '' : sAlias) + '& ' + rAlias,
+          nick: (meOwner ? 'with' : sAlias) + ' ' + rAlias,
           icon: 'done_all',
           avatar: item.coverImg || item[`${prefix}_tags`].avatar
         };

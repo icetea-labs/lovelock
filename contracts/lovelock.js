@@ -181,17 +181,17 @@ class LoveLock {
     expectUserApproved(self);
     return apiCommentMemory(self, memoIndex, content, info);
   }
-  @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number) {
+  @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number, page, pageSize, loadAll) {
     const self = this;
-    return apiGetMemoriesByLock(self, lockIndex, collectionId);
+    return apiGetMemoriesByLock(self, lockIndex, collectionId, page, pageSize, loadAll);
   }
   @view getMemoriesByRange(start: number, end: number) {
     const self = this;
     return apiGetMemoriesByRange(self, start, end);
   }
-  @view getMemoriesByListMemIndex(listMemIndex) {
+  @view getMemoriesByListMemIndex(listMemIndex, page, pageSize, loadAll) {
     const self = this;
-    return apiGetMemoriesByListMemIndex(self, listMemIndex);
+    return apiGetMemoriesByListMemIndex(self, listMemIndex, page, pageSize, loadAll);
   }
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
   @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
@@ -419,7 +419,6 @@ class LoveLock {
   }
   @transaction deleteMemory(memIndex: number) {
     const self = this;
-    expectAdmin(self);
     return apiDeleteMemory(self, memIndex);
   }
   @transaction deleteComment(memIndex: number, cmtNo: number) {
@@ -431,8 +430,9 @@ class LoveLock {
   @view getChoices = () => this.getState('choices', []);
   setChoices = value => this.setState('choices', value);
 
-  @view getChoiceMemories = extra => {
-    let choices = this.getState('choices', [])
+  @view getChoiceMemories = (extra, page, pageSize, loadAll) => {
+    let choices = this.getState('choices', []);
+
     if (extra != null ) {
       choices = choices.concat(extra)
     }
@@ -441,7 +441,7 @@ class LoveLock {
       return []
     }
 
-    return apiGetMemoriesByListMemIndex(this, choices)
+    return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadAll)
   }
 
   @transaction addChoices(_choices) {
@@ -560,7 +560,7 @@ class LoveLock {
 
   // ========== Authorized IPFS APPROVED =============
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
-    
+
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
     if (!users.includes(mainAddress)) {

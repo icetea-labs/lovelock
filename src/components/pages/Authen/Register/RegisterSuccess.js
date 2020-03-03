@@ -55,7 +55,13 @@ const Desc = styled.ul`
     line-height: 1.4;
     h5 {
       font-weight: 700;
-      margin-bottom: 3px;
+      margin-bottom: 1rem;
+    }
+    ul li {
+      text-align: left;
+    }
+    p {
+      padding-top: 1rem;
     }
   }
 `;
@@ -144,15 +150,19 @@ function RegisterSuccess(props) {
         <img src="/static/img/success.svg" alt="" />
         <Title>Wow, you created an account!</Title>
         <Desc>
-          <span>Save your recovery phrase bellow:</span>
+          <span>Save your secret recovery phrase bellow:</span>
           <MnemonixText>
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
           <div className="note">
-            <span>
-              <h5>NOTE</h5> In case you forget your password, this recovery phrase is <u>the only way</u> to gain access
-              to your account. Keep it secret.
-            </span>
+            <div>
+              <h5>ATTENTION:</h5> 
+              <ul>
+                <li>1. SAVE the above phrase</li>
+                <li>2. Don't show it to ANYONE</li>
+              </ul>
+              <p>There is no "I forgot password" feature, you have to save the recovery and keep it secret.</p>
+            </div>
           </div>
         </Desc>
 
@@ -169,7 +179,7 @@ function RegisterSuccess(props) {
                   onChange={() => setSavedPhrase(!savedPhrase)}
                 />
               }
-              label="I've saved my recovery phrase"
+              label="I have saved my recovery phrase"
             />
           </div>
           <Button disabled={!savedPhrase} variant="contained" size="large" color="primary" onClick={gotoHome}>

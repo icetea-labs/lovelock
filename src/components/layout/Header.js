@@ -334,7 +334,11 @@ function Header(props) {
     isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
   function handeOpenMypage() {
-    props.history.push(`/u/${address}`);
+    if (props.match.path === '/u/:address') {
+      window.location.href = `/u/${address}`
+    } else {
+      props.history.push(`/u/${address}`);
+    }
   }
   function handeExpandMore(event) {
     setAnchorElMenu(event.currentTarget);

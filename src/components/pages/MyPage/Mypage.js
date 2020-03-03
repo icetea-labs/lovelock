@@ -15,6 +15,7 @@ import { callView } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
+import appConstants from "../../../helper/constants";
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -59,14 +60,12 @@ const useStyles = makeStyles(theme => ({
   },
   btLikeFollow: {
     color: theme.palette.text.secondary,
-    // color: '#fff',
-    // background: '#92b5fe',
     marginLeft: theme.spacing(1),
   },
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory } = props;
+  const { match, setLocks, setMemory, memoryList } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -81,12 +80,10 @@ function Mypage(props) {
   });
 
   const paramAliasOrAddr = match.params.address || address;
-  
-  const [changed, setChanged] = useState(false);
 
-  function refresh() {
-    setChanged(c => !c);
-  }
+  const [changed, setChanged] = useState(false);
+  const [page, setPage] = useState(1);
+  const [noMoreMemories, setNoMoreMemories] = useState(false);
 
   useEffect(() => {
     async function getDataMypage() {
@@ -110,9 +107,14 @@ function Mypage(props) {
   useEffect(() => {
     fetchDataLocksMemories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page])
+
+  useEffect(() => {
+    fetchDataLocksMemories(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed])
 
-  async function fetchDataLocksMemories() {
+  function fetchDataLocksMemories(loadAll = false) {
     APIService.getLocksForFeed(paramAliasOrAddr).then(resp => {
       // set to redux
       setLocks(resp.locks);
@@ -120,15 +122,31 @@ function Mypage(props) {
       const memoIndex = resp.locks.reduce((tmp, lock) => {
         return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
       }, []);
-      // console.log('memoIndex', memoIndex.length);
-      memoIndex.length > 0 &&
-        APIService.getMemoriesByListMemIndex(memoIndex).then(mems => {
-          // console.log('mems', mems);
-          // set to redux
-          setMemory(mems);
+
+      if (memoIndex.length > 0) {
+        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadAll).then(result => {
+          if (!result.length) {
+            setNoMoreMemories(true);
+            setLoading(false);
+            return;
+          }
+
+          let memories = result;
+          if (!loadAll) memories = memoryList.concat(result);
+          setMemory(memories);
+          setLoading(false);
         });
-      setLoading(false);
+      }
     });
+  }
+
+  function refresh() {
+    setChanged(c => !c);
+  }
+
+  function nextPage() {
+    if (noMoreMemories) return;
+    setPage(page + 1);
   }
 
   function serialFollowData(follow) {
@@ -225,8 +243,10 @@ function Mypage(props) {
         <div className="proposeColumn proposeColumn--right">
           <MemoryList
             {...props}
+            myPageRoute
             onMemoryChanged={refresh}
             loading={loading}
+            nextPage={nextPage}
           />
         </div>
       </LeftBoxWrapper>
@@ -236,6 +256,7 @@ function Mypage(props) {
 const mapStateToProps = state => {
   return {
     address: state.account.address,
+    memoryList: state.loveinfo.memories
   };
 };
 const mapDispatchToProps = dispatch => {
