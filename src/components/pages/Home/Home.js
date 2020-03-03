@@ -253,7 +253,7 @@ function Home(props) {
               <div className="emptySubTitle">
                 <h2>
                   <span>Create locks to connect and share memories with your loved ones. </span>
-                  <a href="/blog/54" className="underline" route="/blog/54" onClick={openLink}>
+                  <a href="https://help.lovelock.one/" className="underline" target="_blank" rel="noopener noreferrer">
                     Learn more...
                   </a>
                 </h2>
