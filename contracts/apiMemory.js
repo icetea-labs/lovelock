@@ -239,10 +239,13 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
 function _getPaginatedMemories(memories, page, pageSize, loadAll) {
   if (!memories.length) return [];
 
-  let from = (page - 1) * pageSize;
+  const sortedMemories = memories.reverse()
+  if (page == null || pageSize == null) {
+    return sortedMemories
+  }
+
+  const from = loadAll ? 0 : ((page - 1) * pageSize);
   const to = page * pageSize;
 
-  if (loadAll) from = 0;
-
-  return memories.reverse().slice(from, to);
+  return sortedMemories.slice(from, to);
 }
