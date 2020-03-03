@@ -130,8 +130,10 @@ exports.apiDeleteMemory = (self, memIndex) => {
   const lockIndex = mem.lockIndex;
 
   const lock = locks[lockIndex]
+  const owners = [mem.sender, lock.sender, lock.receiver];
+  expect(owners.includes(sender) || self.getAdmins().includes(sender), "Only post author or lock owners can delete this post.");
   expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
-
+  
   lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
   // save locks
   self.setLocks(locks);

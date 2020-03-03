@@ -419,7 +419,6 @@ class LoveLock {
   }
   @transaction deleteMemory(memIndex: number) {
     const self = this;
-    expectAdmin(self);
     return apiDeleteMemory(self, memIndex);
   }
   @transaction deleteComment(memIndex: number, cmtNo: number) {
