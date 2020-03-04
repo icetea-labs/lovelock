@@ -163,7 +163,7 @@ function Home(props) {
     };
   }
 
-  function fetchMemories(signal, loadAll = false) {
+  function fetchMemories(signal, loadToCurrentPage = false) {
     if (!address) return false;
 
     return APIService.getLocksForFeed(address).then(resp => {
@@ -181,7 +181,7 @@ function Home(props) {
       }, []);
 
       if (memoIndex.length > 0) {
-        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadAll).then(result => {
+        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
           if (!result.length) {
             setNoMoreMemories(true);
             setLoading(false);
@@ -189,7 +189,7 @@ function Home(props) {
           }
 
           let memories = result;
-          if (!loadAll) memories = memoryList.concat(result);
+          if (!loadToCurrentPage) memories = memoryList.concat(result);
           setMemory(memories);
           setLoading(false);
         });
