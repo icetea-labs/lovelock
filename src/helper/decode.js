@@ -1,5 +1,4 @@
 const keythereum = require('keythereum');
-// const { getAccount } = require('@iceteachain/common/src/utils');
 
 function decode(password, keyObject) {
   const mnemonic = keythereum.recover(password, keyObject);

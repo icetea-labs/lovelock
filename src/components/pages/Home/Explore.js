@@ -29,8 +29,8 @@ function Explore(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed]);
 
-  function fetchMemories(loadAll = false) {
-    APIService.getChoiceMemories(pinIndex, page, appConstants.memoryPageSize, loadAll).then(result => {
+  function fetchMemories(loadToCurrentPage = false) {
+    APIService.getChoiceMemories(pinIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
       if (!result.length) {
         setNoMoreMemories(true);
         setLoading(false);
@@ -38,7 +38,7 @@ function Explore(props) {
       }
 
       let memories = result;
-      if (!loadAll) memories = memoryList.concat(result);
+      if (!loadToCurrentPage) memories = memoryList.concat(result);
       setMemory(memories);
       setLoading(false);
     });
