@@ -181,17 +181,17 @@ class LoveLock {
     expectUserApproved(self);
     return apiCommentMemory(self, memoIndex, content, info);
   }
-  @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number, page, pageSize, loadAll) {
+  @view getMemoriesByLockIndex(lockIndex: number, collectionId: ?number, page, pageSize, loadToCurrentPage) {
     const self = this;
-    return apiGetMemoriesByLock(self, lockIndex, collectionId, page, pageSize, loadAll);
+    return apiGetMemoriesByLock(self, lockIndex, collectionId, page, pageSize, loadToCurrentPage);
   }
   @view getMemoriesByRange(start: number, end: number) {
     const self = this;
     return apiGetMemoriesByRange(self, start, end);
   }
-  @view getMemoriesByListMemIndex(listMemIndex, page, pageSize, loadAll) {
+  @view getMemoriesByListMemIndex(listMemIndex, page, pageSize, loadToCurrentPage) {
     const self = this;
-    return apiGetMemoriesByListMemIndex(self, listMemIndex, page, pageSize, loadAll);
+    return apiGetMemoriesByListMemIndex(self, listMemIndex, page, pageSize, loadToCurrentPage);
   }
   @view getLikeByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].likes;
   @view getCommentsByMemoIndex = (memoIndex: number) => this.getMemory(memoIndex)[0].comments;
@@ -430,7 +430,7 @@ class LoveLock {
   @view getChoices = () => this.getState('choices', []);
   setChoices = value => this.setState('choices', value);
 
-  @view getChoiceMemories = (extra, page, pageSize, loadAll) => {
+  @view getChoiceMemories = (extra, page, pageSize, loadToCurrentPage) => {
     let choices = this.getState('choices', []);
 
     if (extra != null ) {
@@ -441,7 +441,7 @@ class LoveLock {
       return []
     }
 
-    return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadAll)
+    return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadToCurrentPage)
   }
 
   @transaction addChoices(_choices) {

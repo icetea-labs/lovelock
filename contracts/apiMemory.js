@@ -32,7 +32,7 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 };
 
 // ========== GET DATA ==================
-exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadAll) => {
+exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadToCurrentPage) => {
   const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
   const memories = self.getMemories();
 
@@ -44,7 +44,7 @@ exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, l
     return res;
   }, []);
 
-  resp = _getPaginatedMemories(resp, page, pageSize, loadAll);
+  resp = _getPaginatedMemories(resp, page, pageSize, loadToCurrentPage);
 
   return _addInfoToMems(resp, self);
 };
@@ -63,7 +63,7 @@ exports.apiGetMemoriesByRange = (self, start, end) => {
   return res;
 };
 
-exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, loadAll) => {
+exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, loadToCurrentPage) => {
   const memories = self.getMemories();
 
   // remove duplicate
@@ -74,7 +74,7 @@ exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, load
   });
 
   if (page !== false) {
-    mems = _getPaginatedMemories(mems, page, pageSize, loadAll);
+    mems = _getPaginatedMemories(mems, page, pageSize, loadToCurrentPage);
   }
 
   return _addInfoToMems(mems, self);
@@ -133,7 +133,7 @@ exports.apiDeleteMemory = (self, memIndex) => {
   const owners = [mem.sender, lock.sender, lock.receiver];
   expect(owners.includes(sender) || self.getAdmins().includes(sender), "Only post author or lock owners can delete this post.");
   expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
-  
+
   lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
   // save locks
   self.setLocks(locks);
@@ -236,15 +236,15 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
   return memIndex;
 }
 
-function _getPaginatedMemories(memories, page, pageSize, loadAll) {
+function _getPaginatedMemories(memories, page, pageSize, loadToCurrentPage) {
   if (!memories.length) return [];
 
-  const sortedMemories = memories.reverse()
   if (page == null || pageSize == null) {
-    return sortedMemories
+    return memories
   }
 
-  const from = loadAll ? 0 : ((page - 1) * pageSize);
+  const sortedMemories = memories.reverse();
+  const from = loadToCurrentPage ? 0 : ((page - 1) * pageSize);
   const to = page * pageSize;
 
   return sortedMemories.slice(from, to);

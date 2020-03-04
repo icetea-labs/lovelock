@@ -24,17 +24,17 @@ function RightContainer(props) {
   useEffect(() => {
     fetchMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proIndex, validCollectionId, page]);
+  }, [page]);
 
   useEffect(() => {
     fetchMemories(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changed]);
+  }, [proIndex, validCollectionId, changed]);
 
-  function fetchMemories(loadAll = false) {
+  function fetchMemories(loadToCurrentPage = false) {
     setLoading(true);
 
-    APIService.getMemoriesByLockIndex(proIndex, validCollectionId, page, appConstants.memoryPageSize, loadAll).then(result => {
+    APIService.getMemoriesByLockIndex(proIndex, validCollectionId, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
       if (!result.length) {
         setNoMoreMemories(true);
         setLoading(false);
@@ -42,7 +42,7 @@ function RightContainer(props) {
       }
 
       let memories = result;
-      if (!loadAll) memories = memoryList.concat(result);
+      if (!loadToCurrentPage) memories = memoryList.concat(result);
       dispatch(actions.setMemory(memories));
       setLoading(false);
     });

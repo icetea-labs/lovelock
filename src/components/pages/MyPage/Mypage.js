@@ -114,7 +114,7 @@ function Mypage(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed])
 
-  function fetchDataLocksMemories(loadAll = false) {
+  function fetchDataLocksMemories(loadToCurrentPage = false) {
     APIService.getLocksForFeed(paramAliasOrAddr).then(resp => {
       // set to redux
       setLocks(resp.locks);
@@ -124,7 +124,7 @@ function Mypage(props) {
       }, []);
 
       if (memoIndex.length > 0) {
-        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadAll).then(result => {
+        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
           if (!result.length) {
             setNoMoreMemories(true);
             setLoading(false);
@@ -132,7 +132,7 @@ function Mypage(props) {
           }
 
           let memories = result;
-          if (!loadAll) memories = memoryList.concat(result);
+          if (!loadToCurrentPage) memories = memoryList.concat(result);
           setMemory(memories);
           setLoading(false);
         });
