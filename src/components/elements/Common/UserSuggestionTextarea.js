@@ -8,10 +8,17 @@ import { AvatarPro } from "../AvatarPro";
 const SuggestItem = styled.div`
   display: flex;
   align-items: center;
+  padding-right: 10px;
   .suggest-item__avatar {
-    width: 25px;
-    height: 25px;
-    margin-right: 5px;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+  }
+  .suggest-item__name {
+    line-height: 1.3;
+  }
+  .suggest-item__nick {
+    font-size: 85%
   }
 `;
 
@@ -89,10 +96,11 @@ export default function UserSuggestionTextarea(props) {
   }, [isInput]);
   
   function renderSuggestion(suggestion) {
+    console.log(suggestion)
     return (
       <SuggestItem>
         <AvatarPro hash={suggestion.avatar} className='suggest-item__avatar' />
-        <div>{suggestion.id}</div>
+        <div className='suggest-item__name'>{suggestion.display}<div className='suggest-item__nick'>@{suggestion.id}</div></div>
       </SuggestItem>
     )
   }

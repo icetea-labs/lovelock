@@ -28,6 +28,7 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'capitalize',
     cursor: 'pointer',
     marginRight: theme.spacing(0.8),
+    fontWeight: 'bold',
   },
   linkViewMore: {
     color: '#8250c8',
