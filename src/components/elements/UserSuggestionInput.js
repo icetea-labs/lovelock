@@ -11,9 +11,15 @@ export const SuggestItem = styled.div`
   display: flex;
   align-items: center;
   .suggest-item__avatar {
-    width: 25px;
-    height: 25px;
-    margin-right: 5px;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+  }
+  .suggest-item__name {
+    line-height: 1.3;
+  }
+  .suggest-item__nick {
+    font-size: 85%
   }
 `;
 
@@ -57,7 +63,7 @@ export default function UserSuggestionInput(props) {
     return (
       <SuggestItem>
         <AvatarPro hash={user.avatar} className={'suggest-item__avatar'}/>
-        <div>{user.nick}</div>
+        <div className='suggest-item__name'>{user.display}<div className='suggest-item__nick'>@{user.nick}</div></div>
       </SuggestItem>
     )
   }
@@ -75,7 +81,7 @@ export default function UserSuggestionInput(props) {
       onChange={(e, value) => props.setContributors(value)}
       renderTags={(value, getTagProps) =>
         value.map((option, index) => (
-          <Chip variant="outlined" label={renderSuggestionValue(option)} {...getTagProps({ index })} />
+          <Chip variant="outlined" label={renderSuggestionValue(option)} {...getTagProps({ index })} style={{height: 44}} />
         ))
       }
       renderInput={params => (

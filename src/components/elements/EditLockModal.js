@@ -66,6 +66,7 @@ export default function EditLockModal(props) {
         formattedContributors.push({
           nick: username,
           avatar: user.avatar,
+          display: user['display-name'],
           address: topInfo.contributors[i]
         });
       }

@@ -56,8 +56,8 @@ const useStyles = makeStyles(theme => ({
     height: 100,
   },
   avatarSug: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
   },
 }));
 
@@ -255,24 +255,39 @@ class PuNewLock extends React.Component {
     });
   };
 
+  renderSearchMatch(parts, isNick) {
+    return (
+      <>
+        {parts.map((part, index) => {
+            const className = part.highlight ? 'highlight' : null;
+            return (
+              <span className={className} key={index}>
+                {((isNick && part.highlight) ? '@' : '') + part.text}
+              </span>
+            );
+          })}
+      </>
+    )
+  }
+
   renderSuggestion = (suggestion, { query }) => {
-    const suggestionText = `${suggestion.nick}`;
+    const isNick = query.startsWith('@')
+    const searchFor = isNick ? query.slice(1) : query
+    const suggestionText = isNick ? suggestion.nick: suggestion.display
     const suggestionAva = suggestion.avatar;
-    const matches = AutosuggestHighlightMatch(suggestionText, query);
+    const matches = AutosuggestHighlightMatch(suggestionText, searchFor);
     const parts = AutosuggestHighlightParse(suggestionText, matches);
     return (
       <span className="suggestion-content">
         <AvatarProSug hash={suggestionAva} />
-        <span className="name">
-          {parts.map((part, index) => {
-            const className = part.highlight ? 'highlight' : null;
-            return (
-              <span className={className} key={index}>
-                {part.text}
-              </span>
-            );
-          })}
-        </span>
+        <div className="text">
+          <span className="name">
+            {isNick ? suggestion.display : this.renderSearchMatch(parts, false)}
+          </span>
+          <span className="nick">
+            {isNick ? this.renderSearchMatch(parts, true) : ('@' + suggestion.nick)}
+          </span>
+        </div>
       </span>
     );
   };
