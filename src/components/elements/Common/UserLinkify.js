@@ -7,7 +7,7 @@ export default function UserLinkify(props) {
   const [modifiedContent, setModifiedContent] = useState('');
 
   useEffect(() => {
-    const nameRegex = /@\[(.+?)\]/g;
+    const nameRegex = /@\[(.+?)\]/gs;
     const splitContent = content.split(nameRegex);
 
     for (let i = 1; i < splitContent.length; i += 2) {
