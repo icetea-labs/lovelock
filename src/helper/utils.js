@@ -22,7 +22,7 @@ import {
 import HDKey from 'hdkey';
 // import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
-import { getWeb3, getContract, getAliasContract } from '../service/tweb3';
+import { getWeb3, getContract, getAliasContract, getDidContract } from '../service/tweb3';
 import { decodeTx, decode } from './decode';
 import { getTagsInfo } from "./account";
 
@@ -763,26 +763,29 @@ export function handleError(err, action) {
   return msg;
 }
 
-export async function getUserSuggestions(value, usernameKey = 'nick') {
+export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
   // remove the first @ if it is there
   escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1)
-  if (escapedValue.length < 3) {
-    return [];
-  }
+  // if (escapedValue.length < 3) {
+  //   return [];
+  // }
 
   const regexText = `^account\\..*${escapedValue}`
   const regex = new RegExp(regexText);
   
   let people = await getAliasContract()
-    .methods.query(regex)
+    .methods.query(regex, { includeTags: true })
     .call()
     .then(result => {
       return Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
+        const tags = result[key].tags || {}
         return {
           [usernameKey]: nick,
-          address: result[key].address
+          address: result[key].address,
+          avatar: tags.avatar,
+          display: tags['display-name']
         };
       });
     })
@@ -792,21 +795,44 @@ export async function getUserSuggestions(value, usernameKey = 'nick') {
     })
 
   if (!people.length) return []
-  people = people.slice(0, 10);
 
-  return Promise.all(people.reduce((ps, p) => {
-    ps.push(getTagsInfo(p.address).then(tag => {
-      p.avatar = tag.avatar
-      p.display = tag['display-name']
-    }))
-    return ps
-  }, []))
-  .then(() => people)
-  .catch(err => {
-    console.warn(err)
-    return []
-  })
+  return people
+}
 
+export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
+  
+  let people = await getDidContract()
+    .methods.queryByTags({
+      'display-name': value.toLowerCase()
+    }, { includeAlias: true })
+    .call()
+    .then(result => {
+      return result.map(item => {
+        const nick = item.alias.substring(item.alias.indexOf('.') + 1);
+        const tags = item.tags || {}
+        return {
+          [usernameKey]: nick,
+          address: item.address,
+          avatar: tags.avatar,
+          display: tags['display-name']
+        };
+      });
+    })
+    .catch(err => {
+      console.warn(err)
+      return []
+    })
+
+  if (!people.length) return []
+
+  return people
+
+}
+
+export async function getUserSuggestions(value, usernameKey = 'nick') {
+  if (!value) return []
+  if (value.startsWith('@')) return getUserSuggestionsByNick(value, usernameKey)
+  return getUserSuggestionsByName(value, usernameKey)
 }
 
 function escapeRegexCharacters(str) {
