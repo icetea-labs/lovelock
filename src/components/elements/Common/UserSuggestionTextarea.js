@@ -96,7 +96,6 @@ export default function UserSuggestionTextarea(props) {
   }, [isInput]);
   
   function renderSuggestion(suggestion) {
-    console.log(suggestion)
     return (
       <SuggestItem>
         <AvatarPro hash={suggestion.avatar} className='suggest-item__avatar' />

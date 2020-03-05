@@ -775,7 +775,7 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   const regex = new RegExp(regexText);
   
   let people = await getAliasContract()
-    .methods.query(regex, true)
+    .methods.query(regex, { includeTags: true })
     .call()
     .then(result => {
       return Object.keys(result).map(key => {
@@ -795,7 +795,6 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
     })
 
   if (!people.length) return []
-  people = people.slice(0, 10);
 
   return people
 }
@@ -805,10 +804,7 @@ export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
   let people = await getDidContract()
     .methods.queryByTags({
       'display-name': value.toLowerCase()
-    }, {
-      includeAlias: true,
-      maxItems: 10
-    })
+    }, { includeAlias: true })
     .call()
     .then(result => {
       return result.map(item => {
