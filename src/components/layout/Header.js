@@ -6,23 +6,24 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-// import InputBase from '@material-ui/core/InputBase';
-// import Badge from '@material-ui/core/Badge';
+import InputBase from '@material-ui/core/InputBase';
+import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Button from '@material-ui/core/Button';
 import ListItemText from '@material-ui/core/ListItemText';
-// import List from '@material-ui/core/List';
-// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-// import ListItem from '@material-ui/core/ListItem';
+import List from '@material-ui/core/List';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 
+import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-// import GroupIcon from '@material-ui/icons/Group';
-// import NotificationsIcon from '@material-ui/icons/Notifications';
+import GroupIcon from '@material-ui/icons/Group';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
@@ -96,24 +97,24 @@ const useStyles = makeStyles(theme => ({
     marginRight: 10,
     backgroundColor: '#fff',
   },
-  friReqTitle: {
+  lockReqTitle: {
     width: 111,
     height: 18,
     marginLeft: theme.spacing(2),
     color: '#373737',
   },
-  friReqSetting: {
+  lockReqSetting: {
     width: 46,
     height: 15,
     fontSize: 12,
     marginRight: theme.spacing(2),
     color: '#8250c8',
   },
-  friReqConfirm: {
+  lockReqConfirm: {
     color: '#8250c8',
     marginRight: theme.spacing(2),
   },
-  friReqName: {
+  lockReqName: {
     width: 135,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -147,7 +148,7 @@ const useStyles = makeStyles(theme => ({
     color: '#fff',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
-      minWidth: 50,
+      // minWidth: 50,
       // margin: theme.spacing(0, 3, 0, 0),
       textTransform: 'capitalize',
     },
@@ -266,47 +267,47 @@ const StyledMenuItem = withStyles(theme => ({
   },
 }))(MenuItem);
 
-// const friReqList = [
-//   {
-//     id: 0,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Huy Hoang',
-//   },
-//   {
-//     id: 1,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'MyMy',
-//   },
-//   {
-//     id: 2,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Luong Hoa',
-//   },
-// ];
+const lockReqList = [
+  {
+    id: 0,
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Huy Hoang',
+  },
+  {
+    id: 1,
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'MyMy',
+  },
+  {
+    id: 2,
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Luong Hoa',
+  },
+];
 
-// const notifiList = [
-//   {
-//     id: 0,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Huy Hoang',
-//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-//     time: 'just now',
-//   },
-//   {
-//     id: 1,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'MyMy',
-//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-//     time: 'just now',
-//   },
-//   {
-//     id: 2,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Thi Truong',
-//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-//     time: 'just now',
-//   },
-// ];
+const notiList = [
+  {
+    id: 0,
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Huy Hoang',
+    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+    time: 'just now',
+  },
+  {
+    id: 1,
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'MyMy',
+    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+    time: 'just now',
+  },
+  {
+    id: 2,
+    avatar: 'https://i.pravatar.cc/300',
+    name: 'Thi Truong',
+    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
+    time: 'just now',
+  },
+];
 
 function Header(props) {
   const dispatch = useDispatch();
@@ -319,9 +320,9 @@ function Header(props) {
   const address = useSelector(state => state.account.address);
 
   const [showPhrase, setShowPhrase] = useState(false);
-  // const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElLockReq, setAnchorElLockReq] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  // const [anchorElNoti, setAnchorElNoti] = useState(null);
+  const [anchorElNoti, setAnchorElNoti] = useState(null);
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
@@ -356,21 +357,21 @@ function Header(props) {
     setMobileMoreAnchorEl(event.currentTarget);
   }
 
-  // function handleFriReqOpen(event) {
-  //   setAnchorEl(event.currentTarget);
-  // }
+  function handleLockReqOpen(event) {
+    setAnchorElLockReq(event.currentTarget);
+  }
 
-  // function handleFriReqClose() {
-  //   setAnchorEl(null);
-  // }
+  function handleLockReqClose() {
+    setAnchorElLockReq(null);
+  }
 
-  // function handleNotiOpen(event) {
-  //   setAnchorElNoti(event.currentTarget);
-  // }
+  function handleNotiOpen(event) {
+    setAnchorElNoti(event.currentTarget);
+  }
 
-  // function handleNotiClose() {
-  //   setAnchorElNoti(null);
-  // }
+  function handleNotiClose() {
+    setAnchorElNoti(null);
+  }
 
   function handeExplore() {
     props.history.push('/explore');
@@ -465,76 +466,76 @@ function Header(props) {
     </StyledMenu>
   );
 
-  // const friReqMenu = (
-  //   <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText primary="Friend Request" className={classes.friReqTitle} />
-  //       <ListItemText align="right" primary="Setting" className={classes.friReqSetting} />
-  //     </StyledMenuItem>
-  //     {friReqList.map(({ id, avatar, name }) => (
-  //       <StyledMenuItem className={classes.friReqStyle} key={id}>
-  //         <ListItemAvatar>
-  //           <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
-  //         </ListItemAvatar>
-  //         <ListItemText primary={name} className={classes.friReqName} />
-  //         <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
-  //         <ListItemText primary="DELETE" />
-  //       </StyledMenuItem>
-  //     ))}
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
-  //     </StyledMenuItem>
-  //   </StyledMenu>
-  // );
+  const renderLockRequests = () => (
+    <StyledMenu id="lockReq-menu" anchorEl={anchorElLockReq} keepMounted open={Boolean(anchorElLockReq)} onClose={handleLockReqClose}>
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText primary="Lock Request" className={classes.lockReqTitle} />
+        <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} />
+      </StyledMenuItem>
+      {lockReqList.map(({ id, avatar, name }) => (
+        <StyledMenuItem className={classes.lockReqStyle} key={id}>
+          <ListItemAvatar>
+            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
+          </ListItemAvatar>
+          <ListItemText primary={name} className={classes.lockReqName} />
+          <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} />
+          <ListItemText primary="DELETE" />
+        </StyledMenuItem>
+      ))}
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+      </StyledMenuItem>
+    </StyledMenu>
+  );
 
-  // const notiList = (
-  //   <StyledMenu
-  //     id="notifi-menu"
-  //     anchorEl={anchorElNoti}
-  //     keepMounted
-  //     open={Boolean(anchorElNoti)}
-  //     onClose={handleNotiClose}
-  //   >
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText primary="Notification" className={classes.friReqTitle} />
-  //       <ListItemText align="right" primary="Mark all read" className={classes.friReqConfirm} />
-  //       <ListItemText align="center" primary="Setting" className={classes.friReqConfirm} />
-  //     </StyledMenuItem>
-  //     {notifiList.map(({ id, avatar, name, promise, time }) => (
-  //       <List className={classes.listNoti} component="nav" key={id}>
-  //         <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
-  //           <ListItemAvatar>
-  //             <AvatarPro alt="Remy Sharp" src={avatar} />
-  //           </ListItemAvatar>
-  //           <ListItemText
-  //             primary={
-  //               <>
-  //                 <Typography component="span" variant="body2" color="textPrimary">
-  //                   {name}
-  //                 </Typography>
-  //                 {' sent you a promise'}
-  //               </>
-  //             }
-  //             secondary={
-  //               <>
-  //                 <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-  //                   {promise}
-  //                 </Typography>
-  //                 <Typography component="span" variant="body2">
-  //                   {time}
-  //                 </Typography>
-  //               </>
-  //             }
-  //           />
-  //         </ListItem>
-  //         <Divider variant="inset" />
-  //       </List>
-  //     ))}
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
-  //     </StyledMenuItem>
-  //   </StyledMenu>
-  // );
+  const renderNotifications = () => (
+    <StyledMenu
+      id="notifi-menu"
+      anchorEl={anchorElNoti}
+      keepMounted
+      open={Boolean(anchorElNoti)}
+      onClose={handleNotiClose}
+    >
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText primary="Notification" className={classes.lockReqTitle} />
+        <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
+        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} />
+      </StyledMenuItem>
+      {notiList.map(({ id, avatar, name, promise, time }) => (
+        <List className={classes.listNoti} component="nav" key={id}>
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+            <ListItemAvatar>
+              <AvatarPro alt="Remy Sharp" src={avatar} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {name}
+                  </Typography>
+                  {' sent you a promise'}
+                </>
+              }
+              secondary={
+                <>
+                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                    {promise}
+                  </Typography>
+                  <Typography component="span" variant="body2">
+                    {time}
+                  </Typography>
+                </>
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" />
+        </List>
+      ))}
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+      </StyledMenuItem>
+    </StyledMenu>
+  );
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const renderMobileMenu = (
@@ -547,7 +548,7 @@ function Header(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      {/* <MenuItem>
+      <MenuItem>
         <IconButton aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="primary">
             <GroupIcon />
@@ -562,7 +563,7 @@ function Header(props) {
           </Badge>
         </IconButton>
         <p>Notifications</p>
-      </MenuItem> */}
+      </MenuItem>
       <MenuItem onClick={handeOpenMypage}>
         <IconButton
           aria-label="profile settings"
@@ -627,7 +628,7 @@ function Header(props) {
             </StyledLogo>
             {address && (
               <>
-                {/* <div className={classes.search}>
+                <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
@@ -639,12 +640,12 @@ function Header(props) {
                     }}
                     inputProps={{ 'aria-label': 'search' }}
                   />
-                </div> */}
+                </div>
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handeOpenMypage}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
                   <Typography className={classes.title} noWrap>
-                    {displayName}
+                    {displayName ? displayName.split(' ', 2)[0] : "(Unnamed)"}
                   </Typography>
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
@@ -652,6 +653,34 @@ function Header(props) {
                     Create
                   </Typography>
                 </Button>
+
+                <div className={classes.sectionDesktop}>
+                  <IconButton
+                    color="inherit"
+                    className={classes.menuIcon}
+                    aria-controls="lockReq-menu"
+                    aria-haspopup="true"
+                    variant="contained"
+                    onClick={handleLockReqOpen}
+                  >
+                    <Badge badgeContent="4" color="secondary">
+                      <GroupIcon />
+                    </Badge>
+                  </IconButton>
+                  <IconButton
+                    color="inherit"
+                    className={classes.menuIcon}
+                    aria-controls="noti-menu"
+                    aria-haspopup="true"
+                    variant="contained"
+                    onClick={handleNotiOpen}
+                  >
+                    <Badge badgeContent="3" color="secondary">
+                      <NotificationsIcon />
+                    </Badge>
+                  </IconButton>
+                </div>
+
                 <Button className={classes.sectionDesktop} onClick={handeExplore}>
                   <Typography className={classes.title} noWrap>
                     Explore
@@ -660,33 +689,7 @@ function Header(props) {
                 <Button className={classes.btDropDown} onClick={handeExpandMore}>
                   <ArrowDropDownIcon className={classes.expandMore} />
                 </Button>
-
-                {/* <div className={classes.sectionDesktop}>
-                  <IconButton
-                    color="inherit"
-                    className={classes.menuIcon}
-                    aria-controls="friReq-menu"
-                    aria-haspopup="true"
-                    variant="contained"
-                    onClick={handleFriReqOpen}
-                  >
-                    <Badge badgeContent={0} color="primary">
-                      <GroupIcon />
-                    </Badge>
-                  </IconButton>
-                  <IconButton
-                    color="inherit"
-                    className={classes.menuIcon}
-                    aria-controls="notifi-menu"
-                    aria-haspopup="true"
-                    variant="contained"
-                    onClick={handleNotiOpen}
-                  >
-                    <Badge badgeContent={0} color="primary">
-                      <NotificationsIcon />
-                    </Badge>
-                  </IconButton>
-                </div> */}
+                
                 <div className={classes.sectionMobile}>
                   <IconButton
                     aria-label="show more"
@@ -705,8 +708,8 @@ function Header(props) {
       </div>
       {renderMobileMenu}
       {renderMenu}
-      {/* friReqMenu */}
-      {/* notiList */}
+      { renderLockRequests() }
+      { renderNotifications() }
       {needAuth && <PasswordPrompt />}
       {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
