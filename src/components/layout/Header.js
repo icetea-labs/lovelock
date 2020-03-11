@@ -43,19 +43,22 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
-  font-size: ${rem(20)};
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  text-decoration: none;
-  :hover {
+  display: none;
+  @media (min-width: 600px) {
+    font-size: ${rem(20)};
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
     text-decoration: none;
+    :hover {
+      text-decoration: none;
+    }
+    color: inherit;
+    span {
+      margin: 0 ${rem(10)};
+    }
+    cursor: pointer;
   }
-  color: inherit;
-  span {
-    margin: 0 ${rem(10)};
-  }
-  cursor: pointer;
 `;
 
 const StyledAppBar = withStyles(() => ({
@@ -189,6 +192,9 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     [theme.breakpoints.up('md')]: {
       width: 200,
+      '&:focus': {
+        width: 240,
+      },
     },
   },
   sectionDesktop: {
@@ -267,48 +273,6 @@ const StyledMenuItem = withStyles(theme => ({
   },
 }))(MenuItem);
 
-const lockReqList = [
-  {
-    id: 0,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Huy Hoang',
-  },
-  {
-    id: 1,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'MyMy',
-  },
-  {
-    id: 2,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Luong Hoa',
-  },
-];
-
-const notiList = [
-  {
-    id: 0,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Huy Hoang',
-    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-    time: 'just now',
-  },
-  {
-    id: 1,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'MyMy',
-    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-    time: 'just now',
-  },
-  {
-    id: 2,
-    avatar: 'https://i.pravatar.cc/300',
-    name: 'Thi Truong',
-    promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-    time: 'just now',
-  },
-];
-
 function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -325,6 +289,9 @@ function Header(props) {
   const [anchorElNoti, setAnchorElNoti] = useState(null);
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
+
+  const [lockReqList, setLockReqList] = useState([])
+  const [notiList, setNotiList] = useState([])
 
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -408,6 +375,19 @@ function Header(props) {
     }
     fetchData();
   }, [address, tokenAddress, dispatch]);
+
+  useEffect(() => {
+    const abort = new AbortController();
+    fetch('/data/noti.json', { signal: abort.signal })
+    .then(r => r.json())
+    .then(data => {
+      setLockReqList(data.lockRequests)
+      setNotiList(data.notifications)
+    }).catch(err => {
+      if (err.name === 'AbortError') return;
+      throw err;
+    })
+  }, [])
 
   const renderMenu = (
     <StyledMenu
@@ -513,7 +493,7 @@ function Header(props) {
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
                   </Typography>
-                  {' sent you a promise'}
+                  {' sent you a lock request'}
                 </>
               }
               secondary={
@@ -549,16 +529,16 @@ function Header(props) {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="primary">
+        <IconButton aria-label={`show ${lockReqList.length} new requests`} color="inherit">
+          <Badge badgeContent={lockReqList.length} color="primary">
             <GroupIcon />
           </Badge>
         </IconButton>
         <p>Messages</p>
       </MenuItem>
       <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="primary">
+        <IconButton aria-label={`show ${notiList.length} new notifications`} color="inherit">
+          <Badge badgeContent={notiList.length} color="primary">
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -663,7 +643,7 @@ function Header(props) {
                     variant="contained"
                     onClick={handleLockReqOpen}
                   >
-                    <Badge badgeContent="4" color="secondary">
+                    <Badge badgeContent={lockReqList.length} color="secondary">
                       <GroupIcon />
                     </Badge>
                   </IconButton>
@@ -675,7 +655,7 @@ function Header(props) {
                     variant="contained"
                     onClick={handleNotiOpen}
                   >
-                    <Badge badgeContent="3" color="secondary">
+                    <Badge badgeContent={notiList.length} color="secondary">
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>

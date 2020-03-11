@@ -1,0 +1,42 @@
+{
+    "lockRequests": [
+      {
+        "id": 0,
+        "avatar": "https://i.pravatar.cc/300?img=60",
+        "name": "Huy Hoang"
+      },
+      {
+        "id": 1,
+        "avatar": "https://i.pravatar.cc/300?img=5",
+        "name": "MyMy"
+      },
+      {
+        "id": 2,
+        "avatar": "https://i.pravatar.cc/300?img=2",
+        "name": "Luong Hoa"
+      }
+    ],
+    "notifications": [
+      {
+        "id": 0,
+        "avatar": "https://i.pravatar.cc/300?img=59",
+        "name": "Huy Hoang",
+        "promise": "Its hard to find someone who will stay with you Its hard to find someone who will stay with you",
+        "time": "just now"
+      },
+      {
+        "id": 1,
+        "avatar": "https://i.pravatar.cc/300?img=37",
+        "name": "MyMy",
+        "promise": "Its hard to find someone who will stay with you Its hard to find someone who will stay with you",
+        "time": "just now"
+      },
+      {
+        "id": 2,
+        "avatar": "https://i.pravatar.cc/300?img=15",
+        "name": "Thi Truong",
+        "promise": "Its hard to find someone who will stay with you Its hard to find someone who will stay with you",
+        "time": "just now"
+      }
+    ]
+  }
