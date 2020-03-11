@@ -807,8 +807,9 @@ export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
     }, { includeAlias: true })
     .call()
     .then(result => {
+      console.log(result)
       return result.map(item => {
-        const nick = item.alias.substring(item.alias.indexOf('.') + 1);
+        const nick = item.alias ? item.alias.substring(item.alias.indexOf('.') + 1) : ''
         const tags = item.tags || {}
         return {
           [usernameKey]: nick,

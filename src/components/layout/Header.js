@@ -38,9 +38,13 @@ import PuNewLock from '../elements/PuNewLock';
 import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getAuthenAndTags } from '../../helper';
+import { getAuthenAndTags, getUserSuggestions } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import LandingPage from './LandingPage';
+
+import Autosuggest from 'react-autosuggest';
+import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
+import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -293,6 +297,9 @@ function Header(props) {
   const [lockReqList, setLockReqList] = useState([])
   const [notiList, setNotiList] = useState([])
 
+  const [searchValue, setSearchValue] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -301,11 +308,18 @@ function Header(props) {
   const lockIndex =
     isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
-  function handeOpenMypage() {
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  // const privateKey = useSelector(state => state.account.privateKey);
+  const displayName = useSelector(state => state.account.displayName);
+  const avatarRedux = useSelector(state => state.account.avatar);
+  const username = useSelector(state => state.account.username);
+
+  function handeOpenMypage(addr) {
+    addr = addr || address
     if (props.match.path === '/u/:address') {
-      window.location.href = `/u/${address}`
+      window.location.href = `/u/${addr}`
     } else {
-      props.history.push(`/u/${address}`);
+      props.history.push(`/u/${addr}`);
     }
   }
   function handeExpandMore(event) {
@@ -357,10 +371,74 @@ function Header(props) {
     setShowPhrase(false);
   }
 
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  // const privateKey = useSelector(state => state.account.privateKey);
-  const displayName = useSelector(state => state.account.displayName);
-  const avatarRedux = useSelector(state => state.account.avatar);
+  const getSuggestions = async value => {
+    const users = await getUserSuggestions(value);
+    setSuggestions(users)
+  }
+
+  const getSuggestionValue = suggestion => {
+    return `@${suggestion.nick}`;
+  };
+
+  const renderSearchMatch = (parts, isNick) => {
+    return (
+      <>
+        {parts.map((part, index) => {
+          const className = part.highlight ? 'highlight' : null;
+          return (
+            <span className={className} key={index}>
+              {((isNick && part.highlight) ? '@' : '') + part.text}
+            </span>
+          );
+        })}
+      </>
+    )
+  }
+
+  const renderSuggestion = (suggestion, { query }) => {
+    const isNick = query.startsWith('@')
+    const searchFor = isNick ? query.slice(1) : query
+    const suggestionText = isNick ? suggestion.nick : suggestion.display
+    const suggestionAva = suggestion.avatar;
+    const matches = AutosuggestHighlightMatch(suggestionText, searchFor);
+    const parts = AutosuggestHighlightParse(suggestionText, matches);
+    return (
+      <span className="suggestion-content">
+        <AvatarPro hash={suggestionAva} />
+        <div className="text">
+          <span className="name">
+            {isNick ? suggestion.display : renderSearchMatch(parts, false)}
+          </span>
+          <span className="nick">
+            {isNick ? renderSearchMatch(parts, true) : ('@' + suggestion.nick)}
+          </span>
+        </div>
+      </span>
+    );
+  };
+
+  const onSearchChanged = (event, { newValue, method }) => {
+    setSearchValue(newValue)
+    if (method !== 'enter' && method !== 'click') return
+
+    // get the item 
+    const name = newValue.substring(1);
+    if (suggestions) {
+      const seletedItem = suggestions.find(item => item.nick === name);
+      if (seletedItem) {
+        console.log('kkk', seletedItem)
+        handeOpenMypage(seletedItem.nick || seletedItem.address)
+      }
+    }
+  };
+
+  const onSuggestionsFetchRequested = ({ value }) => {
+    getSuggestions(value);
+  };
+
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([])
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -379,14 +457,14 @@ function Header(props) {
   useEffect(() => {
     const abort = new AbortController();
     fetch('/data/noti.json', { signal: abort.signal })
-    .then(r => r.json())
-    .then(data => {
-      setLockReqList(data.lockRequests)
-      setNotiList(data.notifications)
-    }).catch(err => {
-      if (err.name === 'AbortError') return;
-      throw err;
-    })
+      .then(r => r.json())
+      .then(data => {
+        setLockReqList(data.lockRequests)
+        setNotiList(data.notifications)
+      }).catch(err => {
+        if (err.name === 'AbortError') return;
+        throw err;
+      })
   }, [])
 
   const renderMenu = (
@@ -612,14 +690,46 @@ function Header(props) {
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
-                  <InputBase
+                  <Autosuggest
+                    id="suggestSearch"
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={onSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={
+                      {
+                        placeholder: "Search…",
+                        type: "search",
+                        value: searchValue,
+                        onChange: onSearchChanged,
+                      }
+                    }
+                    theme={{
+                      container: 'react-autosuggest__container',
+                      containerOpen: 'react-autosuggest-search__container--open',
+                      input: 'react-autosuggest-search__input',
+                      inputOpen: 'react-autosuggest__input--open',
+                      inputFocused: 'react-autosuggest__input--focused',
+                      suggestionsContainer: 'react-autosuggest-search__suggestions-container',
+                      suggestionsContainerOpen: 'react-autosuggest__suggestions-container--open',
+                      suggestionsList: 'react-autosuggest__suggestions-list',
+                      suggestion: 'react-autosuggest__suggestion',
+                      suggestionFirst: 'react-autosuggest__suggestion--first',
+                      suggestionHighlighted: 'react-autosuggest__suggestion--highlighted',
+                      sectionContainer: 'react-autosuggest__section-container',
+                      sectionContainerFirst: 'react-autosuggest__section-container--first',
+                      sectionTitle: 'react-autosuggest__section-title'
+                    }}
+                  />
+                  {/*<InputBase
                     placeholder="Search…"
                     classes={{
                       root: classes.inputRoot,
                       input: classes.inputInput,
                     }}
                     inputProps={{ 'aria-label': 'search' }}
-                  />
+                  />*/}
                 </div>
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handeOpenMypage}>
@@ -669,7 +779,7 @@ function Header(props) {
                 <Button className={classes.btDropDown} onClick={handeExpandMore}>
                   <ArrowDropDownIcon className={classes.expandMore} />
                 </Button>
-                
+
                 <div className={classes.sectionMobile}>
                   <IconButton
                     aria-label="show more"
@@ -688,8 +798,8 @@ function Header(props) {
       </div>
       {renderMobileMenu}
       {renderMenu}
-      { renderLockRequests() }
-      { renderNotifications() }
+      {renderLockRequests()}
+      {renderNotifications()}
       {needAuth && <PasswordPrompt />}
       {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
