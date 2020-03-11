@@ -426,7 +426,6 @@ function Header(props) {
     if (suggestions) {
       const seletedItem = suggestions.find(item => item.nick === name);
       if (seletedItem) {
-        console.log('kkk', seletedItem)
         handeOpenMypage(seletedItem.nick || seletedItem.address)
       }
     }
@@ -699,8 +698,6 @@ function Header(props) {
                     renderSuggestion={renderSuggestion}
                     inputProps={
                       {
-                        placeholder: "Search…",
-                        type: "search",
                         value: searchValue,
                         onChange: onSearchChanged,
                       }
@@ -708,7 +705,6 @@ function Header(props) {
                     theme={{
                       container: 'react-autosuggest__container',
                       containerOpen: 'react-autosuggest-search__container--open',
-                      input: 'react-autosuggest-search__input',
                       inputOpen: 'react-autosuggest__input--open',
                       inputFocused: 'react-autosuggest__input--focused',
                       suggestionsContainer: 'react-autosuggest-search__suggestions-container',
@@ -721,6 +717,16 @@ function Header(props) {
                       sectionContainerFirst: 'react-autosuggest__section-container--first',
                       sectionTitle: 'react-autosuggest__section-title'
                     }}
+                    renderInputComponent={inputProps => (
+                      <InputBase
+                        placeholder="Search…"
+                        classes={{
+                          root: classes.inputRoot,
+                          input: classes.inputInput,
+                        }}
+                        inputProps={{ 'aria-label': 'search', type: "search", ...inputProps }}
+                      />
+                    )}
                   />
                   {/*<InputBase
                     placeholder="Search…"
