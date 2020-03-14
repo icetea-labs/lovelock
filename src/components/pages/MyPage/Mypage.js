@@ -15,7 +15,15 @@ import { callView } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
-import appConstants from "../../../helper/constants";
+import appConstants from '../../../helper/constants';
+import CreateMemory from '../Memory/CreateMemory';
+
+const RightBox = styled.div`
+  padding: 0 0 0 ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
+`;
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -241,13 +249,18 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          <MemoryList
-            {...props}
-            myPageRoute
-            onMemoryChanged={refresh}
-            loading={loading}
-            nextPage={nextPage}
-          />
+          {address && (
+            <RightBox>
+              <CreateMemory
+                needSelectLock={true}
+                locks={props.locks}
+                onMemoryChanged={refresh}
+                // handleNewCollection={handleNewCollection}
+              />
+            </RightBox>
+          )}
+
+          <MemoryList {...props} myPageRoute onMemoryChanged={refresh} loading={loading} nextPage={nextPage} />
         </div>
       </LeftBoxWrapper>
     </div>
@@ -255,6 +268,7 @@ function Mypage(props) {
 }
 const mapStateToProps = state => {
   return {
+    locks: state.loveinfo.locks,
     address: state.account.address,
     memoryList: state.loveinfo.memories
   };

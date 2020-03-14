@@ -105,6 +105,9 @@ export default function BlogModal(props) {
                     Publish
                   </Button>
                 )}
+                {props.needSelectLock && props.selectionLocks && <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.selectionLocks.showSelectionLocks} style={{ marginLeft: 16 }}>
+                    {props.selectionLocks.selectedLockName()}
+                </Button>}
                 {props.drafts && <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.drafts.showDrafts} style={{ marginLeft: 16 }}>
                     Drafts
                 </Button>}
@@ -116,6 +119,7 @@ export default function BlogModal(props) {
               </Toolbar>
             </AppBar>
           </div>
+          {props.selectionLocks && props.selectionLocks.renderSelectionLocks()}
           {props.drafts && props.drafts.renderDrafts && props.drafts.renderDrafts()}
           <div className={classes.postBody}>{props.children}</div>
         </div>

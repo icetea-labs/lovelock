@@ -12,6 +12,7 @@ import APIService from '../../../service/apiService';
 import { showSubscriptionError } from '../../../helper';
 import { ensureContract } from '../../../service/tweb3';
 import appConstants from "../../../helper/constants";
+import CreateMemory from '../Memory/CreateMemory';
 
 const RightBox = styled.div`
   text-align: center;
@@ -316,6 +317,17 @@ function Home(props) {
                 <LeftContainer loading={loading} />
               </div>
               <div className="proposeColumn proposeColumn--right">
+                {address && (
+                  <div style={{ paddingLeft: rem(45)}}>
+                    <CreateMemory
+                      needSelectLock={true}
+                      locks={props.locks}
+                      onMemoryChanged={refresh}
+                      // handleNewCollection={handleNewCollection}
+                    />
+                  </div>
+                  
+                )}
                 <MemoryList
                   {...props}
                   onMemoryChanged={refresh}

@@ -19,6 +19,7 @@ import {
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
+import BlogEditor from './BlogEditor';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -128,7 +129,7 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryChanged, proIndex, collectionId, collections, handleNewCollection, memory, openBlogEditor } = props;
+  const { onMemoryChanged, collectionId, collections, handleNewCollection, memory } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -142,6 +143,10 @@ export default function CreateMemory(props) {
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
+  const [edittingMemory, setEdittingMemory] = useState(false)
+  const openBlogEditor = () => setEdittingMemory(true)
+  const closeBlogEditor = () => setEdittingMemory(false)
+
   const [filesBuffer, setFilesBuffer] = useState(editBlogData ?
     (editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url ? [editBlogData.meta.coverPhoto.url] : [])
     : (editMode ? memory.info.hash : []));
@@ -150,6 +155,14 @@ export default function CreateMemory(props) {
   const [memoDate, setMemoDate] = useState(editMode ? memory.info.date : new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
+
+  const [proIndex, setProIndex] = useState(props.proIndex);
+  useEffect(() => {
+    if(props.needSelectLock && props.locks[0]){
+      setProIndex(props.locks[0].id);
+    }
+  }, [props.locks]);
+
   const [disableShare, setDisableShare] = useState(true);
   const [grayLayout, setGrayLayout] = useState(false);
 
@@ -163,7 +176,7 @@ export default function CreateMemory(props) {
   useEffect(() => {
     if (editMode) return;
     resetValue();
-  }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (grayLayout && isCompact) {
@@ -382,6 +395,10 @@ export default function CreateMemory(props) {
     }
   }
 
+  function handleChangeLockId(event) {
+    setProIndex(+event.target.value);
+  }
+
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
@@ -457,7 +474,25 @@ export default function CreateMemory(props) {
                     <option value={0}>Public</option>
                     <option value={1} disabled>Private</option>
                   </Select>
-                  <Select
+                  {props.needSelectLock ? (
+                    <Select
+                    native
+                    value={proIndex}
+                    onChange={handleChangeLockId}
+                    classes={{
+                      root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                      icon: classes.selectIcon,
+                    }}
+                    input={<BootstrapInput name="collection" id="outlined-collection" />}
+                  >
+                    {(props.locks || []).map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.s_info.lockName || v.s_content}
+                      </option>
+                    ))}
+                  </Select>
+                  ) : (
+                    <Select
                     native
                     value={postCollectionId}
                     onChange={handleChangePostCollectionId}
@@ -473,8 +508,9 @@ export default function CreateMemory(props) {
                         {c.name}
                       </option>
                     ))}
-                    {handleNewCollection && <option value="add">(+) New Collection</option>}
                   </Select>
+                  )}
+                  
                 </div>
                 <ButtonPro
                   type="submit"
@@ -490,6 +526,14 @@ export default function CreateMemory(props) {
             )}
           </Grid>
         </ShadowBox>
+
+        {address && <BlogEditor
+          onMemoryChanged={onMemoryChanged}
+          memory={edittingMemory}
+          onClose={closeBlogEditor}
+          needSelectLock={props.needSelectLock}
+          locks={props.locks}
+        />}
       </CreatePost>
     </>
   );

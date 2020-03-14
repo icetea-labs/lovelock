@@ -58,15 +58,6 @@ export default function BlogEditor(props) {
 
     const classes = useStyles();
 
-    if (memory && memory.blogContent && memory !== blogMemory) {
-        blogMemory = memory
-
-        const r = blog.split(memory.blogContent)
-        blogBody = r.body
-        setBlogTitle(r.title)
-        setBlogSubtitle(r.subtitle)
-    }
-
     const [previewOn, setPreviewOn] = useState(false)
     const [drafts, setDrafts] = useState()
 
@@ -78,9 +69,29 @@ export default function BlogEditor(props) {
     const editMode = memory != null && memory.lockIndex != null
     const senderName = editMode ? memory.s_tags['display-name'] : (topInfo ? topInfo.s_name : '')
     const receiverName = editMode ? memory.r_tags['display-name'] : (topInfo ? topInfo.r_name : '')
-    const lockIndex = editMode ? memory.lockIndex : topInfo.index
 
     const [actionMenu, setActionMenu] = useState(null);
+    const [selectionLocks, setSelectionLocks] = useState(null);
+		
+		const [lockIndex, setLockIndex] = useState(null);
+		useEffect(() => {
+			if(!lockIndex){
+				if(props.needSelectLock && props.locks[0]){
+					setLockIndex(props.locks[0].id);
+				}else{
+					setLockIndex(editMode ? memory.lockIndex : topInfo.index)
+				}
+			}
+		});
+
+    if (memory && memory.blogContent && memory !== blogMemory) {
+			blogMemory = memory
+
+			const r = blog.split(memory.blogContent)
+			blogBody = r.body
+			setBlogTitle(r.title)
+			setBlogSubtitle(r.subtitle)
+		}
 
     useEffect(() => {
         loadAllDrafts().then(setDrafts)
@@ -283,6 +294,45 @@ export default function BlogEditor(props) {
             </ListItem>
           </Menu>
         )
+		}
+
+		function showSelectionLocks(event) {
+      setSelectionLocks(event.currentTarget);
+		}
+		
+		function selectedLockName(){
+			let id = props.locks.findIndex(lock => lock.id == lockIndex)
+			let lock = props.locks[id]
+			return lock ? (lock.s_info.lockName || lock.s_content) : null
+		}
+
+		function updateLockIndex(lock){
+			setLockIndex(lock)
+			setSelectionLocks(null)
+		}
+		
+    function renderSelectionLocks(){
+			return(
+				<>
+					{ props.needSelectLock && (
+						<Menu
+						anchorEl={selectionLocks}
+						open={Boolean(selectionLocks)}
+						onClose={() => setSelectionLocks(null)}
+						getContentAnchorEl={null}
+						anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+						transformOrigin={{ vertical: "top", horizontal: "left" }}
+						>
+							{props.locks.map(lock => (
+								<ListItem key={lock.id} onClick={() => updateLockIndex(lock.id)} button className={classes.menuItem}>
+									<ListItemText primary={lock.s_info.lockName || lock.s_content} />
+								</ListItem>
+							))}
+						</Menu>
+						)
+					}
+				</>
+			)
     }
 
     async function autoSaveDraft(context, content) {
@@ -312,7 +362,9 @@ export default function BlogEditor(props) {
             open={!!memory}
             handleClose={handleClose}
             handleSubmit={handleSubmit}
-            handlePreview={setPreviewOn}
+						handlePreview={setPreviewOn}
+						needSelectLock={props.needSelectLock}
+            selectionLocks={{ selectedLockName, showSelectionLocks, renderSelectionLocks}}
             drafts={{ renderDrafts, showDrafts, hideDrafts }}
             closeText="Cancel"
             title={<MemoryTitle 

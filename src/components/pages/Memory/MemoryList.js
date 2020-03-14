@@ -48,11 +48,6 @@ export default function MemoryList(props) {
 
   return (
     <RightBox>
-      {address && <BlogEditor
-        onMemoryChanged={onMemoryChanged}
-        memory={edittingMemory}
-        onClose={closeBlogEditor}
-      />}
       {collectionName && (
         <CollectionIndicator>
           <Chip
@@ -70,14 +65,12 @@ export default function MemoryList(props) {
           collections={collections}
           onMemoryChanged={onMemoryChanged}
           handleNewCollection={handleNewCollection}
-          openBlogEditor={openBlogEditor}
         />
       )}
       <MemoryContainer
         loading={loading}
         pinIndex={pinIndex}
         onMemoryChanged={onMemoryChanged}
-        openBlogEditor={setEdittingMemory}
         handleNewCollection={handleNewCollection}
         myPageRoute={myPageRoute}
         history={history}
