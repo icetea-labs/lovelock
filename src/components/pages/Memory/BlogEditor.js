@@ -73,16 +73,8 @@ export default function BlogEditor(props) {
     const [actionMenu, setActionMenu] = useState(null);
     const [selectionLocks, setSelectionLocks] = useState(null);
 		
-		const [lockIndex, setLockIndex] = useState(null);
-		useEffect(() => {
-			if(!lockIndex){
-				if(props.needSelectLock && props.locks[0]){
-					setLockIndex(props.locks[0].id);
-				}else{
-					setLockIndex(editMode ? memory.lockIndex : topInfo.index)
-				}
-			}
-		});
+		const lockIndexInit = editMode ? memory.lockIndex : topInfo.index;
+		const [lockIndex, setLockIndex] = useState(lockIndexInit);
 
     if (memory && memory.blogContent && memory !== blogMemory) {
 			blogMemory = memory
@@ -165,21 +157,25 @@ export default function BlogEditor(props) {
 
         // ensure next time open in edit mode & diff draft key
         setPreviewOn(false)
-
+				setLockIndex(lockIndexInit)
         onClose()
     }
 
     function handleSubmit() {
-        setGLoading(true);
-        submitBlog()
-            .then(() => {
-                setGLoading(false);
-            })
-            .catch(err => {
-                setGLoading(false);
-                console.error(err)
-                showError(`An error has occured, you can try again later: ${err.message}`);
-            });
+			if(!lockIndex){
+				showError(`Please select lock to post`);
+			}else{
+				setGLoading(true);
+				submitBlog()
+					.then(() => {
+						setGLoading(false);
+					})
+					.catch(err => {
+						setGLoading(false);
+						console.error(err)
+						showError(`An error has occured, you can try again later: ${err.message}`);
+					});
+			}
     }
 
     function combineContent() {
@@ -302,6 +298,9 @@ export default function BlogEditor(props) {
 		
 		function selectedLockName(){
 			let id = props.locks.findIndex(lock => lock.id == lockIndex)
+			if(id == -1){
+				return "-- Select lock --"
+			}
 			let lock = props.locks[id]
 			return lock ? (lock.s_info.lockName || lock.s_content) : null
 		}
