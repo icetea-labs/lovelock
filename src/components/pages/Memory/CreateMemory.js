@@ -403,7 +403,7 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
-    setProIndex(null);
+    setProIndex(props.proIndex);
   }
 
   function getPlaceholder() {
@@ -420,6 +420,27 @@ export default function CreateMemory(props) {
       <CreatePost grayLayout={grayLayout} ref={componentRef}>
         <ShadowBox className={`${editMode ? 'edit-mode' : ''}`}>
           <Grid container direction="column">
+            {grayLayout && props.needSelectLock &&
+              <Grid style={{ marginBottom: 24 }}>
+                <Select
+                  native
+                  value={proIndex}
+                  onChange={handleChangeLockId}
+                  classes={{
+                    root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                    icon: classes.selectIcon,
+                  }}
+                  input={<BootstrapInput name="collection" id="outlined-collection" />}
+                >
+                  <option value="">-- Select lock --</option>
+                  {(props.locks || []).map(v => (
+                    <option key={v.id} value={v.id}>
+                      {v.s_info.lockName || v.s_content}
+                    </option>
+                  ))}
+                </Select>
+              </Grid>
+            }
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
                 {!editMode && (
@@ -470,26 +491,7 @@ export default function CreateMemory(props) {
                     <option value={0}>Public</option>
                     <option value={1} disabled>Private</option>
                   </Select>
-                  {props.needSelectLock ? (
-                    <Select
-                    native
-                    value={proIndex}
-                    onChange={handleChangeLockId}
-                    classes={{
-                      root: `${classes.selectStyle} ${classes.selectStyleMid}`,
-                      icon: classes.selectIcon,
-                    }}
-                    input={<BootstrapInput name="collection" id="outlined-collection" />}
-                  >
-                    <option value="">-- Select lock --</option>
-                    {(props.locks || []).map(v => (
-                      <option key={v.id} value={v.id}>
-                        {v.s_info.lockName || v.s_content}
-                      </option>
-                    ))}
-                  </Select>
-                  ) : (
-                    <Select
+                  <Select
                     native
                     value={postCollectionId}
                     onChange={handleChangePostCollectionId}
@@ -505,8 +507,8 @@ export default function CreateMemory(props) {
                         {c.name}
                       </option>
                     ))}
+                    {handleNewCollection && <option value="add">(+) New Collection</option>}
                   </Select>
-                  )}
                   
                 </div>
                 <ButtonPro
