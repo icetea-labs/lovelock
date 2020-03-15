@@ -129,7 +129,7 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryChanged, collectionId, collections, handleNewCollection, memory } = props;
+  const { onMemoryChanged, collectionId, collections, handleNewCollection, memory, openBlogEditor, closeBlogEditor, edittingMemory } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -143,10 +143,6 @@ export default function CreateMemory(props) {
   const tokenKey = useSelector(state => state.account.tokenKey);
   const address = useSelector(state => state.account.address);
 
-  const [edittingMemory, setEdittingMemory] = useState(false)
-  const openBlogEditor = () => setEdittingMemory(true)
-  const closeBlogEditor = () => setEdittingMemory(false)
-
   const [filesBuffer, setFilesBuffer] = useState(editBlogData ?
     (editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url ? [editBlogData.meta.coverPhoto.url] : [])
     : (editMode ? memory.info.hash : []));
@@ -157,11 +153,6 @@ export default function CreateMemory(props) {
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
 
   const [proIndex, setProIndex] = useState(props.proIndex);
-  useEffect(() => {
-    if(props.needSelectLock && props.locks[0]){
-      setProIndex(props.locks[0].id);
-    }
-  }, [props.locks]);
 
   const [disableShare, setDisableShare] = useState(true);
   const [grayLayout, setGrayLayout] = useState(false);
@@ -291,6 +282,10 @@ export default function CreateMemory(props) {
     if (privacy) {
       return showError('Private memory is not currently supported.')
     }
+
+    if (!proIndex) {
+      return showError('Please select lock to post')
+    }
     
     const bufferImages = [];
     const srcImages = [];
@@ -408,6 +403,7 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
+    setProIndex(null);
   }
 
   function getPlaceholder() {
@@ -485,6 +481,7 @@ export default function CreateMemory(props) {
                     }}
                     input={<BootstrapInput name="collection" id="outlined-collection" />}
                   >
+                    <option value="">-- Select lock --</option>
                     {(props.locks || []).map(v => (
                       <option key={v.id} value={v.id}>
                         {v.s_info.lockName || v.s_content}

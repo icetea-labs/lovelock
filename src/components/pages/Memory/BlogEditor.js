@@ -73,8 +73,8 @@ export default function BlogEditor(props) {
     const [actionMenu, setActionMenu] = useState(null);
     const [selectionLocks, setSelectionLocks] = useState(null);
 		
-		const lockIndexInit = editMode ? memory.lockIndex : topInfo.index;
-		const [lockIndex, setLockIndex] = useState(lockIndexInit);
+    const lockIndexInit = editMode ? memory.lockIndex : topInfo.index;
+    const [lockIndex, setLockIndex] = useState(lockIndexInit);
 
     if (memory && memory.blogContent && memory !== blogMemory) {
 			blogMemory = memory
@@ -157,12 +157,12 @@ export default function BlogEditor(props) {
 
         // ensure next time open in edit mode & diff draft key
         setPreviewOn(false)
-				setLockIndex(lockIndexInit)
+		setLockIndex(null)
         onClose()
     }
 
     function handleSubmit() {
-			if(!lockIndex){
+			if(!editMode && !lockIndex){
 				showError(`Please select lock to post`);
 			}else{
 				setGLoading(true);
@@ -361,8 +361,9 @@ export default function BlogEditor(props) {
             open={!!memory}
             handleClose={handleClose}
             handleSubmit={handleSubmit}
-						handlePreview={setPreviewOn}
-						needSelectLock={props.needSelectLock}
+            handlePreview={setPreviewOn}
+            needSelectLock={props.needSelectLock}
+            editMode={editMode}
             selectionLocks={{ selectedLockName, showSelectionLocks, renderSelectionLocks}}
             drafts={{ renderDrafts, showDrafts, hideDrafts }}
             closeText="Cancel"

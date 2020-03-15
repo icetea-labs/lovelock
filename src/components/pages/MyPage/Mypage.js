@@ -82,6 +82,7 @@ function Mypage(props) {
   const [myPageInfo, setMyPageInfo] = useState({
     avatar: '',
     username: '',
+    address: '',
     displayname: '',
     numFollow: 0,
     isMyFollow: false,
@@ -101,6 +102,7 @@ function Mypage(props) {
         info.username = data[0].username;
         info.displayname = data[0]['display-name'];
         info.followed = data[0].followed;
+        info.address = data[0].address;
         const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
         info.numFollow = numFollow;
         info.isMyFollow = isMyFollow;
@@ -249,18 +251,8 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          {address && (
-            <RightBox>
-              <CreateMemory
-                needSelectLock={true}
-                locks={props.locks}
-                onMemoryChanged={refresh}
-                // handleNewCollection={handleNewCollection}
-              />
-            </RightBox>
-          )}
 
-          <MemoryList {...props} myPageRoute onMemoryChanged={refresh} loading={loading} nextPage={nextPage} />
+          <MemoryList {...props} myPageRoute onMemoryChanged={refresh} loading={loading} nextPage={nextPage} needSelectLock={true} locks={props.locks} myPageInfo={myPageInfo} />
         </div>
       </LeftBoxWrapper>
     </div>

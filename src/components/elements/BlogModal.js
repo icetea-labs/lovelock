@@ -88,7 +88,7 @@ export default function BlogModal(props) {
               <Toolbar className={classes.toolbar}>
                 <div className={classes.title}>
                   
-                  {(props.needSelectLock && props.selectionLocks) ? (
+                  {(props.needSelectLock && props.selectionLocks && !props.editMode) ? (
                     <div className={classes.subtitle}>
                       Post to:
                       <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.selectionLocks.showSelectionLocks} style={{ marginLeft: 16 }}>
