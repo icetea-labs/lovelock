@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getContract } from '../service/tweb3';
 import { sendTxUtil } from './utils';
 import { setNeedAuth as actionSetNeedAuth } from '../store/actions/account';
@@ -14,6 +14,19 @@ export function useRemember() {
   };
 
   return [value, setValue];
+}
+
+export function useDidUpdate (callback, deps) {
+  const hasMount = useRef(false)
+
+  useEffect(() => {
+    if (hasMount.current) {
+      callback()
+    } else {
+      hasMount.current = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
 }
 
 /* usage

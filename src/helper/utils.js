@@ -24,7 +24,7 @@ import HDKey from 'hdkey';
 import { encodeTx } from './encode';
 import { getWeb3, getContract, getAliasContract, getDidContract } from '../service/tweb3';
 import { decodeTx, decode } from './decode';
-import { getTagsInfo } from "./account";
+// import { getTagsInfo } from "./account";
 
 // because we do not support private locks/memoris yet
 // let's use a fake eccrypto
@@ -807,7 +807,6 @@ export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
     }, { includeAlias: true })
     .call()
     .then(result => {
-      console.log(result)
       return result.map(item => {
         const nick = item.alias ? item.alias.substring(item.alias.indexOf('.') + 1) : ''
         const tags = item.tags || {}

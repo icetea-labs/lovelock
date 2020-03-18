@@ -13,6 +13,8 @@ import { showSubscriptionError } from '../../../helper';
 import { ensureContract } from '../../../service/tweb3';
 import appConstants from "../../../helper/constants";
 
+import { useDidUpdate } from '../../../helper/hooks'
+
 const RightBox = styled.div`
   text-align: center;
   padding: ${rem(30)};
@@ -146,7 +148,7 @@ function Home(props) {
   }, [page]);
 
 
-  useEffect(() => {
+  useDidUpdate(() => {
     const signal = {};
     fetchMemories(signal, true);
     return handleSignal(signal);
@@ -184,17 +186,25 @@ function Home(props) {
         APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
           if (!result.length) {
             setNoMoreMemories(true);
-            setLoading(false);
-            return;
           }
 
           let memories = result;
-          if (!loadToCurrentPage) memories = memoryList.concat(result);
+          if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
           setMemory(memories);
           setLoading(false);
-        });
+        }).catch(err => {
+          console.error(err)
+          setLoading(false)
+        })
+      } else {
+        setMemory([])
+        setNoMoreMemories(true)
+        setLoading(false)
       }
-    });
+    }).catch(err => {
+      console.error(err)
+      setLoading(false)
+    })
   }
 
   function openPopup() {

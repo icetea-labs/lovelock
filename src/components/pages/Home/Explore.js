@@ -8,6 +8,8 @@ import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import appConstants from "../../../helper/constants";
 
+import { useDidUpdate } from '../../../helper/hooks'
+
 function Explore(props) {
   const { setMemory, memoryList } = props;
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ function Explore(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  useEffect(() => {
+  useDidUpdate(() => {
     fetchMemories(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed]);
@@ -33,15 +35,16 @@ function Explore(props) {
     APIService.getChoiceMemories(pinIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
       if (!result.length) {
         setNoMoreMemories(true);
-        setLoading(false);
-        return;
       }
 
       let memories = result;
-      if (!loadToCurrentPage) memories = memoryList.concat(result);
+      if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
       setMemory(memories);
       setLoading(false);
-    });
+    }).catch(err => {
+      console.error(err)
+      setLoading(false)
+    })
   }
 
   function refresh() {

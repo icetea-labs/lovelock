@@ -312,10 +312,9 @@ function Header(props) {
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
   const avatarRedux = useSelector(state => state.account.avatar);
-  const username = useSelector(state => state.account.username);
 
   function handeOpenMypage(addr) {
-    addr = addr || address
+    addr = typeof addr === 'string' ? addr : address
     if (props.match.path === '/u/:address') {
       window.location.href = `/u/${addr}`
     } else {

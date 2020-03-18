@@ -12,7 +12,7 @@ import LeftContainer from '../Lock/LeftContainer';
 import MemoryList from '../Memory/MemoryList';
 import { AvatarPro } from '../../elements';
 import { callView } from '../../../helper';
-import { useTx } from '../../../helper/hooks';
+import { useTx, useDidUpdate } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import appConstants from "../../../helper/constants";
@@ -109,9 +109,9 @@ function Mypage(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
 
-  useEffect(() => {
+  // this only runs on DidUpdate, not DidMount
+  useDidUpdate(() => {
     fetchDataLocksMemories(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed])
 
   function fetchDataLocksMemories(loadToCurrentPage = false) {
@@ -127,17 +127,25 @@ function Mypage(props) {
         APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
           if (!result.length) {
             setNoMoreMemories(true);
-            setLoading(false);
-            return;
           }
 
           let memories = result;
-          if (!loadToCurrentPage) memories = memoryList.concat(result);
+          if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
           setMemory(memories);
           setLoading(false);
-        });
+        }).catch(err => {
+          console.error(err)
+          setLoading(false)
+        })
+      } else {
+        setMemory([])
+        setNoMoreMemories(true)
+        setLoading(false)
       }
-    });
+    }).catch(err => {
+      console.error(err)
+      setLoading(false)
+    })
   }
 
   function refresh() {
