@@ -32,6 +32,9 @@ import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import { Link, withRouter } from 'react-router-dom';
+import Autosuggest from 'react-autosuggest';
+import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
+import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
@@ -42,9 +45,6 @@ import { getAuthenAndTags, getUserSuggestions } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import LandingPage from './LandingPage';
 
-import Autosuggest from 'react-autosuggest';
-import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
-import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -409,7 +409,7 @@ function Header(props) {
             {isNick ? suggestion.display : renderSearchMatch(parts, false)}
           </span>
           <span className="nick">
-            {isNick ? renderSearchMatch(parts, true) : ('@' + suggestion.nick)}
+            {isNick ? renderSearchMatch(parts, true) : (`@${  suggestion.nick}`)}
           </span>
         </div>
       </span>
@@ -569,7 +569,7 @@ function Header(props) {
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
                   </Typography>
-                  {' sent you a lock request'}
+                   sent you a lock request
                 </>
               }
               secondary={
@@ -727,14 +727,14 @@ function Header(props) {
                       />
                     )}
                   />
-                  {/*<InputBase
+                  {/* <InputBase
                     placeholder="Search…"
                     classes={{
                       root: classes.inputRoot,
                       input: classes.inputInput,
                     }}
                     inputProps={{ 'aria-label': 'search' }}
-                  />*/}
+                  /> */}
                 </div>
                 <div className={classes.grow} />
                 <Button className={classes.sectionDesktop} onClick={handeOpenMypage}>
