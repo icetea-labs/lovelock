@@ -49,6 +49,10 @@ const APIService = {
     const memoryData = await callView('getChoiceMemories', [extra, page, pageSize, loadToCurrentPage]);
     return addInfoToMems(memoryData);
   },
+  getUserByAdd: async address => {
+    const userByAdd = await callView('getUserByAdd', [address]);
+    return userByAdd;
+  },
 };
 
 export default APIService;

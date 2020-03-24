@@ -43,8 +43,8 @@ import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getAuthenAndTags, getUserSuggestions } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
+import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
-
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -159,6 +159,9 @@ const useStyles = makeStyles(theme => ({
       // margin: theme.spacing(0, 3, 0, 0),
       textTransform: 'capitalize',
     },
+  },
+  titlePoint: {
+    color: theme.palette.background.paper,
   },
   search: {
     position: 'relative',
@@ -294,11 +297,11 @@ function Header(props) {
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
-  const [lockReqList, setLockReqList] = useState([])
-  const [notiList, setNotiList] = useState([])
+  const [lockReqList, setLockReqList] = useState([]);
+  const [notiList, setNotiList] = useState([]);
 
-  const [searchValue, setSearchValue] = useState('')
-  const [suggestions, setSuggestions] = useState([])
+  const [searchValue, setSearchValue] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
 
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -311,12 +314,13 @@ function Header(props) {
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
+  const point = useSelector(state => state.account.point);
   const avatarRedux = useSelector(state => state.account.avatar);
 
   function handeOpenMypage(addr) {
-    addr = typeof addr === 'string' ? addr : address
+    addr = typeof addr === 'string' ? addr : address;
     if (props.match.path === '/u/:address') {
-      window.location.href = `/u/${addr}`
+      window.location.href = `/u/${addr}`;
     } else {
       props.history.push(`/u/${addr}`);
     }
@@ -372,8 +376,8 @@ function Header(props) {
 
   const getSuggestions = async value => {
     const users = await getUserSuggestions(value);
-    setSuggestions(users)
-  }
+    setSuggestions(users);
+  };
 
   const getSuggestionValue = suggestion => {
     return `@${suggestion.nick}`;
@@ -386,18 +390,18 @@ function Header(props) {
           const className = part.highlight ? 'highlight' : null;
           return (
             <span className={className} key={index}>
-              {((isNick && part.highlight) ? '@' : '') + part.text}
+              {(isNick && part.highlight ? '@' : '') + part.text}
             </span>
           );
         })}
       </>
-    )
-  }
+    );
+  };
 
   const renderSuggestion = (suggestion, { query }) => {
-    const isNick = query.startsWith('@')
-    const searchFor = isNick ? query.slice(1) : query
-    const suggestionText = isNick ? suggestion.nick : suggestion.display
+    const isNick = query.startsWith('@');
+    const searchFor = isNick ? query.slice(1) : query;
+    const suggestionText = isNick ? suggestion.nick : suggestion.display;
     const suggestionAva = suggestion.avatar;
     const matches = AutosuggestHighlightMatch(suggestionText, searchFor);
     const parts = AutosuggestHighlightParse(suggestionText, matches);
@@ -405,27 +409,23 @@ function Header(props) {
       <span className="suggestion-content">
         <AvatarPro hash={suggestionAva} />
         <div className="text">
-          <span className="name">
-            {isNick ? suggestion.display : renderSearchMatch(parts, false)}
-          </span>
-          <span className="nick">
-            {isNick ? renderSearchMatch(parts, true) : (`@${  suggestion.nick}`)}
-          </span>
+          <span className="name">{isNick ? suggestion.display : renderSearchMatch(parts, false)}</span>
+          <span className="nick">{isNick ? renderSearchMatch(parts, true) : `@${suggestion.nick}`}</span>
         </div>
       </span>
     );
   };
 
   const onSearchChanged = (event, { newValue, method }) => {
-    setSearchValue(newValue)
-    if (method !== 'enter' && method !== 'click') return
+    setSearchValue(newValue);
+    if (method !== 'enter' && method !== 'click') return;
 
-    // get the item 
+    // get the item
     const name = newValue.substring(1);
     if (suggestions) {
       const seletedItem = suggestions.find(item => item.nick === name);
       if (seletedItem) {
-        handeOpenMypage(seletedItem.nick || seletedItem.address)
+        handeOpenMypage(seletedItem.nick || seletedItem.address);
       }
     }
   };
@@ -435,7 +435,7 @@ function Header(props) {
   };
 
   const onSuggestionsClearRequested = () => {
-    setSuggestions([])
+    setSuggestions([]);
   };
 
   useEffect(() => {
@@ -443,7 +443,15 @@ function Header(props) {
       try {
         if (address) {
           const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          dispatch(actions.setAccount({ displayName: tags['display-name'] || '', avatar: tags.avatar, isApproved }));
+          const userPoint = await APIService.getUserByAdd(address);
+          dispatch(
+            actions.setAccount({
+              displayName: tags['display-name'] || '',
+              avatar: tags.avatar,
+              isApproved,
+              point: userPoint.token,
+            })
+          );
         }
       } catch (e) {
         console.error(e);
@@ -457,13 +465,14 @@ function Header(props) {
     fetch('/data/noti.json', { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        setLockReqList(data.lockRequests)
-        setNotiList(data.notifications)
-      }).catch(err => {
+        setLockReqList(data.lockRequests);
+        setNotiList(data.notifications);
+      })
+      .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
-      })
-  }, [])
+      });
+  }, []);
 
   const renderMenu = (
     <StyledMenu
@@ -523,7 +532,13 @@ function Header(props) {
   );
 
   const renderLockRequests = () => (
-    <StyledMenu id="lockReq-menu" anchorEl={anchorElLockReq} keepMounted open={Boolean(anchorElLockReq)} onClose={handleLockReqClose}>
+    <StyledMenu
+      id="lockReq-menu"
+      anchorEl={anchorElLockReq}
+      keepMounted
+      open={Boolean(anchorElLockReq)}
+      onClose={handleLockReqClose}
+    >
       <StyledMenuItem className={classes.lockReqStyle}>
         <ListItemText primary="Lock Request" className={classes.lockReqTitle} />
         <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} />
@@ -569,7 +584,7 @@ function Header(props) {
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
                   </Typography>
-                   sent you a lock request
+                  sent you a lock request
                 </>
               }
               secondary={
@@ -695,12 +710,10 @@ function Header(props) {
                     onSuggestionsClearRequested={onSuggestionsClearRequested}
                     getSuggestionValue={getSuggestionValue}
                     renderSuggestion={renderSuggestion}
-                    inputProps={
-                      {
-                        value: searchValue,
-                        onChange: onSearchChanged,
-                      }
-                    }
+                    inputProps={{
+                      value: searchValue,
+                      onChange: onSearchChanged,
+                    }}
                     theme={{
                       container: 'react-autosuggest__container',
                       containerOpen: 'react-autosuggest-search__container--open',
@@ -714,7 +727,7 @@ function Header(props) {
                       suggestionHighlighted: 'react-autosuggest__suggestion--highlighted',
                       sectionContainer: 'react-autosuggest__section-container',
                       sectionContainerFirst: 'react-autosuggest__section-container--first',
-                      sectionTitle: 'react-autosuggest__section-title'
+                      sectionTitle: 'react-autosuggest__section-title',
                     }}
                     renderInputComponent={inputProps => (
                       <InputBase
@@ -723,7 +736,7 @@ function Header(props) {
                           root: classes.inputRoot,
                           input: classes.inputInput,
                         }}
-                        inputProps={{ 'aria-label': 'search', type: "search", ...inputProps }}
+                        inputProps={{ 'aria-label': 'search', type: 'search', ...inputProps }}
                       />
                     )}
                   />
@@ -737,11 +750,16 @@ function Header(props) {
                   /> */}
                 </div>
                 <div className={classes.grow} />
-                <Button className={classes.sectionDesktop} onClick={handeOpenMypage}>
+                <Button onClick={handeOpenMypage}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
-                  <Typography className={classes.title} noWrap>
-                    {displayName ? displayName.split(' ', 2)[0] : "(Unnamed)"}
-                  </Typography>
+                  {/* <Typography className={classes.title} noWrap>
+                    {displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
+                  </Typography> */}
+                  <ListItemText
+                    className={classes.titlePoint}
+                    primary={displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
+                    secondary={<span className={classes.titlePoint}>{point} point</span>}
+                  />
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>
