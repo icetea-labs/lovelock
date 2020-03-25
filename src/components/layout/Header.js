@@ -668,7 +668,7 @@ function Header(props) {
   return (
     <div>
       <div className={classes.grow}>
-        <StyledAppBar position="static" color="inherit" className={`${classes.AppBar} main-appbar`}>
+        <StyledAppBar position="relative" color="inherit" className={`${classes.AppBar} main-appbar`}>
           <StyledToolbar>
             <MenuIcon
               fontSize="large"
