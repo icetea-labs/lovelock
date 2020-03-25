@@ -536,14 +536,26 @@ class LoveLock {
     
     _users = validate(_users, schema);
     
-    let users = this.getUsers();
-    if (!users[_users]) users[_users] = { activate: true, token: 100 };
+    //migrate userOld
+    let usersOld = this.getUsers();
+    let userNew = {};
+    if (Array.isArray(usersOld)) {
+      userNew = usersOld.reduce(function (result, item) {
+        result[item] = { activate: true, token: 100 };
+        return result;
+      }, {});
+    } else userNew = this.getUsers();
+
+    //add new user
+    if (!userNew[_users]) userNew[_users] = { activate: true, token: 100 };
+
+    this.setUsers(userNew);
+
     // users = users.filter(addr => {
     //   return !_users.includes(addr);
     // });
     // users = users.concat(_users);
 
-    this.setUsers(users);
     return _users;
   }
 

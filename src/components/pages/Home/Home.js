@@ -257,18 +257,20 @@ function Home(props) {
             <div>
               {!isApproved && (
                 <div className="note">
-                  <h5>ACCOUNT ACTIVATION REQUIRED</h5>
+                  <h5>
+                    <FormattedMessage id="home.activationTitle" />
+                  </h5>
                   <span>
-                    LoveLock is in beta and not yet open to public. Please{' '}
+                    <FormattedMessage id="home.activationSubTitle" />
                     <a
                       className="underline"
                       target="_blank"
                       rel="noopener noreferrer"
                       href="http://bit.ly/LoveLock-AAR"
                     >
-                      fill in this form
-                    </a>{' '}
-                    to request activation of your account before you can post contents.
+                      <FormattedMessage id="home.activationForm" />
+                    </a>
+                    <FormattedMessage id="home.activstionGoal" />
                   </span>
                 </div>
               )}
@@ -290,11 +292,11 @@ function Home(props) {
               </div>
               <ActionForm>
                 <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                  Create First Lock
+                  <FormattedMessage id="home.buttonCreate" />
                 </ButtonPro>
               </ActionForm>
               <LinkPro className="btn_add_promise" route="/explore" onClick={openLink}>
-                Explore Notable Blogs
+                <FormattedMessage id="home.exploreLink" />
               </LinkPro>
             </div>
           </RightBox>
@@ -319,13 +321,13 @@ function Home(props) {
         <DownInfo>
           <SupportSite>
             <p>
-              Need support? Contact us via&nbsp;
+              <FormattedMessage id="home.supportTitle" />
               <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
-                Email
+                <FormattedMessage id="home.supportEmail" />
               </a>
-              &nbsp;or&nbsp;
+              <FormattedMessage id="home.supportOr" />
               <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
-                Telegram.
+                <FormattedMessage id="home.supportTelegram" />
               </a>
             </p>
           </SupportSite>
