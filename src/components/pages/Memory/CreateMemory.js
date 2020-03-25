@@ -19,6 +19,7 @@ import {
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
+import BlogEditor from './BlogEditor';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -56,57 +57,76 @@ const ShadowBox = styled.div`
     }
   }
 `;
-const useStyles = makeStyles(theme => ({
-  margin: {
-    // margin: theme.spacing(1),
-  },
-  avatar: {
-    width: 58,
-    height: 58,
-    borderRadius: 10,
-  },
-  btShare: {
-    width: 232,
-    height: 46,
-    borderRadius: 23,
-    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
-      width: '100%',
-      marginTop: 20,
+const useStyles = makeStyles(theme => {
+  //console.log(theme)
+  return {
+    margin: {
+      // margin: theme.spacing(1),
     },
-  },
-  selectStyle: {
-    minWidth: 110,
-    height: 36,
-    fontSize: 12,
-    color: '#8250c8',
-  },
-  selectStyleMid: {
-    minWidth: 160,
-    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
-      marginLeft: 24,
+    avatar: {
+      width: 58,
+      height: 58,
+      borderRadius: 10,
     },
-  },
-  selectIcon: {
-    width: 24,
-    height: 24,
-    color: '#8250c8',
-    marginRight: theme.spacing(1),
-  },
-  btBox: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '25px 0 15px',
-    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
-      display: 'block',
+    btShare: {
+      width: 232,
+      height: 46,
+      borderRadius: 23,
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        width: '100%',
+        marginTop: 20,
+      },
+    },
+    selectStyle: {
+      minWidth: 110,
+      height: 36,
+      fontSize: 12,
+      color: '#8250c8',
+    },
+    selectStyleMid: {
+      minWidth: 160,
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        marginLeft: 24,
+      },
+    },
+    selectIcon: {
+      width: 24,
+      height: 24,
+      color: '#8250c8',
+      marginRight: theme.spacing(1),
+    },
+    btBox: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '25px 0 15px',
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        display: 'block',
+        textAlign: 'right',
+      },
+    },
+    rightBtBox: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '0',
+    },
+    postTopRow: {
+      marginBottom: 6,
+      marginTop: -12,
       textAlign: 'right',
+      '@media (max-width: 768px)': {
+        marginBottom: 12,
+        marginTop: 0
+      },
     },
-  },
-  rightBtBox: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0',
-  },
-}));
+    postToLabel: {
+      color: theme.palette.primary.light,
+      marginRight: theme.spacing(1),
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        display: 'none'
+      },
+    }
+  }
+})
 
 const BootstrapInput = withStyles(theme => ({
   root: {
@@ -128,7 +148,7 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryChanged, proIndex, collectionId, collections, handleNewCollection, memory, openBlogEditor } = props;
+  const { onMemoryChanged, collectionId, collections, handleNewCollection, memory, openBlogEditor, closeBlogEditor, edittingMemory } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -150,6 +170,9 @@ export default function CreateMemory(props) {
   const [memoDate, setMemoDate] = useState(editMode ? memory.info.date : new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
+
+  const [proIndex, setProIndex] = useState(props.proIndex);
+
   const [disableShare, setDisableShare] = useState(true);
   const [grayLayout, setGrayLayout] = useState(false);
 
@@ -163,7 +186,7 @@ export default function CreateMemory(props) {
   useEffect(() => {
     if (editMode) return;
     resetValue();
-  }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (grayLayout && isCompact) {
@@ -278,6 +301,10 @@ export default function CreateMemory(props) {
     if (privacy) {
       return showError('Private memory is not currently supported.')
     }
+
+    if (proIndex == null || proIndex === '') {
+      return showError('Please select a lock to post to.')
+    }
     
     const bufferImages = [];
     const srcImages = [];
@@ -382,6 +409,11 @@ export default function CreateMemory(props) {
     }
   }
 
+  function handleChangeLockId(event) {
+    const v = event.target.value.trim()
+    setProIndex(v.length ? +v : v);
+  }
+
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
@@ -391,6 +423,7 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
+    setProIndex(props.proIndex);
   }
 
   function getPlaceholder() {
@@ -407,6 +440,30 @@ export default function CreateMemory(props) {
       <CreatePost grayLayout={grayLayout} ref={componentRef}>
         <ShadowBox className={`${editMode ? 'edit-mode' : ''}`}>
           <Grid container direction="column">
+            {grayLayout && props.needSelectLock &&
+              <Grid className={classes.postTopRow}>
+                <label>
+                  <span className={classes.postToLabel}>Post to:</span>
+                  <Select
+                    native
+                    value={proIndex}
+                    onChange={handleChangeLockId}
+                    classes={{
+                      root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                      icon: classes.selectIcon,
+                    }}
+                    input={<BootstrapInput name="postToLock" id="outlined-collection" />}
+                  >
+                    <option value="">-- Select lock --</option>
+                    {(props.locks || []).map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.s_info.lockName || v.s_content}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              </Grid>
+            }
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
                 {!editMode && (
@@ -475,6 +532,7 @@ export default function CreateMemory(props) {
                     ))}
                     {handleNewCollection && <option value="add">(+) New Collection</option>}
                   </Select>
+                  
                 </div>
                 <ButtonPro
                   type="submit"
@@ -490,6 +548,14 @@ export default function CreateMemory(props) {
             )}
           </Grid>
         </ShadowBox>
+
+        {address && <BlogEditor
+          onMemoryChanged={onMemoryChanged}
+          memory={edittingMemory}
+          onClose={closeBlogEditor}
+          needSelectLock={props.needSelectLock}
+          locks={props.locks}
+        />}
       </CreatePost>
     </>
   );

@@ -65,6 +65,7 @@ function Explore(props) {
         <MemoryList
           {...props}
           pinIndex={pinIndex}
+          noCreateMemory
           onMemoryChanged={refresh}
           loading={loading}
           nextPage={nextPage}

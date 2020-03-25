@@ -15,7 +15,14 @@ import { callView } from '../../../helper';
 import { useTx, useDidUpdate } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
-import appConstants from "../../../helper/constants";
+import appConstants from '../../../helper/constants';
+
+const RightBox = styled.div`
+  padding: 0 0 0 ${rem(45)};
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
+`;
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -74,6 +81,7 @@ function Mypage(props) {
   const [myPageInfo, setMyPageInfo] = useState({
     avatar: '',
     username: '',
+    address: '',
     displayname: '',
     numFollow: 0,
     isMyFollow: false,
@@ -93,6 +101,7 @@ function Mypage(props) {
         info.username = data[0].username;
         info.displayname = data[0]['display-name'];
         info.followed = data[0].followed;
+        info.address = data[0].address;
         const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
         info.numFollow = numFollow;
         info.isMyFollow = isMyFollow;
@@ -249,13 +258,8 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-          <MemoryList
-            {...props}
-            myPageRoute
-            onMemoryChanged={refresh}
-            loading={loading}
-            nextPage={nextPage}
-          />
+
+          <MemoryList {...props} myPageRoute onMemoryChanged={refresh} loading={loading} nextPage={nextPage} needSelectLock={true} locks={props.locks} myPageInfo={myPageInfo} />
         </div>
       </LeftBoxWrapper>
     </div>
@@ -263,6 +267,7 @@ function Mypage(props) {
 }
 const mapStateToProps = state => {
   return {
+    locks: state.loveinfo.locks,
     address: state.account.address,
     memoryList: state.loveinfo.memories
   };

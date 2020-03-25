@@ -75,6 +75,7 @@ const StyledAppBar = withStyles(() => ({
     padding: '0',
     boxShadow: 'none',
     alignItems: 'center',
+    zIndex: 'auto',
     // [theme.breakpoints.up('sm')]: {
     //   background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
     // },
@@ -685,7 +686,7 @@ function Header(props) {
   return (
     <div>
       <div className={classes.grow}>
-        <StyledAppBar position="static" color="inherit" className={`${classes.AppBar} main-appbar`}>
+        <StyledAppBar position="relative" color="inherit" className={`${classes.AppBar} main-appbar`}>
           <StyledToolbar>
             <MenuIcon
               fontSize="large"

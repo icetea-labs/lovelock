@@ -348,7 +348,17 @@ function Home(props) {
                 <LeftContainer loading={loading} />
               </div>
               <div className="proposeColumn proposeColumn--right">
+<<<<<<< HEAD
                 <MemoryList {...props} onMemoryChanged={refresh} loading={loading} nextPage={nextPage} />
+=======
+                <MemoryList
+                  {...props}
+                  onMemoryChanged={refresh}
+                  loading={loading}
+                  nextPage={nextPage}
+                  needSelectLock={true}
+                />
+>>>>>>> aca67c6bd18921973d3fc697a320e8251990e6e9
               </div>
             </LeftBoxWrapper>
           ) : (

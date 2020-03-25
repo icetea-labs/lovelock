@@ -310,6 +310,7 @@ exports.apiGetDataForMypage = (self, address) => {
 
   let myData = {};
   myData.avatar = tags.avatar;
+  myData.address = address;
   myData['display-name'] = tags['display-name'] || '';
   myData.username = alias.replace('account.', '');
   myData.followed = self.getFollowed()[address] || [];
