@@ -1,0 +1,15 @@
+{
+    "home.emptyTitle": "You have no lock",
+    "home.emptySubTitle": "Create locks to connect and share memories with your loved ones. ",
+    "home.emptySubTitleLink": "Learn more...",
+    "home.buttonCreate": "Create First Lock",
+    "home.exploreLink": "Explore Notable Blogs",
+    "home.activationTitle": "ACCOUNT ACTIVATION REQUIRED",
+    "home.activationSubTitle": "LoveLock is in beta and not yet open to public. Please ",
+    "home.activationForm": "fill in this form ",
+    "home.activstionGoal": "to request activation of your account before you can post contents.",
+    "home.supportTitle": "Need support? Contact us via ",
+    "home.supportEmail": "Email",
+    "home.supportOr": " or ",
+    "home.supportTelegram": "Telegram"
+}

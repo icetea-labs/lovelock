@@ -1,0 +1,15 @@
+{
+    "home.emptyTitle": "ロックがありません。",
+    "home.emptySubTitle": "大切な人を繋いで、記念を共有する為ロックを作成してください。",
+    "home.emptySubTitleLink": "もっと見る...",
+    "home.buttonCreate": "最初のロックを作成",
+    "home.exploreLink": "注目のブログを見る",
+    "home.activationTitle": "アカウントアクティベーション必須",
+    "home.activationSubTitle": "LoveLockはベータ版であり、まだ公開されていません。",
+    "home.activationForm": "このフォームに記入してください。",
+    "home.activstionGoal": "コンテンツを投稿する前に、アカウントのアクティベーションをリクエストします。",
+    "home.supportTitle": "サポートの必要がありませんか。このリンクでお問い合わせください。",
+    "home.supportEmail": "電子メール",
+    "home.supportOr": " または ",
+    "home.supportTelegram": "Telegram"
+}

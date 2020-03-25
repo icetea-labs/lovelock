@@ -15,6 +15,7 @@ const initialState = {
   encryptedData: '',
   displayName: '',
   mode: '',
+  point: '',
   ...(function getSessionStorage() {
     const resp = {};
     const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');

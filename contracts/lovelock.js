@@ -1,6 +1,13 @@
 const { expect, validate } = require(';');
 const Joi = require('@hapi/joi');
-const { expectLockOwners, expectLockContributors, getDataByIndex, expectOwner, expectAdmin, expectUserApproved } = require('./helper.js');
+const {
+  expectLockOwners,
+  expectLockContributors,
+  getDataByIndex,
+  expectOwner,
+  expectAdmin,
+  expectUserApproved,
+} = require('./helper.js');
 const {
   apiCreateLock,
   apiEditLock,
@@ -90,8 +97,8 @@ class LoveLock {
   }
   @transaction editLock(lockIndex: number, data, contributors) {
     const self = this;
-    expectUserApproved(self)
-    return apiEditLock(self, lockIndex, data, contributors)
+    expectUserApproved(self);
+    return apiEditLock(self, lockIndex, data, contributors);
   }
   @transaction changeLockName(index: number, lockName: string) {
     const self = this;
@@ -433,16 +440,16 @@ class LoveLock {
   @view getChoiceMemories = (extra, page, pageSize, loadToCurrentPage) => {
     let choices = this.getState('choices', []);
 
-    if (extra != null ) {
-      choices = choices.concat(extra)
+    if (extra != null) {
+      choices = choices.concat(extra);
     }
 
     if (!choices.length) {
-      return []
+      return [];
     }
 
-    return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadToCurrentPage)
-  }
+    return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadToCurrentPage);
+  };
 
   @transaction addChoices(_choices) {
     expectAdmin(this);
@@ -452,7 +459,9 @@ class LoveLock {
     }
 
     const schema = Joi.array().items(
-      Joi.number().min(0).integer()
+      Joi.number()
+        .min(0)
+        .integer()
     );
 
     _choices = validate(_choices, schema);
@@ -460,10 +469,10 @@ class LoveLock {
     const oldChoices = this.getChoices();
 
     // merge the two array, use Set to remove duplicaton
-    const newChoices = [...new Set([...oldChoices, ..._choices])]
+    const newChoices = [...new Set([...oldChoices, ..._choices])];
 
     // save new choices
-    this.setChoices(newChoices)
+    this.setChoices(newChoices);
 
     // return nothing
   }
@@ -478,17 +487,18 @@ class LoveLock {
     }
 
     const schema = Joi.array().items(
-      Joi.number().min(0).integer()
+      Joi.number()
+        .min(0)
+        .integer()
     );
 
     _choices = validate(_choices, schema);
-
 
     const oldChoices = this.getChoices();
 
     const newChoices = oldChoices.filter(i => !_choices.includes(i));
 
-    this.setChoices(newChoices)
+    this.setChoices(newChoices);
   }
 
   @view isEditorChosen(memoIndex: number): boolean {
@@ -497,35 +507,61 @@ class LoveLock {
   }
 
   // ========== USER APPROVED =============
-  @view getUsers = () => this.getState('users', []);
+  @view getUsers = () => this.getState('users', {});
   setUsers = value => this.setState('users', value);
 
   @transaction addUsers(_users) {
     expectAdmin(this);
-    if (!Array.isArray(_users)) {
-      _users = [_users];
+    // if (!Array.isArray(_users)) {
+    //   _users = [_users];
+    // }
+
+    // _users = _users.map(user => {
+    if (!isValidAddress(_users)) {
+      _users = convertAliasToAddress(_users);
     }
+    //   return user;
+    // });
 
-    _users = _users.map(user => {
-      if (!isValidAddress(user)) {
-        user = convertAliasToAddress(user);
-      }
-      return user;
-    });
+    // const schema = Joi.array().items(
+    //   Joi.string()
+    //     .max(43)
+    //     .min(43)
+    // );
 
-    const schema = Joi.array().items(
-      Joi.string()
-        .max(43)
-        .min(43)
-    );
+    const schema = Joi.string()
+      .max(43)
+      .min(43)
+      .required();
+    
     _users = validate(_users, schema);
-    let users = this.getUsers();
-    users = users.filter(addr => {
-      return !_users.includes(addr);
-    });
-    users = users.concat(_users);
-    this.setUsers(users);
+    
+    //migrate userOld
+    let usersOld = this.getUsers();
+    let userNew = {};
+    if (Array.isArray(usersOld)) {
+      userNew = usersOld.reduce(function (result, item) {
+        result[item] = { activate: true, token: 100 };
+        return result;
+      }, {});
+    } else userNew = this.getUsers();
+
+    //add new user
+    if (!userNew[_users]) userNew[_users] = { activate: true, token: 100 };
+
+    this.setUsers(userNew);
+
+    // users = users.filter(addr => {
+    //   return !_users.includes(addr);
+    // });
+    // users = users.concat(_users);
+
     return _users;
+  }
+
+  @view getUserByAdd(add) {
+    let users = this.getUsers();
+    return users[add] || {};
   }
 
   @transaction removeUsers(_users) {
@@ -560,7 +596,6 @@ class LoveLock {
 
   // ========== Authorized IPFS APPROVED =============
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
-
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
     if (!users.includes(mainAddress)) {
@@ -569,13 +604,13 @@ class LoveLock {
 
     // check tokenAddress is token on mainaddress.
 
-    const ctDid = loadContract('system.did')
+    const ctDid = loadContract('system.did');
     try {
-      const to = contract.includes('.') ? convertAliasToAddress(contract) : contract
-      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to })
-      return true
+      const to = contract.includes('.') ? convertAliasToAddress(contract) : contract;
+      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to });
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
   }
 
@@ -588,7 +623,7 @@ class LoveLock {
 function convertAliasToAddress(alias) {
   const ctAlias = loadContract('system.alias');
   if (!alias.startsWith('account.') && !alias.startsWith('contract.')) {
-    alias = 'account.' + alias
+    alias = 'account.' + alias;
   }
-  return ctAlias.resolve.invokeView(alias) || ''
+  return ctAlias.resolve.invokeView(alias) || '';
 }

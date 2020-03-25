@@ -35,6 +35,7 @@
     "react-dom": "^16.13.0",
     "react-helmet": "^5.2.1",
     "react-images": "^1.0.0",
+    "react-intl": "^4.1.1",
     "react-lazy-with-preload": "^2.0.0",
     "react-lazyload": "^2.6.5",
     "react-linkify": "^1.0.0-alpha",
