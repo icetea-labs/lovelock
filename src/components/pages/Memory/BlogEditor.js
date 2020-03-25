@@ -163,7 +163,7 @@ export default function BlogEditor(props) {
 
     function handleSubmit() {
 			if(!editMode && !lockIndex){
-				showError(`Please select lock to post`);
+				showError('Please select a lock to post to.');
 			}else{
 				setGLoading(true);
 				submitBlog()

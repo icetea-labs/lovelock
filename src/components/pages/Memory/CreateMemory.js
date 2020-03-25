@@ -57,57 +57,76 @@ const ShadowBox = styled.div`
     }
   }
 `;
-const useStyles = makeStyles(theme => ({
-  margin: {
-    // margin: theme.spacing(1),
-  },
-  avatar: {
-    width: 58,
-    height: 58,
-    borderRadius: 10,
-  },
-  btShare: {
-    width: 232,
-    height: 46,
-    borderRadius: 23,
-    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
-      width: '100%',
-      marginTop: 20,
+const useStyles = makeStyles(theme => {
+  //console.log(theme)
+  return {
+    margin: {
+      // margin: theme.spacing(1),
     },
-  },
-  selectStyle: {
-    minWidth: 110,
-    height: 36,
-    fontSize: 12,
-    color: '#8250c8',
-  },
-  selectStyleMid: {
-    minWidth: 160,
-    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
-      marginLeft: 24,
+    avatar: {
+      width: 58,
+      height: 58,
+      borderRadius: 10,
     },
-  },
-  selectIcon: {
-    width: 24,
-    height: 24,
-    color: '#8250c8',
-    marginRight: theme.spacing(1),
-  },
-  btBox: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '25px 0 15px',
-    '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
-      display: 'block',
+    btShare: {
+      width: 232,
+      height: 46,
+      borderRadius: 23,
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        width: '100%',
+        marginTop: 20,
+      },
+    },
+    selectStyle: {
+      minWidth: 110,
+      height: 36,
+      fontSize: 12,
+      color: '#8250c8',
+    },
+    selectStyleMid: {
+      minWidth: 160,
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        marginLeft: 24,
+      },
+    },
+    selectIcon: {
+      width: 24,
+      height: 24,
+      color: '#8250c8',
+      marginRight: theme.spacing(1),
+    },
+    btBox: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '25px 0 15px',
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        display: 'block',
+        textAlign: 'right',
+      },
+    },
+    rightBtBox: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '0',
+    },
+    postTopRow: {
+      marginBottom: 6,
+      marginTop: -12,
       textAlign: 'right',
+      '@media (max-width: 768px)': {
+        marginBottom: 12,
+        marginTop: 0
+      },
     },
-  },
-  rightBtBox: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0',
-  },
-}));
+    postToLabel: {
+      color: theme.palette.primary.light,
+      marginRight: theme.spacing(1),
+      '@media (min-width: 769px) and (max-width: 900px), (max-width: 600px)': {
+        display: 'none'
+      },
+    }
+  }
+})
 
 const BootstrapInput = withStyles(theme => ({
   root: {
@@ -283,8 +302,8 @@ export default function CreateMemory(props) {
       return showError('Private memory is not currently supported.')
     }
 
-    if (!proIndex) {
-      return showError('Please select lock to post')
+    if (proIndex == null || proIndex === '') {
+      return showError('Please select a lock to post to.')
     }
     
     const bufferImages = [];
@@ -391,7 +410,8 @@ export default function CreateMemory(props) {
   }
 
   function handleChangeLockId(event) {
-    setProIndex(+event.target.value);
+    const v = event.target.value.trim()
+    setProIndex(v.length ? +v : v);
   }
 
   function resetValue() {
@@ -421,24 +441,27 @@ export default function CreateMemory(props) {
         <ShadowBox className={`${editMode ? 'edit-mode' : ''}`}>
           <Grid container direction="column">
             {grayLayout && props.needSelectLock &&
-              <Grid style={{ marginBottom: 24 }}>
-                <Select
-                  native
-                  value={proIndex}
-                  onChange={handleChangeLockId}
-                  classes={{
-                    root: `${classes.selectStyle} ${classes.selectStyleMid}`,
-                    icon: classes.selectIcon,
-                  }}
-                  input={<BootstrapInput name="collection" id="outlined-collection" />}
-                >
-                  <option value="">-- Select lock --</option>
-                  {(props.locks || []).map(v => (
-                    <option key={v.id} value={v.id}>
-                      {v.s_info.lockName || v.s_content}
-                    </option>
-                  ))}
-                </Select>
+              <Grid className={classes.postTopRow}>
+                <label>
+                  <span className={classes.postToLabel}>Post to:</span>
+                  <Select
+                    native
+                    value={proIndex}
+                    onChange={handleChangeLockId}
+                    classes={{
+                      root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                      icon: classes.selectIcon,
+                    }}
+                    input={<BootstrapInput name="postToLock" id="outlined-collection" />}
+                  >
+                    <option value="">-- Select lock --</option>
+                    {(props.locks || []).map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.s_info.lockName || v.s_content}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
               </Grid>
             }
             <Grid>
