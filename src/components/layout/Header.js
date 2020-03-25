@@ -30,6 +30,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 import { Link, withRouter } from 'react-router-dom';
 import Autosuggest from 'react-autosuggest';
@@ -162,6 +163,7 @@ const useStyles = makeStyles(theme => ({
   },
   titlePoint: {
     color: theme.palette.background.paper,
+    fontSize: 13
   },
   search: {
     position: 'relative',
@@ -758,7 +760,11 @@ function Header(props) {
                   <ListItemText
                     className={classes.titlePoint}
                     primary={displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
-                    secondary={<span className={classes.titlePoint}>{point} point</span>}
+                    secondary={
+                      <span className={classes.titlePoint}>
+                        {point} <FavoriteIcon className={classes.titlePoint} />
+                      </span>
+                    }
                   />
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
