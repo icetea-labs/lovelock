@@ -87,8 +87,21 @@ export default function BlogModal(props) {
             <AppBar className={classes.appbar}>
               <Toolbar className={classes.toolbar}>
                 <div className={classes.title}>
-                  <Typography variant="h6">{props.title}</Typography>
-                  {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+                  
+                  {(props.needSelectLock && props.selectionLocks && !props.editMode) ? (
+                    <div className={classes.subtitle}>
+                      Post to:
+                      <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.selectionLocks.showSelectionLocks} style={{ marginLeft: 16 }}>
+                        {props.selectionLocks.selectedLockName()}
+                      </Button>
+                    </div>
+                    ) : (
+                      <>
+                        <Typography variant="h6">{props.title}</Typography>
+                        {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+                      </>
+                    )
+                  }
                 </div>
                 {props.handlePreview && (
                   <FormControlLabel
@@ -116,6 +129,7 @@ export default function BlogModal(props) {
               </Toolbar>
             </AppBar>
           </div>
+          {props.selectionLocks && props.selectionLocks.renderSelectionLocks()}
           {props.drafts && props.drafts.renderDrafts && props.drafts.renderDrafts()}
           <div className={classes.postBody}>{props.children}</div>
         </div>

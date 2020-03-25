@@ -19,6 +19,7 @@ import {
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
+import BlogEditor from './BlogEditor';
 
 const GrayLayout = styled.div`
   background: ${props => props.grayLayout && 'rgba(0, 0, 0, 0.5)'};
@@ -128,7 +129,7 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 export default function CreateMemory(props) {
-  const { onMemoryChanged, proIndex, collectionId, collections, handleNewCollection, memory, openBlogEditor } = props;
+  const { onMemoryChanged, collectionId, collections, handleNewCollection, memory, openBlogEditor, closeBlogEditor, edittingMemory } = props;
   const classes = useStyles(props);
   const dispatch = useDispatch();
   const layoutRef = React.createRef();
@@ -150,6 +151,9 @@ export default function CreateMemory(props) {
   const [memoDate, setMemoDate] = useState(editMode ? memory.info.date : new Date());
   const [privacy, setPrivacy] = useState(0);
   const [postCollectionId, setPostCollectionId] = useState(collectionId == null ? '' : collectionId);
+
+  const [proIndex, setProIndex] = useState(props.proIndex);
+
   const [disableShare, setDisableShare] = useState(true);
   const [grayLayout, setGrayLayout] = useState(false);
 
@@ -163,7 +167,7 @@ export default function CreateMemory(props) {
   useEffect(() => {
     if (editMode) return;
     resetValue();
-  }, [proIndex, collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (grayLayout && isCompact) {
@@ -278,6 +282,10 @@ export default function CreateMemory(props) {
     if (privacy) {
       return showError('Private memory is not currently supported.')
     }
+
+    if (!proIndex) {
+      return showError('Please select lock to post')
+    }
     
     const bufferImages = [];
     const srcImages = [];
@@ -382,6 +390,10 @@ export default function CreateMemory(props) {
     }
   }
 
+  function handleChangeLockId(event) {
+    setProIndex(+event.target.value);
+  }
+
   function resetValue() {
     setMemoryContent('');
     setPrivacy(0);
@@ -391,6 +403,7 @@ export default function CreateMemory(props) {
     setGrayLayout(false);
     setFilesBuffer([]);
     setDisableShare(true);
+    setProIndex(props.proIndex);
   }
 
   function getPlaceholder() {
@@ -407,6 +420,27 @@ export default function CreateMemory(props) {
       <CreatePost grayLayout={grayLayout} ref={componentRef}>
         <ShadowBox className={`${editMode ? 'edit-mode' : ''}`}>
           <Grid container direction="column">
+            {grayLayout && props.needSelectLock &&
+              <Grid style={{ marginBottom: 24 }}>
+                <Select
+                  native
+                  value={proIndex}
+                  onChange={handleChangeLockId}
+                  classes={{
+                    root: `${classes.selectStyle} ${classes.selectStyleMid}`,
+                    icon: classes.selectIcon,
+                  }}
+                  input={<BootstrapInput name="collection" id="outlined-collection" />}
+                >
+                  <option value="">-- Select lock --</option>
+                  {(props.locks || []).map(v => (
+                    <option key={v.id} value={v.id}>
+                      {v.s_info.lockName || v.s_content}
+                    </option>
+                  ))}
+                </Select>
+              </Grid>
+            }
             <Grid>
               <Grid container wrap="nowrap" spacing={1}>
                 {!editMode && (
@@ -475,6 +509,7 @@ export default function CreateMemory(props) {
                     ))}
                     {handleNewCollection && <option value="add">(+) New Collection</option>}
                   </Select>
+                  
                 </div>
                 <ButtonPro
                   type="submit"
@@ -490,6 +525,14 @@ export default function CreateMemory(props) {
             )}
           </Grid>
         </ShadowBox>
+
+        {address && <BlogEditor
+          onMemoryChanged={onMemoryChanged}
+          memory={edittingMemory}
+          onClose={closeBlogEditor}
+          needSelectLock={props.needSelectLock}
+          locks={props.locks}
+        />}
       </CreatePost>
     </>
   );

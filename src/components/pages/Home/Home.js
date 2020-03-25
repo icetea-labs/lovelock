@@ -12,6 +12,7 @@ import APIService from '../../../service/apiService';
 import { showSubscriptionError } from '../../../helper';
 import { ensureContract } from '../../../service/tweb3';
 import appConstants from "../../../helper/constants";
+import CreateMemory from '../Memory/CreateMemory';
 
 import { useDidUpdate } from '../../../helper/hooks'
 
@@ -331,6 +332,7 @@ function Home(props) {
                   onMemoryChanged={refresh}
                   loading={loading}
                   nextPage={nextPage}
+                  needSelectLock={true}
                 />
               </div>
             </LeftBoxWrapper>
