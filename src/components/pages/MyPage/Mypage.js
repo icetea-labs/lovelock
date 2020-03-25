@@ -16,7 +16,6 @@ import { useTx, useDidUpdate } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import appConstants from '../../../helper/constants';
-import CreateMemory from '../Memory/CreateMemory';
 
 const RightBox = styled.div`
   padding: 0 0 0 ${rem(45)};

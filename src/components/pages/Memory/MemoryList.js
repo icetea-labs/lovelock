@@ -35,7 +35,8 @@ export default function MemoryList(props) {
     myPageRoute,
     loading,
     nextPage,
-    myPageInfo
+    myPageInfo,
+    noCreateMemory,
   } = props;
 
   const address = useSelector(state => state.account.address);
@@ -45,9 +46,10 @@ export default function MemoryList(props) {
   const openBlogEditor = () => setEdittingMemory(true)
   const closeBlogEditor = () => setEdittingMemory(false)
 
-  const showCreateMemory = (proIndex && (isOwner || isContributor))
-   || (!proIndex && myPageInfo && myPageInfo.address == address)
-   || (!proIndex && !myPageInfo)
+  const showCreateMemory = !noCreateMemory && (
+   (proIndex && (isOwner || isContributor)) // lock screen
+   || (!proIndex && myPageInfo && myPageInfo.address == address) // mypage screen
+   || (!proIndex && !myPageInfo)) // home screen
   return (
     <RightBox>
       {collectionName && (

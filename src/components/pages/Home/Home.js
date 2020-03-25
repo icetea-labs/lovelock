@@ -12,7 +12,6 @@ import APIService from '../../../service/apiService';
 import { showSubscriptionError } from '../../../helper';
 import { ensureContract } from '../../../service/tweb3';
 import appConstants from "../../../helper/constants";
-import CreateMemory from '../Memory/CreateMemory';
 
 import { useDidUpdate } from '../../../helper/hooks'
 
