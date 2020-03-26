@@ -11,5 +11,19 @@
     "home.supportTitle": "Need support? Contact us via ",
     "home.supportEmail": "Email",
     "home.supportOr": " or ",
-    "home.supportTelegram": "Telegram"
+    "home.supportTelegram": "Telegram",
+
+    "login.noAcc": "No account yet?",
+    "login.btnRegist": "Register",
+    "login.userName": "Username",
+    "login.password": "Password",
+    "login.rememberMe": "Remember me for 30 days",
+    "login.forgotPass": "Forgot password?",
+    "login.btnLogin": "Login",
+    "login.passReqMes": "This field is required",
+    "login.recoveryLabel": "Recovery phrase or key",
+    "login.qrCode": "Scan QR Code",
+    "login.newPassLabel": "New Password",
+    "login.btnBack": "Back",
+    "login.btnRecover": "Recover"
 }

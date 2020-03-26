@@ -11,5 +11,19 @@
     "home.supportTitle": "サポートの必要がありませんか。このリンクでお問い合わせください。",
     "home.supportEmail": "電子メール",
     "home.supportOr": " または ",
-    "home.supportTelegram": "Telegram"
+    "home.supportTelegram": "Telegram",
+
+    "login.noAcc": "アカウントがありませんか？",
+    "login.btnRegist": "登録",
+    "login.userName": "ユーザー名",
+    "login.password": "パスワード",
+    "login.rememberMe": "３０日間に忘れないで",
+    "login.forgotPass": "パスワードを忘れた場合?",
+    "login.btnLogin": "ログイン",
+    "login.passReqMes": "この項目は必須である。",
+    "login.recoveryLabel": "回復フレーズまたはキー",
+    "login.qrCode": "QRコードをスキャン",
+    "login.newPassLabel": "新たなパスワード",
+    "login.btnBack": "戻る",
+    "login.btnRecover": "回復"
 }

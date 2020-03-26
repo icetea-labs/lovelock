@@ -38,7 +38,7 @@ export function HeaderAuthen({ title }) {
         <img src="/static/img/logo.svg" alt="itea-scan" />
         <span>LoveLock</span>
       </StyledLogo>
-      <Title><span>{title}</span><span></span></Title>
+      <Title><span>{title}</span></Title>
     </div>
   );
 }
