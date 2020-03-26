@@ -11,11 +11,12 @@ import * as actionCreate from '../../../../store/actions/create';
 import ImageCrop from '../../../elements/ImageCrop';
 
 function Register(props) {
-  const { step, setStep } = props;
+  const { step, setStep, language } = props;
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
   const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
   const [avatarData, setAvatarData] = useState('');
+  const ja = 'ja';
 
   useEffect(() => {
     setStep('one');
@@ -37,7 +38,12 @@ function Register(props) {
         <LayoutAuthen key={1}>
           <BoxAuthen>
             <ShadowBoxAuthen>
-              {step === 'one' && <HeaderAuthen title="Create New Account" />}
+              {step === 'one' &&
+                (language === ja ? (
+                  <HeaderAuthen title="新たなアカウント作成" />
+                ) : (
+                  <HeaderAuthen title="Create New Account" />
+                ))}
               {step === 'one' && (
                 <RegisterUsername
                   setIsOpenCrop={setIsOpenCrop}
@@ -59,6 +65,7 @@ function Register(props) {
 const mapStateToProps = state => {
   return {
     step: state.create.step,
+    language: state.globalData.language,
   };
 };
 
@@ -69,7 +76,4 @@ const mapDispatchToProps = dispatch => {
     },
   };
 };
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withRouter(Register));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Register));
