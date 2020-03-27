@@ -53,5 +53,10 @@
     "header.btnCreate": "作成",
     "header.btnExplore": "もっと見る",
     "header.updateProfile": "プロファイル変更",
-    "header.viewRecovery": "回復フレーズ表示"
+    "header.viewRecovery": "回復フレーズ表示",
+
+    "leftmenu.pendingLock": "保留中ロック",
+    "leftmenu.folowingLock": "フォロー中ロック",
+    "leftmenu.newLock": "新たなロック作成",
+    "leftmenu.collection": "コレクション"
 }

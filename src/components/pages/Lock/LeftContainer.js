@@ -117,35 +117,37 @@ function LeftContainer(props) {
     loading,
     isGuest,
     closeMobileMenu,
+    language,
   } = props;
 
-  const showCollection = proIndex != null
+  const showCollection = proIndex != null;
   const collections = showCollection && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
   const [index, setIndex] = useState(-1);
   const [step, setStep] = useState('');
   const { enqueueSnackbar } = useSnackbar();
+  const ja = 'ja';
 
   useEffect(() => {
     const signal = {};
-    let sub
+    let sub;
     ensureContract().then(c => {
-      sub = watchCreatePropose(c, signal)
-    })
+      sub = watchCreatePropose(c, signal);
+    });
 
     return () => {
-      signal.cancel = true
+      signal.cancel = true;
       if (sub && sub.unsubscribe) {
-        sub.unsubscribe()
-        sub = undefined
+        sub.unsubscribe();
+        sub = undefined;
       }
-    }
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function watchCreatePropose(contract, signal) {
     const filter = {};
     return contract.events.allEvents(filter, async (error, result) => {
-      if (signal && signal.cancel) return
+      if (signal && signal.cancel) return;
 
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
@@ -248,16 +250,20 @@ function LeftContainer(props) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLock;
     });
-    const hasPending = Boolean(newLocks.find(l => l.status === 0))
+    const hasPending = Boolean(newLocks.find(l => l.status === 0));
     return (
       <>
-        <div className="title">{!isGuest ? 'My lock' : 'Public lock'} </div>
+        <div className="title">
+          {!isGuest ? (language === ja ? 'マイロック' : 'My lock') : language === ja ? '公開ロック ' : 'Public lock'}
+        </div>
         <div>
           <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
         {!isGuest && hasPending && (
           <>
-            <div className="title">Pending lock</div>
+            <div className="title">
+              <FormattedMessage id="leftmenu.pendingLock" />
+            </div>
             <div>
               <Lock loading={loading} locksData={newLocks} address={myAddress} flag={0} handlerSelect={selectPending} />
             </div>
@@ -272,7 +278,9 @@ function LeftContainer(props) {
     });
     return (
       <>
-        <div className="title">Following lock</div>
+        <div className="title">
+          <FormattedMessage id="leftmenu.folowingLock" />
+        </div>
         <div>
           <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
         </div>
@@ -286,12 +294,16 @@ function LeftContainer(props) {
           {address && (
             <LinkPro className="btn_add_promise" onClick={newLock}>
               <Icon type="add" />
-              New Lock
+              <FormattedMessage id="leftmenu.newLock" />
             </LinkPro>
           )}
           {renderOwnerLocks(locks, address)}
           {!isGuest && renderFollowingLocks(locks, address)}
-          {showCollection && <div className="title">Collection</div>}
+          {showCollection && (
+            <div className="title">
+              <FormattedMessage id="leftmenu.collection" />
+            </div>
+          )}
           {showCollection && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
         </ShadowBox>
         <SupportSite>
@@ -333,6 +345,7 @@ const mapStateToProps = state => {
     locks: state.loveinfo.locks,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
+    language: state.globalData.language,
   };
 };
 
@@ -350,9 +363,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(LeftContainer)
-);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(LeftContainer));

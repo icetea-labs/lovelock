@@ -13,6 +13,7 @@ import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 import Link from '@material-ui/core/Link';
 
+import IconButton from '@material-ui/core/IconButton';
 import ReadMore from '../../elements/ReaMore';
 
 import {
@@ -30,8 +31,7 @@ import * as actions from '../../../store/actions';
 import { FlexBox, rem } from '../../elements/StyledUtils';
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import ImageCrop from '../../elements/ImageCrop';
-import IconButton from "@material-ui/core/IconButton";
-import EditLockModal from "../../elements/EditLockModal";
+import EditLockModal from '../../elements/EditLockModal';
 
 const TopContainerBox = styled.div`
   .top__coverimg {
@@ -551,7 +551,7 @@ function TopContrainer(props) {
   //     </TopContainerBox>
   //   );
   // }
-  
+
   const renderEditLockIcon = (isRight = false) => (
     <IconButton
       className={`edit_icon ${isRight ? 'edit_icon--right' : ''}`}
@@ -562,34 +562,38 @@ function TopContrainer(props) {
   );
 
   const canChangeCover = () => {
-    if (!address || !topInfo) return false
-    return isSender || isReceiver
-  }
+    if (!address || !topInfo) return false;
+    return isSender || isReceiver;
+  };
 
-  if (!topInfo || !topInfo.sender) return <div /> // loading...
+  if (!topInfo || !topInfo.sender) return <div />; // loading...
 
   return (
     <TopContainerBox>
       <div className="top__coverimg">
         {cropFile ? (
           <CardMedia className={classes.media} image={cropImg}>
-            {canChangeCover() && <div className="showChangeImg">
-              <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
-                Cancel
-              </Button>
-              <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
-                Apply
-              </Button>
-            </div>}
+            {canChangeCover() && (
+              <div className="showChangeImg">
+                <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
+                  Cancel
+                </Button>
+                <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
+                  Apply
+                </Button>
+              </div>
+            )}
           </CardMedia>
         ) : (
           <CardMedia
             className={classes.media}
-            image={topInfo.coverImg && (process.env.REACT_APP_IPFS + topInfo.coverImg)}
+            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
           >
-            {canChangeCover() && <div className="showChangeImg">
-              <div>{buttonChange()}</div>
-            </div>}
+            {canChangeCover() && (
+              <div className="showChangeImg">
+                <div>{buttonChange()}</div>
+              </div>
+            )}
           </CardMedia>
         )}
       </div>
@@ -671,7 +675,13 @@ function TopContrainer(props) {
             ) : (
               <div className="name_time">
                 {/* <span className="user_name color-violet">{topInfo.s_name}</span> */}
-                <Link href={`/u/${topInfo.sender}`} className="user_name color-violet" title={topInfo.s_info.lockName || ''}>{`${topInfo.s_info.lockName || topInfo.s_name}`}</Link>
+                <Link
+                  href={`/u/${topInfo.sender}`}
+                  className="user_name color-violet"
+                  title={topInfo.s_info.lockName || ''}
+                >
+                  {`${topInfo.s_info.lockName || topInfo.s_name}`}
+                </Link>
                 <span className="sinceDate">・</span>
                 <span className="time color-gray">
                   <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
@@ -767,7 +777,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TopContrainer);
+export default connect(mapStateToProps, mapDispatchToProps)(TopContrainer);
