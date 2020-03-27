@@ -5,6 +5,7 @@ export const actionTypes = {
   SET_GLOBAL_LOADING: 'SET_GLOBAL_LOADING',
   SET_NEW_LOCK: 'SET_NEW_LOCK',
   SET_CONFIRM_AUTH_ELE: 'SET_CONFIRM_AUTH_ELE',
+  SET_LANGUAGE: 'SET_LANGUAGE',
 };
 /*
  * action creators
@@ -19,5 +20,9 @@ export const setNewLock = data => ({
 });
 export const setAuthEle = data => ({
   type: actionTypes.SET_CONFIRM_AUTH_ELE,
+  data,
+});
+export const setLanguage = data => ({
+  type: actionTypes.SET_LANGUAGE,
   data,
 });

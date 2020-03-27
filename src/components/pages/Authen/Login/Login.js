@@ -3,13 +3,14 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import QueueAnim from 'rc-queue-anim';
 import { connect } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
 import { HeaderAuthen } from '../../../elements/Common';
 import ByMnemonic from './ByMnemonic';
 import ByPassWord from './ByPassWord';
 import { LinkPro } from '../../../elements/Button';
 import * as actionCreate from '../../../../store/actions/create';
-import ScanQRCodeModal from "../../../elements/ScanQRCodeModal";
+import ScanQRCodeModal from '../../../elements/ScanQRCodeModal';
 
 const styles = () => ({
   //   button: {
@@ -19,22 +20,28 @@ const styles = () => ({
 });
 
 function Login(props) {
-  const { history, setStep, step } = props;
+  const { history, setStep, step, language } = props;
   const [isQRCodeActive, setIsQRCodeActive] = useState(false);
   const [recoveryPhase, setRecoveryPhase] = useState('');
-  
+  const ja = 'ja';
+
   function gotoRegister() {
     setStep('one');
     history.push('/register');
   }
-  
+
   return (
     <div>
       <QueueAnim delay={200} type={['top', 'bottom']}>
         <LayoutAuthen key={1}>
           <BoxAuthen>
             <ShadowBoxAuthen>
-              <HeaderAuthen title="Sign In" />
+              {language === ja ? (
+                <HeaderAuthen title="サインイン" />
+              ) : (
+                <HeaderAuthen title="Sign in" />
+              )}
+
               {step === 'one' && <ByPassWord />}
               {step === 'two' && (
                 <ByMnemonic
@@ -44,25 +51,25 @@ function Login(props) {
                 />
               )}
               <div className="btRegister">
-                <span>No account yet?</span>
-                <LinkPro onClick={gotoRegister}>Register</LinkPro>
+                <span>
+                  <FormattedMessage id="login.noAcc" />
+                </span>
+                <LinkPro onClick={gotoRegister}>
+                  <FormattedMessage id="login.btnRegist" />
+                </LinkPro>
               </div>
             </ShadowBoxAuthen>
           </BoxAuthen>
         </LayoutAuthen>
       </QueueAnim>
-      {isQRCodeActive && (
-        <ScanQRCodeModal
-          setIsQRCodeActive={setIsQRCodeActive}
-          setRecoveryPhase={setRecoveryPhase}
-        />
-      )}
+      {isQRCodeActive && <ScanQRCodeModal setIsQRCodeActive={setIsQRCodeActive} setRecoveryPhase={setRecoveryPhase} />}
     </div>
   );
 }
 
 const mapStateToProps = state => {
   const e = state.create;
+  const { globalData } = state;
   return {
     password: e.password,
     step: e.step,
@@ -70,6 +77,7 @@ const mapStateToProps = state => {
     keyStoreText: e.keyStoreText,
     showPrivateKey: e.showPrivateKey,
     confirmMnemonic: e.confirmMnemonic,
+    language: globalData.language,
   };
 };
 
@@ -80,9 +88,4 @@ const mapDispatchToProps = dispatch => {
     },
   };
 };
-export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(withStyles(styles)(Login))
-);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Login)));

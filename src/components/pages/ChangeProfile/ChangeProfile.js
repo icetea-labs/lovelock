@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
-import { toPubKeyAndAddress } from '@iceteachain/common/src/ecc'
+import { toPubKeyAndAddress } from '@iceteachain/common/src/ecc';
 import { makeStyles } from '@material-ui/core/styles';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { useSnackbar } from 'notistack';
@@ -26,7 +26,7 @@ import {
   applyRotation,
   imageResize,
   handleError,
-  copyToClipboard
+  copyToClipboard,
 } from '../../../helper';
 import { ButtonPro } from '../../elements/Button';
 import * as actionGlobal from '../../../store/actions/globalData';
@@ -365,7 +365,16 @@ function ChangeProfile(props) {
                       <span className="warningMessage">
                         <WarningIcon className="warningIcon" />
                         <span className="warningText">
-                        Please <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can update profile.
+                          Please{' '}
+                          <a
+                            className="underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="http://bit.ly/LoveLock-AAR"
+                          >
+                            fill in this form
+                          </a>{' '}
+                          to request activation of your account before you can update profile.
                         </span>
                       </span>
                     }
@@ -467,7 +476,7 @@ function ChangeProfile(props) {
                         // disabled
                         readOnly
                         onClick={() => {
-                          copyToClipboard(address, enqueueSnackbar)
+                          copyToClipboard(address, enqueueSnackbar);
                         }}
                         value={address}
                         InputProps={{
@@ -523,7 +532,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ChangeProfile);
+export default connect(mapStateToProps, mapDispatchToProps)(ChangeProfile);

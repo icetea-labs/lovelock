@@ -8,13 +8,14 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { encode as codecEncode } from '@iceteachain/common/src/codec';
+import { FormattedMessage } from 'react-intl';
 
 import * as actionAccount from '../../../../store/actions/account';
 import * as actionCreate from '../../../../store/actions/create';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import { encode } from '../../../../helper/encode';
 import { savetoLocalStorage } from '../../../../helper';
-import { getWeb3, grantAccessToken} from '../../../../service/tweb3';
+import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 
 const WrapperImg = styled.div`
   margin-top: 20px;
@@ -109,37 +110,35 @@ function RegisterSuccess(props) {
     setLoading(true);
     setTimeout(async () => {
       const mode = 1;
-      const tweb3 = getWeb3()
+      const tweb3 = getWeb3();
 
       const token = tweb3.wallet.createRegularAccount();
-      grantAccessToken(address, token.address, isRemember)
-        .then(async ({ returnValue }) => {
-          tweb3.wallet.importAccount(token.privateKey);
-          const keyObject = encode(mnemonic, password);
-          const storage = isRemember ? localStorage : sessionStorage;
-          // save token account
-          storage.sessionData = codecEncode({
-              contract: process.env.REACT_APP_CONTRACT,
-              tokenAddress: token.address,
-              tokenKey: token.privateKey,
-              expireAfter: returnValue,
-            })
-            .toString('base64');
-          // save main account
-          savetoLocalStorage({ address, mode, keyObject });
-          const account = {
-            tokenAddress: token.address,
-            tokenKey: token.privateKey,
-            encryptedData: keyObject,
-            mode,
-          };
-          setAccount(account);
-          // setStep('one');
-          setLoading(false);
-          if (pathName) {
-            history.push(pathName);
-          } else history.push('/');
-        });
+      grantAccessToken(address, token.address, isRemember).then(async ({ returnValue }) => {
+        tweb3.wallet.importAccount(token.privateKey);
+        const keyObject = encode(mnemonic, password);
+        const storage = isRemember ? localStorage : sessionStorage;
+        // save token account
+        storage.sessionData = codecEncode({
+          contract: process.env.REACT_APP_CONTRACT,
+          tokenAddress: token.address,
+          tokenKey: token.privateKey,
+          expireAfter: returnValue,
+        }).toString('base64');
+        // save main account
+        savetoLocalStorage({ address, mode, keyObject });
+        const account = {
+          tokenAddress: token.address,
+          tokenKey: token.privateKey,
+          encryptedData: keyObject,
+          mode,
+        };
+        setAccount(account);
+        // setStep('one');
+        setLoading(false);
+        if (pathName) {
+          history.push(pathName);
+        } else history.push('/');
+      });
     }, 100);
     setPathName('');
   }
@@ -148,20 +147,32 @@ function RegisterSuccess(props) {
     <div>
       <WrapperImg>
         <img src="/static/img/success.svg" alt="" />
-        <Title>Wow, you created an account!</Title>
+        <Title>
+          <FormattedMessage id="regist.successTitle" />
+        </Title>
         <Desc>
-          <span>Save your secret recovery phrase bellow:</span>
+          <span>
+            <FormattedMessage id="regist.successDecs" />
+          </span>
           <MnemonixText>
             <p data-cy="mnemonic">{mnemonic}</p>
           </MnemonixText>
           <div className="note">
             <div>
-              <h5>ATTENTION:</h5> 
+              <h5>
+                <FormattedMessage id="regist.successNote" />
+              </h5>
               <ul>
-                <li>1. SAVE the above phrase</li>
-                <li>2. Don't show it to ANYONE</li>
+                <li>
+                  <FormattedMessage id="regist.successNote1" />
+                </li>
+                <li>
+                  <FormattedMessage id="regist.successNote2" />
+                </li>
               </ul>
-              <p>There is no "I forgot password" feature, you have to save the recovery and keep it secret.</p>
+              <p>
+                <FormattedMessage id="regist.successWarning" />
+              </p>
             </div>
           </div>
         </Desc>
@@ -179,11 +190,11 @@ function RegisterSuccess(props) {
                   onChange={() => setSavedPhrase(!savedPhrase)}
                 />
               }
-              label="I have saved my recovery phrase"
+              label={<FormattedMessage id="regist.successConfirm" />}
             />
           </div>
           <Button disabled={!savedPhrase} variant="contained" size="large" color="primary" onClick={gotoHome}>
-            Continue
+            <FormattedMessage id="regist.btnContinue" />
           </Button>
         </FoolterBtn>
       </WrapperImg>
@@ -219,7 +230,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withRouter(RegisterSuccess));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(RegisterSuccess));

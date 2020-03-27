@@ -5,8 +5,14 @@ import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import { SimpleLoading, GlobaLoading } from './components/elements/GlobaLoading';
+import * as globalData from './store/actions/globalData';
 
-// import LandingPage from './components/layout/LandingPage';
+// check display language
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+
+// console.log("language", languageWithoutRegionCode)
+
 const LandingPage = lazy(() => import(
   /* webpackChunkName: "landing" */
 './components/layout/LandingPage'
@@ -98,7 +104,10 @@ function RouteHome(props) {
 }
 
 function App(props) {
-  const { isLoading } = props;
+  const { isLoading, setLanguage } = props;
+
+  setLanguage(languageWithoutRegionCode);
+  
   return (
     <div className="App">
       <Router>
@@ -133,7 +142,15 @@ const mapStateToProps = state => {
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return {
+    setLanguage: value => {
+      dispatch(globalData.setLanguage(value));
+    },
+  };
+};
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(App);

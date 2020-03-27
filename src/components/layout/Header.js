@@ -31,6 +31,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import { FormattedMessage } from 'react-intl';
 
 import { Link, withRouter } from 'react-router-dom';
 import Autosuggest from 'react-autosuggest';
@@ -164,7 +165,7 @@ const useStyles = makeStyles(theme => ({
   },
   titlePoint: {
     color: theme.palette.background.paper,
-    fontSize: 13
+    fontSize: 13,
   },
   search: {
     position: 'relative',
@@ -292,6 +293,7 @@ function Header(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const mode = useSelector(state => state.account.mode);
   const address = useSelector(state => state.account.address);
+  const language = useSelector(state => state.globalData.language);
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorElLockReq, setAnchorElLockReq] = useState(null);
@@ -319,6 +321,8 @@ function Header(props) {
   const displayName = useSelector(state => state.account.displayName);
   const point = useSelector(state => state.account.point);
   const avatarRedux = useSelector(state => state.account.avatar);
+
+  const ja = 'ja';
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
@@ -494,7 +498,7 @@ function Header(props) {
         <ListItemIcon>
           <PersonIcon />
         </ListItemIcon>
-        <ListItemText primary="Update Profile" />
+        <ListItemText primary={<FormattedMessage id="header.updateProfile" />} />
       </StyledMenuItem>
       <Divider />
       <StyledMenuItem
@@ -506,7 +510,7 @@ function Header(props) {
         <ListItemIcon>
           <VpnKeyIcon />
         </ListItemIcon>
-        <ListItemText primary="View recovery phrase" />
+        <ListItemText primary={<FormattedMessage id="header.viewRecovery" />} />
       </StyledMenuItem>
       {/* <StyledMenuItem
         onClick={() => {
@@ -734,7 +738,7 @@ function Header(props) {
                     }}
                     renderInputComponent={inputProps => (
                       <InputBase
-                        placeholder="Search…"
+                        placeholder={language === ja ? '検索…' : 'Search…'}
                         classes={{
                           root: classes.inputRoot,
                           input: classes.inputInput,
@@ -770,7 +774,7 @@ function Header(props) {
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>
-                    Create
+                    <FormattedMessage id="header.btnCreate" />
                   </Typography>
                 </Button>
 
@@ -803,7 +807,7 @@ function Header(props) {
 
                 <Button className={classes.sectionDesktop} onClick={handeExplore}>
                   <Typography className={classes.title} noWrap>
-                    Explore
+                    <FormattedMessage id="header.btnExplore" />
                   </Typography>
                 </Button>
                 <Button className={classes.btDropDown} onClick={handeExpandMore}>

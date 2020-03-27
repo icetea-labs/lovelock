@@ -9,6 +9,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import { FormattedMessage } from 'react-intl';
 
 import { wallet, savetoLocalStorage } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
@@ -42,10 +43,13 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ByMnemonic(props) {
-  const { setLoading, setAccount, setStep, history } = props;
+  const { setLoading, setAccount, setStep, history, language } = props;
   const [password, setPassword] = useState('');
   const [rePassErr] = useState('');
   const [isRemember, setIsRemember] = useRemember();
+  const ja = 'ja';
+  const inputRecovery = '回復フレーズまたはキーを入力してください';
+  const inputPassword = 'パスワードを入力してください';
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -53,14 +57,25 @@ function ByMnemonic(props) {
     e.preventDefault();
 
     const phrase = props.recoveryPhase.trim();
+    let message = '';
 
     if (!phrase) {
-      enqueueSnackbar('Please input recovery phrase or key.', { variant: 'error' });
+      if (language === ja) {
+        message = inputRecovery;
+      } else {
+        message = 'Please input recovery phrase or key.';
+      }
+      enqueueSnackbar(message, { variant: 'error' });
       return;
     }
 
     if (!password) {
-      enqueueSnackbar('Please input new password.', { variant: 'error' });
+      if (language === ja) {
+        message = inputPassword;
+      } else {
+        message = 'Please input new password.';
+      }
+      enqueueSnackbar(message, { variant: 'error' });
       return;
     }
 
@@ -103,12 +118,11 @@ function ByMnemonic(props) {
         const storage = isRemember ? localStorage : sessionStorage;
         // save token account
         storage.sessionData = codecEncode({
-            contract: process.env.REACT_APP_CONTRACT,
-            tokenAddress: token.address,
-            tokenKey: token.privateKey,
-            expireAfter: returnValue,
-          })
-          .toString('base64');
+          contract: process.env.REACT_APP_CONTRACT,
+          tokenAddress: token.address,
+          tokenKey: token.privateKey,
+          expireAfter: returnValue,
+        }).toString('base64');
         // save main account
         savetoLocalStorage({ address, mode, keyObject });
         const account = {
@@ -155,13 +169,13 @@ function ByMnemonic(props) {
   }
 
   const classes = useStyles();
-  
+
   return (
     <form onSubmit={gotoLogin}>
       <TextField
         id="outlined-multiline-static"
-        label="Recovery phrase or key"
-        placeholder="Enter your Recovery phrase or key"
+        label={<FormattedMessage id="login.recoveryLabel" />}
+        placeholder={language === ja ? inputRecovery : 'Enter your Recovery phrase or key'}
         multiline
         rows="4"
         onKeyDown={e => e.keyCode === 13 && gotoLogin(e)}
@@ -174,11 +188,13 @@ function ByMnemonic(props) {
         autoFocus
         value={props.recoveryPhase}
       />
-      <LinkPro onClick={() => props.setIsQRCodeActive(true)}>Scan QR Code</LinkPro>
+      <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
+        <FormattedMessage id="login.qrCode" />
+      </LinkPro>
       <TextField
         id="rePassword"
-        label="New Password"
-        placeholder="Enter your password"
+        label={<FormattedMessage id="login.newPassLabel" />}
+        placeholder={language === ja ? inputPassword : 'Enter your password'}
         helperText={rePassErr}
         error={rePassErr !== ''}
         fullWidth
@@ -198,20 +214,26 @@ function ByMnemonic(props) {
             onChange={() => setIsRemember(!isRemember)}
           />
         }
-        label="Remember me for 30 days"
+        label={<FormattedMessage id="login.rememberMe" />}
         className={classes.formCtLb}
       />
       <DivControlBtnKeystore>
         <ButtonPro color="primary" className="backBtn" onClick={loginWithPrivatekey}>
-          Back
+          <FormattedMessage id="login.btnBack" />
         </ButtonPro>
         <ButtonPro variant="contained" color="primary" className="nextBtn" type="submit">
-          Recover
+          <FormattedMessage id="login.btnRecover" />
         </ButtonPro>
       </DivControlBtnKeystore>
     </form>
   );
 }
+
+const mapStateToProps = state => {
+  return {
+    language: state.globalData.language,
+  };
+};
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -227,9 +249,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withStyles(styles)(
-  connect(
-    null,
-    mapDispatchToProps
-  )(withRouter(ByMnemonic))
-);
+export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(withRouter(ByMnemonic)));

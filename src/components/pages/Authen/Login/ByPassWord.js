@@ -10,6 +10,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import { FormattedMessage } from 'react-intl';
 
 import { AvatarPro } from '../../../elements';
 import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
@@ -110,12 +111,11 @@ function ByPassWord(props) {
             const storage = isRemember ? localStorage : sessionStorage;
             // save token account
             storage.sessionData = codecEncode({
-                contract: process.env.REACT_APP_CONTRACT,
-                tokenAddress: token.address,
-                tokenKey: token.privateKey,
-                expireAfter: returnValue,
-              })
-              .toString('base64');
+              contract: process.env.REACT_APP_CONTRACT,
+              tokenAddress: token.address,
+              tokenKey: token.privateKey,
+              expireAfter: returnValue,
+            }).toString('base64');
             // re-save main account
             savetoLocalStorage({ address, mode, keyObject });
             const account = {
@@ -163,18 +163,23 @@ function ByPassWord(props) {
           <AvatarPro hash={state.avatar} />
         </Grid>
         <Grid item>
-          <TextField label="Username" value={state.username} disabled autoComplete="username" />
+          <TextField
+            label={<FormattedMessage id="login.userName" />}
+            value={state.username}
+            disabled
+            autoComplete="username"
+          />
         </Grid>
       </Grid>
       <ValidatorForm onSubmit={gotoLogin} className={classes.inputPassForm}>
         <TextValidator
-          label="Password"
+          label={<FormattedMessage id="login.password" />}
           fullWidth
           onChange={handlePassword}
           name="password"
           type="password"
           validators={['required']}
-          errorMessages={['This field is required']}
+          errorMessages={[<FormattedMessage id="login.passReqMes" />]}
           margin="normal"
           value={password}
           inputProps={{ autoComplete: 'current-password' }}
@@ -190,13 +195,15 @@ function ByPassWord(props) {
               onChange={() => setIsRemember(!isRemember)}
             />
           }
-          label="Remember me for 30 days"
+          label={<FormattedMessage id="login.rememberMe" />}
           className={classes.formCtLb}
         />
         <DivControlBtnKeystore>
-          <LinkPro onClick={loginWithSeed}>Forgot password?</LinkPro>
+          <LinkPro onClick={loginWithSeed}>
+            <FormattedMessage id="login.forgotPass" />
+          </LinkPro>
           <ButtonPro type="submit" className="nextBtn">
-            Login
+            <FormattedMessage id="login.btnLogin" />
           </ButtonPro>
         </DivControlBtnKeystore>
       </ValidatorForm>
@@ -225,9 +232,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(ByPassWord)
-);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ByPassWord));
