@@ -7,7 +7,7 @@
     "home.activationTitle": "ACCOUNT ACTIVATION REQUIRED",
     "home.activationSubTitle": "LoveLock is in beta and not yet open to public. Please ",
     "home.activationForm": "fill in this form ",
-    "home.activstionGoal": "to request activation of your account before you can post contents.",
+    "home.activationGoal": "to request activation of your account before you can post contents.",
     "home.supportTitle": "Need support? Contact us via ",
     "home.supportEmail": "Email",
     "home.supportOr": " or ",
@@ -58,5 +58,16 @@
     "leftmenu.pendingLock": "Pending lock",
     "leftmenu.folowingLock": "Following lock",
     "leftmenu.newLock": "New Lock",
-    "leftmenu.collection": "Collection"
+    "leftmenu.collection": "Collection",
+
+    "profile.activationForm": "Please fill in this form ",
+    "profile.activationGoal": "to request activation of your account before you can update profile.",
+    "profile.userName": "Username",
+    "profile.firstName": "First Name",
+    "profile.lastName": "Last Name",
+    "profile.address": "Address",
+    "profile.btnSave": "Save change",
+    "profile.requiredMes": "This field is required",
+    "profile.userTaken": "This username is already taken.",
+    "profile.characterCheck": "Username cannot contain spaces and special character."
 }

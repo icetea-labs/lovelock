@@ -7,7 +7,7 @@
     "home.activationTitle": "アカウントアクティベーション必須",
     "home.activationSubTitle": "LoveLockはベータ版であり、まだ公開されていません。",
     "home.activationForm": "このフォームに記入してください。",
-    "home.activstionGoal": "コンテンツを投稿する前に、アカウントのアクティベーションをリクエストします。",
+    "home.activationGoal": "コンテンツを投稿する前に、アカウントのアクティベーションをリクエストします。",
     "home.supportTitle": "サポートの必要がありませんか。このリンクでお問い合わせください。",
     "home.supportEmail": "電子メール",
     "home.supportOr": " または ",
@@ -58,5 +58,16 @@
     "leftmenu.pendingLock": "保留中ロック",
     "leftmenu.folowingLock": "フォロー中ロック",
     "leftmenu.newLock": "新たなロック作成",
-    "leftmenu.collection": "コレクション"
+    "leftmenu.collection": "コレクション",
+
+    "profile.activationForm": "このフォームに記入してください。",
+    "profile.activationGoal": "プロファイルを更新 する前に、アカウントのアクティベーションをリクエストします。",
+    "profile.userName": "ユーザー名",
+    "profile.firstName": "姓",
+    "profile.lastName": "名",
+    "profile.address": "アドレス ",
+    "profile.btnSave": "変更内容を保存",
+    "profile.requiredMes": "この項目は必須である。",
+    "profile.userTaken": "このユーザー名はすでに使用されています。",
+    "profile.characterCheck": "ユーザー名にスペースや特殊文字を含めることはできません。"
 }
