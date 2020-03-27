@@ -45,8 +45,13 @@
     "regist.successDecs": "以下の秘密の回復フレーズを保存してください。",
     "regist.successNote": "注意：",
     "regist.successNote1": "①上記のフレーズを保存してください。",
-    "regist.successNote2": "②誰にも共有しないでください",
+    "regist.successNote2": "②誰にも共有しないでください。",
     "regist.successWarning": "「パスワードを忘れた場合」という機能はありません。回復フレーズを保存して秘密にしてください。",
-    "regist.successConfirm": "回復フレーズを保存しました",
-    "regist.btnContinue": "続ける"
+    "regist.successConfirm": "回復フレーズを保存しました。",
+    "regist.btnContinue": "続ける",
+
+    "header.btnCreate": "作成",
+    "header.btnExplore": "もっと見る",
+    "header.updateProfile": "プロファイル変更",
+    "header.viewRecovery": "回復フレーズ表示"
 }

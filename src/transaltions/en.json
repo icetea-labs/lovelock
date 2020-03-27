@@ -48,5 +48,10 @@
     "regist.successNote2": "2. Don't show it to ANYONE",
     "regist.successWarning": "There is no \"I forgot password\" feature, you have to save the recovery and keep it secret.",
     "regist.successConfirm": "I have saved my recovery phrase",
-    "regist.btnContinue": "Continue"
+    "regist.btnContinue": "Continue",
+
+    "header.btnCreate": "Create",
+    "header.btnExplore": "Explore",
+    "header.updateProfile": "Update Profile",
+    "header.viewRecovery": "View recovery phrase"
 }

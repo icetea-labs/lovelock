@@ -7,6 +7,8 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import PersonIcon from '@material-ui/icons/Person';
 import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
 import MemoryList from '../Memory/MemoryList';
@@ -27,7 +29,7 @@ const RightBox = styled.div`
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
   @media (max-width: 768px) {
-    margin: .4rem;
+    margin: 0.4rem;
   }
 `;
 
@@ -54,6 +56,12 @@ const NavbarBox = styled.div`
     justify-content: flex-end;
   }
 `;
+const PointShow = styled.div`
+  display: flex;
+  padding: 5px 0;
+  box-sizing: border-box;
+  justify-content: center;
+`;
 
 const useStyles = makeStyles(theme => ({
   avatar: {
@@ -69,10 +77,17 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.text.secondary,
     marginLeft: theme.spacing(1),
   },
+  titlePoint: {
+    color: '#8250c8',
+  },
+  titleIcon: {
+    marginLeft: theme.spacing(2),
+    color: '#8250c8',
+  },
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory, memoryList } = props;
+  const { match, setLocks, setMemory, memoryList, point } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -114,47 +129,51 @@ function Mypage(props) {
   }, [paramAliasOrAddr]);
 
   useEffect(() => {
-    fetchDataLocksMemories()
+    fetchDataLocksMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page])
+  }, [page]);
 
   // this only runs on DidUpdate, not DidMount
   useDidUpdate(() => {
-    fetchDataLocksMemories(true)
-  }, [changed])
+    fetchDataLocksMemories(true);
+  }, [changed]);
 
   function fetchDataLocksMemories(loadToCurrentPage = false) {
-    APIService.getLocksForFeed(paramAliasOrAddr).then(resp => {
-      // set to redux
-      setLocks(resp.locks);
+    APIService.getLocksForFeed(paramAliasOrAddr)
+      .then(resp => {
+        // set to redux
+        setLocks(resp.locks);
 
-      const memoIndex = resp.locks.reduce((tmp, lock) => {
-        return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
-      }, []);
+        const memoIndex = resp.locks.reduce((tmp, lock) => {
+          return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
+        }, []);
 
-      if (memoIndex.length > 0) {
-        APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
-          if (!result.length) {
-            setNoMoreMemories(true);
-          }
+        if (memoIndex.length > 0) {
+          APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
+            .then(result => {
+              if (!result.length) {
+                setNoMoreMemories(true);
+              }
 
-          let memories = result;
-          if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-          setMemory(memories);
+              let memories = result;
+              if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
+              setMemory(memories);
+              setLoading(false);
+            })
+            .catch(err => {
+              console.error(err);
+              setLoading(false);
+            });
+        } else {
+          setMemory([]);
+          setNoMoreMemories(true);
           setLoading(false);
-        }).catch(err => {
-          console.error(err)
-          setLoading(false)
-        })
-      } else {
-        setMemory([])
-        setNoMoreMemories(true)
-        setLoading(false)
-      }
-    }).catch(err => {
-      console.error(err)
-      setLoading(false)
-    })
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }
 
   function refresh() {
@@ -219,9 +238,16 @@ function Mypage(props) {
                 <Typography variant="h5" className={classes.displayName}>
                   {myPageInfo.displayname}
                 </Typography>
-                <Typography variant="subtitle1" className={classes.username} color="primary">
-                  {`@${myPageInfo.username}`}
-                </Typography>
+                <PointShow>
+                  <FavoriteIcon className={classes.titlePoint} />
+                  <Typography variant="subtitle1" color="primary">
+                    &nbsp;{point}
+                  </Typography>
+                  <PersonIcon className={classes.titleIcon} />
+                  <Typography variant="subtitle1" color="primary">
+                    &nbsp;{`@${myPageInfo.username}`}
+                  </Typography>
+                </PointShow>
               </div>
             </CoverBox>
             <NavbarBox>
@@ -258,8 +284,16 @@ function Mypage(props) {
           />
         </div>
         <div className="proposeColumn proposeColumn--right">
-
-          <MemoryList {...props} myPageRoute onMemoryChanged={refresh} loading={loading} nextPage={nextPage} needSelectLock={true} locks={props.locks} myPageInfo={myPageInfo} />
+          <MemoryList
+            {...props}
+            myPageRoute
+            onMemoryChanged={refresh}
+            loading={loading}
+            nextPage={nextPage}
+            needSelectLock={true}
+            locks={props.locks}
+            myPageInfo={myPageInfo}
+          />
         </div>
       </LeftBoxWrapper>
     </div>
@@ -269,7 +303,8 @@ const mapStateToProps = state => {
   return {
     locks: state.loveinfo.locks,
     address: state.account.address,
-    memoryList: state.loveinfo.memories
+    memoryList: state.loveinfo.memories,
+    point: state.account.point,
   };
 };
 const mapDispatchToProps = dispatch => {
@@ -282,7 +317,4 @@ const mapDispatchToProps = dispatch => {
     },
   };
 };
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Mypage);
+export default connect(mapStateToProps, mapDispatchToProps)(Mypage);

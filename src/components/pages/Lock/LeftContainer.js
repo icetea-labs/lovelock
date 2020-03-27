@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
+import { FormattedMessage } from 'react-intl';
 import { ensureContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
 import { callView, showSubscriptionError } from '../../../helper';
