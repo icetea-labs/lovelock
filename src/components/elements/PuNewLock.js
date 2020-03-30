@@ -14,6 +14,7 @@ import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import WarningIcon from '@material-ui/icons/Warning';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
+import { FormattedMessage } from 'react-intl';
 
 import * as actions from '../../store/actions';
 import {
@@ -529,7 +530,7 @@ class PuNewLock extends React.Component {
     return (
       <>
         <CommonDialog
-          title="New Lock"
+          title={<FormattedMessage id="newLock.newLock" />}
           okText={this.getMessage('okButton')}
           close={close}
           onKeyEsc={this.onKeyEsc}

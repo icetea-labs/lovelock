@@ -26,6 +26,7 @@
     "login.newPassLabel": "新たなパスワード",
     "login.btnBack": "戻る",
     "login.btnRecover": "回復",
+    "login.login": "サインイン",
 
     "regist.userName": "ユーザー名",
     "regist.firstName": "姓",
@@ -49,6 +50,7 @@
     "regist.successWarning": "「パスワードを忘れた場合」という機能はありません。回復フレーズを保存して秘密にしてください。",
     "regist.successConfirm": "回復フレーズを保存しました。",
     "regist.btnContinue": "続ける",
+    "regist.regist": "新たなアカウント作成",
 
     "header.btnCreate": "作成",
     "header.btnExplore": "もっと見る",
@@ -61,7 +63,7 @@
     "leftmenu.collection": "コレクション",
 
     "profile.activationForm": "このフォームに記入してください。",
-    "profile.activationGoal": "プロファイルを更新 する前に、アカウントのアクティベーションをリクエストします。",
+    "profile.activationGoal": "プロファイルを更新する前に、アカウントのアクティベーションをリクエストします。",
     "profile.userName": "ユーザー名",
     "profile.firstName": "姓",
     "profile.lastName": "名",
@@ -69,5 +71,8 @@
     "profile.btnSave": "変更内容を保存",
     "profile.requiredMes": "この項目は必須である。",
     "profile.userTaken": "このユーザー名はすでに使用されています。",
-    "profile.characterCheck": "ユーザー名にスペースや特殊文字を含めることはできません。"
+    "profile.characterCheck": "ユーザー名にスペースや特殊文字を含めることはできません。",
+    "profile.profile": "プロファイル更新",
+
+    "newLock.newLock": "新たなロック作成"
 }

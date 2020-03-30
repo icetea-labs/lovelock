@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { withRouter } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
 import { HeaderAuthen } from '../../../elements/Common';
@@ -11,12 +12,11 @@ import * as actionCreate from '../../../../store/actions/create';
 import ImageCrop from '../../../elements/ImageCrop';
 
 function Register(props) {
-  const { step, setStep, language } = props;
+  const { step, setStep } = props;
   const [isOpenCrop, setIsOpenCrop] = useState(false);
   const [originFile, setOriginFile] = useState([]);
   const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
   const [avatarData, setAvatarData] = useState('');
-  const ja = 'ja';
 
   useEffect(() => {
     setStep('one');
@@ -38,12 +38,7 @@ function Register(props) {
         <LayoutAuthen key={1}>
           <BoxAuthen>
             <ShadowBoxAuthen>
-              {step === 'one' &&
-                (language === ja ? (
-                  <HeaderAuthen title="新たなアカウント作成" />
-                ) : (
-                  <HeaderAuthen title="Create New Account" />
-                ))}
+              {step === 'one' && <HeaderAuthen title={<FormattedMessage id="regist.regist" />} />}
               {step === 'one' && (
                 <RegisterUsername
                   setIsOpenCrop={setIsOpenCrop}
@@ -65,7 +60,6 @@ function Register(props) {
 const mapStateToProps = state => {
   return {
     step: state.create.step,
-    language: state.globalData.language,
   };
 };
 

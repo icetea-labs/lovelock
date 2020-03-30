@@ -20,10 +20,9 @@ const styles = () => ({
 });
 
 function Login(props) {
-  const { history, setStep, step, language } = props;
+  const { history, setStep, step } = props;
   const [isQRCodeActive, setIsQRCodeActive] = useState(false);
   const [recoveryPhase, setRecoveryPhase] = useState('');
-  const ja = 'ja';
 
   function gotoRegister() {
     setStep('one');
@@ -36,11 +35,7 @@ function Login(props) {
         <LayoutAuthen key={1}>
           <BoxAuthen>
             <ShadowBoxAuthen>
-              {language === ja ? (
-                <HeaderAuthen title="サインイン" />
-              ) : (
-                <HeaderAuthen title="Sign in" />
-              )}
+              <HeaderAuthen title={<FormattedMessage id="login.login" />} />
 
               {step === 'one' && <ByPassWord />}
               {step === 'two' && (
@@ -69,7 +64,6 @@ function Login(props) {
 
 const mapStateToProps = state => {
   const e = state.create;
-  const { globalData } = state;
   return {
     password: e.password,
     step: e.step,
@@ -77,7 +71,6 @@ const mapStateToProps = state => {
     keyStoreText: e.keyStoreText,
     showPrivateKey: e.showPrivateKey,
     confirmMnemonic: e.confirmMnemonic,
-    language: globalData.language,
   };
 };
 

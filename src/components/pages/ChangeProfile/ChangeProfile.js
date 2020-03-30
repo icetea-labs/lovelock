@@ -175,7 +175,6 @@ function ChangeProfile(props) {
     tokenKey,
     setNeedAuth,
     privateKey,
-    language,
   } = props;
   const [firstname, setFirstname] = useState({ old: '', new: '' });
   const [lastname, setLastname] = useState({ old: '', new: '' });
@@ -351,7 +350,6 @@ function ChangeProfile(props) {
   // console.log('avatar', avatar);
 
   const classes = useStyles();
-  const ja = 'ja';
 
   return (
     <>
@@ -359,11 +357,7 @@ function ChangeProfile(props) {
         <LayoutAuthen key={1}>
           <BoxAuthenCus>
             <ShadowBoxAuthen>
-              {language === ja ? (
-                <HeaderAuthen title="プロファイル更新" isActive />
-              ) : (
-                <HeaderAuthen title="Change Profile" isActive />
-              )}
+              <HeaderAuthen title={<FormattedMessage id="profile.profile" />} isActive />
 
               {!isApproved && (
                 <WarningPass>
