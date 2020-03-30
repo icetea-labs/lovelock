@@ -23,7 +23,7 @@ import {
   applyRotation,
   imageResize,
   handleError,
-  getUserSuggestions
+  getUserSuggestions,
 } from '../../helper';
 import { ensureToken, sendTransaction } from '../../helper/hooks';
 import AddInfoMessage from './AddInfoMessage';
@@ -31,7 +31,7 @@ import CommonDialog from './CommonDialog';
 import { FlexBox } from './StyledUtils';
 import ImageCrop from './ImageCrop';
 import { AvatarPro } from './AvatarPro';
-import appConstants from "../../helper/constants";
+import appConstants from '../../helper/constants';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -239,12 +239,12 @@ class PuNewLock extends React.Component {
 
   async getSuggestions(value) {
     const users = await getUserSuggestions(value);
-    
+
     this.setState({
       suggestions: users,
     });
   }
-  
+
   getSuggestionValue = suggestion => {
     return `@${suggestion.nick}`;
   };
@@ -260,21 +260,21 @@ class PuNewLock extends React.Component {
     return (
       <>
         {parts.map((part, index) => {
-            const className = part.highlight ? 'highlight' : null;
-            return (
-              <span className={className} key={index}>
-                {((isNick && part.highlight) ? '@' : '') + part.text}
-              </span>
-            );
-          })}
+          const className = part.highlight ? 'highlight' : null;
+          return (
+            <span className={className} key={index}>
+              {(isNick && part.highlight ? '@' : '') + part.text}
+            </span>
+          );
+        })}
       </>
-    )
+    );
   }
 
   renderSuggestion = (suggestion, { query }) => {
-    const isNick = query.startsWith('@')
-    const searchFor = isNick ? query.slice(1) : query
-    const suggestionText = isNick ? suggestion.nick: suggestion.display
+    const isNick = query.startsWith('@');
+    const searchFor = isNick ? query.slice(1) : query;
+    const suggestionText = isNick ? suggestion.nick : suggestion.display;
     const suggestionAva = suggestion.avatar;
     const matches = AutosuggestHighlightMatch(suggestionText, searchFor);
     const parts = AutosuggestHighlightParse(suggestionText, matches);
@@ -282,12 +282,8 @@ class PuNewLock extends React.Component {
       <span className="suggestion-content">
         <AvatarProSug hash={suggestionAva} />
         <div className="text">
-          <span className="name">
-            {isNick ? suggestion.display : this.renderSearchMatch(parts, false)}
-          </span>
-          <span className="nick">
-            {isNick ? this.renderSearchMatch(parts, true) : ('@' + suggestion.nick)}
-          </span>
+          <span className="name">{isNick ? suggestion.display : this.renderSearchMatch(parts, false)}</span>
+          <span className="nick">{isNick ? this.renderSearchMatch(parts, true) : '@' + suggestion.nick}</span>
         </div>
       </span>
     );
@@ -330,16 +326,14 @@ class PuNewLock extends React.Component {
 
     const lockType = e.target.value;
 
-    if (lockType === 'lock') {
+    if (lockType === 'crush') {
       this.setState({
         lockType,
-        okText: 'Create',
         partner: process.env.REACT_APP_BOT_LOVER,
       });
     } else {
       this.setState({
         lockType,
-        okText: 'Send',
         value: '',
         partner: '',
       });
@@ -387,7 +381,7 @@ class PuNewLock extends React.Component {
     this.setState({
       value: '',
       lockType: 'journal',
-      isJournal: false
+      isJournal: false,
     });
   };
 
@@ -402,22 +396,12 @@ class PuNewLock extends React.Component {
   };
 
   async createLock() {
-    const { setLoading, enqueueSnackbar, close } = this.props;
-    const {
-      promiseStm,
-      date,
-      file,
-      firstname,
-      lastname,
-      cropFile,
-      lockType,
-      lockName,
-      botReply
-    } = this.state;
+    const { setLoading, enqueueSnackbar, close, address } = this.props;
+    const { promiseStm, date, file, firstname, lastname, cropFile, lockType, lockName, botReply } = this.state;
 
-    let partner = this.state.partner
+    let { partner } = this.state;
     let hash = [];
-    let botInfo
+    let botInfo;
 
     try {
       if (lockType === 'lock') {
@@ -428,7 +412,7 @@ class PuNewLock extends React.Component {
           return;
         }
       } else if (lockType === 'crush') {
-        partner = process.env.REACT_APP_BOT_LOVER
+        partner = process.env.REACT_APP_BOT_LOVER;
         if (!firstname) {
           const message = 'Please enter your crush first name.';
           enqueueSnackbar(message, { variant: 'error' });
@@ -451,19 +435,19 @@ class PuNewLock extends React.Component {
         }
         botInfo = { firstname, lastname, botReply };
       } else if (lockType === 'journal') {
-        partner = null
+        partner = address;
       } else {
         enqueueSnackbar('Invalid lock type.', { variant: 'error' });
         return;
       }
 
       if (!promiseStm) {
-        const message = 'Please input ' + this.getMessage('messageLabel')
+        const message = `Please input ${this.getMessage('messageLabel')}`;
         enqueueSnackbar(message, { variant: 'error' });
         return;
       }
 
-      const uploadThenSendTx = async  opts => {
+      const uploadThenSendTx = async opts => {
         setLoading(true);
 
         if (cropFile) {
@@ -489,11 +473,10 @@ class PuNewLock extends React.Component {
         close();
 
         // redirect to the new lock
-        this.props.history.push('/lock/' + result.returnValue)
+        this.props.history.push(`/lock/${result.returnValue}`);
       }
-
     } catch (err) {
-      console.log(err)
+      console.log(err);
       const msg = handleError(err, 'creating new lock.');
       enqueueSnackbar(msg, { variant: 'error' });
       setLoading(false);
@@ -501,12 +484,12 @@ class PuNewLock extends React.Component {
   }
 
   getMessage(id) {
-    const lockType = this.state.lockType;
+    const { lockType } = this.state;
     return appConstants.textByLockTypes[lockType][id];
   }
 
   render() {
-    const { close, isApproved } = this.props;
+    const { close, isApproved, language } = this.props;
     const {
       // partner,
       // promiseStm,
@@ -520,9 +503,10 @@ class PuNewLock extends React.Component {
       originFile,
       isJournal,
     } = this.state;
+    const ja = 'ja';
 
     const inputProps = {
-      placeholder: "type some letters to search",
+      placeholder: language === ja ? '検索する文字を入力してください' : 'type some letters to search',
       value,
       onChange: this.onPartnerChange,
     };
@@ -538,23 +522,25 @@ class PuNewLock extends React.Component {
             this.createLock();
           }}
         >
-          <TagTitle className="prmContent">Lock with</TagTitle>
+          <TagTitle className="prmContent">
+            <FormattedMessage id="newlock.lockWith" />
+          </TagTitle>
 
           <RadioGroup value={lockType} onChange={this.handleCheckChange} row>
             <FormControlLabel
               control={<ColoredRadio />}
               value="lock"
-              label="Other member"
+              label={<FormattedMessage id="newLock.member" />}
             />
             <FormControlLabel
               control={<ColoredRadio />}
               value="crush"
-              label="Your own crush"
+              label={<FormattedMessage id="newLock.crush" />}
             />
             <FormControlLabel
               control={<ColoredRadio />}
               value="journal"
-              label="Create a journal"
+              label={<FormattedMessage id="newLock.journal" />}
             />
           </RadioGroup>
 
@@ -575,14 +561,14 @@ class PuNewLock extends React.Component {
           {lockType === 'journal' && (
             <div>
               <TextFieldPlaceholder
-                label="Journal Name"
+                label={<FormattedMessage id="newLock.journalName" />}
                 fullWidth
                 onChange={this.handleUsername}
                 name="lockName"
                 inputProps={{ maxLength: 28 }}
               />
             </div>
-              )}
+          )}
 
           {lockType === 'crush' && (
             <FlexBox>
@@ -603,7 +589,7 @@ class PuNewLock extends React.Component {
               </PreviewContainter>
               <RightBotInfo>
                 <TextFieldPlaceholder
-                  label="Crush First Name"
+                  label={<FormattedMessage id="newLock.crushFirstName" />}
                   fullWidth
                   onChange={this.handleUsername}
                   name="firstname"
@@ -611,7 +597,7 @@ class PuNewLock extends React.Component {
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label="Crush Last Name"
+                  label={<FormattedMessage id="newLock.crushLastName" />}
                   fullWidth
                   onChange={this.handleUsername}
                   name="lastname"
@@ -619,7 +605,7 @@ class PuNewLock extends React.Component {
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label="Crush's Reply to You"
+                  label={<FormattedMessage id="newLock.crushReply" />}
                   fullWidth
                   onChange={this.handleUsername}
                   name="botReply"
@@ -647,7 +633,7 @@ class PuNewLock extends React.Component {
             coverPhotoMode
             hasParentDialog
             onDialogToggle={this.onDialogToggle}
-            photoButtonText="Cover"
+            photoButtonText={<FormattedMessage id="newLock.btnCover" />}
           />
           <WarningPass>
             <SnackbarContent
@@ -657,15 +643,22 @@ class PuNewLock extends React.Component {
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
                     <span className="warningText">
-                      This lock will be public. Private locks will be supported soon.
+                      <FormattedMessage id="newLock.warning" />
                     </span>
                   </span>
                 ) : (
                   <span className="warningMessage">
                     <WarningIcon className="warningIcon" />
                     <span className="warningText">
-                      Please <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">fill in this form</a> to request activation of your account before you can post
-                      contents.
+                      <a
+                        className="underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href="http://bit.ly/LoveLock-AAR"
+                      >
+                        <FormattedMessage id="newLock.activationForm" />
+                      </a>
+                      <FormattedMessage id="newLock.activationGoal" />
                     </span>
                   </span>
                 )
@@ -687,7 +680,9 @@ class PuNewLock extends React.Component {
             hasParentDialog
           >
             <TagTitle>
-              <span>By create a lock with yourself, you will create a Journal instead.</span>
+              <span>
+                <FormattedMessage id="newLock.journalSearch" />
+              </span>
             </TagTitle>
           </CommonDialog>
         )}
@@ -708,6 +703,7 @@ const mapStateToProps = state => {
     tokenKey: state.account.tokenKey,
     tokenAddress: state.account.tokenAddress,
     isApproved: state.account.isApproved,
+    language: state.globalData.language,
   };
 };
 
@@ -719,7 +715,4 @@ const mapDispatchToProps = dispatch => {
     dispatch,
   };
 };
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withSnackbar(PuNewLock));
+export default connect(mapStateToProps, mapDispatchToProps)(withSnackbar(PuNewLock));

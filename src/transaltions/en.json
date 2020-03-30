@@ -74,5 +74,22 @@
     "profile.characterCheck": "Username cannot contain spaces and special character.",
     "profile.profile": "Change Profile",
 
-    "newLock.newLock": "New Lock"
+    "newLock.newLock": "New Lock",
+    "newlock.lockWith": "Lock with",
+    "newLock.member": "Lovelock member",
+    "newLock.crush": "Your own crush",
+    "newLock.journal": "Create a journal",
+    "newLock.msgLockCrush": "Your Message",
+    "newLock.btnSend": "Send",
+    "newLock.btnCover": "Cover",
+    "newLock.activationForm": "Please fill in this form ",
+    "newLock.activationGoal": "to request activation of your account before you can post contents.",
+    "newLock.warning": "This lock will be public. Private locks will be supported soon.",
+    "newLock.btnCreate": "Create",
+    "newLock.msgJournal": "Journal Description",
+    "newLock.journalName": "Journal Name",
+    "newLock.crushFirstName": "Crush First Name",
+    "newLock.crushLastName": "Crush Last Name",
+    "newLock.crushReply": "Crush's Reply to You",
+    "newLock.journalSearch": "By create a lock with yourself, you will create a Journal instead."
 }

@@ -33,7 +33,7 @@ exports.expectUserApproved = (self, opts) => {
   const errmsg =
     'You are not approved to create content. Please contact customer support to unlock your account first.'; //opts.message + '. You are not approved to use the app yet.';
   const users = self.getUsers();
-  expect(users.includes(opts.from), errmsg);
+  expect((opts.from) in users, errmsg);
 };
 //private function
 exports.getDataByIndex = (array, index) => {

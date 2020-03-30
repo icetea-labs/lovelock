@@ -74,5 +74,22 @@
     "profile.characterCheck": "ユーザー名にスペースや特殊文字を含めることはできません。",
     "profile.profile": "プロファイル更新",
 
-    "newLock.newLock": "新たなロック作成"
+    "newLock.newLock": "新たなロック作成",
+    "newlock.lockWith": "どなたとロックしたいですか。",
+    "newLock.member": "Lovelockメンバー",
+    "newLock.crush": "好きな人",
+    "newLock.journal": "ジャーナル作成",
+    "newLock.msgLockCrush": "貴方のメッセージ",
+    "newLock.btnSend": "送信",
+    "newLock.btnCover": "カーバ",
+    "newLock.activationForm": "このフォームに記入してください。",
+    "newLock.activationGoal": "コンテンツを投稿する前に、アカウントのアクティベーションをリクエストします。",
+    "newLock.warning": "このロックは公開されます。プライベートロックは次の版でサポートされます。",
+    "newLock.btnCreate": "作成 ",
+    "newLock.msgJournal": "ジャーナル説明",
+    "newLock.journalName": "ジャーナル名",
+    "newLock.crushFirstName": "好きな人姓",
+    "newLock.crushLastName": "好きな人名",
+    "newLock.crushReply": "好きな人返事",
+    "newLock.journalSearch": "自分でロックを作成すると、代わりにジャーナルが作成されます。"
 }

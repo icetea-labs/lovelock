@@ -591,14 +591,14 @@ class LoveLock {
   }
   @view isUserApproved(user: address) {
     const users = this.getUsers();
-    return users.includes(user);
+    return user in users;
   }
 
   // ========== Authorized IPFS APPROVED =============
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
-    if (!users.includes(mainAddress)) {
+    if (!(mainAddress in users)) {
       return false;
     }
 
@@ -616,7 +616,7 @@ class LoveLock {
 
   @view isUserApproved(mainAddress: address) {
     const users = this.getUsers();
-    return users.includes(mainAddress);
+    return mainAddress in users;
   }
 }
 
