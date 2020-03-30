@@ -91,5 +91,15 @@
     "newLock.crushFirstName": "好きな人姓",
     "newLock.crushLastName": "好きな人名",
     "newLock.crushReply": "好きな人返事",
-    "newLock.journalSearch": "自分でロックを作成すると、代わりにジャーナルが作成されます。"
+    "newLock.journalSearch": "自分でロックを作成すると、代わりにジャーナルが作成されます。",
+
+    "passPrompt.passTitle": "パスワード確認",
+    "passPrompt.pass": "パスワード",
+    "passPrompt.forgot": "パスワードを忘れましたか?",
+    "passPrompt.remember": "３０日間に忘れないで",
+    "passPrompt.btnConfirm": "確認",
+
+    "showMnemonic.recoveryPhrase": "回復フレーズ",
+    "showMnemonic.btnOK": "閉じる",
+    "showMnemonic.qrCode": "以下のQRコードをスキャンしてください"
 }

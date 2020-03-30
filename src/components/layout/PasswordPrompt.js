@@ -8,13 +8,14 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { withRouter } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import { getWeb3, grantAccessToken } from '../../service/tweb3';
 import * as actions from '../../store/actions';
 import { wallet, decode } from '../../helper';
 import { useRemember } from '../../helper/hooks';
 import CommonDialog from '../elements/CommonDialog';
-import { LinkPro } from "../elements/Button";
+import { LinkPro } from '../elements/Button';
 
 const LOGIN_BY_PRIVATEKEY = 0;
 const LOGIN_BY_MNEMONIC = 1;
@@ -26,8 +27,9 @@ function PasswordPrompt(props) {
   const needAuth = useSelector(state => state.account.needAuth);
   const addressRedux = useSelector(state => state.account.address);
   const [isRemember, setIsRemember] = useRemember();
+  const language = useSelector(state => state.globalData.language);
 
-  let credLoading = useRef(false);
+  const credLoading = useRef(false);
   const [autoPassFailed, _setAutoPassFailed] = useState(false);
   const setAutoPassFailed = () => {
     _setAutoPassFailed(true);
@@ -35,6 +37,7 @@ function PasswordPrompt(props) {
   };
 
   const { enqueueSnackbar } = useSnackbar();
+  const ja = 'ja';
 
   if (!addressRedux) {
     setPathName(window.location.pathname);
@@ -121,12 +124,11 @@ function PasswordPrompt(props) {
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
           storage.sessionData = codecEncode({
-              contract: process.env.REACT_APP_CONTRACT,
-              tokenAddress: token.address,
-              tokenKey: token.privateKey,
-              expireAfter: returnValue,
-            })
-            .toString('base64');
+            contract: process.env.REACT_APP_CONTRACT,
+            tokenAddress: token.address,
+            tokenKey: token.privateKey,
+            expireAfter: returnValue,
+          }).toString('base64');
           // re-save main account
           // savetoLocalStorage(address, keyObject);
           const account = {
@@ -165,7 +167,7 @@ function PasswordPrompt(props) {
   function handleConfirm() {
     confirm(password);
   }
-  
+
   function goToForgotPassScreen() {
     props.history.push('/login');
     dispatch(actions.setStep('two'));
@@ -173,8 +175,8 @@ function PasswordPrompt(props) {
 
   return (!credLoading.current || autoPassFailed) && needAuth ? (
     <CommonDialog
-      title="Password Confirm"
-      okText="Confirm"
+      title={<FormattedMessage id="passPrompt.passTitle" />}
+      okText={<FormattedMessage id="passPrompt.btnConfirm" />}
       close={close}
       confirm={handleConfirm}
       onKeyReturn
@@ -183,8 +185,8 @@ function PasswordPrompt(props) {
     >
       <TextField
         id="Password"
-        label="Password"
-        placeholder="Enter your password"
+        label={<FormattedMessage id="passPrompt.pass" />}
+        placeholder={language === ja ? 'パスワードを入力してください' : 'Enter your password'}
         fullWidth
         autoFocus
         margin="normal"
@@ -193,7 +195,9 @@ function PasswordPrompt(props) {
         autoComplete="current-password"
       />
       <div>
-        <LinkPro onClick={goToForgotPassScreen}>Forgot password?</LinkPro>
+        <LinkPro onClick={goToForgotPassScreen}>
+          <FormattedMessage id="passPrompt.forgot" />
+        </LinkPro>
       </div>
       <FormControlLabel
         control={
@@ -206,7 +210,7 @@ function PasswordPrompt(props) {
             onChange={() => setIsRemember(!isRemember)}
           />
         }
-        label="Remember me for 30 days"
+        label={<FormattedMessage id="passPrompt.remember" />}
       />
     </CommonDialog>
   ) : null;

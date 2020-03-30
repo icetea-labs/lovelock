@@ -91,5 +91,15 @@
     "newLock.crushFirstName": "Crush First Name",
     "newLock.crushLastName": "Crush Last Name",
     "newLock.crushReply": "Crush's Reply to You",
-    "newLock.journalSearch": "By create a lock with yourself, you will create a Journal instead."
+    "newLock.journalSearch": "By create a lock with yourself, you will create a Journal instead.",
+
+    "passPrompt.passTitle": "Password Confirm",
+    "passPrompt.pass": "Password",
+    "passPrompt.forgot": "Forgot password?",
+    "passPrompt.remember": "Remember me for 30 days",
+    "passPrompt.btnConfirm": "Confirm",
+
+    "showMnemonic.recoveryPhrase": "Recovery phrase",
+    "showMnemonic.btnOK": "Close",
+    "showMnemonic.qrCode": "Scan this QR"
 }
