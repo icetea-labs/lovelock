@@ -113,5 +113,7 @@
     "topContainer.changeApply": "適用",
     "topContainer.journal": "ジャーナル",
     "topContainer.follow": "フォロー",
-    "topContainer.following": "フォロー中"
+    "topContainer.following": "フォロー中",
+
+    "memory.blog": "ブログ"
 }

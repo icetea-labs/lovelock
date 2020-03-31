@@ -113,5 +113,7 @@
     "topContainer.changeApply": "Apply",
     "topContainer.journal": "JOURNAL",
     "topContainer.follow": "Follow",
-    "topContainer.following": "Following"
+    "topContainer.following": "Following",
+
+    "memory.blog": "Blog"
 }
