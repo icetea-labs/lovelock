@@ -101,5 +101,17 @@
 
     "showMnemonic.recoveryPhrase": "Recovery phrase",
     "showMnemonic.btnOK": "Close",
-    "showMnemonic.qrCode": "Scan this QR"
+    "showMnemonic.qrCode": "Scan this QR",
+
+    "collection.newCol": "New Collection",
+    "collection.btnOK": "Create",
+    "collection.name": "Collection name",
+    "collection.des": "Description",
+
+    "topContainer.changeCover": "Change Cover",
+    "topContainer.changeCancel": "Cancel",
+    "topContainer.changeApply": "Apply",
+    "topContainer.journal": "JOURNAL",
+    "topContainer.follow": "Follow",
+    "topContainer.following": "Following"
 }

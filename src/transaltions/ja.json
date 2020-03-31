@@ -81,7 +81,7 @@
     "newLock.journal": "ジャーナル作成",
     "newLock.msgLockCrush": "貴方のメッセージ",
     "newLock.btnSend": "送信",
-    "newLock.btnCover": "カーバ",
+    "newLock.btnCover": "カバー写真",
     "newLock.activationForm": "このフォームに記入してください。",
     "newLock.activationGoal": "コンテンツを投稿する前に、アカウントのアクティベーションをリクエストします。",
     "newLock.warning": "このロックは公開されます。プライベートロックは次の版でサポートされます。",
@@ -101,5 +101,17 @@
 
     "showMnemonic.recoveryPhrase": "回復フレーズ",
     "showMnemonic.btnOK": "閉じる",
-    "showMnemonic.qrCode": "以下のQRコードをスキャンしてください"
+    "showMnemonic.qrCode": "以下のQRコードをスキャンしてください",
+
+    "collection.newCol": "新たなコレクション",
+    "collection.btnOK": "作成",
+    "collection.name": "コレクション名",
+    "collection.des": "説明",
+
+    "topContainer.changeCover": "カバー更新",
+    "topContainer.changeCancel": "キャンセル",
+    "topContainer.changeApply": "適用",
+    "topContainer.journal": "ジャーナル",
+    "topContainer.follow": "フォロー",
+    "topContainer.following": "フォロー中"
 }

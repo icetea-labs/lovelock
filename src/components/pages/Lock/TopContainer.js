@@ -12,6 +12,7 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 import Link from '@material-ui/core/Link';
+import { FormattedMessage } from 'react-intl';
 
 import IconButton from '@material-ui/core/IconButton';
 import ReadMore from '../../elements/ReaMore';
@@ -511,7 +512,9 @@ function TopContrainer(props) {
     <label htmlFor="outlined-button-file">
       <Button component="span" className={classes.btChange}>
         <PhotoCameraIcon className={classes.photoCameraIcon} />
-        <Typography noWrap>Change Cover</Typography>
+        <Typography noWrap>
+          <FormattedMessage id="topContainer.changeCover" />
+        </Typography>
         <input
           accept="image/jpeg,image/png"
           className={classes.input}
@@ -576,10 +579,10 @@ function TopContrainer(props) {
             {canChangeCover() && (
               <div className="showChangeImg">
                 <Button variant="contained" className={classes.button} onClick={cancelCoverImg}>
-                  Cancel
+                  <FormattedMessage id="topContainer.changeCancel" />
                 </Button>
                 <Button variant="contained" color="primary" className={classes.button} onClick={acceptCoverImg}>
-                  Apply
+                  <FormattedMessage id="topContainer.changeApply" />
                 </Button>
               </div>
             )}
@@ -609,7 +612,9 @@ function TopContrainer(props) {
             </div>
           </div>
         ) : (
-          <div className="journalTitle">JOURNAL</div>
+          <div className="journalTitle">
+            <FormattedMessage id="topContainer.journal" />
+          </div>
         )}
         <div className="proLike">
           <ArrowTooltip title="Follow">
@@ -618,7 +623,7 @@ function TopContrainer(props) {
                 <>
                   <BookmarkIcon color="primary" className={classes.rightIcon} />
                   <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
-                    Following
+                    <FormattedMessage id="topContainer.following" />
                     {/* {topInfo.numFollow > 0 && `${topInfo.numFollow}`} */}
                   </Typography>
                 </>
@@ -626,7 +631,7 @@ function TopContrainer(props) {
                 <>
                   <BookmarkBorderIcon className={classes.rightIcon} />
                   <Typography component="span" variant="body2" className={classes.textFollow}>
-                    Follow
+                    <FormattedMessage id="topContainer.follow" />
                     {/* {topInfo.numFollow > 0 && `${topInfo.numFollow}`} */}
                   </Typography>
                 </>
