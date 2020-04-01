@@ -6,6 +6,7 @@ import { Button, Typography } from '@material-ui/core';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
+import { FormattedMessage } from 'react-intl';
 
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import PersonIcon from '@material-ui/icons/Person';
@@ -259,14 +260,16 @@ function Mypage(props) {
                     <>
                       <BookmarkIcon color="primary" className={classes.rightIcon} />
                       <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
-                        Following {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
+                        <FormattedMessage id="topContainer.following" />
+                        {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
                       </Typography>
                     </>
                   ) : (
                     <>
                       <BookmarkBorderIcon className={classes.rightIcon} />
                       <Typography component="span" variant="body2" className={classes.textFollow}>
-                        Follow {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
+                        <FormattedMessage id="topContainer.follow" />
+                        {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
                       </Typography>
                     </>
                   )}

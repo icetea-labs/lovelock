@@ -115,5 +115,20 @@
     "topContainer.follow": "フォロー",
     "topContainer.following": "フォロー中",
 
-    "memory.blog": "ブログ"
+    "memory.blog": "ブログ",
+    "memory.deleteMemory": "このメモリを削除",
+    "memory.deletePost": "この投稿を削除",
+    "memory.changeBlog": "ブログ情報を変更",
+    "memory.editMemory": "メモリ編集",
+    "memory.editBlog": "ブログ内容編集",
+    "memory.permanentLink": "パーマネントリンク",
+    "memory.share": "共有",
+    "memory.close": "閉じる",
+    "memory.copy": "コピー",
+    "memory.sureDelete": "削除してもよろしいですか",
+    "memory.cancel": "キャンセル",
+    "memory.okDelete": "いいよ、削除してください",
+    "memory.warningDel": "これは元に戻せません。続けてもよろしいですか。",
+    "memory.startJournal": "のジャーナルを開始します。",
+    "memory.lockedWith": "その人とロックされた。"
 }

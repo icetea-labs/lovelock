@@ -115,5 +115,20 @@
     "topContainer.follow": "Follow",
     "topContainer.following": "Following",
 
-    "memory.blog": "Blog"
+    "memory.blog": "Blog",
+    "memory.deleteMemory": "Delete This Memory",
+    "memory.deletePost": "Delete This Post",
+    "memory.changeBlog": "Change Blog Info",
+    "memory.editMemory": "Edit Memory",
+    "memory.editBlog": "Edit Blog Content",
+    "memory.permanentLink": "Permanent Link",
+    "memory.share": "Share",
+    "memory.close": "Close",
+    "memory.copy": "Copy",
+    "memory.sureDelete": "Sure to Delete?",
+    "memory.cancel": "Cancel",
+    "memory.okDelete": "Yes, Let's Delete",
+    "memory.warningDel": "This cannot be undone. Continue?",
+    "memory.startJournal": " started the journal.",
+    "memory.lockedWith": "Locked with "
 }
