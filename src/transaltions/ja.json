@@ -130,5 +130,11 @@
     "memory.okDelete": "いいよ、削除してください",
     "memory.warningDel": "これは元に戻せません。続けてもよろしいですか。",
     "memory.startJournal": "のジャーナルを開始します。",
-    "memory.lockedWith": "その人とロックされた。"
+    "memory.lockedWith": "その人とロックされた。",
+    "memory.publish": "投稿",
+    "memory.drafts": "下書き",
+    "memory.preview": "プレビュー",
+    "memory.export": "エクスポート",
+    "memory.import": "インポート",
+    "memory.postTo": "投稿先："
 }

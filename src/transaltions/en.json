@@ -130,5 +130,11 @@
     "memory.okDelete": "Yes, Let's Delete",
     "memory.warningDel": "This cannot be undone. Continue?",
     "memory.startJournal": " started the journal.",
-    "memory.lockedWith": "Locked with "
+    "memory.lockedWith": "Locked with ",
+    "memory.publish": "Publish",
+    "memory.drafts": "Drafts" ,
+    "memory.preview": "Preview",
+    "memory.export": "Export",
+    "memory.import": "Import",
+    "memory.postTo": "Post to:"
 }

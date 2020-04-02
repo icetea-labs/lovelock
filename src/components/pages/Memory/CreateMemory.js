@@ -8,6 +8,7 @@ import InputBase from '@material-ui/core/InputBase';
 import { useSnackbar } from 'notistack';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
+import { FormattedMessage } from 'react-intl';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
@@ -462,7 +463,9 @@ export default function CreateMemory(props) {
             {grayLayout && props.needSelectLock && (
               <Grid className={classes.postTopRow}>
                 <label>
-                  <span className={classes.postToLabel}>Post to:</span>
+                  <span className={classes.postToLabel}>
+                    <FormattedMessage id="memory.postTo" />
+                  </span>
                   <Select
                     native
                     value={proIndex}
@@ -473,7 +476,7 @@ export default function CreateMemory(props) {
                     }}
                     input={<BootstrapInput name="postToLock" id="outlined-collection" />}
                   >
-                    <option value="">-- Select lock --</option>
+                    <option value="">{language === ja ? '--ロックを洗濯してください--' : '-- Select lock --'}</option>
                     {(props.locks || []).map(v => (
                       <option key={v.id} value={v.id}>
                         {v.s_info.lockName || v.s_content}
