@@ -536,7 +536,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`Congratulations for ${diffDate} days together!.`}</span>
+          <span>{`Congratulations for ${diffDate} days together!`}</span>
         </div>
       </div>
     );
