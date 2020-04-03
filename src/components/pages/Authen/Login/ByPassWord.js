@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ByPassWord(props) {
-  const { setLoading, setAccount, setStep, history, encryptedData } = props;
+  const { setLoading, setAccount, setStep, history, encryptedData, language } = props;
   const [state, setState] = React.useState({
     username: '',
     avatar: '',
@@ -53,6 +53,7 @@ function ByPassWord(props) {
   const [password, setPassword] = useState('');
   const [isRemember, setIsRemember] = useRemember();
   const { enqueueSnackbar } = useSnackbar();
+  const ja = 'ja';
 
   useEffect(() => {
     async function loadData() {
@@ -64,8 +65,14 @@ function ByPassWord(props) {
         }
       } else {
         setState({ ...state, username: 'undefined' });
-        const message =
-          'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
+        let message;
+        if (language === ja) {
+          message =
+            'このマシンでの最初のログインである。 別のマシンでアカウントを作成した場合は、回復フレーズを入力してください。';
+        } else {
+          message =
+            'This is the first time log in on this machine. If you created an account on another machine, please enter recovery phrase.';
+        }
         enqueueSnackbar(message, {
           variant: 'info',
           autoHideDuration: 15000,
@@ -215,6 +222,7 @@ const mapStateToProps = state => {
   return {
     encryptedData: state.account.encryptedData,
     address: state.account.address,
+    language: state.globalData.language,
   };
 };
 

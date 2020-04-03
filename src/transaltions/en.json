@@ -136,5 +136,16 @@
     "memory.preview": "Preview",
     "memory.export": "Export",
     "memory.import": "Import",
-    "memory.postTo": "Post to:"
+    "memory.postTo": "Post to:",
+
+    "landing.introTitle": "An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting.",
+    "landing.introSubTit": " Keep to yourself or share with close friends.",
+    "landing.tagline": "Love written in the blocks.",
+    "landing.cta": "Join LoveLock now.",
+    "landing.btnRegist": "Register",
+    "landing.btnLogin": "Log In",
+
+    "notFound.oop": "OOPS, PAGE NOT FOUND!",
+    "notFound.guide": "Perhaps you are wandering too far. Click the button below to come back home.",
+    "notFound.btnBack": "RETURN HOME"
 }

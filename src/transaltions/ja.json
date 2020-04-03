@@ -136,5 +136,16 @@
     "memory.preview": "プレビュー",
     "memory.export": "エクスポート",
     "memory.import": "インポート",
-    "memory.postTo": "投稿先："
+    "memory.postTo": "投稿先：",
+
+    "landing.introTitle": "有意義な記念を保存して大切にする個人的なところである。安全で騒がしくなくて、永久に保存する場所である。",
+    "landing.introSubTit": "自分でプライベット投稿し、親友に共有できるようにします。",
+    "landing.tagline": "ブロックに書かれた恋愛。",
+    "landing.cta": "LoveLockを登録してください。",
+    "landing.btnRegist": "登録",
+    "landing.btnLogin": "ログイン",
+
+    "notFound.oop": "ほら、ページが見つかりません！",
+    "notFound.guide": "そのリンクは存在しませんでした。下のボタンをクリックしてホームに戻ります。",
+    "notFound.btnBack": "ホームに戻る"
 }
