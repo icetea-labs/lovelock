@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -7,7 +8,7 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import { AvatarPro } from './AvatarPro';
 import Icon from './Icon';
 
-import { getShortName } from '../../helper/utils'
+import { getShortName } from '../../helper/utils';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -39,22 +40,25 @@ function Lock(props) {
   const classes = useStyles();
   const { loading = false, locksData, address } = props;
   const locksByStatus = locksData.filter(item => item.status === props.flag);
+  const language = useSelector(state => state.globalData.language);
+
+  const ja = 'ja';
 
   const getInfo = item => {
-    const meOwner = address && (address === item.sender || address === item.receiver)
+    const meOwner = address && (address === item.sender || address === item.receiver);
     const prefix = item.receiver === address ? 's' : 'r';
-    const sAlias = '@' + item.s_alias
-    const rAlias = '@' + item.r_alias
+    const sAlias = '@' + item.s_alias;
+    const rAlias = '@' + item.r_alias;
 
     switch (item.type) {
       case 2: // journal
         return {
-         name: item.s_info.lockName
+          name: item.s_info.lockName
             ? item.s_info.lockName
             : meOwner
             ? 'My Journal'
             : getShortName(item['s_tags']) + ' Journal',
-          nick: item.s_info.lockName ? ((meOwner ? 'my' : sAlias) + ' journal') : ('by ' + sAlias),
+          nick: item.s_info.lockName ? (meOwner ? 'my' : sAlias) + ' journal' : 'by ' + sAlias,
           icon: 'waves',
           avatar: item.coverImg || item.s_tags.avatar,
         };
@@ -78,7 +82,7 @@ function Lock(props) {
             : getShortName(item['s_tags']) + ' & ' + getShortName(item['r_tags']),
           nick: (meOwner ? 'with' : sAlias) + ' ' + rAlias,
           icon: 'done_all',
-          avatar: item.coverImg || item[`${prefix}_tags`].avatar
+          avatar: item.coverImg || item[`${prefix}_tags`].avatar,
         };
     }
   };
@@ -103,7 +107,7 @@ function Lock(props) {
     <CardHeader
       avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
       title={loading ? <Skeleton height={6} width="80%" /> : ''}
-      subheader={loading ? <Skeleton height={6} width="80%" /> : 'None'}
+      subheader={loading ? <Skeleton height={6} width="80%" /> : language === ja ? 'なし ' : 'None'}
     />
   );
 

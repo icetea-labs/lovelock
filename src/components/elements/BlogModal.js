@@ -9,6 +9,7 @@ import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Box from '@material-ui/core/Box';
 import { CSSTransition } from 'react-transition-group';
+import { FormattedMessage } from 'react-intl';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -87,40 +88,50 @@ export default function BlogModal(props) {
             <AppBar className={classes.appbar}>
               <Toolbar className={classes.toolbar}>
                 <div className={classes.title}>
-                  
-                  {(props.needSelectLock && props.selectionLocks && !props.editMode) ? (
+                  {props.needSelectLock && props.selectionLocks && !props.editMode ? (
                     <div className={classes.subtitle}>
-                      Post to:
-                      <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.selectionLocks.showSelectionLocks} style={{ marginLeft: 16 }}>
+                      <FormattedMessage id="memory.postTo" />
+                      <Button
+                        variant="contained"
+                        endIcon={<ArrowDropDownIcon />}
+                        onClick={props.selectionLocks.showSelectionLocks}
+                        style={{ marginLeft: 16 }}
+                      >
                         {props.selectionLocks.selectedLockName()}
                       </Button>
                     </div>
-                    ) : (
-                      <>
-                        <Typography variant="h6">{props.title}</Typography>
-                        {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
-                      </>
-                    )
-                  }
+                  ) : (
+                    <>
+                      <Typography variant="h6">{props.title}</Typography>
+                      {props.subtitle && <Typography className={classes.subtitle}>{props.subtitle}</Typography>}
+                    </>
+                  )}
                 </div>
                 {props.handlePreview && (
                   <FormControlLabel
                     control={<Switch onChange={e => props.handlePreview(e.target.checked)} />}
                     label={
                       <Typography component="div">
-                        <Box color="primary.main">{props.previewText || 'Preview'}</Box>
+                        <Box color="primary.main">{props.previewText || <FormattedMessage id="memory.publish" />}</Box>
                       </Typography>
                     }
                   />
                 )}
                 {props.handleSubmit && (
                   <Button variant="contained" color="primary" onClick={props.handleSubmit}>
-                    Publish
+                    <FormattedMessage id="memory.publish" />
                   </Button>
                 )}
-                {props.drafts && <Button variant="contained" endIcon={<ArrowDropDownIcon />} onClick={props.drafts.showDrafts} style={{ marginLeft: 16 }}>
-                    Drafts
-                </Button>}
+                {props.drafts && (
+                  <Button
+                    variant="contained"
+                    endIcon={<ArrowDropDownIcon />}
+                    onClick={props.drafts.showDrafts}
+                    style={{ marginLeft: 16 }}
+                  >
+                    <FormattedMessage id="memory.drafts" />
+                  </Button>
+                )}
                 {props.handleClose && (
                   <Button className={classes.back} onClick={props.handleClose}>
                     {props.closeText || <i className="material-icons">close</i>}

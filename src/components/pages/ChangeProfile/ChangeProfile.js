@@ -16,6 +16,7 @@ import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import Tooltip from '@material-ui/core/Tooltip';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import WarningIcon from '@material-ui/icons/Warning';
+import { FormattedMessage } from 'react-intl';
 
 import {
   getAliasAndTags,
@@ -356,7 +357,8 @@ function ChangeProfile(props) {
         <LayoutAuthen key={1}>
           <BoxAuthenCus>
             <ShadowBoxAuthen>
-              <HeaderAuthen title="Change Profile" isActive />
+              <HeaderAuthen title={<FormattedMessage id="profile.profile" />} isActive />
+
               {!isApproved && (
                 <WarningPass>
                   <SnackbarContent
@@ -365,16 +367,15 @@ function ChangeProfile(props) {
                       <span className="warningMessage">
                         <WarningIcon className="warningIcon" />
                         <span className="warningText">
-                          Please{' '}
                           <a
                             className="underline"
                             target="_blank"
                             rel="noopener noreferrer"
                             href="http://bit.ly/LoveLock-AAR"
                           >
-                            fill in this form
-                          </a>{' '}
-                          to request activation of your account before you can update profile.
+                            <FormattedMessage id="profile.activationForm" />
+                          </a>
+                          <FormattedMessage id="profile.activationGoal" />
                         </span>
                       </span>
                     }
@@ -416,7 +417,7 @@ function ChangeProfile(props) {
                   </PreviewContainter>
                   <RightProfile>
                     <TextValidator
-                      label="Username"
+                      label={<FormattedMessage id="profile.userName" />}
                       fullWidth
                       onChange={event => {
                         // Fix issue #148
@@ -429,9 +430,9 @@ function ChangeProfile(props) {
                           : ['required', 'specialCharacter', 'isAliasRegistered']
                       }
                       errorMessages={[
-                        'This field is required.',
-                        'Username cannot contain spaces and special character.',
-                        'This username is already taken.',
+                        <FormattedMessage id="profile.requiredMes" />,
+                        <FormattedMessage id="profile.characterCheck" />,
+                        <FormattedMessage id="profile.userTaken" />,
                       ]}
                       margin="dense"
                       value={username}
@@ -446,22 +447,22 @@ function ChangeProfile(props) {
                     />
                     <BoxName>
                       <TextValidator
-                        label="First Name"
+                        label={<FormattedMessage id="profile.firstName" />}
                         fullWidth
                         onChange={event => setFirstname({ ...firstname, new: event.currentTarget.value })}
                         name="firstname"
                         validators={['required']}
-                        errorMessages={['This field is required']}
+                        errorMessages={[<FormattedMessage id="profile.requiredMes" />]}
                         margin="normal"
                         value={firstname.new}
                       />
                       <TextValidator
-                        label="Last Name"
+                        label={<FormattedMessage id="profile.lastName" />}
                         fullWidth
                         onChange={event => setLastname({ ...lastname, new: event.currentTarget.value })}
                         name="lastname"
                         validators={['required']}
-                        errorMessages={['This field is required']}
+                        errorMessages={[<FormattedMessage id="profile.requiredMes" />]}
                         margin="normal"
                         value={lastname.new}
                       />
@@ -470,7 +471,7 @@ function ChangeProfile(props) {
                       <TextValidator
                         className={classes.copyAddress}
                         fullWidth
-                        label="Address"
+                        label={<FormattedMessage id="profile.address" />}
                         name="address"
                         margin="normal"
                         // disabled
@@ -492,7 +493,7 @@ function ChangeProfile(props) {
                 </FlexBox>
                 <DivControlBtnKeystore justify="center">
                   <ButtonPro type="submit" className="nextBtn">
-                    Save change
+                    <FormattedMessage id="profile.btnSave" />
                   </ButtonPro>
                 </DivControlBtnKeystore>
               </ValidatorForm>
@@ -512,6 +513,7 @@ const mapStateToProps = state => {
     isApproved: state.account.isApproved,
     tokenKey: state.account.tokenKey,
     tokenAddress: state.account.tokenAddress,
+    language: state.globalData.language,
   };
 };
 

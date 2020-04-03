@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 
 import { Helmet } from 'react-helmet';
 import TextField from '@material-ui/core/TextField';
@@ -62,13 +63,13 @@ export default function DetailContainer(props) {
       callView('getMaxLocksIndex').then(async maxIndex => {
         if (proIndex > maxIndex) {
           history.push('/notfound');
-          return
+          return;
         } else {
           APIService.getDetailLock(proIndex).then(lock => {
             if (cancel) return;
             if (lock.status !== 1) {
-              history.push('/notfound')
-              return
+              history.push('/notfound');
+              return;
             }
             setProposeInfo(lock);
             dispatch(actions.setTopInfo(lock));
@@ -179,18 +180,24 @@ export default function DetailContainer(props) {
       {proposeInfo && proposeInfo.status === 1 && (isOwner || isView) && renderDetailPropose()}
       {/* {pageErr && renderNotFound()} */}
       {dialogVisible && (
-        <CommonDialog title="New Collection" okText="Create" onKeyReturn close={hideDialog} confirm={createCollection}>
+        <CommonDialog
+          title={<FormattedMessage id="collection.newCol" />}
+          okText={<FormattedMessage id="collection.btnOK" />}
+          onKeyReturn
+          close={hideDialog}
+          confirm={createCollection}
+        >
           <TextField
             autoFocus
             required
             onChange={e => setColName(e.target.value.normalize())}
-            label="Collection name"
+            label={<FormattedMessage id="collection.name" />}
             type="text"
             autoComplete="off"
           />
           <TextField
             onChange={e => setColDesc(e.target.value.normalize())}
-            label="Description"
+            label={<FormattedMessage id="collection.des" />}
             type="text"
             style={{ marginTop: 16 }}
             fullWidth
