@@ -512,43 +512,40 @@ class LoveLock {
 
   @transaction addUsers(_users) {
     expectAdmin(this);
-    // if (!Array.isArray(_users)) {
-    //   _users = [_users];
-    // }
-
-    // _users = _users.map(user => {
-    if (!isValidAddress(_users)) {
-      _users = convertAliasToAddress(_users);
+    if (!Array.isArray(_users)) {
+      _users = [_users];
     }
-    //   return user;
-    // });
 
-    // const schema = Joi.array().items(
-    //   Joi.string()
-    //     .max(43)
-    //     .min(43)
-    // );
+    _users = _users.map(user => {
+      if (!isValidAddress(user)) {
+        user = convertAliasToAddress(user);
+      }
+      return user;
+    });
 
-    const schema = Joi.string()
-      .max(43)
-      .min(43)
-      .required();
-    
+    const schema = Joi.array().items(
+      Joi.string()
+        .max(43)
+        .min(43)
+    );
+
     _users = validate(_users, schema);
-    
+
     //migrate userOld
     let usersOld = this.getUsers();
     let userNew = {};
     if (Array.isArray(usersOld)) {
-      userNew = usersOld.reduce(function (result, item) {
+      userNew = usersOld.reduce(function(result, item) {
         result[item] = { activate: true, token: 100 };
         return result;
       }, {});
     } else userNew = this.getUsers();
 
     //add new user
-    if (!userNew[_users]) userNew[_users] = { activate: true, token: 100 };
-
+    for (let i = 0; i < _users.length; i++) {
+      if (!userNew[_users[i]]) userNew[_users[i]] = { activate: true, token: 100 };
+    }
+    
     this.setUsers(userNew);
 
     // users = users.filter(addr => {
@@ -583,9 +580,9 @@ class LoveLock {
     );
     _users = validate(_users, schema);
     let users = this.getUsers();
-    users = users.filter(addr => {
-      return _users.indexOf(addr) === -1;
-    });
+    for (let i = 0; i < _users.length; i++) {
+      delete users[_users[i]];
+    }
     this.setUsers(users);
     return _users;
   }
