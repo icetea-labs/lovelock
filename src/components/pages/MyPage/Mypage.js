@@ -19,13 +19,7 @@ import { useTx, useDidUpdate } from '../../../helper/hooks';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import appConstants from '../../../helper/constants';
-
-const RightBox = styled.div`
-  padding: 0 0 0 ${rem(45)};
-  @media (max-width: 768px) {
-    padding-left: 0;
-  }
-`;
+import EmptyPage from '../../layout/EmptyPage';
 
 const BannerContainer = styled.div`
   margin-bottom: ${rem(20)};
@@ -88,7 +82,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory, memoryList, point } = props;
+  const { match, setLocks, setMemory, memoryList, point, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -228,84 +222,101 @@ function Mypage(props) {
     window.history.replaceState(null, '', pathname);
   }
 
+  const isHaveLocks = props.locks.length > 0;
+  const isGuest = myPageInfo.address != address
   return (
-    <div>
-      <BannerContainer>
-        <ShadowBox>
-          <ProfileCover>
-            <CoverBox>
-              <AvatarPro hash={myPageInfo.avatar} className={classes.avatar} />
-              <div>
-                <Typography variant="h5" className={classes.displayName}>
-                  {myPageInfo.displayname}
-                </Typography>
-                <PointShow>
-                  <FavoriteIcon className={classes.titlePoint} />
-                  <Typography variant="subtitle1" color="primary">
-                    &nbsp;{point}
-                  </Typography>
-                  <PersonIcon className={classes.titleIcon} />
-                  <Typography variant="subtitle1" color="primary">
-                    &nbsp;{`@${myPageInfo.username}`}
-                  </Typography>
-                </PointShow>
-              </div>
-            </CoverBox>
-            <NavbarBox>
-              <div className="proLike">
-                {/* <Button>Timeline</Button> */}
-                {/* <Button>Photos</Button> */}
-                <Button onClick={handleFollow} className={classes.btLikeFollow}>
-                  {myPageInfo.isMyFollow ? (
-                    <>
-                      <BookmarkIcon color="primary" className={classes.rightIcon} />
-                      <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
-                        <FormattedMessage id="topContainer.following" />
-                        {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <BookmarkBorderIcon className={classes.rightIcon} />
-                      <Typography component="span" variant="body2" className={classes.textFollow}>
-                        <FormattedMessage id="topContainer.follow" />
-                        {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
-                      </Typography>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </NavbarBox>
-          </ProfileCover>
-        </ShadowBox>
-      </BannerContainer>
-      <LeftBoxWrapper>
-        <div className="proposeColumn proposeColumn--left">
-          <LeftContainer
-            loading={loading}
-            isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
-          />
-        </div>
-        <div className="proposeColumn proposeColumn--right">
-          <MemoryList
-            {...props}
-            myPageRoute
-            onMemoryChanged={refresh}
-            loading={loading}
-            nextPage={nextPage}
-            needSelectLock={true}
-            locks={props.locks}
-            myPageInfo={myPageInfo}
-          />
-        </div>
-      </LeftBoxWrapper>
-    </div>
+    <>
+      {!loading && (
+        <>
+          {isHaveLocks ? (
+            <div>
+              <BannerContainer>
+                <ShadowBox>
+                  <ProfileCover>
+                    <CoverBox>
+                      <AvatarPro hash={myPageInfo.avatar} className={classes.avatar} />
+                      <div>
+                        <Typography variant="h5" className={classes.displayName}>
+                          {myPageInfo.displayname}
+                        </Typography>
+                        <PointShow>
+                          <FavoriteIcon className={classes.titlePoint} />
+                          <Typography variant="subtitle1" color="primary">
+                            &nbsp;{point}
+                          </Typography>
+                          <PersonIcon className={classes.titleIcon} />
+                          <Typography variant="subtitle1" color="primary">
+                            &nbsp;{`@${myPageInfo.username}`}
+                          </Typography>
+                        </PointShow>
+                      </div>
+                    </CoverBox>
+                    <NavbarBox>
+                      <div className="proLike">
+                        {/* <Button>Timeline</Button> */}
+                        {/* <Button>Photos</Button> */}
+                        <Button onClick={handleFollow} className={classes.btLikeFollow}>
+                          {myPageInfo.isMyFollow ? (
+                            <>
+                              <BookmarkIcon color="primary" className={classes.rightIcon} />
+                              <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
+                                <FormattedMessage id="topContainer.following" />
+                                {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
+                              </Typography>
+                            </>
+                          ) : (
+                            <>
+                              <BookmarkBorderIcon className={classes.rightIcon} />
+                              <Typography component="span" variant="body2" className={classes.textFollow}>
+                                <FormattedMessage id="topContainer.follow" />
+                                {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
+                              </Typography>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </NavbarBox>
+                  </ProfileCover>
+                </ShadowBox>
+              </BannerContainer>
+              <LeftBoxWrapper>
+                <div className="proposeColumn proposeColumn--left">
+                  <LeftContainer
+                    loading={loading}
+                    isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
+                  />
+                </div>
+                <div className="proposeColumn proposeColumn--right">
+                  <MemoryList
+                    {...props}
+                    myPageRoute
+                    onMemoryChanged={refresh}
+                    loading={loading}
+                    nextPage={nextPage}
+                    needSelectLock={true}
+                    locks={props.locks}
+                    myPageInfo={myPageInfo}
+                  />
+                </div>
+              </LeftBoxWrapper>
+            </div>
+          ) : <EmptyPage 
+                isApproved={isApproved} 
+                history={props.history} 
+                isGuest={isGuest} 
+                username={myPageInfo.username} 
+              />
+          }
+        </>
+      )}
+    </>
   );
 }
 const mapStateToProps = state => {
   return {
     locks: state.loveinfo.locks,
     address: state.account.address,
+    isApproved: state.account.isApproved,
     memoryList: state.loveinfo.memories,
     point: state.account.point,
   };
