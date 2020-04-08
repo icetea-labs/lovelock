@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -168,12 +168,12 @@ export function BlogView(props) {
             <MemoryTitle
               sender={blogView.s_tags['display-name']}
               receiver={blogView.r_tags['display-name']}
+              lock={blogView.lock}
               handleClose={closeMemory}
             />
           }
-          subtitle={<TimeWithFormat value={blogView.info.date} format="DD MMM YYYY" />}
         >
-          <Editor initContent={blogView.blogContent} read_only />
+          <Editor initContent={blogView.blogContent} memoryInfo={blogView} read_only />
           <div className={classes.editorComment}>
             <MemoryActionButton
               handleShowComment={handleShowComment}
