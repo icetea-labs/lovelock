@@ -42,10 +42,6 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     margin: '30px 0',
-<<<<<<< HEAD
-    fontSize: 12,
-=======
->>>>>>> add author info to blog view
     alignItems: 'center',
   },
   authorInfoLeft: {
@@ -55,31 +51,21 @@ const styles = {
     marginLeft: 12,
   },
   date: {
-<<<<<<< HEAD
-    fontSize: 10,
-    color: '#9e9e9e',
-  },
-  authorName: {
-=======
     fontSize: 13,
     color: '#9e9e9e',
   },
   authorName: {
     fontSize: 16,
->>>>>>> add author info to blog view
     display: 'block',
     color: 'inherit',
   },
   pointer: {
     cursor: 'pointer',
   },
-<<<<<<< HEAD
-=======
   avatar: {
     width: 50,
     height: 50
   }
->>>>>>> add author info to blog view
 };
 
 class Editor extends React.Component {
@@ -146,20 +132,23 @@ class Editor extends React.Component {
 
   renderAuthorInfo() {
     const { classes } = this.props;
-
+    
     let memoryInfo = this.props.memoryInfo;
+    let avatar = memoryInfo.s_avatar || memoryInfo.s_tags.avatar;
+    let displayName = memoryInfo.s_name || memoryInfo.s_tags['display-name'];
+    let date = memoryInfo.s_date || memoryInfo.info.date
     return ReactDOMServer.renderToString(
       <div className={classes.authorInfo}>
         <div className={classes.authorInfoLeft}>
           <a href={`/u/${memoryInfo.sender}`}>
-            <AvatarPro className={classes.avatar} hash={memoryInfo.s_tags.avatar} />
+            <AvatarPro className={classes.avatar} hash={avatar} />
           </a>
           <div className={classes.author}>
             <a className={classes.authorName} href={`/u/${memoryInfo.sender}`}>
-              {memoryInfo.s_tags['display-name']}
+              {displayName}
             </a>
             <div className={classes.date}>
-              <TimeWithFormat value={memoryInfo.info.date} format="DD MMM YYYY" />
+              <TimeWithFormat value={date} format="DD MMM YYYY" />
             </div>
           </div>
         </div>

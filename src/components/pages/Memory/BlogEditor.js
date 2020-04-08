@@ -318,11 +318,13 @@ export default function BlogEditor(props) {
             title={<MemoryTitle 
                 sender={senderName} 
                 receiver={receiverName} 
-                handleClose={handleClose} />}
+                handleClose={handleClose}
+                lock={topInfo} />}
         >
             {!previewOn && (
                 <Editor
                     initContent={blogBody}
+                    memoryInfo={topInfo}
                     title={blogTitle}
                     onTitleChange={setBlogTitle}
                     subtitle={blogSubtitle}
@@ -334,7 +336,7 @@ export default function BlogEditor(props) {
                     onChange={onChangeBlogBody}
                 />
             )}
-            {previewOn && <Editor initContent={combineContent()} read_only />}
+            {previewOn && <Editor memoryInfo={topInfo} initContent={combineContent()} read_only />}
         </BlogModal>
     )
 }
