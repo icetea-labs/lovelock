@@ -446,9 +446,7 @@ export function TimeWithFormat(props) {
   const formatValue = format || 'MM/DD/YYYY';
 
   return (
-    <span>
-      {language === ja ? moment(value).format('YYYY年MM月DD日 HH:mm:ss') : moment(value).format(formatValue)}
-    </span>
+    <span>{language === ja ? moment(value).format('YYYY年MM月DD日 HH:mm:ss') : moment(value).format(formatValue)}</span>
   );
 }
 
@@ -510,7 +508,15 @@ export function HolidayEvent(props) {
       <div className="summaryCongrat">
         <div className="congratContent">
           {diffYear === 1 ? (
-            <span>{`You have been together for ${diffYear} year.`}</span>
+            <span>{`You have been together for ${diffYear} year. Your lock is bronze.`}</span>
+          ) : diffYear === 2 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is silver.`}</span>
+          ) : diffYear === 5 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is gold.`}</span>
+          ) : diffYear === 10 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is platinum.`}</span>
+          ) : diffYear >= 10 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is diamond.`}</span>
           ) : (
             <span>{`You have been together for ${diffYear} years.`}</span>
           )}
@@ -524,7 +530,9 @@ export function HolidayEvent(props) {
       <div className="summaryCongrat">
         <div className="congratContent">
           {diffMonth === 1 ? (
-            <span>{`You have been together for ${diffMonth} month.`}</span>
+            <span>{`You have been together for ${diffMonth} month. Your lock is wooden.`}</span>
+          ) : diffMonth === 3 ? (
+            <span>{`You have been together for ${diffMonth} months. Your lock is steel.`}</span>
           ) : (
             <span>{`You have been together for ${diffMonth} months.`}</span>
           )}
@@ -537,7 +545,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`Congratulations for ${diffDate} days together!.`}</span>
+          <span>{`Congratulations for ${diffDate} days together!`}</span>
         </div>
       </div>
     );

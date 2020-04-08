@@ -434,7 +434,7 @@ function MemoryContent(props) {
         </div>
         <span>
           <span>
-            <FormattedMessage id="memory.lockedWith " />
+            <FormattedMessage id="memory.lockedWith" />
           </span>
           {renderLinkUser(false)}
         </span>
