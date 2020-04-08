@@ -77,7 +77,7 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     console.log('Adding user ' + users);
     try {
       const newContract = tweb3.contract(r);
-      await newContract.methods.addUsers(users).sendCommit({ from: account.address });
+      await newContract.methods.addUsers(users.length > 1 ? users : users[0]).sendCommit({ from: account.address });
       console.log('User added.');
     } catch (e) {
       console.log('Fail to add user: ', e.message);

@@ -14,10 +14,9 @@ import { Lock } from '../../elements';
 import PuConfirmLock from '../../elements/PuConfirmLock';
 import PuNotifyLock from '../../elements/PuNotifyLock';
 import * as actions from '../../../store/actions';
+import StickyBox from "react-sticky-box";
 
 const LeftBox = styled.div`
-  position: sticky;
-  top: 5px;
   width: 100%;
   min-height: ${rem(360)};
   margin-bottom: ${rem(100)};
@@ -83,7 +82,6 @@ const CollectionBox = styled.div`
 `;
 
 const SupportSite = styled.div`
-  position: absolute;
   display: block;
   padding-top: 1rem;
   line-height: 18px;
@@ -288,7 +286,7 @@ function LeftContainer(props) {
     );
   }
   return (
-    <>
+    <StickyBox offsetTop={20} offsetBottom={20}>
       <LeftBox>
         <ShadowBox>
           {address && (
@@ -336,7 +334,7 @@ function LeftContainer(props) {
       )}
       {step === 'accept' && <PuConfirmLock close={closePopup} index={index} />}
       {step === 'deny' && <PuConfirmLock isDeny close={closePopup} index={index} />}
-    </>
+    </StickyBox>
   );
 }
 
