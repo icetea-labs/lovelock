@@ -105,7 +105,8 @@ class Editor extends React.Component {
   }
 
   insertCardToDOM() {
-    waitForHtmlTags('.postContent', dom => {
+    setTimeout(() =>
+      waitForHtmlTags('.postContent', dom => {
         const postContentNode = dom[0];
         let title = postContentNode.querySelector('h1 + h3') ||
           postContentNode.querySelector('h1') ||
@@ -122,7 +123,7 @@ class Editor extends React.Component {
         } else {
           title.parentNode.appendChild(cardNode);
         }
-    });
+    }));
   }
 
   renderAuthorInfo() {
