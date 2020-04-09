@@ -112,7 +112,7 @@ export default function BlogModal(props) {
                     control={<Switch onChange={e => props.handlePreview(e.target.checked)} />}
                     label={
                       <Typography component="div">
-                        <Box color="primary.main">{props.previewText || <FormattedMessage id="memory.publish" />}</Box>
+                        <Box color="primary.main">{props.previewText || <FormattedMessage id="memory.preview" />}</Box>
                       </Typography>
                     }
                   />
