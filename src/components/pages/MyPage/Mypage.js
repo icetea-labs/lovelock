@@ -247,7 +247,7 @@ function Mypage(props) {
                           </Typography>
                           <LoyaltyIcon className={classes.titlePoint} />
                           <Typography variant="subtitle1" color="primary">
-                            &nbsp;{balances[myPageInfo.address]}
+                            &nbsp;{balances[myPageInfo.address || paramAliasOrAddr]}
                           </Typography>
                         </PointShow>
                       </div>
