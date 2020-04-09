@@ -151,7 +151,7 @@ export default function EmptyPage(props){
                   >
                     <FormattedMessage id="home.activationForm" />
                   </a>
-                  <FormattedMessage id="home.activstionGoal" />
+                  <FormattedMessage id="home.activationGoal" />
                 </span>
               </div>
             )}
