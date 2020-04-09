@@ -5,6 +5,7 @@ import MemoryList from '../Memory/MemoryList';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 import appConstants from "../../../helper/constants";
+import { useDidUpdate } from '../../../helper/hooks';
 
 function RightContainer(props) {
   const { proIndex, collectionId, memoryList } = props;
@@ -26,7 +27,7 @@ function RightContainer(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  useEffect(() => {
+  useDidUpdate(() => {
     fetchMemories(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proIndex, validCollectionId, changed]);
@@ -37,15 +38,16 @@ function RightContainer(props) {
     APIService.getMemoriesByLockIndex(proIndex, validCollectionId, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
       if (!result.length) {
         setNoMoreMemories(true);
-        setLoading(false);
-        return;
       }
 
       let memories = result;
-      if (!loadToCurrentPage) memories = memoryList.concat(result);
+      if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
       dispatch(actions.setMemory(memories));
       setLoading(false);
-    });
+    }).catch(err => {
+      console.error(err)
+      setLoading(false)
+    })
   }
 
   function nextPage() {

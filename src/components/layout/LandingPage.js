@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import { FormattedMessage } from 'react-intl';
 
 const OutBox = styled.div`
   display: flex;
@@ -164,8 +165,10 @@ class LandingPage extends PureComponent {
           <SplitLeft>
             <SplitContentLeft>
               <LoveLockQuote>
-                An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting.<span className="more"> Keep to
-                yourself or share with close friends.</span>
+                <FormattedMessage id="landing.introTitle" />
+                <span className="more">
+                  <FormattedMessage id="landing.introSubTit" />
+                </span>
               </LoveLockQuote>
             </SplitContentLeft>
           </SplitLeft>
@@ -174,14 +177,18 @@ class LandingPage extends PureComponent {
               <div className="imgView">
                 <img src="/static/img/logo.svg" alt="loveLock" />
               </div>
-              <h1 className="signUpTitle">Love written in the blocks.</h1>
+              <h1 className="signUpTitle">
+                <FormattedMessage id="landing.tagline" />
+              </h1>
               <SignupForm>
-                <h2 className="signUpSubTitle">Join LoveLock now.</h2>
+                <h2 className="signUpSubTitle">
+                  <FormattedMessage id="landing.cta" />
+                </h2>
                 <Button href="/register" className="signUpBtn" variant="contained" color="primary">
-                  Register
+                  <FormattedMessage id="landing.btnRegist" />
                 </Button>
                 <Button href="/login" className="signUpBtn" variant="outlined" color="primary">
-                  Log In
+                  <FormattedMessage id="landing.btnLogin" />
                 </Button>
               </SignupForm>
             </SplitContentRight>

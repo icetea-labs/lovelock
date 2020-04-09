@@ -9,8 +9,8 @@ import { useSnackbar } from 'notistack';
 import { ArrowTooltip, AvatarPro } from '../../elements';
 import { callView, getTagsInfo, diffTime, TimeWithFormat, handleError } from '../../../helper';
 import { useTx } from '../../../helper/hooks';
-import UserSuggestionTextarea from "../../elements/Common/UserSuggestionTextarea";
-import UserLinkify from "../../elements/Common/UserLinkify";
+import UserSuggestionTextarea from '../../elements/Common/UserSuggestionTextarea';
+import UserLinkify from '../../elements/Common/UserLinkify';
 
 const useStyles = makeStyles(theme => ({
   avatarComment: {
@@ -93,7 +93,9 @@ export default function MemoryComments(props) {
   const [comments, setComments] = useState([]);
   const [numHidencmt, setNumHidencmt] = useState(0);
   const [showComments, setShowComments] = useState([]);
-  let myFormRef = useRef();
+  const myFormRef = useRef();
+  const language = useSelector(state => state.globalData.language);
+  const ja = 'ja';
 
   useEffect(() => {
     let cancel = false;
@@ -136,11 +138,10 @@ export default function MemoryComments(props) {
   async function newComment() {
     if (!comment) return;
 
-    tx.sendCommit('addComment', memoryIndex, comment, '')
-      .catch(err => {
-        const message = handleError(err, 'sending comment');
-        enqueueSnackbar(message, { variant: 'error' });
-      });
+    tx.sendCommit('addComment', memoryIndex, comment, '').catch(err => {
+      const message = handleError(err, 'sending comment');
+      enqueueSnackbar(message, { variant: 'error' });
+    });
 
     myFormRef.current && myFormRef.current.reset();
     setComment('');
@@ -160,7 +161,7 @@ export default function MemoryComments(props) {
   }
 
   function canDelelte(item) {
-    return [item.sender, memory[0].sender, memory[0].receiver].includes(address)
+    return [item.sender, memory[0].sender, memory[0].receiver].includes(address);
   }
 
   async function deleteComment(item, indexKey) {
@@ -193,7 +194,7 @@ export default function MemoryComments(props) {
   const renderViewMore = (
     <Grid item>
       <Link onClick={viewMoreComment} className={classes.linkViewMore}>
-        View {numHidencmt} more comments
+        {language === ja ? `他の${numHidencmt}件のコメントを表示` : `View ${numHidencmt} more comments`}
       </Link>
     </Grid>
   );
@@ -213,7 +214,14 @@ export default function MemoryComments(props) {
                   <UserLinkify content={item.content} />
                 </Typography>
 
-                <ArrowTooltip title={<TimeWithFormat value={item.timestamp} format="dddd, MMMM Do YYYY, h:mm:ss a" />}>
+                <ArrowTooltip
+                  title={
+                    <TimeWithFormat
+                      value={item.timestamp}
+                      format={language === ja ? 'MMM Do' : 'dddd, MMMM Do YYYY, h:mm:ss a'}
+                    />
+                  }
+                >
                   <Typography margin="dense" className={classes.timeComment}>
                     {diffTime(item.timestamp)}
                   </Typography>
@@ -238,7 +246,7 @@ export default function MemoryComments(props) {
       <Grid item classes={{ root: classes.btBox }}>
         <UserSuggestionTextarea
           value={comment}
-          placeholder="Write a comment..."
+          placeholder={language === ja ? 'コメントを記入してください。' : 'Write a comment...'}
           onChange={e => setComment(e.target.value.normalize())}
           inputRef={textInput}
           onKeyDown={onKeyDownPostComment}

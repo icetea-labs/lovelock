@@ -1,7 +1,13 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
-import { ipfs, createIpfsClient } from '../service/ipfs';
-import { toPublicKey, stableHashObject, sign, toPubKeyAndAddress, toPubKeyAndAddressBuffer } from '@iceteachain/common/src/ecc';
+import { useSelector } from 'react-redux';
+import {
+  toPublicKey,
+  stableHashObject,
+  sign,
+  toPubKeyAndAddress,
+  toPubKeyAndAddressBuffer,
+} from '@iceteachain/common/src/ecc';
 import {
   decode as codecDecode,
   toString as codecToString,
@@ -9,31 +15,27 @@ import {
   toKeyBuffer as codecToKeyBuffer,
   toKeyString as codecToKeyString,
   isAddressType as codecIsAddressType,
- } from '@iceteachain/common/src/codec';
+} from '@iceteachain/common/src/codec';
 import { AccountType } from '@iceteachain/common/src/enum';
 
-
 import moment from 'moment';
-import {
-  generateMnemonic,
-  validateMnemonic,
-  mnemonicToSeedSync,
-} from 'bip39';
+import { generateMnemonic, validateMnemonic, mnemonicToSeedSync } from 'bip39';
 import HDKey from 'hdkey';
+import { ipfs, createIpfsClient } from '../service/ipfs';
 // import eccrypto from 'eccrypto';
 import { encodeTx } from './encode';
 import { getWeb3, getContract, getAliasContract, getDidContract } from '../service/tweb3';
 import { decodeTx, decode } from './decode';
-import { getTagsInfo } from "./account";
+// import { getTagsInfo } from "./account";
 
 // because we do not support private locks/memoris yet
 // let's use a fake eccrypto
 // we will review things later when we enable private locks/memories
 const eccrypto = {
   derive: function() {
-    return 0
-  }
-}
+    return 0;
+  },
+};
 
 const paths = 'm’/44’/349’/0’/0';
 
@@ -69,7 +71,7 @@ export function waitForHtmlTags(
 }
 
 export function ensureHashUrl(url, gateway = ipfsGateway) {
-  gateway = ipfsGateway // the alt gateway does not always work for image, so always use primary gateway
+  gateway = ipfsGateway; // the alt gateway does not always work for image, so always use primary gateway
   return url.indexOf(':') < 0 ? gateway + url : url;
 }
 
@@ -296,19 +298,20 @@ export async function saveToIpfs(files) {
   let user = localStorage.getItem('user') || sessionStorage.getItem('user');
   user = JSON.parse(user);
   const from = user.address;
-  const app = process.env.REACT_APP_CONTRACT
+  const app = process.env.REACT_APP_CONTRACT;
 
   const time = Date.now();
   const hash32bytes = stableHashObject({ app, fileHashes, from, time });
   const signature = sign(hash32bytes, tokenKey).signature;
   const authData = JSON.stringify({ app, from, pubkey, sign: codecToDataString(signature), time });
 
-  const newIpfs = createIpfsClient(authData)
+  const newIpfs = createIpfsClient(authData);
 
   const results = []
   for await (const result of newIpfs.add([...contentBuffer])) {
     results.push(String(result.cid))
   }
+  
   return results;
 }
 
@@ -437,9 +440,14 @@ export async function loadMemCacheAPI(id) {
 }
 
 export function TimeWithFormat(props) {
+  const language = useSelector(state => state.globalData.language);
+  const ja = 'ja';
   const { format, value } = props;
   const formatValue = format || 'MM/DD/YYYY';
-  return <span>{moment(value).format(formatValue)}</span>;
+
+  return (
+    <span>{language === ja ? moment(value).format('YYYY年MM月DD日 HH:mm:ss') : moment(value).format(formatValue)}</span>
+  );
 }
 
 export function summaryDayCal(value) {
@@ -500,7 +508,15 @@ export function HolidayEvent(props) {
       <div className="summaryCongrat">
         <div className="congratContent">
           {diffYear === 1 ? (
-            <span>{`You have been together for ${diffYear} year.`}</span>
+            <span>{`You have been together for ${diffYear} year. Your lock is bronze.`}</span>
+          ) : diffYear === 2 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is silver.`}</span>
+          ) : diffYear === 5 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is gold.`}</span>
+          ) : diffYear === 10 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is platinum.`}</span>
+          ) : diffYear >= 10 ? (
+            <span>{`You have been together for ${diffYear} years. Your lock is diamond.`}</span>
           ) : (
             <span>{`You have been together for ${diffYear} years.`}</span>
           )}
@@ -514,7 +530,9 @@ export function HolidayEvent(props) {
       <div className="summaryCongrat">
         <div className="congratContent">
           {diffMonth === 1 ? (
-            <span>{`You have been together for ${diffMonth} month.`}</span>
+            <span>{`You have been together for ${diffMonth} month. Your lock is wooden.`}</span>
+          ) : diffMonth === 3 ? (
+            <span>{`You have been together for ${diffMonth} months. Your lock is steel.`}</span>
           ) : (
             <span>{`You have been together for ${diffMonth} months.`}</span>
           )}
@@ -527,7 +545,7 @@ export function HolidayEvent(props) {
     return (
       <div className="summaryCongrat">
         <div className="congratContent">
-          <span>{`Congratulations for ${diffDate} days together!.`}</span>
+          <span>{`Congratulations for ${diffDate} days together!`}</span>
         </div>
       </div>
     );
@@ -766,73 +784,74 @@ export function handleError(err, action) {
 export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
   // remove the first @ if it is there
-  escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1)
+  escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
   // if (escapedValue.length < 3) {
   //   return [];
   // }
 
-  const regexText = `^account\\..*${escapedValue}`
+  const regexText = `^account\\..*${escapedValue}`;
   const regex = new RegExp(regexText);
-  
+
   let people = await getAliasContract()
     .methods.query(regex, { includeTags: true })
     .call()
     .then(result => {
       return Object.keys(result).map(key => {
         const nick = key.substring(key.indexOf('.') + 1);
-        const tags = result[key].tags || {}
+        const tags = result[key].tags || {};
         return {
           [usernameKey]: nick,
           address: result[key].address,
           avatar: tags.avatar,
-          display: tags['display-name']
+          display: tags['display-name'],
         };
       });
     })
     .catch(err => {
-      console.warn(err)
-      return []
-    })
+      console.warn(err);
+      return [];
+    });
 
-  if (!people.length) return []
+  if (!people.length) return [];
 
-  return people
+  return people;
 }
 
 export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
-  
   let people = await getDidContract()
-    .methods.queryByTags({
-      'display-name': value.toLowerCase()
-    }, { includeAlias: true })
+    .methods.queryByTags(
+      {
+        'display-name': value.toLowerCase(),
+      },
+      { includeAlias: true }
+    )
     .call()
     .then(result => {
       return result.map(item => {
-        const nick = item.alias.substring(item.alias.indexOf('.') + 1);
-        const tags = item.tags || {}
+        const nick = item.alias ? item.alias.substring(item.alias.indexOf('.') + 1) : '';
+        const tags = item.tags || {};
         return {
           [usernameKey]: nick,
           address: item.address,
           avatar: tags.avatar,
-          display: tags['display-name']
+          display: tags['display-name'],
         };
       });
     })
     .catch(err => {
-      console.warn(err)
-      return []
-    })
+      console.warn(err);
+      return [];
+    });
 
-  if (!people.length) return []
+  if (!people.length) return [];
 
-  return people
-
+  return people;
 }
 
 export async function getUserSuggestions(value, usernameKey = 'nick') {
-  if (!value) return []
-  if (value.startsWith('@')) return getUserSuggestionsByNick(value, usernameKey)
-  return getUserSuggestionsByName(value, usernameKey)
+  if (!value) return [];
+  if (value.startsWith('@')) return getUserSuggestionsByNick(value, usernameKey);
+  return getUserSuggestionsByName(value, usernameKey);
 }
 
 function escapeRegexCharacters(str) {
@@ -850,7 +869,7 @@ export function copyToClipboard(text, enqueueSnackbar) {
 }
 
 export function getShortName(tags) {
-  if (tags.firstname) return tags.firstname
-  if (tags.lastname) return tags.lastname
-  return tags['display-name'].split(' ')[0]
+  if (tags.firstname) return tags.firstname;
+  if (tags.lastname) return tags.lastname;
+  return tags['display-name'].split(' ')[0];
 }

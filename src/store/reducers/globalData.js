@@ -5,6 +5,7 @@ const initialState = {
   isNewLock: false,
   showNotLoginNotify: false,
   triggerElement: null,
+  language: "en",
 };
 
 const globalData = (state = initialState, action) => {
@@ -15,6 +16,8 @@ const globalData = (state = initialState, action) => {
       return { ...state, isNewLock: action.data };
     case actionTypes.SET_CONFIRM_AUTH_ELE:
       return { ...state, triggerElement: action.data };
+    case actionTypes.SET_LANGUAGE:
+      return { ...state, language: action.data };
     // case types.SET_SHOW_PRIVATEKEY:
     //   return {
     //     ...state,

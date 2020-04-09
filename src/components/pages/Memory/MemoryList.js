@@ -9,7 +9,6 @@ import CollectionsIcon from '@material-ui/icons/Collections';
 import { rem } from '../../elements/StyledUtils';
 import MemoryContainer from './MemoryContainer';
 import CreateMemory from './CreateMemory';
-import BlogEditor from "./BlogEditor";
 
 const RightBox = styled.div`
   padding: 0 0 ${rem(45)} ${rem(45)};
@@ -35,24 +34,24 @@ export default function MemoryList(props) {
     onMemoryChanged,
     myPageRoute,
     loading,
-    nextPage
+    nextPage,
+    myPageInfo,
+    noCreateMemory,
   } = props;
-
-  const [edittingMemory, setEdittingMemory] = useState(false)
 
   const address = useSelector(state => state.account.address);
   const history = useHistory();
 
+  const [edittingMemory, setEdittingMemory] = useState(false)
   const openBlogEditor = () => setEdittingMemory(true)
   const closeBlogEditor = () => setEdittingMemory(false)
 
+  const showCreateMemory = !noCreateMemory && (
+   (proIndex && (isOwner || isContributor)) // lock screen
+   || (!proIndex && myPageInfo && myPageInfo.address == address) // mypage screen
+   || (!proIndex && !myPageInfo)) // home screen
   return (
     <RightBox>
-      {address && <BlogEditor
-        onMemoryChanged={onMemoryChanged}
-        memory={edittingMemory}
-        onClose={closeBlogEditor}
-      />}
       {collectionName && (
         <CollectionIndicator>
           <Chip
@@ -63,14 +62,18 @@ export default function MemoryList(props) {
           />
         </CollectionIndicator>
       )}
-      {proIndex != null && address && (isOwner || isContributor) && (
+      {address && showCreateMemory && (
         <CreateMemory
           proIndex={proIndex}
           collectionId={collectionId}
           collections={collections}
           onMemoryChanged={onMemoryChanged}
           handleNewCollection={handleNewCollection}
+          needSelectLock={props.needSelectLock}
+          locks={props.locks}
           openBlogEditor={openBlogEditor}
+          closeBlogEditor={closeBlogEditor}
+          edittingMemory={edittingMemory}
         />
       )}
       <MemoryContainer

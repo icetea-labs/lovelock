@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import QueueAnim from 'rc-queue-anim';
 import { withRouter } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
 import { HeaderAuthen } from '../../../elements/Common';
@@ -37,7 +38,7 @@ function Register(props) {
         <LayoutAuthen key={1}>
           <BoxAuthen>
             <ShadowBoxAuthen>
-              {step === 'one' && <HeaderAuthen title="Create New Account" />}
+              {step === 'one' && <HeaderAuthen title={<FormattedMessage id="regist.regist" />} />}
               {step === 'one' && (
                 <RegisterUsername
                   setIsOpenCrop={setIsOpenCrop}
@@ -69,7 +70,4 @@ const mapDispatchToProps = dispatch => {
     },
   };
 };
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withRouter(Register));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Register));

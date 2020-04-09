@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Fab from '@material-ui/core/Fab';
 import { makeStyles } from '@material-ui/core/styles';
 import notFoundImg from '../../../assets/img/404PageBackground.jpg';
+import { FormattedMessage } from 'react-intl';
 
 const NotFoundContainer = styled.div`
   color: white;
@@ -92,13 +93,17 @@ function NotFound(props) {
     <NotFoundContainer>
       <img src={notFoundImg} alt="tradatech" />
       <div className="title">
-        <span>OOPS, PAGE NOT FOUND!</span>
+        <span>
+          <FormattedMessage id="notFound.oop" />
+        </span>
       </div>
       <div className="title404">
         <span>404</span>
       </div>
       <div className="guide">
-        <span>Perhaps you are wandering too far. Click the button below to come back home.</span>
+        <span>
+          <FormattedMessage id="notFound.guide" />
+        </span>
       </div>
       <div className="btn">
         <Fab
@@ -109,7 +114,7 @@ function NotFound(props) {
             props.history.push('/');
           }}
         >
-          RETURN HOME
+          <FormattedMessage id="notFound.btnBack" />
         </Fab>
       </div>
     </NotFoundContainer>

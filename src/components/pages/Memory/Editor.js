@@ -6,6 +6,7 @@ import mediumZoom from 'medium-zoom';
 import Input from '@material-ui/core/Input';
 import { DividerBlockConfig } from 'Dante2/package/es/components/blocks/divider';
 import throttle from 'lodash/throttle';
+import { connect } from 'react-redux';
 
 import { waitForHtmlTags } from '../../../helper';
 import { AvatarPro } from '../../elements/index';
@@ -70,6 +71,7 @@ const styles = {
 
 class Editor extends React.Component {
   titleText = React.createRef();
+
   subtitleText = React.createRef();
 
   componentDidMount() {
@@ -233,12 +235,13 @@ class Editor extends React.Component {
   };
 
   render() {
-    const { classes, saveOptions } = this.props;
+    const { classes, saveOptions, language } = this.props;
     const draftStorage = saveOptions
       ? {
           data_storage: saveOptions,
         }
       : {};
+    const ja = 'ja';
 
     return (
       <div className={classes.wrapper}>
@@ -247,7 +250,7 @@ class Editor extends React.Component {
             <Input
               className={classes.titleText}
               inputRef={this.titleText}
-              placeholder="Title"
+              placeholder={language === ja ? '題名' : 'Title'}
               value={this.props.title}
               onChange={e => this.props.onTitleChange(e.target.value)}
               fullWidth
@@ -255,7 +258,7 @@ class Editor extends React.Component {
             <Input
               className={classes.subtitleText}
               inputRef={this.subtitleText}
-              placeholder="Subtitle (optional)"
+              placeholder={language === ja ? 'サブタイトル（オプション）' : 'Subtitle (optional)'}
               value={this.props.subtitle}
               onChange={e => this.props.onSubtitleChange(e.target.value)}
               fullWidth
@@ -265,7 +268,11 @@ class Editor extends React.Component {
         <Dante
           content={this.props.initContent ? this.props.initContent : null}
           read_only={!!this.props.read_only}
-          body_placeholder="Write content, paste or drag & drop photos..."
+          body_placeholder={
+            language === ja
+              ? '内容を書き込み、写真を貼り付ける（ドラッグ＆ドロップもできる）'
+              : 'Write content, paste or drag & drop photos...'
+          }
           widgets={this.configWidgets()}
           tooltips={this.configTooltips()}
           {...draftStorage}
@@ -276,4 +283,10 @@ class Editor extends React.Component {
   }
 }
 
-export default withStyles(styles)(Editor);
+const mapStateToProps = state => {
+  return {
+    language: state.globalData.language,
+  };
+};
+
+export default withStyles(styles)(connect(mapStateToProps, null)(Editor));

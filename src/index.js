@@ -1,4 +1,4 @@
-import React, { Suspense, lazy} from 'react';
+import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -9,25 +9,30 @@ import IconButton from '@material-ui/core/IconButton';
 // import { PersistGate } from 'redux-persist/lib/integration/react';
 
 import { Helmet } from 'react-helmet';
+import { IntlProvider } from 'react-intl';
 import * as serviceWorker from './serviceWorker';
 import { SimpleLoading } from './components/elements/GlobaLoading';
 // import { persistor, store } from './store';
 import { store } from './store';
+import messageEn from './transaltions/en.json';
+import messageJa from './transaltions/ja.json';
 
 // we have to do it here because App component is lasily loaded
 // so cannot this kind of stuff there
-(function(p){
+(function(p) {
   if (/^\/blog\/\d+\/?$/.test(p) || /^\/lock\/\d+(\/|$)/.test(p)) {
     window.prerenderReady = false;
   }
-})(window.location.pathname)
+})(window.location.pathname);
 
 // import App from './App';
-const App = lazy(() => import(
-  /* webpackChunkName: "app" */
-  /* webpackPreload: true */
-'./App'
-));
+const App = lazy(() =>
+  import(
+    /* webpackChunkName: "app" */
+    /* webpackPreload: true */
+    './App'
+  )
+);
 
 // const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
@@ -144,6 +149,22 @@ const onClickDismiss = key => () => {
   notistackRef.current.closeSnackbar(key);
 };
 
+// Define user's language. Different browsers have the user locale defined
+// on different fields on the `navigator` object, so we make sure to account
+// for these different by checking all of them
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+
+// Split locales with a region code
+const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+
+// Try full locale, try locale without region code, fallback to 'en'
+const messages = {
+  en: messageEn,
+  ja: messageJa,
+};
+
+// console.log('language', languageWithoutRegionCode);
+
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
@@ -164,7 +185,12 @@ ReactDOM.render(
         }}
       >
         <Suspense fallback={<SimpleLoading />}>
-          <App />
+          <IntlProvider
+            locale={languageWithoutRegionCode}
+            messages={messages[languageWithoutRegionCode] || messages.en}
+          >
+            <App />
+          </IntlProvider>
         </Suspense>
       </SnackbarProvider>
       {/* </PersistGate> */}
@@ -189,7 +215,7 @@ ReactDOM.render(
 
 serviceWorker.register({
   onUpdate: registration => {
-    const waitingServiceWorker = registration.waiting
+    const waitingServiceWorker = registration.waiting;
 
     if (waitingServiceWorker) {
       // waitingServiceWorker.addEventListener("statechange", event => {
@@ -197,7 +223,7 @@ serviceWorker.register({
       //     window.location.reload()
       //   }
       // });
-      waitingServiceWorker.postMessage({ type: "SKIP_WAITING" });
+      waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
     }
-  }
+  },
 });
