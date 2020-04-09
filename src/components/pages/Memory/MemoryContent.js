@@ -11,6 +11,9 @@ import Gallery from 'react-photo-gallery';
 import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
+// import DoneIcon from '@material-ui/icons/Done';
+// import DoneAllIcon from '@material-ui/icons/DoneAll';
+
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
@@ -407,10 +410,14 @@ function MemoryContent(props) {
       name = m.name;
     } else {
       u = m.receiver;
-      name = m.r_tags && m.r_tags['display-name'];
+      name = m.r_tags && m.r_tags['display-name']
     }
 
-    if (!name) return <span>a crush</span>;
+    if (!name) {
+      return <span>a crush</span>;
+    } else {
+      name = name.split(' ')[0]
+    }
 
     return (
       <Link
@@ -426,6 +433,39 @@ function MemoryContent(props) {
         {name}
       </Link>
     );
+  }
+
+  function renderLinkReceiver() {
+    const mem = memoryDecrypted;
+    //let icon = mem.lock.type === 2 ? <WavesIcon /> : (mem.lock.type === 1 ? <DoneIcon /> : <DoneAllIcon />)
+    let type = mem.lock.type === 2 ? 'a journal' : (mem.lock.type === 1 ? 'a crush' : 'a lock')
+    let receiver = ''
+    let style = {}
+    if (mem.lock.s_info.lockName) {
+      receiver = mem.lock.s_info.lockName
+    } else if (mem.r_tags && mem.r_tags['display-name']) {
+      receiver = mem.r_tags['display-name'].split(' ')[0]
+    } else {
+      receiver = type
+      style = { textTransform: 'none' }
+    }
+    
+    return (
+          <>
+            <ArrowRightIcon color="primary" />
+            {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
+              <p style={{ color: 'inherit' }}>&nbsp;{receiver}</p>
+            ) : (
+              <Link href={`/lock/${mem.lockIndex}`} style={style}
+                onClick={e => {
+                    e.preventDefault();
+                    history.push(`/lock/${mem.lockIndex}`);
+                }}>
+                {receiver}
+              </Link>
+            )}
+          </>
+          )
   }
 
   const renderLockEventMemory = () => {
@@ -589,23 +629,10 @@ function MemoryContent(props) {
   const { isUnlock } = memoryDecrypted;
 
   const renderTitleMem = () => {
-    const mem = memoryDecrypted;
     return (
       <>
         {renderLinkUser(true)}
-
-        {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
-          <>
-            <ArrowRightIcon color="primary" />
-            {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
-              <p style={{ color: 'inherit' }}>{mem.r_tags['display-name']}</p>
-            ) : (
-              <a href={`/u/${mem.receiver}`} style={{ color: 'inherit' }} className={classes.memoryReceiver}>
-                {mem.r_tags['display-name']}
-              </a>
-            )}
-          </>
-        )}
+        {!memoryDecrypted.isDetailScreen && renderLinkReceiver()}
       </>
     );
   };
