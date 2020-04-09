@@ -358,7 +358,8 @@ function MemoryContent(props) {
   function closeMemory() {
     setOpenModal(false);
     const pathname = `/lock/${memory.lockIndex}`;
-    window.history.pushState({}, '', pathname);
+    //window.history.pushState({}, '', pathname);
+    window.history.back()
   }
 
   const [currentImage, setCurrentImage] = useState(0);
