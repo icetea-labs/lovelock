@@ -31,7 +31,8 @@ const BannerContainer = styled.div`
 const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
-  background: linear-gradient(320deg, #e8e8e8, #d8d8d8);
+  background: linear-gradient(320deg, #eee, #ddd);
+  background-image: url("/static/img/small_tiles.png");
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;
