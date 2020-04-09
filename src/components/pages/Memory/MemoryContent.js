@@ -165,8 +165,8 @@ const setMemoryCollection = (lock, memory) => {
   }
 };
 
-const renderCardSubtitle = memory => {
-  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />;
+const renderCardSubtitle = (memory, language) => {
+  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" language={language} />;
   const hasCol = memory.collection;
   if (!hasCol) return time;
 
@@ -187,6 +187,8 @@ function MemoryContent(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
+  const language = useSelector(state => state.globalData.language);
+
   const { collections } = memory.lock;
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
@@ -692,7 +694,7 @@ function MemoryContent(props) {
         <CardHeader
           avatar={<AvatarPro alt={memoryDecrypted['s_tags']['display-name']} hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem()}
-          subheader={renderCardSubtitle(memoryDecrypted)}
+          subheader={renderCardSubtitle(memoryDecrypted, language)}
           action={
             <IconButton aria-label="settings" onClick={openActionMenu}>
               <MoreVertIcon />

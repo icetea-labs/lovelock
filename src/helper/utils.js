@@ -440,7 +440,7 @@ export async function loadMemCacheAPI(id) {
 }
 
 export function TimeWithFormat(props) {
-  const language = useSelector(state => state.globalData.language);
+  const language = props.language
   const ja = 'ja';
   const { format, value } = props;
   const formatValue = format || 'MM/DD/YYYY';

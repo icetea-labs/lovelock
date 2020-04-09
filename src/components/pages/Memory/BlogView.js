@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy } from 'react';
-import { connect, useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -10,7 +10,7 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
-import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
+import { smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 

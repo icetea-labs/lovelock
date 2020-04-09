@@ -218,6 +218,7 @@ export default function MemoryComments(props) {
                   title={
                     <TimeWithFormat
                       value={item.timestamp}
+                      language={language}
                       format={language === ja ? 'MMM Do' : 'dddd, MMMM Do YYYY, h:mm:ss a'}
                     />
                   }

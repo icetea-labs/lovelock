@@ -341,7 +341,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, address, topInfo, setTopInfo, setGLoading } = props;
+  const { proIndex, address, topInfo, setTopInfo, setGLoading, language } = props;
   const tx = useTx();
   const isSender = topInfo.sender === address;
   const isReceiver = topInfo.receiver === address;
@@ -689,7 +689,7 @@ function TopContrainer(props) {
                 </Link>
                 <span className="sinceDate">・</span>
                 <span className="time color-gray">
-                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
+                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" language={language} />
                 </span>
                 {isSender && renderEditLockIcon()}
               </div>
@@ -765,6 +765,7 @@ const mapStateToProps = state => {
   return {
     topInfo: state.loveinfo.topInfo,
     address: state.account.address,
+    language: state.globalData.language
   };
 };
 

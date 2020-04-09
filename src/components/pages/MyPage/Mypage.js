@@ -8,7 +8,7 @@ import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 import { FormattedMessage } from 'react-intl';
 
-import FavoriteIcon from '@material-ui/icons/Favorite';
+import LoyaltyIcon from '@material-ui/icons/Loyalty';
 import PersonIcon from '@material-ui/icons/Person';
 import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
@@ -31,7 +31,7 @@ const BannerContainer = styled.div`
 const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
-  background: linear-gradient(340deg, #8dc1fe, #ad76ff);
+  background: linear-gradient(320deg, #e8e8e8, #d8d8d8);
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;
@@ -73,10 +73,10 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(1),
   },
   titlePoint: {
+    marginLeft: theme.spacing(2),
     color: '#8250c8',
   },
   titleIcon: {
-    marginLeft: theme.spacing(2),
     color: '#8250c8',
   },
 }));
@@ -223,12 +223,11 @@ function Mypage(props) {
   }
 
   const isHaveLocks = props.locks.length > 0;
-  const isGuest = myPageInfo.address != address
+  const isGuest = myPageInfo.address !== address
   return (
     <>
       {!loading && (
         <>
-          {isHaveLocks ? (
             <div>
               <BannerContainer>
                 <ShadowBox>
@@ -240,13 +239,13 @@ function Mypage(props) {
                           {myPageInfo.displayname}
                         </Typography>
                         <PointShow>
-                          <FavoriteIcon className={classes.titlePoint} />
-                          <Typography variant="subtitle1" color="primary">
-                            &nbsp;{point}
-                          </Typography>
-                          <PersonIcon className={classes.titleIcon} />
+                        <PersonIcon className={classes.titleIcon} />
                           <Typography variant="subtitle1" color="primary">
                             &nbsp;{`@${myPageInfo.username}`}
+                          </Typography>
+                          <LoyaltyIcon className={classes.titlePoint} />
+                          <Typography variant="subtitle1" color="primary">
+                            &nbsp;{point}
                           </Typography>
                         </PointShow>
                       </div>
@@ -279,7 +278,7 @@ function Mypage(props) {
                   </ProfileCover>
                 </ShadowBox>
               </BannerContainer>
-              <LeftBoxWrapper>
+              {isHaveLocks ? (<LeftBoxWrapper>
                 <div className="proposeColumn proposeColumn--left">
                   <LeftContainer
                     loading={loading}
@@ -298,14 +297,14 @@ function Mypage(props) {
                     myPageInfo={myPageInfo}
                   />
                 </div>
-              </LeftBoxWrapper>
-            </div>
-          ) : <EmptyPage 
+              </LeftBoxWrapper> ) : <EmptyPage 
                 isApproved={isApproved} 
                 history={props.history} 
                 isGuest={isGuest} 
                 username={myPageInfo.username} 
               />
+          }
+            </div>
           }
         </>
       )}

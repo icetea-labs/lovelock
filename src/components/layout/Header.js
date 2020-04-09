@@ -30,7 +30,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import FavoriteIcon from '@material-ui/icons/Favorite';
+import LoyaltyIcon from '@material-ui/icons/Loyalty';
 import { FormattedMessage } from 'react-intl';
 
 import { Link, withRouter } from 'react-router-dom';
@@ -759,18 +759,18 @@ function Header(props) {
                 <div className={classes.grow} />
                 <Button onClick={handeOpenMypage}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
-                  {/* <Typography className={classes.title} noWrap>
+                  <Typography className={classes.title} noWrap>
                     {displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
-                  </Typography> */}
-                  <ListItemText
+                  </Typography>
+                  {/* <ListItemText
                     className={classes.titlePoint}
                     primary={displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
                     secondary={
                       <span className={classes.titlePoint}>
-                        {point} <FavoriteIcon className={classes.titlePoint} />
+                        {point} <LoyaltyIcon />
                       </span>
                     }
-                  />
+                  /> */}
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>

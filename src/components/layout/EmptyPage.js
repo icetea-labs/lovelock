@@ -157,13 +157,13 @@ export default function EmptyPage(props){
             )}
             <img src="/static/img/plant.svg" alt="plant" />
             <div className="emptyTitle">
-              <h1>
-                <FormattedMessage id="home.emptyTitle" />
-              </h1>
+                {
+                  isGuest ? <h1>{username || 'This user'} has no lock.</h1> : <h1><FormattedMessage id="home.emptyTitle" /></h1>
+                }
             </div>
             <div className="emptySubTitle">
               {isGuest ? (
-                <h2>{username} has not created any content.</h2>
+                <h2>{username || 'This user'} has not created any content.</h2>
               ) : (
                 <h2>
                   <span>

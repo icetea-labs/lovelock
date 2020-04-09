@@ -157,7 +157,7 @@ export default function BlogEditor(props) {
   }
 
   function handleSubmit() {
-    if (!editMode && !lockIndex) {
+    if (!editMode && lockIndex == null) {
       showError('Please select a lock to post to.');
     } else {
       setGLoading(true);
@@ -292,14 +292,14 @@ export default function BlogEditor(props) {
   }
 
   function selectedLockName() {
-    const id = props.locks.findIndex(lock => lock.id == lockIndex);
-    if (id == -1) {
+    const lock = props.locks.find(lock => lock.id === lockIndex);
+    if (!lock) {
       if (language === ja) {
         return '--ロックを洗濯してください--';
       }
       return '-- Select lock --';
     }
-    const lock = props.locks[id];
+
     return lock ? lock.s_info.lockName || lock.s_content : null;
   }
 
