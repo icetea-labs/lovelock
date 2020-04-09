@@ -311,7 +311,7 @@ export async function saveToIpfs(files) {
   for await (const result of newIpfs.add([...contentBuffer])) {
     results.push(String(result.cid))
   }
-
+  
   return results;
 }
 

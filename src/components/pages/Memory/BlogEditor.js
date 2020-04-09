@@ -366,11 +366,12 @@ export default function BlogEditor(props) {
       selectionLocks={{ selectedLockName, showSelectionLocks, renderSelectionLocks }}
       drafts={{ renderDrafts, showDrafts, hideDrafts }}
       closeText={<FormattedMessage id="memory.cancel" />}
-      title={<MemoryTitle sender={senderName} receiver={receiverName} handleClose={handleClose} />}
+      title={<MemoryTitle sender={senderName} receiver={receiverName} handleClose={handleClose} lock={topInfo} />}
     >
       {!previewOn && (
         <Editor
           initContent={blogBody}
+          memoryInfo={topInfo}
           title={blogTitle}
           onTitleChange={setBlogTitle}
           subtitle={blogSubtitle}
@@ -382,7 +383,7 @@ export default function BlogEditor(props) {
           onChange={onChangeBlogBody}
         />
       )}
-      {previewOn && <Editor initContent={combineContent()} read_only />}
+      {previewOn && <Editor initContent={combineContent()} memoryInfo={topInfo} read_only />}
     </BlogModal>
   );
 }

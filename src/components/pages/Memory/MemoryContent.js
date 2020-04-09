@@ -517,12 +517,12 @@ function MemoryContent(props) {
               <MemoryTitle
                 sender={memoryDecrypted.s_tags['display-name']}
                 receiver={memoryDecrypted.r_tags['display-name']}
+                lock={memoryDecrypted.lock}
                 handleClose={closeMemory}
               />
             }
-            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
-            <Editor initContent={memoryDecrypted.blogContent} read_only />
+            <Editor initContent={memoryDecrypted.blogContent} memoryInfo={memoryDecrypted} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
