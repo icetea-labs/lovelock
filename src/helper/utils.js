@@ -1,6 +1,5 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
-import { useSelector } from 'react-redux';
 import {
   toPublicKey,
   stableHashObject,

@@ -30,7 +30,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import LoyaltyIcon from '@material-ui/icons/Loyalty';
+//import LoyaltyIcon from '@material-ui/icons/Loyalty';
 import { FormattedMessage } from 'react-intl';
 
 import { Link, withRouter } from 'react-router-dom';
@@ -319,7 +319,7 @@ function Header(props) {
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
-  const point = useSelector(state => state.account.point);
+  // const point = useSelector(state => state.account.point);
   const avatarRedux = useSelector(state => state.account.avatar);
 
   const ja = 'ja';

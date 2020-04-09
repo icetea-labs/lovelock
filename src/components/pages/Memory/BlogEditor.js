@@ -66,7 +66,7 @@ export default function BlogEditor(props) {
   const [actionMenu, setActionMenu] = useState(null);
   const [selectionLocks, setSelectionLocks] = useState(null);
 
-  const lockIndexInit = editMode ? memory.lockIndex : topInfo.index;
+  const lockIndexInit = editMode ? memory.lockIndex : (props.needSelectLock ? null : topInfo.index)
   const [lockIndex, setLockIndex] = useState(lockIndexInit);
   const language = useSelector(state => state.globalData.language);
   const ja = 'ja';
@@ -83,6 +83,12 @@ export default function BlogEditor(props) {
   useEffect(() => {
     loadAllDrafts().then(setDrafts);
   }, []);
+
+  useEffect(() => {
+    if (!editMode && !props.needSelectLock) {
+      setLockIndex(topInfo.index)
+    }
+  }, [editMode, props.needSelectLock, topInfo.index])
 
   function showDrafts(event) {
     setActionMenu(event.currentTarget);
@@ -292,7 +298,7 @@ export default function BlogEditor(props) {
   }
 
   function selectedLockName() {
-    const lock = props.locks.find(lock => lock.id === lockIndex);
+    const lock = lockIndex == null ? null : props.locks.find(lock => lock.id === lockIndex);
     if (!lock) {
       if (language === ja) {
         return '--ロックを洗濯してください--';
