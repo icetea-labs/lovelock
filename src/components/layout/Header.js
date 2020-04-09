@@ -591,7 +591,7 @@ function Header(props) {
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
                   </Typography>
-                  sent you a lock request
+                  {' '}sent you a lock request
                 </>
               }
               secondary={
