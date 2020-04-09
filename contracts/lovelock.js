@@ -180,7 +180,9 @@ class LoveLock {
   @transaction addLike(memoIndex: number, type: number) {
     const self = this;
     // expectUserApproved(self);
-    return apiLikeMemory(self, memoIndex, type);
+    const memo = apiLikeMemory(self, memoIndex, type);
+    const balances = this.transferToken(memo.sender)
+    return { likes: memo.likes || [], balances }
   }
   // create comment for memory
   @transaction addComment(memoIndex: number, content: string, info: string) {
@@ -363,7 +365,10 @@ class LoveLock {
     if (!isValidAddress(addOrAlias)) {
       address = convertAliasToAddress(addOrAlias);
     }
-    return apiGetDataForMypage(self, address);
+    const data = apiGetDataForMypage(self, address);
+    Object.assign(data, this.getUserByAdd(address))
+
+    return [data]
   }
 
   // ========== DATA MIGRATION =============
@@ -536,14 +541,14 @@ class LoveLock {
     let userNew = {};
     if (Array.isArray(usersOld)) {
       userNew = usersOld.reduce(function(result, item) {
-        result[item] = { activate: true, token: 100 };
+        result[item] = { activated: true, token: 100 };
         return result;
       }, {});
     } else userNew = this.getUsers();
 
     //add new user
     for (let i = 0; i < _users.length; i++) {
-      if (!userNew[_users[i]]) userNew[_users[i]] = { activate: true, token: 100 };
+      if (!userNew[_users[i]]) userNew[_users[i]] = { activated: true, token: 100 };
     }
     
     this.setUsers(userNew);
@@ -586,16 +591,12 @@ class LoveLock {
     this.setUsers(users);
     return _users;
   }
-  @view isUserApproved(user: address) {
-    const users = this.getUsers();
-    return user in users;
-  }
 
   // ========== Authorized IPFS APPROVED =============
   @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
     // expectUserApproved(self, { from: mainAddress });
     const users = this.getUsers();
-    if (!(mainAddress in users)) {
+    if (!users[mainAddress] || !users[mainAddress].activated) {
       return false;
     }
 
@@ -613,7 +614,33 @@ class LoveLock {
 
   @view isUserApproved(mainAddress: address) {
     const users = this.getUsers();
-    return mainAddress in users;
+    return  Boolean(users[mainAddress] && users[mainAddress].activated);
+  }
+
+  @transaction transferToken(receiverAddr: addresss, amount: number = 1) {
+    if (msg.sender === receiverAddr) return
+    expect(amount > 0, 'Transfer amount must > 0, got ' + amount)
+
+    const users = this.getUsers()
+
+    const me = users[msg.sender]
+    expect(me && me.token > amount, 'User does not have enough token.')
+    me.token -= amount
+
+    let receiver = users[receiverAddr]
+    if (!receiver) {
+      receiver = { token: amount }
+      users[receiverAddr] = receiver
+    } else {
+      receiver.token = (receiver.token || 0) + amount
+    }
+
+    this.setUsers(users)
+
+    return {
+      [msg.sender]: me.token,
+      [receiverAddr]: receiver.token
+    }
   }
 }
 

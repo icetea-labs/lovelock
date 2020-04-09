@@ -5,6 +5,7 @@ const initialState = {
   memories: [],
   topInfo: {},
   blogView: {},
+  balances: {},
 };
 const loveinfo = (state = initialState, action) => {
   switch (action.type) {
@@ -31,6 +32,8 @@ const loveinfo = (state = initialState, action) => {
       return { ...state, memories: action.data };
     case actionTypes.SET_BLOG_VIEW:
       return { ...state, blogView: action.data };
+    case actionTypes.UPDATE_BALANCES:
+      return { ...state, balances: { ...state.balances, ...action.data } };
     default:
       return state;
   }

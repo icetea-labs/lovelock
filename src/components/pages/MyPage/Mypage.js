@@ -83,7 +83,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory, memoryList, point, isApproved } = props;
+  const { match, setLocks, setMemory, memoryList, balances, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -113,6 +113,7 @@ function Mypage(props) {
         info.displayname = data[0]['display-name'];
         info.followed = data[0].followed;
         info.address = data[0].address;
+        balances[info.address] = data[0].token;
         const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
         info.numFollow = numFollow;
         info.isMyFollow = isMyFollow;
@@ -246,7 +247,7 @@ function Mypage(props) {
                           </Typography>
                           <LoyaltyIcon className={classes.titlePoint} />
                           <Typography variant="subtitle1" color="primary">
-                            &nbsp;{point}
+                            &nbsp;{balances[myPageInfo.address]}
                           </Typography>
                         </PointShow>
                       </div>
@@ -318,7 +319,7 @@ const mapStateToProps = state => {
     address: state.account.address,
     isApproved: state.account.isApproved,
     memoryList: state.loveinfo.memories,
-    point: state.account.point,
+    balances: state.loveinfo.balances,
   };
 };
 const mapDispatchToProps = dispatch => {

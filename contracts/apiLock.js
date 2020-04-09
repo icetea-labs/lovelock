@@ -314,7 +314,7 @@ exports.apiGetDataForMypage = (self, address) => {
   myData['display-name'] = tags['display-name'] || '';
   myData.username = alias.replace('account.', '');
   myData.followed = self.getFollowed()[address] || [];
-  return [myData];
+  return myData;
 };
 function _prepareData(locks, locksIndex) {
   let resp = [];
