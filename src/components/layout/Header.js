@@ -6,55 +6,65 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-// import InputBase from '@material-ui/core/InputBase';
-// import Badge from '@material-ui/core/Badge';
+import InputBase from '@material-ui/core/InputBase';
+import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Button from '@material-ui/core/Button';
 import ListItemText from '@material-ui/core/ListItemText';
-// import List from '@material-ui/core/List';
-// import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-// import ListItem from '@material-ui/core/ListItem';
+import List from '@material-ui/core/List';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 
+import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-// import GroupIcon from '@material-ui/icons/Group';
-// import NotificationsIcon from '@material-ui/icons/Notifications';
+import GroupIcon from '@material-ui/icons/Group';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import ExploreIcon from '@material-ui/icons/Explore';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import PersonIcon from '@material-ui/icons/Person';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import { FormattedMessage } from 'react-intl';
 
 import { Link, withRouter } from 'react-router-dom';
+import Autosuggest from 'react-autosuggest';
+import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
+import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
 import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getAuthenAndTags } from '../../helper';
+import { getAuthenAndTags, getUserSuggestions } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
+import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
-  font-size: ${rem(20)};
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  text-decoration: none;
-  :hover {
+  display: none;
+  @media (min-width: 600px) {
+    font-size: ${rem(20)};
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
     text-decoration: none;
+    :hover {
+      text-decoration: none;
+    }
+    color: inherit;
+    span {
+      margin: 0 ${rem(10)};
+    }
+    cursor: pointer;
   }
-  color: inherit;
-  span {
-    margin: 0 ${rem(10)};
-  }
-  cursor: pointer;
 `;
 
 const StyledAppBar = withStyles(() => ({
@@ -66,6 +76,7 @@ const StyledAppBar = withStyles(() => ({
     padding: '0',
     boxShadow: 'none',
     alignItems: 'center',
+    zIndex: 'auto',
     // [theme.breakpoints.up('sm')]: {
     //   background: 'linear-gradient(340deg, #b276ff, #fe8dc3)',
     // },
@@ -96,24 +107,24 @@ const useStyles = makeStyles(theme => ({
     marginRight: 10,
     backgroundColor: '#fff',
   },
-  friReqTitle: {
+  lockReqTitle: {
     width: 111,
     height: 18,
     marginLeft: theme.spacing(2),
     color: '#373737',
   },
-  friReqSetting: {
+  lockReqSetting: {
     width: 46,
     height: 15,
     fontSize: 12,
     marginRight: theme.spacing(2),
     color: '#8250c8',
   },
-  friReqConfirm: {
+  lockReqConfirm: {
     color: '#8250c8',
     marginRight: theme.spacing(2),
   },
-  friReqName: {
+  lockReqName: {
     width: 135,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -147,10 +158,14 @@ const useStyles = makeStyles(theme => ({
     color: '#fff',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
-      minWidth: 50,
+      // minWidth: 50,
       // margin: theme.spacing(0, 3, 0, 0),
       textTransform: 'capitalize',
     },
+  },
+  titlePoint: {
+    color: theme.palette.background.paper,
+    fontSize: 13,
   },
   search: {
     position: 'relative',
@@ -188,6 +203,9 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     [theme.breakpoints.up('md')]: {
       width: 200,
+      '&:focus': {
+        width: 240,
+      },
     },
   },
   sectionDesktop: {
@@ -266,48 +284,6 @@ const StyledMenuItem = withStyles(theme => ({
   },
 }))(MenuItem);
 
-// const friReqList = [
-//   {
-//     id: 0,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Huy Hoang',
-//   },
-//   {
-//     id: 1,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'MyMy',
-//   },
-//   {
-//     id: 2,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Luong Hoa',
-//   },
-// ];
-
-// const notifiList = [
-//   {
-//     id: 0,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Huy Hoang',
-//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-//     time: 'just now',
-//   },
-//   {
-//     id: 1,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'MyMy',
-//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-//     time: 'just now',
-//   },
-//   {
-//     id: 2,
-//     avatar: 'https://i.pravatar.cc/300',
-//     name: 'Thi Truong',
-//     promise: 'Its hard to find someone who will stay with you Its hard to find someone who will stay with you',
-//     time: 'just now',
-//   },
-// ];
-
 function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -317,13 +293,20 @@ function Header(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const mode = useSelector(state => state.account.mode);
   const address = useSelector(state => state.account.address);
+  const language = useSelector(state => state.globalData.language);
 
   const [showPhrase, setShowPhrase] = useState(false);
-  // const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElLockReq, setAnchorElLockReq] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  // const [anchorElNoti, setAnchorElNoti] = useState(null);
+  const [anchorElNoti, setAnchorElNoti] = useState(null);
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
+
+  const [lockReqList, setLockReqList] = useState([]);
+  const [notiList, setNotiList] = useState([]);
+
+  const [searchValue, setSearchValue] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
 
   const isMenuOpen = Boolean(anchorElMenu);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -333,11 +316,20 @@ function Header(props) {
   const lockIndex =
     isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
-  function handeOpenMypage() {
+  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  // const privateKey = useSelector(state => state.account.privateKey);
+  const displayName = useSelector(state => state.account.displayName);
+  const point = useSelector(state => state.account.point);
+  const avatarRedux = useSelector(state => state.account.avatar);
+
+  const ja = 'ja';
+
+  function handeOpenMypage(addr) {
+    addr = typeof addr === 'string' ? addr : address;
     if (props.match.path === '/u/:address') {
-      window.location.href = `/u/${address}`
+      window.location.href = `/u/${addr}`;
     } else {
-      props.history.push(`/u/${address}`);
+      props.history.push(`/u/${addr}`);
     }
   }
   function handeExpandMore(event) {
@@ -356,21 +348,21 @@ function Header(props) {
     setMobileMoreAnchorEl(event.currentTarget);
   }
 
-  // function handleFriReqOpen(event) {
-  //   setAnchorEl(event.currentTarget);
-  // }
+  function handleLockReqOpen(event) {
+    setAnchorElLockReq(event.currentTarget);
+  }
 
-  // function handleFriReqClose() {
-  //   setAnchorEl(null);
-  // }
+  function handleLockReqClose() {
+    setAnchorElLockReq(null);
+  }
 
-  // function handleNotiOpen(event) {
-  //   setAnchorElNoti(event.currentTarget);
-  // }
+  function handleNotiOpen(event) {
+    setAnchorElNoti(event.currentTarget);
+  }
 
-  // function handleNotiClose() {
-  //   setAnchorElNoti(null);
-  // }
+  function handleNotiClose() {
+    setAnchorElNoti(null);
+  }
 
   function handeExplore() {
     props.history.push('/explore');
@@ -389,17 +381,84 @@ function Header(props) {
     setShowPhrase(false);
   }
 
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  // const privateKey = useSelector(state => state.account.privateKey);
-  const displayName = useSelector(state => state.account.displayName);
-  const avatarRedux = useSelector(state => state.account.avatar);
+  const getSuggestions = async value => {
+    const users = await getUserSuggestions(value);
+    setSuggestions(users);
+  };
+
+  const getSuggestionValue = suggestion => {
+    return `@${suggestion.nick}`;
+  };
+
+  const renderSearchMatch = (parts, isNick) => {
+    return (
+      <>
+        {parts.map((part, index) => {
+          const className = part.highlight ? 'highlight' : null;
+          return (
+            <span className={className} key={index}>
+              {(isNick && part.highlight ? '@' : '') + part.text}
+            </span>
+          );
+        })}
+      </>
+    );
+  };
+
+  const renderSuggestion = (suggestion, { query }) => {
+    const isNick = query.startsWith('@');
+    const searchFor = isNick ? query.slice(1) : query;
+    const suggestionText = isNick ? suggestion.nick : suggestion.display;
+    const suggestionAva = suggestion.avatar;
+    const matches = AutosuggestHighlightMatch(suggestionText, searchFor);
+    const parts = AutosuggestHighlightParse(suggestionText, matches);
+    return (
+      <span className="suggestion-content">
+        <AvatarPro hash={suggestionAva} />
+        <div className="text">
+          <span className="name">{isNick ? suggestion.display : renderSearchMatch(parts, false)}</span>
+          <span className="nick">{isNick ? renderSearchMatch(parts, true) : `@${suggestion.nick}`}</span>
+        </div>
+      </span>
+    );
+  };
+
+  const onSearchChanged = (event, { newValue, method }) => {
+    setSearchValue(newValue);
+    if (method !== 'enter' && method !== 'click') return;
+
+    // get the item
+    const name = newValue.substring(1);
+    if (suggestions) {
+      const seletedItem = suggestions.find(item => item.nick === name);
+      if (seletedItem) {
+        handeOpenMypage(seletedItem.nick || seletedItem.address);
+      }
+    }
+  };
+
+  const onSuggestionsFetchRequested = ({ value }) => {
+    getSuggestions(value);
+  };
+
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
 
   useEffect(() => {
     async function fetchData() {
       try {
         if (address) {
           const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          dispatch(actions.setAccount({ displayName: tags['display-name'] || '', avatar: tags.avatar, isApproved }));
+          const userPoint = await APIService.getUserByAdd(address);
+          dispatch(
+            actions.setAccount({
+              displayName: tags['display-name'] || '',
+              avatar: tags.avatar,
+              isApproved,
+              point: userPoint.token,
+            })
+          );
         }
       } catch (e) {
         console.error(e);
@@ -407,6 +466,20 @@ function Header(props) {
     }
     fetchData();
   }, [address, tokenAddress, dispatch]);
+
+  useEffect(() => {
+    const abort = new AbortController();
+    fetch('/data/noti.json', { signal: abort.signal })
+      .then(r => r.json())
+      .then(data => {
+        setLockReqList(data.lockRequests);
+        setNotiList(data.notifications);
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        throw err;
+      });
+  }, []);
 
   const renderMenu = (
     <StyledMenu
@@ -425,7 +498,7 @@ function Header(props) {
         <ListItemIcon>
           <PersonIcon />
         </ListItemIcon>
-        <ListItemText primary="Update Profile" />
+        <ListItemText primary={<FormattedMessage id="header.updateProfile" />} />
       </StyledMenuItem>
       <Divider />
       <StyledMenuItem
@@ -437,7 +510,7 @@ function Header(props) {
         <ListItemIcon>
           <VpnKeyIcon />
         </ListItemIcon>
-        <ListItemText primary="View recovery phrase" />
+        <ListItemText primary={<FormattedMessage id="header.viewRecovery" />} />
       </StyledMenuItem>
       {/* <StyledMenuItem
         onClick={() => {
@@ -465,76 +538,82 @@ function Header(props) {
     </StyledMenu>
   );
 
-  // const friReqMenu = (
-  //   <StyledMenu id="friReq-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleFriReqClose}>
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText primary="Friend Request" className={classes.friReqTitle} />
-  //       <ListItemText align="right" primary="Setting" className={classes.friReqSetting} />
-  //     </StyledMenuItem>
-  //     {friReqList.map(({ id, avatar, name }) => (
-  //       <StyledMenuItem className={classes.friReqStyle} key={id}>
-  //         <ListItemAvatar>
-  //           <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
-  //         </ListItemAvatar>
-  //         <ListItemText primary={name} className={classes.friReqName} />
-  //         <ListItemText primary="CONFIRM" className={classes.friReqConfirm} />
-  //         <ListItemText primary="DELETE" />
-  //       </StyledMenuItem>
-  //     ))}
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
-  //     </StyledMenuItem>
-  //   </StyledMenu>
-  // );
+  const renderLockRequests = () => (
+    <StyledMenu
+      id="lockReq-menu"
+      anchorEl={anchorElLockReq}
+      keepMounted
+      open={Boolean(anchorElLockReq)}
+      onClose={handleLockReqClose}
+    >
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText primary="Lock Request" className={classes.lockReqTitle} />
+        <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} />
+      </StyledMenuItem>
+      {lockReqList.map(({ id, avatar, name }) => (
+        <StyledMenuItem className={classes.lockReqStyle} key={id}>
+          <ListItemAvatar>
+            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
+          </ListItemAvatar>
+          <ListItemText primary={name} className={classes.lockReqName} />
+          <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} />
+          <ListItemText primary="DELETE" />
+        </StyledMenuItem>
+      ))}
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+      </StyledMenuItem>
+    </StyledMenu>
+  );
 
-  // const notiList = (
-  //   <StyledMenu
-  //     id="notifi-menu"
-  //     anchorEl={anchorElNoti}
-  //     keepMounted
-  //     open={Boolean(anchorElNoti)}
-  //     onClose={handleNotiClose}
-  //   >
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText primary="Notification" className={classes.friReqTitle} />
-  //       <ListItemText align="right" primary="Mark all read" className={classes.friReqConfirm} />
-  //       <ListItemText align="center" primary="Setting" className={classes.friReqConfirm} />
-  //     </StyledMenuItem>
-  //     {notifiList.map(({ id, avatar, name, promise, time }) => (
-  //       <List className={classes.listNoti} component="nav" key={id}>
-  //         <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
-  //           <ListItemAvatar>
-  //             <AvatarPro alt="Remy Sharp" src={avatar} />
-  //           </ListItemAvatar>
-  //           <ListItemText
-  //             primary={
-  //               <>
-  //                 <Typography component="span" variant="body2" color="textPrimary">
-  //                   {name}
-  //                 </Typography>
-  //                 {' sent you a promise'}
-  //               </>
-  //             }
-  //             secondary={
-  //               <>
-  //                 <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-  //                   {promise}
-  //                 </Typography>
-  //                 <Typography component="span" variant="body2">
-  //                   {time}
-  //                 </Typography>
-  //               </>
-  //             }
-  //           />
-  //         </ListItem>
-  //         <Divider variant="inset" />
-  //       </List>
-  //     ))}
-  //     <StyledMenuItem className={classes.friReqStyle}>
-  //       <ListItemText align="center" primary="See all" className={classes.friReqSetting} />
-  //     </StyledMenuItem>
-  //   </StyledMenu>
-  // );
+  const renderNotifications = () => (
+    <StyledMenu
+      id="notifi-menu"
+      anchorEl={anchorElNoti}
+      keepMounted
+      open={Boolean(anchorElNoti)}
+      onClose={handleNotiClose}
+    >
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText primary="Notification" className={classes.lockReqTitle} />
+        <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
+        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} />
+      </StyledMenuItem>
+      {notiList.map(({ id, avatar, name, promise, time }) => (
+        <List className={classes.listNoti} component="nav" key={id}>
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+            <ListItemAvatar>
+              <AvatarPro alt="Remy Sharp" src={avatar} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {name}
+                  </Typography>
+                  sent you a lock request
+                </>
+              }
+              secondary={
+                <>
+                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                    {promise}
+                  </Typography>
+                  <Typography component="span" variant="body2">
+                    {time}
+                  </Typography>
+                </>
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" />
+        </List>
+      ))}
+      <StyledMenuItem className={classes.lockReqStyle}>
+        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+      </StyledMenuItem>
+    </StyledMenu>
+  );
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const renderMobileMenu = (
@@ -547,22 +626,22 @@ function Header(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      {/* <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="primary">
+      <MenuItem>
+        <IconButton aria-label={`show ${lockReqList.length} new requests`} color="inherit">
+          <Badge badgeContent={lockReqList.length} color="primary">
             <GroupIcon />
           </Badge>
         </IconButton>
         <p>Messages</p>
       </MenuItem>
       <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="primary">
+        <IconButton aria-label={`show ${notiList.length} new notifications`} color="inherit">
+          <Badge badgeContent={notiList.length} color="primary">
             <NotificationsIcon />
           </Badge>
         </IconButton>
         <p>Notifications</p>
-      </MenuItem> */}
+      </MenuItem>
       <MenuItem onClick={handeOpenMypage}>
         <IconButton
           aria-label="profile settings"
@@ -611,7 +690,7 @@ function Header(props) {
   return (
     <div>
       <div className={classes.grow}>
-        <StyledAppBar position="static" color="inherit" className={`${classes.AppBar} main-appbar`}>
+        <StyledAppBar position="relative" color="inherit" className={`${classes.AppBar} main-appbar`}>
           <StyledToolbar>
             <MenuIcon
               fontSize="large"
@@ -627,66 +706,114 @@ function Header(props) {
             </StyledLogo>
             {address && (
               <>
-                {/* <div className={classes.search}>
+                <div className={classes.search}>
                   <div className={classes.searchIcon}>
                     <SearchIcon />
                   </div>
-                  <InputBase
+                  <Autosuggest
+                    id="suggestSearch"
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={onSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={{
+                      value: searchValue,
+                      onChange: onSearchChanged,
+                    }}
+                    theme={{
+                      container: 'react-autosuggest__container',
+                      containerOpen: 'react-autosuggest-search__container--open',
+                      inputOpen: 'react-autosuggest__input--open',
+                      inputFocused: 'react-autosuggest__input--focused',
+                      suggestionsContainer: 'react-autosuggest-search__suggestions-container',
+                      suggestionsContainerOpen: 'react-autosuggest__suggestions-container--open',
+                      suggestionsList: 'react-autosuggest__suggestions-list',
+                      suggestion: 'react-autosuggest__suggestion',
+                      suggestionFirst: 'react-autosuggest__suggestion--first',
+                      suggestionHighlighted: 'react-autosuggest__suggestion--highlighted',
+                      sectionContainer: 'react-autosuggest__section-container',
+                      sectionContainerFirst: 'react-autosuggest__section-container--first',
+                      sectionTitle: 'react-autosuggest__section-title',
+                    }}
+                    renderInputComponent={inputProps => (
+                      <InputBase
+                        placeholder={language === ja ? '検索…' : 'Search…'}
+                        classes={{
+                          root: classes.inputRoot,
+                          input: classes.inputInput,
+                        }}
+                        inputProps={{ 'aria-label': 'search', type: 'search', ...inputProps }}
+                      />
+                    )}
+                  />
+                  {/* <InputBase
                     placeholder="Search…"
                     classes={{
                       root: classes.inputRoot,
                       input: classes.inputInput,
                     }}
                     inputProps={{ 'aria-label': 'search' }}
-                  />
-                </div> */}
+                  /> */}
+                </div>
                 <div className={classes.grow} />
-                <Button className={classes.sectionDesktop} onClick={handeOpenMypage}>
+                <Button onClick={handeOpenMypage}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
-                  <Typography className={classes.title} noWrap>
-                    {displayName}
-                  </Typography>
+                  {/* <Typography className={classes.title} noWrap>
+                    {displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
+                  </Typography> */}
+                  <ListItemText
+                    className={classes.titlePoint}
+                    primary={displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
+                    secondary={
+                      <span className={classes.titlePoint}>
+                        {point} <FavoriteIcon className={classes.titlePoint} />
+                      </span>
+                    }
+                  />
                 </Button>
                 <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>
-                    Create
+                    <FormattedMessage id="header.btnCreate" />
                   </Typography>
-                </Button>
-                <Button className={classes.sectionDesktop} onClick={handeExplore}>
-                  <Typography className={classes.title} noWrap>
-                    Explore
-                  </Typography>
-                </Button>
-                <Button className={classes.btDropDown} onClick={handeExpandMore}>
-                  <ArrowDropDownIcon className={classes.expandMore} />
                 </Button>
 
-                {/* <div className={classes.sectionDesktop}>
+                <div className={classes.sectionDesktop}>
                   <IconButton
                     color="inherit"
                     className={classes.menuIcon}
-                    aria-controls="friReq-menu"
+                    aria-controls="lockReq-menu"
                     aria-haspopup="true"
                     variant="contained"
-                    onClick={handleFriReqOpen}
+                    onClick={handleLockReqOpen}
                   >
-                    <Badge badgeContent={0} color="primary">
+                    <Badge badgeContent={lockReqList.length} color="secondary">
                       <GroupIcon />
                     </Badge>
                   </IconButton>
                   <IconButton
                     color="inherit"
                     className={classes.menuIcon}
-                    aria-controls="notifi-menu"
+                    aria-controls="noti-menu"
                     aria-haspopup="true"
                     variant="contained"
                     onClick={handleNotiOpen}
                   >
-                    <Badge badgeContent={0} color="primary">
+                    <Badge badgeContent={notiList.length} color="secondary">
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>
-                </div> */}
+                </div>
+
+                <Button className={classes.sectionDesktop} onClick={handeExplore}>
+                  <Typography className={classes.title} noWrap>
+                    <FormattedMessage id="header.btnExplore" />
+                  </Typography>
+                </Button>
+                <Button className={classes.btDropDown} onClick={handeExpandMore}>
+                  <ArrowDropDownIcon className={classes.expandMore} />
+                </Button>
+
                 <div className={classes.sectionMobile}>
                   <IconButton
                     aria-label="show more"
@@ -705,8 +832,8 @@ function Header(props) {
       </div>
       {renderMobileMenu}
       {renderMenu}
-      {/* friReqMenu */}
-      {/* notiList */}
+      {renderLockRequests()}
+      {renderNotifications()}
       {needAuth && <PasswordPrompt />}
       {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}

@@ -6,6 +6,7 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import { FormattedMessage } from 'react-intl';
 import ZoomImage from './AutoZoomImage';
 import ImageCrop from './ImageCrop';
 import { applyRotation, imageResize, ensureHashUrl } from '../../helper';
@@ -400,7 +401,7 @@ export default function AddInfoMessage(props) {
               <ActionItem>
                 <div className="icon-upload">
                   <i className="material-icons">menu_book</i>
-                  <div>Blog</div>
+                  <div><FormattedMessage id="memory.blog" /></div>
                 </div>
               </ActionItem>
             </Grid>

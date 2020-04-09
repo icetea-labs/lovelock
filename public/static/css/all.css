@@ -256,8 +256,7 @@
   }
   
   .react-autosuggest__suggestion--highlighted {
-    background-color: #ffabd3;
-    color: #fff;
+    background-color: #fee;
   }
   
   .suggestion-content {
@@ -279,9 +278,19 @@
     display: block;
     font-size: 80%;
   }
-  
-  img {
-    /* width: 30px; */
+
+  .react-autosuggest-search__container--open .react-autosuggest-search__suggestions-container {
+    display: block;
+    margin-top: 6px;
+    width: 100%;
+    background-color: #f5f5f5;
+    color: #333;
+    font-family: Montserrat, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 2000;
   }
   
   .highlight {

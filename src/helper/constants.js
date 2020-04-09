@@ -1,29 +1,39 @@
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
+
+// check display language
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+const ja = 'ja';
+
 const appConstants = {
   textByLockTypes: {
     lock: {
-      messageLabel: 'Your Message',
-      messagePlaceholder: 'Say something to your partner…',
-      okButton: 'Send',
-      sent: 'Lock sent'
+      messageLabel: <FormattedMessage id="newLock.msgLockCrush" />,
+      messagePlaceholder:
+        languageWithoutRegionCode === ja ? 'パートナーに何かを言ってください。' : 'Say something to your partner…',
+      okButton: <FormattedMessage id="newLock.btnSend" />,
+      sent: 'Lock sent',
     },
     crush: {
-      messageLabel: 'Your Message',
-      messagePlaceholder: 'Express yourself to your crush…',
-      okButton: 'Create',
-      sent: 'Lock created'
+      messageLabel: <FormattedMessage id="newLock.msgLockCrush" />,
+      messagePlaceholder:
+        languageWithoutRegionCode === ja ? '好きな人に自分のことを紹介して' : 'Express yourself to your crush…',
+      okButton: <FormattedMessage id="newLock.btnCreate" />,
+      sent: 'Lock created',
     },
     journal: {
-      messageLabel: 'Journal Description',
-      messagePlaceholder: 'My Amazing Blog',
-      okButton: 'Create',
-      sent: 'Journal created'
-    }
+      messageLabel: <FormattedMessage id="newLock.msgJournal" />,
+      messagePlaceholder: languageWithoutRegionCode === ja ? '私の素晴らしいブログ' : 'My Amazing Blog',
+      okButton: <FormattedMessage id="newLock.btnCreate" />,
+      sent: 'Journal created',
+    },
   },
   memoryTypes: {
     systemGenerated: 1,
     manualGenerated: 0,
   },
-  memoryPageSize: 30
+  memoryPageSize: 30,
 };
 
 export default appConstants;

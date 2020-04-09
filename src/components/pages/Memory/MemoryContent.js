@@ -13,7 +13,8 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
-import { useTx } from '../../../helper/hooks'
+import { FormattedMessage } from 'react-intl';
+import { useTx } from '../../../helper/hooks';
 
 import * as actions from '../../../store/actions';
 import {
@@ -27,7 +28,7 @@ import {
   signalPrerenderDone,
   smartFetchIpfsJson,
   ensureHashUrl,
-  copyToClipboard
+  copyToClipboard,
 } from '../../../helper';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
@@ -36,10 +37,10 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryComments from './MemoryComments';
 import MemoryTitle from './MemoryTitle';
 import BlogShowcase from './BlogShowcase';
-import CommonDialog from "../../elements/CommonDialog";
-import CreateMemory from "./CreateMemory";
-import appConstants from "../../../helper/constants";
-import UserLinkify from "../../elements/Common/UserLinkify";
+import CommonDialog from '../../elements/CommonDialog';
+import CreateMemory from './CreateMemory';
+import appConstants from '../../../helper/constants';
+import UserLinkify from '../../elements/Common/UserLinkify';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -128,12 +129,12 @@ const useStyles = makeStyles(theme => ({
     lineHeight: 2,
   },
   relationshipName: {
-    textTransform: 'capitalize'
+    textTransform: 'capitalize',
   },
   card: {
     marginBottom: theme.spacing(3),
     boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15)',
-    overflow: 'initial'
+    overflow: 'initial',
   },
   media: {
     height: 350,
@@ -186,7 +187,7 @@ function MemoryContent(props) {
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
-  const collections = memory.lock.collections
+  const { collections } = memory.lock;
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
   const [decoding, setDecoding] = useState(false);
@@ -201,9 +202,9 @@ function MemoryContent(props) {
   const classes = useStyles();
 
   const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
-  const isMyPost = address === memory.sender
+  const isMyPost = address === memory.sender;
 
-  const tx = useTx()
+  const tx = useTx();
 
   useEffect(() => {
     let cancel = false;
@@ -394,31 +395,35 @@ function MemoryContent(props) {
   };
 
   function renderLinkUser(isSender) {
-    const m = memoryDecrypted
-    if (!m) return
+    const m = memoryDecrypted;
+    if (!m) return;
 
-    let u, name
+    let u;
+    let name;
     if (isSender) {
-      u = m.sender
-      name = m.name
+      u = m.sender;
+      name = m.name;
     } else {
-      u = m.receiver
-      name = m.r_tags && m.r_tags['display-name']
+      u = m.receiver;
+      name = m.r_tags && m.r_tags['display-name'];
     }
 
-    if (!name) return <span>a crush</span>
+    if (!name) return <span>a crush</span>;
 
-    return <Link
-      href={`/u/${u}`}
-      className={classes.relationshipName}
-      onClick={e => {
-        if (!myPageRoute) {
-          e.preventDefault()
-          history.push(`/u/${u}`)
-        }
-      }}>
-      {name}
-    </Link>
+    return (
+      <Link
+        href={`/u/${u}`}
+        className={classes.relationshipName}
+        onClick={e => {
+          if (!myPageRoute) {
+            e.preventDefault();
+            history.push(`/u/${u}`);
+          }
+        }}
+      >
+        {name}
+      </Link>
+    );
   }
 
   const renderLockEventMemory = () => {
@@ -428,7 +433,9 @@ function MemoryContent(props) {
           <FavoriteIcon color="primary" fontSize="large" />
         </div>
         <span>
-          <span>Locked with </span>
+          <span>
+            <FormattedMessage id="memory.lockedWith" />
+          </span>
           {renderLinkUser(false)}
         </span>
       </Typography>
@@ -443,7 +450,9 @@ function MemoryContent(props) {
         </div>
         <span>
           {renderLinkUser(true)}
-          <span> started the journal.</span>
+          <span>
+            <FormattedMessage id="memory.startJournal" />
+          </span>
         </span>
       </Typography>
     );
@@ -488,9 +497,7 @@ function MemoryContent(props) {
           )
         ) : (
           <Typography variant="body1" style={{ whiteSpace: 'pre-line', overflowWrap: 'break-word' }} component="div">
-            {!isBlog && (
-              <UserLinkify content={postContent} />
-            )}
+            {!isBlog && <UserLinkify content={postContent} />}
             {isBlog && blogInfo.title && (
               <BlogShowcase
                 classes={classes}
@@ -580,7 +587,7 @@ function MemoryContent(props) {
   const { isUnlock } = memoryDecrypted;
 
   const renderTitleMem = () => {
-    const mem = memoryDecrypted
+    const mem = memoryDecrypted;
     return (
       <>
         {renderLinkUser(true)}
@@ -619,19 +626,21 @@ function MemoryContent(props) {
   function openEditBlogContent() {
     closeActionMenu();
     setTimeout(() => {
-      openBlogEditor(memoryDecrypted)
+      openBlogEditor(memoryDecrypted);
     }, 0);
   }
 
   function openPermLinkModal() {
     closeActionMenu();
-    const url = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${memory.id}`
-    const link = { url }
+    const url = `${process.env.PUBLIC_URL || 'https://lovelock.one'}/${memory.info.blog ? 'blog' : 'memory'}/${
+      memory.id
+    }`;
+    const link = { url };
     if (memory.info.blog) {
-      link.title = memoryDecrypted.meta.title
-      link.text = link.title
+      link.title = memoryDecrypted.meta.title;
+      link.text = link.title;
     } else {
-      link.text = memory.content
+      link.text = memory.content;
     }
 
     setTimeout(() => {
@@ -647,34 +656,34 @@ function MemoryContent(props) {
   }
 
   function closeConfirmDelete() {
-    setConfirmDelete(false)
+    setConfirmDelete(false);
   }
 
   function deleteMemory() {
     tx.sendCommit('deleteMemory', memory.id)
-    .then(r => {
-      enqueueSnackbar('Memory deleted.', { variant: 'success' })
-      closeConfirmDelete()
-      onMemoryChanged({index: memory.id})
-    })
-    .catch(e => {
-      enqueueSnackbar(e.message, { variant: 'error' })
-      closeConfirmDelete()
-    })
+      .then(r => {
+        enqueueSnackbar('Memory deleted.', { variant: 'success' });
+        closeConfirmDelete();
+        onMemoryChanged({ index: memory.id });
+      })
+      .catch(e => {
+        enqueueSnackbar(e.message, { variant: 'error' });
+        closeConfirmDelete();
+      });
   }
 
   function trySharePermLink() {
     // Share API is only supported on modern MOBILE browser and Mac Safari
-    navigator.share && navigator.share(permLink)
-    .catch(err => {
-      if (err.name !== 'AbortError') {
-        console.error('Error sharing', err)
-        enqueueSnackbar('Error sharing: ' + err.messsage, { variant: 'error' })
-      }
-    });
+    navigator.share &&
+      navigator.share(permLink).catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing', err);
+          enqueueSnackbar(`Error sharing: ${err.messsage}`, { variant: 'error' });
+        }
+      });
 
     // close the dialog
-    setPermLink(null)
+    setPermLink(null);
   }
 
   return (
@@ -697,13 +706,35 @@ function MemoryContent(props) {
             open={Boolean(actionMenu)}
             onClose={closeActionMenu}
             getContentAnchorEl={null}
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            transformOrigin={{ vertical: "top", horizontal: "left" }}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           >
-            <MenuItem onClick={openPermLinkModal}>Permanent Link</MenuItem>
-            {isMyPost && <MenuItem onClick={openEditPostModal}>{memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}</MenuItem>}
-            {isMyPost && memory.info.blog && <MenuItem onClick={openEditBlogContent}>Edit Blog Content</MenuItem>}
-            {isMyPost && <MenuItem onClick={openConfirmDelete}>{memory.info.blog ? 'Delete This Post' : 'Delete This Memory'}</MenuItem>}
+            <MenuItem onClick={openPermLinkModal}>
+              <FormattedMessage id="memory.permanentLink" />
+            </MenuItem>
+            {isMyPost && (
+              <MenuItem onClick={openEditPostModal}>
+                {memory.info.blog ? (
+                  <FormattedMessage id="memory.changeBlog" />
+                ) : (
+                  <FormattedMessage id="memory.editMemory" />
+                )}
+              </MenuItem>
+            )}
+            {isMyPost && memory.info.blog && (
+              <MenuItem onClick={openEditBlogContent}>
+                <FormattedMessage id="memory.editBlog" />
+              </MenuItem>
+            )}
+            {isMyPost && (
+              <MenuItem onClick={openConfirmDelete}>
+                {memory.info.blog ? (
+                  <FormattedMessage id="memory.deletePost" />
+                ) : (
+                  <FormattedMessage id="memory.deleteMemory" />
+                )}
+              </MenuItem>
+            )}
           </Menu>
         )}
 
@@ -713,15 +744,21 @@ function MemoryContent(props) {
         {showComment && renderComments()}
         {isEditOpened && (
           <CommonDialog
-            title={memory.info.blog ? 'Change Blog Info' : 'Edit Memory'}
+            title={
+              memory.info.blog ? (
+                <FormattedMessage id="memory.changeBlog" />
+              ) : (
+                <FormattedMessage id="memory.editMemory" />
+              )
+            }
             close={() => setIsEditOpened(false)}
           >
             <CreateMemory
               collectionId={memoryDecrypted.collection ? memoryDecrypted.collection.id : null}
               collections={collections}
               onMemoryChanged={data => {
-                setIsEditOpened(false)
-                onMemoryChanged && onMemoryChanged(data)
+                setIsEditOpened(false);
+                onMemoryChanged && onMemoryChanged(data);
               }}
               handleNewCollection={handleNewCollection}
               memory={memoryDecrypted}
@@ -730,29 +767,35 @@ function MemoryContent(props) {
         )}
         {permLink && (
           <CommonDialog
-            title='Permanent Link'
-            cancelText={navigator.share ? 'Share' : 'Close'}
+            title={<FormattedMessage id="memory.permanentLink" />}
+            cancelText={
+              navigator.share ? <FormattedMessage id="memory.share" /> : <FormattedMessage id="memory.close" />
+            }
             cancel={trySharePermLink}
-            okText='Copy'
+            okText={<FormattedMessage id="memory.copy" />}
             confirm={() => {
-              copyToClipboard(permLink.url, enqueueSnackbar)
-              setPermLink(null)
+              copyToClipboard(permLink.url, enqueueSnackbar);
+              setPermLink(null);
             }}
             close={() => setPermLink(null)}
           >
-            <a className='underline' href={permLink.url}>{permLink.url}</a>
+            <a className="underline" href={permLink.url}>
+              {permLink.url}
+            </a>
           </CommonDialog>
         )}
         {confirmDelete && (
           <CommonDialog
-            title='Sure to Delete?'
-            cancelText='Cancel'
-            okText="Yes, Let's Delete"
+            title={<FormattedMessage id="memory.sureDelete" />}
+            cancelText={<FormattedMessage id="memory.cancel" />}
+            okText={<FormattedMessage id="memory.okDelete" />}
             confirm={deleteMemory}
             cancel={closeConfirmDelete}
             close={closeConfirmDelete}
           >
-            <Typography>This cannot be undone. Continue?</Typography>
+            <Typography>
+              <FormattedMessage id="memory.warningDel" />
+            </Typography>
           </CommonDialog>
         )}
       </Card>
@@ -785,7 +828,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(MemoryContent);
+export default connect(null, mapDispatchToProps)(MemoryContent);

@@ -13,6 +13,8 @@ import WarningIcon from '@material-ui/icons/Warning';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import { FormattedMessage } from 'react-intl';
+
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import getWeb3 from '../../../../service/tweb3';
@@ -126,7 +128,13 @@ const WarningPass = styled.div`
 `;
 
 function RegisterUsername(props) {
-  const { setStep, setLoading, setAccount, setIsRemember, /* setIsOpenCrop, setOriginFile, avatar, */ avatarData } = props;
+  const {
+    setStep,
+    setLoading,
+    setAccount,
+    setIsRemember,
+    /* setIsOpenCrop, setOriginFile, avatar, */ avatarData,
+  } = props;
   const [username, setUsername] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -287,7 +295,7 @@ function RegisterUsername(props) {
     <>
       <ValidatorForm onSubmit={gotoNext}>
         <TextValidator
-          label="Username"
+          label={<FormattedMessage id="regist.userName" />}
           fullWidth
           onChange={event => {
             // Fix issue #148
@@ -296,9 +304,9 @@ function RegisterUsername(props) {
           name="username"
           validators={['required', 'specialCharacter', 'isAliasRegistered']}
           errorMessages={[
-            'This field is required.',
-            'Username cannot contain spaces and special character.',
-            'This username is already taken.',
+            <FormattedMessage id="regist.requiredMes" />,
+            <FormattedMessage id="regist.characterCheck" />,
+            <FormattedMessage id="regist.userTaken" />,
           ]}
           margin="dense"
           value={username}
@@ -306,33 +314,33 @@ function RegisterUsername(props) {
         />
         <FlexBox>
           <TextValidator
-            label="First Name"
+            label={<FormattedMessage id="regist.firstName" />}
             fullWidth
             onChange={event => {
               setFirstname(event.currentTarget.value);
             }}
             name="firstname"
             validators={['required']}
-            errorMessages={['This field is required']}
+            errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
             className={classes.marginRight}
             margin="dense"
             value={firstname}
           />
           <TextValidator
-            label="Last Name"
+            label={<FormattedMessage id="regist.lastName" />}
             fullWidth
             onChange={event => {
               setLastname(event.currentTarget.value);
             }}
             name="lastname"
             validators={['required']}
-            errorMessages={['This field is required']}
+            errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
             margin="dense"
             value={lastname}
           />
         </FlexBox>
         <TextValidator
-          label="Password"
+          label={<FormattedMessage id="regist.password" />}
           fullWidth
           onChange={event => {
             setPassword(event.currentTarget.value);
@@ -340,13 +348,13 @@ function RegisterUsername(props) {
           name="password"
           type="password"
           validators={['required']}
-          errorMessages={['This field is required']}
+          errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
           margin="dense"
           value={password}
           inputProps={{ autoComplete: 'new-password' }}
         />
         <TextValidator
-          label="Repeat password"
+          label={<FormattedMessage id="regist.rePassword" />}
           fullWidth
           onChange={event => {
             setRePassword(event.currentTarget.value);
@@ -354,7 +362,7 @@ function RegisterUsername(props) {
           name="rePassword"
           type="password"
           validators={['isPasswordMatch', 'required']}
-          errorMessages={['Password mismatch', 'This field is required']}
+          errorMessages={[<FormattedMessage id="regist.passMismatch" />, <FormattedMessage id="regist.requiredMes" />]}
           margin="dense"
           value={rePassword}
           inputProps={{ autoComplete: 'new-password' }}
@@ -389,7 +397,7 @@ function RegisterUsername(props) {
                 onChange={() => setIsRememberState(!isRememberState)}
               />
             }
-            label="Remember me for 30 days"
+            label={<FormattedMessage id="regist.rememberMe" />}
           />
         </div>
         <WarningPass>
@@ -399,8 +407,7 @@ function RegisterUsername(props) {
               <span className="warningMessage">
                 <WarningIcon className="warningIcon" />
                 <span className="warningText">
-                  It is recommended that you let the browser or a password manager to keep your password. LoveLock
-                  cannot recover forgotten passwords.
+                  <FormattedMessage id="regist.warningText" />
                 </span>
               </span>
             }
@@ -409,13 +416,15 @@ function RegisterUsername(props) {
 
         <DivControlBtnKeystore>
           <div>
-            <span>Already had an account?</span>
+            <span>
+              <FormattedMessage id="regist.alreadyAcc" />
+            </span>
             <LinkPro className="alreadyAcc" onClick={gotoLogin}>
-              Login
+              <FormattedMessage id="regist.login" />
             </LinkPro>
           </div>
           <ButtonPro type="submit" className="nextBtn">
-            Next
+            <FormattedMessage id="regist.next" />
             <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
           </ButtonPro>
         </DivControlBtnKeystore>
@@ -449,9 +458,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(RegisterUsername)
-);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterUsername));
