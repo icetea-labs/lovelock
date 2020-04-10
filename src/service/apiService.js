@@ -24,8 +24,8 @@ const APIService = {
     const memoryData = await callView('getMemoriesByListMemIndex', [arrayMem, page, pageSize, loadToCurrentPage]);
     return addInfoToMems(memoryData);
   },
-  getLocksForFeed: async address => {
-    const lockForFeed = await callView('getLocksForFeed', [address]);
+  getLocksForFeed: async (address, includeFollowing = false, includeMemoryIndexes = false) => {
+    const lockForFeed = await callView('getLocksForFeed', [address, includeFollowing, includeMemoryIndexes]);
     return lockForFeed;
   },
   getDetailLock: async index => {

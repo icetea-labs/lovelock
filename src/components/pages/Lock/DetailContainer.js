@@ -60,6 +60,10 @@ export default function DetailContainer(props) {
     if (isNaN(proIndex) || invalidCollectionId) {
       history.push('/notfound');
     } else {
+      // remove lock list displaying on left sidebar
+      dispatch(actions.setLocks([]))
+
+      // load memories
       callView('getMaxLocksIndex').then(async maxIndex => {
         if (proIndex > maxIndex) {
           history.push('/notfound');
@@ -73,15 +77,12 @@ export default function DetailContainer(props) {
             }
             setProposeInfo(lock);
             dispatch(actions.setTopInfo(lock));
-          });
-          APIService.getLocksForFeed(address).then(resp => {
-            // set to redux
-            dispatch(actions.setLocks(resp.locks));
-            if (cancel) return;
-            setLoading(false);
-          });
+          }).finally(() => setLoading(false))
         }
-      });
+      }).catch(err => {
+        console.error(err);
+        setLoading(false);
+      })
     }
 
     return () => (cancel = true);

@@ -106,6 +106,7 @@ function LeftContainer(props) {
   const {
     locks,
     setLocks,
+    showNewLock,
     setNewLock,
     confirmLock,
     topInfo,
@@ -187,8 +188,8 @@ function LeftContainer(props) {
     setStep('deny');
   }
 
-  function selectAccepted(lockIndex, collectionId) {
-    let url = `/lock/${lockIndex}`;
+  function selectAccepted(lockIndex, collectionId, username) {
+    let url = username ? `/u/${username}` : `/lock/${lockIndex}`;
     if (collectionId != null) {
       url += `/collection/${collectionId}`;
     }
@@ -216,7 +217,7 @@ function LeftContainer(props) {
   }
 
   async function eventCreatePropose(data) {
-    const lockForFeed = await callView('getLocksForFeed', [address]);
+    const lockForFeed = await callView('getLocksForFeed', [address, true, false]);
     setLocks(lockForFeed.locks);
 
     // console.log(data);
@@ -248,22 +249,27 @@ function LeftContainer(props) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLock;
     });
-    const hasPending = Boolean(newLocks.find(l => l.status === 0));
+    const acceptedLocks = newLocks.filter(l => l.status === 1);
+    const pendingLocks = newLocks.filter(l => l.status === 0);
     return (
       <>
-        <div className="title">
-          {!isGuest ? (language === ja ? 'マイロック' : 'My lock') : language === ja ? '公開ロック ' : 'Public lock'}
-        </div>
-        <div>
-          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
-        </div>
-        {!isGuest && hasPending && (
+        {!!acceptedLocks.length && (
+          <>
+            <div className="title">
+              {!isGuest ? (language === ja ? 'マイロック' : 'My lock') : language === ja ? '公開ロック ' : 'Public lock'}
+            </div>
+            <div>
+              <Lock loading={loading} locksData={acceptedLocks} address={myAddress} handlerSelect={selectAccepted} />
+            </div>
+          </>
+        )}
+        {!isGuest && !!pendingLocks.length && (
           <>
             <div className="title">
               <FormattedMessage id="leftmenu.pendingLock" />
             </div>
             <div>
-              <Lock loading={loading} locksData={newLocks} address={myAddress} flag={0} handlerSelect={selectPending} />
+              <Lock loading={loading} locksData={pendingLocks} address={myAddress} handlerSelect={selectPending} />
             </div>
           </>
         )}
@@ -271,16 +277,18 @@ function LeftContainer(props) {
     );
   }
   function renderFollowingLocks(locks, myAddress) {
-    const newLocks = locks.filter(lock => {
-      return !lock.isMyLock;
+    const followingLocks = locks.filter(lock => {
+      return lock.address || (!lock.isMyLock && lock.status === 1) // accepted
     });
+    if (!followingLocks.length) return
+
     return (
       <>
         <div className="title">
           <FormattedMessage id="leftmenu.folowingLock" />
         </div>
         <div>
-          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
+          <Lock loading={loading} locksData={followingLocks} address={myAddress} handlerSelect={selectAccepted} />
         </div>
       </>
     );
@@ -289,7 +297,7 @@ function LeftContainer(props) {
     <StickyBox offsetTop={20} offsetBottom={20}>
       <LeftBox>
         <ShadowBox>
-          {address && (
+          {address && showNewLock && (
             <LinkPro className="btn_add_promise" onClick={newLock}>
               <Icon type="add" />
               <FormattedMessage id="leftmenu.newLock" />

@@ -19,7 +19,6 @@ const {
   apiAddContributorsToLock,
   apiRemoveContributorsToLock,
   apiChangeLockImg,
-  apiGetLocksFollowingPersionByAddress,
   apiGetLocksFollowingByAddress,
   apiGetDetailLock,
   apiGetLocksByAddress,
@@ -151,13 +150,13 @@ class LoveLock {
   }
   @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
-  @view getLocksForFeed = (addOrAlias: string) => {
+  @view getLocksForFeed = (addOrAlias: string, includeFollowing: boolean, includeMemoryIndexes: Boolean) => {
     const self = this;
     let address = addOrAlias;
     if (!isValidAddress(addOrAlias)) {
       address = convertAliasToAddress(addOrAlias);
     }
-    return apiGetLocksForFeed(self, address);
+    return apiGetLocksForFeed(self, address, includeFollowing, includeMemoryIndexes);
   };
   @view getMaxLocksIndex = () => {
     const locks = this.getLocks();
@@ -357,7 +356,6 @@ class LoveLock {
 
   @view getFollowingPerson = (addr: address) => this.getFollowing()[addr] || [];
   @view getLocksFollowingByAddress = (addr: address) => apiGetLocksFollowingByAddress(this, addr);
-  @view getLocksFollowingPersionByAddress = (addr: address) => apiGetLocksFollowingPersionByAddress(this, addr);
 
   @view getDataForMypage(addOrAlias: string) {
     const self = this;

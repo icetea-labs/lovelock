@@ -39,7 +39,6 @@ const BoxAction = styled.div`
 function Lock(props) {
   const classes = useStyles();
   const { loading = false, locksData, address } = props;
-  const locksByStatus = locksData.filter(item => item.status === props.flag);
   const language = useSelector(state => state.globalData.language);
 
   const ja = 'ja';
@@ -75,7 +74,14 @@ function Lock(props) {
           avatar: item.s_tags.avatar,
           avatar2: item.bot_info.botAva,
         };
-      default:
+      case -1: // user
+        return {
+          name: item['display-name'],
+          nick: '@' + item.username,
+          icon: 'perm_identity',
+          avatar: item.avatar
+        };
+      default: // couple
         return {
           name: item.s_info.lockName
             ? item.s_info.lockName
@@ -117,7 +123,7 @@ function Lock(props) {
   const layoutLoaded = (() => {
     const isPenddingLock = !!(props.flag === 0);
 
-    return locksByStatus.sort(compare).map(item => {
+    return locksData.sort(compare).map(item => {
       const info = getInfo(item);
 
       return (
@@ -129,7 +135,7 @@ function Lock(props) {
             subheader: classes.subheader,
           }}
           onClick={() => {
-            props.handlerSelect(item.id);
+            props.handlerSelect(item.id, undefined, item.username);
           }}
           action={
             <BoxAction>
@@ -148,7 +154,7 @@ function Lock(props) {
     });
   })();
 
-  return <>{locksByStatus.length <= 0 ? layoutLoading : layoutLoaded}</>;
+  return <>{locksData.length <= 0 ? layoutLoading : layoutLoaded}</>;
 }
 export { Lock };
 export default Lock;

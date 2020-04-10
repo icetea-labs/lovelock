@@ -284,85 +284,82 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
 // ========== GET DATA ==================
 exports.apiGetLocksByAddress = (self, addr) => {
   const locks = self.getLocks();
-  const locksIndex = self.getA2l()[addr] || [];
-  return _prepareData(locks, locksIndex);
+  const lockIndexes = self.getA2l()[addr] || [];
+  return _prepareData(locks, lockIndexes);
 };
 exports.apiGetLocksFollowingByAddress = (self, addr) => {
   const locks = self.getLocks();
-  const locksIndex = self.getAFL()[addr] || [];
-  return _prepareData(locks, locksIndex);
+  const lockIndexes = self.getAFL()[addr] || [];
+  return _prepareData(locks, lockIndexes);
 };
-exports.apiGetLocksFollowingPersionByAddress = (self, addr) => {
-  const followingAddr = self.getFollowing()[addr] || [];
-  let resp = followingAddr.reduce((res, addr) => {
-    let lock = exports.apiGetLocksByAddress(self, addr);
-    res = res.concat(lock);
-    return res;
-  }, []);
-  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
-  return resp;
-};
-exports.apiGetDataForMypage = (self, address) => {
-  const ctDid = loadContract('system.did');
-  const ctAlias = loadContract('system.alias');
+
+exports.apiGetDataForMypage = (self, address, excludeFollowing, ctDid, ctAlias) => {
+  ctDid = ctDid || loadContract('system.did');
+  ctAlias = ctAlias || loadContract('system.alias');
   const alias = ctAlias.byAddress.invokeView(address) || '';
   const tags = ctDid.query.invokeView(address).tags || {};
 
   let myData = {};
   myData.avatar = tags.avatar;
   myData.address = address;
+  myData.firstname = tags.firstname || ''
   myData['display-name'] = tags['display-name'] || '';
   myData.username = alias.replace('account.', '');
-  myData.followed = self.getFollowed()[address] || [];
+  if (!excludeFollowing) {
+    myData.followed = self.getFollowed()[address] || [];
+  }
   return myData;
 };
-function _prepareData(locks, locksIndex) {
-  let resp = [];
-  locksIndex.forEach(index => {
-    let lock = getDataByIndex(locks, index);
-    lock = Object.assign({}, lock, { id: index });
-    resp.push(lock);
-  });
-  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
-  return resp;
+
+function _prepareData(locks, lockIndexes) {
+  return locks.filter((l, i) => lockIndexes.includes(i)).map((l, i) => ({...l, id: i}))
 }
+
 exports.apiGetDetailLock = (self, index) => {
   const [lock] = self.getLock(index);
   if (lock.deletedBy) throw new Error(`Lock is deleted by ${lock.deletedBy}`);
   const newLock = _addTopInfoToLocks([lock]);
   return newLock;
 };
-exports.apiGetLocksForFeed = (self, addr) => {
-  let resp = [];
-  const ownerLocks = exports.apiGetLocksByAddress(self, addr);
-  const followLocks = exports.apiGetLocksFollowingByAddress(self, addr);
-  const followPersionLocks = exports.apiGetLocksFollowingPersionByAddress(self, addr);
-  // get locks ID
-  const ownerLocksId = ownerLocks.map(lock => lock.id);
-  const followLocksId = followLocks
-    .map(lock => lock.id)
-    .filter(id => {
-      return ownerLocksId.indexOf(id) === -1;
-    });
-  const followPersionLocksId = followPersionLocks
-    .map(lock => lock.id)
-    .filter(id => {
-      return ownerLocksId.indexOf(id) === -1;
-    });
+exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes) => {
+  const locks = self.getLocks();
+  const a2l = self.getA2l()
+  const myLockIndexes = a2l[addr] || [];
+  const myFollowingIndexes = includeFollowing ? (self.getAFL()[addr] || []) : []
+  const combinedLocks = _prepareData(locks, myLockIndexes.concat(myFollowingIndexes))
 
-  resp = ownerLocks.concat(followLocks).concat(followPersionLocks);
-  // remove duplicate locks
-  resp = Array.from(new Set(resp.map(JSON.stringify))).map(JSON.parse);
-  // get more info from system.did, system.alias
-  resp = _addLeftInfoToLocks(resp, ownerLocksId);
-
-  return { locks: resp, ownerLocksId, followLocksId, followPersionLocksId };
-};
-
-function _addLeftInfoToLocks(locks, ownerLocksId = []) {
+  const myFollowingAddresses = includeFollowing ? (self.getFollowing()[addr] || []).filter(a => a !== addr) : []
   const ctDid = loadContract('system.did');
   const ctAlias = loadContract('system.alias');
-  let resp = [];
+  const myFollowingUsers = myFollowingAddresses.reduce((users, faddr) => {
+    const u = exports.apiGetDataForMypage(self, faddr, true, ctDid, ctAlias)
+    u.type = -1
+    users.push(u)
+    return users
+  }, [])
+
+  _addLeftInfoToLocks(combinedLocks, myLockIndexes, ctDid, ctAlias);
+
+  // get memory indexes
+  const memoryIndexes = []
+  if (includeMemoryIndexes) {
+    const flIndexes = myFollowingAddresses.reduce((list, faddr) => {
+      list.push(...(a2l[faddr] || []))
+      return list
+    }, [])
+
+    const flocks = _prepareData(locks, flIndexes)
+    const allLocks = combinedLocks.concat(flocks)
+
+    allLocks.forEach(l => {
+      memoryIndexes.push(...l.memoIndex)
+    })
+  }
+
+  return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes: Array.from(new Set(memoryIndexes)) };
+};
+
+function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
   locks.forEach(lock => {
     if (lock && lock.deletedBy) return;
     let tmp = {};
@@ -386,9 +383,11 @@ function _addLeftInfoToLocks(locks, ownerLocksId = []) {
 
     tmp.isMyLock = ownerLocksId.includes(lock.id)
 
-    resp.push({ ...lock, ...tmp });
-  });
-  return resp;
+    Object.assign(lock, tmp)
+
+  })
+
+  return locks;
 }
 
 function _addTopInfoToLocks(locks) {

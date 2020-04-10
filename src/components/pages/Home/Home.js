@@ -54,8 +54,9 @@ function Home(props) {
   function fetchMemories(signal, loadToCurrentPage = false) {
     if (!address) return false;
 
-    return APIService.getLocksForFeed(address)
+    return APIService.getLocksForFeed(address, true, true)
       .then(resp => {
+
         // set to redux
         setLocks(resp.locks);
         if (signal.cancel) return;
@@ -66,9 +67,7 @@ function Home(props) {
             signal.sub = watchCreatePropose(c, signal);
           });
 
-        const memoIndex = resp.locks.reduce((tmp, lock) => {
-          return tmp.concat(lock.memoIndex);
-        }, []);
+        const memoIndex = resp.memoryIndexes
 
         if (memoIndex.length > 0) {
           APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)

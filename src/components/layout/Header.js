@@ -698,7 +698,7 @@ function Header(props) {
               onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
             />
             <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
-              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} />
+              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} showNewLock />
             </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />

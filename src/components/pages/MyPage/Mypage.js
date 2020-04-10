@@ -136,14 +136,12 @@ function Mypage(props) {
   }, [changed]);
 
   function fetchDataLocksMemories(loadToCurrentPage = false) {
-    APIService.getLocksForFeed(paramAliasOrAddr)
+    APIService.getLocksForFeed(paramAliasOrAddr, false, true)
       .then(resp => {
         // set to redux
         setLocks(resp.locks);
 
-        const memoIndex = resp.locks.reduce((tmp, lock) => {
-          return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
-        }, []);
+        const memoIndex = resp.memoryIndexes;
 
         if (memoIndex.length > 0) {
           APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
@@ -284,6 +282,7 @@ function Mypage(props) {
                 <div className="proposeColumn proposeColumn--left">
                   <LeftContainer
                     loading={loading}
+                    showNewLock
                     isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
                   />
                 </div>
