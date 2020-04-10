@@ -44,6 +44,7 @@ import CommonDialog from '../../elements/CommonDialog';
 import CreateMemory from './CreateMemory';
 import appConstants from '../../../helper/constants';
 import UserLinkify from '../../elements/Common/UserLinkify';
+import { getShortName } from '../../../helper/utils';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -400,7 +401,11 @@ function MemoryContent(props) {
     );
   };
 
-  function renderLinkUser(isSender) {
+  function getName(tags, showFullname) {
+    return showFullname ? tags['display-name'] : getShortName(tags)
+  }
+
+  function renderLinkUser(isSender, showFullname) {
     const m = memoryDecrypted;
     if (!m) return;
 
@@ -408,16 +413,19 @@ function MemoryContent(props) {
     let name;
     if (isSender) {
       u = m.sender;
-      name = m.name;
+      name = (m.s_tags && getName(m.s_tags, showFullname)) || (showFullname? m.name : m.name.split(' ')[0])
     } else {
       u = m.receiver;
-      name = m.r_tags && m.r_tags['display-name']
+      name = m.r_tags && getName(m.r_tags, showFullname)
     }
 
     if (!name) {
       return <span>a crush</span>;
-    } else {
-      name = name.split(' ')[0]
+    }
+
+    // a crush there is no link
+    if (u === process.env.REACT_APP_BOT_LOVER) {
+      return  <span className={classes.relationshipName}>{name}</span>;
     }
 
     return (
@@ -445,7 +453,7 @@ function MemoryContent(props) {
     if (mem.lock.s_info.lockName) {
       receiver = mem.lock.s_info.lockName
     } else if (mem.r_tags && mem.r_tags['display-name']) {
-      receiver = mem.r_tags['display-name'].split(' ')[0]
+      receiver = getShortName(mem.r_tags)
     } else {
       receiver = type
       style = { textTransform: 'none' }
@@ -454,17 +462,13 @@ function MemoryContent(props) {
     return (
           <>
             <ArrowRightIcon color="primary" />
-            {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
-              <p style={{ color: 'inherit' }}>&nbsp;{receiver}</p>
-            ) : (
-              <Link href={`/lock/${mem.lockIndex}`} style={style}
-                onClick={e => {
-                    e.preventDefault();
-                    history.push(`/lock/${mem.lockIndex}`);
-                }}>
-                {receiver}
-              </Link>
-            )}
+            <Link href={`/lock/${mem.lockIndex}`} style={style}
+              onClick={e => {
+                  e.preventDefault();
+                  history.push(`/lock/${mem.lockIndex}`);
+              }}>
+              {receiver}
+            </Link>
           </>
           )
   }
@@ -479,7 +483,7 @@ function MemoryContent(props) {
           <span>
             <FormattedMessage id="memory.lockedWith" />
           </span>
-          {renderLinkUser(false)}
+          {renderLinkUser(false, true)}
         </span>
       </Typography>
     );
@@ -492,7 +496,7 @@ function MemoryContent(props) {
           <WavesIcon color="primary" fontSize="large" />
         </div>
         <span>
-          {renderLinkUser(true)}
+          {renderLinkUser(true, true)}
           <span>
             <FormattedMessage id="memory.startJournal" />
           </span>

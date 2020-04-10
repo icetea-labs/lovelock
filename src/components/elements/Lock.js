@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CardHeader from '@material-ui/core/CardHeader';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-import { AvatarPro } from './AvatarPro';
+import { LockAvatar } from './LockAvatar';
 import Icon from './Icon';
 
 import { getShortName } from '../../helper/utils';
@@ -46,7 +46,8 @@ function Lock(props) {
 
   const getInfo = item => {
     const meOwner = address && (address === item.sender || address === item.receiver);
-    const prefix = item.receiver === address ? 's' : 'r';
+    // these 2 following vars only meaningful if meOwner === true
+    const [selfTags, otherTags] = item.receiver === address ? ['r_tags', 's_tags'] : ['s_tags', 'r_tags'];
     const sAlias = '@' + item.s_alias;
     const rAlias = '@' + item.r_alias;
 
@@ -60,7 +61,7 @@ function Lock(props) {
             : getShortName(item['s_tags']) + ' Journal',
           nick: item.s_info.lockName ? (meOwner ? 'my' : sAlias) + ' journal' : 'by ' + sAlias,
           icon: 'waves',
-          avatar: item.coverImg || item.s_tags.avatar,
+          avatar: item.s_tags.avatar,
         };
       case 1: // crush
         return {
@@ -71,18 +72,20 @@ function Lock(props) {
             : getShortName(item['s_tags']) + ' & ' + getShortName(item.bot_info),
           nick: (meOwner ? 'my' : sAlias) + ' crush',
           icon: 'done',
-          avatar: item.coverImg || item.s_tags.avatar,
+          avatar: item.s_tags.avatar,
+          avatar2: item.bot_info.botAva,
         };
       default:
         return {
           name: item.s_info.lockName
             ? item.s_info.lockName
             : meOwner
-            ? item[`${prefix}_tags`]['display-name']
+            ? item[otherTags]['display-name']
             : getShortName(item['s_tags']) + ' & ' + getShortName(item['r_tags']),
           nick: (meOwner ? 'with' : sAlias) + ' ' + rAlias,
           icon: 'done_all',
-          avatar: item.coverImg || item[`${prefix}_tags`].avatar,
+          avatar: meOwner ? item[otherTags].avatar : item['s_tags'].avatar,
+          avatar2: meOwner ? item[selfTags].avatar : item['r_tags'].avatar,
         };
     }
   };
@@ -137,7 +140,7 @@ function Lock(props) {
               )}
             </BoxAction>
           }
-          avatar={<AvatarPro alt={info.name} hash={info.avatar} />}
+          avatar={<LockAvatar {...info}  />}
           title={info.name}
           subheader={info.nick}
         />
