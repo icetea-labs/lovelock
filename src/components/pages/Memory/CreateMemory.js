@@ -169,6 +169,8 @@ export default function CreateMemory(props) {
   const address = useSelector(state => state.account.address);
   const language = useSelector(state => state.globalData.language);
 
+  const myLocks = (props.locks || []).filter(l => l.isMyLock && l.status === 1)
+
   const [filesBuffer, setFilesBuffer] = useState(
     editBlogData
       ? editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url
@@ -477,7 +479,7 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="postToLock" id="outlined-collection" />}
                   >
                     <option value="">{language === ja ? '--ロックを洗濯してください--' : '-- Select lock --'}</option>
-                    {(props.locks || []).map(v => (
+                    {myLocks.map(v => (
                       <option key={v.id} value={v.id}>
                         {v.s_info.lockName || v.s_content}
                       </option>
@@ -592,7 +594,7 @@ export default function CreateMemory(props) {
             memory={edittingMemory}
             onClose={closeBlogEditor}
             needSelectLock={props.needSelectLock}
-            locks={props.locks}
+            locks={myLocks}
           />
         )}
       </CreatePost>

@@ -71,6 +71,8 @@ export default function BlogEditor(props) {
   const language = useSelector(state => state.globalData.language);
   const ja = 'ja';
 
+  const myLocks = (props.locks || []).filter(l => l.isMyLock && l.status === 1)
+
   if (memory && memory.blogContent && memory !== blogMemory) {
     blogMemory = memory;
 
@@ -298,7 +300,7 @@ export default function BlogEditor(props) {
   }
 
   function selectedLockName() {
-    const lock = lockIndex == null ? null : props.locks.find(lock => lock.id === lockIndex);
+    const lock = lockIndex == null ? null : myLocks.find(lock => lock.id === lockIndex);
     if (!lock) {
       if (language === ja) {
         return '--ロックを洗濯してください--';
@@ -326,7 +328,7 @@ export default function BlogEditor(props) {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
             transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           >
-            {props.locks.map(lock => (
+            {myLocks.map(lock => (
               <ListItem key={lock.id} onClick={() => updateLockIndex(lock.id)} button className={classes.menuItem}>
                 <ListItemText primary={lock.s_info.lockName || lock.s_content} />
               </ListItem>

@@ -78,7 +78,7 @@ function Lock(props) {
         return {
           name: item['display-name'],
           nick: '@' + item.username,
-          icon: 'perm_identity',
+          icon: 'emoji_people',
           avatar: item.avatar
         };
       default: // couple
@@ -123,12 +123,11 @@ function Lock(props) {
   const layoutLoaded = (() => {
     const isPenddingLock = !!(props.flag === 0);
 
-    return locksData.sort(compare).map(item => {
+    return locksData.sort(compare).map((item, index) => {
       const info = getInfo(item);
-
       return (
         <CardHeader
-          key={item.id}
+          key={index}
           classes={{
             root: classes.root, // class name, e.g. `classes-nesting-root-x`
             title: classes.title,

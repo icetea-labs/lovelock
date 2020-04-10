@@ -312,7 +312,12 @@ exports.apiGetDataForMypage = (self, address, excludeFollowing, ctDid, ctAlias) 
 };
 
 function _prepareData(locks, lockIndexes) {
-  return locks.filter((l, i) => lockIndexes.includes(i)).map((l, i) => ({...l, id: i}))
+  return locks.filter((l, i) => {
+    if (lockIndexes.includes(i)) {
+      l.id = i
+      return true
+    }
+  })
 }
 
 exports.apiGetDetailLock = (self, index) => {
