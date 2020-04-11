@@ -8,6 +8,7 @@ import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { sendTxWithAuthen } from '../../helper/hooks';
 import { handleError } from '../../helper';
+import appConstants from "../../helper/constants";
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -20,6 +21,10 @@ const useStyles = makeStyles(theme => ({
 function TextFieldMultiLine(props) {
   const classes = useStyles();
   return <TextField className={classes.textMulti} {...props} />;
+}
+
+function getMessage(id) {
+  return appConstants.textByLockTypes.lock[id];
 }
 
 class PuConfirmLock extends React.Component {
@@ -48,6 +53,12 @@ class PuConfirmLock extends React.Component {
   async messageAccept(message) {
     const { index, enqueueSnackbar, close } = this.props;
 
+    if (!message) {
+      const message = <div><span>Please input </span><span>{getMessage('messageLabel')}</span></div>
+      enqueueSnackbar(message, { variant: 'error' });
+      return;
+    }
+
     try {
       const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
@@ -69,7 +80,7 @@ class PuConfirmLock extends React.Component {
       if (result) {
         // window.alert('Success');
         const errMessage = 'Lock request has been rejected successfully.';
-        enqueueSnackbar(errMessage, { variant: 'info' });
+        enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
     } catch (err) {
