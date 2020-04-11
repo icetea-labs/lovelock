@@ -60,6 +60,7 @@ const ShadowBox = styled.div`
 
 const CollectionBox = styled.div`
   padding-top: 1rem;
+  padding-bottom: 1rem;
   width: 100%;
   display: block;
   .colName {
@@ -80,6 +81,24 @@ const CollectionBox = styled.div`
     } */
   }
 `;
+
+const RecentImageBox = styled.div`
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  width: 100%;
+  display: block;
+  img {
+    width: 112px;
+    height: 112px;
+    padding-left: 2px;
+    padding-bottom: 2px;
+    object-fit: cover;
+    cursor: pointer;
+    :hover {
+      opacity: 0.9;
+    }
+  }
+  `;
 
 const SupportSite = styled.div`
   display: block;
@@ -119,8 +138,9 @@ function LeftContainer(props) {
     language,
   } = props;
 
-  const showCollection = proIndex != null;
-  const collections = showCollection && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
+  const isLockPage = proIndex != null;
+  const collections = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
+  const recentImages = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.recentImages || [] : [];
 
   const [index, setIndex] = useState(-1);
   const [step, _setStep] = useState('');
@@ -254,6 +274,14 @@ function LeftContainer(props) {
     });
   }
 
+  function renderRecentImages(images) {
+    return images.map((hash, index) => {
+      return (
+        <img key={index} src={process.env.REACT_APP_IPFS + hash} />
+      );
+    });
+  }
+
   function renderOwnerLocks(locks, myAddress) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLock;
@@ -302,6 +330,7 @@ function LeftContainer(props) {
       </>
     );
   }
+
   return (
     <StickyBox className='sticky-leftside' offsetTop={20} offsetBottom={20}>
       <LeftBox>
@@ -314,12 +343,18 @@ function LeftContainer(props) {
           )}
           {renderOwnerLocks(locks, address)}
           {!isGuest && renderFollowingLocks(locks, address)}
-          {showCollection && (
+          {isLockPage && (
             <div className="title">
               <FormattedMessage id="leftmenu.collection" />
             </div>
           )}
-          {showCollection && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
+          {isLockPage && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
+          {isLockPage && !!recentImages.length && (
+            <div className="title">
+              Recent Images
+            </div>
+          )}
+          {isLockPage && !!recentImages.length && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
         </ShadowBox>
         <SupportSite>
           <p>

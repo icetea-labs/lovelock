@@ -28,14 +28,14 @@ const APIService = {
     const lockForFeed = await callView('getLocksForFeed', [address, includeFollowing, includeMemoryIndexes]);
     return lockForFeed;
   },
-  getDetailLock: async index => {
-    const lock = await callView('getDetailLock', [index]);
+  getDetailLock: async (index, includeRecentImages = false) => {
+    const lock = await callView('getDetailLock', [index, includeRecentImages]);
     const proInfo = lock[0] || {};
 
     // add basic extra info
     proInfo.index = index;
     proInfo.coverImg = proInfo.coverImg || 'QmXtwtitd7ouUKJfmfXXcmsUhq2nGv98nxnw2reYg4yncM';
-    proInfo.isJournal = proInfo.sender === proInfo.receiver;
+    proInfo.isJournal = !proInfo.receiver || (proInfo.sender === proInfo.receiver);
     proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
     proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
 

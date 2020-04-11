@@ -64,25 +64,18 @@ export default function DetailContainer(props) {
       dispatch(actions.setLocks([]))
 
       // load memories
-      callView('getMaxLocksIndex').then(async maxIndex => {
-        if (proIndex > maxIndex) {
+      APIService.getDetailLock(proIndex, true).then(lock => {
+        if (cancel) return;
+        if (lock.status !== 1) {
           history.push('/notfound');
           return;
-        } else {
-          APIService.getDetailLock(proIndex).then(lock => {
-            if (cancel) return;
-            if (lock.status !== 1) {
-              history.push('/notfound');
-              return;
-            }
-            setProposeInfo(lock);
-            dispatch(actions.setTopInfo(lock));
-          }).finally(() => setLoading(false))
         }
+        setProposeInfo(lock);
+        dispatch(actions.setTopInfo(lock));
       }).catch(err => {
         console.error(err);
-        setLoading(false);
-      })
+        history.push('/notfound');
+      }).finally(() => setLoading(false))
     }
 
     return () => (cancel = true);

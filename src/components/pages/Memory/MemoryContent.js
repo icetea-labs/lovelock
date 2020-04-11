@@ -453,10 +453,10 @@ function MemoryContent(props) {
     let receiver = ''
     let style = {}
     const toMe = mem.receiver === address
-    if (toMe) {
-      receiver = 'Me'
-    } else if (mem.lock.s_info.lockName) {
+    if (mem.lock.s_info.lockName) {
       receiver = mem.lock.s_info.lockName
+    } else if (toMe) {
+      receiver = 'Me'
     } else if (mem.r_tags && mem.r_tags['display-name']) {
       receiver = getName(mem.r_tags, showFullname)
     } else {

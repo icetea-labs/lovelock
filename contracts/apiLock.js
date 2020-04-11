@@ -320,12 +320,14 @@ function _prepareData(locks, lockIndexes) {
   })
 }
 
-exports.apiGetDetailLock = (self, index) => {
+exports.apiGetDetailLock = (self, index, includeRecentImages) => {
   const [lock] = self.getLock(index);
-  if (lock.deletedBy) throw new Error(`Lock is deleted by ${lock.deletedBy}`);
-  const newLock = _addTopInfoToLocks([lock]);
+  if (lock.deletedBy) throw new Error(`This lock was deleted by ${lock.deletedBy}.`);
+  const newLock = _addTopInfoToLocks(self, [lock], includeRecentImages);
+
   return newLock;
 };
+
 exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes) => {
   const locks = self.getLocks();
   const a2l = self.getA2l()
@@ -364,6 +366,28 @@ exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes
   return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes: Array.from(new Set(memoryIndexes)) };
 };
 
+exports.apiGetRecentImages = (self, lockIndex, lock) => {
+  if (!lock) {
+    lock = self.getLock(lockIndex)
+    if (lock.deletedBy) throw new Error(`This lock was deleted by ${lock.deletedBy}.`)
+  }
+  
+  const memoIndexes = lock.memoIndex
+  if (!memoIndexes || !memoIndexes.length) return []
+
+  const memories = self.getMemories()
+  return memoIndexes.reduce((r, i) => {
+    if (r.length > 10) return r
+
+    const m = getDataByIndex(memories, i)
+    // get list of image
+    if (m.info && m.info.hash && m.info.hash.length) {
+      r.push(...m.info.hash)
+    }
+    return r
+  }, [])
+}
+
 function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
   locks.forEach(lock => {
     if (lock && lock.deletedBy) return;
@@ -395,7 +419,7 @@ function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
   return locks;
 }
 
-function _addTopInfoToLocks(locks) {
+function _addTopInfoToLocks(self, locks, includeRecentImages) {
   const ctDid = loadContract('system.did');
   let resp = [];
   locks.forEach(lock => {
@@ -413,6 +437,9 @@ function _addTopInfoToLocks(locks) {
       tmp.r_name = r_tags['display-name'];
       tmp.r_avatar = r_tags.avatar;
       tmp.r_publicKey = r_tags['pub-key'] || '';
+    }
+    if (includeRecentImages) {
+      tmp.recentImages = exports.apiGetRecentImages(self, undefined, lock)
     }
     resp.push({ ...lock, ...tmp });
   });

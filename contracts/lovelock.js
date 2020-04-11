@@ -24,6 +24,7 @@ const {
   apiGetLocksByAddress,
   apiGetLocksForFeed,
   apiGetDataForMypage,
+  apiGetRecentImages,
   apiDeleteLock,
 } = require('./apiLock.js');
 const {
@@ -144,13 +145,13 @@ class LoveLock {
     const self = this;
     return apiGetLocksByAddress(self, addr);
   }
-  @view getDetailLock(index: number) {
+  @view getDetailLock(index: number, includeRecentImages: boolean) {
     const self = this;
-    return apiGetDetailLock(self, index);
+    return apiGetDetailLock(self, index, includeRecentImages);
   }
   @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
-  @view getLocksForFeed = (addOrAlias: string, includeFollowing: boolean, includeMemoryIndexes: Boolean) => {
+  @view getLocksForFeed = (addOrAlias: string, includeFollowing: boolean, includeMemoryIndexes: boolean) => {
     const self = this;
     let address = addOrAlias;
     if (!isValidAddress(addOrAlias)) {
@@ -367,6 +368,11 @@ class LoveLock {
     Object.assign(data, this.getUserByAdd(address))
 
     return [data]
+  }
+
+  @view getRecentImages(lockIndex: number) {
+    const self = this;
+    return apiGetRecentImages(self, lockIndex);
   }
 
   // ========== DATA MIGRATION =============
@@ -647,5 +653,7 @@ function convertAliasToAddress(alias) {
   if (!alias.startsWith('account.') && !alias.startsWith('contract.')) {
     alias = 'account.' + alias;
   }
-  return ctAlias.resolve.invokeView(alias) || '';
+  const addr = ctAlias.resolve.invokeView(alias)
+  expect(addr, `Unresolvable address or alias ${alias}.`)
+  return addr
 }
