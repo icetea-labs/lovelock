@@ -121,10 +121,9 @@ function Lock(props) {
   );
 
   const layoutLoaded = (() => {
-    const isPenddingLock = !!(props.flag === 0);
-
     return locksData.sort(compare).map((item, index) => {
       const info = getInfo(item);
+      const isPenddingLock = item.status === 0
       return (
         <CardHeader
           key={index}
