@@ -70,10 +70,10 @@ const useStylesArrow = makeStyles(theme => ({
 
 function ArrowTooltip(props) {
   const { arrow, ...classes } = useStylesArrow();
-  const [arrowRef, setArrowRef] = React.useState(null);
+  const [_arrowRef, setArrowRef] = React.useState(null);
   const { title, ...rest } = props;
 
-  const getArrowRef = () => (!arrowRef || Object.keys(arrowRef).length) ? null : arrowRef
+  const arrowRef = (!_arrowRef || Object.keys(_arrowRef).length) ? null : _arrowRef
 
   return (
     <Tooltip
@@ -82,8 +82,8 @@ function ArrowTooltip(props) {
         popperOptions: {
           modifiers: {
             arrow: {
-              enabled: Boolean(getArrowRef()),
-              element: getArrowRef(),
+              enabled: Boolean(arrowRef),
+              element: arrowRef,
             },
           },
         },
