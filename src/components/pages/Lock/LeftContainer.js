@@ -41,7 +41,11 @@ const LeftBox = styled.div`
     font-weight: 600;
     font-size: ${rem(14)};
     text-transform: uppercase;
+    margin-top: ${rem(30)};
     /* margin-bottom: ${rem(20)}; */
+  }
+  .title:first-of-type {
+    margin-top: 0px;
   }
   @media (max-width: 768px) {
     min-height: auto;
@@ -60,7 +64,6 @@ const ShadowBox = styled.div`
 
 const CollectionBox = styled.div`
   padding-top: 1rem;
-  padding-bottom: 1rem;
   width: 100%;
   display: block;
   .colName {
@@ -84,7 +87,6 @@ const CollectionBox = styled.div`
 
 const RecentImageBox = styled.div`
   padding-top: 1rem;
-  padding-bottom: 1rem;
   width: 100%;
   display: block;
   img {
@@ -295,7 +297,7 @@ function LeftContainer(props) {
             <div className="title">
               {!isGuest ? (language === ja ? 'マイロック' : 'My lock') : language === ja ? '公開ロック ' : 'Public lock'}
             </div>
-            <div>
+            <div className="content">
               <Lock loading={loading} locksData={acceptedLocks} address={myAddress} handlerSelect={selectAccepted} />
             </div>
           </>
@@ -305,7 +307,7 @@ function LeftContainer(props) {
             <div className="title">
               <FormattedMessage id="leftmenu.pendingLock" />
             </div>
-            <div>
+            <div className="content">
               <Lock loading={loading} locksData={pendingLocks} address={myAddress} handlerSelect={selectPending} />
             </div>
           </>
@@ -324,7 +326,7 @@ function LeftContainer(props) {
         <div className="title">
           <FormattedMessage id="leftmenu.folowingLock" />
         </div>
-        <div>
+        <div className="content">
           <Lock loading={loading} locksData={followingLocks} address={myAddress} handlerSelect={selectAccepted} />
         </div>
       </>

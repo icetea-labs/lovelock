@@ -206,9 +206,10 @@ export function getQueryParam(name) {
 }
 
 export function makeLockName(p, prefix = '') {
+  const isJournal = !p.receiver || (p.sender === p.receiver)
   const sn = p.s_name || getShortName(p.s_tags)
-  const rn = p.r_name || getShortName(p.r_tags || p.bot_info)
-  return prefix + (p.sender === p.receiver ? `${sn}'s Journal` : `${sn} & ${rn}`);
+  const rn = isJournal || p.r_name || getShortName(p.r_tags || p.bot_info)
+  return prefix + (isJournal ? `${sn}'s Journal` : `${sn} & ${rn}`);
 }
 
 export function callPure(funcName, params) {
