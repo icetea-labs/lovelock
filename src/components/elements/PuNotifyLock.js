@@ -54,7 +54,7 @@ function PuNotifyLock(props) {
     async function loadData() {
       const obj = locks.find(item => item.id === index);
 
-      if (obj.status === 0) {
+      if (obj.status === 0) { // pending
         const addr = address === obj.sender ? obj.receiver : obj.sender;
         const alias = await getAlias(addr);
         setSender(obj.sender);
@@ -97,7 +97,7 @@ function PuNotifyLock(props) {
     <>
       {address === sender ? (
         <CommonDialog
-          title="Lock alert"
+          title="Sent Lock Request"
           okText="Cancel Lock"
           close={close}
           confirm={() => {
@@ -105,7 +105,7 @@ function PuNotifyLock(props) {
           }}
         >
           <TagTitle>
-            <span>You sent lock to </span>
+            <span>You sent this lock request to </span>
             <span className="highlight">{name}</span>
           </TagTitle>
           <ImgView>
@@ -120,10 +120,10 @@ function PuNotifyLock(props) {
           </PageView>
         </CommonDialog>
       ) : (
-        <CommonDialog title="Lock alert" okText="Accept" confirm={accept} cancelText="Deny" cancel={deny} close={close}>
+        <CommonDialog title="Received Lock Request" okText="Accept" confirm={accept} cancelText="Deny" cancel={deny} close={close}>
           <TagTitle>
             <span className="highlight">{name}</span>
-            <span> sent a lock to you</span>
+            <span> requests to lock with you.</span>
           </TagTitle>
           <ImgView>
             {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}

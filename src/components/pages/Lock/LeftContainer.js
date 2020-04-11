@@ -123,7 +123,16 @@ function LeftContainer(props) {
   const collections = showCollection && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
 
   const [index, setIndex] = useState(-1);
-  const [step, setStep] = useState('');
+  const [step, _setStep] = useState('');
+
+  // fix the z-order of PuNotifyLock
+  // can remove if moving PuNotifyLock to parent element
+  const setStep = value => {
+    _setStep(value)
+    const position = value === 'pending' ? 'static' : 'sticky'
+    document.querySelector('.sticky-leftside').style.position = position
+  }
+
   const { enqueueSnackbar } = useSnackbar();
   const ja = 'ja';
 
@@ -294,7 +303,7 @@ function LeftContainer(props) {
     );
   }
   return (
-    <StickyBox offsetTop={20} offsetBottom={20}>
+    <StickyBox className='sticky-leftside' offsetTop={20} offsetBottom={20}>
       <LeftBox>
         <ShadowBox>
           {address && showNewLock && (
