@@ -129,7 +129,7 @@ function LeftContainer(props) {
   // can remove if moving PuNotifyLock to parent element
   const setStep = value => {
     _setStep(value)
-    const position = value === 'pending' ? 'static' : 'sticky'
+    const position = value === '' ? 'sticky' : 'static'
     document.querySelector('.sticky-leftside').style.position = position
   }
 

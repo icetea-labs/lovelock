@@ -78,7 +78,7 @@ function Lock(props) {
         return {
           name: item['display-name'],
           nick: '@' + item.username,
-          icon: 'emoji_people',
+          icon: 'account_box',
           avatar: item.avatar
         };
       default: // couple

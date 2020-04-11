@@ -319,7 +319,7 @@ export default function CreateMemory(props) {
       return showError('Private memory is not currently supported.');
     }
 
-    if (proIndex == null || proIndex === '') {
+    if (!editMode && (proIndex == null || proIndex === '')) {
       return showError('Please select a lock to post to.');
     }
 

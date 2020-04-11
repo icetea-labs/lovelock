@@ -51,12 +51,12 @@ class PuConfirmLock extends React.Component {
     try {
       const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
-        const errMessage = 'Your lock has been confirmed.';
+        const errMessage = 'Your lock has been created, go post a memory.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
     } catch (err) {
-      const msg = handleError(err, 'sendding accept lock');
+      const msg = handleError(err, 'accepting the lock.');
       enqueueSnackbar(msg, { variant: 'error' });
     }
   }
@@ -68,7 +68,7 @@ class PuConfirmLock extends React.Component {
 
       if (result) {
         // window.alert('Success');
-        const errMessage = 'Your lock has been rejected.';
+        const errMessage = 'Lock request has been rejected successfully.';
         enqueueSnackbar(errMessage, { variant: 'info' });
         close();
       }
@@ -83,8 +83,8 @@ class PuConfirmLock extends React.Component {
     const { messageAccept, messageDeny } = this.state;
     return (
       <CommonDialog
-        title="Lock alert"
-        okText="Send"
+        title="Accept Lock Request"
+        okText="Finish"
         cancelText="Cancel"
         close={close}
         cancel={close}
@@ -96,11 +96,11 @@ class PuConfirmLock extends React.Component {
           }
         }}
       >
-        <TagTitle>{isDeny ? 'Your message (optional)' : 'Your message'}</TagTitle>
+        <TagTitle>{isDeny ? 'Reason (optional)' : 'Reply something'}</TagTitle>
         {isDeny ? (
           <TextFieldMultiLine
             id="outlined-multiline-static"
-            placeholder="I don’t care"
+            placeholder="I don't know you"
             multiline
             fullWidth
             rows="5"
@@ -113,7 +113,7 @@ class PuConfirmLock extends React.Component {
           <div>
             <TextFieldMultiLine
               id="outlined-multiline-static"
-              placeholder="Like your lock"
+              placeholder="It is amazing to be together"
               multiline
               fullWidth
               rows="5"

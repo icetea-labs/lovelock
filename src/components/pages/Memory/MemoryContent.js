@@ -405,7 +405,7 @@ function MemoryContent(props) {
     return showFullname ? tags['display-name'] : getShortName(tags)
   }
 
-  function renderLinkUser(isSender, showFullname) {
+  function renderLinkUser(isSender, showFullname = true, showAsMe) {
     const m = memoryDecrypted;
     if (!m) return;
 
@@ -419,7 +419,9 @@ function MemoryContent(props) {
       name = m.r_tags && getName(m.r_tags, showFullname)
     }
 
-    if (!name) {
+    if (showAsMe && u === address) {
+      name = 'Me'
+    } else if (!name) {
       return <span>a crush</span>;
     }
 
@@ -431,7 +433,7 @@ function MemoryContent(props) {
     return (
       <Link
         href={`/u/${u}`}
-        className={classes.relationshipName}
+        className={classes.relationshipName + ' text-clip'}
         onClick={e => {
           if (!myPageRoute) {
             e.preventDefault();
@@ -444,25 +446,30 @@ function MemoryContent(props) {
     );
   }
 
-  function renderLinkReceiver() {
+  function renderLinkReceiver(showFullname = true) {
     const mem = memoryDecrypted;
     //let icon = mem.lock.type === 2 ? <WavesIcon /> : (mem.lock.type === 1 ? <DoneIcon /> : <DoneAllIcon />)
     let type = mem.lock.type === 2 ? 'a journal' : (mem.lock.type === 1 ? 'a crush' : 'a lock')
     let receiver = ''
     let style = {}
-    if (mem.lock.s_info.lockName) {
+    const toMe = mem.receiver === address
+    if (toMe) {
+      receiver = 'Me'
+    } else if (mem.lock.s_info.lockName) {
       receiver = mem.lock.s_info.lockName
     } else if (mem.r_tags && mem.r_tags['display-name']) {
-      receiver = getShortName(mem.r_tags)
+      receiver = getName(mem.r_tags, showFullname)
     } else {
       receiver = type
-      style = { textTransform: 'none' }
+      style = { ...style, textTransform: 'none' }
     }
     
     return (
           <>
-            <ArrowRightIcon color="primary" />
-            <Link href={`/lock/${mem.lockIndex}`} style={style}
+            <ArrowRightIcon color="primary" style={{ flex: '0 1 24px' }} />
+            <Link href={`/lock/${mem.lockIndex}`}
+              style={style}
+              className="text-ellipsis"
               onClick={e => {
                   e.preventDefault();
                   history.push(`/lock/${mem.lockIndex}`);
@@ -636,7 +643,7 @@ function MemoryContent(props) {
   const renderTitleMem = () => {
     return (
       <>
-        {renderLinkUser(true)}
+        {renderLinkUser(true, false, true)}
         {!memoryDecrypted.isDetailScreen && renderLinkReceiver()}
       </>
     );
@@ -835,14 +842,10 @@ function MemoryContent(props) {
       </Card>
       <ModalGateway>
         {viewerIsOpen ? (
-          <Modal onClose={closeLightbox} style={{ zIndex: 3 }}>
+          <Modal onClose={closeLightbox}>
             <Carousel
               currentIndex={currentImage}
-              views={memoryDecrypted.info.hash.map(x => ({
-                ...x,
-                srcset: x.srcSet,
-                caption: x.title,
-              }))}
+              views={memoryDecrypted.info.hash.map(img => ({ source: img.src }))}
             />
           </Modal>
         ) : null}
