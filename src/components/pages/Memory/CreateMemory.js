@@ -12,7 +12,7 @@ import { FormattedMessage } from 'react-intl';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveBufferToIpfs, sendTxUtil, handleError } from '../../../helper';
+import { saveBufferToIpfs, sendTxUtil, handleError, makeLockName } from '../../../helper';
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import UserSuggestionTextarea from '../../elements/Common/UserSuggestionTextarea';
@@ -481,7 +481,7 @@ export default function CreateMemory(props) {
                     <option value="">{language === ja ? '--ロックを洗濯してください--' : '-- Select lock --'}</option>
                     {myLocks.map(v => (
                       <option key={v.id} value={v.id}>
-                        {v.s_info.lockName || v.s_content}
+                        {v.s_info.lockName || makeLockName(v)}
                       </option>
                     ))}
                   </Select>

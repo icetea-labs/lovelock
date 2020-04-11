@@ -18,7 +18,7 @@ import Editor from './Editor';
 import * as blog from '../../../helper/blog';
 import { loadAllDrafts, saveDraft, delDraft } from '../../../helper/draft';
 import { ensureToken } from '../../../helper/hooks';
-import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError, makeLockName } from '../../../helper';
 
 const useStyles = makeStyles(theme => ({
   menuItem: {
@@ -308,7 +308,7 @@ export default function BlogEditor(props) {
       return '-- Select lock --';
     }
 
-    return lock ? lock.s_info.lockName || lock.s_content : null;
+    return lock ? lock.s_info.lockName || makeLockName(lock) : null;
   }
 
   function updateLockIndex(lock) {
@@ -330,7 +330,7 @@ export default function BlogEditor(props) {
           >
             {myLocks.map(lock => (
               <ListItem key={lock.id} onClick={() => updateLockIndex(lock.id)} button className={classes.menuItem}>
-                <ListItemText primary={lock.s_info.lockName || lock.s_content} />
+                <ListItemText primary={lock.s_info.lockName || makeLockName(lock)} />
               </ListItem>
             ))}
           </Menu>
