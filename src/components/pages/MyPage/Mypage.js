@@ -118,7 +118,10 @@ function Mypage(props) {
         info.numFollow = numFollow;
         info.isMyFollow = isMyFollow;
         setMyPageInfo(info);
-      });
+      }).catch(err => {
+        console.error(err)
+        props.history.push('/notfound')
+      })
     }
 
     getDataMypage();
