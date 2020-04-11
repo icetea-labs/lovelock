@@ -6,7 +6,7 @@ function arrowGenerator(color) {
   return {
     '&[x-placement*="bottom"] $arrow': {
       top: 0,
-      left: 0,
+      left: '2em',
       marginTop: '-0.95em',
       width: '2em',
       height: '1em',
@@ -71,7 +71,9 @@ const useStylesArrow = makeStyles(theme => ({
 function ArrowTooltip(props) {
   const { arrow, ...classes } = useStylesArrow();
   const [arrowRef, setArrowRef] = React.useState(null);
-  const { title } = props;
+  const { title, ...rest } = props;
+
+  const getArrowRef = () => (!arrowRef || Object.keys(arrowRef).length) ? null : arrowRef
 
   return (
     <Tooltip
@@ -80,13 +82,13 @@ function ArrowTooltip(props) {
         popperOptions: {
           modifiers: {
             arrow: {
-              enabled: Boolean(arrowRef),
-              element: arrowRef,
+              enabled: Boolean(getArrowRef()),
+              element: getArrowRef(),
             },
           },
         },
       }}
-      {...props}
+      {...rest}
       title={
         <React.Fragment>
           {title}
