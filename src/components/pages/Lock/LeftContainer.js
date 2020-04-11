@@ -351,7 +351,7 @@ function LeftContainer(props) {
           {isLockPage && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
           {isLockPage && !!recentImages.length && (
             <div className="title">
-              Recent Images
+              Recent Image
             </div>
           )}
           {isLockPage && !!recentImages.length && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}

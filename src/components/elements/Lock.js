@@ -49,6 +49,8 @@ function Lock(props) {
     const [selfTags, otherTags] = item.receiver === address ? ['r_tags', 's_tags'] : ['s_tags', 'r_tags'];
     const sAlias = '@' + item.s_alias;
     const rAlias = '@' + item.r_alias;
+    // these 2 following vars only meaningfull when meOwner === true
+    // const [selfAlias, otherAlias] = item.receiver === address ? [rAlias, sAlias] : [sAlias, rAlias];
 
     switch (item.type) {
       case 2: // journal
@@ -88,7 +90,7 @@ function Lock(props) {
             : meOwner
             ? item[otherTags]['display-name']
             : getShortName(item['s_tags']) + ' & ' + getShortName(item['r_tags']),
-          nick: (meOwner ? 'with' : sAlias) + ' ' + rAlias,
+          nick: meOwner ? 'with me' : (sAlias + ' ' + rAlias),
           icon: 'done_all',
           avatar: meOwner ? item[otherTags].avatar : item['s_tags'].avatar,
           avatar2: meOwner ? item[selfTags].avatar : item['r_tags'].avatar,

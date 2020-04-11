@@ -23,6 +23,7 @@ const MainAvatar = withStyles(theme => ({
   const StyledBadge = withStyles(theme => ({
     root: {
       transform: 'translate(30%, -20%)',
+      marginRight: theme.spacing(1),
     }
   }))(Badge);
 
