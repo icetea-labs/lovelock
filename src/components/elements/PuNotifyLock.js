@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { CardMedia } from '@material-ui/core';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
-import { getAlias } from '../../helper';
+import { getAliasAndTags } from '../../helper/account';
 import { useTx } from '../../helper/hooks';
 import ReadMore from '../elements/ReaMore';
 
@@ -45,7 +45,8 @@ function PuNotifyLock(props) {
   const { deny, close, accept, address, index, locks, enqueueSnackbar } = props;
   const [sender, setSender] = useState('');
   const [content, setContent] = useState('');
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [promiseImg, setPromiseImg] = useState('');
   const hash = promiseImg;
   const tx = useTx();
@@ -56,11 +57,13 @@ function PuNotifyLock(props) {
 
       if (obj.status === 0) { // pending
         const addr = address === obj.sender ? obj.receiver : obj.sender;
-        const alias = await getAlias(addr);
+        const [username, tags] = await getAliasAndTags(addr);
+        const displayName = tags['display-name']
         setSender(obj.sender);
         setContent(obj.s_content);
         setPromiseImg(obj.coverImg);
-        setName(alias);
+        setUsername(username);
+        setDisplayName(displayName);
       }
     }
 
@@ -106,7 +109,7 @@ function PuNotifyLock(props) {
         >
           <TagTitle>
             <span>You sent this lock request to </span>
-            <span className="highlight">{name}</span>
+            <a className="highlight" target="_blank" rel="noopener noreferrer" href={`/u/${username}`}>{displayName}</a>
           </TagTitle>
           <ImgView>
             {hash.length > 0 && <CardMediaCus image={process.env.REACT_APP_IPFS + hash} title="lockImg" />}
@@ -122,7 +125,7 @@ function PuNotifyLock(props) {
       ) : (
         <CommonDialog title="Received Lock Request" okText="Accept" confirm={accept} cancelText="Deny" cancel={deny} close={close}>
           <TagTitle>
-            <span className="highlight">{name}</span>
+            <a className="highlight" target="_blank" rel="noopener noreferrer" href={`/u/${username}`}>{displayName}</a>
             <span> requests to lock with you.</span>
           </TagTitle>
           <ImgView>
