@@ -469,7 +469,6 @@ function Header(props) {
 
   useEffect(() => {
     const abort = new AbortController();
-<<<<<<< HEAD
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
@@ -486,13 +485,6 @@ function Header(props) {
           }
         }
         setLockReqList(lockRequests);
-=======
-    fetch(`${process.env.REACT_APP_SERVER}/noti/list?address=${address}`, { signal: abort.signal })
-      .then(r => r.json())
-      .then(data => {
-        console.log(data)
-        // setLockReqList(data.lockRequests);
->>>>>>> bcba5d8f36308aac10041dd2560eaba56d2ad59a
         // setNotiList(data.notifications);
       })
       .catch(err => {
