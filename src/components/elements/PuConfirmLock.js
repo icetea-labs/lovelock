@@ -8,6 +8,7 @@ import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { sendTxWithAuthen } from '../../helper/hooks';
 import { handleError } from '../../helper';
+import appConstants from "../../helper/constants";
 
 const useStyles = makeStyles(theme => ({
   textMulti: {
@@ -20,6 +21,10 @@ const useStyles = makeStyles(theme => ({
 function TextFieldMultiLine(props) {
   const classes = useStyles();
   return <TextField className={classes.textMulti} {...props} />;
+}
+
+function getMessage(id) {
+  return appConstants.textByLockTypes.lock[id];
 }
 
 class PuConfirmLock extends React.Component {
@@ -48,15 +53,21 @@ class PuConfirmLock extends React.Component {
   async messageAccept(message) {
     const { index, enqueueSnackbar, close } = this.props;
 
+    if (!message) {
+      const message = <div><span>Please input </span><span>{getMessage('messageLabel')}</span></div>
+      enqueueSnackbar(message, { variant: 'error' });
+      return;
+    }
+
     try {
       const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
-        const errMessage = 'Your lock has been confirmed.';
+        const errMessage = 'Your lock has been created, go post a memory.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
     } catch (err) {
-      const msg = handleError(err, 'sendding accept lock');
+      const msg = handleError(err, 'accepting the lock.');
       enqueueSnackbar(msg, { variant: 'error' });
     }
   }
@@ -68,8 +79,8 @@ class PuConfirmLock extends React.Component {
 
       if (result) {
         // window.alert('Success');
-        const errMessage = 'Your lock has been rejected.';
-        enqueueSnackbar(errMessage, { variant: 'info' });
+        const errMessage = 'Lock request has been rejected successfully.';
+        enqueueSnackbar(errMessage, { variant: 'success' });
         close();
       }
     } catch (err) {
@@ -83,8 +94,8 @@ class PuConfirmLock extends React.Component {
     const { messageAccept, messageDeny } = this.state;
     return (
       <CommonDialog
-        title="Lock alert"
-        okText="Send"
+        title="Accept Lock Request"
+        okText="Finish"
         cancelText="Cancel"
         close={close}
         cancel={close}
@@ -96,11 +107,11 @@ class PuConfirmLock extends React.Component {
           }
         }}
       >
-        <TagTitle>{isDeny ? 'Your message (optional)' : 'Your message'}</TagTitle>
+        <TagTitle>{isDeny ? 'Reason (optional)' : 'Reply something'}</TagTitle>
         {isDeny ? (
           <TextFieldMultiLine
             id="outlined-multiline-static"
-            placeholder="I don’t care"
+            placeholder="I don't know you"
             multiline
             fullWidth
             rows="5"
@@ -113,7 +124,7 @@ class PuConfirmLock extends React.Component {
           <div>
             <TextFieldMultiLine
               id="outlined-multiline-static"
-              placeholder="Like your lock"
+              placeholder="It is amazing to be together"
               multiline
               fullWidth
               rows="5"

@@ -16,7 +16,7 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
   const eventName = 'addLike_' + memoIndex;
   self.emitEvent(eventName, { by: msg.sender, memoIndex, type }, ['by', 'memoIndex']);
 
-  return memo.likes || [];
+  return memo;
 };
 
 exports.apiCommentMemory = (self, memoIndex, content, info) => {

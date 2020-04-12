@@ -70,8 +70,6 @@ const useStylesArrow = makeStyles(theme => ({
 
 function ArrowTooltip(props) {
   const { arrow, ...classes } = useStylesArrow();
-  const [arrowRef, setArrowRef] = React.useState(null);
-  const { title } = props;
 
   return (
     <Tooltip
@@ -80,17 +78,17 @@ function ArrowTooltip(props) {
         popperOptions: {
           modifiers: {
             arrow: {
-              enabled: Boolean(arrowRef),
-              element: arrowRef,
-            },
-          },
-        },
+              enabled: true,
+              element: '#_tooltipArrow'
+            }
+          }
+        }
       }}
       {...props}
       title={
         <React.Fragment>
-          {title}
-          <span className={arrow} ref={setArrowRef} />
+          {props.title}
+          <span id='_tooltipArrow' className={arrow} />
         </React.Fragment>
       }
     />

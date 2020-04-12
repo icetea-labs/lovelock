@@ -11,7 +11,7 @@ import appConstants from "../../../helper/constants";
 import { useDidUpdate } from '../../../helper/hooks'
 
 function Explore(props) {
-  const { setMemory, memoryList } = props;
+  const { setMemory, memoryList, setLocks } = props;
   const [loading, setLoading] = useState(true);
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
@@ -20,6 +20,8 @@ function Explore(props) {
   const indexParam = Number(props.match.params.index)
   const pinIndex = (indexParam > 0 && Number.isInteger(indexParam)) ? indexParam : null
 
+  // remove items on left sidebar, will add lock/user choices later
+  useEffect(() => setLocks([]), [])
 
   useEffect(() => {
     fetchMemories();
@@ -84,6 +86,9 @@ const mapDispatchToProps = dispatch => {
     setMemory: value => {
       dispatch(actions.setMemory(value));
     },
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
+    }
   };
 };
 

@@ -442,7 +442,7 @@ class PuNewLock extends React.Component {
       }
 
       if (!promiseStm) {
-        const message = `Please input ${this.getMessage('messageLabel')}`;
+        const message = <div><span>Please input </span><span>{this.getMessage('messageLabel')}</span></div>
         enqueueSnackbar(message, { variant: 'error' });
         return;
       }
@@ -472,8 +472,10 @@ class PuNewLock extends React.Component {
         setLoading(false);
         close();
 
-        // redirect to the new lock
-        this.props.history.push(`/lock/${result.returnValue}`);
+        // redirect to the new lock if it is auto-accepted type
+        if (lockType !== 'lock') {
+          this.props.history.push(`/lock/${result.returnValue}`);
+        }
       }
     } catch (err) {
       console.log(err);

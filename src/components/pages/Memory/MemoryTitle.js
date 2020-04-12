@@ -27,7 +27,7 @@ function LockContentTitle(props) {
   const classes = useStyles();
   return (
     <div className={classes.lockcontent}>
-      {props.lock.coverImg && <AvatarPro hash={props.lock.coverImg} />}
+      {props.lock.coverImg && <AvatarPro hash={props.lock.coverImg}  />}
       <span className={classes.lockcontentText}>{props.lock.s_info.lockName}</span>
     </div>
   );

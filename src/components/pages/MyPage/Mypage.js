@@ -31,7 +31,8 @@ const BannerContainer = styled.div`
 const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
-  background: linear-gradient(320deg, #e8e8e8, #d8d8d8);
+  background: linear-gradient(320deg, #eee, #ddd);
+  background-image: url("/static/img/small_tiles.png");
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;
@@ -82,7 +83,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory, memoryList, point, isApproved } = props;
+  const { match, setLocks, setMemory, memoryList, balances, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -112,11 +113,15 @@ function Mypage(props) {
         info.displayname = data[0]['display-name'];
         info.followed = data[0].followed;
         info.address = data[0].address;
+        balances[info.address] = data[0].token;
         const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
         info.numFollow = numFollow;
         info.isMyFollow = isMyFollow;
         setMyPageInfo(info);
-      });
+      }).catch(err => {
+        console.error(err)
+        props.history.push('/notfound')
+      })
     }
 
     getDataMypage();
@@ -134,14 +139,12 @@ function Mypage(props) {
   }, [changed]);
 
   function fetchDataLocksMemories(loadToCurrentPage = false) {
-    APIService.getLocksForFeed(paramAliasOrAddr)
+    APIService.getLocksForFeed(paramAliasOrAddr, false, true)
       .then(resp => {
         // set to redux
         setLocks(resp.locks);
 
-        const memoIndex = resp.locks.reduce((tmp, lock) => {
-          return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
-        }, []);
+        const memoIndex = resp.memoryIndexes;
 
         if (memoIndex.length > 0) {
           APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
@@ -245,7 +248,7 @@ function Mypage(props) {
                           </Typography>
                           <LoyaltyIcon className={classes.titlePoint} />
                           <Typography variant="subtitle1" color="primary">
-                            &nbsp;{point}
+                            &nbsp;{balances[myPageInfo.address || paramAliasOrAddr]}
                           </Typography>
                         </PointShow>
                       </div>
@@ -282,6 +285,7 @@ function Mypage(props) {
                 <div className="proposeColumn proposeColumn--left">
                   <LeftContainer
                     loading={loading}
+                    showNewLock
                     isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
                   />
                 </div>
@@ -317,7 +321,7 @@ const mapStateToProps = state => {
     address: state.account.address,
     isApproved: state.account.isApproved,
     memoryList: state.loveinfo.memories,
-    point: state.account.point,
+    balances: state.loveinfo.balances,
   };
 };
 const mapDispatchToProps = dispatch => {

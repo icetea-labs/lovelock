@@ -206,7 +206,10 @@ export function getQueryParam(name) {
 }
 
 export function makeLockName(p, prefix = '') {
-  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} & ${p.r_name}`);
+  const isJournal = !p.receiver || (p.sender === p.receiver)
+  const sn = p.s_name || getShortName(p.s_tags)
+  const rn = isJournal || p.r_name || getShortName(p.r_tags || p.bot_info)
+  return prefix + (isJournal ? `${sn}'s Journal` : `${sn} & ${rn}`);
 }
 
 export function callPure(funcName, params) {
@@ -868,6 +871,7 @@ export function copyToClipboard(text, enqueueSnackbar) {
 }
 
 export function getShortName(tags) {
+  if (!tags) return ''
   if (tags.firstname) return tags.firstname;
   if (tags.lastname) return tags.lastname;
   return tags['display-name'].split(' ')[0];

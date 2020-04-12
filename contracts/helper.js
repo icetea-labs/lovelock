@@ -38,6 +38,6 @@ exports.expectUserApproved = (self, opts) => {
 //private function
 exports.getDataByIndex = (array, index) => {
   const data = array[index];
-  expect(!!data, 'The array index (' + index + ') out of bounds ');
+  expect(!!data, '[IOB] The array index (' + index + ') is out of bounds.');
   return data;
 };

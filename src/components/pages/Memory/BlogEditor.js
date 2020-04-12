@@ -18,7 +18,7 @@ import Editor from './Editor';
 import * as blog from '../../../helper/blog';
 import { loadAllDrafts, saveDraft, delDraft } from '../../../helper/draft';
 import { ensureToken } from '../../../helper/hooks';
-import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError, makeLockName } from '../../../helper';
 
 const useStyles = makeStyles(theme => ({
   menuItem: {
@@ -70,6 +70,8 @@ export default function BlogEditor(props) {
   const [lockIndex, setLockIndex] = useState(lockIndexInit);
   const language = useSelector(state => state.globalData.language);
   const ja = 'ja';
+
+  const myLocks = (props.locks || []).filter(l => l.isMyLock && l.status === 1)
 
   if (memory && memory.blogContent && memory !== blogMemory) {
     blogMemory = memory;
@@ -298,7 +300,7 @@ export default function BlogEditor(props) {
   }
 
   function selectedLockName() {
-    const lock = lockIndex == null ? null : props.locks.find(lock => lock.id === lockIndex);
+    const lock = lockIndex == null ? null : myLocks.find(lock => lock.id === lockIndex);
     if (!lock) {
       if (language === ja) {
         return '--ロックを洗濯してください--';
@@ -306,7 +308,7 @@ export default function BlogEditor(props) {
       return '-- Select lock --';
     }
 
-    return lock ? lock.s_info.lockName || lock.s_content : null;
+    return lock ? lock.s_info.lockName || makeLockName(lock) : null;
   }
 
   function updateLockIndex(lock) {
@@ -326,9 +328,9 @@ export default function BlogEditor(props) {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
             transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           >
-            {props.locks.map(lock => (
+            {myLocks.map(lock => (
               <ListItem key={lock.id} onClick={() => updateLockIndex(lock.id)} button className={classes.menuItem}>
-                <ListItemText primary={lock.s_info.lockName || lock.s_content} />
+                <ListItemText primary={lock.s_info.lockName || makeLockName(lock)} />
               </ListItem>
             ))}
           </Menu>

@@ -712,7 +712,7 @@ function TopContrainer(props) {
           </div>
         </div>
 
-        {topInfo.r_content && (
+        {!topInfo.isJournal && (
           <div className="proposeMes">
             <div className="content_detail clearfix">
               {loading ? (
@@ -736,7 +736,7 @@ function TopContrainer(props) {
                   />
                 </div>
               ) : (
-                <div className="rightContent">{topInfo.r_content}</div>
+                <div className="rightContent">{topInfo.r_content || '🌼'}</div>
               )}
             </div>
             <div className="user_photo ">

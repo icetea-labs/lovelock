@@ -12,7 +12,7 @@ import { FormattedMessage } from 'react-intl';
 import { ButtonPro } from '../../elements/Button';
 import AddInfoMessage from '../../elements/AddInfoMessage';
 import * as actions from '../../../store/actions';
-import { saveBufferToIpfs, sendTxUtil, handleError } from '../../../helper';
+import { saveBufferToIpfs, sendTxUtil, handleError, makeLockName } from '../../../helper';
 import { ensureToken } from '../../../helper/hooks';
 import { AvatarPro } from '../../elements';
 import UserSuggestionTextarea from '../../elements/Common/UserSuggestionTextarea';
@@ -169,6 +169,8 @@ export default function CreateMemory(props) {
   const address = useSelector(state => state.account.address);
   const language = useSelector(state => state.globalData.language);
 
+  const myLocks = (props.locks || []).filter(l => l.isMyLock && l.status === 1)
+
   const [filesBuffer, setFilesBuffer] = useState(
     editBlogData
       ? editBlogData.meta.coverPhoto && editBlogData.meta.coverPhoto.url
@@ -317,7 +319,7 @@ export default function CreateMemory(props) {
       return showError('Private memory is not currently supported.');
     }
 
-    if (proIndex == null || proIndex === '') {
+    if (!editMode && (proIndex == null || proIndex === '')) {
       return showError('Please select a lock to post to.');
     }
 
@@ -477,9 +479,9 @@ export default function CreateMemory(props) {
                     input={<BootstrapInput name="postToLock" id="outlined-collection" />}
                   >
                     <option value="">{language === ja ? '--ロックを洗濯してください--' : '-- Select lock --'}</option>
-                    {(props.locks || []).map(v => (
+                    {myLocks.map(v => (
                       <option key={v.id} value={v.id}>
-                        {v.s_info.lockName || v.s_content}
+                        {v.s_info.lockName || makeLockName(v)}
                       </option>
                     ))}
                   </Select>
@@ -592,7 +594,7 @@ export default function CreateMemory(props) {
             memory={edittingMemory}
             onClose={closeBlogEditor}
             needSelectLock={props.needSelectLock}
-            locks={props.locks}
+            locks={myLocks}
           />
         )}
       </CreatePost>
