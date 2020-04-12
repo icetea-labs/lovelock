@@ -28,8 +28,8 @@ const APIService = {
     const lockForFeed = await callView('getLocksForFeed', [address, includeFollowing, includeMemoryIndexes]);
     return lockForFeed;
   },
-  getDetailLock: async (index, includeRecentImages = false) => {
-    const lock = await callView('getDetailLock', [index, includeRecentImages]);
+  getDetailLock: async (index, includeRecentData = false) => {
+    const lock = await callView('getDetailLock', [index, includeRecentData]);
     const proInfo = lock[0] || {};
 
     // add basic extra info

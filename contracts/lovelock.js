@@ -24,7 +24,7 @@ const {
   apiGetLocksByAddress,
   apiGetLocksForFeed,
   apiGetDataForMypage,
-  apiGetRecentImages,
+  apiGetRecentData,
   apiDeleteLock,
 } = require('./apiLock.js');
 const {
@@ -145,9 +145,9 @@ class LoveLock {
     const self = this;
     return apiGetLocksByAddress(self, addr);
   }
-  @view getDetailLock(index: number, includeRecentImages: boolean) {
+  @view getDetailLock(index: number, includeRecentData: boolean) {
     const self = this;
-    return apiGetDetailLock(self, index, includeRecentImages);
+    return apiGetDetailLock(self, index, includeRecentData);
   }
   @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
@@ -370,9 +370,9 @@ class LoveLock {
     return [data]
   }
 
-  @view getRecentImages(lockIndex: number) {
+  @view getRecentData(lockIndex: number) {
     const self = this;
-    return apiGetRecentImages(self, lockIndex);
+    return apiGetRecentData(self, lockIndex);
   }
 
   // ========== DATA MIGRATION =============

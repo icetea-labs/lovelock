@@ -6,7 +6,7 @@ import { useSnackbar } from 'notistack';
 import { FormattedMessage } from 'react-intl';
 import { ensureContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
-import { callView, showSubscriptionError } from '../../../helper';
+import { callView, showSubscriptionError, TimeWithFormat } from '../../../helper';
 import Icon from '../../elements/Icon';
 
 import { LinkPro } from '../../elements/Button';
@@ -102,6 +102,23 @@ const RecentImageBox = styled.div`
   }
   `;
 
+  const RecentBlogPostBox = styled.ul`
+    padding-top: 1rem;
+    width: 100%;
+    line-height: 1.5;
+    li {
+      padding: 0.2rem 0;
+      a:hover {
+        text-decoration: underline;
+      }
+      .date {
+        font-size: 85%;
+        color: #8f8f8f;
+        margin-left: .2em;
+      }
+    }
+  `;
+
 const SupportSite = styled.div`
   display: block;
   padding-top: 1rem;
@@ -142,7 +159,9 @@ function LeftContainer(props) {
 
   const isLockPage = proIndex != null;
   const collections = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
-  const recentImages = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.recentImages || [] : [];
+  const recentImages = isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.photos || {} : {};
+  const hasRecentImages = !!Object.keys(recentImages).length
+  const recentBlogPosts = isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.blogPosts || [] : [];
 
   const [index, setIndex] = useState(-1);
   const [step, _setStep] = useState('');
@@ -277,9 +296,23 @@ function LeftContainer(props) {
   }
 
   function renderRecentImages(images) {
-    return images.map((hash, index) => {
+    return Object.entries(images).map(([hash, data], index) => {
       return (
-        <img key={index} src={process.env.REACT_APP_IPFS + hash} />
+        <img key={index} src={process.env.REACT_APP_IPFS + hash} title={data.content} alt="Photo" />
+      );
+    });
+  }
+
+  function renderRecentBlogPosts(posts) {
+    return posts.map(({ date, content, index }, i) => {
+      return (
+        <li key={i}>
+          <a href={`/blog/${index}`} onClick={e => {
+            e.preventDefault()
+            history.push(`/blog/${index}`)
+          }}>{content.meta.title}</a>
+          <span className="date">・<TimeWithFormat value={date} format="DD MMM YYYY" /></span>
+        </li>
       );
     });
   }
@@ -351,12 +384,18 @@ function LeftContainer(props) {
             </div>
           )}
           {isLockPage && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
-          {isLockPage && !!recentImages.length && (
+          {isLockPage && !!recentBlogPosts.length && (
             <div className="title">
-              Recent Image
+              Article
             </div>
           )}
-          {isLockPage && !!recentImages.length && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
+          {isLockPage && !!recentBlogPosts.length && <RecentBlogPostBox>{renderRecentBlogPosts(recentBlogPosts)}</RecentBlogPostBox>}
+          {isLockPage && hasRecentImages && (
+            <div className="title">
+              Photo
+            </div>
+          )}
+          {isLockPage && hasRecentImages && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
         </ShadowBox>
         <SupportSite>
           <p>

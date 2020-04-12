@@ -871,6 +871,7 @@ export function copyToClipboard(text, enqueueSnackbar) {
 }
 
 export function getShortName(tags) {
+  if (!tags) return ''
   if (tags.firstname) return tags.firstname;
   if (tags.lastname) return tags.lastname;
   return tags['display-name'].split(' ')[0];

@@ -320,10 +320,10 @@ function _prepareData(locks, lockIndexes) {
   })
 }
 
-exports.apiGetDetailLock = (self, index, includeRecentImages) => {
+exports.apiGetDetailLock = (self, index, includeRecentData) => {
   const [lock] = self.getLock(index);
   if (lock.deletedBy) throw new Error(`This lock was deleted by ${lock.deletedBy}.`);
-  const newLock = _addTopInfoToLocks(self, [lock], includeRecentImages);
+  const newLock = _addTopInfoToLocks(self, [lock], includeRecentData);
 
   return newLock;
 };
@@ -366,26 +366,50 @@ exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes
   return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes: Array.from(new Set(memoryIndexes)) };
 };
 
-exports.apiGetRecentImages = (self, lockIndex, lock) => {
-  if (!lock) {
-    lock = self.getLock(lockIndex)
+exports.apiGetRecentData = (self, lockOrIndex) => {
+  let lock = lockOrIndex
+  if (typeof lockOrIndex === 'number') {
+    lock = self.getLock(lockOrIndex)
     if (lock.deletedBy) throw new Error(`This lock was deleted by ${lock.deletedBy}.`)
   }
   
   const memoIndexes = lock.memoIndex
   if (!memoIndexes || !memoIndexes.length) return []
 
+  const MAX_PHOTO = 8
+  const MAX_BLOG = 5
+
   const memories = self.getMemories()
-  return memoIndexes.reduce((r, i) => {
-    if (r.length > 10) return r
+  return memoIndexes.reverse().reduce((r, i) => {
+    if (r.photos.length >= MAX_PHOTO && r.blogPosts.length >= MAX_BLOG) return r
 
     const m = getDataByIndex(memories, i)
+    if (m.isPrivate) return r
+
     // get list of image
-    if (m.info && m.info.hash && m.info.hash.length) {
-      r.push(...m.info.hash)
+    if (m.info && (m.info.blog || (m.info.hash && m.info.hash.length))) {
+      const data = {
+        index: i,
+        author: m.sender,
+        date: m.info.date,
+        content: m.info.blog ? JSON.parse(m.content) : m.content,
+        collectionId: m.info.collectionId,
+        likes: m.likes ? Object.keys(m.likes).length : 0,
+        comments: m.comments ? m.comments.length : 0
+      }
+
+      if (m.info.blog) {
+        r.blogPosts.push(data)
+      } else {
+        m.info.hash.reduce((p, h) => {
+          p[h] = data
+          return p
+        }, r.photos)
+      }
     }
+
     return r
-  }, [])
+  }, { photos:{}, blogPosts: [] })
 }
 
 function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
@@ -419,7 +443,7 @@ function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
   return locks;
 }
 
-function _addTopInfoToLocks(self, locks, includeRecentImages) {
+function _addTopInfoToLocks(self, locks, includeRecentData) {
   const ctDid = loadContract('system.did');
   let resp = [];
   locks.forEach(lock => {
@@ -438,8 +462,8 @@ function _addTopInfoToLocks(self, locks, includeRecentImages) {
       tmp.r_avatar = r_tags.avatar;
       tmp.r_publicKey = r_tags['pub-key'] || '';
     }
-    if (includeRecentImages) {
-      tmp.recentImages = exports.apiGetRecentImages(self, undefined, lock)
+    if (includeRecentData) {
+      tmp.recentData = exports.apiGetRecentData(self, lock)
     }
     resp.push({ ...lock, ...tmp });
   });
