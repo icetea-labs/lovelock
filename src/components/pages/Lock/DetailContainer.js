@@ -57,7 +57,7 @@ export default function DetailContainer(props) {
 
   useEffect(() => {
     let cancel = false;
-    if (isNaN(proIndex) || invalidCollectionId) {
+    if (isNaN(proIndex) || proIndex < 0 || invalidCollectionId) {
       history.push('/notfound');
     } else {
       // remove lock list displaying on left sidebar
@@ -67,15 +67,22 @@ export default function DetailContainer(props) {
       APIService.getDetailLock(proIndex, true).then(lock => {
         if (cancel) return;
         if (lock.status !== 1) {
+          // lock is not accepted (pending or denied)
           history.push('/notfound');
           return;
         }
         setProposeInfo(lock);
         dispatch(actions.setTopInfo(lock));
+        setLoading(false)
       }).catch(err => {
         console.error(err);
-        history.push('/notfound');
-      }).finally(() => setLoading(false))
+        if (String(err).includes('[IOB]')) { // index out of bound
+          history.push('/notfound');
+        } else {
+          setLoading(false)
+          enqueueSnackbar(err.message, { variant: 'error' })
+        }
+      })
     }
 
     return () => (cancel = true);

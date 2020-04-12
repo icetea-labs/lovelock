@@ -114,7 +114,7 @@ function Lock(props) {
     return v1.localeCompare(v2);
   };
 
-  const layoutLoading = (
+  const layoutLoading = () => (
     <CardHeader
       avatar={loading ? <Skeleton variant="circle" width={40} height={40} /> : ''}
       title={loading ? <Skeleton height={6} width="80%" /> : ''}
@@ -122,7 +122,7 @@ function Lock(props) {
     />
   );
 
-  const layoutLoaded = (() => {
+  const layoutLoaded = () => {
     return locksData.sort(compare).map((item, index) => {
       const info = getInfo(item);
       const isPenddingLock = item.status === 0
@@ -152,9 +152,9 @@ function Lock(props) {
         />
       );
     });
-  })();
+  }
 
-  return <>{locksData.length <= 0 ? layoutLoading : layoutLoaded}</>;
+  return locksData.length <= 0 ? layoutLoading() : layoutLoaded();
 }
 export { Lock };
 export default Lock;
