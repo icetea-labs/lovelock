@@ -469,11 +469,22 @@ function Header(props) {
 
   useEffect(() => {
     const abort = new AbortController();
-    fetch(`${process.env.REACT_APP_SERVER}/noti/list?address=${address}`, { signal: abort.signal })
+    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        console.log(data)
-        // setLockReqList(data.lockRequests);
+        console.log('useEffectdata', data);
+        const lockRequests = [];
+        if (data.result.length > 0) {
+          for (let i = 0; i < data.result.length; i++) {
+            const lockReq = {
+              id: i,
+              avatar: data.result[i].avatar,
+              name: data.result[i].display_name,
+            };
+            lockRequests.push(lockReq);
+          }
+        }
+        setLockReqList(lockRequests);
         // setNotiList(data.notifications);
       })
       .catch(err => {
@@ -595,8 +606,8 @@ function Header(props) {
                 <>
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
-                  </Typography>
-                  {' '}sent you a lock request
+                  </Typography>{' '}
+                  sent you a lock request
                 </>
               }
               secondary={
