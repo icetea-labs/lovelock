@@ -469,16 +469,21 @@ function Header(props) {
 
   useEffect(() => {
     const abort = new AbortController();
-    fetch('/data/noti.json', { signal: abort.signal })
+    fetch(`${process.env.REACT_APP_SERVER}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        setLockReqList(data.lockRequests);
-        setNotiList(data.notifications);
+        console.log(data)
+        // setLockReqList(data.lockRequests);
+        // setNotiList(data.notifications);
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
+
+      return () => {
+        abort.abort();
+      };
   }, []);
 
   const renderMenu = (
