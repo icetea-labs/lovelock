@@ -185,7 +185,7 @@ const renderCardSubtitle = (memory, language) => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
+  const { memory, setNeedAuth, showPhotoViewer, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -358,22 +358,18 @@ function MemoryContent(props) {
 
   function closeMemory() {
     setOpenModal(false);
-    const pathname = `/lock/${memory.lockIndex}`;
+    //const pathname = `/lock/${memory.lockIndex}`;
     //window.history.pushState({}, '', pathname);
     window.history.back()
   }
 
-  const [currentImage, setCurrentImage] = useState(0);
-  const [viewerIsOpen, setViewerIsOpen] = useState(false);
-
-  const openLightbox = useCallback((event, { index }) => {
-    setCurrentImage(index);
-    setViewerIsOpen(true);
+  const openPhotoViewer = useCallback((event, { index }) => {
+    const options = {
+      currentIndex: index,
+      views: memoryDecrypted.info.hash.map(img => ({ source: img.src }))
+    }
+    showPhotoViewer(options)
   }, []);
-  const closeLightbox = () => {
-    setCurrentImage(0);
-    setViewerIsOpen(false);
-  };
 
   function unlockMemory() {
     if (privateKey) {
@@ -608,10 +604,8 @@ function MemoryContent(props) {
       <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
         {memoryDecrypted.info.hash && (
           <Gallery
-            // targetRowHeight={300}
-            // containerWidth={600}
             photos={memoryDecrypted.info.hash.slice(0, 5)}
-            onClick={openLightbox}
+            onClick={openPhotoViewer}
           />
         )}
       </div>
@@ -840,16 +834,6 @@ function MemoryContent(props) {
           </CommonDialog>
         )}
       </Card>
-      <ModalGateway>
-        {viewerIsOpen ? (
-          <Modal onClose={closeLightbox}>
-            <Carousel
-              currentIndex={currentImage}
-              views={memoryDecrypted.info.hash.map(img => ({ source: img.src }))}
-            />
-          </Modal>
-        ) : null}
-      </ModalGateway>
     </>
   );
 }
@@ -859,6 +843,9 @@ const mapDispatchToProps = dispatch => {
     setNeedAuth(value) {
       dispatch(actions.setNeedAuth(value));
     },
+    showPhotoViewer(options) {
+      dispatch(actions.setShowPhotoViewer(options))
+    }
   };
 };
 

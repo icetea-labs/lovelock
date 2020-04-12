@@ -146,6 +146,7 @@ function LeftContainer(props) {
     setLocks,
     showNewLock,
     setShowNewLockDialog,
+    showPhotoViewer,
     confirmLock,
     topInfo,
     proIndex,
@@ -215,6 +216,16 @@ function LeftContainer(props) {
         }
       }
     });
+  }
+
+  const openPhotoViewer = event => {
+    const currentIndex = Number(event.target.getAttribute('data-index')) || 0
+    const views = Object.keys(recentImages).map(hash => ({ source: process.env.REACT_APP_IPFS + hash }))
+    const options = {
+      currentIndex,
+      views
+    }
+    showPhotoViewer(options)
   }
 
   function closePopup() {
@@ -290,7 +301,7 @@ function LeftContainer(props) {
   function renderRecentImages(images) {
     return Object.entries(images).map(([hash, data], index) => {
       return (
-        <img key={index} src={process.env.REACT_APP_IPFS + hash} title={data.content} alt="Photo" />
+        <img key={index} data-index={index} onClick={openPhotoViewer} src={process.env.REACT_APP_IPFS + hash} title={data.content} alt="Photo" />
       );
     });
   }
@@ -449,6 +460,9 @@ const mapDispatchToProps = dispatch => {
     confirmLock: value => {
       dispatch(actions.confirmLock(value));
     },
+    showPhotoViewer(options) {
+      dispatch(actions.setShowPhotoViewer(options))
+    }
   };
 };
 

@@ -2,8 +2,8 @@ import { actionTypes } from '../actions/globalData';
 
 const initialState = {
   isLoading: false,
-  newLockDialogOptions: false,
-  photoViewerOptions: false,
+  newLockDialog: false,
+  photoViewer: false,
   showNotLoginNotify: false,
   triggerElement: null,
   language: "en",
@@ -14,9 +14,9 @@ const globalData = (state = initialState, action) => {
     case actionTypes.SET_GLOBAL_LOADING:
       return { ...state, isLoading: action.data };
     case actionTypes.SET_SHOW_NEW_LOCK_DIALOG:
-      return { ...state, newLockDialogOptions: action.data };
+      return { ...state, newLockDialog: action.data };
     case actionTypes.SET_SHOW_PHOTO_VIEWER:
-      return { ...state, photoViewerOptions: action.data };
+      return { ...state, photoViewer: action.data };
     case actionTypes.SET_LANGUAGE:
       return { ...state, language: action.data };
     default:
