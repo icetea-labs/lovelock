@@ -37,6 +37,7 @@ import { Link, withRouter } from 'react-router-dom';
 import Autosuggest from 'react-autosuggest';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
+import axios from 'axios';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
@@ -44,6 +45,7 @@ import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
 import { getAuthenAndTags, getUserSuggestions } from '../../helper';
+import { notiList } from '../../helper/baseapi';
 import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
@@ -284,6 +286,19 @@ const StyledMenuItem = withStyles(theme => ({
   },
 }))(MenuItem);
 
+const getNotiListApi = async add => {
+  const url = `${process.env.REACT_APP_API + notiList}?address=${add}`;
+  console.log('url', url);
+  await axios
+    .get(url)
+    .then(response => {
+      console.log('getNotiListApi', response);
+    })
+    .catch(error => {
+      console.log('error', error);
+    });
+};
+
 function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -323,6 +338,9 @@ function Header(props) {
   const avatarRedux = useSelector(state => state.account.avatar);
 
   const ja = 'ja';
+
+  const renderGetNoti = getNotiListApi(address);
+  console.log('renderGetNoti', renderGetNoti);
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
@@ -590,8 +608,8 @@ function Header(props) {
                 <>
                   <Typography component="span" variant="body2" color="textPrimary">
                     {name}
-                  </Typography>
-                  {' '}sent you a lock request
+                  </Typography>{' '}
+                  sent you a lock request
                 </>
               }
               secondary={
