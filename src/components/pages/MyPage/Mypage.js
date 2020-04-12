@@ -83,7 +83,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory, memoryList, balances, isApproved } = props;
+  const { match, setLocks, setMemories, memoryList, balances, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -155,7 +155,7 @@ function Mypage(props) {
 
               let memories = result;
               if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemory(memories);
+              setMemories(memories);
               setLoading(false);
             })
             .catch(err => {
@@ -163,7 +163,7 @@ function Mypage(props) {
               setLoading(false);
             });
         } else {
-          setMemory([]);
+          setMemories([]);
           setNoMoreMemories(true);
           setLoading(false);
         }
@@ -329,8 +329,8 @@ const mapDispatchToProps = dispatch => {
     setLocks: value => {
       dispatch(actions.setLocks(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
   };
 };

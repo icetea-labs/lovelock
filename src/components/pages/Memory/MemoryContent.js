@@ -856,9 +856,6 @@ function MemoryContent(props) {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
-    },
     setNeedAuth(value) {
       dispatch(actions.setNeedAuth(value));
     },

@@ -33,7 +33,8 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 
 // ========== GET DATA ==================
 exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadToCurrentPage) => {
-  const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
+  const locks = self.getLocks()
+  const memoryPro = getDataByIndex(locks, lockIndex)['memoIndex'];
   const memories = self.getMemories();
 
   let resp = memoryPro.reduce((res, index) => {
@@ -46,7 +47,7 @@ exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, l
 
   resp = _getPaginatedMemories(resp, page, pageSize, loadToCurrentPage);
 
-  return _addInfoToMems(resp, self);
+  return _addInfoToMems(resp, self, locks);
 };
 
 exports.apiGetMemoriesByRange = (self, start, end) => {
@@ -163,16 +164,16 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   self.setMemories(memories);
 };
 
-function _addInfoToMems(memories, self) {
+function _addInfoToMems(memories, self, locks) {
   const ctDid = loadContract('system.did');
-
+  locks = locks || self.getLocks()
   let res = memories.map(mem => {
     let tmpMem = {};
     tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
     tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
     tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
     //LOCK_TYPE_JOURNAL
-    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
+    let lock = getDataByIndex(locks, mem.lockIndex);
     if (mem.receiver === mem.sender) {
       tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {

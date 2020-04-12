@@ -48,6 +48,8 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
+import Carousel, { Modal, ModalGateway } from 'react-images';
+
 const StyledLogo = styled(Link)`
   display: none;
   @media (min-width: 600px) {
@@ -368,10 +370,10 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handeNewLock() {
-    dispatch(actions.setNewLock(true));
+    dispatch(actions.setShowNewLockDialog(true));
   }
   function closePopup() {
-    dispatch(actions.setNewLock(false));
+    dispatch(actions.setShowNewLockDialog(false));
   }
   function handleShowphrase() {
     dispatch(actions.setNeedAuth(true));

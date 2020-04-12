@@ -774,8 +774,8 @@ const mapDispatchToProps = dispatch => {
     setTopInfo: value => {
       dispatch(actions.setTopInfo(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
     setGLoading(value) {
       dispatch(actions.setLoading(value));

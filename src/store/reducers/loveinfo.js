@@ -15,10 +15,6 @@ const loveinfo = (state = initialState, action) => {
       return { ...state, topInfo: { ...state.topInfo, ...action.data } };
     case actionTypes.SET_LOCKS:
       return { ...state, locks: action.data };
-    case actionTypes.ADD_LOCK:
-      // eslint-disable-next-line no-case-declarations
-      const isAdd = state.locks.filter(item => item.id === action.data.id);
-      return isAdd.length > 0 ? state : { ...state, locks: [...state.locks, action.data] };
     case actionTypes.CONFIRM_LOCK:
       // eslint-disable-next-line no-case-declarations
       const newLocks = state.locks.map(el => {
@@ -28,7 +24,7 @@ const loveinfo = (state = initialState, action) => {
         return el;
       });
       return { ...state, locks: [...newLocks] };
-    case actionTypes.SET_MEMORY:
+    case actionTypes.SET_MEMORIES:
       return { ...state, memories: action.data };
     case actionTypes.SET_BLOG_VIEW:
       return { ...state, blogView: action.data };

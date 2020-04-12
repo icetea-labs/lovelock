@@ -145,7 +145,7 @@ function LeftContainer(props) {
     locks,
     setLocks,
     showNewLock,
-    setNewLock,
+    setShowNewLockDialog,
     confirmLock,
     topInfo,
     proIndex,
@@ -164,15 +164,7 @@ function LeftContainer(props) {
   const recentBlogPosts = isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.blogPosts || [] : [];
 
   const [index, setIndex] = useState(-1);
-  const [step, _setStep] = useState('');
-
-  // fix the z-order of PuNotifyLock
-  // can remove if moving PuNotifyLock to parent element
-  const setStep = value => {
-    _setStep(value)
-    const position = value === '' ? 'sticky' : 'static'
-    document.querySelector('.sticky-leftside').style.position = position
-  }
+  const [step, setStep] = useState('');
 
   const { enqueueSnackbar } = useSnackbar();
   const ja = 'ja';
@@ -227,7 +219,7 @@ function LeftContainer(props) {
 
   function closePopup() {
     setStep('');
-    setNewLock(false);
+    setShowNewLockDialog(false);
   }
 
   function nextToAccept() {
@@ -249,7 +241,7 @@ function LeftContainer(props) {
   }
 
   function newLock() {
-    setNewLock(true);
+    setShowNewLockDialog(true);
     if (closeMobileMenu) closeMobileMenu();
   }
 
@@ -272,7 +264,7 @@ function LeftContainer(props) {
 
     // console.log(data);
     if (address !== data.log.sender) {
-      const message = 'You have a new lock.';
+      const message = 'You have a new lock request.';
       enqueueSnackbar(message, { variant: 'info' });
     }
     // goto propose detail when sent to bot.
@@ -307,7 +299,7 @@ function LeftContainer(props) {
     return posts.map(({ date, content, index }, i) => {
       return (
         <li key={i}>
-          <a href={`/blog/${index}`} onClick={e => {
+          ・<a href={`/blog/${index}`} onClick={e => {
             e.preventDefault()
             history.push(`/blog/${index}`)
           }}>{content.meta.title}</a>
@@ -366,7 +358,12 @@ function LeftContainer(props) {
     );
   }
 
+  // Note: the StickyBox with position:sticky make dialogs, modals go into displaying ordering problems
+  // so must put all modals and dialog outside of sticky box.
+  // In the future, we should move all dialogs/modals to parent layer to avoid problems on mobile
+  // where left sidebar is hidden
   return (
+    <>
     <StickyBox className='sticky-leftside' offsetTop={20} offsetBottom={20}>
       <LeftBox>
         <ShadowBox>
@@ -415,7 +412,8 @@ function LeftContainer(props) {
           </p>
         </SupportSite>
       </LeftBox>
-      {step === 'pending' && (
+    </StickyBox>
+    {step === 'pending' && (
         <PuNotifyLock
           index={index}
           locks={locks}
@@ -425,9 +423,9 @@ function LeftContainer(props) {
           deny={nextToDeny}
         />
       )}
-      {step === 'accept' && <PuConfirmLock close={closePopup} index={index} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closePopup} index={index} />}
-    </StickyBox>
+    {step === 'accept' && <PuConfirmLock close={closePopup} index={index} />}
+    {step === 'deny' && <PuConfirmLock isDeny close={closePopup} index={index} />}
+    </>
   );
 }
 
@@ -445,8 +443,8 @@ const mapDispatchToProps = dispatch => {
     setLocks: value => {
       dispatch(actions.setLocks(value));
     },
-    setNewLock: value => {
-      dispatch(actions.setNewLock(value));
+    setShowNewLockDialog: value => {
+      dispatch(actions.setShowNewLockDialog(value));
     },
     confirmLock: value => {
       dispatch(actions.confirmLock(value));

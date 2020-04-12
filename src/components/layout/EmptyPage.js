@@ -123,7 +123,7 @@ export default function EmptyPage(props){
   const { history, isApproved, isGuest, username } = props;
 
   function openPopup() {
-    dispatch(actions.setNewLock(true));
+    dispatch(actions.setShowNewLockDialog(true));
   }
 
   function openLink(event) {

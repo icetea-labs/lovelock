@@ -53,7 +53,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export function BlogView(props) {
-  const { match, setMemory, setBlogView, blogView, needAuth } = props;
+  const { match, setMemories, setBlogView, blogView, needAuth } = props;
   const paramMemIndex = parseInt(match.params.index, 10);
 
   const [showComment, setShowComment] = useState(true);
@@ -95,7 +95,7 @@ export function BlogView(props) {
 
         // save to redux
         setBlogView(mem);
-        setMemory(mems);
+        setMemories(mems);
 
       } else {
         // not a blog, redirect to memory screen
@@ -219,8 +219,8 @@ const mapDispatchToProps = dispatch => {
     setBlogView: value => {
       dispatch(actions.setBlogView(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
   };
 };
