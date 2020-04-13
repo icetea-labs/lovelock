@@ -20,7 +20,7 @@ function Home(props) {
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
 
-  const { setLocks, setMemory, address, locks, history, isApproved, memoryList } = props;
+  const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
   const { enqueueSnackbar } = useSnackbar();
 
   function refresh() {
@@ -78,7 +78,7 @@ function Home(props) {
 
               let memories = result;
               if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemory(memories);
+              setMemories(memories);
               setLoading(false);
             })
             .catch(err => {
@@ -86,7 +86,7 @@ function Home(props) {
               setLoading(false);
             });
         } else {
-          setMemory([]);
+          setMemories([]);
           setNoMoreMemories(true);
           setLoading(false);
         }
@@ -171,8 +171,8 @@ const mapDispatchToProps = dispatch => {
     setLocks: value => {
       dispatch(actions.setLocks(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
   };
 };

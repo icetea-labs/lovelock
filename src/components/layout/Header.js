@@ -50,6 +50,8 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
+import Carousel, { Modal, ModalGateway } from 'react-images';
+
 const StyledLogo = styled(Link)`
   display: none;
   @media (min-width: 600px) {
@@ -290,7 +292,8 @@ function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
-  const isNewLock = useSelector(state => state.globalData.isNewLock);
+  const newLockDialog = useSelector(state => state.globalData.newLockDialog);
+  const photoViewer = useSelector(state => state.globalData.photoViewer);
   const mnemonic = useSelector(state => state.account.mnemonic);
   const privateKey = useSelector(state => state.account.privateKey);
   const mode = useSelector(state => state.account.mode);
@@ -374,10 +377,13 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handeNewLock() {
-    dispatch(actions.setNewLock(true));
+    dispatch(actions.setShowNewLockDialog(true));
   }
-  function closePopup() {
-    dispatch(actions.setNewLock(false));
+  function closeNewLockDialog() {
+    dispatch(actions.setShowNewLockDialog(false));
+  }
+  function closePhotoViewer() {
+    dispatch(actions.setShowPhotoViewer(false));
   }
   function handleShowphrase() {
     dispatch(actions.setNeedAuth(true));
@@ -941,7 +947,7 @@ function Header(props) {
       {renderLockRequests()}
       {renderNotifications()}
       {needAuth && <PasswordPrompt />}
-      {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
+      {newLockDialog && <PuNewLock history={props.history} close={closeNewLockDialog} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
       {isNotifyLock && (
         <PuNotifyLock
@@ -955,6 +961,13 @@ function Header(props) {
       )}
       {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={parseInt(index, 10)} />}
       {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={parseInt(index, 10)} />}
+      <ModalGateway>
+        {photoViewer ? (
+          <Modal onClose={closePhotoViewer}>
+            <Carousel currentIndex={photoViewer.currentIndex} views={photoViewer.views} />
+          </Modal>
+        ) : null}
+      </ModalGateway>
     </div>
   );
 }

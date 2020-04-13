@@ -11,7 +11,7 @@ import appConstants from "../../../helper/constants";
 import { useDidUpdate } from '../../../helper/hooks'
 
 function Explore(props) {
-  const { setMemory, memoryList, setLocks } = props;
+  const { setMemories, memoryList, setLocks } = props;
   const [loading, setLoading] = useState(true);
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
@@ -41,7 +41,7 @@ function Explore(props) {
 
       let memories = result;
       if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-      setMemory(memories);
+      setMemories(memories);
       setLoading(false);
     }).catch(err => {
       console.error(err)
@@ -83,8 +83,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
     setLocks: value => {
       dispatch(actions.setLocks(value));
