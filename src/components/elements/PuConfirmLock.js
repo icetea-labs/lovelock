@@ -84,7 +84,7 @@ class PuConfirmLock extends React.Component {
         close();
       }
     } catch (err) {
-      const msg = handleError(err, 'sendding deny lock');
+      const msg = handleError(err, 'sending deny lock');
       enqueueSnackbar(msg, { variant: 'error' });
     }
   }

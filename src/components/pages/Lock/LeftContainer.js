@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { FormattedMessage } from 'react-intl';
+import StickyBox from "react-sticky-box";
 import { ensureContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
 import { callView, showSubscriptionError, TimeWithFormat } from '../../../helper';
@@ -14,7 +15,6 @@ import { Lock } from '../../elements';
 import PuConfirmLock from '../../elements/PuConfirmLock';
 import PuNotifyLock from '../../elements/PuNotifyLock';
 import * as actions from '../../../store/actions';
-import StickyBox from "react-sticky-box";
 
 const LeftBox = styled.div`
   width: 100%;

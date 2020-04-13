@@ -206,9 +206,9 @@ export function getQueryParam(name) {
 }
 
 export function makeLockName(p, prefix = '') {
-  const isJournal = !p.receiver || (p.sender === p.receiver)
-  const sn = p.s_name || getShortName(p.s_tags)
-  const rn = isJournal || p.r_name || getShortName(p.r_tags || p.bot_info)
+  const isJournal = !p.receiver || p.sender === p.receiver;
+  const sn = p.s_name || getShortName(p.s_tags);
+  const rn = isJournal || p.r_name || getShortName(p.r_tags || p.bot_info);
   return prefix + (isJournal ? `${sn}'s Journal` : `${sn} & ${rn}`);
 }
 
@@ -309,11 +309,11 @@ export async function saveToIpfs(files) {
 
   const newIpfs = createIpfsClient(authData);
 
-  const results = []
+  const results = [];
   for await (const result of newIpfs.add([...contentBuffer])) {
-    results.push(String(result.cid))
+    results.push(String(result.cid));
   }
-  
+
   return results;
 }
 
@@ -442,7 +442,7 @@ export async function loadMemCacheAPI(id) {
 }
 
 export function TimeWithFormat(props) {
-  const language = props.language
+  const { language } = props.language;
   const ja = 'ja';
   const { format, value } = props;
   const formatValue = format || 'MM/DD/YYYY';
@@ -871,7 +871,7 @@ export function copyToClipboard(text, enqueueSnackbar) {
 }
 
 export function getShortName(tags) {
-  if (!tags) return ''
+  if (!tags) return '';
   if (tags.firstname) return tags.firstname;
   if (tags.lastname) return tags.lastname;
   return tags['display-name'].split(' ')[0];

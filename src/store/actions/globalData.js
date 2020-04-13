@@ -6,6 +6,7 @@ export const actionTypes = {
   SET_NEW_LOCK: 'SET_NEW_LOCK',
   SET_CONFIRM_AUTH_ELE: 'SET_CONFIRM_AUTH_ELE',
   SET_LANGUAGE: 'SET_LANGUAGE',
+  SET_NOTIFY_LOCK: 'SET_NOTIFY_LOCK',
 };
 /*
  * action creators
@@ -24,5 +25,9 @@ export const setAuthEle = data => ({
 });
 export const setLanguage = data => ({
   type: actionTypes.SET_LANGUAGE,
+  data,
+});
+export const setNotifyLock = data => ({
+  type: actionTypes.SET_NOTIFY_LOCK,
   data,
 });
