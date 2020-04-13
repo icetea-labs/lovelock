@@ -40,10 +40,12 @@ import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
+import PuNotifyLock from '../elements/PuNotifyLock';
+import PuConfirmLock from '../elements/PuConfirmLock';
 import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getAuthenAndTags, getUserSuggestions } from '../../helper';
+import { getAuthenAndTags, getUserSuggestions, diffTime } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
@@ -140,7 +142,7 @@ const useStyles = makeStyles(theme => ({
   },
   listItemNotiStyle: {
     borderRadius: 10,
-    margin: theme.spacing(1),
+    // margin: theme.spacing(1),
   },
   notiPromise: {
     width: '100%',
@@ -326,6 +328,10 @@ function Header(props) {
   const avatarRedux = useSelector(state => state.account.avatar);
 
   const ja = 'ja';
+  const isNotifyLock = useSelector(state => state.globalData.isNotifyLock);
+  const [apiLocks, setApiLocks] = useState([]);
+  const [step, setStep] = useState('');
+  const [index, setIndex] = useState(-1);
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
@@ -377,7 +383,7 @@ function Header(props) {
     dispatch(actions.setShowNewLockDialog(false));
   }
   function closePhotoViewer() {
-    dispatch(actions.setShowPhotoViewer(false))
+    dispatch(actions.setShowPhotoViewer(false));
   }
   function handleShowphrase() {
     dispatch(actions.setNeedAuth(true));
@@ -385,6 +391,27 @@ function Header(props) {
   }
   function closeShowMnemonic() {
     setShowPhrase(false);
+  }
+
+  function handleSelLock(lockId) {
+    dispatch(actions.setNotifyLock(true));
+    setIndex(lockId);
+  }
+
+  function closeNotiLock() {
+    dispatch(actions.setNotifyLock(false));
+  }
+
+  function closeConfirmLock() {
+    setStep('');
+  }
+
+  function nextToAccept() {
+    setStep('accept');
+  }
+
+  function nextToDeny() {
+    setStep('deny');
   }
 
   const getSuggestions = async value => {
@@ -480,27 +507,74 @@ function Header(props) {
       .then(data => {
         console.log('useEffectdata', data);
         const lockRequests = [];
+        const allLocksList = [];
         if (data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
-            const lockReq = {
-              id: i,
-              avatar: data.result[i].avatar,
-              name: data.result[i].display_name,
-            };
-            lockRequests.push(lockReq);
+            if (data.result[i].event_name === 'createLock') {
+              const lockReq = {
+                id: data.result[i].id,
+                avatar: data.result[i].avatar,
+                name: data.result[i].display_name,
+                lockId: data.result[i].lockIndex,
+              };
+              const allLocks = {
+                id: data.result[i].lockIndex,
+                sender: data.result[i].sender,
+                receiver: data.result[i].receiver,
+                s_content: data.result[i].content,
+                coverImg: data.result[i].coverImg,
+                status: data.result[i].status,
+                displayName: data.result[i].display_name,
+              };
+              lockRequests.push(lockReq);
+              allLocksList.push(allLocks);
+            }
+            setApiLocks(allLocksList);
           }
         }
         setLockReqList(lockRequests);
-        // setNotiList(data.notifications);
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
 
-      return () => {
-        abort.abort();
-      };
+    return () => {
+      abort.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const abort = new AbortController();
+    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
+      .then(r => r.json())
+      .then(data => {
+        console.log('addMemory', data);
+        const memoryList = [];
+        if (data.result.length > 0) {
+          for (let i = 0; i < data.result.length; i++) {
+            if (data.result[i].event_name === 'addMemory') {
+              const memoryReq = {
+                id: data.result[i].id,
+                eventName: data.result[i].event_name,
+                avatar: data.result[i].avatar,
+                name: data.result[i].display_name,
+                content: data.result[i].content,
+                time: data.result[i].created_at,
+              };
+              memoryList.push(memoryReq);
+            }
+          }
+        }
+        setNotiList(memoryList);
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        throw err;
+      });
+    return () => {
+      abort.abort();
+    };
   }, []);
 
   const renderMenu = (
@@ -570,21 +644,36 @@ function Header(props) {
     >
       <StyledMenuItem className={classes.lockReqStyle}>
         <ListItemText primary="Lock Request" className={classes.lockReqTitle} />
-        <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} />
+        {/* <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} /> */}
       </StyledMenuItem>
-      {lockReqList.map(({ id, avatar, name }) => (
-        <StyledMenuItem className={classes.lockReqStyle} key={id}>
+      {lockReqList.map(({ id, avatar, name, lockId }) => (
+        <StyledMenuItem
+          className={classes.lockReqStyle}
+          key={id}
+          onClick={() => {
+            handleSelLock(lockId);
+            handleLockReqClose();
+            const abort = new AbortController();
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`, { signal: abort.signal })
+              .then(r => r.json())
+              .then(data => {})
+              .catch(err => {
+                if (err.name === 'AbortError') return;
+                throw err;
+              });
+          }}
+        >
           <ListItemAvatar>
             <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
           </ListItemAvatar>
           <ListItemText primary={name} className={classes.lockReqName} />
-          <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} />
-          <ListItemText primary="DELETE" />
+          {/* <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} /> */}
+          {/* <ListItemText primary="DELETE" /> */}
         </StyledMenuItem>
       ))}
-      <StyledMenuItem className={classes.lockReqStyle}>
+      {/* <StyledMenuItem className={classes.lockReqStyle}>
         <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
-      </StyledMenuItem>
+      </StyledMenuItem> */}
     </StyledMenu>
   );
 
@@ -598,10 +687,10 @@ function Header(props) {
     >
       <StyledMenuItem className={classes.lockReqStyle}>
         <ListItemText primary="Notification" className={classes.lockReqTitle} />
-        <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} />
+        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} /> */}
+        {/* <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
       </StyledMenuItem>
-      {notiList.map(({ id, avatar, name, promise, time }) => (
+      {notiList.map(({ id, avatar, name, content, time, eventName }) => (
         <List className={classes.listNoti} component="nav" key={id}>
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
@@ -610,19 +699,20 @@ function Header(props) {
             <ListItemText
               primary={
                 <>
-                  <Typography component="span" variant="body2" color="textPrimary">
-                    {name}
-                  </Typography>{' '}
-                  sent you a lock request
+                  {eventName === 'addMemory' && (
+                    <Typography component="span" variant="body2" color="textPrimary">
+                      {name} create a new memory with you
+                    </Typography>
+                  )}
                 </>
               }
               secondary={
                 <>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {promise}
+                    {content}
                   </Typography>
                   <Typography component="span" variant="body2">
-                    {time}
+                    {diffTime(time)}
                   </Typography>
                 </>
               }
@@ -632,7 +722,7 @@ function Header(props) {
         </List>
       ))}
       <StyledMenuItem className={classes.lockReqStyle}>
-        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
       </StyledMenuItem>
     </StyledMenu>
   );
@@ -859,13 +949,22 @@ function Header(props) {
       {needAuth && <PasswordPrompt />}
       {newLockDialog && <PuNewLock history={props.history} close={closeNewLockDialog} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
+      {isNotifyLock && (
+        <PuNotifyLock
+          index={index}
+          locks={apiLocks}
+          address={address}
+          close={closeNotiLock}
+          accept={nextToAccept}
+          deny={nextToDeny}
+        />
+      )}
+      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={parseInt(index, 10)} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={parseInt(index, 10)} />}
       <ModalGateway>
         {photoViewer ? (
           <Modal onClose={closePhotoViewer}>
-            <Carousel
-              currentIndex={photoViewer.currentIndex}
-              views={photoViewer.views}
-            />
+            <Carousel currentIndex={photoViewer.currentIndex} views={photoViewer.views} />
           </Modal>
         ) : null}
       </ModalGateway>

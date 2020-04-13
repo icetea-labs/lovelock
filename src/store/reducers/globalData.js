@@ -6,7 +6,8 @@ const initialState = {
   photoViewer: false,
   showNotLoginNotify: false,
   triggerElement: null,
-  language: "en",
+  language: 'en',
+  isNotifyLock: false,
 };
 
 const globalData = (state = initialState, action) => {
@@ -19,6 +20,13 @@ const globalData = (state = initialState, action) => {
       return { ...state, photoViewer: action.data };
     case actionTypes.SET_LANGUAGE:
       return { ...state, language: action.data };
+    case actionTypes.SET_NOTIFY_LOCK:
+      return { ...state, isNotifyLock: action.data };
+    // case types.SET_SHOW_PRIVATEKEY:
+    //   return {
+    //     ...state,
+    //     triggerElement: action.data
+    //   }
     default:
       return state;
   }

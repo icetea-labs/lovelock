@@ -2,10 +2,13 @@
  * action types
  */
 export const actionTypes = {
-  SET_GLOBAL_LOADING: 'global/SET_GLOBAL_LOADING',
+  SET_GLOBAL_LOADING: 'SET_GLOBAL_LOADING',
+  SET_NEW_LOCK: 'SET_NEW_LOCK',
+  SET_CONFIRM_AUTH_ELE: 'SET_CONFIRM_AUTH_ELE',
+  SET_LANGUAGE: 'SET_LANGUAGE',
+  SET_NOTIFY_LOCK: 'SET_NOTIFY_LOCK',
   SET_SHOW_NEW_LOCK_DIALOG: 'global/SET_SHOW_NEW_LOCK_DIALOG',
   SET_SHOW_PHOTO_VIEWER: 'global/SET_SHOW_PHOTO_VIEWER',
-  SET_LANGUAGE: 'global/SET_LANGUAGE',
 };
 /*
  * action creators
@@ -24,5 +27,9 @@ export const setShowPhotoViewer = data => ({
 });
 export const setLanguage = data => ({
   type: actionTypes.SET_LANGUAGE,
+  data,
+});
+export const setNotifyLock = data => ({
+  type: actionTypes.SET_NOTIFY_LOCK,
   data,
 });
