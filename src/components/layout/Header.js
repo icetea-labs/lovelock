@@ -293,6 +293,7 @@ function Header(props) {
   const mode = useSelector(state => state.account.mode);
   const address = useSelector(state => state.account.address);
   const language = useSelector(state => state.globalData.language);
+  const isApproved = useSelector(state => state.account.isApproved);
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorElLockReq, setAnchorElLockReq] = useState(null);
@@ -784,7 +785,7 @@ function Header(props) {
         </IconButton>
         <p>MyPage</p>
       </MenuItem>
-      <MenuItem onClick={handeNewLock}>
+      {isApproved && <MenuItem onClick={handeNewLock}>
         <IconButton
           aria-label="explore post of other users"
           aria-controls="primary-search-explore-menu"
@@ -793,7 +794,7 @@ function Header(props) {
           <AddIcon />
         </IconButton>
         <p>Create</p>
-      </MenuItem>
+      </MenuItem>}
       <MenuItem onClick={handeExplore}>
         <IconButton
           aria-label="explore post of other users"
@@ -903,11 +904,11 @@ function Header(props) {
                     }
                   /> */}
                 </Button>
-                <Button className={classes.sectionDesktop} onClick={handeNewLock}>
+                {isApproved && <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>
                     <FormattedMessage id="header.btnCreate" />
                   </Typography>
-                </Button>
+                </Button>}
 
                 <div className={classes.sectionDesktop}>
                   <IconButton
