@@ -42,7 +42,7 @@ function RightContainer(props) {
 
       let memories = result;
       if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-      dispatch(actions.setMemory(memories));
+      dispatch(actions.setMemories(memories));
       setLoading(false);
     }).catch(err => {
       console.error(err)

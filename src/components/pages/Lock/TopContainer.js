@@ -341,7 +341,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, address, topInfo, setTopInfo, setGLoading } = props;
+  const { proIndex, address, topInfo, setTopInfo, setGLoading, language } = props;
   const tx = useTx();
   const isSender = topInfo.sender === address;
   const isReceiver = topInfo.receiver === address;
@@ -590,7 +590,7 @@ function TopContrainer(props) {
         ) : (
           <CardMedia
             className={classes.media}
-            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
+            image={topInfo.coverImg ? process.env.REACT_APP_IPFS + topInfo.coverImg : '/static/img/landing.svg'}
           >
             {canChangeCover() && (
               <div className="showChangeImg">
@@ -689,7 +689,7 @@ function TopContrainer(props) {
                 </Link>
                 <span className="sinceDate">・</span>
                 <span className="time color-gray">
-                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
+                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" language={language} />
                 </span>
                 {isSender && renderEditLockIcon()}
               </div>
@@ -712,7 +712,7 @@ function TopContrainer(props) {
           </div>
         </div>
 
-        {topInfo.r_content && (
+        {!topInfo.isJournal && (
           <div className="proposeMes">
             <div className="content_detail clearfix">
               {loading ? (
@@ -736,7 +736,7 @@ function TopContrainer(props) {
                   />
                 </div>
               ) : (
-                <div className="rightContent">{topInfo.r_content}</div>
+                <div className="rightContent">{topInfo.r_content || '🌼'}</div>
               )}
             </div>
             <div className="user_photo ">
@@ -765,6 +765,7 @@ const mapStateToProps = state => {
   return {
     topInfo: state.loveinfo.topInfo,
     address: state.account.address,
+    language: state.globalData.language
   };
 };
 
@@ -773,8 +774,8 @@ const mapDispatchToProps = dispatch => {
     setTopInfo: value => {
       dispatch(actions.setTopInfo(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
     setGLoading(value) {
       dispatch(actions.setLoading(value));

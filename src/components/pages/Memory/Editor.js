@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import ReactDOMServer from 'react-dom/server';
 import Dante from 'Dante2';
 import { withStyles } from '@material-ui/core/styles';
 import mediumZoom from 'medium-zoom';
@@ -9,6 +9,9 @@ import throttle from 'lodash/throttle';
 import { connect } from 'react-redux';
 
 import { waitForHtmlTags } from '../../../helper';
+import { AvatarPro } from '../../elements/index';
+import FacebookIcon from '@material-ui/icons/Facebook';
+import { TimeWithFormat } from '../../../helper/utils';
 
 const font =
   '"jaf-bernino-sans", "Open Sans", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
@@ -35,6 +38,34 @@ const styles = {
     lineHeight: 1.2,
     marginBottom: 20,
   },
+  authorInfo: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    margin: '30px 0',
+    alignItems: 'center',
+  },
+  authorInfoLeft: {
+    display: 'flex',
+  },
+  author: {
+    marginLeft: 12,
+  },
+  date: {
+    fontSize: 13,
+    color: '#9e9e9e',
+  },
+  authorName: {
+    fontSize: 16,
+    display: 'block',
+    color: 'inherit',
+  },
+  pointer: {
+    cursor: 'pointer',
+  },
+  avatar: {
+    width: 50,
+    height: 50
+  }
 };
 
 class Editor extends React.Component {
@@ -67,6 +98,61 @@ class Editor extends React.Component {
       this.resizeEventHandler = throttle(() => this.resizeImages(), 1000);
       window.addEventListener('resize', this.resizeEventHandler, { passive: true });
     }
+
+    if (this.props.read_only) {
+      this.insertCardToDOM();
+    }
+  }
+
+  insertCardToDOM() {
+    setTimeout(() =>
+      waitForHtmlTags('.postContent', dom => {
+        const postContentNode = dom[0];
+        let title = postContentNode.querySelector('h1 + h3') ||
+          postContentNode.querySelector('h1') ||
+          postContentNode.querySelector('h2 + h3') ||
+          postContentNode.querySelector('h2') ||
+          postContentNode.querySelector('h3')
+
+        const cardNode = document.createElement('div');
+        cardNode.innerHTML = this.renderAuthorInfo();
+        if (!title) {
+          postContentNode.prepend(cardNode);
+        } else if (title.nextSibling) {
+          title.parentNode.insertBefore(cardNode, title.nextSibling);
+        } else {
+          title.parentNode.appendChild(cardNode);
+        }
+    }));
+  }
+
+  renderAuthorInfo() {
+    const { classes } = this.props;
+    
+    let memoryInfo = this.props.memoryInfo;
+    let avatar = memoryInfo.s_avatar || memoryInfo.s_tags.avatar;
+    let displayName = memoryInfo.s_name || memoryInfo.s_tags['display-name'];
+    let date = memoryInfo.s_date || memoryInfo.info.date
+    return ReactDOMServer.renderToString(
+      <div className={classes.authorInfo}>
+        <div className={classes.authorInfoLeft}>
+          <a href={`/u/${memoryInfo.sender}`}>
+            <AvatarPro className={classes.avatar} hash={avatar} />
+          </a>
+          <div className={classes.author}>
+            <a className={classes.authorName} href={`/u/${memoryInfo.sender}`}>
+              {displayName}
+            </a>
+            <div className={classes.date}>
+              <TimeWithFormat value={date} format="DD MMM YYYY" language={this.props.language} />
+            </div>
+          </div>
+        </div>
+        <a className={classes.pointer} href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target='_blank' rel="noopener noreferrer">
+          <FacebookIcon />
+        </a>
+      </div>
+    );
   }
 
   componentWillUnmount() {

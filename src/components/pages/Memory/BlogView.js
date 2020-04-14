@@ -10,7 +10,7 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
-import { TimeWithFormat, smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
+import { smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
@@ -53,7 +53,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export function BlogView(props) {
-  const { match, setMemory, setBlogView, blogView, needAuth } = props;
+  const { match, setMemories, setBlogView, blogView, needAuth } = props;
   const paramMemIndex = parseInt(match.params.index, 10);
 
   const [showComment, setShowComment] = useState(true);
@@ -95,7 +95,7 @@ export function BlogView(props) {
 
         // save to redux
         setBlogView(mem);
-        setMemory(mems);
+        setMemories(mems);
 
       } else {
         // not a blog, redirect to memory screen
@@ -168,12 +168,12 @@ export function BlogView(props) {
             <MemoryTitle
               sender={blogView.s_tags['display-name']}
               receiver={blogView.r_tags['display-name']}
+              lock={blogView.lock}
               handleClose={closeMemory}
             />
           }
-          subtitle={<TimeWithFormat value={blogView.info.date} format="DD MMM YYYY" />}
         >
-          <Editor initContent={blogView.blogContent} read_only />
+          <Editor initContent={blogView.blogContent} memoryInfo={blogView} read_only />
           <div className={classes.editorComment}>
             <MemoryActionButton
               handleShowComment={handleShowComment}
@@ -219,8 +219,8 @@ const mapDispatchToProps = dispatch => {
     setBlogView: value => {
       dispatch(actions.setBlogView(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
   };
 };

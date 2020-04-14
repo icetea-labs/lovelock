@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { FlexWidthBox, rem } from '../elements/StyledUtils';
 import { ButtonPro, LinkPro } from '../elements/Button/index';
 import { useDispatch } from 'react-redux';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import * as actions from '../../store/actions';
 
 const RightBox = styled.div`
@@ -29,16 +30,14 @@ const RightBox = styled.div`
     max-width: 158px;
   }
   .note {
-    padding: 12px 12px 12px 20px;
-    background-color: #fe7;
-    line-height: 1.4;
     text-align: left;
-    margin-top: -1.5rem;
-    margin-bottom: 2rem;
-    border-radius: 6px;
+    font-size: 1em;
     h5 {
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      font-size: 1.1em;
+    }
+    strong {
+      font-weight: 700;
     }
   }
   @media (max-width: 768px) {
@@ -123,7 +122,7 @@ export default function EmptyPage(props){
   const { history, isApproved, isGuest, username } = props;
 
   function openPopup() {
-    dispatch(actions.setNewLock(true));
+    dispatch(actions.setShowNewLockDialog(true));
   }
 
   function openLink(event) {
@@ -135,12 +134,11 @@ export default function EmptyPage(props){
     <FlexWidthBox>
       <ShadowBox>
         <RightBox>
-          <div>
-            {!isApproved && !isGuest && (
-              <div className="note">
-                <h5>
-                  <FormattedMessage id="home.activationTitle" />
-                </h5>
+            {(!isApproved && !isGuest) ? (
+              <Alert severity="info" variant="outlined" className="note">
+                <AlertTitle>
+                  <h5><FormattedMessage id="home.activationTitle" /></h5>
+                </AlertTitle>
                 <span>
                   <FormattedMessage id="home.activationSubTitle" />
                   <a
@@ -149,49 +147,51 @@ export default function EmptyPage(props){
                     rel="noopener noreferrer"
                     href="http://bit.ly/LoveLock-AAR"
                   >
-                    <FormattedMessage id="home.activationForm" />
+                    <strong><FormattedMessage id="home.activationForm" /></strong>
                   </a>
-                  <FormattedMessage id="home.activstionGoal" />
+                  <FormattedMessage id="home.activationGoal" />
                 </span>
+              </Alert>
+            ) : (
+              <div>
+                <img src="/static/img/plant.svg" alt="plant" />
+                <div className="emptyTitle">
+                    {
+                      isGuest ? <h1>{username || 'This user'} has no lock.</h1> : <h1><FormattedMessage id="home.emptyTitle" /></h1>
+                    }
+                </div>
+                <div className="emptySubTitle">
+                  {isGuest ? (
+                    <h2>{username || 'This user'} has not created any content.</h2>
+                  ) : (
+                    <h2>
+                      <span>
+                        <FormattedMessage id="home.emptySubTitle" />
+                      </span>
+                      <a href="https://help.lovelock.one/" className="underline" target="_blank" rel="noopener noreferrer">
+                        <FormattedMessage id="home.emptySubTitleLink" />
+                      </a>
+                    </h2>
+                  )}
+                </div>
+                {isGuest ? (
+                  <LinkPro variant="contained" color="primary" route="/explore" onClick={openLink}>
+                    <FormattedMessage id="home.exploreLink" />
+                  </LinkPro>
+                ) : (
+                  <>
+                    <ActionForm>
+                      <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                        <FormattedMessage id="home.buttonCreate" />
+                      </ButtonPro>
+                    </ActionForm>
+                    <LinkPro className="btn_add_promise" route="/explore" onClick={openLink}>
+                      <FormattedMessage id="home.exploreLink" />
+                    </LinkPro>
+                  </>
+                )}
               </div>
             )}
-            <img src="/static/img/plant.svg" alt="plant" />
-            <div className="emptyTitle">
-              <h1>
-                <FormattedMessage id="home.emptyTitle" />
-              </h1>
-            </div>
-            <div className="emptySubTitle">
-              {isGuest ? (
-                <h2>{username} has not created any content.</h2>
-              ) : (
-                <h2>
-                  <span>
-                    <FormattedMessage id="home.emptySubTitle" />
-                  </span>
-                  <a href="https://help.lovelock.one/" className="underline" target="_blank" rel="noopener noreferrer">
-                    <FormattedMessage id="home.emptySubTitleLink" />
-                  </a>
-                </h2>
-              )}
-            </div>
-            {isGuest ? (
-              <LinkPro variant="contained" color="primary" route="/explore" onClick={openLink}>
-                <FormattedMessage id="home.exploreLink" />
-              </LinkPro>
-            ) : (
-              <>
-                <ActionForm>
-                  <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                    <FormattedMessage id="home.buttonCreate" />
-                  </ButtonPro>
-                </ActionForm>
-                <LinkPro className="btn_add_promise" route="/explore" onClick={openLink}>
-                  <FormattedMessage id="home.exploreLink" />
-                </LinkPro>
-              </>
-            )}
-          </div>
         </RightBox>
       </ShadowBox>
       <FooterWapper>

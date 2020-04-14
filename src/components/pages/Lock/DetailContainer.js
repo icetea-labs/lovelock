@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
 import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
-import { callView, makeLockName } from '../../../helper';
+import { makeLockName } from '../../../helper';
 
 import { useTx } from '../../../helper/hooks';
 import TopContrainer from './TopContainer';
@@ -57,31 +57,36 @@ export default function DetailContainer(props) {
 
   useEffect(() => {
     let cancel = false;
-    if (isNaN(proIndex) || invalidCollectionId) {
+    if (isNaN(proIndex) || proIndex < 0 || invalidCollectionId) {
       history.push('/notfound');
     } else {
-      callView('getMaxLocksIndex').then(async maxIndex => {
-        if (proIndex > maxIndex) {
+      // remove lock list displaying on left sidebar
+      dispatch(actions.setLocks([]))
+
+      // load memories
+      APIService.getDetailLock(proIndex, true).then(lock => {
+        if (cancel) return;
+        if (lock.status !== 1) {
+          // lock is not accepted (pending or denied)
           history.push('/notfound');
           return;
-        } else {
-          APIService.getDetailLock(proIndex).then(lock => {
-            if (cancel) return;
-            if (lock.status !== 1) {
-              history.push('/notfound');
-              return;
-            }
-            setProposeInfo(lock);
-            dispatch(actions.setTopInfo(lock));
-          });
-          APIService.getLocksForFeed(address).then(resp => {
-            // set to redux
-            dispatch(actions.setLocks(resp.locks));
-            if (cancel) return;
-            setLoading(false);
-          });
         }
-      });
+        if (lock.s_content == null) {
+          // it is the auto generated first journal when activating user
+          lock.s_content = 'My LoveLock journal'
+        }
+        setProposeInfo(lock);
+        dispatch(actions.setTopInfo(lock));
+        setLoading(false)
+      }).catch(err => {
+        console.error(err);
+        if (String(err).includes('[IOB]')) { // index out of bound
+          history.push('/notfound');
+        } else {
+          setLoading(false)
+          enqueueSnackbar(err.message, { variant: 'error' })
+        }
+      })
     }
 
     return () => (cancel = true);
@@ -150,7 +155,7 @@ export default function DetailContainer(props) {
 
       <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
-          <LeftContainer proIndex={proIndex} loading={loading} />
+          <LeftContainer proIndex={proIndex} loading={loading} context="lock" />
         </div>
         <div className="proposeColumn proposeColumn--right">
           <RightContainer

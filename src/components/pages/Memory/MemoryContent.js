@@ -8,9 +8,11 @@ import LockIcon from '@material-ui/icons/Lock';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSnackbar } from 'notistack';
 import Gallery from 'react-photo-gallery';
-import Carousel, { Modal, ModalGateway } from 'react-images';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import WavesIcon from '@material-ui/icons/Waves';
+// import DoneIcon from '@material-ui/icons/Done';
+// import DoneAllIcon from '@material-ui/icons/DoneAll';
+
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
@@ -41,6 +43,7 @@ import CommonDialog from '../../elements/CommonDialog';
 import CreateMemory from './CreateMemory';
 import appConstants from '../../../helper/constants';
 import UserLinkify from '../../elements/Common/UserLinkify';
+import { getShortName } from '../../../helper/utils';
 
 const useStylesFacebook = makeStyles({
   root: {
@@ -165,8 +168,8 @@ const setMemoryCollection = (lock, memory) => {
   }
 };
 
-const renderCardSubtitle = memory => {
-  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" />;
+const renderCardSubtitle = (memory, language) => {
+  const time = <TimeWithFormat value={memory.info.date} format="h:mm a DD MMM YYYY" language={language} />;
   const hasCol = memory.collection;
   if (!hasCol) return time;
 
@@ -181,12 +184,14 @@ const renderCardSubtitle = memory => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
+  const { memory, setNeedAuth, showPhotoViewer, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
   const publicKey = useSelector(state => state.account.publicKey);
   const address = useSelector(state => state.account.address);
+  const language = useSelector(state => state.globalData.language);
+
   const { collections } = memory.lock;
 
   const [memoryDecrypted, setMemoryDecrypted] = useState(memory);
@@ -352,21 +357,18 @@ function MemoryContent(props) {
 
   function closeMemory() {
     setOpenModal(false);
-    const pathname = `/lock/${memory.lockIndex}`;
-    window.history.pushState({}, '', pathname);
+    //const pathname = `/lock/${memory.lockIndex}`;
+    //window.history.pushState({}, '', pathname);
+    window.history.back()
   }
 
-  const [currentImage, setCurrentImage] = useState(0);
-  const [viewerIsOpen, setViewerIsOpen] = useState(false);
-
-  const openLightbox = useCallback((event, { index }) => {
-    setCurrentImage(index);
-    setViewerIsOpen(true);
+  const openPhotoViewer = useCallback((event, { index }) => {
+    const options = {
+      currentIndex: index,
+      views: memoryDecrypted.info.hash.map(img => ({ source: img.src }))
+    }
+    showPhotoViewer(options)
   }, []);
-  const closeLightbox = () => {
-    setCurrentImage(0);
-    setViewerIsOpen(false);
-  };
 
   function unlockMemory() {
     if (privateKey) {
@@ -394,7 +396,11 @@ function MemoryContent(props) {
     );
   };
 
-  function renderLinkUser(isSender) {
+  function getName(tags, showFullname) {
+    return showFullname ? tags['display-name'] : getShortName(tags)
+  }
+
+  function renderLinkUser(isSender, showFullname = true, showAsMe) {
     const m = memoryDecrypted;
     if (!m) return;
 
@@ -402,18 +408,27 @@ function MemoryContent(props) {
     let name;
     if (isSender) {
       u = m.sender;
-      name = m.name;
+      name = (m.s_tags && getName(m.s_tags, showFullname)) || (showFullname? m.name : m.name.split(' ')[0])
     } else {
       u = m.receiver;
-      name = m.r_tags && m.r_tags['display-name'];
+      name = m.r_tags && getName(m.r_tags, showFullname)
     }
 
-    if (!name) return <span>a crush</span>;
+    if (showAsMe && u === address) {
+      name = 'Me'
+    } else if (!name) {
+      return <span>a crush</span>;
+    }
+
+    // a crush there is no link
+    if (u === process.env.REACT_APP_BOT_LOVER) {
+      return  <span className={classes.relationshipName}>{name}</span>;
+    }
 
     return (
       <Link
         href={`/u/${u}`}
-        className={classes.relationshipName}
+        className={classes.relationshipName + ' text-clip'}
         onClick={e => {
           if (!myPageRoute) {
             e.preventDefault();
@@ -426,6 +441,44 @@ function MemoryContent(props) {
     );
   }
 
+  function renderLinkReceiver(showFullname = true) {
+    const mem = memoryDecrypted;
+    //let icon = mem.lock.type === 2 ? <WavesIcon /> : (mem.lock.type === 1 ? <DoneIcon /> : <DoneAllIcon />)
+    let type = mem.lock.type === 2 ? 'a journal' : (mem.lock.type === 1 ? 'a crush' : 'a lock')
+    let receiver = ''
+    let style = {}
+    const toMe = mem.receiver === address
+    if (mem.lock.s_info.lockName) {
+      receiver = mem.lock.s_info.lockName
+    } else if (!mem.lock.type && toMe) {
+      // couple lock, and to me
+      receiver = 'Me'
+    } else if (mem.lock.type === 2) {
+      // couple lock, and to me
+      receiver = toMe ?  'My Journal' : (getName(mem.s_tags, false) + ' Journal')
+    } else if (mem.r_tags && mem.r_tags['display-name']) {
+      receiver = getName(mem.r_tags, showFullname)
+    } else {
+      receiver = type
+      style = { ...style, textTransform: 'none' }
+    }
+    
+    return (
+          <>
+            <ArrowRightIcon color="primary" style={{ flex: '0 1 24px' }} />
+            <Link href={`/lock/${mem.lockIndex}`}
+              style={style}
+              className="text-ellipsis"
+              onClick={e => {
+                  e.preventDefault();
+                  history.push(`/lock/${mem.lockIndex}`);
+              }}>
+              {receiver}
+            </Link>
+          </>
+          )
+  }
+
   const renderLockEventMemory = () => {
     return (
       <Typography variant="body2" className={classes.relationship} style={{ whiteSpace: 'pre-line' }} component="div">
@@ -436,7 +489,7 @@ function MemoryContent(props) {
           <span>
             <FormattedMessage id="memory.lockedWith" />
           </span>
-          {renderLinkUser(false)}
+          {renderLinkUser(false, true)}
         </span>
       </Typography>
     );
@@ -449,7 +502,7 @@ function MemoryContent(props) {
           <WavesIcon color="primary" fontSize="large" />
         </div>
         <span>
-          {renderLinkUser(true)}
+          {renderLinkUser(true, true)}
           <span>
             <FormattedMessage id="memory.startJournal" />
           </span>
@@ -517,12 +570,12 @@ function MemoryContent(props) {
               <MemoryTitle
                 sender={memoryDecrypted.s_tags['display-name']}
                 receiver={memoryDecrypted.r_tags['display-name']}
+                lock={memoryDecrypted.lock}
                 handleClose={closeMemory}
               />
             }
-            subtitle={<TimeWithFormat value={memoryDecrypted.info.date} format="DD MMM YYYY" />}
           >
-            <Editor initContent={memoryDecrypted.blogContent} read_only />
+            <Editor initContent={memoryDecrypted.blogContent} memoryInfo={memoryDecrypted} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton
@@ -554,10 +607,8 @@ function MemoryContent(props) {
       <div style={{ maxHeight: '1500px', overflow: 'hidden' }}>
         {memoryDecrypted.info.hash && (
           <Gallery
-            // targetRowHeight={300}
-            // containerWidth={600}
             photos={memoryDecrypted.info.hash.slice(0, 5)}
-            onClick={openLightbox}
+            onClick={openPhotoViewer}
           />
         )}
       </div>
@@ -587,23 +638,10 @@ function MemoryContent(props) {
   const { isUnlock } = memoryDecrypted;
 
   const renderTitleMem = () => {
-    const mem = memoryDecrypted;
     return (
       <>
-        {renderLinkUser(true)}
-
-        {!mem.isDetailScreen && mem.r_tags && mem.r_tags['display-name'] && (
-          <>
-            <ArrowRightIcon color="primary" />
-            {mem.receiver === process.env.REACT_APP_BOT_LOVER ? (
-              <p style={{ color: 'inherit' }}>{mem.r_tags['display-name']}</p>
-            ) : (
-              <a href={`/u/${mem.receiver}`} style={{ color: 'inherit' }} className={classes.memoryReceiver}>
-                {mem.r_tags['display-name']}
-              </a>
-            )}
-          </>
-        )}
+        {renderLinkUser(true, false, true)}
+        {!memoryDecrypted.isDetailScreen && renderLinkReceiver()}
       </>
     );
   };
@@ -692,7 +730,7 @@ function MemoryContent(props) {
         <CardHeader
           avatar={<AvatarPro alt={memoryDecrypted['s_tags']['display-name']} hash={memoryDecrypted['s_tags'].avatar} />}
           title={renderTitleMem()}
-          subheader={renderCardSubtitle(memoryDecrypted)}
+          subheader={renderCardSubtitle(memoryDecrypted, language)}
           action={
             <IconButton aria-label="settings" onClick={openActionMenu}>
               <MoreVertIcon />
@@ -799,32 +837,18 @@ function MemoryContent(props) {
           </CommonDialog>
         )}
       </Card>
-      <ModalGateway>
-        {viewerIsOpen ? (
-          <Modal onClose={closeLightbox} style={{ zIndex: 3 }}>
-            <Carousel
-              currentIndex={currentImage}
-              views={memoryDecrypted.info.hash.map(x => ({
-                ...x,
-                srcset: x.srcSet,
-                caption: x.title,
-              }))}
-            />
-          </Modal>
-        ) : null}
-      </ModalGateway>
     </>
   );
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
-    },
     setNeedAuth(value) {
       dispatch(actions.setNeedAuth(value));
     },
+    showPhotoViewer(options) {
+      dispatch(actions.setShowPhotoViewer(options))
+    }
   };
 };
 

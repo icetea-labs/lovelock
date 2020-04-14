@@ -63,6 +63,7 @@ function MemoryActionButton(props) {
     handleShowComment,
     numComment,
     setLikeTopInfo,
+    updateBalances,
     numLike, // Lock-level number of likes
     isMyLike, // Lock-level isMyLike
   } = props;
@@ -109,10 +110,12 @@ function MemoryActionButton(props) {
     const LOVE = 1; // like, love, wow, etc.
     try {
       tx.sendCommit('addLike', memoryIndex, LOVE)
-        .then(({ returnValue: likes }) => {
+        .then(({ returnValue }) => {
+          const { likes, balances } = returnValue
           const newNumLike = Object.keys(likes).length;
           const newIsMyLike = !!likes[address];
           setLikeData(newNumLike, newIsMyLike);
+          balances && updateBalances(balances)
         })
         .catch(error => {
           const msg = handleError(error, 'sending like memory');
@@ -172,6 +175,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setLikeTopInfo: value => {
       dispatch(actions.setLikeTopInfo(value));
+    },
+    updateBalances: value => {
+      dispatch(actions.updateBalances(value));
     },
   };
 };

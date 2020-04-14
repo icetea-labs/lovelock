@@ -59,6 +59,7 @@
 
     "leftmenu.pendingLock": "保留中ロック",
     "leftmenu.folowingLock": "フォロー中ロック",
+    "leftmenu.featured": "Featured",
     "leftmenu.newLock": "新たなロック作成",
     "leftmenu.collection": "コレクション",
 
@@ -79,6 +80,9 @@
     "newLock.member": "Lovelockメンバー",
     "newLock.crush": "好きな人",
     "newLock.journal": "ジャーナル作成",
+    "newLock.memberDesc": "A shared timelime with another member.",
+    "newLock.crushDesc": "Create your own crush, like your idol or even your pet.",
+    "newLock.journalDesc": "A place for sharing your thoughts and memories.",
     "newLock.msgLockCrush": "貴方のメッセージ",
     "newLock.btnSend": "送信",
     "newLock.btnCover": "カバー写真",

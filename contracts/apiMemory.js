@@ -1,5 +1,5 @@
 exports.apiCreateMemory = (self, lockIndex, isPrivate, content, info = {}, opts = []) => {
-  return _addMemory(self, lockIndex, isPrivate, content, info, [...opts]);
+  return _addMemory(self, lockIndex, isPrivate, content, info, opts);
 };
 
 exports.apiLikeMemory = (self, memoIndex, type) => {
@@ -16,7 +16,7 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
   const eventName = 'addLike_' + memoIndex;
   self.emitEvent(eventName, { by: msg.sender, memoIndex, type }, ['by', 'memoIndex']);
 
-  return memo.likes || [];
+  return memo;
 };
 
 exports.apiCommentMemory = (self, memoIndex, content, info) => {
@@ -33,7 +33,8 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 
 // ========== GET DATA ==================
 exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadToCurrentPage) => {
-  const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
+  const locks = self.getLocks()
+  const memoryPro = getDataByIndex(locks, lockIndex)['memoIndex'];
   const memories = self.getMemories();
 
   let resp = memoryPro.reduce((res, index) => {
@@ -46,7 +47,7 @@ exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, l
 
   resp = _getPaginatedMemories(resp, page, pageSize, loadToCurrentPage);
 
-  return _addInfoToMems(resp, self);
+  return _addInfoToMems(resp, self, locks);
 };
 
 exports.apiGetMemoriesByRange = (self, start, end) => {
@@ -163,16 +164,16 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   self.setMemories(memories);
 };
 
-function _addInfoToMems(memories, self) {
+function _addInfoToMems(memories, self, locks) {
   const ctDid = loadContract('system.did');
-
+  locks = locks || self.getLocks()
   let res = memories.map(mem => {
     let tmpMem = {};
     tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
     tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
     tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
     //LOCK_TYPE_JOURNAL
-    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
+    let lock = getDataByIndex(locks, mem.lockIndex);
     if (mem.receiver === mem.sender) {
       tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
@@ -193,7 +194,7 @@ function _addInfoToMems(memories, self) {
   return res;
 }
 
-function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
+function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks, lockSender] = []) {
   if (info.date == null) {
     info = { ...info, date: block.timestamp }
   } else {
@@ -207,8 +208,8 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
   }
 
   expect(lock.status === 1, 'Cannot add memory to a pending lock.')
-  expectLockContributors(lock, 'Only lock contributors can add memory.');
-  const sender = msg.sender;
+  !lockSender && expectLockContributors(lock, 'Only lock contributors can add memory.');
+  const sender = lockSender || msg.sender;
   const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
 
   //new memories

@@ -11,7 +11,7 @@ import appConstants from "../../../helper/constants";
 import { useDidUpdate } from '../../../helper/hooks'
 
 function Explore(props) {
-  const { setMemory, memoryList } = props;
+  const { setMemories, memoryList, setLocks } = props;
   const [loading, setLoading] = useState(true);
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
@@ -20,6 +20,10 @@ function Explore(props) {
   const indexParam = Number(props.match.params.index)
   const pinIndex = (indexParam > 0 && Number.isInteger(indexParam)) ? indexParam : null
 
+  // remove items on left sidebar, will add lock/user choices later
+  useEffect(() => {
+    APIService.getFeaturedChoices().then(setLocks)
+  }, [])
 
   useEffect(() => {
     fetchMemories();
@@ -39,7 +43,7 @@ function Explore(props) {
 
       let memories = result;
       if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-      setMemory(memories);
+      setMemories(memories);
       setLoading(false);
     }).catch(err => {
       console.error(err)
@@ -59,7 +63,7 @@ function Explore(props) {
   return (
     <LeftBoxWrapper>
       <div className="proposeColumn proposeColumn--left">
-        <LeftContainer loading={loading} />
+        <LeftContainer loading={loading} context="explore" featured />
       </div>
       <div className="proposeColumn proposeColumn--right">
         <MemoryList
@@ -81,9 +85,12 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
+    setLocks: value => {
+      dispatch(actions.setLocks(value));
+    }
   };
 };
 

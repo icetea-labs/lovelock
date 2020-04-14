@@ -66,18 +66,20 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     const newContract = tweb3.contract(r);
     await newContract.methods.migrateState(contractAlias, true).sendCommit({ from: account.address });
     await newContract.methods.addAdmins([account.address]).sendCommit({ from: account.address });
+    await newContract.methods.migrateUsers().sendCommit({ from: account.address });
+    await newContract.methods.migrateChoices().sendCommit({ from: account.address });
     console.log('Data migration finished.');
   } catch (e) {
     console.log('Fail to migrate data: ', e.message);
   }
 
-  // add user
+  // add users
   if (config.USER_ADDRESS) {
     const users = config.USER_ADDRESS.split(',');
     console.log('Adding user ' + users);
     try {
       const newContract = tweb3.contract(r);
-      await newContract.methods.addUsers(users.length > 1 ? users : users[0]).sendCommit({ from: account.address });
+      await newContract.methods.addUsers(users).sendCommit({ from: account.address });
       console.log('User added.');
     } catch (e) {
       console.log('Fail to add user: ', e.message);

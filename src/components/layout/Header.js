@@ -30,7 +30,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AddIcon from '@material-ui/icons/Add';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import FavoriteIcon from '@material-ui/icons/Favorite';
+//import LoyaltyIcon from '@material-ui/icons/Loyalty';
 import { FormattedMessage } from 'react-intl';
 
 import { Link, withRouter } from 'react-router-dom';
@@ -40,13 +40,17 @@ import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
+import PuNotifyLock from '../elements/PuNotifyLock';
+import PuConfirmLock from '../elements/PuConfirmLock';
 import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getAuthenAndTags, getUserSuggestions } from '../../helper';
+import { getAuthenAndTags, getUserSuggestions, diffTime } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
+
+import Carousel, { Modal, ModalGateway } from 'react-images';
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -108,16 +112,10 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#fff',
   },
   lockReqTitle: {
-    width: 111,
-    height: 18,
-    marginLeft: theme.spacing(2),
     color: '#373737',
   },
   lockReqSetting: {
-    width: 46,
-    height: 15,
     fontSize: 12,
-    marginRight: theme.spacing(2),
     color: '#8250c8',
   },
   lockReqConfirm: {
@@ -138,7 +136,7 @@ const useStyles = makeStyles(theme => ({
   },
   listItemNotiStyle: {
     borderRadius: 10,
-    margin: theme.spacing(1),
+    // margin: theme.spacing(1),
   },
   notiPromise: {
     width: '100%',
@@ -288,12 +286,15 @@ function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
   const needAuth = useSelector(state => state.account.needAuth);
-  const isNewLock = useSelector(state => state.globalData.isNewLock);
+  const newLockDialog = useSelector(state => state.globalData.newLockDialog);
+  const photoViewer = useSelector(state => state.globalData.photoViewer);
   const mnemonic = useSelector(state => state.account.mnemonic);
   const privateKey = useSelector(state => state.account.privateKey);
   const mode = useSelector(state => state.account.mode);
   const address = useSelector(state => state.account.address);
   const language = useSelector(state => state.globalData.language);
+  const isApproved = useSelector(state => state.account.isApproved);
+  const sideBarLocks = useSelector(state => state.loveinfo.locks)
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorElLockReq, setAnchorElLockReq] = useState(null);
@@ -319,10 +320,14 @@ function Header(props) {
   const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
-  const point = useSelector(state => state.account.point);
+  // const point = useSelector(state => state.account.point);
   const avatarRedux = useSelector(state => state.account.avatar);
 
+  const notifyLockData = useSelector(state => state.globalData.notifyLockData) || {};
+
   const ja = 'ja';
+  const [apiLocks, setApiLocks] = useState([]);
+  const [step, setStep] = useState('');
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
@@ -368,10 +373,13 @@ function Header(props) {
     props.history.push('/explore');
   }
   function handeNewLock() {
-    dispatch(actions.setNewLock(true));
+    dispatch(actions.setShowNewLockDialog(true));
   }
-  function closePopup() {
-    dispatch(actions.setNewLock(false));
+  function closeNewLockDialog() {
+    dispatch(actions.setShowNewLockDialog(false));
+  }
+  function closePhotoViewer() {
+    dispatch(actions.setShowPhotoViewer(false));
   }
   function handleShowphrase() {
     dispatch(actions.setNeedAuth(true));
@@ -379,6 +387,33 @@ function Header(props) {
   }
   function closeShowMnemonic() {
     setShowPhrase(false);
+  }
+
+  function handleSelLock(lockId) {
+    dispatch(actions.setNotifyLock({
+      index: lockId,
+      show: true
+    }));
+  }
+
+  function closeNotiLock() {
+    dispatch(actions.setNotifyLock({
+      show: false
+    }));
+  }
+
+  function closeConfirmLock() {
+    setStep('');
+  }
+
+  function nextToAccept() {
+    setStep('accept');
+    closeNotiLock();
+  }
+
+  function nextToDeny() {
+    setStep('deny');
+    closeNotiLock();
   }
 
   const getSuggestions = async value => {
@@ -450,7 +485,7 @@ function Header(props) {
       try {
         if (address) {
           const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          const userPoint = await APIService.getUserByAdd(address);
+          const userPoint = await APIService.getUserByAddress(address);
           dispatch(
             actions.setAccount({
               displayName: tags['display-name'] || '',
@@ -469,16 +504,79 @@ function Header(props) {
 
   useEffect(() => {
     const abort = new AbortController();
-    fetch('/data/noti.json', { signal: abort.signal })
+    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        setLockReqList(data.lockRequests);
-        setNotiList(data.notifications);
+        const lockRequests = [];
+        const allLocksList = [];
+        if (data.result.length > 0) {
+          for (let i = 0; i < data.result.length; i++) {
+            if (data.result[i].event_name === 'createLock') {
+              const lockReq = {
+                id: data.result[i].id,
+                avatar: data.result[i].avatar,
+                name: data.result[i].display_name,
+                lockId: data.result[i].lockIndex,
+              };
+              const allLocks = {
+                id: data.result[i].lockIndex,
+                sender: data.result[i].sender,
+                receiver: data.result[i].receiver,
+                s_content: data.result[i].content,
+                coverImg: data.result[i].coverImg,
+                status: data.result[i].status,
+                displayName: data.result[i].display_name,
+              };
+              lockRequests.push(lockReq);
+              allLocksList.push(allLocks);
+            }
+            setApiLocks(allLocksList);
+          }
+        }
+        setLockReqList(lockRequests);
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
+
+    return () => {
+      abort.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const abort = new AbortController();
+    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
+      .then(r => r.json())
+      .then(data => {
+        console.log('addMemory', data);
+        const memoryList = [];
+        if (data.result.length > 0) {
+          for (let i = 0; i < data.result.length; i++) {
+            if (data.result[i].event_name === 'addMemory') {
+              const memoryReq = {
+                id: data.result[i].id,
+                eventName: data.result[i].event_name,
+                avatar: data.result[i].avatar,
+                name: data.result[i].display_name,
+                content: data.result[i].content,
+                lockId: data.result[i].lockIndex,
+                time: data.result[i].created_at,
+              };
+              memoryList.push(memoryReq);
+            }
+          }
+        }
+        setNotiList(memoryList);
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        throw err;
+      });
+    return () => {
+      abort.abort();
+    };
   }, []);
 
   const renderMenu = (
@@ -548,20 +646,32 @@ function Header(props) {
     >
       <StyledMenuItem className={classes.lockReqStyle}>
         <ListItemText primary="Lock Request" className={classes.lockReqTitle} />
-        <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} />
+        {/* <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} /> */}
       </StyledMenuItem>
-      {lockReqList.map(({ id, avatar, name }) => (
-        <StyledMenuItem className={classes.lockReqStyle} key={id}>
+      {lockReqList.map(({ id, avatar, name, lockId }) => (
+        <StyledMenuItem
+          className={classes.lockReqStyle}
+          key={id}
+          onClick={() => {
+            lockReqList.length -= 1;
+            handleSelLock(lockId);
+            handleLockReqClose();
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`)
+          }}
+        >
           <ListItemAvatar>
             <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
           </ListItemAvatar>
           <ListItemText primary={name} className={classes.lockReqName} />
-          <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} />
-          <ListItemText primary="DELETE" />
+          {/* <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} /> */}
+          {/* <ListItemText primary="DELETE" /> */}
         </StyledMenuItem>
       ))}
       <StyledMenuItem className={classes.lockReqStyle}>
-        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
+        {lockReqList.length === 0 && (
+          <ListItemText align="center" primary="No request to you." className={classes.lockReqSetting} />
+        )}
       </StyledMenuItem>
     </StyledMenu>
   );
@@ -576,11 +686,21 @@ function Header(props) {
     >
       <StyledMenuItem className={classes.lockReqStyle}>
         <ListItemText primary="Notification" className={classes.lockReqTitle} />
-        <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} />
+        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} /> */}
+        {/* <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
       </StyledMenuItem>
-      {notiList.map(({ id, avatar, name, promise, time }) => (
-        <List className={classes.listNoti} component="nav" key={id}>
+      {notiList.map(({ id, avatar, name, content, time, eventName, lockId }) => (
+        <List
+          className={classes.listNoti}
+          component="nav"
+          key={id}
+          onClick={() => {
+            notiList.length -= 1;
+            props.history.push(`/lock/${lockId}`);
+            handleNotiClose();
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`)
+          }}
+        >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
               <AvatarPro alt="Remy Sharp" src={avatar} />
@@ -588,19 +708,20 @@ function Header(props) {
             <ListItemText
               primary={
                 <>
-                  <Typography component="span" variant="body2" color="textPrimary">
-                    {name}
-                  </Typography>
-                  sent you a lock request
+                  {eventName === 'addMemory' && (
+                    <Typography component="span" variant="body2" color="textPrimary">
+                      {name} create a new memory with you
+                    </Typography>
+                  )}
                 </>
               }
               secondary={
                 <>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {promise}
+                    {content}
                   </Typography>
                   <Typography component="span" variant="body2">
-                    {time}
+                    {diffTime(time)}
                   </Typography>
                 </>
               }
@@ -610,7 +731,10 @@ function Header(props) {
         </List>
       ))}
       <StyledMenuItem className={classes.lockReqStyle}>
-        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
+        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
+        {notiList.length === 0 && (
+          <ListItemText align="center" primary="No message to you." className={classes.lockReqSetting} />
+        )}
       </StyledMenuItem>
     </StyledMenu>
   );
@@ -653,7 +777,7 @@ function Header(props) {
         </IconButton>
         <p>MyPage</p>
       </MenuItem>
-      <MenuItem onClick={handeNewLock}>
+      {isApproved && <MenuItem onClick={handeNewLock}>
         <IconButton
           aria-label="explore post of other users"
           aria-controls="primary-search-explore-menu"
@@ -662,7 +786,7 @@ function Header(props) {
           <AddIcon />
         </IconButton>
         <p>Create</p>
-      </MenuItem>
+      </MenuItem>}
       <MenuItem onClick={handeExplore}>
         <IconButton
           aria-label="explore post of other users"
@@ -698,7 +822,7 @@ function Header(props) {
               onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
             />
             <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
-              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} />
+              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} showNewLock context="header" />
             </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
@@ -759,24 +883,24 @@ function Header(props) {
                 <div className={classes.grow} />
                 <Button onClick={handeOpenMypage}>
                   <AvatarPro alt="avatar" hash={avatarRedux} className={classes.jsxAvatar} />
-                  {/* <Typography className={classes.title} noWrap>
+                  <Typography className={classes.title} noWrap>
                     {displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
-                  </Typography> */}
-                  <ListItemText
+                  </Typography>
+                  {/* <ListItemText
                     className={classes.titlePoint}
                     primary={displayName ? displayName.split(' ', 2)[0] : '(Unnamed)'}
                     secondary={
                       <span className={classes.titlePoint}>
-                        {point} <FavoriteIcon className={classes.titlePoint} />
+                        {point} <LoyaltyIcon />
                       </span>
                     }
-                  />
+                  /> */}
                 </Button>
-                <Button className={classes.sectionDesktop} onClick={handeNewLock}>
+                {isApproved && <Button className={classes.sectionDesktop} onClick={handeNewLock}>
                   <Typography className={classes.title} noWrap>
                     <FormattedMessage id="header.btnCreate" />
                   </Typography>
-                </Button>
+                </Button>}
 
                 <div className={classes.sectionDesktop}>
                   <IconButton
@@ -835,8 +959,27 @@ function Header(props) {
       {renderLockRequests()}
       {renderNotifications()}
       {needAuth && <PasswordPrompt />}
-      {isNewLock && <PuNewLock history={props.history} close={closePopup} />}
+      {newLockDialog && <PuNewLock history={props.history} close={closeNewLockDialog} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
+      {notifyLockData.show && (
+        <PuNotifyLock
+          index={notifyLockData.index}
+          locks={(sideBarLocks || []).concat(apiLocks)}
+          address={address}
+          close={closeNotiLock}
+          accept={nextToAccept}
+          deny={nextToDeny}
+        />
+      )}
+      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={notifyLockData.index} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={notifyLockData.index} />}
+      <ModalGateway>
+        {photoViewer ? (
+          <Modal onClose={closePhotoViewer}>
+            <Carousel currentIndex={photoViewer.currentIndex} views={photoViewer.views} />
+          </Modal>
+        ) : null}
+      </ModalGateway>
     </div>
   );
 }

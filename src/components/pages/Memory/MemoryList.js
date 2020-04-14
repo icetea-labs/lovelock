@@ -48,7 +48,7 @@ export default function MemoryList(props) {
 
   const showCreateMemory = !noCreateMemory && (
    (proIndex && (isOwner || isContributor)) // lock screen
-   || (!proIndex && myPageInfo && myPageInfo.address == address) // mypage screen
+   || (!proIndex && myPageInfo && myPageInfo.address === address) // mypage screen
    || (!proIndex && !myPageInfo)) // home screen
   return (
     <RightBox>

@@ -1,20 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { FormattedMessage } from 'react-intl';
+import StickyBox from 'react-sticky-box';
 import { ensureContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
-import { callView, showSubscriptionError } from '../../../helper';
+import { callView, showSubscriptionError, TimeWithFormat } from '../../../helper';
 import Icon from '../../elements/Icon';
 
 import { LinkPro } from '../../elements/Button';
 import { Lock } from '../../elements';
-import PuConfirmLock from '../../elements/PuConfirmLock';
-import PuNotifyLock from '../../elements/PuNotifyLock';
 import * as actions from '../../../store/actions';
-import StickyBox from "react-sticky-box";
 
 const LeftBox = styled.div`
   width: 100%;
@@ -41,7 +39,11 @@ const LeftBox = styled.div`
     font-weight: 600;
     font-size: ${rem(14)};
     text-transform: uppercase;
+    margin-top: ${rem(30)};
     /* margin-bottom: ${rem(20)}; */
+  }
+  .title:first-of-type {
+    margin-top: 0px;
   }
   @media (max-width: 768px) {
     min-height: auto;
@@ -81,6 +83,40 @@ const CollectionBox = styled.div`
   }
 `;
 
+const RecentImageBox = styled.div`
+  padding-top: 1rem;
+  width: 100%;
+  display: block;
+  img {
+    width: 112px;
+    height: 112px;
+    padding-left: 2px;
+    padding-bottom: 2px;
+    object-fit: cover;
+    cursor: pointer;
+    :hover {
+      opacity: 0.9;
+    }
+  }
+`;
+
+const RecentBlogPostBox = styled.ul`
+  padding-top: 1rem;
+  width: 100%;
+  line-height: 1.5;
+  li {
+    padding: 0.2rem 0;
+    a:hover {
+      text-decoration: underline;
+    }
+    .date {
+      font-size: 85%;
+      color: #8f8f8f;
+      margin-left: 0.2em;
+    }
+  }
+`;
+
 const SupportSite = styled.div`
   display: block;
   padding-top: 1rem;
@@ -106,7 +142,10 @@ function LeftContainer(props) {
   const {
     locks,
     setLocks,
-    setNewLock,
+    showNewLock,
+    setShowNewLockDialog,
+    showNotifyLock,
+    showPhotoViewer,
     confirmLock,
     topInfo,
     proIndex,
@@ -116,13 +155,17 @@ function LeftContainer(props) {
     isGuest,
     closeMobileMenu,
     language,
+    featured,
   } = props;
 
-  const showCollection = proIndex != null;
-  const collections = showCollection && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
+  const isLockPage = proIndex != null;
+  const collections = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
+  const recentImages =
+    isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.photos || {} : {};
+  const hasRecentImages = !!Object.keys(recentImages).length;
+  const recentBlogPosts =
+    isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.blogPosts || [] : [];
 
-  const [index, setIndex] = useState(-1);
-  const [step, setStep] = useState('');
   const { enqueueSnackbar } = useSnackbar();
   const ja = 'ja';
 
@@ -174,21 +217,18 @@ function LeftContainer(props) {
     });
   }
 
-  function closePopup() {
-    setStep('');
-    setNewLock(false);
-  }
+  const openPhotoViewer = event => {
+    const currentIndex = Number(event.target.getAttribute('data-index')) || 0;
+    const views = Object.keys(recentImages).map(hash => ({ source: process.env.REACT_APP_IPFS + hash }));
+    const options = {
+      currentIndex,
+      views,
+    };
+    showPhotoViewer(options);
+  };
 
-  function nextToAccept() {
-    setStep('accept');
-  }
-
-  function nextToDeny() {
-    setStep('deny');
-  }
-
-  function selectAccepted(lockIndex, collectionId) {
-    let url = `/lock/${lockIndex}`;
+  function selectAccepted(lockIndex, collectionId, username) {
+    let url = username ? `/u/${username}` : `/lock/${lockIndex}`;
     if (collectionId != null) {
       url += `/collection/${collectionId}`;
     }
@@ -198,13 +238,8 @@ function LeftContainer(props) {
   }
 
   function newLock() {
-    setNewLock(true);
+    setShowNewLockDialog(true);
     if (closeMobileMenu) closeMobileMenu();
-  }
-
-  function selectPending(lockIndex) {
-    setStep('pending');
-    setIndex(lockIndex);
   }
 
   function eventConfirmLock(data) {
@@ -216,12 +251,12 @@ function LeftContainer(props) {
   }
 
   async function eventCreatePropose(data) {
-    const lockForFeed = await callView('getLocksForFeed', [address]);
+    const lockForFeed = await callView('getLocksForFeed', [address, true, false]);
     setLocks(lockForFeed.locks);
 
     // console.log(data);
     if (address !== data.log.sender) {
-      const message = 'You have a new lock.';
+      const message = 'You have a new lock request.';
       enqueueSnackbar(message, { variant: 'info' });
     }
     // goto propose detail when sent to bot.
@@ -244,97 +279,163 @@ function LeftContainer(props) {
     });
   }
 
+  function renderRecentImages(images) {
+    return Object.entries(images).map(([hash, data], index) => {
+      return (
+        <img
+          key={index}
+          data-index={index}
+          onClick={openPhotoViewer}
+          src={process.env.REACT_APP_IPFS + hash}
+          title={data.content}
+          alt="Photo"
+        />
+      );
+    });
+  }
+
+  function renderRecentBlogPosts(posts) {
+    return posts.map(({ date, content, index }, i) => {
+      return (
+        <li key={i}>
+          ・
+          <a
+            href={`/blog/${index}`}
+            onClick={e => {
+              e.preventDefault();
+              history.push(`/blog/${index}`);
+            }}
+          >
+            {content.meta.title}
+          </a>
+          <span className="date">
+            ・<TimeWithFormat value={date} format="DD MMM YYYY" />
+          </span>
+        </li>
+      );
+    });
+  }
+
   function renderOwnerLocks(locks, myAddress) {
     const newLocks = locks.filter(lock => {
       return lock.isMyLock;
     });
-    const hasPending = Boolean(newLocks.find(l => l.status === 0));
+    const acceptedLocks = newLocks.filter(l => l.status === 1);
+    const pendingLocks = newLocks.filter(l => l.status === 0);
     return (
       <>
-        <div className="title">
-          {!isGuest ? (language === ja ? 'マイロック' : 'My lock') : language === ja ? '公開ロック ' : 'Public lock'}
-        </div>
-        <div>
-          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
-        </div>
-        {!isGuest && hasPending && (
+        {!!acceptedLocks.length && (
+          <>
+            <div className="title">
+              {!isGuest
+                ? language === ja
+                  ? 'マイロック'
+                  : 'My lock'
+                : language === ja
+                ? '公開ロック '
+                : 'Public lock'}
+            </div>
+            <div className="content">
+              <Lock loading={loading} locksData={acceptedLocks} address={myAddress} handlerSelect={selectAccepted} />
+            </div>
+          </>
+        )}
+        {!isGuest && !!pendingLocks.length && (
           <>
             <div className="title">
               <FormattedMessage id="leftmenu.pendingLock" />
             </div>
-            <div>
-              <Lock loading={loading} locksData={newLocks} address={myAddress} flag={0} handlerSelect={selectPending} />
+            <div className="content">
+              <Lock loading={loading} locksData={pendingLocks} address={myAddress} handlerSelect={showNotifyLock} />
             </div>
           </>
         )}
       </>
     );
   }
+
+  function renderFeatured(locks) {
+    return (
+      <>
+        <div className="title">
+          <FormattedMessage id="leftmenu.featured" />
+        </div>
+        <div className="content">
+          <Lock loading={loading} locksData={locks}  handlerSelect={selectAccepted} />
+        </div>
+      </>
+    );
+  }
+
   function renderFollowingLocks(locks, myAddress) {
-    const newLocks = locks.filter(lock => {
-      return !lock.isMyLock;
+    const followingLocks = locks.filter(lock => {
+      return lock.address || (!lock.isMyLock && lock.status === 1); // accepted
     });
+    if (!followingLocks.length) return;
+
     return (
       <>
         <div className="title">
           <FormattedMessage id="leftmenu.folowingLock" />
         </div>
-        <div>
-          <Lock loading={loading} locksData={newLocks} address={myAddress} flag={1} handlerSelect={selectAccepted} />
+        <div className="content">
+          <Lock loading={loading} locksData={followingLocks} address={myAddress} handlerSelect={selectAccepted} />
         </div>
       </>
     );
   }
+
+  // Note: the StickyBox with position:sticky make dialogs, modals go into displaying ordering problems
+  // so must put all modals and dialog outside of sticky box.
+  // In the future, we should move all dialogs/modals to parent layer to avoid problems on mobile
+  // where left sidebar is hidden
   return (
-    <StickyBox offsetTop={20} offsetBottom={20}>
-      <LeftBox>
-        <ShadowBox>
-          {address && (
-            <LinkPro className="btn_add_promise" onClick={newLock}>
-              <Icon type="add" />
-              <FormattedMessage id="leftmenu.newLock" />
-            </LinkPro>
-          )}
-          {renderOwnerLocks(locks, address)}
-          {!isGuest && renderFollowingLocks(locks, address)}
-          {showCollection && (
-            <div className="title">
-              <FormattedMessage id="leftmenu.collection" />
-            </div>
-          )}
-          {showCollection && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
-        </ShadowBox>
-        <SupportSite>
-          <p>
-            <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
-              Email
-            </a>
-            &nbsp;ー&nbsp;
-            <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
-              Telegram
-            </a>
-          </p>
-          <p>
-            Powered by&nbsp;
-            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-              Icetea Platform
-            </a>
-          </p>
-        </SupportSite>
-      </LeftBox>
-      {step === 'pending' && (
-        <PuNotifyLock
-          index={index}
-          locks={locks}
-          address={address}
-          close={closePopup}
-          accept={nextToAccept}
-          deny={nextToDeny}
-        />
-      )}
-      {step === 'accept' && <PuConfirmLock close={closePopup} index={index} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closePopup} index={index} />}
-    </StickyBox>
+    <>
+      <StickyBox className="sticky-leftside" offsetTop={20} offsetBottom={20}>
+        <LeftBox>
+          <ShadowBox>
+            {address && showNewLock && (
+              <LinkPro className="btn_add_promise" onClick={newLock}>
+                <Icon type="add" />
+                <FormattedMessage id="leftmenu.newLock" />
+              </LinkPro>
+            )}
+            {!featured && renderOwnerLocks(locks, address)}
+            {!featured && !isGuest && renderFollowingLocks(locks, address)}
+            {featured && renderFeatured(locks)}
+            {isLockPage && (
+              <div className="title">
+                <FormattedMessage id="leftmenu.collection" />
+              </div>
+            )}
+            {isLockPage && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
+            {isLockPage && !!recentBlogPosts.length && <div className="title">Article</div>}
+            {isLockPage && !!recentBlogPosts.length && (
+              <RecentBlogPostBox>{renderRecentBlogPosts(recentBlogPosts)}</RecentBlogPostBox>
+            )}
+            {isLockPage && hasRecentImages && <div className="title">Photo</div>}
+            {isLockPage && hasRecentImages && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
+          </ShadowBox>
+          <SupportSite>
+            <p>
+              <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
+                Email
+              </a>
+              &nbsp;ー&nbsp;
+              <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
+                Telegram
+              </a>
+            </p>
+            <p>
+              Powered by&nbsp;
+              <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+                Icetea Platform
+              </a>
+            </p>
+          </SupportSite>
+        </LeftBox>
+      </StickyBox>
+    </>
   );
 }
 
@@ -352,11 +453,20 @@ const mapDispatchToProps = dispatch => {
     setLocks: value => {
       dispatch(actions.setLocks(value));
     },
-    setNewLock: value => {
-      dispatch(actions.setNewLock(value));
+    setShowNewLockDialog: value => {
+      dispatch(actions.setShowNewLockDialog(value));
     },
     confirmLock: value => {
       dispatch(actions.confirmLock(value));
+    },
+    showPhotoViewer(options) {
+      dispatch(actions.setShowPhotoViewer(options));
+    },
+    showNotifyLock(lockIndex) {
+      dispatch(actions.setNotifyLock({
+        index: lockIndex,
+        show: true
+      }));
     },
   };
 };

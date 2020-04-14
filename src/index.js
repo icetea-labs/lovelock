@@ -169,30 +169,30 @@ ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
       {/* <PersistGate loading={<GlobaLoading />} persistor={persistor}> */}
-      <SnackbarProvider
-        ref={notistackRef}
-        action={key => (
-          <IconButton onClick={onClickDismiss(key)}>
-            <CloseIcon />
-          </IconButton>
-        )}
-        preventDuplicate
-        autoHideDuration={7000}
-        maxSnack={2}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <Suspense fallback={<SimpleLoading />}>
-          <IntlProvider
+      <IntlProvider
             locale={languageWithoutRegionCode}
             messages={messages[languageWithoutRegionCode] || messages.en}
           >
-            <App />
-          </IntlProvider>
-        </Suspense>
-      </SnackbarProvider>
+        <SnackbarProvider
+          ref={notistackRef}
+          action={key => (
+            <IconButton onClick={onClickDismiss(key)}>
+              <CloseIcon />
+            </IconButton>
+          )}
+          preventDuplicate
+          autoHideDuration={7000}
+          maxSnack={2}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <Suspense fallback={<SimpleLoading />}>
+              <App />  
+          </Suspense>
+        </SnackbarProvider>
+      </IntlProvider>
       {/* </PersistGate> */}
     </Provider>
     <Helmet>
