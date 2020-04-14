@@ -71,6 +71,8 @@ const src = fs.readFileSync('./contracts/lovelock.js');
     console.log('Data migration finished.');
   } catch (e) {
     console.log('Fail to migrate data: ', e.message);
+    console.log('Skip adding users and register alias.')
+    process.exit(1)
   }
 
   // add users
