@@ -49,6 +49,9 @@ const APIService = {
     const memoryData = await callView('getChoiceMemories', [extra, page, pageSize, loadToCurrentPage]);
     return addInfoToMems(memoryData);
   },
+  getFeaturedChoices: async () => {
+    return await callView('getFeaturedChoices', []);
+  },
   getUserByAddress: async address => {
     return await callView('getUserByAddress', [address]);
   },

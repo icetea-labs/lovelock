@@ -155,6 +155,7 @@ function LeftContainer(props) {
     isGuest,
     closeMobileMenu,
     language,
+    featured,
   } = props;
 
   const isLockPage = proIndex != null;
@@ -352,6 +353,20 @@ function LeftContainer(props) {
       </>
     );
   }
+
+  function renderFeatured(locks) {
+    return (
+      <>
+        <div className="title">
+          <FormattedMessage id="leftmenu.featured" />
+        </div>
+        <div className="content">
+          <Lock loading={loading} locksData={locks}  handlerSelect={selectAccepted} />
+        </div>
+      </>
+    );
+  }
+
   function renderFollowingLocks(locks, myAddress) {
     const followingLocks = locks.filter(lock => {
       return lock.address || (!lock.isMyLock && lock.status === 1); // accepted
@@ -385,8 +400,9 @@ function LeftContainer(props) {
                 <FormattedMessage id="leftmenu.newLock" />
               </LinkPro>
             )}
-            {renderOwnerLocks(locks, address)}
-            {!isGuest && renderFollowingLocks(locks, address)}
+            {!featured && renderOwnerLocks(locks, address)}
+            {!featured && !isGuest && renderFollowingLocks(locks, address)}
+            {featured && renderFeatured(locks)}
             {isLockPage && (
               <div className="title">
                 <FormattedMessage id="leftmenu.collection" />

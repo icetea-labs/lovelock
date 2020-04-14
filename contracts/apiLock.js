@@ -374,6 +374,24 @@ exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes
   return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes: Array.from(new Set(memoryIndexes)) };
 };
 
+exports.apiGetFeaturedChoices = (self, lockIndexes, userAddrs) => {
+  const locks = self.getLocks();
+  const ctDid = loadContract('system.did');
+  const ctAlias = loadContract('system.alias');
+
+  const featuredLocks = _prepareData(locks, lockIndexes)
+  _addLeftInfoToLocks(featuredLocks, [], ctDid, ctAlias)
+
+  const featuredUsers = userAddrs.reduce((users, faddr) => {
+    const u = exports.apiGetDataForMypage(self, faddr, true, ctDid, ctAlias)
+    u.type = -1
+    users.push(u)
+    return users
+  }, [])
+
+  return featuredLocks.concat(featuredUsers)
+}
+
 exports.apiGetRecentData = (self, lockOrIndex) => {
   let lock = lockOrIndex
   if (typeof lockOrIndex === 'number') {

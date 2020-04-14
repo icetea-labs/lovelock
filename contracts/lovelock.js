@@ -27,6 +27,7 @@ const {
   apiGetDataForMypage,
   apiGetRecentData,
   apiDeleteLock,
+  apiGetFeaturedChoices,
 } = require('./apiLock.js');
 const {
   apiCreateMemory,
@@ -460,6 +461,13 @@ class LoveLock {
     return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadToCurrentPage);
   };
 
+  @view getFeaturedChoices = () => {
+    const { locks = [], users = [] } = this.getChoices()
+
+    // get details for showing
+    return apiGetFeaturedChoices(this, locks, users)
+  }
+
   @transaction migrateChoices(): boolean {
     const choices = this.getState('choices')
     if (Array.isArray(choices)) {
@@ -471,7 +479,7 @@ class LoveLock {
   }
 
   @transaction addChoices(_choices, type: string) {
-    //expectAdmin(this);
+    expectAdmin(this);
 
     if (type === 'u') {
       _choices = ensureAliasArray(_choices)
@@ -510,7 +518,7 @@ class LoveLock {
   }
 
   @transaction removeChoices(_choices, type: string) {
-    //expectAdmin(this);
+    expectAdmin(this);
 
     if (type === 'u') {
       _choices = ensureAliasArray(_choices)

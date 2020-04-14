@@ -21,7 +21,9 @@ function Explore(props) {
   const pinIndex = (indexParam > 0 && Number.isInteger(indexParam)) ? indexParam : null
 
   // remove items on left sidebar, will add lock/user choices later
-  useEffect(() => setLocks([]), [])
+  useEffect(() => {
+    APIService.getFeaturedChoices().then(setLocks)
+  }, [])
 
   useEffect(() => {
     fetchMemories();
@@ -61,7 +63,7 @@ function Explore(props) {
   return (
     <LeftBoxWrapper>
       <div className="proposeColumn proposeColumn--left">
-        <LeftContainer loading={loading} context="explore" />
+        <LeftContainer loading={loading} context="explore" featured />
       </div>
       <div className="proposeColumn proposeColumn--right">
         <MemoryList
