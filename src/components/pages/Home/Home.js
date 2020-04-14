@@ -138,7 +138,7 @@ function Home(props) {
           {isHaveLocks ? (
             <LeftBoxWrapper>
               <div className="proposeColumn proposeColumn--left">
-                <LeftContainer loading={loading} />
+                <LeftContainer loading={loading} context="home" />
               </div>
               <div className="proposeColumn proposeColumn--right">
                 <MemoryList {...props} onMemoryChanged={refresh} loading={loading} nextPage={nextPage} needSelectLock />

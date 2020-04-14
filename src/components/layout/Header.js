@@ -294,6 +294,7 @@ function Header(props) {
   const address = useSelector(state => state.account.address);
   const language = useSelector(state => state.globalData.language);
   const isApproved = useSelector(state => state.account.isApproved);
+  const sideBarLocks = useSelector(state => state.loveinfo.locks)
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorElLockReq, setAnchorElLockReq] = useState(null);
@@ -322,11 +323,11 @@ function Header(props) {
   // const point = useSelector(state => state.account.point);
   const avatarRedux = useSelector(state => state.account.avatar);
 
+  const notifyLockData = useSelector(state => state.globalData.notifyLockData) || {};
+
   const ja = 'ja';
-  const isNotifyLock = useSelector(state => state.globalData.isNotifyLock);
   const [apiLocks, setApiLocks] = useState([]);
   const [step, setStep] = useState('');
-  const [index, setIndex] = useState(-1);
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
@@ -389,12 +390,16 @@ function Header(props) {
   }
 
   function handleSelLock(lockId) {
-    dispatch(actions.setNotifyLock(true));
-    setIndex(lockId);
+    dispatch(actions.setNotifyLock({
+      index: lockId,
+      show: true
+    }));
   }
 
   function closeNotiLock() {
-    dispatch(actions.setNotifyLock(false));
+    dispatch(actions.setNotifyLock({
+      show: false
+    }));
   }
 
   function closeConfirmLock() {
@@ -480,7 +485,7 @@ function Header(props) {
       try {
         if (address) {
           const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          const userPoint = await APIService.getUserByAdd(address);
+          const userPoint = await APIService.getUserByAddress(address);
           dispatch(
             actions.setAccount({
               displayName: tags['display-name'] || '',
@@ -502,7 +507,6 @@ function Header(props) {
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        console.log('useEffectdata', data);
         const lockRequests = [];
         const allLocksList = [];
         if (data.result.length > 0) {
@@ -652,13 +656,7 @@ function Header(props) {
             lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
-            const abort = new AbortController();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`, { signal: abort.signal })
-              .then(r => r.json())
-              .catch(err => {
-                if (err.name === 'AbortError') return;
-                throw err;
-              });
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`)
           }}
         >
           <ListItemAvatar>
@@ -700,13 +698,7 @@ function Header(props) {
             notiList.length -= 1;
             props.history.push(`/lock/${lockId}`);
             handleNotiClose();
-            const abort = new AbortController();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`, { signal: abort.signal })
-              .then(r => r.json())
-              .catch(err => {
-                if (err.name === 'AbortError') return;
-                throw err;
-              });
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`)
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
@@ -830,7 +822,7 @@ function Header(props) {
               onClick={() => setIsLeftMenuOpened(!isLeftMenuOpened)}
             />
             <Drawer open={isLeftMenuOpened} onClose={() => setIsLeftMenuOpened(false)}>
-              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} showNewLock />
+              <LeftContainer proIndex={lockIndex} closeMobileMenu={setIsLeftMenuOpened} showNewLock context="header" />
             </Drawer>
             <StyledLogo to="/">
               <img src="/static/img/logo.svg" alt="itea-scan" />
@@ -969,18 +961,18 @@ function Header(props) {
       {needAuth && <PasswordPrompt />}
       {newLockDialog && <PuNewLock history={props.history} close={closeNewLockDialog} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
-      {isNotifyLock && (
+      {notifyLockData.show && (
         <PuNotifyLock
-          index={index}
-          locks={apiLocks}
+          index={notifyLockData.index}
+          locks={(sideBarLocks || []).concat(apiLocks)}
           address={address}
           close={closeNotiLock}
           accept={nextToAccept}
           deny={nextToDeny}
         />
       )}
-      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={parseInt(index, 10)} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={parseInt(index, 10)} />}
+      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={notifyLockData.index} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={notifyLockData.index} />}
       <ModalGateway>
         {photoViewer ? (
           <Modal onClose={closePhotoViewer}>

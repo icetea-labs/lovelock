@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
@@ -12,8 +12,6 @@ import Icon from '../../elements/Icon';
 
 import { LinkPro } from '../../elements/Button';
 import { Lock } from '../../elements';
-import PuConfirmLock from '../../elements/PuConfirmLock';
-import PuNotifyLock from '../../elements/PuNotifyLock';
 import * as actions from '../../../store/actions';
 
 const LeftBox = styled.div`
@@ -146,6 +144,7 @@ function LeftContainer(props) {
     setLocks,
     showNewLock,
     setShowNewLockDialog,
+    showNotifyLock,
     showPhotoViewer,
     confirmLock,
     topInfo,
@@ -165,9 +164,6 @@ function LeftContainer(props) {
   const hasRecentImages = !!Object.keys(recentImages).length;
   const recentBlogPosts =
     isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.blogPosts || [] : [];
-
-  const [index, setIndex] = useState(-1);
-  const [step, setStep] = useState('');
 
   const { enqueueSnackbar } = useSnackbar();
   const ja = 'ja';
@@ -230,19 +226,6 @@ function LeftContainer(props) {
     showPhotoViewer(options);
   };
 
-  function closePopup() {
-    setStep('');
-    setShowNewLockDialog(false);
-  }
-
-  function nextToAccept() {
-    setStep('accept');
-  }
-
-  function nextToDeny() {
-    setStep('deny');
-  }
-
   function selectAccepted(lockIndex, collectionId, username) {
     let url = username ? `/u/${username}` : `/lock/${lockIndex}`;
     if (collectionId != null) {
@@ -256,11 +239,6 @@ function LeftContainer(props) {
   function newLock() {
     setShowNewLockDialog(true);
     if (closeMobileMenu) closeMobileMenu();
-  }
-
-  function selectPending(lockIndex) {
-    setStep('pending');
-    setIndex(lockIndex);
   }
 
   function eventConfirmLock(data) {
@@ -367,7 +345,7 @@ function LeftContainer(props) {
               <FormattedMessage id="leftmenu.pendingLock" />
             </div>
             <div className="content">
-              <Lock loading={loading} locksData={pendingLocks} address={myAddress} handlerSelect={selectPending} />
+              <Lock loading={loading} locksData={pendingLocks} address={myAddress} handlerSelect={showNotifyLock} />
             </div>
           </>
         )}
@@ -441,18 +419,6 @@ function LeftContainer(props) {
           </SupportSite>
         </LeftBox>
       </StickyBox>
-      {step === 'pending' && (
-        <PuNotifyLock
-          index={index}
-          locks={locks}
-          address={address}
-          close={closePopup}
-          accept={nextToAccept}
-          deny={nextToDeny}
-        />
-      )}
-      {step === 'accept' && <PuConfirmLock close={closePopup} index={index} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closePopup} index={index} />}
     </>
   );
 }
@@ -479,6 +445,12 @@ const mapDispatchToProps = dispatch => {
     },
     showPhotoViewer(options) {
       dispatch(actions.setShowPhotoViewer(options));
+    },
+    showNotifyLock(lockIndex) {
+      dispatch(actions.setNotifyLock({
+        index: lockIndex,
+        show: true
+      }));
     },
   };
 };

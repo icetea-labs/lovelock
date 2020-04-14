@@ -61,7 +61,7 @@ function Explore(props) {
   return (
     <LeftBoxWrapper>
       <div className="proposeColumn proposeColumn--left">
-        <LeftContainer loading={loading} />
+        <LeftContainer loading={loading} context="explore" />
       </div>
       <div className="proposeColumn proposeColumn--right">
         <MemoryList

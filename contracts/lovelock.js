@@ -366,7 +366,7 @@ class LoveLock {
       address = convertAliasToAddress(addOrAlias);
     }
     const data = apiGetDataForMypage(self, address);
-    Object.assign(data, this.getUserByAdd(address))
+    Object.assign(data, this.getUserByAddress(address))
 
     return [data]
   }
@@ -444,11 +444,10 @@ class LoveLock {
   }
 
   // ==== EDITOR CHOICE (for Explore menu) ===
-  @view getChoices = () => this.getState('choices', []);
-  setChoices = value => this.setState('choices', value);
+  @view getChoices = () => this.getState('choices', {});
 
   @view getChoiceMemories = (extra, page, pageSize, loadToCurrentPage) => {
-    let choices = this.getState('choices', []);
+    let choices = this.getState(['choices', 'memories'], []);
 
     if (extra != null) {
       choices = choices.concat(extra);
@@ -461,70 +460,100 @@ class LoveLock {
     return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadToCurrentPage);
   };
 
-  @transaction addChoices(_choices) {
-    expectAdmin(this);
+  @transaction migrateChoices(): boolean {
+    const choices = this.getState('choices')
+    if (Array.isArray(choices)) {
+      // convert to object
+      this.setState('choices', { memories: choices })
+      return true
+    }
+    return false
+  }
 
-    if (!Array.isArray(_choices)) {
-      _choices = [_choices];
+  @transaction addChoices(_choices, type: string) {
+    //expectAdmin(this);
+
+    if (type === 'u') {
+      _choices = ensureAliasArray(_choices)
+    } else {
+      if (!Array.isArray(_choices)) {
+        _choices = [_choices];
+      }
+
+      const schema = Joi.array().items(
+        Joi.number()
+          .min(0)
+          .integer()
+      );
+  
+      _choices = validate(_choices, schema);
     }
 
-    const schema = Joi.array().items(
-      Joi.number()
-        .min(0)
-        .integer()
-    );
+    const types = {
+      u: 'users',
+      l: 'locks',
+      m: 'memories'
+    }
 
-    _choices = validate(_choices, schema);
+    const prop = types[type]
+    expect(prop, 'Invalid choice type.')
 
-    const oldChoices = this.getChoices();
+    const oldChoices = this.getState(['choices', prop], []);
 
     // merge the two array, use Set to remove duplicaton
     const newChoices = [...new Set([...oldChoices, ..._choices])];
 
     // save new choices
-    this.setChoices(newChoices);
+    this.setState(['choices', prop], newChoices);
 
     // return nothing
   }
 
-  @transaction removeChoices(_choices) {
-    expectAdmin(this);
+  @transaction removeChoices(_choices, type: string) {
+    //expectAdmin(this);
 
-    expectAdmin(this);
+    if (type === 'u') {
+      _choices = ensureAliasArray(_choices)
+    } else {
+      if (!Array.isArray(_choices)) {
+        _choices = [_choices];
+      }
 
-    if (!Array.isArray(_choices)) {
-      _choices = [_choices];
+      const schema = Joi.array().items(
+        Joi.number()
+          .min(0)
+          .integer()
+      );
+  
+      _choices = validate(_choices, schema);
     }
 
-    const schema = Joi.array().items(
-      Joi.number()
-        .min(0)
-        .integer()
-    );
+    const types = {
+      u: 'users',
+      l: 'locks',
+      m: 'memories'
+    }
 
-    _choices = validate(_choices, schema);
+    const prop = types[type]
+    expect(prop, 'Invalid choice type.')
 
-    const oldChoices = this.getChoices();
+    const oldChoices = this.getState(['choices', prop], []);
 
     const newChoices = oldChoices.filter(i => !_choices.includes(i));
 
-    this.setChoices(newChoices);
+    // save new choices
+    this.setState(['choices', prop], newChoices);
   }
 
-  @view isEditorChosen(memoIndex: number): boolean {
-    const choices = this.getChoices();
-    return choices.includes(memoIndex);
-  }
-
-  // ========== USER APPROVED =============
+  // ========== USERS =============
   @view getUsers = () => this.getState('users', {});
   setUsers = value => this.setState('users', value);
 
   @transaction migrateUsers(): boolean {
     expectAdmin(this);
     const users = this.getUsers()
-    const newUsers = {}
     if (Array.isArray(users)) {
+      const newUsers = {}
       users.forEach(addr => {
         newUsers[addr] = { activated: true, token: 100 };
         // create the first lock
@@ -532,7 +561,7 @@ class LoveLock {
           apiCreateFirstLock(this, addr)
         }
       });
-      this.setUsers(newUsers)
+      this.setState(newUsers)
       return true
     }
     return false
@@ -540,24 +569,9 @@ class LoveLock {
 
   @transaction addUsers(newUsers) {
     expectAdmin(this);
-    if (!Array.isArray(newUsers)) {
-      newUsers = [newUsers];
-    }
 
-    newUsers = newUsers.map(user => {
-      if (!isValidAddress(user)) {
-        return convertAliasToAddress(user);
-      }
-      return user;
-    });
-
-    const schema = Joi.array().items(
-      Joi.string()
-        .max(43)
-        .min(43)
-    );
-
-    newUsers = validate(newUsers, schema);
+    // Note: this ensures we have valid addresses, so no need Joi validation
+    newUsers = ensureAliasArray(newUsers)
 
     const users = this.getUsers();
     const changed = []
@@ -578,51 +592,28 @@ class LoveLock {
     return changed
   }
 
-  @view getUserByAdd(add) {
-    let users = this.getUsers();
-    return users[add] || {};
+  @view getUserByAddress(addr: address) {
+    return this.getState(['users', addr], {})
   }
 
   @transaction removeUsers(_users) {
     expectAdmin(this);
-    if (!Array.isArray(_users)) {
-      _users = [_users];
-    }
-
-    _users = _users.map(user => {
-      if (!isValidAddress(user)) {
-        user = convertAliasToAddress(user);
-      }
-      return user;
-    });
-    const schema = Joi.array().items(
-      Joi.string()
-        .max(43)
-        .min(43)
-    );
-    _users = validate(_users, schema);
-    let users = this.getUsers();
-    for (let i = 0; i < _users.length; i++) {
-      delete users[_users[i]];
-    }
-    this.setUsers(users);
-    return _users;
+    
+    // Note: this ensures we have valid addresses, so no need Joi validation
+    ensureAliasArray(_users).forEach(u => this.deleteState(['users', u]));
   }
 
   // ========== Authorized IPFS APPROVED =============
-  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
-    // expectUserApproved(self, { from: mainAddress });
-    const users = this.getUsers();
-    if (!users[mainAddress] || !users[mainAddress].activated) {
+  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
+    if (!this.isUserApproved(mainAddress)) {
       return false;
     }
 
-    // check tokenAddress is token on mainaddress.
+    // check tokenAddress is an access token of mainAddress.
 
     const ctDid = loadContract('system.did');
     try {
-      const to = contract.includes('.') ? convertAliasToAddress(contract) : contract;
-      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to });
+      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to: contract });
       return true;
     } catch (e) {
       return false;
@@ -630,8 +621,7 @@ class LoveLock {
   }
 
   @view isUserApproved(mainAddress: address) {
-    const users = this.getUsers();
-    return  Boolean(users[mainAddress] && users[mainAddress].activated);
+    return this.getState(['users', mainAddress, 'activated'], false)
   }
 
   @transaction transferToken(receiverAddr: addresss, amount: number = 1) {
@@ -640,19 +630,18 @@ class LoveLock {
 
     const users = this.getUsers()
 
-    const me = users[msg.sender]
+    const me = this.getState(['users', msg.sender])
     expect(me && me.token > amount, 'User does not have enough token.')
     me.token -= amount
 
-    let receiver = users[receiverAddr]
+    let receiver = this.getState(['users', receiverAddr])
     if (!receiver) {
       receiver = { token: amount }
-      users[receiverAddr] = receiver
     } else {
       receiver.token = (receiver.token || 0) + amount
     }
 
-    this.setUsers(users)
+    this.setState(['users', receiverAddr], receiver)
 
     return {
       [msg.sender]: me.token,
@@ -669,4 +658,12 @@ function convertAliasToAddress(alias) {
   const addr = ctAlias.resolve.invokeView(alias)
   expect(addr, `Unresolvable address or alias ${alias}.`)
   return addr
+}
+
+function ensureAliasArray(aliasArray) {
+  if (!Array.isArray(aliasArray)) {
+    expect(typeof aliasArray === 'string', 'aliasArray must be string or Array of strings.')
+    aliasArray = [aliasArray]
+  }
+  return aliasArray.map(a => isValidAddress(a) ? a : convertAliasToAddress(a))
 }

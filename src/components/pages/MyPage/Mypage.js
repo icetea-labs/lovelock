@@ -285,6 +285,7 @@ function Mypage(props) {
                 <div className="proposeColumn proposeColumn--left">
                   <LeftContainer
                     loading={loading}
+                    context="mypage"
                     showNewLock
                     isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
                   />

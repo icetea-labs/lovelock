@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import TextField from '@material-ui/core/TextField';
 import { useSnackbar } from 'notistack';
 import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
-import { callView, makeLockName } from '../../../helper';
+import { makeLockName } from '../../../helper';
 
 import { useTx } from '../../../helper/hooks';
 import TopContrainer from './TopContainer';
@@ -155,7 +155,7 @@ export default function DetailContainer(props) {
 
       <LeftBoxWrapper>
         <div className="proposeColumn proposeColumn--left">
-          <LeftContainer proIndex={proIndex} loading={loading} />
+          <LeftContainer proIndex={proIndex} loading={loading} context="lock" />
         </div>
         <div className="proposeColumn proposeColumn--right">
           <RightContainer

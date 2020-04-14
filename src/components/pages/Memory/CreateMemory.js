@@ -321,7 +321,7 @@ export default function CreateMemory(props) {
 
     let lockIndex = proIndex
     if (!editMode && (lockIndex == null || lockIndex === '')) {
-      if (myLocks.length == 1) {
+      if (myLocks.length === 1) {
         lockIndex = myLocks[0].id
       } else {
         return showError('Please select a lock to post to.');
