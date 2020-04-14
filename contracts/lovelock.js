@@ -9,6 +9,7 @@ const {
   expectUserApproved,
 } = require('./helper.js');
 const {
+  apiCreateFirstLock,
   apiCreateLock,
   apiEditLock,
   apiChangeLockName,
@@ -546,13 +547,22 @@ class LoveLock {
     if (Array.isArray(usersOld)) {
       userNew = usersOld.reduce(function(result, item) {
         result[item] = { activated: true, token: 100 };
+        // create the first lock
+        if (!(this.getA2l()[item] || []).length) {
+          apiCreateFirstLock(this, item)
+        }
         return result;
       }, {});
-    } else userNew = this.getUsers();
+    } else userNew = usersOld;
 
     //add new user
     for (let i = 0; i < _users.length; i++) {
-      if (!userNew[_users[i]]) userNew[_users[i]] = { activated: true, token: 100 };
+      if (!userNew[_users[i]]) {
+        userNew[_users[i]] = { activated: true, token: 100 };   
+        apiCreateFirstLock(this, _users[i])
+      } else if (!userNew[_users[i]].activated) {
+        userNew[_users[i]].activated = true
+      }
     }
     
     this.setUsers(userNew);

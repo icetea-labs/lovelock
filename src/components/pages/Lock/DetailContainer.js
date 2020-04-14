@@ -71,6 +71,10 @@ export default function DetailContainer(props) {
           history.push('/notfound');
           return;
         }
+        if (lock.s_content == null) {
+          // it is the auto generated first journal when activating user
+          lock.s_content = 'My LoveLock journal.'
+        }
         setProposeInfo(lock);
         dispatch(actions.setTopInfo(lock));
         setLoading(false)

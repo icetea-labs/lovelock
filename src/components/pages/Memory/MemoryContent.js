@@ -451,8 +451,12 @@ function MemoryContent(props) {
     const toMe = mem.receiver === address
     if (mem.lock.s_info.lockName) {
       receiver = mem.lock.s_info.lockName
-    } else if (toMe) {
+    } else if (!mem.lock.type && toMe) {
+      // couple lock, and to me
       receiver = 'Me'
+    } else if (mem.lock.type === 2) {
+      // couple lock, and to me
+      receiver = toMe ?  'My Journal' : (getName(mem.s_tags, false) + ' Journal')
     } else if (mem.r_tags && mem.r_tags['display-name']) {
       receiver = getName(mem.r_tags, showFullname)
     } else {

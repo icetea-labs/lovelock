@@ -6,9 +6,17 @@ const LOCK_TYPE_COUPLE = 0;
 const LOCK_TYPE_CRUSH = 1;
 const LOCK_TYPE_JOURNAL = 2;
 
-exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
+exports.apiCreateFirstLock = (self, lockSender) => {
+  return _createLock(self, undefined, undefined, undefined, undefined, lockSender)
+}
+
+exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info,) => {
+  return _createLock(self, s_content, receiver, s_info, bot_info)
+}
+
+const _createLock = (self, s_content, receiver, s_info = {}, bot_info, lockSender) => {
   // cache some variables
-  const sender = msg.sender;
+  const sender = lockSender || msg.sender;
   const isPrivate = false;
 
   // this should not needed because it waste state space
@@ -87,7 +95,7 @@ exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
 
   // create the first memory for auto-accepted lock
   if (pendingLock.status === LOCK_STATUS_ACCEPTED) {
-    apiCreateMemory(self, index, false, '', { hash: [] }, [true]);
+    apiCreateMemory(self, index, false, '', { hash: [] }, [true, undefined, undefined, sender]);
   }
 
   // map address to lock

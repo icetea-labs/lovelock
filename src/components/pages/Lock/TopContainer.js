@@ -590,7 +590,7 @@ function TopContrainer(props) {
         ) : (
           <CardMedia
             className={classes.media}
-            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
+            image={topInfo.coverImg ? process.env.REACT_APP_IPFS + topInfo.coverImg : '/static/img/landing.svg'}
           >
             {canChangeCover() && (
               <div className="showChangeImg">

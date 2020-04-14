@@ -1,5 +1,5 @@
 exports.apiCreateMemory = (self, lockIndex, isPrivate, content, info = {}, opts = []) => {
-  return _addMemory(self, lockIndex, isPrivate, content, info, [...opts]);
+  return _addMemory(self, lockIndex, isPrivate, content, info, opts);
 };
 
 exports.apiLikeMemory = (self, memoIndex, type) => {
@@ -194,7 +194,7 @@ function _addInfoToMems(memories, self, locks) {
   return res;
 }
 
-function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
+function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks, lockSender] = []) {
   if (info.date == null) {
     info = { ...info, date: block.timestamp }
   } else {
@@ -208,8 +208,8 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
   }
 
   expect(lock.status === 1, 'Cannot add memory to a pending lock.')
-  expectLockContributors(lock, 'Only lock contributors can add memory.');
-  const sender = msg.sender;
+  !lockSender && expectLockContributors(lock, 'Only lock contributors can add memory.');
+  const sender = lockSender || msg.sender;
   const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
 
   //new memories

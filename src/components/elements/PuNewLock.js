@@ -508,7 +508,7 @@ class PuNewLock extends React.Component {
     const ja = 'ja';
 
     const inputProps = {
-      placeholder: language === ja ? '検索する文字を入力してください' : 'type some letters to search',
+      placeholder: language === ja ? '検索する文字を入力してください' : 'type the member to lock with',
       value,
       onChange: this.onPartnerChange,
     };
