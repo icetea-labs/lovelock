@@ -552,7 +552,7 @@ function Header(props) {
       .then(data => {
         console.log('addMemory', data);
         const memoryList = [];
-        if (data.result.length > 0) {
+        if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
               const memoryReq = {

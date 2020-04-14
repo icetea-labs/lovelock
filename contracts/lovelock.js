@@ -153,13 +153,13 @@ class LoveLock {
   }
   @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
-  @view getLocksForFeed = (addOrAlias: string, includeFollowing: boolean, includeMemoryIndexes: boolean) => {
+  @view getLocksForFeed = (addOrAlias: string, includeFollowing: ?boolean, includeMemoryIndexes: ?boolean) => {
     const self = this;
     let address = addOrAlias;
     if (!isValidAddress(addOrAlias)) {
       address = convertAliasToAddress(addOrAlias);
     }
-    return apiGetLocksForFeed(self, address, includeFollowing, includeMemoryIndexes);
+    return apiGetLocksForFeed(self, address, !!includeFollowing, !!includeMemoryIndexes);
   };
   @view getMaxLocksIndex = () => {
     const locks = this.getLocks();
@@ -569,7 +569,7 @@ class LoveLock {
           apiCreateFirstLock(this, addr)
         }
       });
-      this.setState(newUsers)
+      this.setState('users', newUsers)
       return true
     }
     return false
