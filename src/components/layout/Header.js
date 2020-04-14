@@ -509,7 +509,7 @@ function Header(props) {
       .then(data => {
         const lockRequests = [];
         const allLocksList = [];
-        if (data.result.length > 0) {
+        if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'createLock') {
               const lockReq = {
