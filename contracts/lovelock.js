@@ -520,15 +520,33 @@ class LoveLock {
   @view getUsers = () => this.getState('users', {});
   setUsers = value => this.setState('users', value);
 
-  @transaction addUsers(_users) {
+  @transaction migrateUsers(): boolean {
     expectAdmin(this);
-    if (!Array.isArray(_users)) {
-      _users = [_users];
+    const users = this.getUsers()
+    const newUsers = {}
+    if (Array.isArray(users)) {
+      users.forEach(addr => {
+        newUsers[addr] = { activated: true, token: 100 };
+        // create the first lock
+        if (!(this.getA2l()[addr] || []).length) {
+          apiCreateFirstLock(this, addr)
+        }
+      });
+      this.setUsers(newUsers)
+      return true
+    }
+    return false
+  }
+
+  @transaction addUsers(newUsers) {
+    expectAdmin(this);
+    if (!Array.isArray(newUsers)) {
+      newUsers = [newUsers];
     }
 
-    _users = _users.map(user => {
+    newUsers = newUsers.map(user => {
       if (!isValidAddress(user)) {
-        user = convertAliasToAddress(user);
+        return convertAliasToAddress(user);
       }
       return user;
     });
@@ -539,40 +557,25 @@ class LoveLock {
         .min(43)
     );
 
-    _users = validate(_users, schema);
+    newUsers = validate(newUsers, schema);
 
-    //migrate userOld
-    let usersOld = this.getUsers();
-    let userNew = {};
-    if (Array.isArray(usersOld)) {
-      userNew = usersOld.reduce(function(result, item) {
-        result[item] = { activated: true, token: 100 };
-        // create the first lock
-        if (!(this.getA2l()[item] || []).length) {
-          apiCreateFirstLock(this, item)
-        }
-        return result;
-      }, {});
-    } else userNew = usersOld;
-
-    //add new user
-    for (let i = 0; i < _users.length; i++) {
-      if (!userNew[_users[i]]) {
-        userNew[_users[i]] = { activated: true, token: 100 };   
-        apiCreateFirstLock(this, _users[i])
-      } else if (!userNew[_users[i]].activated) {
-        userNew[_users[i]].activated = true
+    const users = this.getUsers();
+    const changed = []
+    newUsers.forEach(addr => {
+      if (!users[addr]) {
+        users[addr] = { activated: true, token: 100 };
+        apiCreateFirstLock(this, addr)
+        changed.push(addr)
+      } else if (!users[addr].activated) {
+        users[addr].activated = true
+        changed.push(addr)
       }
-    }
-    
-    this.setUsers(userNew);
+    })
 
-    // users = users.filter(addr => {
-    //   return !_users.includes(addr);
-    // });
-    // users = users.concat(_users);
+    // save
+    this.setUsers(users);
 
-    return _users;
+    return changed
   }
 
   @view getUserByAdd(add) {

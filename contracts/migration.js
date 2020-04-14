@@ -42,7 +42,7 @@ module.exports = context => {
     function migrateState(fromContract, overwrite) {
         const c = context.runtime.loadContract(fromContract)
         const data = c.exportState.invokeView()
-        if (data && typeof data == 'object') {
+        if (data && typeof data === 'object') {
             importState(data, overwrite)
         }
     }

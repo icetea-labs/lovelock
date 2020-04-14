@@ -73,7 +73,7 @@ export default function DetailContainer(props) {
         }
         if (lock.s_content == null) {
           // it is the auto generated first journal when activating user
-          lock.s_content = 'My LoveLock journal.'
+          lock.s_content = 'My LoveLock journal'
         }
         setProposeInfo(lock);
         dispatch(actions.setTopInfo(lock));
