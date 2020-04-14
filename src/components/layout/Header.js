@@ -112,16 +112,10 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#fff',
   },
   lockReqTitle: {
-    width: 111,
-    height: 18,
-    marginLeft: theme.spacing(2),
     color: '#373737',
   },
   lockReqSetting: {
-    width: 46,
-    height: 15,
     fontSize: 12,
-    marginRight: theme.spacing(2),
     color: '#8250c8',
   },
   lockReqConfirm: {
@@ -408,10 +402,12 @@ function Header(props) {
 
   function nextToAccept() {
     setStep('accept');
+    closeNotiLock();
   }
 
   function nextToDeny() {
     setStep('deny');
+    closeNotiLock();
   }
 
   const getSuggestions = async value => {
@@ -560,6 +556,7 @@ function Header(props) {
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 content: data.result[i].content,
+                lockId: data.result[i].lockIndex,
                 time: data.result[i].created_at,
               };
               memoryList.push(memoryReq);
@@ -651,12 +648,12 @@ function Header(props) {
           className={classes.lockReqStyle}
           key={id}
           onClick={() => {
+            lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
             const abort = new AbortController();
             fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`, { signal: abort.signal })
               .then(r => r.json())
-              .then(data => {})
               .catch(err => {
                 if (err.name === 'AbortError') return;
                 throw err;
@@ -671,9 +668,12 @@ function Header(props) {
           {/* <ListItemText primary="DELETE" /> */}
         </StyledMenuItem>
       ))}
-      {/* <StyledMenuItem className={classes.lockReqStyle}>
-        <ListItemText align="center" primary="See all" className={classes.lockReqSetting} />
-      </StyledMenuItem> */}
+      <StyledMenuItem className={classes.lockReqStyle}>
+        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
+        {lockReqList.length === 0 && (
+          <ListItemText align="center" primary="No request to you." className={classes.lockReqSetting} />
+        )}
+      </StyledMenuItem>
     </StyledMenu>
   );
 
@@ -690,8 +690,24 @@ function Header(props) {
         {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} /> */}
         {/* <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
       </StyledMenuItem>
-      {notiList.map(({ id, avatar, name, content, time, eventName }) => (
-        <List className={classes.listNoti} component="nav" key={id}>
+      {notiList.map(({ id, avatar, name, content, time, eventName, lockId }) => (
+        <List
+          className={classes.listNoti}
+          component="nav"
+          key={id}
+          onClick={() => {
+            notiList.length -= 1;
+            props.history.push(`/lock/${lockId}`);
+            handleNotiClose();
+            const abort = new AbortController();
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`, { signal: abort.signal })
+              .then(r => r.json())
+              .catch(err => {
+                if (err.name === 'AbortError') return;
+                throw err;
+              });
+          }}
+        >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
               <AvatarPro alt="Remy Sharp" src={avatar} />
@@ -723,6 +739,9 @@ function Header(props) {
       ))}
       <StyledMenuItem className={classes.lockReqStyle}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
+        {notiList.length === 0 && (
+          <ListItemText align="center" primary="No message to you." className={classes.lockReqSetting} />
+        )}
       </StyledMenuItem>
     </StyledMenu>
   );
