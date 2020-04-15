@@ -112,11 +112,19 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: '#fff',
   },
   lockReqTitle: {
-    color: '#373737',
+    color: '#fff',
+  },
+  lockReqTitleBg: {
+    backgroundColor: '#8250c8',
+    borderRadius: 10,
+    margin: theme.spacing(1),
+    height: 'fit-content',
   },
   lockReqSetting: {
-    fontSize: 12,
     color: '#8250c8',
+  },
+  lockReqSettingBg: {
+    margin: theme.spacing(2),
   },
   lockReqConfirm: {
     color: '#8250c8',
@@ -294,7 +302,7 @@ function Header(props) {
   const address = useSelector(state => state.account.address);
   const language = useSelector(state => state.globalData.language);
   const isApproved = useSelector(state => state.account.isApproved);
-  const sideBarLocks = useSelector(state => state.loveinfo.locks)
+  const sideBarLocks = useSelector(state => state.loveinfo.locks);
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorElLockReq, setAnchorElLockReq] = useState(null);
@@ -390,16 +398,20 @@ function Header(props) {
   }
 
   function handleSelLock(lockId) {
-    dispatch(actions.setNotifyLock({
-      index: lockId,
-      show: true
-    }));
+    dispatch(
+      actions.setNotifyLock({
+        index: +lockId,
+        show: true,
+      })
+    );
   }
 
   function closeNotiLock() {
-    dispatch(actions.setNotifyLock({
-      show: false
-    }));
+    dispatch(
+      actions.setNotifyLock({
+        show: false,
+      })
+    );
   }
 
   function closeConfirmLock() {
@@ -480,6 +492,15 @@ function Header(props) {
     setSuggestions([]);
   };
 
+  function IsJsonString(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -547,15 +568,50 @@ function Header(props) {
 
   useEffect(() => {
     const abort = new AbortController();
+    const memoryList = [];
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        console.log('addMemory', data);
-        const memoryList = [];
+        // console.log('addMemory', data);
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
+              const contentFrApi = data.result[i].content;
+              let contentNoti;
+              if (IsJsonString(contentFrApi)) {
+                const obj = JSON.parse(contentFrApi);
+                contentNoti = obj.meta.title;
+              } else {
+                contentNoti = contentFrApi;
+              }
               const memoryReq = {
+                id: data.result[i].id,
+                eventName: data.result[i].event_name,
+                avatar: data.result[i].avatar,
+                name: data.result[i].display_name,
+                content: contentNoti,
+                lockId: data.result[i].lockIndex,
+                time: data.result[i].created_at,
+              };
+              memoryList.push(memoryReq);
+            }
+          }
+        }
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        throw err;
+      });
+
+    fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
+      .then(r => r.json())
+      .then(data => {
+        // console.log('addLikeCmt', data);
+        if (data.result && data.result.length > 0) {
+          for (let i = 0; i < data.result.length; i++) {
+            const senderNoti = data.result[i].sender;
+            if (address !== senderNoti) {
+              const likeCmt = {
                 id: data.result[i].id,
                 eventName: data.result[i].event_name,
                 avatar: data.result[i].avatar,
@@ -564,16 +620,21 @@ function Header(props) {
                 lockId: data.result[i].lockIndex,
                 time: data.result[i].created_at,
               };
-              memoryList.push(memoryReq);
+              memoryList.push(likeCmt);
             }
           }
         }
-        setNotiList(memoryList);
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
+
+    console.log('memoryList', memoryList);
+
+    // setState
+    setNotiList(memoryList);
+
     return () => {
       abort.abort();
     };
@@ -644,11 +705,10 @@ function Header(props) {
       open={Boolean(anchorElLockReq)}
       onClose={handleLockReqClose}
     >
-      <StyledMenuItem className={classes.lockReqStyle}>
-        <ListItemText primary="Lock Request" className={classes.lockReqTitle} />
-        {/* <ListItemText align="right" primary="Setting" className={classes.lockReqSetting} /> */}
-      </StyledMenuItem>
-      {lockReqList.map(({ id, avatar, name, lockId }) => (
+      <div className={classes.lockReqTitleBg}>
+        <ListItemText align="center" primary="Lock Request" className={classes.lockReqTitle} />
+      </div>
+      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId }) => (
         <StyledMenuItem
           className={classes.lockReqStyle}
           key={id}
@@ -656,7 +716,7 @@ function Header(props) {
             lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`)
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
           <ListItemAvatar>
@@ -667,12 +727,19 @@ function Header(props) {
           {/* <ListItemText primary="DELETE" /> */}
         </StyledMenuItem>
       ))}
-      <StyledMenuItem className={classes.lockReqStyle}>
+      <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
         {lockReqList.length === 0 && (
           <ListItemText align="center" primary="No request to you." className={classes.lockReqSetting} />
         )}
-      </StyledMenuItem>
+        {lockReqList.length > 5 && (
+          <ListItemText
+            align="center"
+            primary={`and ${lockReqList.length - 5} more...`}
+            className={classes.lockReqSetting}
+          />
+        )}
+      </div>
     </StyledMenu>
   );
 
@@ -684,21 +751,25 @@ function Header(props) {
       open={Boolean(anchorElNoti)}
       onClose={handleNotiClose}
     >
-      <StyledMenuItem className={classes.lockReqStyle}>
-        <ListItemText primary="Notification" className={classes.lockReqTitle} />
-        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} /> */}
-        {/* <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
-      </StyledMenuItem>
-      {notiList.map(({ id, avatar, name, content, time, eventName, lockId }) => (
+      <div className={classes.lockReqTitleBg}>
+        <ListItemText align="center" primary="Notification" className={classes.lockReqTitle} />
+        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
+        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
+      </div>
+
+      {notiList.slice(0, 5).map(({ id, avatar, name, content, time, eventName, lockId }) => (
         <List
           className={classes.listNoti}
           component="nav"
           key={id}
           onClick={() => {
             notiList.length -= 1;
-            props.history.push(`/lock/${lockId}`);
+            if (eventName === 'addMemory') {
+              props.history.push(`/lock/${lockId}`);
+            } else props.history.push(`/memory/${lockId}`);
+
             handleNotiClose();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`)
+            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
@@ -710,7 +781,17 @@ function Header(props) {
                 <>
                   {eventName === 'addMemory' && (
                     <Typography component="span" variant="body2" color="textPrimary">
-                      {name} create a new memory with you
+                      {name} shared a new memory with you.
+                    </Typography>
+                  )}
+                  {eventName === 'addLike' && (
+                    <Typography component="span" variant="body2" color="textPrimary">
+                      {name} liked your memory.
+                    </Typography>
+                  )}
+                  {eventName === 'addComment' && (
+                    <Typography component="span" variant="body2" color="textPrimary">
+                      {name} wrote a comment in your memory.
                     </Typography>
                   )}
                 </>
@@ -730,12 +811,19 @@ function Header(props) {
           <Divider variant="inset" />
         </List>
       ))}
-      <StyledMenuItem className={classes.lockReqStyle}>
+      <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
         {notiList.length === 0 && (
           <ListItemText align="center" primary="No message to you." className={classes.lockReqSetting} />
         )}
-      </StyledMenuItem>
+        {notiList.length > 5 && (
+          <ListItemText
+            align="center"
+            primary={`and ${notiList.length - 5} more...`}
+            className={classes.lockReqSetting}
+          />
+        )}
+      </div>
     </StyledMenu>
   );
 
@@ -777,16 +865,18 @@ function Header(props) {
         </IconButton>
         <p>MyPage</p>
       </MenuItem>
-      {isApproved && <MenuItem onClick={handeNewLock}>
-        <IconButton
-          aria-label="explore post of other users"
-          aria-controls="primary-search-explore-menu"
-          color="inherit"
-        >
-          <AddIcon />
-        </IconButton>
-        <p>Create</p>
-      </MenuItem>}
+      {isApproved && (
+        <MenuItem onClick={handeNewLock}>
+          <IconButton
+            aria-label="explore post of other users"
+            aria-controls="primary-search-explore-menu"
+            color="inherit"
+          >
+            <AddIcon />
+          </IconButton>
+          <p>Create</p>
+        </MenuItem>
+      )}
       <MenuItem onClick={handeExplore}>
         <IconButton
           aria-label="explore post of other users"
@@ -896,11 +986,13 @@ function Header(props) {
                     }
                   /> */}
                 </Button>
-                {isApproved && <Button className={classes.sectionDesktop} onClick={handeNewLock}>
-                  <Typography className={classes.title} noWrap>
-                    <FormattedMessage id="header.btnCreate" />
-                  </Typography>
-                </Button>}
+                {isApproved && (
+                  <Button className={classes.sectionDesktop} onClick={handeNewLock}>
+                    <Typography className={classes.title} noWrap>
+                      <FormattedMessage id="header.btnCreate" />
+                    </Typography>
+                  </Button>
+                )}
 
                 <div className={classes.sectionDesktop}>
                   <IconButton
