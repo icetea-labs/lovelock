@@ -612,7 +612,7 @@ class LoveLock {
   }
 
   // ========== Authorized IPFS APPROVED =============
-  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: address) {
+  @view isAuthorized(mainAddress: address, tokenAddress: address, contract: string) {
     if (!this.isUserApproved(mainAddress)) {
       return false;
     }
@@ -621,7 +621,8 @@ class LoveLock {
 
     const ctDid = loadContract('system.did');
     try {
-      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to: contract });
+      const to = contract.includes('.') ? convertAliasToAddress(contract) : contract;
+      ctDid.checkPermission.invokeView(mainAddress, { signers: [tokenAddress], to });
       return true;
     } catch (e) {
       return false;
