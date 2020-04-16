@@ -38,6 +38,7 @@ import { Link, withRouter } from 'react-router-dom';
 import Autosuggest from 'react-autosuggest';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
+import Carousel, { Modal, ModalGateway } from 'react-images';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
@@ -51,7 +52,6 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
-import Carousel, { Modal, ModalGateway } from 'react-images';
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -112,12 +112,6 @@ const useStyles = makeStyles(theme => ({
     marginRight: 10,
     backgroundColor: '#fff',
   },
-  lockReqTitle: {
-    color: '#fff',
-  },
-  paddingHeader: {
-    padding: theme.spacing(0),
-  },
   lockReqHeader: {
     display: 'flex',
     alignItems: 'center',
@@ -128,17 +122,6 @@ const useStyles = makeStyles(theme => ({
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
-  },
-  lockReqConfirm: {
-    color: '#8250c8',
-    marginRight: theme.spacing(2),
-  },
-  lockReqName: {
-    width: 135,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    margin: theme.spacing(1),
   },
   listNoti: {
     maxWidth: 330,
@@ -719,7 +702,7 @@ function Header(props) {
       </Paper>
       {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId, content, time }) => (
         <List
-          className={classes.lockReqStyle}
+          className={classes.listNoti}
           key={id}
           onClick={() => {
             lockReqList.length -= 1;
@@ -728,28 +711,31 @@ function Header(props) {
             fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
-          <ListItemAvatar>
-            <AvatarPro alt="avatar" hash={avatar} className={classes.jsxAvatar} />
-          </ListItemAvatar>
-          <ListItemText
-            primary={
-              <>
-                <Typography component="span" variant="body2" color="textPrimary">
-                  {name} want to lock with you.
-                </Typography>
-              </>
-            }
-            secondary={
-              <>
-                <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                  {content}
-                </Typography>
-                <Typography component="span" variant="body2">
-                  {diffTime(time)}
-                </Typography>
-              </>
-            }
-          />
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+            <ListItemAvatar>
+              <AvatarPro alt="avatar" hash={avatar} className={classes.jsxAvatar} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {name} want to lock with you.
+                  </Typography>
+                </>
+              }
+              secondary={
+                <>
+                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                    {content}
+                  </Typography>
+                  <Typography component="span" variant="body2">
+                    {diffTime(time)}
+                  </Typography>
+                </>
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" />
         </List>
       ))}
       <div className={classes.lockReqSettingBg}>
