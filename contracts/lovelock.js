@@ -637,8 +637,6 @@ class LoveLock {
     if (msg.sender === receiverAddr) return
     expect(amount > 0, 'Transfer amount must > 0, got ' + amount)
 
-    const users = this.getUsers()
-
     const me = this.getState(['users', msg.sender])
     expect(me && me.token > amount, 'User does not have enough token.')
     me.token -= amount
@@ -650,6 +648,7 @@ class LoveLock {
       receiver.token = (receiver.token || 0) + amount
     }
 
+    this.setState(['users', msg.sender], me)
     this.setState(['users', receiverAddr], receiver)
 
     return {
