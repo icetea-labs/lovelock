@@ -52,7 +52,6 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
-
 const StyledLogo = styled(Link)`
   display: none;
   @media (min-width: 600px) {
@@ -122,6 +121,9 @@ const useStyles = makeStyles(theme => ({
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
+  },
+  lockReqSetting: {
+    color: '#8250c8',
   },
   listNoti: {
     maxWidth: 330,
@@ -555,11 +557,11 @@ function Header(props) {
 
   useEffect(() => {
     const abort = new AbortController();
-    const memoryList = [];
+    let memoryList = [];
+
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        // console.log('addMemory', data);
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
@@ -589,22 +591,17 @@ function Header(props) {
         throw err;
       });
 
+    // const interval = setInterval(() => {
     fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        // console.log('addLikeCmt', data);
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
-            const senderNoti = data.result[i].sender;
             const cmter = data.result[i].coverImg;
-            const eventName = data.result[i].event_name;
-            if (
-              (eventName === 'addLike' && address !== senderNoti) ||
-              (eventName === 'addComment' && address !== cmter)
-            ) {
+            if (address !== cmter) {
               const likeCmt = {
                 id: data.result[i].id,
-                eventName,
+                eventName: data.result[i].event_name,
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 content: data.result[i].content,
@@ -620,14 +617,13 @@ function Header(props) {
         if (err.name === 'AbortError') return;
         throw err;
       });
-
+    // }, 1000);
+    memoryList = [...new Set(memoryList)];
     // console.log('memoryList', memoryList);
-
-    // setState
     setNotiList(memoryList);
-
     return () => {
       abort.abort();
+      // clearInterval(interval);
     };
   }, []);
 
@@ -789,11 +785,17 @@ function Header(props) {
             <ListItemText
               primary={
                 <>
-                  {eventName === 'addMemory' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {name} shared a new memory with you.
-                    </Typography>
-                  )}
+                  {eventName === 'addMemory' &&
+                    (content === '' ? (
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {name} created a new lock with you.
+                      </Typography>
+                    ) : (
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {name} shared a new memory with you.
+                      </Typography>
+                    ))}
+
                   {eventName === 'addLike' && (
                     <Typography component="span" variant="body2" color="textPrimary">
                       {name} liked your memory.
