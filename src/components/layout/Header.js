@@ -299,8 +299,8 @@ function Header(props) {
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
-  const [lockReqList, setLockReqList] = useState([]);
-  const [notiList, setNotiList] = useState([]);
+  const lockReqList = useSelector(state => state.notify.lockRequests);
+  const notiList = useSelector(state => state.notify.notifications);
 
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -488,29 +488,7 @@ function Header(props) {
     }
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        if (address) {
-          const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          const userPoint = await APIService.getUserByAddress(address);
-          dispatch(
-            actions.setAccount({
-              displayName: tags['display-name'] || '',
-              avatar: tags.avatar,
-              isApproved,
-              point: userPoint.token,
-            })
-          );
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    fetchData();
-  }, [address, tokenAddress, dispatch]);
-
-  useEffect(() => {
+  const getLockReq = () => {
     const abort = new AbortController();
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
@@ -543,21 +521,39 @@ function Header(props) {
             setApiLocks(allLocksList);
           }
         }
-        setLockReqList(lockRequests);
+        dispatch(actions.setLockReq(lockRequests));
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
-
-    return () => {
-      abort.abort();
-    };
-  }, []);
+  };
 
   useEffect(() => {
+    async function fetchData() {
+      try {
+        if (address) {
+          const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
+          const userPoint = await APIService.getUserByAddress(address);
+          dispatch(
+            actions.setAccount({
+              displayName: tags['display-name'] || '',
+              avatar: tags.avatar,
+              isApproved,
+              point: userPoint.token,
+            })
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchData();
+  }, [address, tokenAddress, dispatch]);
+
+  const getNoti = () => {
     const abort = new AbortController();
-    let memoryList = [];
+    const memoryList = [];
 
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
@@ -591,7 +587,6 @@ function Header(props) {
         throw err;
       });
 
-    // const interval = setInterval(() => {
     fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
@@ -617,13 +612,18 @@ function Header(props) {
         if (err.name === 'AbortError') return;
         throw err;
       });
-    // }, 1000);
-    memoryList = [...new Set(memoryList)];
-    // console.log('memoryList', memoryList);
-    setNotiList(memoryList);
+
+    dispatch(actions.setNoti(memoryList));
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getLockReq();
+      getNoti();
+    }, 7000);
     return () => {
-      abort.abort();
-      // clearInterval(interval);
+      // abort.abort();
+      clearInterval(interval);
     };
   }, []);
 
@@ -701,7 +701,7 @@ function Header(props) {
           className={classes.listNoti}
           key={id}
           onClick={() => {
-            lockReqList.length -= 1;
+            // lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
             fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
@@ -769,7 +769,7 @@ function Header(props) {
           component="nav"
           key={id}
           onClick={() => {
-            notiList.length -= 1;
+            // notiList.length -= 1;
             if (eventName === 'addMemory') {
               props.history.push(`/lock/${lockId}`);
             } else props.history.push(`/memory/${lockId}`);
