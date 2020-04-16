@@ -492,13 +492,12 @@ function Header(props) {
     setSuggestions([]);
   };
 
-  function IsJsonString(str) {
+  function getJsonObject(str) {
     try {
-      JSON.parse(str);
+      return JSON.parse(str);
     } catch (e) {
-      return false;
+      return str;
     }
-    return true;
   }
 
   useEffect(() => {
@@ -577,12 +576,11 @@ function Header(props) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
               const contentFrApi = data.result[i].content;
-              let contentNoti;
-              if (IsJsonString(contentFrApi)) {
-                const obj = JSON.parse(contentFrApi);
-                contentNoti = obj.meta.title;
-              } else {
+              let contentNoti = getJsonObject(contentFrApi);
+              if (typeof contentNoti === 'string') {
                 contentNoti = contentFrApi;
+              } else {
+                contentNoti = contentNoti.meta.title;
               }
               const memoryReq = {
                 id: data.result[i].id,
@@ -630,7 +628,7 @@ function Header(props) {
         throw err;
       });
 
-    console.log('memoryList', memoryList);
+    // console.log('memoryList', memoryList);
 
     // setState
     setNotiList(memoryList);
@@ -791,7 +789,7 @@ function Header(props) {
                   )}
                   {eventName === 'addComment' && (
                     <Typography component="span" variant="body2" color="textPrimary">
-                      {name} wrote a comment in your memory.
+                      {name} commented on your memory.
                     </Typography>
                   )}
                 </>
