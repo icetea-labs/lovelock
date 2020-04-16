@@ -18,6 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
+import Paper from '@material-ui/core/Paper';
 
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -114,14 +115,16 @@ const useStyles = makeStyles(theme => ({
   lockReqTitle: {
     color: '#fff',
   },
-  lockReqTitleBg: {
-    backgroundColor: '#8250c8',
-    borderRadius: 10,
-    margin: theme.spacing(1),
-    height: 'fit-content',
+  paddingHeader: {
+    padding: theme.spacing(0),
   },
-  lockReqSetting: {
+  lockReqHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    height: 50,
     color: '#8250c8',
+    paddingLeft: theme.spacing(4),
+    backgroundColor: theme.palette.background.default,
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
@@ -537,6 +540,8 @@ function Header(props) {
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 lockId: data.result[i].lockIndex,
+                content: data.result[i].content,
+                time: data.result[i].created_at,
               };
               const allLocks = {
                 id: data.result[i].lockIndex,
@@ -608,10 +613,15 @@ function Header(props) {
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             const senderNoti = data.result[i].sender;
-            if (address !== senderNoti) {
+            const cmter = data.result[i].coverImg;
+            const eventName = data.result[i].event_name;
+            if (
+              (eventName === 'addLike' && address !== senderNoti) ||
+              (eventName === 'addComment' && address !== cmter)
+            ) {
               const likeCmt = {
                 id: data.result[i].id,
-                eventName: data.result[i].event_name,
+                eventName,
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 content: data.result[i].content,
@@ -702,12 +712,13 @@ function Header(props) {
       keepMounted
       open={Boolean(anchorElLockReq)}
       onClose={handleLockReqClose}
+      MenuListProps={{ disablePadding: true }}
     >
-      <div className={classes.lockReqTitleBg}>
-        <ListItemText align="center" primary="Lock Request" className={classes.lockReqTitle} />
-      </div>
-      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId }) => (
-        <StyledMenuItem
+      <Paper square elevation={0} className={classes.lockReqHeader}>
+        <Typography>Lock Request</Typography>
+      </Paper>
+      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId, content, time }) => (
+        <List
           className={classes.lockReqStyle}
           key={id}
           onClick={() => {
@@ -718,12 +729,28 @@ function Header(props) {
           }}
         >
           <ListItemAvatar>
-            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
+            <AvatarPro alt="avatar" hash={avatar} className={classes.jsxAvatar} />
           </ListItemAvatar>
-          <ListItemText primary={name} className={classes.lockReqName} />
-          {/* <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} /> */}
-          {/* <ListItemText primary="DELETE" /> */}
-        </StyledMenuItem>
+          <ListItemText
+            primary={
+              <>
+                <Typography component="span" variant="body2" color="textPrimary">
+                  {name} want to lock with you.
+                </Typography>
+              </>
+            }
+            secondary={
+              <>
+                <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                  {content}
+                </Typography>
+                <Typography component="span" variant="body2">
+                  {diffTime(time)}
+                </Typography>
+              </>
+            }
+          />
+        </List>
       ))}
       <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
@@ -748,12 +775,11 @@ function Header(props) {
       keepMounted
       open={Boolean(anchorElNoti)}
       onClose={handleNotiClose}
+      MenuListProps={{ disablePadding: true }}
     >
-      <div className={classes.lockReqTitleBg}>
-        <ListItemText align="center" primary="Notification" className={classes.lockReqTitle} />
-        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
-      </div>
+      <Paper square elevation={0} className={classes.lockReqHeader}>
+        <Typography>Notification</Typography>
+      </Paper>
 
       {notiList.slice(0, 5).map(({ id, avatar, name, content, time, eventName, lockId }) => (
         <List
@@ -772,7 +798,7 @@ function Header(props) {
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
-              <AvatarPro alt="Remy Sharp" src={avatar} />
+              <AvatarPro alt="Remy Sharp" hash={avatar} />
             </ListItemAvatar>
             <ListItemText
               primary={

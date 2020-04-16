@@ -630,7 +630,7 @@ class LoveLock {
   }
 
   @view isUserApproved(mainAddress: address) {
-    return this.getState(['users', mainAddress, 'activated'], false)
+    return this.getState(['users', mainAddress, 'activate'], false)
   }
 
   @transaction transferToken(receiverAddr: addresss, amount: number = 1) {
