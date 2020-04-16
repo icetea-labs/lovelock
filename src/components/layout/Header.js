@@ -18,6 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
+import Paper from '@material-ui/core/Paper';
 
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -37,6 +38,7 @@ import { Link, withRouter } from 'react-router-dom';
 import Autosuggest from 'react-autosuggest';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
+import Carousel, { Modal, ModalGateway } from 'react-images';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
@@ -50,7 +52,6 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
-import Carousel, { Modal, ModalGateway } from 'react-images';
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -111,31 +112,16 @@ const useStyles = makeStyles(theme => ({
     marginRight: 10,
     backgroundColor: '#fff',
   },
-  lockReqTitle: {
-    color: '#fff',
-  },
-  lockReqTitleBg: {
-    backgroundColor: '#8250c8',
-    borderRadius: 10,
-    margin: theme.spacing(1),
-    height: 'fit-content',
-  },
-  lockReqSetting: {
+  lockReqHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    height: 50,
     color: '#8250c8',
+    paddingLeft: theme.spacing(4),
+    backgroundColor: theme.palette.background.default,
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
-  },
-  lockReqConfirm: {
-    color: '#8250c8',
-    marginRight: theme.spacing(2),
-  },
-  lockReqName: {
-    width: 135,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    margin: theme.spacing(1),
   },
   listNoti: {
     maxWidth: 330,
@@ -492,13 +478,12 @@ function Header(props) {
     setSuggestions([]);
   };
 
-  function IsJsonString(str) {
+  function getJsonObject(str) {
     try {
-      JSON.parse(str);
+      return JSON.parse(str);
     } catch (e) {
-      return false;
+      return str;
     }
-    return true;
   }
 
   useEffect(() => {
@@ -538,6 +523,8 @@ function Header(props) {
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 lockId: data.result[i].lockIndex,
+                content: data.result[i].content,
+                time: data.result[i].created_at,
               };
               const allLocks = {
                 id: data.result[i].lockIndex,
@@ -577,12 +564,11 @@ function Header(props) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
               const contentFrApi = data.result[i].content;
-              let contentNoti;
-              if (IsJsonString(contentFrApi)) {
-                const obj = JSON.parse(contentFrApi);
-                contentNoti = obj.meta.title;
-              } else {
+              let contentNoti = getJsonObject(contentFrApi);
+              if (typeof contentNoti === 'string') {
                 contentNoti = contentFrApi;
+              } else {
+                contentNoti = contentNoti.meta.title;
               }
               const memoryReq = {
                 id: data.result[i].id,
@@ -610,10 +596,15 @@ function Header(props) {
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             const senderNoti = data.result[i].sender;
-            if (address !== senderNoti) {
+            const cmter = data.result[i].coverImg;
+            const eventName = data.result[i].event_name;
+            if (
+              (eventName === 'addLike' && address !== senderNoti) ||
+              (eventName === 'addComment' && address !== cmter)
+            ) {
               const likeCmt = {
                 id: data.result[i].id,
-                eventName: data.result[i].event_name,
+                eventName,
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 content: data.result[i].content,
@@ -630,7 +621,7 @@ function Header(props) {
         throw err;
       });
 
-    console.log('memoryList', memoryList);
+    // console.log('memoryList', memoryList);
 
     // setState
     setNotiList(memoryList);
@@ -704,13 +695,14 @@ function Header(props) {
       keepMounted
       open={Boolean(anchorElLockReq)}
       onClose={handleLockReqClose}
+      MenuListProps={{ disablePadding: true }}
     >
-      <div className={classes.lockReqTitleBg}>
-        <ListItemText align="center" primary="Lock Request" className={classes.lockReqTitle} />
-      </div>
-      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId }) => (
-        <StyledMenuItem
-          className={classes.lockReqStyle}
+      <Paper square elevation={0} className={classes.lockReqHeader}>
+        <Typography>Lock Request</Typography>
+      </Paper>
+      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId, content, time }) => (
+        <List
+          className={classes.listNoti}
           key={id}
           onClick={() => {
             lockReqList.length -= 1;
@@ -719,13 +711,32 @@ function Header(props) {
             fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
-          <ListItemAvatar>
-            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
-          </ListItemAvatar>
-          <ListItemText primary={name} className={classes.lockReqName} />
-          {/* <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} /> */}
-          {/* <ListItemText primary="DELETE" /> */}
-        </StyledMenuItem>
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+            <ListItemAvatar>
+              <AvatarPro alt="avatar" hash={avatar} className={classes.jsxAvatar} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {name} want to lock with you.
+                  </Typography>
+                </>
+              }
+              secondary={
+                <>
+                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                    {content}
+                  </Typography>
+                  <Typography component="span" variant="body2">
+                    {diffTime(time)}
+                  </Typography>
+                </>
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" />
+        </List>
       ))}
       <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
@@ -750,12 +761,11 @@ function Header(props) {
       keepMounted
       open={Boolean(anchorElNoti)}
       onClose={handleNotiClose}
+      MenuListProps={{ disablePadding: true }}
     >
-      <div className={classes.lockReqTitleBg}>
-        <ListItemText align="center" primary="Notification" className={classes.lockReqTitle} />
-        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
-      </div>
+      <Paper square elevation={0} className={classes.lockReqHeader}>
+        <Typography>Notification</Typography>
+      </Paper>
 
       {notiList.slice(0, 5).map(({ id, avatar, name, content, time, eventName, lockId }) => (
         <List
@@ -774,7 +784,7 @@ function Header(props) {
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
-              <AvatarPro alt="Remy Sharp" src={avatar} />
+              <AvatarPro alt="Remy Sharp" hash={avatar} />
             </ListItemAvatar>
             <ListItemText
               primary={
@@ -791,7 +801,7 @@ function Header(props) {
                   )}
                   {eventName === 'addComment' && (
                     <Typography component="span" variant="body2" color="textPrimary">
-                      {name} wrote a comment in your memory.
+                      {name} commented on your memory.
                     </Typography>
                   )}
                 </>
