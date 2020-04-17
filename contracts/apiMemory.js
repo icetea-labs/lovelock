@@ -17,13 +17,11 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
   // save the memeory
   self.setMemories(memories);
   // const eventName = 'addLike' + memoIndex;
-  if (isLike) {
-    self.emitEvent(
-      'addLike',
-      { by: msg.sender, memoIndex, type, timestamp, sender: memo.sender, receiver: memo.receiver },
-      ['by', 'memoIndex']
-    );
-  }
+  self.emitEvent(
+    'addLike',
+    { by: msg.sender, log: { id: memoIndex, isLike, type, timestamp, sender: memo.sender, receiver: memo.receiver } },
+    ['by']
+  );
 
   return memo;
 };
@@ -33,12 +31,12 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
   const [memo, memories] = self.getMemory(memoIndex);
   const timestamp = Date.now();
 
-  const comment = { sender, content, info, timestamp, memSender: memo.sender, receiver: memo.receiver };
+  const comment = { sender, content, info, timestamp };
   memo.comments.push(comment);
 
   // save memories
   self.setMemories(memories);
-  const log = { ...comment, id: memoIndex };
+  const log = { ...comment, id: memoIndex, sender: memo.sender, receiver: memo.receiver };
   self.emitEvent('addComment', { by: msg.sender, log }, ['by']);
 
   return memo;

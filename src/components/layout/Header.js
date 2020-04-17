@@ -47,7 +47,7 @@ import PuConfirmLock from '../elements/PuConfirmLock';
 import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getInfoAndTags, getUserSuggestions, diffTime } from '../../helper';
+import { getInfoAndTags, getUserSuggestions, diffTime, camelObject, fetchNoti, markNoti } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
@@ -430,7 +430,7 @@ function Header(props) {
 
   const processTags = text => {
     if (!text) return ''
-    return text.replace(/@\[.+?\-(.+?)\]/gs, '$1')
+    return text.replace(/@\[.+?-(.+?)\]/gs, '$1')
   }
 
   const renderSearchMatch = (parts, isNick) => {
@@ -488,52 +488,48 @@ function Header(props) {
     setSuggestions([]);
   };
 
-  function getJsonObject(str) {
-    try {
-      return JSON.parse(str);
-    } catch (e) {
-      return str;
-    }
-  }
 
   const getLockReq = signal => {
-    process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal })
-      .then(r => r.json())
-      .then(data => {
+    fetchNoti({ address }, signal)
+      .then((result) => {
+        const [lockReqs, otherReqs] = result || []
+
         const lockRequests = [];
         const allLocksList = [];
-        if (data.result && data.result.length > 0) {
-          for (let i = 0; i < data.result.length; i++) {
-            if (data.result[i].event_name === 'createLock') {
-              const lockReq = {
-                id: data.result[i].id,
-                avatar: data.result[i].avatar,
-                name: data.result[i].display_name,
-                lockId: data.result[i].lockIndex,
-                content: processTags(data.result[i].content),
-                time: data.result[i].created_at,
-              };
-              const fullLock = {
-                id: Number(data.result[i].lockIndex),
-                sender: data.result[i].sender,
-                receiver: data.result[i].receiver,
-                s_content: data.result[i].content,
-                coverImg: data.result[i].coverImg,
-                status: data.result[i].status,
-                displayName: data.result[i].display_name,
-              };
-              lockRequests.push(lockReq);
-              allLocksList.push(fullLock);
-            }
-          }
-          setApiLocks(allLocksList);
-        }
+        lockReqs && lockReqs.forEach(dataItem => {
+            const item = camelObject(dataItem)
+            const fullLock = {
+              id: Number(item.itemId),
+              sender: item.itemSender,
+              receiver: item.itemReceiver,
+              s_content: item.text,
+              coverImg: item.image,
+              status: Number(item.status),
+              displayName: item.actorName,
+            };
+            lockRequests.push(item);
+            allLocksList.push(fullLock);
+        })
+        allLocksList.length &&  setApiLocks(allLocksList);
         dispatch(actions.setLockReq(lockRequests));
+
+        const otherNotiList = []
+        const likeList = []; // to prevent dupplicate like noti
+        otherReqs && otherReqs.forEach(dataItem => {
+          const item = camelObject(dataItem)
+          item.text = processTags(item.text)
+          if (item.eventName === 'addLike') {
+            // no add duplicate
+            if (!likeList.includes(item.itemId)) {
+              likeList.push(item.itemId)
+              otherNotiList.push(item);
+            }
+          } else {
+            otherNotiList.push(item);
+          }
+        })
+        dispatch(actions.setNoti(otherNotiList));
       })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        throw err;
-      });
   };
 
   useEffect(() => {
@@ -559,79 +555,11 @@ function Header(props) {
     fetchData();
   }, [address, dispatch]);
 
-  const getNoti = signal => {
-    const memoryList = [];
-
-    process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal })
-      .then(r => r.json())
-      .then(data => {
-        if (data.result && data.result.length > 0) {
-          for (let i = 0; i < data.result.length; i++) {
-            if (data.result[i].event_name === 'addMemory') {
-              const contentFrApi = data.result[i].content;
-              let contentNoti = getJsonObject(contentFrApi);
-              if (typeof contentNoti === 'string') {
-                contentNoti = contentFrApi;
-              } else {
-                contentNoti = contentNoti.meta.title;
-              }
-              const memoryReq = {
-                id: data.result[i].id,
-                eventName: data.result[i].event_name,
-                avatar: data.result[i].avatar,
-                name: data.result[i].display_name,
-                content: processTags(contentNoti),
-                lockId: data.result[i].lockIndex,
-                time: data.result[i].created_at,
-              };
-              memoryList.push(memoryReq);
-            }
-          }
-          fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal })
-            .then(r => r.json())
-            .then(data => {
-              if (data.result && data.result.length > 0) {
-                const likeList = []; // to prevent dupplicate like noti
-                for (let i = 0; i < data.result.length; i++) {
-                  const likeCmt = {
-                    id: data.result[i].id,
-                    eventName: data.result[i].event_name,
-                    avatar: data.result[i].avatar,
-                    name: data.result[i].display_name,
-                    content: processTags(data.result[i].content),
-                    lockId: data.result[i].lockIndex,
-                    time: data.result[i].created_at,
-                  };
-                  if (likeCmt.eventName === 'addLike') {
-                    // no add duplicate, note that lockId is actually the memory index :D
-                    if (!likeList.includes(likeCmt.lockId)) {
-                      likeList.push(likeCmt.lockId)
-                      memoryList.push(likeCmt);
-                    }
-                  } else {
-                    memoryList.push(likeCmt);
-                  }
-                }
-              }
-              dispatch(actions.setNoti(memoryList));
-            })
-            .catch(err => {
-              if (err.name === 'AbortError') return;
-              throw err;
-            });
-        }
-      })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        throw err;
-      });
-  };
-
   useEffect(() => {
     const abort = new AbortController();
     const interval = setInterval(() => {
       getLockReq(abort.signal);
-      getNoti(abort.signal);
+      //getNoti(abort.signal);
     }, 7000);
     return () => {
       abort.abort();
@@ -709,36 +637,35 @@ function Header(props) {
       <Paper square elevation={0} className={classes.lockReqHeader}>
         <Typography>Lock Request</Typography>
       </Paper>
-      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId, content, time }) => (
+      {lockReqList.slice(0, 5).map(({ id, actorName, actorAvatar, itemId, text, image, timestamp }) => (
         <List
           className={classes.listNoti}
           key={id}
           onClick={() => {
-            // lockReqList.length -= 1;
             handleLockReqClose();
-            handleSelLock(lockId);
-            // process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
+            handleSelLock(itemId);
+            // markNoti({ id: id })
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
-              <AvatarPro alt="avatar" hash={avatar} className={classes.jsxAvatar} />
+              <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
             </ListItemAvatar>
             <ListItemText
               primary={
                 <>
                   <Typography component="span" variant="body2" color="textPrimary">
-                    {name} want to lock with you.
+                    {actorName} wants to lock with you.
                   </Typography>
                 </>
               }
               secondary={
                 <>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {content}
+                    {text}
                   </Typography>
                   <Typography component="span" variant="body2">
-                    {diffTime(time)}
+                    {diffTime(timestamp)}
                   </Typography>
                 </>
               }
@@ -776,47 +703,60 @@ function Header(props) {
         <Typography>Notification</Typography>
       </Paper>
 
-      {notiList.slice(0, 5).map(({ id, avatar, name, content, time, eventName, lockId }) => (
+      {notiList.slice(0, 5).map(({ id, eventName, actorName, actorAvatar, itemId, text, image, itemFlag: isBlog, itemType: isFirstMemory, itemData: lockId, timestamp }) => (
         <List
           className={classes.listNoti}
           component="nav"
           key={id}
           onClick={() => {
-            // notiList.length -= 1;
-            if (eventName === 'addMemory') {
-              props.history.push(`/lock/${lockId}`);
-            } else props.history.push(`/memory/${lockId}`);
-
+            let path = `/memory/${itemId}`
+            if (eventName === 'addMemory' && isFirstMemory) {
+              // it is better to go to the lock because it has more info
+              path = `/lock/${lockId}`
+            } else if (isBlog) {
+              path = `/blog/${itemId}`
+            }
+            props.history.push(path);
             handleNotiClose();
-            process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
+            markNoti({ id })
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
-              <AvatarPro alt="Remy Sharp" hash={avatar} />
+              <AvatarPro alt={actorName} hash={actorAvatar} />
             </ListItemAvatar>
             <ListItemText
               primary={
                 <>
                   {eventName === 'addMemory' &&
-                    (content === '' ? (
+                    (isFirstMemory ? (
                       <Typography component="span" variant="body2" color="textPrimary">
-                        {name} accepted your lock request.
+                        {actorName} accepted your lock request.
                       </Typography>
                     ) : (
                       <Typography component="span" variant="body2" color="textPrimary">
-                        {name} shared a new memory with you.
+                        {actorName} shared a new memory with you.
                       </Typography>
                     ))}
 
                   {eventName === 'addLike' && (
                     <Typography component="span" variant="body2" color="textPrimary">
-                      {name} liked your memory.
+                      {actorName} liked your memory.
                     </Typography>
                   )}
                   {eventName === 'addComment' && (
                     <Typography component="span" variant="body2" color="textPrimary">
-                      {name} commented on your memory.
+                      {actorName} commented on your memory.
+                    </Typography>
+                  )}
+                  {eventName === 'tag_addMemory' && (
+                    <Typography component="span" variant="body2" color="textPrimary">
+                      {actorName} tagged you in a memory.
+                    </Typography>
+                  )}
+                  {eventName === 'tag_addComment' && (
+                    <Typography component="span" variant="body2" color="textPrimary">
+                      {actorName} tagged you in a comment.
                     </Typography>
                   )}
                 </>
@@ -824,10 +764,10 @@ function Header(props) {
               secondary={
                 <>
                   <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {content}
+                    {text}
                   </Typography>
                   <Typography component="span" variant="body2">
-                    {diffTime(time)}
+                    {diffTime(timestamp)}
                   </Typography>
                 </>
               }

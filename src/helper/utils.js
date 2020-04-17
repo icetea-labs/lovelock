@@ -876,3 +876,40 @@ export function getShortName(tags) {
   if (tags.lastname) return tags.lastname;
   return tags['display-name'].split(' ')[0];
 }
+
+// snake to camel
+export function toCamel(s) {
+  return s.replace(/(_[a-z])/ig, ($1) => {
+    return $1.toUpperCase()
+      .replace('_', '');
+  });
+};
+
+export function camelObject(obj) {
+  const r = []
+  for (const prop in obj) {
+    r[toCamel(prop)] = obj[prop]
+  }
+  return r
+}
+
+function _fetchNotiCore(subPath, params, signal) {
+  const query = new URLSearchParams(params).toString()
+  return fetch(`${process.env.REACT_APP_API}/noti/${subPath}?${query}`, { signal })
+}
+
+export function fetchNoti(params, signal) {
+  return !process.env.REACT_APP_API ? Promise.resolve([]) : _fetchNotiCore('list', params, signal)
+    .then(r => r.json())
+    .then(r => {
+      return r.result
+    })
+    .catch(err => {
+      if (err.name === 'AbortError') return;
+      throw err;
+    })
+}
+
+export function markNoti(params) {
+  return process.env.REACT_APP_API && _fetchNotiCore('mark', params);
+}
