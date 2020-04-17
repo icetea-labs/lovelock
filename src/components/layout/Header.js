@@ -387,12 +387,14 @@ function Header(props) {
   }
 
   function handleSelLock(lockId) {
-    dispatch(
-      actions.setNotifyLock({
-        index: +lockId,
-        show: true,
-      })
-    );
+    setTimeout(() => {
+      dispatch(
+        actions.setNotifyLock({
+          index: +lockId,
+          show: true,
+        })
+      );
+    }, 0)
   }
 
   function closeNotiLock() {
@@ -506,8 +508,8 @@ function Header(props) {
                 content: data.result[i].content,
                 time: data.result[i].created_at,
               };
-              const allLocks = {
-                id: data.result[i].lockIndex,
+              const fullLock = {
+                id: Number(data.result[i].lockIndex),
                 sender: data.result[i].sender,
                 receiver: data.result[i].receiver,
                 s_content: data.result[i].content,
@@ -516,10 +518,10 @@ function Header(props) {
                 displayName: data.result[i].display_name,
               };
               lockRequests.push(lockReq);
-              allLocksList.push(allLocks);
+              allLocksList.push(fullLock);
             }
-            setApiLocks(allLocksList);
           }
+          setApiLocks(allLocksList);
         }
         dispatch(actions.setLockReq(lockRequests));
       })
@@ -703,8 +705,8 @@ function Header(props) {
           key={id}
           onClick={() => {
             // lockReqList.length -= 1;
-            handleSelLock(lockId);
             handleLockReqClose();
+            handleSelLock(lockId);
             // process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
