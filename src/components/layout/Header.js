@@ -428,6 +428,11 @@ function Header(props) {
     return `@${suggestion.nick}`;
   };
 
+  const processTags = text => {
+    if (!text) return ''
+    return text.replace(/@\[.+?\-(.+?)\]/gs, '$1')
+  }
+
   const renderSearchMatch = (parts, isNick) => {
     return (
       <>
@@ -505,7 +510,7 @@ function Header(props) {
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
                 lockId: data.result[i].lockIndex,
-                content: data.result[i].content,
+                content: processTags(data.result[i].content),
                 time: data.result[i].created_at,
               };
               const fullLock = {
@@ -576,7 +581,7 @@ function Header(props) {
                 eventName: data.result[i].event_name,
                 avatar: data.result[i].avatar,
                 name: data.result[i].display_name,
-                content: contentNoti,
+                content: processTags(contentNoti),
                 lockId: data.result[i].lockIndex,
                 time: data.result[i].created_at,
               };
@@ -595,7 +600,7 @@ function Header(props) {
                       eventName: data.result[i].event_name,
                       avatar: data.result[i].avatar,
                       name: data.result[i].display_name,
-                      content: data.result[i].content,
+                      content: processTags(data.result[i].content),
                       lockId: data.result[i].lockIndex,
                       time: data.result[i].created_at,
                     };
