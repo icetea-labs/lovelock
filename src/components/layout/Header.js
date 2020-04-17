@@ -47,9 +47,9 @@ import PuConfirmLock from '../elements/PuConfirmLock';
 import PasswordPrompt from './PasswordPrompt';
 import ShowMnemonic from './ShowMnemonic';
 import * as actions from '../../store/actions';
-import { getAuthenAndTags, getUserSuggestions, diffTime } from '../../helper';
+import { getInfoAndTags, getUserSuggestions, diffTime } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
-import APIService from '../../service/apiService';
+// import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
 const StyledLogo = styled(Link)`
@@ -313,7 +313,7 @@ function Header(props) {
   const lockIndex =
     isNaN(lockIndexInt) || lockIndexInt < 0 || !Number.isInteger(lockIndexInt) ? undefined : lockIndexInt;
 
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
+  // const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
   const displayName = useSelector(state => state.account.displayName);
   // const point = useSelector(state => state.account.point);
@@ -488,9 +488,8 @@ function Header(props) {
     }
   }
 
-  const getLockReq = () => {
-    const abort = new AbortController();
-    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
+  const getLockReq = signal => {
+    process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal })
       .then(r => r.json())
       .then(data => {
         const lockRequests = [];
@@ -533,14 +532,15 @@ function Header(props) {
     async function fetchData() {
       try {
         if (address) {
-          const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          const userPoint = await APIService.getUserByAddress(address);
+          const [tags, user] = await getInfoAndTags(address);
+          const isApproved = !!user.activated
+          const point = user.token || 0
           dispatch(
             actions.setAccount({
               displayName: tags['display-name'] || '',
               avatar: tags.avatar,
               isApproved,
-              point: userPoint.token,
+              point
             })
           );
         }
@@ -549,13 +549,13 @@ function Header(props) {
       }
     }
     fetchData();
-  }, [address, tokenAddress, dispatch]);
+  }, [address, dispatch]);
 
-  const getNoti = () => {
+  const getNoti = signal => {
     const abort = new AbortController();
     const memoryList = [];
 
-    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
+    process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal })
       .then(r => r.json())
       .then(data => {
         if (data.result && data.result.length > 0) {
@@ -615,15 +615,17 @@ function Header(props) {
   };
 
   useEffect(() => {
+    const abort = new AbortController();
     const interval = setInterval(() => {
-      getLockReq();
-      getNoti();
+      getLockReq(abort.signal);
+      getNoti(abort.signal);
     }, 7000);
     return () => {
-      // abort.abort();
+      abort.abort();
       clearInterval(interval);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   const renderMenu = (
     <StyledMenu
@@ -702,7 +704,7 @@ function Header(props) {
             // lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
-            // fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
+            // process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
@@ -773,7 +775,7 @@ function Header(props) {
             } else props.history.push(`/memory/${lockId}`);
 
             handleNotiClose();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
+            process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>

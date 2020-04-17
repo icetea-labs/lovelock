@@ -58,7 +58,7 @@ export function useAbortableEffect(makeFn, takeFn, deps) {
                 throw new Error('useAbortableEffort makeFn must return a promise.')
             }
             promise.then(data => {
-                !signal.aborted && takeFn(data)
+                !signal.aborted && takeFn && takeFn(data)
             }).catch(err => {
                 if (err.name !== 'AbortError') {
                     throw err
@@ -72,4 +72,13 @@ export function useAbortableEffect(makeFn, takeFn, deps) {
         }
 
     }, deps) 
+}
+
+export function useNotiFetch(path, params, takeFn, deps) {
+    if (!path.startsWitn('/')) path = '/' + path
+    const query = params ? ('?' + new URLSearchParams(params).toString()) : ''
+    const makeFn = ({ fetchJson }) => {
+        return fetchJson(`${process.env.REACT_APP_API}${path}${query}`)
+    }
+    return useAbortableEffect(makeFn, takeFn, deps)
 }

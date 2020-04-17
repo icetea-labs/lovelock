@@ -65,7 +65,7 @@ class PuConfirmLock extends React.Component {
         const errMessage = 'Your lock has been created, go post a memory.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
-        fetch(`${process.env.REACT_APP_API}/noti/lock/mark?id=${index}`);
+        process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/lock/mark?id=${index}`);
       }
     } catch (err) {
       const msg = handleError(err, 'accepting the lock.');
@@ -83,7 +83,7 @@ class PuConfirmLock extends React.Component {
         const errMessage = 'Lock request has been rejected successfully.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
-        fetch(`${process.env.REACT_APP_API}/noti/lock/mark?id=${index}`);
+        process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/lock/mark?id=${index}`);
       }
     } catch (err) {
       const msg = handleError(err, 'sending deny lock');

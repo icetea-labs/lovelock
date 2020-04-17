@@ -368,7 +368,7 @@ function MemoryContent(props) {
       views: memoryDecrypted.info.hash.map(img => ({ source: img.src }))
     }
     showPhotoViewer(options)
-  }, []);
+  }, [memoryDecrypted.info.hash, showPhotoViewer]);
 
   function unlockMemory() {
     if (privateKey) {
