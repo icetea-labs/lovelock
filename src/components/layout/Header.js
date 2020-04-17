@@ -114,10 +114,11 @@ const useStyles = makeStyles(theme => ({
   lockReqHeader: {
     display: 'flex',
     alignItems: 'center',
-    height: 50,
-    color: '#8250c8',
-    paddingLeft: theme.spacing(4),
-    backgroundColor: theme.palette.background.default,
+    height: theme.spacing(4),
+    minWidth: theme.spacing(30),
+    paddingLeft: theme.spacing(2),
+    backgroundColor: theme.palette.grey[100],
+    outline: 0
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
@@ -737,7 +738,7 @@ function Header(props) {
       <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
         {lockReqList.length === 0 && (
-          <ListItemText align="center" primary="No request to you." className={classes.lockReqSetting} />
+          <ListItemText align="center" primary="No unseen requests." className={classes.lockReqSetting} />
         )}
         {lockReqList.length > 5 && (
           <ListItemText
@@ -826,7 +827,7 @@ function Header(props) {
       <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
         {notiList.length === 0 && (
-          <ListItemText align="center" primary="No message to you." className={classes.lockReqSetting} />
+          <ListItemText align="center" primary="No new notifications." className={classes.lockReqSetting} />
         )}
         {notiList.length > 5 && (
           <ListItemText
