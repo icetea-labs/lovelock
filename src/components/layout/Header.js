@@ -18,6 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
+import Paper from '@material-ui/core/Paper';
 
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -37,6 +38,7 @@ import { Link, withRouter } from 'react-router-dom';
 import Autosuggest from 'react-autosuggest';
 import AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import AutosuggestHighlightParse from 'autosuggest-highlight/parse';
+import Carousel, { Modal, ModalGateway } from 'react-images';
 import { rem } from '../elements/StyledUtils';
 import { AvatarPro } from '../elements';
 import PuNewLock from '../elements/PuNewLock';
@@ -49,8 +51,6 @@ import { getAuthenAndTags, getUserSuggestions, diffTime } from '../../helper';
 import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
-
-import Carousel, { Modal, ModalGateway } from 'react-images';
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -111,31 +111,19 @@ const useStyles = makeStyles(theme => ({
     marginRight: 10,
     backgroundColor: '#fff',
   },
-  lockReqTitle: {
-    color: '#fff',
-  },
-  lockReqTitleBg: {
-    backgroundColor: '#8250c8',
-    borderRadius: 10,
-    margin: theme.spacing(1),
-    height: 'fit-content',
-  },
-  lockReqSetting: {
+  lockReqHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    height: 50,
     color: '#8250c8',
+    paddingLeft: theme.spacing(4),
+    backgroundColor: theme.palette.background.default,
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
   },
-  lockReqConfirm: {
+  lockReqSetting: {
     color: '#8250c8',
-    marginRight: theme.spacing(2),
-  },
-  lockReqName: {
-    width: 135,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    margin: theme.spacing(1),
   },
   listNoti: {
     maxWidth: 330,
@@ -311,8 +299,8 @@ function Header(props) {
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
-  const [lockReqList, setLockReqList] = useState([]);
-  const [notiList, setNotiList] = useState([]);
+  const lockReqList = useSelector(state => state.notify.lockRequests);
+  const notiList = useSelector(state => state.notify.notifications);
 
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -492,14 +480,54 @@ function Header(props) {
     setSuggestions([]);
   };
 
-  function IsJsonString(str) {
+  function getJsonObject(str) {
     try {
-      JSON.parse(str);
+      return JSON.parse(str);
     } catch (e) {
-      return false;
+      return str;
     }
-    return true;
   }
+
+  const getLockReq = () => {
+    const abort = new AbortController();
+    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
+      .then(r => r.json())
+      .then(data => {
+        const lockRequests = [];
+        const allLocksList = [];
+        if (data.result && data.result.length > 0) {
+          for (let i = 0; i < data.result.length; i++) {
+            if (data.result[i].event_name === 'createLock') {
+              const lockReq = {
+                id: data.result[i].id,
+                avatar: data.result[i].avatar,
+                name: data.result[i].display_name,
+                lockId: data.result[i].lockIndex,
+                content: data.result[i].content,
+                time: data.result[i].created_at,
+              };
+              const allLocks = {
+                id: data.result[i].lockIndex,
+                sender: data.result[i].sender,
+                receiver: data.result[i].receiver,
+                s_content: data.result[i].content,
+                coverImg: data.result[i].coverImg,
+                status: data.result[i].status,
+                displayName: data.result[i].display_name,
+              };
+              lockRequests.push(lockReq);
+              allLocksList.push(allLocks);
+            }
+            setApiLocks(allLocksList);
+          }
+        }
+        dispatch(actions.setLockReq(lockRequests));
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        throw err;
+      });
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -523,66 +551,22 @@ function Header(props) {
     fetchData();
   }, [address, tokenAddress, dispatch]);
 
-  useEffect(() => {
-    const abort = new AbortController();
-    fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
-      .then(r => r.json())
-      .then(data => {
-        const lockRequests = [];
-        const allLocksList = [];
-        if (data.result && data.result.length > 0) {
-          for (let i = 0; i < data.result.length; i++) {
-            if (data.result[i].event_name === 'createLock') {
-              const lockReq = {
-                id: data.result[i].id,
-                avatar: data.result[i].avatar,
-                name: data.result[i].display_name,
-                lockId: data.result[i].lockIndex,
-              };
-              const allLocks = {
-                id: data.result[i].lockIndex,
-                sender: data.result[i].sender,
-                receiver: data.result[i].receiver,
-                s_content: data.result[i].content,
-                coverImg: data.result[i].coverImg,
-                status: data.result[i].status,
-                displayName: data.result[i].display_name,
-              };
-              lockRequests.push(lockReq);
-              allLocksList.push(allLocks);
-            }
-            setApiLocks(allLocksList);
-          }
-        }
-        setLockReqList(lockRequests);
-      })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        throw err;
-      });
-
-    return () => {
-      abort.abort();
-    };
-  }, []);
-
-  useEffect(() => {
+  const getNoti = () => {
     const abort = new AbortController();
     const memoryList = [];
+
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        // console.log('addMemory', data);
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
               const contentFrApi = data.result[i].content;
-              let contentNoti;
-              if (IsJsonString(contentFrApi)) {
-                const obj = JSON.parse(contentFrApi);
-                contentNoti = obj.meta.title;
-              } else {
+              let contentNoti = getJsonObject(contentFrApi);
+              if (typeof contentNoti === 'string') {
                 contentNoti = contentFrApi;
+              } else {
+                contentNoti = contentNoti.meta.title;
               }
               const memoryReq = {
                 id: data.result[i].id,
@@ -596,47 +580,48 @@ function Header(props) {
               memoryList.push(memoryReq);
             }
           }
+          fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
+            .then(r => r.json())
+            .then(data => {
+              if (data.result && data.result.length > 0) {
+                for (let i = 0; i < data.result.length; i++) {
+                  const cmter = data.result[i].coverImg;
+                  if (address !== cmter) {
+                    const likeCmt = {
+                      id: data.result[i].id,
+                      eventName: data.result[i].event_name,
+                      avatar: data.result[i].avatar,
+                      name: data.result[i].display_name,
+                      content: data.result[i].content,
+                      lockId: data.result[i].lockIndex,
+                      time: data.result[i].created_at,
+                    };
+                    memoryList.push(likeCmt);
+                  }
+                }
+              }
+              dispatch(actions.setNoti(memoryList));
+            })
+            .catch(err => {
+              if (err.name === 'AbortError') return;
+              throw err;
+            });
         }
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
+  };
 
-    fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
-      .then(r => r.json())
-      .then(data => {
-        // console.log('addLikeCmt', data);
-        if (data.result && data.result.length > 0) {
-          for (let i = 0; i < data.result.length; i++) {
-            const senderNoti = data.result[i].sender;
-            if (address !== senderNoti) {
-              const likeCmt = {
-                id: data.result[i].id,
-                eventName: data.result[i].event_name,
-                avatar: data.result[i].avatar,
-                name: data.result[i].display_name,
-                content: data.result[i].content,
-                lockId: data.result[i].lockIndex,
-                time: data.result[i].created_at,
-              };
-              memoryList.push(likeCmt);
-            }
-          }
-        }
-      })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        throw err;
-      });
-
-    console.log('memoryList', memoryList);
-
-    // setState
-    setNotiList(memoryList);
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getLockReq();
+      getNoti();
+    }, 7000);
     return () => {
-      abort.abort();
+      // abort.abort();
+      clearInterval(interval);
     };
   }, []);
 
@@ -704,28 +689,48 @@ function Header(props) {
       keepMounted
       open={Boolean(anchorElLockReq)}
       onClose={handleLockReqClose}
+      MenuListProps={{ disablePadding: true }}
     >
-      <div className={classes.lockReqTitleBg}>
-        <ListItemText align="center" primary="Lock Request" className={classes.lockReqTitle} />
-      </div>
-      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId }) => (
-        <StyledMenuItem
-          className={classes.lockReqStyle}
+      <Paper square elevation={0} className={classes.lockReqHeader}>
+        <Typography>Lock Request</Typography>
+      </Paper>
+      {lockReqList.slice(0, 5).map(({ id, avatar, name, lockId, content, time }) => (
+        <List
+          className={classes.listNoti}
           key={id}
           onClick={() => {
-            lockReqList.length -= 1;
+            // lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
+            // fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
-          <ListItemAvatar>
-            <AvatarPro alt="avatar" src={avatar} className={classes.jsxAvatar} />
-          </ListItemAvatar>
-          <ListItemText primary={name} className={classes.lockReqName} />
-          {/* <ListItemText primary="CONFIRM" className={classes.lockReqConfirm} /> */}
-          {/* <ListItemText primary="DELETE" /> */}
-        </StyledMenuItem>
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+            <ListItemAvatar>
+              <AvatarPro alt="avatar" hash={avatar} className={classes.jsxAvatar} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {name} want to lock with you.
+                  </Typography>
+                </>
+              }
+              secondary={
+                <>
+                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                    {content}
+                  </Typography>
+                  <Typography component="span" variant="body2">
+                    {diffTime(time)}
+                  </Typography>
+                </>
+              }
+            />
+          </ListItem>
+          <Divider variant="inset" />
+        </List>
       ))}
       <div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
@@ -750,12 +755,11 @@ function Header(props) {
       keepMounted
       open={Boolean(anchorElNoti)}
       onClose={handleNotiClose}
+      MenuListProps={{ disablePadding: true }}
     >
-      <div className={classes.lockReqTitleBg}>
-        <ListItemText align="center" primary="Notification" className={classes.lockReqTitle} />
-        {/* <ListItemText align="right" primary="Mark all read" className={classes.lockReqConfirm} />
-        <ListItemText align="center" primary="Setting" className={classes.lockReqConfirm} /> */}
-      </div>
+      <Paper square elevation={0} className={classes.lockReqHeader}>
+        <Typography>Notification</Typography>
+      </Paper>
 
       {notiList.slice(0, 5).map(({ id, avatar, name, content, time, eventName, lockId }) => (
         <List
@@ -763,7 +767,7 @@ function Header(props) {
           component="nav"
           key={id}
           onClick={() => {
-            notiList.length -= 1;
+            // notiList.length -= 1;
             if (eventName === 'addMemory') {
               props.history.push(`/lock/${lockId}`);
             } else props.history.push(`/memory/${lockId}`);
@@ -774,16 +778,22 @@ function Header(props) {
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
             <ListItemAvatar>
-              <AvatarPro alt="Remy Sharp" src={avatar} />
+              <AvatarPro alt="Remy Sharp" hash={avatar} />
             </ListItemAvatar>
             <ListItemText
               primary={
                 <>
-                  {eventName === 'addMemory' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {name} shared a new memory with you.
-                    </Typography>
-                  )}
+                  {eventName === 'addMemory' &&
+                    (content === '' ? (
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {name} created a new lock with you.
+                      </Typography>
+                    ) : (
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {name} shared a new memory with you.
+                      </Typography>
+                    ))}
+
                   {eventName === 'addLike' && (
                     <Typography component="span" variant="body2" color="textPrimary">
                       {name} liked your memory.
@@ -791,7 +801,7 @@ function Header(props) {
                   )}
                   {eventName === 'addComment' && (
                     <Typography component="span" variant="body2" color="textPrimary">
-                      {name} wrote a comment in your memory.
+                      {name} commented on your memory.
                     </Typography>
                   )}
                 </>

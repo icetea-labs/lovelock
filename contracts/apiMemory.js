@@ -29,7 +29,7 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
   const [memo, memories] = self.getMemory(memoIndex);
   const timestamp = Date.now();
 
-  const comment = { sender, content, info, timestamp, sender: memo.sender, receiver: memo.receiver };
+  const comment = { sender, content, info, timestamp, memSender: memo.sender, receiver: memo.receiver };
   memo.comments.push(comment);
 
   // save memories
