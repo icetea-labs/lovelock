@@ -702,7 +702,7 @@ function Header(props) {
             // lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
-            fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
+            // fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
           }}
         >
           <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>

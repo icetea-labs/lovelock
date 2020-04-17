@@ -355,7 +355,7 @@ function LeftContainer(props) {
           <FormattedMessage id="leftmenu.featured" />
         </div>
         <div className="content">
-          <Lock loading={loading} locksData={locks}  handlerSelect={selectAccepted} />
+          <Lock loading={loading} locksData={locks} handlerSelect={selectAccepted} />
         </div>
       </>
     );
