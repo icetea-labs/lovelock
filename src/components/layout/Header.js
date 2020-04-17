@@ -796,7 +796,7 @@ function Header(props) {
                   {eventName === 'addMemory' &&
                     (content === '' ? (
                       <Typography component="span" variant="body2" color="textPrimary">
-                        {name} created a new lock with you.
+                        {name} accepted your lock request.
                       </Typography>
                     ) : (
                       <Typography component="span" variant="body2" color="textPrimary">
