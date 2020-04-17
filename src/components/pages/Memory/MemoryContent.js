@@ -486,6 +486,7 @@ function MemoryContent(props) {
           <FavoriteIcon color="primary" fontSize="large" />
         </div>
         <span>
+          {renderLinkUser(true, true)}
           <span>
             <FormattedMessage id="memory.lockedWith" />
           </span>

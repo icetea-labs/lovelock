@@ -164,8 +164,8 @@ exports.apiChangeLockName = (self, lockIndex, lockName) => {
 };
 
 exports.apiAcceptLock = (self, lockIndex, r_content) => {
-  const ret = _confirmLock(self, lockIndex, r_content, LOCK_STATUS_ACCEPTED);
-  apiCreateMemory(self, lockIndex, false, '', { hash: [] }, [true, ...ret]);
+  const [lock, locks] = _confirmLock(self, lockIndex, r_content, LOCK_STATUS_ACCEPTED);
+  apiCreateMemory(self, lockIndex, false, '', { hash: [] }, [true, lock, locks, lock.sender]);
 };
 exports.apiCancelLock = (self, lockIndex, r_content) => {
   _confirmLock(self, lockIndex, r_content, LOCK_STATUS_DENIED, true);
