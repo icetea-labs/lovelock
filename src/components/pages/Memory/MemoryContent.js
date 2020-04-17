@@ -368,7 +368,7 @@ function MemoryContent(props) {
       views: memoryDecrypted.info.hash.map(img => ({ source: img.src }))
     }
     showPhotoViewer(options)
-  }, []);
+  }, [memoryDecrypted.info.hash, showPhotoViewer]);
 
   function unlockMemory() {
     if (privateKey) {
@@ -486,6 +486,7 @@ function MemoryContent(props) {
           <FavoriteIcon color="primary" fontSize="large" />
         </div>
         <span>
+          {renderLinkUser(true, true)}
           <span>
             <FormattedMessage id="memory.lockedWith" />
           </span>

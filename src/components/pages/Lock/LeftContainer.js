@@ -288,7 +288,7 @@ function LeftContainer(props) {
           onClick={openPhotoViewer}
           src={process.env.REACT_APP_IPFS + hash}
           title={data.content}
-          alt="Photo"
+          alt={`${index + 1}`}
         />
       );
     });

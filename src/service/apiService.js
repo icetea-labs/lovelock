@@ -34,7 +34,6 @@ const APIService = {
 
     // add basic extra info
     proInfo.index = index;
-    proInfo.coverImg = proInfo.coverImg;
     proInfo.isJournal = !proInfo.receiver || (proInfo.sender === proInfo.receiver);
     proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
     proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;

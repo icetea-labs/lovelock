@@ -23,7 +23,7 @@ function Explore(props) {
   // remove items on left sidebar, will add lock/user choices later
   useEffect(() => {
     APIService.getFeaturedChoices().then(setLocks)
-  }, [])
+  }, [setLocks])
 
   useEffect(() => {
     fetchMemories();
