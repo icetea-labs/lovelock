@@ -6,20 +6,24 @@ exports.apiLikeMemory = (self, memoIndex, type) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
   const timestamp = Date.now();
+  let isLike = false;
 
   if (memo.likes[sender]) {
     delete memo.likes[sender];
   } else {
     memo.likes[sender] = { type };
+    isLike = true;
   }
   // save the memeory
   self.setMemories(memories);
   // const eventName = 'addLike' + memoIndex;
-  self.emitEvent(
-    'addLike',
-    { by: msg.sender, memoIndex, type, timestamp, sender: memo.sender, receiver: memo.receiver },
-    ['by', 'memoIndex']
-  );
+  if (isLike) {
+    self.emitEvent(
+      'addLike',
+      { by: msg.sender, memoIndex, type, timestamp, sender: memo.sender, receiver: memo.receiver },
+      ['by', 'memoIndex']
+    );
+  }
 
   return memo;
 };
