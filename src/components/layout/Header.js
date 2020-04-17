@@ -580,40 +580,38 @@ function Header(props) {
               memoryList.push(memoryReq);
             }
           }
+          fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
+            .then(r => r.json())
+            .then(data => {
+              if (data.result && data.result.length > 0) {
+                for (let i = 0; i < data.result.length; i++) {
+                  const cmter = data.result[i].coverImg;
+                  if (address !== cmter) {
+                    const likeCmt = {
+                      id: data.result[i].id,
+                      eventName: data.result[i].event_name,
+                      avatar: data.result[i].avatar,
+                      name: data.result[i].display_name,
+                      content: data.result[i].content,
+                      lockId: data.result[i].lockIndex,
+                      time: data.result[i].created_at,
+                    };
+                    memoryList.push(likeCmt);
+                  }
+                }
+              }
+              dispatch(actions.setNoti(memoryList));
+            })
+            .catch(err => {
+              if (err.name === 'AbortError') return;
+              throw err;
+            });
         }
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
-
-    fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
-      .then(r => r.json())
-      .then(data => {
-        if (data.result && data.result.length > 0) {
-          for (let i = 0; i < data.result.length; i++) {
-            const cmter = data.result[i].coverImg;
-            if (address !== cmter) {
-              const likeCmt = {
-                id: data.result[i].id,
-                eventName: data.result[i].event_name,
-                avatar: data.result[i].avatar,
-                name: data.result[i].display_name,
-                content: data.result[i].content,
-                lockId: data.result[i].lockIndex,
-                time: data.result[i].created_at,
-              };
-              memoryList.push(likeCmt);
-            }
-          }
-        }
-      })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        throw err;
-      });
-
-    dispatch(actions.setNoti(memoryList));
   };
 
   useEffect(() => {
