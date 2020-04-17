@@ -560,7 +560,6 @@ function Header(props) {
   }, [address, dispatch]);
 
   const getNoti = signal => {
-    const abort = new AbortController();
     const memoryList = [];
 
     process.env.REACT_APP_API && fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal })
@@ -588,22 +587,28 @@ function Header(props) {
               memoryList.push(memoryReq);
             }
           }
-          fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
+          fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal })
             .then(r => r.json())
             .then(data => {
               if (data.result && data.result.length > 0) {
+                const likeList = []; // to prevent dupplicate like noti
                 for (let i = 0; i < data.result.length; i++) {
-                  const cmter = data.result[i].coverImg;
-                  if (address !== cmter) {
-                    const likeCmt = {
-                      id: data.result[i].id,
-                      eventName: data.result[i].event_name,
-                      avatar: data.result[i].avatar,
-                      name: data.result[i].display_name,
-                      content: processTags(data.result[i].content),
-                      lockId: data.result[i].lockIndex,
-                      time: data.result[i].created_at,
-                    };
+                  const likeCmt = {
+                    id: data.result[i].id,
+                    eventName: data.result[i].event_name,
+                    avatar: data.result[i].avatar,
+                    name: data.result[i].display_name,
+                    content: processTags(data.result[i].content),
+                    lockId: data.result[i].lockIndex,
+                    time: data.result[i].created_at,
+                  };
+                  if (likeCmt.eventName === 'addLike') {
+                    // no add duplicate, note that lockId is actually the memory index :D
+                    if (!likeList.includes(likeCmt.lockId)) {
+                      likeList.push(likeCmt.lockId)
+                      memoryList.push(likeCmt);
+                    }
+                  } else {
                     memoryList.push(likeCmt);
                   }
                 }
