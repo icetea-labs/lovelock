@@ -52,7 +52,6 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
-
 const StyledLogo = styled(Link)`
   display: none;
   @media (min-width: 600px) {
@@ -122,6 +121,9 @@ const useStyles = makeStyles(theme => ({
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
+  },
+  lockReqSetting: {
+    color: '#8250c8',
   },
   listNoti: {
     maxWidth: 330,
@@ -297,8 +299,8 @@ function Header(props) {
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
-  const [lockReqList, setLockReqList] = useState([]);
-  const [notiList, setNotiList] = useState([]);
+  const lockReqList = useSelector(state => state.notify.lockRequests);
+  const notiList = useSelector(state => state.notify.notifications);
 
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -486,29 +488,7 @@ function Header(props) {
     }
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        if (address) {
-          const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
-          const userPoint = await APIService.getUserByAddress(address);
-          dispatch(
-            actions.setAccount({
-              displayName: tags['display-name'] || '',
-              avatar: tags.avatar,
-              isApproved,
-              point: userPoint.token,
-            })
-          );
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    fetchData();
-  }, [address, tokenAddress, dispatch]);
-
-  useEffect(() => {
+  const getLockReq = () => {
     const abort = new AbortController();
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
@@ -541,25 +521,43 @@ function Header(props) {
             setApiLocks(allLocksList);
           }
         }
-        setLockReqList(lockRequests);
+        dispatch(actions.setLockReq(lockRequests));
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
-
-    return () => {
-      abort.abort();
-    };
-  }, []);
+  };
 
   useEffect(() => {
+    async function fetchData() {
+      try {
+        if (address) {
+          const [tags, isApproved] = await getAuthenAndTags(address, tokenAddress);
+          const userPoint = await APIService.getUserByAddress(address);
+          dispatch(
+            actions.setAccount({
+              displayName: tags['display-name'] || '',
+              avatar: tags.avatar,
+              isApproved,
+              point: userPoint.token,
+            })
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchData();
+  }, [address, tokenAddress, dispatch]);
+
+  const getNoti = () => {
     const abort = new AbortController();
     const memoryList = [];
+
     fetch(`${process.env.REACT_APP_API}/noti/list?address=${address}`, { signal: abort.signal })
       .then(r => r.json())
       .then(data => {
-        // console.log('addMemory', data);
         if (data.result && data.result.length > 0) {
           for (let i = 0; i < data.result.length; i++) {
             if (data.result[i].event_name === 'addMemory') {
@@ -582,52 +580,48 @@ function Header(props) {
               memoryList.push(memoryReq);
             }
           }
+          fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
+            .then(r => r.json())
+            .then(data => {
+              if (data.result && data.result.length > 0) {
+                for (let i = 0; i < data.result.length; i++) {
+                  const cmter = data.result[i].coverImg;
+                  if (address !== cmter) {
+                    const likeCmt = {
+                      id: data.result[i].id,
+                      eventName: data.result[i].event_name,
+                      avatar: data.result[i].avatar,
+                      name: data.result[i].display_name,
+                      content: data.result[i].content,
+                      lockId: data.result[i].lockIndex,
+                      time: data.result[i].created_at,
+                    };
+                    memoryList.push(likeCmt);
+                  }
+                }
+              }
+              dispatch(actions.setNoti(memoryList));
+            })
+            .catch(err => {
+              if (err.name === 'AbortError') return;
+              throw err;
+            });
         }
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
         throw err;
       });
+  };
 
-    fetch(`${process.env.REACT_APP_API}/noti/list/lc?address=${address}`, { signal: abort.signal })
-      .then(r => r.json())
-      .then(data => {
-        // console.log('addLikeCmt', data);
-        if (data.result && data.result.length > 0) {
-          for (let i = 0; i < data.result.length; i++) {
-            const senderNoti = data.result[i].sender;
-            const cmter = data.result[i].coverImg;
-            const eventName = data.result[i].event_name;
-            if (
-              (eventName === 'addLike' && address !== senderNoti) ||
-              (eventName === 'addComment' && address !== cmter)
-            ) {
-              const likeCmt = {
-                id: data.result[i].id,
-                eventName,
-                avatar: data.result[i].avatar,
-                name: data.result[i].display_name,
-                content: data.result[i].content,
-                lockId: data.result[i].lockIndex,
-                time: data.result[i].created_at,
-              };
-              memoryList.push(likeCmt);
-            }
-          }
-        }
-      })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        throw err;
-      });
-
-    // console.log('memoryList', memoryList);
-
-    // setState
-    setNotiList(memoryList);
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getLockReq();
+      getNoti();
+    }, 7000);
     return () => {
-      abort.abort();
+      // abort.abort();
+      clearInterval(interval);
     };
   }, []);
 
@@ -705,7 +699,7 @@ function Header(props) {
           className={classes.listNoti}
           key={id}
           onClick={() => {
-            lockReqList.length -= 1;
+            // lockReqList.length -= 1;
             handleSelLock(lockId);
             handleLockReqClose();
             fetch(`${process.env.REACT_APP_API}/noti/mark?id=${id}`);
@@ -773,7 +767,7 @@ function Header(props) {
           component="nav"
           key={id}
           onClick={() => {
-            notiList.length -= 1;
+            // notiList.length -= 1;
             if (eventName === 'addMemory') {
               props.history.push(`/lock/${lockId}`);
             } else props.history.push(`/memory/${lockId}`);
@@ -789,11 +783,17 @@ function Header(props) {
             <ListItemText
               primary={
                 <>
-                  {eventName === 'addMemory' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {name} shared a new memory with you.
-                    </Typography>
-                  )}
+                  {eventName === 'addMemory' &&
+                    (content === '' ? (
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {name} created a new lock with you.
+                      </Typography>
+                    ) : (
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {name} shared a new memory with you.
+                      </Typography>
+                    ))}
+
                   {eventName === 'addLike' && (
                     <Typography component="span" variant="body2" color="textPrimary">
                       {name} liked your memory.
