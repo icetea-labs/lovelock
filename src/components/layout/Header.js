@@ -489,8 +489,8 @@ function Header(props) {
   };
 
 
-  const getLockReq = signal => {
-    fetchNoti({ address }, signal)
+  const getLockReqAndNoti = signal => {
+    return fetchNoti({ address }, signal)
       .then((result) => {
         const [lockReqs, otherReqs] = result || []
 
@@ -540,6 +540,20 @@ function Header(props) {
       })
   };
 
+  const pollNoti = ( handleCollector, signal, timeout = 7000) => {
+    handleCollector.handle = setTimeout(() => {
+      getLockReqAndNoti(signal)
+        .then(() => {
+          return pollNoti(handleCollector, signal)
+        })
+        .catch(() => {
+          return pollNoti(handleCollector, signal, timeout * 2)
+        })
+    }, timeout);
+
+    return handleCollector.handle
+  }
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -563,15 +577,19 @@ function Header(props) {
     fetchData();
   }, [address, dispatch]);
 
+  
+
   useEffect(() => {
     const abort = new AbortController();
-    const interval = setInterval(() => {
-      getLockReq(abort.signal);
-      //getNoti(abort.signal);
-    }, 7000);
+    const handleCollector = {}
+    handleCollector.handle = setTimeout(() => {
+      getLockReqAndNoti(abort.signal)
+    }, 0);
+    pollNoti(handleCollector, abort.signal)
+
     return () => {
+      clearTimeout(handleCollector.handle);
       abort.abort();
-      clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
