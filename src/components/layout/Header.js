@@ -19,7 +19,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
-import Paper from '@material-ui/core/Paper';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -116,7 +116,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     height: theme.spacing(4),
-    minWidth: theme.spacing(30),
+    width: theme.spacing(40),
     backgroundColor: theme.palette.grey[100],
     color: theme.palette.text.primary,
   },
@@ -136,11 +136,15 @@ const useStyles = makeStyles(theme => ({
     }
   },
   notiPromise: {
-    width: '100%',
     display: 'block',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+  },
+  notiThumbnail: {
+    width: 56,
+    heigh: 56,
+    objectFit: 'contain'
   },
   expandMore: {
     color: '#fff',
@@ -489,7 +493,6 @@ function Header(props) {
   };
 
   const processNotiResult = result => {
-    console.log('result', result)
     const [lockReqs, otherReqs] = result || []
 
     const lockRequests = [];
@@ -653,6 +656,46 @@ function Header(props) {
     </StyledMenu>
   );
 
+  const renderNotiItem = ({id, adjustedEvent, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
+    adjustedEvent = adjustedEvent || eventName
+    return  <ListItem
+      alignItems="flex-start"
+      button
+      className={classes.listItemNotiStyle}
+      style={{ paddingRight: image ? 60 : 16 }}
+      key={id}
+      onClick={onClick}>
+      <ListItemAvatar>
+        <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
+      </ListItemAvatar>
+      <ListItemText
+        primary={
+          <Typography component="span" variant="body1" >
+            <FormattedMessage
+              id={"noti." + adjustedEvent}
+              values={{ actorName: <b>{actorName}</b> }} />
+          </Typography>
+        }
+        secondary={
+          <>
+            <Typography component="span" variant="body1"
+              className={classes.notiPromise}
+              style={{ width: image ? 'calc(100% - 24px)' : '100%' }}
+            >
+              {text}
+            </Typography>
+            <Typography component="span" variant="body2">
+              {diffTime(timestamp)}
+            </Typography>
+          </>
+        }
+      />
+      {!!image && <ListItemSecondaryAction>
+        <img alt="Thumbnail" src={process.env.REACT_APP_IPFS + image} className={classes.notiThumbnail} />
+      </ListItemSecondaryAction>}
+    </ListItem>
+  }
+
   const renderLockRequests = () => (
     <StyledMenu
       id="lockReq-menu"
@@ -666,39 +709,12 @@ function Header(props) {
           className={classes.listNoti}
           subheader={<ListSubheader className={classes.lockReqHeader}>Lock Request</ListSubheader>}
         >
-          {lockReqList.slice(0, 5).map(({ id, actorName, actorAvatar, itemId, text, image, timestamp }) => (
-            <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}
-            key={id}
-            onClick={() => {
+          {lockReqList.slice(0, 5).map(lockReq => (
+            renderNotiItem(lockReq, () => {
               handleLockReqClose();
-              handleSelLock(itemId);
-              // markNoti({ id })
-            }}>
-              <ListItemAvatar>
-                <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <>
-                    <Typography component="span" variant="body1" >
-                      <FormattedMessage
-                        id="noti.createLock"
-                        values={{ actorName: <b>{actorName}</b> }} />
-                    </Typography>
-                  </>
-                }
-                secondary={
-                  <>
-                    <Typography component="span" variant="body1" className={classes.notiPromise}>
-                      {text}
-                    </Typography>
-                    <Typography component="span" variant="body2">
-                      {diffTime(timestamp)}
-                    </Typography>
-                  </>
-                }
-              />
-            </ListItem>
+              handleSelLock(lockReq.itemId);
+              // markNoti({ id: lockReq.id })
+            })
           ))}
         </List>
       {(lockReqList.length === 0 || lockReqList.length > 5) && (
@@ -732,48 +748,23 @@ function Header(props) {
         className={classes.listNoti}
         subheader={<ListSubheader className={classes.lockReqHeader}>Notification</ListSubheader>}
       >
-        {notiList.slice(0, 5).map(({ id, adjustedEvent, actorName, actorAvatar, itemId, text, image, itemFlag: isBlog, itemData: lockId, timestamp }) => (
-          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}
-            key={id}
-            onClick={() => {
-              let path = `/memory/${itemId}`
-              if (adjustedEvent === 'acceptLock') {
-                // it is better to go to the lock because it has more info
-                path = `/lock/${lockId}`
-              } else if (isBlog) {
-                path = `/blog/${itemId}`
-              }
-              props.history.push(path);
-              handleNotiClose();
-              // most of the time, history.push navigates to other page
-              // and the noti is reloaded as the result of Header's useEffect
-              // so no need to reload noti here
-              markNoti({ id })
-            }}
-          >
-            <ListItemAvatar>
-              <AvatarPro alt={actorName} hash={actorAvatar} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography component="span" variant="body1">
-                  <FormattedMessage
-                    id={'noti.' + adjustedEvent}
-                    values={{ actorName: <b>{actorName}</b> }} />
-                </Typography>
-              }
-              secondary={
-                <>
-                  <Typography component="span" variant="body1" className={classes.notiPromise}>
-                    {text}
-                  </Typography>
-                  <Typography component="span" variant="body2">
-                    {diffTime(timestamp)}
-                  </Typography>
-                </>
-              }
-            />
-          </ListItem>
+        {notiList.slice(0, 5).map(notiItem => (
+          renderNotiItem(notiItem, () => {
+            const { id, adjustedEvent, itemId, itemFlag: isBlog, itemData: lockId } = notiItem
+            let path = `/memory/${itemId}`
+            if (adjustedEvent === 'acceptLock') {
+              // it is better to go to the lock because it has more info
+              path = `/lock/${lockId}`
+            } else if (isBlog) {
+              path = `/blog/${itemId}`
+            }
+            props.history.push(path);
+            handleNotiClose();
+            // most of the time, history.push navigates to other page
+            // and the noti is reloaded as the result of Header's useEffect
+            // so no need to reload noti here
+            markNoti({ id })
+          })
         ))}
       </List>
       {(notiList.length === 0 || notiList.length > 5) && (<div className={classes.lockReqSettingBg}>
