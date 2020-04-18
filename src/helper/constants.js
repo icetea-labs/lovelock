@@ -34,6 +34,7 @@ const appConstants = {
     manualGenerated: 0,
   },
   memoryPageSize: 30,
+  maxNotiShown: 5
 };
 
 export default appConstants;

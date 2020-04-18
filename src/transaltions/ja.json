@@ -149,6 +149,13 @@
     "landing.btnRegist": "登録",
     "landing.btnLogin": "ログイン",
 
+    "noti.lockHeader": "Lock Request",
+    "noti.lockNoItem": "No requests.",
+    "noti.lockMore": "and {remainning} more…",
+    "noti.notiHeader": "Notification",
+    "noti.notiNoItem": "No new notifications.",
+    "noti.notiMore": "and {remainning} more…",
+
     "noti.createLock": "{actorName}",
     "noti.acceptLock": "{actorName} accepted your lock request.",
     "noti.addMemory": "{actorName} shared a new memory with you.",

@@ -53,6 +53,9 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 // import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 
+import appConstants from '../../helper/constants'
+const maxNotiShown = appConstants.maxNotiShown
+
 const StyledLogo = styled(Link)`
   display: none;
   @media (min-width: 600px) {
@@ -696,6 +699,61 @@ function Header(props) {
     </ListItem>
   }
 
+  const renderNoTiFooter = (notiList, noItemLangId, moreItemLangId) => {
+    if (notiList.length > 0 && notiList.length <= maxNotiShown) return
+
+    return (
+      <div className={classes.lockReqSettingBg}>
+        {notiList.length === 0 && (
+          <ListItemText align="center" primary={<FormattedMessage id={noItemLangId} />} className={classes.lockReqSetting} />
+        )}
+        {notiList.length > maxNotiShown && (
+          <ListItemText
+            align="center"
+            primary={<FormattedMessage id={moreItemLangId} values={{ remainning: notiList.length - maxNotiShown }} />}
+            className={classes.lockReqSetting}
+          />
+        )}
+      </div>
+    )
+  }
+
+  const renderNotiList = (notiList, headerLangId, onItemClick) => {
+    return <List
+      className={classes.listNoti}
+      subheader={<ListSubheader className={classes.lockReqHeader}>
+        <FormattedMessage id={headerLangId} />
+      </ListSubheader>}
+    >
+      {notiList.slice(0, maxNotiShown).map(item => (
+        renderNotiItem(item, () => onItemClick(item))
+      ))}
+    </List>
+  }
+
+  const handleLockNotiClick = lockReq => {
+    handleLockReqClose();
+    handleSelLock(lockReq.itemId);
+    // markNoti({ id: lockReq.id })
+  }
+
+  const handleNotiClick = notiItem => {
+    const { id, adjustedEvent, itemId, itemFlag: isBlog, itemData: lockId } = notiItem
+    let path = `/memory/${itemId}`
+    if (adjustedEvent === 'acceptLock') {
+      // it is better to go to the lock because it has more info
+      path = `/lock/${lockId}`
+    } else if (isBlog) {
+      path = `/blog/${itemId}`
+    }
+    props.history.push(path);
+    handleNotiClose();
+    // most of the time, history.push navigates to other page
+    // and the noti is reloaded as the result of Header's useEffect
+    // so no need to reload noti here
+    markNoti({ id })
+  }
+
   const renderLockRequests = () => (
     <StyledMenu
       id="lockReq-menu"
@@ -705,33 +763,8 @@ function Header(props) {
       onClose={handleLockReqClose}
       MenuListProps={{ disablePadding: true }}
     >
-        <List
-          className={classes.listNoti}
-          subheader={<ListSubheader className={classes.lockReqHeader}>Lock Request</ListSubheader>}
-        >
-          {lockReqList.slice(0, 5).map(lockReq => (
-            renderNotiItem(lockReq, () => {
-              handleLockReqClose();
-              handleSelLock(lockReq.itemId);
-              // markNoti({ id: lockReq.id })
-            })
-          ))}
-        </List>
-      {(lockReqList.length === 0 || lockReqList.length > 5) && (
-        <div className={classes.lockReqSettingBg}>
-          {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
-          {lockReqList.length === 0 && (
-            <ListItemText align="center" primary="No requests." className={classes.lockReqSetting} />
-          )}
-          {lockReqList.length > 5 && (
-            <ListItemText
-              align="center"
-              primary={`and ${lockReqList.length - 5} more...`}
-              className={classes.lockReqSetting}
-            />
-          )}
-        </div>
-      )}
+        {renderNotiList(lockReqList, "noti.lockHeader", handleLockNotiClick)}
+        {renderNoTiFooter(lockReqList, "noti.lockNoItem", "noti.lockMore")}
     </StyledMenu>
   );
 
@@ -744,42 +777,8 @@ function Header(props) {
       onClose={handleNotiClose}
       MenuListProps={{ disablePadding: true }}
     >
-      <List
-        className={classes.listNoti}
-        subheader={<ListSubheader className={classes.lockReqHeader}>Notification</ListSubheader>}
-      >
-        {notiList.slice(0, 5).map(notiItem => (
-          renderNotiItem(notiItem, () => {
-            const { id, adjustedEvent, itemId, itemFlag: isBlog, itemData: lockId } = notiItem
-            let path = `/memory/${itemId}`
-            if (adjustedEvent === 'acceptLock') {
-              // it is better to go to the lock because it has more info
-              path = `/lock/${lockId}`
-            } else if (isBlog) {
-              path = `/blog/${itemId}`
-            }
-            props.history.push(path);
-            handleNotiClose();
-            // most of the time, history.push navigates to other page
-            // and the noti is reloaded as the result of Header's useEffect
-            // so no need to reload noti here
-            markNoti({ id })
-          })
-        ))}
-      </List>
-      {(notiList.length === 0 || notiList.length > 5) && (<div className={classes.lockReqSettingBg}>
-        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
-        {notiList.length === 0 && (
-          <ListItemText align="center" primary="No new notifications." className={classes.lockReqSetting} />
-        )}
-        {notiList.length > 5 && (
-          <ListItemText
-            align="center"
-            primary={`and ${notiList.length - 5} more...`}
-            className={classes.lockReqSetting}
-          />
-        )}
-      </div>)}
+      {renderNotiList(notiList, "noti.notiHeader", handleNotiClick)}
+      {renderNoTiFooter(notiList, "noti.notiNoItem", "noti.notiMore")}
     </StyledMenu>
   );
 
