@@ -183,7 +183,7 @@ const renderCardSubtitle = (memory, language) => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, showPhotoViewer, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
+  const { memory, setNeedAuth, showPhotoViewer, onMemoryChanged, handleNewCollection, openBlogEditor, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -432,10 +432,8 @@ function MemoryContent(props) {
         href={`/u/${u}`}
         className={classes.relationshipName + ' text-clip'}
         onClick={e => {
-          if (!myPageRoute) {
-            e.preventDefault();
-            history.push(`/u/${u}`);
-          }
+          e.preventDefault();
+          history.push(`/u/${u}`);
         }}
       >
         {name}

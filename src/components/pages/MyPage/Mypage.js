@@ -129,9 +129,11 @@ function Mypage(props) {
   }, [paramAliasOrAddr]);
 
   useEffect(() => {
+    //setLoading(true)
+    setMemories([]);
     fetchDataLocksMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, paramAliasOrAddr]);
 
   // this only runs on DidUpdate, not DidMount
   useDidUpdate(() => {
@@ -293,7 +295,6 @@ function Mypage(props) {
                 <div className="proposeColumn proposeColumn--right">
                   <MemoryList
                     {...props}
-                    myPageRoute
                     onMemoryChanged={refresh}
                     loading={loading}
                     nextPage={nextPage}

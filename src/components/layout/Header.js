@@ -335,11 +335,11 @@ function Header(props) {
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
-    if (props.match.path === '/u/:address') {
-      window.location.href = `/u/${addr}`;
-    } else {
+    // if (props.match.path === '/u/:address') {
+    //   window.location.href = `/u/${addr}`;
+    // } else {
       props.history.push(`/u/${addr}`);
-    }
+    //}
   }
   function handeExpandMore(event) {
     setAnchorElMenu(event.currentTarget);
