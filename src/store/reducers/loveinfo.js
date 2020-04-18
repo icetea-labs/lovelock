@@ -26,6 +26,18 @@ const loveinfo = (state = initialState, action) => {
       return { ...state, locks: [...newLocks] };
     case actionTypes.SET_MEMORIES:
       return { ...state, memories: action.data };
+    case actionTypes.UPDATE_MEMORY: {
+      if (state.memories && state.memories.length) {
+        const existing = state.memories.findIndex(m => m.id === action.data.id)
+        if (existing >= 0) {
+          state.memories[existing] = action.data;
+        } else {
+          state.memories.push(action.data);
+        }
+        return state
+      }
+      return { ...state, memories: [action.data] };
+    }
     case actionTypes.SET_BLOG_VIEW:
       return { ...state, blogView: action.data };
     case actionTypes.UPDATE_BALANCES:

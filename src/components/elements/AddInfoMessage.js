@@ -9,7 +9,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import { FormattedMessage } from 'react-intl';
 import ZoomImage from './AutoZoomImage';
 import ImageCrop from './ImageCrop';
-import { applyRotation, imageResize, ensureHashUrl } from '../../helper';
+import { applyRotation, imageResize } from '../../helper';
+import { ensureHashUrl } from '../../helper/blogcontent';
 import CustomDatePicker from "./CustomDatePicker";
 
 const Container = styled.div``;

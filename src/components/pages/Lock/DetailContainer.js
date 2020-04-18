@@ -53,9 +53,17 @@ export default function DetailContainer(props) {
   const [colDesc, setColDesc] = useState('');
   const [colCreationCallback, setColCreationCallback] = useState();
 
+  const topInfo = useSelector(state => state.loveinfo.topInfo);
+
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+    if (topInfo && topInfo.index === proIndex) {
+      setProposeInfo(topInfo)
+      setLoading(false);
+      return;
+    }
+
     let cancel = false;
     if (isNaN(proIndex) || proIndex < 0 || invalidCollectionId) {
       history.push('/notfound');
