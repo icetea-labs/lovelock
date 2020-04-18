@@ -787,9 +787,9 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
   // remove the first @ if it is there
   escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-  // if (escapedValue.length < 3) {
-  //   return [];
-  // }
+  if (escapedValue.length < 2) {
+    return [];
+  }
 
   const regexText = `^account\\..*${escapedValue}`;
   const regex = new RegExp(regexText);
@@ -820,6 +820,7 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
 }
 
 export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
+  if (value.length < 2) return []
   let people = await getDidContract()
     .methods.queryByTags(
       {

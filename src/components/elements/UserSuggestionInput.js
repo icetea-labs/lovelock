@@ -74,7 +74,8 @@ export default function UserSuggestionInput(props) {
       open={open}
       onOpen={() => {setOpen(true)}}
       onClose={() => {setOpen(false)}}
-      getOptionLabel={option => renderSuggestionValue(option)}
+      getOptionLabel={option => `${option.display}@${option.nick}`}
+      renderOption={renderSuggestionValue}
       options={options}
       loading={loading}
       value={props.contributors}
