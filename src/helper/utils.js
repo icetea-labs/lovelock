@@ -787,9 +787,9 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
   // remove the first @ if it is there
   escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-  // if (escapedValue.length < 3) {
-  //   return [];
-  // }
+  if (escapedValue.length < 2) {
+    return [];
+  }
 
   const regexText = `^account\\..*${escapedValue}`;
   const regex = new RegExp(regexText);
@@ -820,6 +820,7 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
 }
 
 export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
+  if (value.length < 2) return []
   let people = await getDidContract()
     .methods.queryByTags(
       {
@@ -894,12 +895,10 @@ export function camelObject(obj) {
 }
 
 function _fetchNotiCore(subPath, params, signal) {
+  if (!process.env.REACT_APP_API) return Promise.resolve([])
+
   const query = new URLSearchParams(params).toString()
   return fetch(`${process.env.REACT_APP_API}/noti/${subPath}?${query}`, { signal })
-}
-
-export function fetchNoti(params, signal) {
-  return !process.env.REACT_APP_API ? Promise.resolve([]) : _fetchNotiCore('list', params, signal)
     .then(r => r.json())
     .then(r => {
       return r.result
@@ -910,6 +909,10 @@ export function fetchNoti(params, signal) {
     })
 }
 
-export function markNoti(params) {
-  return process.env.REACT_APP_API && _fetchNotiCore('mark', params);
+export function fetchNoti(params, signal) {
+  return _fetchNotiCore('list', params, signal)
+}
+
+export function markNoti(params, signal) {
+  return _fetchNotiCore('mark', params, signal);
 }

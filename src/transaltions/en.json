@@ -149,6 +149,23 @@
     "landing.btnRegist": "Register",
     "landing.btnLogin": "Log In",
 
+    "noti.lockHeader": "Lock Request",
+    "noti.lockNoItem": "No requests.",
+    "noti.lockMore": "and {remainning} more…",
+    "noti.notiHeader": "Notification",
+    "noti.notiNoItem": "No new notifications.",
+    "noti.notiMore": "and {remainning} more…",
+
+    "noti.createLock": "{actorName}",
+    "noti.acceptLock": "{actorName} accepted your lock request.",
+    "noti.addMemory": "{actorName} shared a new memory with you.",
+    "noti.addBlogPost": "{actorName} shared a blog article with you.",
+    "noti.addLike": "{actorName} liked your memory.",
+    "noti.addComment": "{actorName} commented on your memory.",
+    "noti.tag_addMemory": "{actorName} tagged you in a memory.",
+    "noti.tag_addComment": "{actorName} tagged you in a comment.",
+
+
     "notFound.oop": "OOPS, PAGE NOT FOUND!",
     "notFound.guide": "Perhaps you are wandering too far. Click the button below to come back home.",
     "notFound.btnBack": "RETURN HOME"

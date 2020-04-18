@@ -16,9 +16,10 @@ import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
-import Paper from '@material-ui/core/Paper';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -51,6 +52,9 @@ import { getInfoAndTags, getUserSuggestions, diffTime, camelObject, fetchNoti, m
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
+
+import appConstants from '../../helper/constants'
+const maxNotiShown = appConstants.maxNotiShown
 
 const StyledLogo = styled(Link)`
   display: none;
@@ -115,32 +119,35 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     height: theme.spacing(4),
-    minWidth: theme.spacing(30),
-    paddingLeft: theme.spacing(2),
+    width: theme.spacing(40),
     backgroundColor: theme.palette.grey[100],
-    outline: 0
+    color: theme.palette.text.primary,
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
   },
   lockReqSetting: {
-    color: '#8250c8',
+    color: theme.palette.primary.main,
   },
   listNoti: {
     maxWidth: 330,
-    padding: theme.spacing(0),
-    backgroundColor: theme.palette.background.paper,
+    padding: 0,
   },
   listItemNotiStyle: {
-    borderRadius: 10,
-    // margin: theme.spacing(1),
+    '& b': {
+      fontWeight: 700
+    }
   },
   notiPromise: {
-    width: '100%',
     display: 'block',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+  },
+  notiThumbnail: {
+    width: 56,
+    heigh: 56,
+    objectFit: 'contain'
   },
   expandMore: {
     color: '#fff',
@@ -488,49 +495,72 @@ function Header(props) {
     setSuggestions([]);
   };
 
+  const processNotiResult = result => {
+    const [lockReqs, otherReqs] = result || []
 
-  const getLockReq = signal => {
-    fetchNoti({ address }, signal)
-      .then((result) => {
-        const [lockReqs, otherReqs] = result || []
+    const lockRequests = [];
+    const allLocksList = [];
+    lockReqs && lockReqs.forEach(dataItem => {
+        const item = camelObject(dataItem)
+        const fullLock = {
+          id: Number(item.itemId),
+          sender: item.itemSender,
+          receiver: item.itemReceiver,
+          s_content: item.text,
+          coverImg: item.image,
+          status: Number(item.status),
+          displayName: item.actorName,
+        };
+        lockRequests.push(item);
+        allLocksList.push(fullLock);
+    })
+    allLocksList.length &&  setApiLocks(allLocksList);
+    dispatch(actions.setLockReq(lockRequests));
 
-        const lockRequests = [];
-        const allLocksList = [];
-        lockReqs && lockReqs.forEach(dataItem => {
-            const item = camelObject(dataItem)
-            const fullLock = {
-              id: Number(item.itemId),
-              sender: item.itemSender,
-              receiver: item.itemReceiver,
-              s_content: item.text,
-              coverImg: item.image,
-              status: Number(item.status),
-              displayName: item.actorName,
-            };
-            lockRequests.push(item);
-            allLocksList.push(fullLock);
-        })
-        allLocksList.length &&  setApiLocks(allLocksList);
-        dispatch(actions.setLockReq(lockRequests));
+    const otherNotiList = []
+    const likeList = []; // to prevent dupplicate like noti
+    otherReqs && otherReqs.forEach(dataItem => {
+      const item = camelObject(dataItem)
+      item.text = processTags(item.text)
+      item.adjustedEvent = item.eventName
+      if (item.eventName === 'addMemory') {
+        if (item.itemType) {
+          item.adjustedEvent = 'acceptLock'
+        } else if (item.itemFlag) {
+          item.adjustedEvent = 'addBlogPost'
+        }
+      }
+      if (item.eventName === 'addLike') {
+        // no add duplicate
+        if (!likeList.includes(item.itemId)) {
+          likeList.push(item.itemId)
+          otherNotiList.push(item);
+        }
+      } else {
+        otherNotiList.push(item);
+      }
+    })
+    dispatch(actions.setNoti(otherNotiList));
+  }
 
-        const otherNotiList = []
-        const likeList = []; // to prevent dupplicate like noti
-        otherReqs && otherReqs.forEach(dataItem => {
-          const item = camelObject(dataItem)
-          item.text = processTags(item.text)
-          if (item.eventName === 'addLike') {
-            // no add duplicate
-            if (!likeList.includes(item.itemId)) {
-              likeList.push(item.itemId)
-              otherNotiList.push(item);
-            }
-          } else {
-            otherNotiList.push(item);
-          }
-        })
-        dispatch(actions.setNoti(otherNotiList));
-      })
+  const getLockReqAndNoti = signal => {
+    return fetchNoti({ address }, signal)
+      .then(processNotiResult)
   };
+
+  const pollNoti = ( handleCollector, signal, timeout = 7000) => {
+    handleCollector.handle = setTimeout(() => {
+      getLockReqAndNoti(signal)
+        .then(() => {
+          return pollNoti(handleCollector, signal)
+        })
+        .catch(() => {
+          return pollNoti(handleCollector, signal, timeout * 2)
+        })
+    }, timeout);
+
+    return handleCollector.handle
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -555,15 +585,19 @@ function Header(props) {
     fetchData();
   }, [address, dispatch]);
 
+  
+
   useEffect(() => {
     const abort = new AbortController();
-    const interval = setInterval(() => {
-      getLockReq(abort.signal);
-      //getNoti(abort.signal);
-    }, 7000);
+    const handleCollector = {}
+    handleCollector.handle = setTimeout(() => {
+      getLockReqAndNoti(abort.signal)
+    }, 0);
+    pollNoti(handleCollector, abort.signal)
+
     return () => {
+      clearTimeout(handleCollector.handle);
       abort.abort();
-      clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
@@ -625,6 +659,101 @@ function Header(props) {
     </StyledMenu>
   );
 
+  const renderNotiItem = ({id, adjustedEvent, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
+    adjustedEvent = adjustedEvent || eventName
+    return  <ListItem
+      alignItems="flex-start"
+      button
+      className={classes.listItemNotiStyle}
+      style={{ paddingRight: image ? 60 : 16 }}
+      key={id}
+      onClick={onClick}>
+      <ListItemAvatar>
+        <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
+      </ListItemAvatar>
+      <ListItemText
+        primary={
+          <Typography component="span" variant="body1" >
+            <FormattedMessage
+              id={"noti." + adjustedEvent}
+              values={{ actorName: <b>{actorName}</b> }} />
+          </Typography>
+        }
+        secondary={
+          <>
+            <Typography component="span" variant="body1"
+              className={classes.notiPromise}
+              style={{ width: image ? 'calc(100% - 24px)' : '100%' }}
+            >
+              {text}
+            </Typography>
+            <Typography component="span" variant="body2">
+              {diffTime(timestamp)}
+            </Typography>
+          </>
+        }
+      />
+      {!!image && <ListItemSecondaryAction>
+        <img alt="Thumbnail" src={process.env.REACT_APP_IPFS + image} className={classes.notiThumbnail} />
+      </ListItemSecondaryAction>}
+    </ListItem>
+  }
+
+  const renderNoTiFooter = (notiList, noItemLangId, moreItemLangId) => {
+    if (notiList.length > 0 && notiList.length <= maxNotiShown) return
+
+    return (
+      <div className={classes.lockReqSettingBg}>
+        {notiList.length === 0 && (
+          <ListItemText align="center" primary={<FormattedMessage id={noItemLangId} />} className={classes.lockReqSetting} />
+        )}
+        {notiList.length > maxNotiShown && (
+          <ListItemText
+            align="center"
+            primary={<FormattedMessage id={moreItemLangId} values={{ remainning: notiList.length - maxNotiShown }} />}
+            className={classes.lockReqSetting}
+          />
+        )}
+      </div>
+    )
+  }
+
+  const renderNotiList = (notiList, headerLangId, onItemClick) => {
+    return <List
+      className={classes.listNoti}
+      subheader={<ListSubheader className={classes.lockReqHeader}>
+        <FormattedMessage id={headerLangId} />
+      </ListSubheader>}
+    >
+      {notiList.slice(0, maxNotiShown).map(item => (
+        renderNotiItem(item, () => onItemClick(item))
+      ))}
+    </List>
+  }
+
+  const handleLockNotiClick = lockReq => {
+    handleLockReqClose();
+    handleSelLock(lockReq.itemId);
+    // markNoti({ id: lockReq.id })
+  }
+
+  const handleNotiClick = notiItem => {
+    const { id, adjustedEvent, itemId, itemFlag: isBlog, itemData: lockId } = notiItem
+    let path = `/memory/${itemId}`
+    if (adjustedEvent === 'acceptLock') {
+      // it is better to go to the lock because it has more info
+      path = `/lock/${lockId}`
+    } else if (isBlog) {
+      path = `/blog/${itemId}`
+    }
+    props.history.push(path);
+    handleNotiClose();
+    // most of the time, history.push navigates to other page
+    // and the noti is reloaded as the result of Header's useEffect
+    // so no need to reload noti here
+    markNoti({ id })
+  }
+
   const renderLockRequests = () => (
     <StyledMenu
       id="lockReq-menu"
@@ -634,59 +763,8 @@ function Header(props) {
       onClose={handleLockReqClose}
       MenuListProps={{ disablePadding: true }}
     >
-      <Paper square elevation={0} className={classes.lockReqHeader}>
-        <Typography>Lock Request</Typography>
-      </Paper>
-      {lockReqList.slice(0, 5).map(({ id, actorName, actorAvatar, itemId, text, image, timestamp }) => (
-        <List
-          className={classes.listNoti}
-          key={id}
-          onClick={() => {
-            handleLockReqClose();
-            handleSelLock(itemId);
-            // markNoti({ id: id })
-          }}
-        >
-          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
-            <ListItemAvatar>
-              <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <>
-                  <Typography component="span" variant="body2" color="textPrimary">
-                    {actorName} wants to lock with you.
-                  </Typography>
-                </>
-              }
-              secondary={
-                <>
-                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {text}
-                  </Typography>
-                  <Typography component="span" variant="body2">
-                    {diffTime(timestamp)}
-                  </Typography>
-                </>
-              }
-            />
-          </ListItem>
-          <Divider variant="inset" />
-        </List>
-      ))}
-      <div className={classes.lockReqSettingBg}>
-        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
-        {lockReqList.length === 0 && (
-          <ListItemText align="center" primary="No unseen requests." className={classes.lockReqSetting} />
-        )}
-        {lockReqList.length > 5 && (
-          <ListItemText
-            align="center"
-            primary={`and ${lockReqList.length - 5} more...`}
-            className={classes.lockReqSetting}
-          />
-        )}
-      </div>
+        {renderNotiList(lockReqList, "noti.lockHeader", handleLockNotiClick)}
+        {renderNoTiFooter(lockReqList, "noti.lockNoItem", "noti.lockMore")}
     </StyledMenu>
   );
 
@@ -699,96 +777,8 @@ function Header(props) {
       onClose={handleNotiClose}
       MenuListProps={{ disablePadding: true }}
     >
-      <Paper square elevation={0} className={classes.lockReqHeader}>
-        <Typography>Notification</Typography>
-      </Paper>
-
-      {notiList.slice(0, 5).map(({ id, eventName, actorName, actorAvatar, itemId, text, image, itemFlag: isBlog, itemType: isFirstMemory, itemData: lockId, timestamp }) => (
-        <List
-          className={classes.listNoti}
-          component="nav"
-          key={id}
-          onClick={() => {
-            let path = `/memory/${itemId}`
-            if (eventName === 'addMemory' && isFirstMemory) {
-              // it is better to go to the lock because it has more info
-              path = `/lock/${lockId}`
-            } else if (isBlog) {
-              path = `/blog/${itemId}`
-            }
-            props.history.push(path);
-            handleNotiClose();
-            markNoti({ id })
-          }}
-        >
-          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
-            <ListItemAvatar>
-              <AvatarPro alt={actorName} hash={actorAvatar} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <>
-                  {eventName === 'addMemory' &&
-                    (isFirstMemory ? (
-                      <Typography component="span" variant="body2" color="textPrimary">
-                        {actorName} accepted your lock request.
-                      </Typography>
-                    ) : (
-                      <Typography component="span" variant="body2" color="textPrimary">
-                        {actorName} shared a new memory with you.
-                      </Typography>
-                    ))}
-
-                  {eventName === 'addLike' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} liked your memory.
-                    </Typography>
-                  )}
-                  {eventName === 'addComment' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} commented on your memory.
-                    </Typography>
-                  )}
-                  {eventName === 'tag_addMemory' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} tagged you in a memory.
-                    </Typography>
-                  )}
-                  {eventName === 'tag_addComment' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} tagged you in a comment.
-                    </Typography>
-                  )}
-                </>
-              }
-              secondary={
-                <>
-                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {text}
-                  </Typography>
-                  <Typography component="span" variant="body2">
-                    {diffTime(timestamp)}
-                  </Typography>
-                </>
-              }
-            />
-          </ListItem>
-          <Divider variant="inset" />
-        </List>
-      ))}
-      <div className={classes.lockReqSettingBg}>
-        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
-        {notiList.length === 0 && (
-          <ListItemText align="center" primary="No new notifications." className={classes.lockReqSetting} />
-        )}
-        {notiList.length > 5 && (
-          <ListItemText
-            align="center"
-            primary={`and ${notiList.length - 5} more...`}
-            className={classes.lockReqSetting}
-          />
-        )}
-      </div>
+      {renderNotiList(notiList, "noti.notiHeader", handleNotiClick)}
+      {renderNoTiFooter(notiList, "noti.notiNoItem", "noti.notiMore")}
     </StyledMenu>
   );
 
@@ -1028,8 +1018,8 @@ function Header(props) {
           deny={nextToDeny}
         />
       )}
-      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={notifyLockData.index} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={notifyLockData.index} />}
+      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} updateNoti={processNotiResult} index={notifyLockData.index} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} updateNoti={processNotiResult} index={notifyLockData.index} />}
       <ModalGateway>
         {photoViewer ? (
           <Modal onClose={closePhotoViewer}>
