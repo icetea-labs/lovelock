@@ -16,6 +16,7 @@ import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import Paper from '@material-ui/core/Paper';
@@ -116,24 +117,23 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     height: theme.spacing(4),
     minWidth: theme.spacing(30),
-    paddingLeft: theme.spacing(2),
     backgroundColor: theme.palette.grey[100],
-    outline: 0
+    color: theme.palette.text.primary,
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
   },
   lockReqSetting: {
-    color: '#8250c8',
+    color: theme.palette.primary.main,
   },
   listNoti: {
     maxWidth: 330,
-    padding: theme.spacing(0),
-    backgroundColor: theme.palette.background.paper,
+    padding: 0,
   },
   listItemNotiStyle: {
-    borderRadius: 10,
-    // margin: theme.spacing(1),
+    '& b': {
+      fontWeight: 700
+    }
   },
   notiPromise: {
     width: '100%',
@@ -518,6 +518,14 @@ function Header(props) {
         otherReqs && otherReqs.forEach(dataItem => {
           const item = camelObject(dataItem)
           item.text = processTags(item.text)
+          item.adjustedEvent = item.eventName
+          if (item.eventName === 'addMemory') {
+            if (item.itemType) {
+              item.adjustedEvent = 'acceptLock'
+            } else if (item.itemFlag) {
+              item.adjustedEvent = 'addBlogPost'
+            }
+          }
           if (item.eventName === 'addLike') {
             // no add duplicate
             if (!likeList.includes(item.itemId)) {
@@ -634,59 +642,60 @@ function Header(props) {
       onClose={handleLockReqClose}
       MenuListProps={{ disablePadding: true }}
     >
-      <Paper square elevation={0} className={classes.lockReqHeader}>
-        <Typography>Lock Request</Typography>
-      </Paper>
-      {lockReqList.slice(0, 5).map(({ id, actorName, actorAvatar, itemId, text, image, timestamp }) => (
         <List
           className={classes.listNoti}
-          key={id}
-          onClick={() => {
-            handleLockReqClose();
-            handleSelLock(itemId);
-            // markNoti({ id: id })
-          }}
+          subheader={<ListSubheader className={classes.lockReqHeader}>Lock Request</ListSubheader>}
         >
-          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
-            <ListItemAvatar>
-              <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <>
-                  <Typography component="span" variant="body2" color="textPrimary">
-                    {actorName} wants to lock with you.
-                  </Typography>
-                </>
-              }
-              secondary={
-                <>
-                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
-                    {text}
-                  </Typography>
-                  <Typography component="span" variant="body2">
-                    {diffTime(timestamp)}
-                  </Typography>
-                </>
-              }
-            />
-          </ListItem>
-          <Divider variant="inset" />
+          {lockReqList.slice(0, 5).map(({ id, actorName, actorAvatar, itemId, text, image, timestamp }) => (
+            <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}
+            key={id}
+            onClick={() => {
+              handleLockReqClose();
+              handleSelLock(itemId);
+              // markNoti({ id: id })
+            }}>
+              <ListItemAvatar>
+                <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <>
+                    <Typography component="span" variant="body1" >
+                      <FormattedMessage
+                        id="noti.createLock"
+                        values={{ actorName: <b>{actorName}</b> }} />
+                    </Typography>
+                  </>
+                }
+                secondary={
+                  <>
+                    <Typography component="span" variant="body1" className={classes.notiPromise}>
+                      {text}
+                    </Typography>
+                    <Typography component="span" variant="body2">
+                      {diffTime(timestamp)}
+                    </Typography>
+                  </>
+                }
+              />
+            </ListItem>
+          ))}
         </List>
-      ))}
-      <div className={classes.lockReqSettingBg}>
-        {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
-        {lockReqList.length === 0 && (
-          <ListItemText align="center" primary="No unseen requests." className={classes.lockReqSetting} />
-        )}
-        {lockReqList.length > 5 && (
-          <ListItemText
-            align="center"
-            primary={`and ${lockReqList.length - 5} more...`}
-            className={classes.lockReqSetting}
-          />
-        )}
-      </div>
+      {(lockReqList.length === 0 || lockReqList.length > 5) && (
+        <div className={classes.lockReqSettingBg}>
+          {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
+          {lockReqList.length === 0 && (
+            <ListItemText align="center" primary="No requests." className={classes.lockReqSetting} />
+          )}
+          {lockReqList.length > 5 && (
+            <ListItemText
+              align="center"
+              primary={`and ${lockReqList.length - 5} more...`}
+              className={classes.lockReqSetting}
+            />
+          )}
+        </div>
+      )}
     </StyledMenu>
   );
 
@@ -699,71 +708,40 @@ function Header(props) {
       onClose={handleNotiClose}
       MenuListProps={{ disablePadding: true }}
     >
-      <Paper square elevation={0} className={classes.lockReqHeader}>
-        <Typography>Notification</Typography>
-      </Paper>
-
-      {notiList.slice(0, 5).map(({ id, eventName, actorName, actorAvatar, itemId, text, image, itemFlag: isBlog, itemType: isFirstMemory, itemData: lockId, timestamp }) => (
-        <List
-          className={classes.listNoti}
-          component="nav"
-          key={id}
-          onClick={() => {
-            let path = `/memory/${itemId}`
-            if (eventName === 'addMemory' && isFirstMemory) {
-              // it is better to go to the lock because it has more info
-              path = `/lock/${lockId}`
-            } else if (isBlog) {
-              path = `/blog/${itemId}`
-            }
-            props.history.push(path);
-            handleNotiClose();
-            markNoti({ id })
-          }}
-        >
-          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}>
+      <List
+        className={classes.listNoti}
+        subheader={<ListSubheader className={classes.lockReqHeader}>Notification</ListSubheader>}
+      >
+        {notiList.slice(0, 5).map(({ id, adjustedEvent, actorName, actorAvatar, itemId, text, image, itemFlag: isBlog, itemData: lockId, timestamp }) => (
+          <ListItem alignItems="flex-start" button className={classes.listItemNotiStyle}
+            key={id}
+            onClick={() => {
+              let path = `/memory/${itemId}`
+              if (adjustedEvent === 'acceptLock') {
+                // it is better to go to the lock because it has more info
+                path = `/lock/${lockId}`
+              } else if (isBlog) {
+                path = `/blog/${itemId}`
+              }
+              props.history.push(path);
+              handleNotiClose();
+              markNoti({ id })
+            }}
+          >
             <ListItemAvatar>
               <AvatarPro alt={actorName} hash={actorAvatar} />
             </ListItemAvatar>
             <ListItemText
               primary={
-                <>
-                  {eventName === 'addMemory' &&
-                    (isFirstMemory ? (
-                      <Typography component="span" variant="body2" color="textPrimary">
-                        {actorName} accepted your lock request.
-                      </Typography>
-                    ) : (
-                      <Typography component="span" variant="body2" color="textPrimary">
-                        {actorName} shared a new memory with you.
-                      </Typography>
-                    ))}
-
-                  {eventName === 'addLike' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} liked your memory.
-                    </Typography>
-                  )}
-                  {eventName === 'addComment' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} commented on your memory.
-                    </Typography>
-                  )}
-                  {eventName === 'tag_addMemory' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} tagged you in a memory.
-                    </Typography>
-                  )}
-                  {eventName === 'tag_addComment' && (
-                    <Typography component="span" variant="body2" color="textPrimary">
-                      {actorName} tagged you in a comment.
-                    </Typography>
-                  )}
-                </>
+                <Typography component="span" variant="body1">
+                  <FormattedMessage
+                    id={'noti.' + adjustedEvent}
+                    values={{ actorName: <b>{actorName}</b> }} />
+                </Typography>
               }
               secondary={
                 <>
-                  <Typography variant="caption" className={classes.notiPromise} color="textPrimary">
+                  <Typography component="span" variant="body1" className={classes.notiPromise}>
                     {text}
                   </Typography>
                   <Typography component="span" variant="body2">
@@ -773,10 +751,9 @@ function Header(props) {
               }
             />
           </ListItem>
-          <Divider variant="inset" />
-        </List>
-      ))}
-      <div className={classes.lockReqSettingBg}>
+        ))}
+      </List>
+      {(notiList.length === 0 || notiList.length > 5) && (<div className={classes.lockReqSettingBg}>
         {/* <ListItemText align="center" primary="See all" className={classes.lockReqSetting} /> */}
         {notiList.length === 0 && (
           <ListItemText align="center" primary="No new notifications." className={classes.lockReqSetting} />
@@ -788,7 +765,7 @@ function Header(props) {
             className={classes.lockReqSetting}
           />
         )}
-      </div>
+      </div>)}
     </StyledMenu>
   );
 
