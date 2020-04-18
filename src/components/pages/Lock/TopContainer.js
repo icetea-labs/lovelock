@@ -341,7 +341,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, address, topInfo, setTopInfo, setGLoading, language } = props;
+  const { proIndex, address, topInfo, setTopInfo, setGLoading, history, language } = props;
   const tx = useTx();
   const isSender = topInfo.sender === address;
   const isReceiver = topInfo.receiver === address;
@@ -506,6 +506,11 @@ function TopContrainer(props) {
       }
       setGLoading(false);
     }, 1);
+  }
+
+  function navigateLink(e) {
+    e.preventDefault()
+    history.push(e.target.getAttribute('href'))
   }
 
   const buttonChange = () => (
@@ -684,6 +689,7 @@ function TopContrainer(props) {
                   href={`/u/${topInfo.sender}`}
                   className="user_name color-violet"
                   title={topInfo.s_info.lockName || ''}
+                  onClick={navigateLink}
                 >
                   {`${topInfo.s_info.lockName || topInfo.s_name}`}
                 </Link>
@@ -720,7 +726,7 @@ function TopContrainer(props) {
               ) : (
                 <div className="name_time" style={{ width: '100%', textAlign: 'right' }}>
                   {isReceiver && renderEditLockIcon(true)}
-                  <Link href={`/u/${topInfo.receiver}`} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
+                  <Link href={`/u/${topInfo.receiver}`}  onClick={navigateLink} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
                 </div>
               )}
               {loading ? (

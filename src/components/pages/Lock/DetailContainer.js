@@ -157,7 +157,7 @@ export default function DetailContainer(props) {
     <>
       <BannerContainer>
         <ShadowBox>
-          <TopContrainer proIndex={proIndex} />
+          <TopContrainer proIndex={proIndex} history={history} />
         </ShadowBox>
       </BannerContainer>
 
