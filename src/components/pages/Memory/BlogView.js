@@ -10,7 +10,8 @@ import BlogModal from '../../elements/BlogModal';
 import MemoryTitle from './MemoryTitle';
 import MemoryActionButton from './MemoryActionButton';
 import MemoryComments from './MemoryComments';
-import { smartFetchIpfsJson, makeLockName, signalPrerenderDone, ensureHashUrl } from '../../../helper';
+import { makeLockName, signalPrerenderDone } from '../../../helper';
+import { smartFetchIpfsJson, ensureHashUrl } from '../../../helper/blogcontent';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
 
@@ -53,7 +54,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export function BlogView(props) {
-  const { match, setMemories, setBlogView, blogView, needAuth } = props;
+  const { match, memories, setBlogView, blogView, needAuth } = props;
   const paramMemIndex = parseInt(match.params.index, 10);
 
   const [showComment, setShowComment] = useState(true);
@@ -71,31 +72,41 @@ export function BlogView(props) {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [paramMemIndex]);
+
+  async function fetchMemory() {
+    if (memories && memories.length) {
+      const existingMemo = memories.find(m => m.id === paramMemIndex)
+      if (existingMemo) return existingMemo
+    }
+
+    return APIService.getMemoriesByListMemIndex([paramMemIndex]).then(mems => mems[0])
+  }
 
   async function fetchData(signal) {
-    APIService.getMemoriesByListMemIndex([paramMemIndex]).then(async mems => {
-      const mem = mems[0];
+    fetchMemory().then(async mem => {
       if (mem.info.blog) {
-        const blogData = JSON.parse(mem.content);
-        mem.meta = blogData.meta;
-        const { json, gateway } = await smartFetchIpfsJson(blogData.blogHash, {
-          signal,
-          timestamp: mem.info.date,
-        }).catch(err => {
-          if (err.name === 'AbortError') return;
-          throw err;
-        });
-        mem.blogContent = json;
+        if (!mem.blogContent) {
+          const blogData = JSON.parse(mem.content);
+          mem.meta = blogData.meta;
+          const { json, gateway } = await smartFetchIpfsJson(blogData.blogHash, {
+            signal,
+            timestamp: mem.info.date,
+          }).catch(err => {
+            if (err.name === 'AbortError') return;
+            throw err;
+          });
+          json._overwrite = true;
+          mem.blogContent = json;
 
-        // set blog coverPhoto to full path
-        if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
-          mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway);
+          // set blog coverPhoto to full path
+          if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
+            mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway);
+          }
         }
 
         // save to redux
         setBlogView(mem);
-        setMemories(mems);
 
       } else {
         // not a blog, redirect to memory screen
@@ -108,7 +119,8 @@ export function BlogView(props) {
   }
 
   function closeMemory() {
-    props.history.push(`/lock/${blogView.lockIndex}`);
+    //props.history.push(`/lock/${blogView.lockIndex}`);
+    window.history.back();
   }
 
   const textInput = React.createRef();
@@ -211,6 +223,7 @@ export function BlogView(props) {
 const mapStateToProps = state => {
   return {
     blogView: state.loveinfo.blogView,
+    memories: state.loveinfo.memories,
     needAuth: state.account.needAuth
   };
 };
@@ -218,9 +231,6 @@ const mapDispatchToProps = dispatch => {
   return {
     setBlogView: value => {
       dispatch(actions.setBlogView(value));
-    },
-    setMemories: value => {
-      dispatch(actions.setMemories(value));
     },
   };
 };

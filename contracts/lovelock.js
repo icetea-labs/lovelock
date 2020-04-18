@@ -25,7 +25,6 @@ const {
   apiGetLocksByAddress,
   apiGetLocksForFeed,
   apiGetDataForMypage,
-  apiGetRecentData,
   apiDeleteLock,
   apiGetFeaturedChoices,
 } = require('./apiLock.js');
@@ -153,13 +152,13 @@ class LoveLock {
   }
   @view getLikeByLockIndex = (index: number) => this.getLock(index)[0].likes;
   @view getFollowByLockIndex = (index: number) => this.getLock(index)[0].follows;
-  @view getLocksForFeed = (addOrAlias: string, includeFollowing: ?boolean, includeMemoryIndexes: ?boolean) => {
+  @view getLocksForFeed = (addOrAlias: string, includeFollowing: ?boolean, includeMemoryIndexes: ?boolean, includeRecentData: ?boolean) => {
     const self = this;
     let address = addOrAlias;
     if (!isValidAddress(addOrAlias)) {
       address = convertAliasToAddress(addOrAlias);
     }
-    return apiGetLocksForFeed(self, address, !!includeFollowing, !!includeMemoryIndexes);
+    return apiGetLocksForFeed(self, address, !!includeFollowing, !!includeMemoryIndexes, !!includeRecentData);
   };
   @view getMaxLocksIndex = () => {
     const locks = this.getLocks();
@@ -372,11 +371,6 @@ class LoveLock {
     return [data]
   }
 
-  @view getRecentData(lockIndex: number) {
-    const self = this;
-    return apiGetRecentData(self, lockIndex);
-  }
-
   // ========== DATA MIGRATION =============
   @view exportState() {
     return exportState();
@@ -458,6 +452,8 @@ class LoveLock {
       return [];
     }
 
+    // sort ASC, in-place
+    choices.sort((a, b) => a - b)
     return apiGetMemoriesByListMemIndex(this, choices, page, pageSize, loadToCurrentPage);
   };
 

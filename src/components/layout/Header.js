@@ -335,11 +335,11 @@ function Header(props) {
 
   function handeOpenMypage(addr) {
     addr = typeof addr === 'string' ? addr : address;
-    if (props.match.path === '/u/:address') {
-      window.location.href = `/u/${addr}`;
-    } else {
+    // if (props.match.path === '/u/:address') {
+    //   window.location.href = `/u/${addr}`;
+    // } else {
       props.history.push(`/u/${addr}`);
-    }
+    //}
   }
   function handeExpandMore(event) {
     setAnchorElMenu(event.currentTarget);
@@ -746,7 +746,11 @@ function Header(props) {
     } else if (isBlog) {
       path = `/blog/${itemId}`
     }
-    props.history.push(path);
+    if (path === window.location.pathname) {
+      window.location.href = path;
+    } else {
+      props.history.push(path);
+    }
     handleNotiClose();
     // most of the time, history.push navigates to other page
     // and the noti is reloaded as the result of Header's useEffect

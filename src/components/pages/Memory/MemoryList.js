@@ -32,7 +32,6 @@ export default function MemoryList(props) {
     isOwner,
     isContributor,
     onMemoryChanged,
-    myPageRoute,
     loading,
     nextPage,
     myPageInfo,
@@ -82,7 +81,6 @@ export default function MemoryList(props) {
         onMemoryChanged={onMemoryChanged}
         openBlogEditor={setEdittingMemory}
         handleNewCollection={handleNewCollection}
-        myPageRoute={myPageRoute}
         history={history}
         nextPage={nextPage}
       />

@@ -53,9 +53,17 @@ export default function DetailContainer(props) {
   const [colDesc, setColDesc] = useState('');
   const [colCreationCallback, setColCreationCallback] = useState();
 
+  const topInfo = useSelector(state => state.loveinfo.topInfo);
+
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
+    if (topInfo && topInfo.index === proIndex) {
+      setProposeInfo(topInfo)
+      setLoading(false);
+      return;
+    }
+
     let cancel = false;
     if (isNaN(proIndex) || proIndex < 0 || invalidCollectionId) {
       history.push('/notfound');
@@ -75,8 +83,11 @@ export default function DetailContainer(props) {
           // it is the auto generated first journal when activating user
           lock.s_content = 'My LoveLock journal'
         }
+        const recentData = lock.recentData;
+        delete lock.recentData
         setProposeInfo(lock);
         dispatch(actions.setTopInfo(lock));
+        dispatch(actions.setRecentData(recentData))
         setLoading(false)
       }).catch(err => {
         console.error(err);
@@ -149,7 +160,7 @@ export default function DetailContainer(props) {
     <>
       <BannerContainer>
         <ShadowBox>
-          <TopContrainer proIndex={proIndex} />
+          <TopContrainer proIndex={proIndex} history={history} />
         </ShadowBox>
       </BannerContainer>
 

@@ -28,10 +28,9 @@ import {
   getJsonFromIpfs,
   makeLockName,
   signalPrerenderDone,
-  smartFetchIpfsJson,
-  ensureHashUrl,
   copyToClipboard,
 } from '../../../helper';
+import { smartFetchIpfsJson, ensureHashUrl } from '../../../helper/blogcontent';
 import { AvatarPro } from '../../elements';
 import MemoryActionButton from './MemoryActionButton';
 import Editor from './Editor';
@@ -184,7 +183,7 @@ const renderCardSubtitle = (memory, language) => {
 };
 
 function MemoryContent(props) {
-  const { memory, setNeedAuth, showPhotoViewer, onMemoryChanged, handleNewCollection, openBlogEditor, myPageRoute, history } = props;
+  const { memory, setNeedAuth, showPhotoViewer, onMemoryChanged, handleNewCollection, openBlogEditor, history } = props;
   setMemoryCollection(memory.lock, memory);
 
   const privateKey = useSelector(state => state.account.privateKey);
@@ -221,18 +220,21 @@ function MemoryContent(props) {
         const blogData = JSON.parse(memory.content);
         mem = { ...memory };
         mem.meta = blogData.meta;
-        const fetchedData = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date }).catch(
-          err => {
-            if (err.name === 'AbortError') return;
-            throw err;
+        if (!mem.blogContent) {
+          const fetchedData = await smartFetchIpfsJson(blogData.blogHash, { signal, timestamp: memory.info.date }).catch(
+            err => {
+              if (err.name === 'AbortError') return;
+              throw err;
+            }
+          );
+          if (fetchedData) {
+            mem.blogContent = fetchedData.json;
+            // set blog coverPhoto to full path
+            if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
+              mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, fetchedData.gateway);
+            }
           }
-        );
-        if (fetchedData) {
-          mem.blogContent = fetchedData.json;
-          // set blog coverPhoto to full path
-          if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
-            mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, fetchedData.gateway);
-          }
+          props.updateMemory(mem)
         }
       } else if (memory.isPrivate) {
         const memCache = await loadMemCacheAPI(memory.id);
@@ -430,10 +432,8 @@ function MemoryContent(props) {
         href={`/u/${u}`}
         className={classes.relationshipName + ' text-clip'}
         onClick={e => {
-          if (!myPageRoute) {
-            e.preventDefault();
-            history.push(`/u/${u}`);
-          }
+          e.preventDefault();
+          history.push(`/u/${u}`);
         }}
       >
         {name}
@@ -849,7 +849,10 @@ const mapDispatchToProps = dispatch => {
     },
     showPhotoViewer(options) {
       dispatch(actions.setShowPhotoViewer(options))
-    }
+    },
+    updateMemory: memory => {
+      dispatch(actions.updateMemory(memory));
+    },
   };
 };
 

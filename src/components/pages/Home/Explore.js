@@ -28,7 +28,7 @@ function Explore(props) {
   useEffect(() => {
     fetchMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, pinIndex]);
 
   useDidUpdate(() => {
     fetchMemories(true);

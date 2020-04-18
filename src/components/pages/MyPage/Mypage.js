@@ -83,7 +83,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemories, memoryList, balances, isApproved } = props;
+  const { match, setLocks, setMemories, setRecentData, memoryList, balances, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -129,9 +129,11 @@ function Mypage(props) {
   }, [paramAliasOrAddr]);
 
   useEffect(() => {
+    //setLoading(true)
+    setMemories([]);
     fetchDataLocksMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, paramAliasOrAddr]);
 
   // this only runs on DidUpdate, not DidMount
   useDidUpdate(() => {
@@ -139,10 +141,11 @@ function Mypage(props) {
   }, [changed]);
 
   function fetchDataLocksMemories(loadToCurrentPage = false) {
-    APIService.getLocksForFeed(paramAliasOrAddr, false, true)
+    APIService.getLocksForFeed(paramAliasOrAddr, false, true, true)
       .then(resp => {
         // set to redux
         setLocks(resp.locks);
+        setRecentData(resp.recentData)
 
         const memoIndex = resp.memoryIndexes;
 
@@ -293,7 +296,6 @@ function Mypage(props) {
                 <div className="proposeColumn proposeColumn--right">
                   <MemoryList
                     {...props}
-                    myPageRoute
                     onMemoryChanged={refresh}
                     loading={loading}
                     nextPage={nextPage}
@@ -332,6 +334,9 @@ const mapDispatchToProps = dispatch => {
     },
     setMemories: value => {
       dispatch(actions.setMemories(value));
+    },
+    setRecentData: value => {
+      dispatch(actions.setRecentData(value));
     },
   };
 };

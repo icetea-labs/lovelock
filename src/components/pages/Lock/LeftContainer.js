@@ -148,6 +148,7 @@ function LeftContainer(props) {
     showPhotoViewer,
     confirmLock,
     topInfo,
+    recentData,
     proIndex,
     address,
     history,
@@ -156,15 +157,15 @@ function LeftContainer(props) {
     closeMobileMenu,
     language,
     featured,
+    context
   } = props;
 
   const isLockPage = proIndex != null;
+  const shouldRenderRecent = ['mypage', 'lock'].includes(context)
   const collections = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
-  const recentImages =
-    isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.photos || {} : {};
+  const recentImages = shouldRenderRecent ? recentData.photos || {} : {};
   const hasRecentImages = !!Object.keys(recentImages).length;
-  const recentBlogPosts =
-    isLockPage && topInfo && topInfo.index === proIndex && topInfo.recentData ? topInfo.recentData.blogPosts || [] : [];
+  const recentBlogPosts = shouldRenderRecent ? recentData.blogPosts || [] : [];
 
   const { enqueueSnackbar } = useSnackbar();
   const ja = 'ja';
@@ -299,7 +300,12 @@ function LeftContainer(props) {
       return (
         <li key={i}>
           ・
-          <a href={`/blog/${index}`}>
+          <a href={`/blog/${index}`}
+            onClick={e => {
+              e.preventDefault()
+              history.push(`/blog/${index}`)
+            }}
+          >
             {content.meta.title}
           </a>
           <span className="date">
@@ -403,12 +409,12 @@ function LeftContainer(props) {
               </div>
             )}
             {isLockPage && <CollectionBox>{renderCollections(collections)}</CollectionBox>}
-            {isLockPage && !!recentBlogPosts.length && <div className="title">Article</div>}
-            {isLockPage && !!recentBlogPosts.length && (
+            {shouldRenderRecent && !!recentBlogPosts.length && <div className="title">Article</div>}
+            {shouldRenderRecent && !!recentBlogPosts.length && (
               <RecentBlogPostBox>{renderRecentBlogPosts(recentBlogPosts)}</RecentBlogPostBox>
             )}
-            {isLockPage && hasRecentImages && <div className="title">Photo</div>}
-            {isLockPage && hasRecentImages && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
+            {shouldRenderRecent && hasRecentImages && <div className="title">Photo</div>}
+            {shouldRenderRecent && hasRecentImages && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
           </ShadowBox>
           <SupportSite>
             <p>
@@ -438,6 +444,7 @@ const mapStateToProps = state => {
     locks: state.loveinfo.locks,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
+    recentData: state.loveinfo.recentData,
     language: state.globalData.language,
   };
 };

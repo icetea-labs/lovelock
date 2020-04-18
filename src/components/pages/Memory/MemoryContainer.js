@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function MemoryContainer(props) {
-  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor, pinIndex, myPageRoute, history, nextPage } = props;
+  const { memoryList, loading, onMemoryChanged, handleNewCollection, openBlogEditor, pinIndex, history, nextPage } = props;
   const arrayLoadin = [{}, {}, {}, {}];
   const [/* isFetching */, setIsFetching] = useInfiniteScroll(fetchMoreMemories);
 
@@ -108,7 +108,6 @@ function MemoryContainer(props) {
             onMemoryChanged={onMemoryChanged}
             openBlogEditor={openBlogEditor}
             handleNewCollection={handleNewCollection}
-            myPageRoute={myPageRoute}
             history={history}
           />
         )}
@@ -129,7 +128,6 @@ function MemoryContainer(props) {
             onMemoryChanged={onMemoryChanged}
             openBlogEditor={openBlogEditor}
             handleNewCollection={handleNewCollection}
-            myPageRoute={myPageRoute}
             history={history}
           />
         ))}
