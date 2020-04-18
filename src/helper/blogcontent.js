@@ -42,7 +42,6 @@ export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
     }
 
     if (cache[hash]) {
-        console.log('cache hit!!!')
         return Promise.resolve(cache[hash])
     }
   

@@ -6,6 +6,7 @@ const initialState = {
   topInfo: {},
   blogView: {},
   balances: {},
+  recentData: {}
 };
 const loveinfo = (state = initialState, action) => {
   switch (action.type) {
@@ -42,6 +43,8 @@ const loveinfo = (state = initialState, action) => {
       return { ...state, blogView: action.data };
     case actionTypes.UPDATE_BALANCES:
       return { ...state, balances: { ...state.balances, ...action.data } };
+      case actionTypes.SET_RECENT_DATA:
+        return { ...state, recentData: action.data || {} };
     default:
       return state;
   }

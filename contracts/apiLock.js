@@ -336,7 +336,7 @@ exports.apiGetDetailLock = (self, index, includeRecentData) => {
   return newLock;
 };
 
-exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes) => {
+exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes, includeRecentData) => {
   const locks = self.getLocks();
   const a2l = self.getA2l()
   const myLockIndexes = a2l[addr] || [];
@@ -356,7 +356,7 @@ exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes
   _addLeftInfoToLocks(combinedLocks, myLockIndexes, ctDid, ctAlias);
 
   // get memory indexes
-  const memoryIndexes = []
+  let memoryIndexes = []
   if (includeMemoryIndexes) {
     const flIndexes = myFollowingAddresses.reduce((list, faddr) => {
       list.push(...(a2l[faddr] || []))
@@ -370,8 +370,15 @@ exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes
       memoryIndexes.push(...l.memoIndex)
     })
   }
+  // remove dupplicate and sort ASC
+  memoryIndexes = Array.from(new Set(memoryIndexes)).sort((a, b) => a - b)
 
-  return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes: Array.from(new Set(memoryIndexes)) };
+  let recentData = {}
+  if (includeRecentData) {
+    recentData = _getRecentData(self, memoryIndexes)
+  }
+
+  return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes, recentData };
 };
 
 exports.apiGetFeaturedChoices = (self, lockIndexes, userAddrs) => {
@@ -392,21 +399,16 @@ exports.apiGetFeaturedChoices = (self, lockIndexes, userAddrs) => {
   return featuredLocks.concat(featuredUsers)
 }
 
-exports.apiGetRecentData = (self, lockOrIndex) => {
-  let lock = lockOrIndex
-  if (typeof lockOrIndex === 'number') {
-    lock = self.getLock(lockOrIndex)
-    if (lock.deletedBy) throw new Error(`This lock was deleted by ${lock.deletedBy}.`)
-  }
+// assume memoryIndexes are sorted ASC
+const _getRecentData = (self, memoIndexes) => {
   
-  const memoIndexes = lock.memoIndex
   if (!memoIndexes || !memoIndexes.length) return []
 
   const MAX_PHOTO = 8
   const MAX_BLOG = 5
 
   const memories = self.getMemories()
-  return memoIndexes.reverse().reduce((r, i) => {
+  return [...memoIndexes].reverse().reduce((r, i) => {
     if (r.photos.length >= MAX_PHOTO && r.blogPosts.length >= MAX_BLOG) return r
 
     const m = getDataByIndex(memories, i)
@@ -489,7 +491,7 @@ function _addTopInfoToLocks(self, locks, includeRecentData) {
       tmp.r_publicKey = r_tags['pub-key'] || '';
     }
     if (includeRecentData) {
-      tmp.recentData = exports.apiGetRecentData(self, lock)
+      tmp.recentData = _getRecentData(self, lock.memoIndex)
     }
     resp.push({ ...lock, ...tmp });
   });

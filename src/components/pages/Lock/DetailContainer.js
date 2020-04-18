@@ -83,8 +83,11 @@ export default function DetailContainer(props) {
           // it is the auto generated first journal when activating user
           lock.s_content = 'My LoveLock journal'
         }
+        const recentData = lock.recentData;
+        delete lock.recentData
         setProposeInfo(lock);
         dispatch(actions.setTopInfo(lock));
+        dispatch(actions.setRecentData(recentData))
         setLoading(false)
       }).catch(err => {
         console.error(err);

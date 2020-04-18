@@ -10,6 +10,7 @@ export const actionTypes = {
   UPDATE_MEMORY: 'info/UPDATE_MEMORY',
   SET_BLOG_VIEW: 'info/SET_BLOG_VIEW',
   UPDATE_BALANCES: 'info/UPDATE_BALANCES',
+  SET_RECENT_DATA: 'info/SET_RECENT_DATA',
 };
 /*
  * action creators
@@ -22,3 +23,4 @@ export const setMemories = data => ({ type: actionTypes.SET_MEMORIES, data });
 export const updateMemory = data => ({ type: actionTypes.UPDATE_MEMORY, data });
 export const setBlogView = data => ({ type: actionTypes.SET_BLOG_VIEW, data });
 export const updateBalances = data => ({ type: actionTypes.UPDATE_BALANCES, data });
+export const setRecentData = data => ({ type: actionTypes.SET_RECENT_DATA, data });
