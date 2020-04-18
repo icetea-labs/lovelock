@@ -895,12 +895,10 @@ export function camelObject(obj) {
 }
 
 function _fetchNotiCore(subPath, params, signal) {
+  if (!process.env.REACT_APP_API) return Promise.resolve([])
+
   const query = new URLSearchParams(params).toString()
   return fetch(`${process.env.REACT_APP_API}/noti/${subPath}?${query}`, { signal })
-}
-
-export function fetchNoti(params, signal) {
-  return !process.env.REACT_APP_API ? Promise.resolve([]) : _fetchNotiCore('list', params, signal)
     .then(r => r.json())
     .then(r => {
       return r.result
@@ -911,6 +909,10 @@ export function fetchNoti(params, signal) {
     })
 }
 
-export function markNoti(params) {
-  return process.env.REACT_APP_API && _fetchNotiCore('mark', params);
+export function fetchNoti(params, signal) {
+  return _fetchNotiCore('list', params, signal)
+}
+
+export function markNoti(params, signal) {
+  return _fetchNotiCore('mark', params, signal);
 }

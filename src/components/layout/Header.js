@@ -488,56 +488,58 @@ function Header(props) {
     setSuggestions([]);
   };
 
+  const processNotiResult = result => {
+    console.log('result', result)
+    const [lockReqs, otherReqs] = result || []
+
+    const lockRequests = [];
+    const allLocksList = [];
+    lockReqs && lockReqs.forEach(dataItem => {
+        const item = camelObject(dataItem)
+        const fullLock = {
+          id: Number(item.itemId),
+          sender: item.itemSender,
+          receiver: item.itemReceiver,
+          s_content: item.text,
+          coverImg: item.image,
+          status: Number(item.status),
+          displayName: item.actorName,
+        };
+        lockRequests.push(item);
+        allLocksList.push(fullLock);
+    })
+    allLocksList.length &&  setApiLocks(allLocksList);
+    dispatch(actions.setLockReq(lockRequests));
+
+    const otherNotiList = []
+    const likeList = []; // to prevent dupplicate like noti
+    otherReqs && otherReqs.forEach(dataItem => {
+      const item = camelObject(dataItem)
+      item.text = processTags(item.text)
+      item.adjustedEvent = item.eventName
+      if (item.eventName === 'addMemory') {
+        if (item.itemType) {
+          item.adjustedEvent = 'acceptLock'
+        } else if (item.itemFlag) {
+          item.adjustedEvent = 'addBlogPost'
+        }
+      }
+      if (item.eventName === 'addLike') {
+        // no add duplicate
+        if (!likeList.includes(item.itemId)) {
+          likeList.push(item.itemId)
+          otherNotiList.push(item);
+        }
+      } else {
+        otherNotiList.push(item);
+      }
+    })
+    dispatch(actions.setNoti(otherNotiList));
+  }
 
   const getLockReqAndNoti = signal => {
     return fetchNoti({ address }, signal)
-      .then((result) => {
-        const [lockReqs, otherReqs] = result || []
-
-        const lockRequests = [];
-        const allLocksList = [];
-        lockReqs && lockReqs.forEach(dataItem => {
-            const item = camelObject(dataItem)
-            const fullLock = {
-              id: Number(item.itemId),
-              sender: item.itemSender,
-              receiver: item.itemReceiver,
-              s_content: item.text,
-              coverImg: item.image,
-              status: Number(item.status),
-              displayName: item.actorName,
-            };
-            lockRequests.push(item);
-            allLocksList.push(fullLock);
-        })
-        allLocksList.length &&  setApiLocks(allLocksList);
-        dispatch(actions.setLockReq(lockRequests));
-
-        const otherNotiList = []
-        const likeList = []; // to prevent dupplicate like noti
-        otherReqs && otherReqs.forEach(dataItem => {
-          const item = camelObject(dataItem)
-          item.text = processTags(item.text)
-          item.adjustedEvent = item.eventName
-          if (item.eventName === 'addMemory') {
-            if (item.itemType) {
-              item.adjustedEvent = 'acceptLock'
-            } else if (item.itemFlag) {
-              item.adjustedEvent = 'addBlogPost'
-            }
-          }
-          if (item.eventName === 'addLike') {
-            // no add duplicate
-            if (!likeList.includes(item.itemId)) {
-              likeList.push(item.itemId)
-              otherNotiList.push(item);
-            }
-          } else {
-            otherNotiList.push(item);
-          }
-        })
-        dispatch(actions.setNoti(otherNotiList));
-      })
+      .then(processNotiResult)
   };
 
   const pollNoti = ( handleCollector, signal, timeout = 7000) => {
@@ -670,7 +672,7 @@ function Header(props) {
             onClick={() => {
               handleLockReqClose();
               handleSelLock(itemId);
-              // markNoti({ id: id })
+              // markNoti({ id })
             }}>
               <ListItemAvatar>
                 <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
@@ -743,6 +745,9 @@ function Header(props) {
               }
               props.history.push(path);
               handleNotiClose();
+              // most of the time, history.push navigates to other page
+              // and the noti is reloaded as the result of Header's useEffect
+              // so no need to reload noti here
               markNoti({ id })
             }}
           >
@@ -1023,8 +1028,8 @@ function Header(props) {
           deny={nextToDeny}
         />
       )}
-      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} index={notifyLockData.index} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} index={notifyLockData.index} />}
+      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} updateNoti={processNotiResult} index={notifyLockData.index} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} updateNoti={processNotiResult} index={notifyLockData.index} />}
       <ModalGateway>
         {photoViewer ? (
           <Modal onClose={closePhotoViewer}>

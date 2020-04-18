@@ -51,7 +51,7 @@ class PuConfirmLock extends React.Component {
   };
 
   async messageAccept(message) {
-    const { index, enqueueSnackbar, close } = this.props;
+    const { index, enqueueSnackbar, close, updateNoti, address } = this.props;
 
     if (!message) {
       const message = <div><span>Please input </span><span>{getMessage('messageLabel')}</span></div>
@@ -65,7 +65,11 @@ class PuConfirmLock extends React.Component {
         const errMessage = 'Your lock has been created, go post a memory.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
-        markNoti({ lock_id: index })
+        if (updateNoti) {
+          markNoti({ lock_id: index, address }).then(updateNoti)
+        } else {
+          markNoti({ lock_id: index })
+        }
       }
     } catch (err) {
       const msg = handleError(err, 'accepting the lock.');
@@ -74,7 +78,7 @@ class PuConfirmLock extends React.Component {
   }
 
   async messageDeny(message) {
-    const { index, enqueueSnackbar, close } = this.props;
+    const { index, enqueueSnackbar, close, updateNoti, address } = this.props;
     try {
       const result = await sendTxWithAuthen(this.props, 'cancelLock', index, message);
 
@@ -83,7 +87,11 @@ class PuConfirmLock extends React.Component {
         const errMessage = 'Lock request has been rejected successfully.';
         enqueueSnackbar(errMessage, { variant: 'success' });
         close();
-        markNoti({ lock_id: index })
+        if (updateNoti) {
+          markNoti({ lock_id: index, address }).then(updateNoti)
+        } else {
+          markNoti({ lock_id: index })
+        }
       }
     } catch (err) {
       const msg = handleError(err, 'sending deny lock');
