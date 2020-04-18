@@ -71,7 +71,7 @@ export function BlogView(props) {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [paramMemIndex]);
 
   async function fetchData(signal) {
     APIService.getMemoriesByListMemIndex([paramMemIndex]).then(async mems => {
@@ -86,6 +86,7 @@ export function BlogView(props) {
           if (err.name === 'AbortError') return;
           throw err;
         });
+        json._overwrite = true;
         mem.blogContent = json;
 
         // set blog coverPhoto to full path
@@ -108,7 +109,8 @@ export function BlogView(props) {
   }
 
   function closeMemory() {
-    props.history.push(`/lock/${blogView.lockIndex}`);
+    //props.history.push(`/lock/${blogView.lockIndex}`);
+    window.history.back();
   }
 
   const textInput = React.createRef();

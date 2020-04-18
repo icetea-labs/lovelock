@@ -299,7 +299,12 @@ function LeftContainer(props) {
       return (
         <li key={i}>
           ・
-          <a href={`/blog/${index}`}>
+          <a href={`/blog/${index}`}
+            onClick={e => {
+              e.preventDefault()
+              history.push(`/blog/${index}`)
+            }}
+          >
             {content.meta.title}
           </a>
           <span className="date">
