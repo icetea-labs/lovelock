@@ -103,6 +103,8 @@ export function BlogView(props) {
           if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
             mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway);
           }
+        } else {
+          mem.blogContent = { ...mem.blogContent, _overwrite: true}
         }
 
         // save to redux
