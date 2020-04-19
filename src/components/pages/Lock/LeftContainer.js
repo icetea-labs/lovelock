@@ -403,7 +403,7 @@ function LeftContainer(props) {
       <StickyBox className="sticky-leftside" offsetTop={20} offsetBottom={20}>
         <LeftBox>
           <ShadowBox>
-            {address && showNewLock && (
+            {address && !isGuest && showNewLock && (
               <LinkPro className="btn_add_promise" onClick={newLock}>
                 <Icon type="add" />
                 <FormattedMessage id="leftmenu.newLock" />
