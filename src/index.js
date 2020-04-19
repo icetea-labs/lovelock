@@ -218,11 +218,13 @@ serviceWorker.register({
     const waitingServiceWorker = registration.waiting;
 
     if (waitingServiceWorker) {
-      // waitingServiceWorker.addEventListener("statechange", event => {
-      //   if (event.target.state === "activated") {
-      //     window.location.reload()
-      //   }
-      // });
+      waitingServiceWorker.addEventListener("statechange", event => {
+        if (event.target.state === "activated") {
+          if (window.confirm("The LoveLock website you are seeing is cached and outdated, click OK to refresh the page.")) {
+            window.location.reload()
+          }
+        }
+      });
       waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
     }
   },
