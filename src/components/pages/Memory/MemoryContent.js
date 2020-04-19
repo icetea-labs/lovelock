@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, IconButton, Typography, Menu, MenuItem, Link } from '@material-ui/core';
@@ -203,6 +203,9 @@ function MemoryContent(props) {
   const [isEditOpened, setIsEditOpened] = useState(false);
   const [permLink, setPermLink] = useState();
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const pathname = useRef(window.location.pathname)
+
   const classes = useStyles();
 
   const isEditable = memory.type !== appConstants.memoryTypes.systemGenerated;
@@ -229,12 +232,13 @@ function MemoryContent(props) {
           );
           if (fetchedData) {
             mem.blogContent = fetchedData.json;
-            // set blog coverPhoto to full path
-            if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
-              mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, fetchedData.gateway);
-            }
           }
-          props.updateMemory(mem)
+          // No need to update since no one would use, and the JSON is cached anyway
+          // props.updateMemory(mem)
+        }
+        // set blog coverPhoto to full path
+        if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
+          mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url);
         }
       } else if (memory.isPrivate) {
         const memCache = await loadMemCacheAPI(memory.id);
@@ -258,7 +262,7 @@ function MemoryContent(props) {
       setMemoryDecrypted(mem);
 
       if (memory.showDetail && memory.info.blog) {
-        setOpenModal(true);
+        openMemory(memory.id);
       }
     });
 
@@ -350,18 +354,21 @@ function MemoryContent(props) {
   }
 
   function openMemory(memoryId) {
+    pathname.current = window.location.pathname
     setOpenModal(true);
-    // console.log('window.location', window.location);
-    const pathname = `/blog/${memoryId}`;
-    window.history.pushState(null, '', pathname);
+    window.history.pushState(null, '', `/blog/${memoryId}`);
     window.trackPageView && window.trackPageView(window.location.pathname);
   }
 
   function closeMemory() {
     setOpenModal(false);
-    //const pathname = `/lock/${memory.lockIndex}`;
-    //window.history.pushState({}, '', pathname);
-    window.history.back()
+    window.history.pushState({}, '', pathname.current);
+    pathname.current = window.location.pathname
+    memory.showDetail = false;
+    // setTimeout(() => {
+         // no need as no one care
+    //   props.updateMemory(memory)
+    // }, 0)
   }
 
   const openPhotoViewer = useCallback((event, { index }) => {

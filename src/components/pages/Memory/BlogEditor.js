@@ -83,6 +83,11 @@ export default function BlogEditor(props) {
   }
 
   useEffect(() => {
+    if (lockIndex != null) return
+    setLockIndex(lockIndexInit)
+  })
+
+  useEffect(() => {
     loadAllDrafts().then(setDrafts);
   }, []);
 
@@ -171,7 +176,8 @@ export default function BlogEditor(props) {
       setGLoading(true);
       submitBlog()
         .then(() => {
-          setGLoading(false);
+            setGLoading(false);
+            enqueueSnackbar('Published', { variant: 'success' });
         })
         .catch(err => {
           setGLoading(false);
@@ -227,7 +233,7 @@ export default function BlogEditor(props) {
         return sendBlogPost(blogData, opts || { address, tokenAddress });
       };
 
-      ensureToken({ tokenKey, dispatch }, uploadThenSendTx);
+      return ensureToken({ tokenKey, dispatch }, uploadThenSendTx);
     } else {
       showError('Please enter memory content.');
     }

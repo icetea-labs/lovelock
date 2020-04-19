@@ -303,7 +303,13 @@ function LeftContainer(props) {
           <a href={`/blog/${index}`}
             onClick={e => {
               e.preventDefault()
-              history.push(`/blog/${index}`)
+              const memo = props.memories.find(m => m.id === index)
+              if (memo) {
+                memo.showDetail = true;
+                props.updateMemory(memo)
+              } else {
+                history.push(`/blog/${index}`)
+              }
             }}
           >
             {content.meta.title}
@@ -444,6 +450,7 @@ const mapStateToProps = state => {
     locks: state.loveinfo.locks,
     address: state.account.address,
     topInfo: state.loveinfo.topInfo,
+    memories: state.loveinfo.memories,
     recentData: state.loveinfo.recentData,
     language: state.globalData.language,
   };
@@ -453,6 +460,9 @@ const mapDispatchToProps = dispatch => {
   return {
     setLocks: value => {
       dispatch(actions.setLocks(value));
+    },
+    updateMemory: memory => {
+      dispatch(actions.updateMemory(memory));
     },
     setShowNewLockDialog: value => {
       dispatch(actions.setShowNewLockDialog(value));

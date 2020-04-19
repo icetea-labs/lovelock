@@ -35,7 +35,7 @@ const loveinfo = (state = initialState, action) => {
         } else {
           state.memories.push(action.data);
         }
-        return state
+        return { ...state, memories: [...state.memories] }
       }
       return { ...state, memories: [action.data] };
     }
