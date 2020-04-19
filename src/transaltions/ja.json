@@ -61,6 +61,7 @@
     "leftmenu.folowingLock": "フォロー中ロック",
     "leftmenu.featured": "Featured",
     "leftmenu.newLock": "新たなロック作成",
+    "leftmenu.requestLock": "Request Lock",
     "leftmenu.collection": "コレクション",
 
     "profile.activationForm": "このフォームに記入してください。",
@@ -76,6 +77,7 @@
     "profile.profile": "プロファイル更新",
 
     "newLock.newLock": "新たなロック作成",
+    "newLock.requestLock": "Request to Lock",
     "newlock.lockWith": "どなたとロックしたいですか。",
     "newLock.member": "Lovelockメンバー",
     "newLock.crush": "好きな人",

@@ -1,6 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 import { connect } from 'react-redux';
 import { withSnackbar } from 'notistack';
 
@@ -51,7 +52,7 @@ class PuConfirmLock extends React.Component {
   };
 
   async messageAccept(message) {
-    const { index, enqueueSnackbar, close, updateNoti, address } = this.props;
+    const { index, enqueueSnackbar, close, updateNoti, address, history } = this.props;
 
     if (!message) {
       const message = <div><span>Please input </span><span>{getMessage('messageLabel')}</span></div>
@@ -62,8 +63,14 @@ class PuConfirmLock extends React.Component {
     try {
       const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
-        const errMessage = 'Your lock has been created, go post a memory.';
-        enqueueSnackbar(errMessage, { variant: 'success' });
+        const errMessage = 'Lock request accepted, go post a memory.';
+        const action = (
+          <Button variant="contained" color="secondary"
+            onClick={() => history.push(`/lock/${index}`)}>
+            VIEW
+          </Button>
+        )
+        enqueueSnackbar(errMessage, { variant: 'success', action });
         close();
         if (updateNoti) {
           markNoti({ lock_id: index, address }).then(updateNoti)

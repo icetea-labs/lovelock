@@ -726,7 +726,11 @@ function TopContrainer(props) {
               ) : (
                 <div className="name_time" style={{ width: '100%', textAlign: 'right' }}>
                   {isReceiver && renderEditLockIcon(true)}
-                  <Link href={`/u/${topInfo.receiver}`}  onClick={navigateLink} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
+                  {topInfo.isCrush ? (
+                    <span className="user_name color-violet">{`${topInfo.r_name}`}</span>
+                  ) : (
+                    <Link href={`/u/${topInfo.receiver}`}  onClick={navigateLink} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
+                  )}
                 </div>
               )}
               {loading ? (

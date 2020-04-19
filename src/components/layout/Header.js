@@ -1020,7 +1020,7 @@ function Header(props) {
       {renderLockRequests()}
       {renderNotifications()}
       {needAuth && <PasswordPrompt />}
-      {newLockDialog && <PuNewLock history={props.history} close={closeNewLockDialog} />}
+      {newLockDialog && <PuNewLock history={props.history} close={closeNewLockDialog} newLockOptions={newLockDialog} />}
       {!needAuth && showPhrase && (mode === 1 ? mnemonic : privateKey) && <ShowMnemonic close={closeShowMnemonic} />}
       {notifyLockData.show && (
         <PuNotifyLock
@@ -1032,8 +1032,8 @@ function Header(props) {
           deny={nextToDeny}
         />
       )}
-      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} updateNoti={processNotiResult} index={notifyLockData.index} />}
-      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} updateNoti={processNotiResult} index={notifyLockData.index} />}
+      {step === 'accept' && <PuConfirmLock close={closeConfirmLock} updateNoti={processNotiResult} history={props.history} index={notifyLockData.index} />}
+      {step === 'deny' && <PuConfirmLock isDeny close={closeConfirmLock} updateNoti={processNotiResult} history={props.history} index={notifyLockData.index} />}
       <ModalGateway>
         {photoViewer ? (
           <Modal onClose={closePhotoViewer}>

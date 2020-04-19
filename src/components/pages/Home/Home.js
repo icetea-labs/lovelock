@@ -7,8 +7,8 @@ import MemoryList from '../Memory/MemoryList';
 import LandingPage from '../../layout/LandingPage';
 import * as actions from '../../../store/actions';
 import APIService from '../../../service/apiService';
-import { showSubscriptionError } from '../../../helper';
-import { ensureContract } from '../../../service/tweb3';
+// import { showSubscriptionError } from '../../../helper';
+// import { ensureContract } from '../../../service/tweb3';
 import appConstants from '../../../helper/constants';
 
 import { useDidUpdate } from '../../../helper/hooks';
@@ -21,7 +21,7 @@ function Home(props) {
   const [noMoreMemories, setNoMoreMemories] = useState(false);
 
   const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
-  const { enqueueSnackbar } = useSnackbar();
+  // const { enqueueSnackbar } = useSnackbar();
 
   function refresh() {
     setChanged(c => !c);
@@ -62,10 +62,10 @@ function Home(props) {
         if (signal.cancel) return;
 
         // Don't need to subscribe when no lock, because LeftContainer already do that
-        !resp.locks.length &&
-          ensureContract().then(c => {
-            signal.sub = watchCreatePropose(c, signal);
-          });
+        // !resp.locks.length &&
+        //   ensureContract().then(c => {
+        //     signal.sub = watchCreatePropose(c, signal);
+        //   });
 
         const memoIndex = resp.memoryIndexes
 
@@ -97,28 +97,28 @@ function Home(props) {
       });
   }
 
-  function watchCreatePropose(contract, signal) {
-    const filter = {};
-    return contract.events.allEvents(filter, async (error, result) => {
-      if (signal.cancel) return;
+  // function watchCreatePropose(contract, signal) {
+  //   const filter = {};
+  //   return contract.events.allEvents(filter, async (error, result) => {
+  //     if (signal.cancel) return;
 
-      if (error) {
-        showSubscriptionError(error, enqueueSnackbar);
-      } else {
-        const repsNew = result.filter(({ eventName }) => {
-          return eventName === 'createLock';
-        });
+  //     if (error) {
+  //       showSubscriptionError(error, enqueueSnackbar);
+  //     } else {
+  //       const repsNew = result.filter(({ eventName }) => {
+  //         return eventName === 'createLock';
+  //       });
 
-        if (
-          repsNew.length > 0 &&
-          (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
-        ) {
-          // navigate to the created lock (this should unsub the watch via useEffect)
-          props.history.push(`/lock/${repsNew[0].eventData.log.id}`);
-        }
-      }
-    });
-  }
+  //       if (
+  //         repsNew.length > 0 &&
+  //         (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
+  //       ) {
+  //         // navigate to the created lock (this should unsub the watch via useEffect)
+  //         props.history.push(`/lock/${repsNew[0].eventData.log.id}`);
+  //       }
+  //     }
+  //   });
+  // }
 
   function nextPage() {
     if (noMoreMemories) return;

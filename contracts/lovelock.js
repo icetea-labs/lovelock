@@ -146,7 +146,7 @@ class LoveLock {
     const self = this;
     return apiGetLocksByAddress(self, addr);
   }
-  @view getDetailLock(index: number, includeRecentData: boolean) {
+  @view getDetailLock(index: number, includeRecentData: ?boolean) {
     const self = this;
     return apiGetDetailLock(self, index, includeRecentData);
   }
