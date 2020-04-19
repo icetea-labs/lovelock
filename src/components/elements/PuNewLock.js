@@ -16,6 +16,7 @@ import { FormattedMessage } from 'react-intl';
 import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import ContactSupportOutlinedIcon from '@material-ui/icons/ContactSupportOutlined';
+import Button from '@material-ui/core/Button';
 
 import * as actions from '../../store/actions';
 import {
@@ -100,7 +101,6 @@ function AvatarProSug(props) {
 
 export const TagTitle = styled.div`
   width: 100%;
-  height: 18px;
   font-family: Montserrat;
   font-size: 16px;
   font-weight: 500;
@@ -113,6 +113,12 @@ export const TagTitle = styled.div`
     color: #8250c8;
   }
   &.prmContent {
+    b {
+      font-weight: 700;
+    }
+    small {
+      font-size: 85%;
+    }
   }
 `;
 
@@ -120,7 +126,7 @@ const PreviewContainter = styled.div`
   display: flex;
   flex-direction: row;
   -webkit-box-pack: justify;
-  padding: 30px 0 0 0;
+  padding: 0;
   font-size: 14px;
   cursor: pointer;
   .upload_img input[type='file'] {
@@ -377,10 +383,20 @@ class PuNewLock extends React.Component {
   };
 
   async createLock() {
-    const { setLoading, enqueueSnackbar, close, address } = this.props;
-    const { promiseStm, date, file, firstname, lastname, cropFile, lockType, lockName, botReply } = this.state;
+    const { setLoading, enqueueSnackbar, close, address, newLockOptions } = this.props;
+    const { promiseStm, date, file, firstname, lastname, cropFile, lockType: lockTypeState, lockName, botReply } = this.state;
 
     let { partner } = this.state;
+
+    const allowChangePartner = !(newLockOptions != null && newLockOptions.address)
+    const myPageInfo = allowChangePartner ? null : newLockOptions
+
+    let lockType = lockTypeState
+    if (!allowChangePartner) {
+      lockType = 'lock'
+      partner = myPageInfo.address
+    }
+
     let hash = [];
     let botInfo;
 
@@ -449,14 +465,20 @@ class PuNewLock extends React.Component {
       const result = await ensureToken(this.props, uploadThenSendTx);
 
       if (result) {
-        enqueueSnackbar(this.getMessage('sent'), { variant: 'success' });
+        let action
+        if (lockType !== 'lock') {
+          // button to view lock if it is auto-accepted
+          action = (
+            <Button 
+              variant="contained" color="secondary"
+              onClick={() => this.props.history.push(`/lock/${result.returnValue}`)}>
+              VIEW
+            </Button>
+          )
+        }
+        enqueueSnackbar(this.getMessage('sent'), { variant: 'success', action });
         setLoading(false);
         close();
-
-        // redirect to the new lock if it is auto-accepted type
-        if (lockType !== 'lock') {
-          this.props.history.push(`/lock/${result.returnValue}`);
-        }
       }
     } catch (err) {
       console.log(err);
@@ -472,11 +494,9 @@ class PuNewLock extends React.Component {
   }
 
   render() {
-    const { close, language } = this.props;
+    const { newLockOptions, close, language } = this.props;
 
     const {
-      // partner,
-      // promiseStm,
       date,
       file,
       suggestions,
@@ -487,7 +507,11 @@ class PuNewLock extends React.Component {
       originFile,
       isJournal,
     } = this.state;
+
     const ja = 'ja';
+
+    const allowChangePartner = !(newLockOptions != null && newLockOptions.address)
+    const myPageInfo = allowChangePartner ? null : newLockOptions
 
     const inputProps = {
       placeholder: language === ja ? '検索する文字を入力してください' : 'type the member to lock with',
@@ -498,7 +522,7 @@ class PuNewLock extends React.Component {
     return (
       <>
         <CommonDialog
-          title={<FormattedMessage id="newLock.newLock" />}
+          title={<FormattedMessage id={allowChangePartner ? "newLock.newLock" : "newLock.requestLock"} />}
           okText={this.getMessage('okButton')}
           close={close}
           onKeyEsc={this.onKeyEsc}
@@ -506,6 +530,15 @@ class PuNewLock extends React.Component {
             this.createLock();
           }}
         >
+          {!allowChangePartner ? (
+            <>
+            <TagTitle className="prmContent">
+              Send request to <b>{myPageInfo.displayname}</b> <small>(@{myPageInfo.username})</small>
+            </TagTitle>
+            <DividerCus />
+            </>
+          ) : (
+          <>
           <TagTitle className="prmContent">
             <FormattedMessage id="newlock.lockWith" />
           </TagTitle>
@@ -528,15 +561,17 @@ class PuNewLock extends React.Component {
             />
           </RadioGroup>
 
-          <Typography variant="body1" color="textSecondary">
+          <Typography variant="body1" color="textSecondary" style={{ paddingBottom: 24}}>
             <ContactSupportOutlinedIcon style={{ verticalAlign: 'bottom', paddingRight: 6 }} />
             {this.state.lockType === 'lock' && <FormattedMessage id="newLock.memberDesc" />}
             {this.state.lockType === 'crush' && <FormattedMessage id="newLock.crushDesc" />}
             {this.state.lockType === 'journal' && <FormattedMessage id="newLock.journalDesc" />}
           </Typography>
 
+          {/* <DividerCus /> */}
+
           {lockType === 'lock' && (
-            <div>
+            <div style={{marginTop: -14}}>
               <Autosuggest
                 id="suggestPartner"
                 suggestions={suggestions}
@@ -553,9 +588,12 @@ class PuNewLock extends React.Component {
             <div>
               <TextFieldPlaceholder
                 label={<FormattedMessage id="newLock.journalName" />}
+                placeholder="Give your journal/blog a name"
+                variant="outlined"
                 fullWidth
                 onChange={this.handleUsername}
                 name="lockName"
+                autoComplete="off"
                 inputProps={{ maxLength: 28 }}
               />
             </div>
@@ -580,35 +618,44 @@ class PuNewLock extends React.Component {
               </PreviewContainter>
               <RightBotInfo>
                 <TextFieldPlaceholder
-                  label={<FormattedMessage id="newLock.crushFirstName" />}
+                  placeholder="Crush First Name"
                   fullWidth
                   onChange={this.handleUsername}
                   name="firstname"
+                  autoComplete="off"
                   validators={['required']}
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label={<FormattedMessage id="newLock.crushLastName" />}
+                  placeholder="Crush Last Name"
                   fullWidth
                   onChange={this.handleUsername}
                   name="lastname"
+                  autoComplete="off"
                   validators={['required']}
                   // margin="normal"
                 />
                 <TextFieldPlaceholder
-                  label={<FormattedMessage id="newLock.crushReply" />}
+                  placeholder="Crush's Reply to You"
                   fullWidth
                   onChange={this.handleUsername}
                   name="botReply"
+                  autoComplete="off"
                   validators={['required']}
                 />
               </RightBotInfo>
             </FlexBox>
           )}
-          <DividerCus />
-          <TagTitle className="prmContent">{this.getMessage('messageLabel')}</TagTitle>
+
+          </>
+          )}
+
+          {/* <DividerCus />
+          <TagTitle className="prmContent">{this.getMessage('messageLabel')}</TagTitle> */}
+
           <TextFieldMultiLine
             id="outlined-multiline-static"
+            label={this.getMessage('messageLabel')}
             placeholder={this.getMessage('messagePlaceholder')}
             multiline
             fullWidth
@@ -616,6 +663,7 @@ class PuNewLock extends React.Component {
             variant="outlined"
             onChange={this.promiseStmChange}
           />
+
           <AddInfoMessage
             files={file}
             date={date}

@@ -290,7 +290,8 @@ function Mypage(props) {
                     loading={loading}
                     context="mypage"
                     showNewLock
-                    isGuest={address !== paramAliasOrAddr && myPageInfo.username !== paramAliasOrAddr}
+                    myPageInfo={isGuest ? myPageInfo : undefined}
+                    isGuest={isGuest}
                   />
                 </div>
                 <div className="proposeColumn proposeColumn--right">
