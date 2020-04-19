@@ -81,7 +81,7 @@ export default function EditLockModal(props) {
     const editData = generateEditData();
   
     if (!message) {
-      const message = 'Please input ' + getMessage('messageLabel');
+      const message = <div><span>Please input </span><span>{getMessage('messageLabel')}</span></div>
       enqueueSnackbar(message, { variant: 'error' });
       return;
     }

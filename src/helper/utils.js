@@ -1,6 +1,5 @@
 import React from 'react';
 import Hash from 'ipfs-only-hash';
-import { useSelector } from 'react-redux';
 import {
   toPublicKey,
   stableHashObject,
@@ -40,8 +39,6 @@ const eccrypto = {
 const paths = 'm’/44’/349’/0’/0';
 
 export const contract = process.env.REACT_APP_CONTRACT;
-export const ipfsGateway = process.env.REACT_APP_IPFS;
-export const ipfsAltGateway = process.env.REACT_APP_ALT_IPFS;
 
 export function waitForHtmlTags(
   selector,
@@ -70,116 +67,6 @@ export function waitForHtmlTags(
   }
 }
 
-export function ensureHashUrl(url, gateway = ipfsGateway) {
-  gateway = ipfsGateway; // the alt gateway does not always work for image, so always use primary gateway
-  return url.indexOf(':') < 0 ? gateway + url : url;
-}
-
-export function resolveBlogHashUrls(json, gateway) {
-  if (!json || !json.blocks || !json.blocks.length) {
-    return json;
-  }
-  const blocks = json.blocks;
-  for (const b of blocks) {
-    if (b.type === 'image' && b.data.url && b.data.url.indexOf(':') < 0) {
-      b.data.url = ensureHashUrl(b.data.url, gateway);
-    }
-  }
-  return json;
-}
-
-export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
-  return fetch(gateway + hash, signal ? { signal } : undefined).then(r => resolveBlogHashUrls(r.json(), gateway));
-}
-
-export function fetchJsonWithFallback(
-  hash,
-  mainGateway,
-  fallbackGateway,
-  {
-    timeout = 10, // almost race
-    signal,
-    abortAtTimeout, // whether to abort main gateway when timeout
-    abortMain, // whether to abort main gateway when resolved
-    abortFallback, // whether to abort fallback gateway when resolve
-  } = {}
-) {
-  if (signal && signal.aborted) {
-    return Promise.reject(new DOMException('Aborted', 'AbortError'));
-  }
-
-  return new Promise((resolve, reject) => {
-    const mainController = new AbortController();
-    const secondController = signal ? new AbortController() : undefined;
-
-    const timeoutId = setTimeout(() => {
-      abortAtTimeout && mainController.abort();
-      fetch(fallbackGateway + hash, { signal: secondController && secondController.signal })
-        .then(response => response.json())
-        .then(json => {
-          resolve({ json: resolveBlogHashUrls(json, fallbackGateway), gateway: fallbackGateway });
-          abortMain && mainController.abort();
-        })
-        .catch(err => {
-          if (err.name !== 'AbortError') {
-            reject(err);
-          }
-        });
-    }, timeout);
-
-    if (signal) {
-      signal.addEventListener('abort', () => {
-        clearTimeout(timeoutId);
-        mainController.abort();
-        secondController && secondController.abort();
-        reject(new DOMException('Aborted', 'AbortError'));
-      });
-    }
-
-    fetch(mainGateway + hash, { signal: mainController.signal })
-      .then(response => {
-        clearTimeout(timeoutId);
-        return response.json();
-      })
-      .then(json => {
-        resolve({ json: resolveBlogHashUrls(json, mainGateway), gateway: mainGateway });
-        if (abortFallback) {
-          clearTimeout(timeoutId);
-          secondController && secondController.abort();
-        }
-      })
-      .catch(err => {
-        if (err.name !== 'AbortError') {
-          reject(err);
-        }
-      });
-  });
-}
-
-export function fetchMainFirstIpfsJson(hash, options = {}) {
-  if (options.abortMain == null) {
-    options.abortMain = true;
-  }
-  return fetchJsonWithFallback(hash, ipfsGateway, ipfsAltGateway, options);
-}
-
-export function fetchAltFirstIpfsJson(hash, options = {}) {
-  if (options.timeout == null) {
-    options.timeout = 1500; // wait a little to reduce load for our main gateway
-  }
-  if (options.abortFallback == null) {
-    options.abortFallback = true;
-  }
-  return fetchJsonWithFallback(hash, ipfsAltGateway, ipfsGateway, options);
-}
-
-export function smartFetchIpfsJson(hash, options = {}) {
-  let func = fetchMainFirstIpfsJson;
-  if (options.timestamp && Date.now() - options.timestamp > 100000 * 60 * 1000) {
-    func = fetchAltFirstIpfsJson;
-  }
-  return func(hash, options);
-}
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
@@ -207,7 +94,10 @@ export function getQueryParam(name) {
 }
 
 export function makeLockName(p, prefix = '') {
-  return prefix + (p.sender === p.receiver ? `${p.s_name}'s Journal` : `${p.s_name} & ${p.r_name}`);
+  const isJournal = !p.receiver || p.sender === p.receiver;
+  const sn = p.s_name || getShortName(p.s_tags);
+  const rn = isJournal || p.r_name || getShortName(p.r_tags || p.bot_info);
+  return prefix + (isJournal ? `${sn}'s Journal` : `${sn} & ${rn}`);
 }
 
 export function callPure(funcName, params) {
@@ -307,11 +197,11 @@ export async function saveToIpfs(files) {
 
   const newIpfs = createIpfsClient(authData);
 
-  const results = []
+  const results = [];
   for await (const result of newIpfs.add([...contentBuffer])) {
-    results.push(String(result.cid))
+    results.push(String(result.cid));
   }
-  
+
   return results;
 }
 
@@ -440,7 +330,7 @@ export async function loadMemCacheAPI(id) {
 }
 
 export function TimeWithFormat(props) {
-  const language = useSelector(state => state.globalData.language);
+  const language = props.language;
   const ja = 'ja';
   const { format, value } = props;
   const formatValue = format || 'MM/DD/YYYY';
@@ -785,9 +675,9 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   let escapedValue = escapeRegexCharacters(value.trim().toLowerCase());
   // remove the first @ if it is there
   escapedValue = escapedValue.substring(escapedValue.indexOf('@') + 1);
-  // if (escapedValue.length < 3) {
-  //   return [];
-  // }
+  if (escapedValue.length < 2) {
+    return [];
+  }
 
   const regexText = `^account\\..*${escapedValue}`;
   const regex = new RegExp(regexText);
@@ -818,6 +708,7 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
 }
 
 export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
+  if (value.length < 2) return []
   let people = await getDidContract()
     .methods.queryByTags(
       {
@@ -869,7 +760,47 @@ export function copyToClipboard(text, enqueueSnackbar) {
 }
 
 export function getShortName(tags) {
+  if (!tags) return '';
   if (tags.firstname) return tags.firstname;
   if (tags.lastname) return tags.lastname;
   return tags['display-name'].split(' ')[0];
+}
+
+// snake to camel
+export function toCamel(s) {
+  return s.replace(/(_[a-z])/ig, ($1) => {
+    return $1.toUpperCase()
+      .replace('_', '');
+  });
+};
+
+export function camelObject(obj) {
+  const r = []
+  for (const prop in obj) {
+    r[toCamel(prop)] = obj[prop]
+  }
+  return r
+}
+
+function _fetchNotiCore(subPath, params, signal) {
+  if (!process.env.REACT_APP_API) return Promise.resolve([])
+
+  const query = new URLSearchParams(params).toString()
+  return fetch(`${process.env.REACT_APP_API}/noti/${subPath}?${query}`, { signal })
+    .then(r => r.json())
+    .then(r => {
+      return r.result
+    })
+    .catch(err => {
+      if (err.name === 'AbortError') return;
+      throw err;
+    })
+}
+
+export function fetchNoti(params, signal) {
+  return _fetchNotiCore('list', params, signal)
+}
+
+export function markNoti(params, signal) {
+  return _fetchNotiCore('mark', params, signal);
 }

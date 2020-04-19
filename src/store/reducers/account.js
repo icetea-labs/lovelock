@@ -54,14 +54,9 @@ const account = (state = initialState, action) => {
     case actionTypes.SET_ACCOUNT:
       return { ...state, ...action.data };
 
-    case actionTypes.IMPORT_NEW_ACCOUNT:
-      return { ...state, ...action.data };
-
-    case actionTypes.SET_USER_INFO:
-      return { ...state, userInfo: action.data };
     case actionTypes.SET_NEEDAUTH:
-      // if (state.flags.isHardware) action.data = false;
       return { ...state, needAuth: action.data };
+      
     default:
       return state;
   }

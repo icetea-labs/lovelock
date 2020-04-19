@@ -13,7 +13,7 @@ const appConstants = {
       messagePlaceholder:
         languageWithoutRegionCode === ja ? 'パートナーに何かを言ってください。' : 'Say something to your partner…',
       okButton: <FormattedMessage id="newLock.btnSend" />,
-      sent: 'Lock sent',
+      sent: 'Lock request sent',
     },
     crush: {
       messageLabel: <FormattedMessage id="newLock.msgLockCrush" />,
@@ -34,6 +34,7 @@ const appConstants = {
     manualGenerated: 0,
   },
   memoryPageSize: 30,
+  maxNotiShown: 5
 };
 
 export default appConstants;

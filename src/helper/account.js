@@ -62,13 +62,25 @@ export async function getTagsInfo(address) {
       return tags;
     });
 }
+
+export async function getUserInfo(address) {
+  return ctMethods
+    .getUserByAddress(address)
+    .call()
+    .then(user => {
+      return user;
+    })
+    .catch(() => {
+      return {};
+    });
+}
+
 export async function isApproved(address) {
-  // console.log('address', address, '-', tokenAddress, '-', process.env.REACT_APP_CONTRACT);
   return ctMethods
     .isUserApproved(address)
     .call()
     .then(resp => {
-      return resp;
+      return !!resp;
     })
     .catch(() => {
       return false;
@@ -78,6 +90,7 @@ export async function isApproved(address) {
 export function getAliasAndTags(address) {
   return Promise.all([getAlias(address), getTagsInfo(address)]);
 }
-export function getAuthenAndTags(address) {
-  return Promise.all([getTagsInfo(address), isApproved(address)]);
+
+export function getInfoAndTags(address) {
+  return Promise.all([getTagsInfo(address), getUserInfo(address)]);
 }

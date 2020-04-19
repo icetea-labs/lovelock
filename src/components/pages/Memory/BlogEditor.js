@@ -18,7 +18,7 @@ import Editor from './Editor';
 import * as blog from '../../../helper/blog';
 import { loadAllDrafts, saveDraft, delDraft } from '../../../helper/draft';
 import { ensureToken } from '../../../helper/hooks';
-import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError } from '../../../helper';
+import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError, makeLockName } from '../../../helper';
 
 const useStyles = makeStyles(theme => ({
   menuItem: {
@@ -66,10 +66,12 @@ export default function BlogEditor(props) {
   const [actionMenu, setActionMenu] = useState(null);
   const [selectionLocks, setSelectionLocks] = useState(null);
 
-  const lockIndexInit = editMode ? memory.lockIndex : topInfo.index;
+  const lockIndexInit = editMode ? memory.lockIndex : (props.needSelectLock ? null : topInfo.index)
   const [lockIndex, setLockIndex] = useState(lockIndexInit);
   const language = useSelector(state => state.globalData.language);
   const ja = 'ja';
+
+  const myLocks = (props.locks || []).filter(l => l.isMyLock && l.status === 1)
 
   if (memory && memory.blogContent && memory !== blogMemory) {
     blogMemory = memory;
@@ -81,8 +83,19 @@ export default function BlogEditor(props) {
   }
 
   useEffect(() => {
+    if (lockIndex != null) return
+    setLockIndex(lockIndexInit)
+  })
+
+  useEffect(() => {
     loadAllDrafts().then(setDrafts);
   }, []);
+
+  useEffect(() => {
+    if (!editMode && !props.needSelectLock) {
+      setLockIndex(topInfo.index)
+    }
+  }, [editMode, props.needSelectLock, topInfo.index])
 
   function showDrafts(event) {
     setActionMenu(event.currentTarget);
@@ -157,13 +170,14 @@ export default function BlogEditor(props) {
   }
 
   function handleSubmit() {
-    if (!editMode && !lockIndex) {
+    if (!editMode && lockIndex == null) {
       showError('Please select a lock to post to.');
     } else {
       setGLoading(true);
       submitBlog()
         .then(() => {
-          setGLoading(false);
+            setGLoading(false);
+            enqueueSnackbar('Published', { variant: 'success' });
         })
         .catch(err => {
           setGLoading(false);
@@ -219,7 +233,7 @@ export default function BlogEditor(props) {
         return sendBlogPost(blogData, opts || { address, tokenAddress });
       };
 
-      ensureToken({ tokenKey, dispatch }, uploadThenSendTx);
+      return ensureToken({ tokenKey, dispatch }, uploadThenSendTx);
     } else {
       showError('Please enter memory content.');
     }
@@ -292,15 +306,15 @@ export default function BlogEditor(props) {
   }
 
   function selectedLockName() {
-    const id = props.locks.findIndex(lock => lock.id == lockIndex);
-    if (id == -1) {
+    const lock = lockIndex == null ? null : myLocks.find(lock => lock.id === lockIndex);
+    if (!lock) {
       if (language === ja) {
         return '--ロックを洗濯してください--';
       }
       return '-- Select lock --';
     }
-    const lock = props.locks[id];
-    return lock ? lock.s_info.lockName || lock.s_content : null;
+
+    return lock ? lock.s_info.lockName || makeLockName(lock) : null;
   }
 
   function updateLockIndex(lock) {
@@ -320,9 +334,9 @@ export default function BlogEditor(props) {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
             transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           >
-            {props.locks.map(lock => (
+            {myLocks.map(lock => (
               <ListItem key={lock.id} onClick={() => updateLockIndex(lock.id)} button className={classes.menuItem}>
-                <ListItemText primary={lock.s_info.lockName || lock.s_content} />
+                <ListItemText primary={lock.s_info.lockName || makeLockName(lock)} />
               </ListItem>
             ))}
           </Menu>

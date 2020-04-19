@@ -24,18 +24,17 @@ const APIService = {
     const memoryData = await callView('getMemoriesByListMemIndex', [arrayMem, page, pageSize, loadToCurrentPage]);
     return addInfoToMems(memoryData);
   },
-  getLocksForFeed: async address => {
-    const lockForFeed = await callView('getLocksForFeed', [address]);
+  getLocksForFeed: async (address, includeFollowing = false, includeMemoryIndexes = false, includeRecentData = false) => {
+    const lockForFeed = await callView('getLocksForFeed', [address, includeFollowing, includeMemoryIndexes, includeRecentData]);
     return lockForFeed;
   },
-  getDetailLock: async index => {
-    const lock = await callView('getDetailLock', [index]);
+  getDetailLock: async (index, includeRecentData = false) => {
+    const lock = await callView('getDetailLock', [index, includeRecentData]);
     const proInfo = lock[0] || {};
 
     // add basic extra info
     proInfo.index = index;
-    proInfo.coverImg = proInfo.coverImg || 'QmXtwtitd7ouUKJfmfXXcmsUhq2nGv98nxnw2reYg4yncM';
-    proInfo.isJournal = proInfo.sender === proInfo.receiver;
+    proInfo.isJournal = !proInfo.receiver || (proInfo.sender === proInfo.receiver);
     proInfo.isCrush = proInfo.receiver === process.env.REACT_APP_BOT_LOVER;
     proInfo.isCouple = !proInfo.isJournal && !proInfo.isCrush;
 
@@ -49,9 +48,11 @@ const APIService = {
     const memoryData = await callView('getChoiceMemories', [extra, page, pageSize, loadToCurrentPage]);
     return addInfoToMems(memoryData);
   },
-  getUserByAdd: async address => {
-    const userByAdd = await callView('getUserByAdd', [address]);
-    return userByAdd;
+  getFeaturedChoices: async () => {
+    return await callView('getFeaturedChoices', []);
+  },
+  getUserByAddress: async address => {
+    return await callView('getUserByAddress', [address]);
   },
 };
 

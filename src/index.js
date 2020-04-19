@@ -169,30 +169,30 @@ ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
       {/* <PersistGate loading={<GlobaLoading />} persistor={persistor}> */}
-      <SnackbarProvider
-        ref={notistackRef}
-        action={key => (
-          <IconButton onClick={onClickDismiss(key)}>
-            <CloseIcon />
-          </IconButton>
-        )}
-        preventDuplicate
-        autoHideDuration={7000}
-        maxSnack={2}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <Suspense fallback={<SimpleLoading />}>
-          <IntlProvider
+      <IntlProvider
             locale={languageWithoutRegionCode}
             messages={messages[languageWithoutRegionCode] || messages.en}
           >
-            <App />
-          </IntlProvider>
-        </Suspense>
-      </SnackbarProvider>
+        <SnackbarProvider
+          ref={notistackRef}
+          action={key => (
+            <IconButton onClick={onClickDismiss(key)}>
+              <CloseIcon />
+            </IconButton>
+          )}
+          preventDuplicate
+          autoHideDuration={7000}
+          maxSnack={2}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <Suspense fallback={<SimpleLoading />}>
+              <App />  
+          </Suspense>
+        </SnackbarProvider>
+      </IntlProvider>
       {/* </PersistGate> */}
     </Provider>
     <Helmet>
@@ -218,11 +218,13 @@ serviceWorker.register({
     const waitingServiceWorker = registration.waiting;
 
     if (waitingServiceWorker) {
-      // waitingServiceWorker.addEventListener("statechange", event => {
-      //   if (event.target.state === "activated") {
-      //     window.location.reload()
-      //   }
-      // });
+      waitingServiceWorker.addEventListener("statechange", event => {
+        if (event.target.state === "activated") {
+          if (window.confirm("The LoveLock website you are seeing is cached and outdated, click OK to refresh the page.")) {
+            window.location.reload()
+          }
+        }
+      });
       waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
     }
   },

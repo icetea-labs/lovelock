@@ -65,12 +65,7 @@ function Login(props) {
 const mapStateToProps = state => {
   const e = state.create;
   return {
-    password: e.password,
     step: e.step,
-    privateKey: e.privateKey,
-    keyStoreText: e.keyStoreText,
-    showPrivateKey: e.showPrivateKey,
-    confirmMnemonic: e.confirmMnemonic,
   };
 };
 

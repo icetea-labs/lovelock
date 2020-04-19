@@ -10,7 +10,8 @@ import { useDidUpdate } from '../../../helper/hooks';
 function RightContainer(props) {
   const { proIndex, collectionId, memoryList } = props;
 
-  const collections = useSelector(state => state.loveinfo.topInfo.collections);
+  const topInfo = useSelector(state => state.loveinfo.topInfo);
+  const collections = topInfo.collections;
   const currentCol = collections == null ? '' : collections.find(c => c.id === collectionId);
   const collectionName = currentCol == null ? '' : currentCol.name;
   const validCollectionId = collectionName ? collectionId : null;
@@ -23,26 +24,42 @@ function RightContainer(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    if (validCollectionId == null && proIndex === topInfo.index) return;
+    fetchMemories();
+  }, [])
+
+  useDidUpdate(() => {
+    if (noMoreMemories) return;
+    if (page * appConstants.memoryPageSize <= memoryList.length) return;
     fetchMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useDidUpdate(() => {
+    if (validCollectionId == null && proIndex === topInfo.index) return;
+    fetchMemories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proIndex, validCollectionId]);
+
+  useDidUpdate(() => {
     fetchMemories(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proIndex, validCollectionId, changed]);
+  }, [changed]);
 
   function fetchMemories(loadToCurrentPage = false) {
-    setLoading(true);
+    (page === 1) && setLoading(true);
 
     APIService.getMemoriesByLockIndex(proIndex, validCollectionId, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
       if (!result.length) {
         setNoMoreMemories(true);
+        if (!loadToCurrentPage) {
+          setPage(page - 1)
+        }
       }
 
       let memories = result;
       if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-      dispatch(actions.setMemory(memories));
+      dispatch(actions.setMemories(memories));
       setLoading(false);
     }).catch(err => {
       console.error(err)

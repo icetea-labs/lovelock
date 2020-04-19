@@ -12,9 +12,10 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Divider from '@material-ui/core/Divider';
 import CameraAltIcon from '@material-ui/icons/CameraAlt';
-import WarningIcon from '@material-ui/icons/Warning';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
 import { FormattedMessage } from 'react-intl';
+import Alert from '@material-ui/lab/Alert';
+import Typography from '@material-ui/core/Typography';
+import ContactSupportOutlinedIcon from '@material-ui/icons/ContactSupportOutlined';
 
 import * as actions from '../../store/actions';
 import {
@@ -184,34 +185,14 @@ const PreviewContainter = styled.div`
 const RightBotInfo = styled.div`
   margin-left: 8px;
 `;
-const WarningPass = styled.div`
-  .warningSnackbar {
-    background-color: #fe7;
-    box-shadow: none;
-    margin-top: 8px;
-    /* max-width: 400px; */
-  }
-  .warningMessage {
-    display: flex;
-    align-items: center;
-  }
-  .warningIcon {
-    margin-right: 16px;
-    color: #d90;
-  }
-  .warningText {
-    color: #333;
-    font-style: italic;
-    font-size: 1.1em;
-  }
-`;
+
 class PuNewLock extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       partner: '',
       promiseStm: '',
-      date: Date.parse(new Date()),
+      date: Date.now(),
       file: '',
       value: '',
       suggestions: [],
@@ -442,7 +423,7 @@ class PuNewLock extends React.Component {
       }
 
       if (!promiseStm) {
-        const message = `Please input ${this.getMessage('messageLabel')}`;
+        const message = <div><span>Please input </span><span>{this.getMessage('messageLabel')}</span></div>
         enqueueSnackbar(message, { variant: 'error' });
         return;
       }
@@ -472,8 +453,10 @@ class PuNewLock extends React.Component {
         setLoading(false);
         close();
 
-        // redirect to the new lock
-        this.props.history.push(`/lock/${result.returnValue}`);
+        // redirect to the new lock if it is auto-accepted type
+        if (lockType !== 'lock') {
+          this.props.history.push(`/lock/${result.returnValue}`);
+        }
       }
     } catch (err) {
       console.log(err);
@@ -489,7 +472,8 @@ class PuNewLock extends React.Component {
   }
 
   render() {
-    const { close, isApproved, language } = this.props;
+    const { close, language } = this.props;
+
     const {
       // partner,
       // promiseStm,
@@ -506,7 +490,7 @@ class PuNewLock extends React.Component {
     const ja = 'ja';
 
     const inputProps = {
-      placeholder: language === ja ? '検索する文字を入力してください' : 'type some letters to search',
+      placeholder: language === ja ? '検索する文字を入力してください' : 'type the member to lock with',
       value,
       onChange: this.onPartnerChange,
     };
@@ -526,7 +510,7 @@ class PuNewLock extends React.Component {
             <FormattedMessage id="newlock.lockWith" />
           </TagTitle>
 
-          <RadioGroup value={lockType} onChange={this.handleCheckChange} row>
+          <RadioGroup value={lockType} onChange={this.handleCheckChange} row style={{ padding: '0.5rem 0 0.3rem' }}>
             <FormControlLabel
               control={<ColoredRadio />}
               value="lock"
@@ -543,6 +527,13 @@ class PuNewLock extends React.Component {
               label={<FormattedMessage id="newLock.journal" />}
             />
           </RadioGroup>
+
+          <Typography variant="body1" color="textSecondary">
+            <ContactSupportOutlinedIcon style={{ verticalAlign: 'bottom', paddingRight: 6 }} />
+            {this.state.lockType === 'lock' && <FormattedMessage id="newLock.memberDesc" />}
+            {this.state.lockType === 'crush' && <FormattedMessage id="newLock.crushDesc" />}
+            {this.state.lockType === 'journal' && <FormattedMessage id="newLock.journalDesc" />}
+          </Typography>
 
           {lockType === 'lock' && (
             <div>
@@ -635,36 +626,9 @@ class PuNewLock extends React.Component {
             onDialogToggle={this.onDialogToggle}
             photoButtonText={<FormattedMessage id="newLock.btnCover" />}
           />
-          <WarningPass>
-            <SnackbarContent
-              className="warningSnackbar"
-              message={
-                isApproved ? (
-                  <span className="warningMessage">
-                    <WarningIcon className="warningIcon" />
-                    <span className="warningText">
-                      <FormattedMessage id="newLock.warning" />
-                    </span>
-                  </span>
-                ) : (
-                  <span className="warningMessage">
-                    <WarningIcon className="warningIcon" />
-                    <span className="warningText">
-                      <a
-                        className="underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href="http://bit.ly/LoveLock-AAR"
-                      >
-                        <FormattedMessage id="newLock.activationForm" />
-                      </a>
-                      <FormattedMessage id="newLock.activationGoal" />
-                    </span>
-                  </span>
-                )
-              }
-            />
-          </WarningPass>
+          <Alert severity="warning">
+            <FormattedMessage id="newLock.warning" />
+          </Alert>
         </CommonDialog>
         {isOpenCrop && (
           <ImageCrop close={this.closeCrop} accept={this.acceptCrop} originFile={originFile} hasParentDialog />
@@ -702,7 +666,6 @@ const mapStateToProps = state => {
     address: state.account.address,
     tokenKey: state.account.tokenKey,
     tokenAddress: state.account.tokenAddress,
-    isApproved: state.account.isApproved,
     language: state.globalData.language,
   };
 };

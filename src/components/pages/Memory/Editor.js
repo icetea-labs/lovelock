@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import { waitForHtmlTags } from '../../../helper';
 import { AvatarPro } from '../../elements/index';
 import FacebookIcon from '@material-ui/icons/Facebook';
-import { Link } from 'react-router-dom';
 import { TimeWithFormat } from '../../../helper/utils';
 
 const font =
@@ -106,14 +105,14 @@ class Editor extends React.Component {
   }
 
   insertCardToDOM() {
-    waitForHtmlTags('.postContent', dom => {
-      setTimeout(() => {
+    setTimeout(() =>
+      waitForHtmlTags('.postContent', dom => {
         const postContentNode = dom[0];
-        let title = postContentNode.querySelector('h1 + h3');
-        title = title ? title : postContentNode.querySelector('h1');
-        title = title ? title : postContentNode.querySelector('h2 + h3');
-        title = title ? title : postContentNode.querySelector('h2');
-        title = title ? title : postContentNode.querySelector('h3');
+        let title = postContentNode.querySelector('h1 + h3') ||
+          postContentNode.querySelector('h1') ||
+          postContentNode.querySelector('h2 + h3') ||
+          postContentNode.querySelector('h2') ||
+          postContentNode.querySelector('h3')
 
         const cardNode = document.createElement('div');
         cardNode.innerHTML = this.renderAuthorInfo();
@@ -124,12 +123,7 @@ class Editor extends React.Component {
         } else {
           title.parentNode.appendChild(cardNode);
         }
-
-        let fbshare = () =>
-          window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href));
-        document.querySelector('.fbshare').addEventListener('click', fbshare);
-      });
-    });
+    }));
   }
 
   renderAuthorInfo() {
@@ -150,13 +144,13 @@ class Editor extends React.Component {
               {displayName}
             </a>
             <div className={classes.date}>
-              <TimeWithFormat value={date} format="DD MMM YYYY" />
+              <TimeWithFormat value={date} format="DD MMM YYYY" language={this.props.language} />
             </div>
           </div>
         </div>
-        <div className={'fbshare ' + classes.pointer}>
+        <a className={classes.pointer} href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target='_blank' rel="noopener noreferrer">
           <FacebookIcon />
-        </div>
+        </a>
       </div>
     );
   }

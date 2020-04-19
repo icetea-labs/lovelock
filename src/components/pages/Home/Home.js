@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import { FlexBox, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
@@ -20,7 +20,7 @@ function Home(props) {
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
 
-  const { setLocks, setMemory, address, locks, history, isApproved, memoryList } = props;
+  const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
   const { enqueueSnackbar } = useSnackbar();
 
   function refresh() {
@@ -54,8 +54,9 @@ function Home(props) {
   function fetchMemories(signal, loadToCurrentPage = false) {
     if (!address) return false;
 
-    return APIService.getLocksForFeed(address)
+    return APIService.getLocksForFeed(address, true, true)
       .then(resp => {
+
         // set to redux
         setLocks(resp.locks);
         if (signal.cancel) return;
@@ -66,9 +67,7 @@ function Home(props) {
             signal.sub = watchCreatePropose(c, signal);
           });
 
-        const memoIndex = resp.locks.reduce((tmp, lock) => {
-          return tmp.concat(lock.memoIndex);
-        }, []);
+        const memoIndex = resp.memoryIndexes
 
         if (memoIndex.length > 0) {
           APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
@@ -79,7 +78,7 @@ function Home(props) {
 
               let memories = result;
               if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemory(memories);
+              setMemories(memories);
               setLoading(false);
             })
             .catch(err => {
@@ -87,7 +86,7 @@ function Home(props) {
               setLoading(false);
             });
         } else {
-          setMemory([]);
+          setMemories([]);
           setNoMoreMemories(true);
           setLoading(false);
         }
@@ -139,7 +138,7 @@ function Home(props) {
           {isHaveLocks ? (
             <LeftBoxWrapper>
               <div className="proposeColumn proposeColumn--left">
-                <LeftContainer loading={loading} />
+                <LeftContainer loading={loading} context="home" />
               </div>
               <div className="proposeColumn proposeColumn--right">
                 <MemoryList {...props} onMemoryChanged={refresh} loading={loading} nextPage={nextPage} needSelectLock />
@@ -172,8 +171,8 @@ const mapDispatchToProps = dispatch => {
     setLocks: value => {
       dispatch(actions.setLocks(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
   };
 };

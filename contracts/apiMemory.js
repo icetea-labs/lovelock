@@ -1,22 +1,29 @@
 exports.apiCreateMemory = (self, lockIndex, isPrivate, content, info = {}, opts = []) => {
-  return _addMemory(self, lockIndex, isPrivate, content, info, [...opts]);
+  return _addMemory(self, lockIndex, isPrivate, content, info, opts);
 };
 
 exports.apiLikeMemory = (self, memoIndex, type) => {
   const sender = msg.sender;
   const [memo, memories] = self.getMemory(memoIndex);
+  const timestamp = Date.now();
+  let isLike = false;
 
   if (memo.likes[sender]) {
     delete memo.likes[sender];
   } else {
     memo.likes[sender] = { type };
+    isLike = true;
   }
   // save the memeory
   self.setMemories(memories);
-  const eventName = 'addLike_' + memoIndex;
-  self.emitEvent(eventName, { by: msg.sender, memoIndex, type }, ['by', 'memoIndex']);
+  // const eventName = 'addLike' + memoIndex;
+  self.emitEvent(
+    'addLike',
+    { by: msg.sender, log: { id: memoIndex, isLike, type, timestamp, sender: memo.sender, receiver: memo.receiver } },
+    ['by']
+  );
 
-  return memo.likes || [];
+  return memo;
 };
 
 exports.apiCommentMemory = (self, memoIndex, content, info) => {
@@ -29,11 +36,16 @@ exports.apiCommentMemory = (self, memoIndex, content, info) => {
 
   // save memories
   self.setMemories(memories);
+  const log = { ...comment, id: memoIndex, sender: memo.sender, receiver: memo.receiver };
+  self.emitEvent('addComment', { by: msg.sender, log }, ['by']);
+
+  return memo;
 };
 
 // ========== GET DATA ==================
 exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, loadToCurrentPage) => {
-  const memoryPro = getDataByIndex(self.getLocks(), lockIndex)['memoIndex'];
+  const locks = self.getLocks();
+  const memoryPro = getDataByIndex(locks, lockIndex)['memoIndex'];
   const memories = self.getMemories();
 
   let resp = memoryPro.reduce((res, index) => {
@@ -46,7 +58,7 @@ exports.apiGetMemoriesByLock = (self, lockIndex, collectionId, page, pageSize, l
 
   resp = _getPaginatedMemories(resp, page, pageSize, loadToCurrentPage);
 
-  return _addInfoToMems(resp, self);
+  return _addInfoToMems(resp, self, locks);
 };
 
 exports.apiGetMemoriesByRange = (self, start, end) => {
@@ -67,7 +79,7 @@ exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, load
   const memories = self.getMemories();
 
   // remove duplicate
-  listMemIndex = [... new Set(listMemIndex)]
+  listMemIndex = [...new Set(listMemIndex)];
 
   let mems = listMemIndex.map(index => {
     return { ...getDataByIndex(memories, index), id: index };
@@ -83,42 +95,45 @@ exports.apiGetMemoriesByListMemIndex = (self, listMemIndex, page, pageSize, load
 exports.apiEditMemory = (self, memIndex, content, info) => {
   const [mem, mems] = self.getMemory(memIndex);
 
-  expect(msg.sender === mem.sender, 'Only author can edit memory.')
+  expect(msg.sender === mem.sender, 'Only author can edit memory.');
 
   if (content != null) {
-    expect(typeof content === 'string', 'Type of content must be string.')
-    mem.content = content
+    expect(typeof content === 'string', 'Type of content must be string.');
+    mem.content = content;
   }
 
   if (info != null) {
-    const { hash, date, collectionId } = info
+    const { hash, date, collectionId } = info;
     if (hash != null) {
-      expect(Array.isArray(hash), 'info.hash must be an array.')
+      expect(Array.isArray(hash), 'info.hash must be an array.');
       hash.forEach(h => {
         if (typeof h !== 'string') {
-          throw new Error('info.hash members must be strings.')
+          throw new Error('info.hash members must be strings.');
         }
-      })
+      });
 
-      mem.info.hash = hash
+      mem.info.hash = hash;
     }
 
     if (date != null) {
-      expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.')
-      mem.info.date = date
+      expect(typeof date === 'number' && date > 0 && Number.isInteger(date), 'info.date must be a valid timestamp.');
+      mem.info.date = date;
     }
 
     if (collectionId != null) {
-      expect(typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId), 'info.collectionId must be a valid number.')
-      mem.info.collectionId = collectionId
+      expect(
+        typeof collectionId === 'number' && collectionId >= 0 && Number.isInteger(collectionId),
+        'info.collectionId must be a valid number.'
+      );
+      mem.info.collectionId = collectionId;
     }
   }
 
   // save memories
-  self.setMemories(mems)
+  self.setMemories(mems);
 
-  return mem
-}
+  return mem;
+};
 
 // ========== DELETE DATA ==================
 exports.apiDeleteMemory = (self, memIndex) => {
@@ -129,10 +144,13 @@ exports.apiDeleteMemory = (self, memIndex) => {
   const locks = self.getLocks();
   const lockIndex = mem.lockIndex;
 
-  const lock = locks[lockIndex]
+  const lock = locks[lockIndex];
   const owners = [mem.sender, lock.sender, lock.receiver];
-  expect(owners.includes(sender) || self.getAdmins().includes(sender), "Only post author or lock owners can delete this post.");
-  expect(lock.memoryRelationIndex !== memIndex, "Cannot delete initial memory.")
+  expect(
+    owners.includes(sender) || self.getAdmins().includes(sender),
+    'Only post author or lock owners can delete this post.'
+  );
+  expect(lock.memoryRelationIndex !== memIndex, 'Cannot delete initial memory.');
 
   lock.memoIndex.splice(lock.memoIndex.indexOf(memIndex), 1);
   // save locks
@@ -151,7 +169,7 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   const comments = memo.comments;
   const owners = [comments[cmtNo].sender, memo.sender, memo.receiver];
 
-  expect(owners.includes(sender) || self.getAdmins().includes(sender), "You cannot delete this comment.");
+  expect(owners.includes(sender) || self.getAdmins().includes(sender), 'You cannot delete this comment.');
 
   // delete comments.cmtNo;
   comments.splice(cmtNo, 1);
@@ -163,16 +181,16 @@ exports.apiDeleteComment = (self, memoIndex, cmtNo) => {
   self.setMemories(memories);
 };
 
-function _addInfoToMems(memories, self) {
+function _addInfoToMems(memories, self, locks) {
   const ctDid = loadContract('system.did');
-
+  locks = locks || self.getLocks();
   let res = memories.map(mem => {
     let tmpMem = {};
     tmpMem.s_tags = ctDid.query.invokeView(mem.sender).tags || {};
     tmpMem.name = tmpMem.s_tags['display-name']; // tmpMem
     tmpMem.pubkey = tmpMem.s_tags['pub-key']; // tmpMem
     //LOCK_TYPE_JOURNAL
-    let lock = getDataByIndex(self.getLocks(), mem.lockIndex);
+    let lock = getDataByIndex(locks, mem.lockIndex);
     if (mem.receiver === mem.sender) {
       tmpMem.r_tags = {};
     } else if (mem.receiver === self.botAddress) {
@@ -193,9 +211,9 @@ function _addInfoToMems(memories, self) {
   return res;
 }
 
-function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks] = []) {
+function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, lock, locks, lockSender] = []) {
   if (info.date == null) {
-    info = { ...info, date: block.timestamp }
+    info = { ...info, date: block.timestamp };
   } else {
     if (typeof info.date !== 'number' || !Number.isInteger(info.date) || info.date < 0) {
       throw new Error('info.date must be a timestamp (integer).');
@@ -206,9 +224,9 @@ function _addMemory(self, lockIndex, isPrivate, content, info, [isFirstMemory, l
     [lock, locks] = self.getLock(lockIndex);
   }
 
-  expect(lock.status === 1, 'Cannot add memory to a pending lock.')
-  expectLockContributors(lock, 'Only lock contributors can add memory.');
-  const sender = msg.sender;
+  expect(lock.status === 1, 'Cannot add memory to a pending lock.');
+  !lockSender && expectLockContributors(lock, 'Only lock contributors can add memory.');
+  const sender = lockSender || msg.sender;
   const memory = { isPrivate, sender, lockIndex, content, info, type: isFirstMemory ? 1 : 0, likes: {}, comments: [] };
 
   //new memories
@@ -240,11 +258,11 @@ function _getPaginatedMemories(memories, page, pageSize, loadToCurrentPage) {
   if (!memories.length) return [];
 
   if (page == null || pageSize == null) {
-    return memories
+    return memories;
   }
 
   const sortedMemories = memories.reverse();
-  const from = loadToCurrentPage ? 0 : ((page - 1) * pageSize);
+  const from = loadToCurrentPage ? 0 : (page - 1) * pageSize;
   const to = page * pageSize;
 
   return sortedMemories.slice(from, to);

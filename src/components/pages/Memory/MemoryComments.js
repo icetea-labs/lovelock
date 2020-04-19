@@ -87,7 +87,8 @@ export default function MemoryComments(props) {
   const avatar = useSelector(state => state.account.avatar);
   const address = useSelector(state => state.account.address);
   const memories = useSelector(state => state.loveinfo.memories);
-  const memory = memories.filter(item => item.id === memoryIndex);
+  const blogView = useSelector(state => state.loveinfo.blogView);
+  const memory = memories.find(item => item.id === memoryIndex) || blogView;
   const { enqueueSnackbar } = useSnackbar();
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -161,7 +162,7 @@ export default function MemoryComments(props) {
   }
 
   function canDelelte(item) {
-    return [item.sender, memory[0].sender, memory[0].receiver].includes(address);
+    return [item.sender, memory.sender, memory.receiver].includes(address);
   }
 
   async function deleteComment(item, indexKey) {
@@ -218,6 +219,7 @@ export default function MemoryComments(props) {
                   title={
                     <TimeWithFormat
                       value={item.timestamp}
+                      language={language}
                       format={language === ja ? 'MMM Do' : 'dddd, MMMM Do YYYY, h:mm:ss a'}
                     />
                   }

@@ -61,23 +61,32 @@ const src = fs.readFileSync('./contracts/lovelock.js');
   console.log(`Contract created: ${r.address}`);
 
   // migrate data
-  console.log('Trying to migrate data from ' + contractAlias);
   try {
-    const newContract = tweb3.contract(r);
-    await newContract.methods.migrateState(contractAlias, true).sendCommit({ from: account.address });
-    await newContract.methods.addAdmins([account.address]).sendCommit({ from: account.address });
-    console.log('Data migration finished.');
+    const contractAddr = await tweb3.contract('system.alias').methods.resolve(contractAlias).call()
+    if (!contractAddr) {
+      console.log(`${contractAlias} does not exist, no need to migrate data.`);
+    } else {
+      console.log('Trying to migrate data from ' + contractAlias);
+      const newContract = tweb3.contract(r);
+      await newContract.methods.migrateState(contractAlias, true).sendCommit({ from: account.address });
+      await newContract.methods.addAdmins([account.address]).sendCommit({ from: account.address });
+      await newContract.methods.migrateUsers().sendCommit({ from: account.address });
+      await newContract.methods.migrateChoices().sendCommit({ from: account.address });
+      console.log('Data migration finished.');
+    }
   } catch (e) {
     console.log('Fail to migrate data: ', e.message);
+    console.log('Skip adding users and register alias.')
+    process.exit(1)
   }
 
-  // add user
+  // add users
   if (config.USER_ADDRESS) {
     const users = config.USER_ADDRESS.split(',');
     console.log('Adding user ' + users);
     try {
       const newContract = tweb3.contract(r);
-      await newContract.methods.addUsers(users.length > 1 ? users : users[0]).sendCommit({ from: account.address });
+      await newContract.methods.addUsers(users).sendCommit({ from: account.address });
       console.log('User added.');
     } catch (e) {
       console.log('Fail to add user: ', e.message);

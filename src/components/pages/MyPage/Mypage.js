@@ -8,7 +8,7 @@ import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { useSnackbar } from 'notistack';
 import { FormattedMessage } from 'react-intl';
 
-import FavoriteIcon from '@material-ui/icons/Favorite';
+import LoyaltyIcon from '@material-ui/icons/Loyalty';
 import PersonIcon from '@material-ui/icons/Person';
 import { rem, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
@@ -31,7 +31,8 @@ const BannerContainer = styled.div`
 const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
-  background: linear-gradient(340deg, #8dc1fe, #ad76ff);
+  background: linear-gradient(320deg, #eee, #ddd);
+  background-image: url("/static/img/small_tiles.png");
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;
@@ -73,16 +74,16 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(1),
   },
   titlePoint: {
+    marginLeft: theme.spacing(2),
     color: '#8250c8',
   },
   titleIcon: {
-    marginLeft: theme.spacing(2),
     color: '#8250c8',
   },
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemory, memoryList, point, isApproved } = props;
+  const { match, setLocks, setMemories, setRecentData, memoryList, balances, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -112,11 +113,15 @@ function Mypage(props) {
         info.displayname = data[0]['display-name'];
         info.followed = data[0].followed;
         info.address = data[0].address;
+        balances[info.address] = data[0].token;
         const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
         info.numFollow = numFollow;
         info.isMyFollow = isMyFollow;
         setMyPageInfo(info);
-      });
+      }).catch(err => {
+        console.error(err)
+        props.history.push('/notfound')
+      })
     }
 
     getDataMypage();
@@ -124,9 +129,11 @@ function Mypage(props) {
   }, [paramAliasOrAddr]);
 
   useEffect(() => {
+    //setLoading(true)
+    setMemories([]);
     fetchDataLocksMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, paramAliasOrAddr]);
 
   // this only runs on DidUpdate, not DidMount
   useDidUpdate(() => {
@@ -134,14 +141,13 @@ function Mypage(props) {
   }, [changed]);
 
   function fetchDataLocksMemories(loadToCurrentPage = false) {
-    APIService.getLocksForFeed(paramAliasOrAddr)
+    APIService.getLocksForFeed(paramAliasOrAddr, false, true, true)
       .then(resp => {
         // set to redux
         setLocks(resp.locks);
+        setRecentData(resp.recentData)
 
-        const memoIndex = resp.locks.reduce((tmp, lock) => {
-          return lock.isMyLock ? tmp.concat(lock.memoIndex) : tmp;
-        }, []);
+        const memoIndex = resp.memoryIndexes;
 
         if (memoIndex.length > 0) {
           APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
@@ -152,7 +158,7 @@ function Mypage(props) {
 
               let memories = result;
               if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemory(memories);
+              setMemories(memories);
               setLoading(false);
             })
             .catch(err => {
@@ -160,7 +166,7 @@ function Mypage(props) {
               setLoading(false);
             });
         } else {
-          setMemory([]);
+          setMemories([]);
           setNoMoreMemories(true);
           setLoading(false);
         }
@@ -223,12 +229,11 @@ function Mypage(props) {
   }
 
   const isHaveLocks = props.locks.length > 0;
-  const isGuest = myPageInfo.address != address
+  const isGuest = myPageInfo.address !== address
   return (
     <>
       {!loading && (
         <>
-          {isHaveLocks ? (
             <div>
               <BannerContainer>
                 <ShadowBox>
@@ -240,13 +245,13 @@ function Mypage(props) {
                           {myPageInfo.displayname}
                         </Typography>
                         <PointShow>
-                          <FavoriteIcon className={classes.titlePoint} />
-                          <Typography variant="subtitle1" color="primary">
-                            &nbsp;{point}
-                          </Typography>
-                          <PersonIcon className={classes.titleIcon} />
+                        <PersonIcon className={classes.titleIcon} />
                           <Typography variant="subtitle1" color="primary">
                             &nbsp;{`@${myPageInfo.username}`}
+                          </Typography>
+                          <LoyaltyIcon className={classes.titlePoint} />
+                          <Typography variant="subtitle1" color="primary">
+                            &nbsp;{balances[myPageInfo.address || paramAliasOrAddr]}
                           </Typography>
                         </PointShow>
                       </div>
@@ -279,17 +284,18 @@ function Mypage(props) {
                   </ProfileCover>
                 </ShadowBox>
               </BannerContainer>
-              <LeftBoxWrapper>
+              {isHaveLocks ? (<LeftBoxWrapper>
                 <div className="proposeColumn proposeColumn--left">
                   <LeftContainer
                     loading={loading}
+                    context="mypage"
+                    showNewLock
                     isGuest={address !== paramAliasOrAddr || myPageInfo.username !== paramAliasOrAddr}
                   />
                 </div>
                 <div className="proposeColumn proposeColumn--right">
                   <MemoryList
                     {...props}
-                    myPageRoute
                     onMemoryChanged={refresh}
                     loading={loading}
                     nextPage={nextPage}
@@ -298,14 +304,14 @@ function Mypage(props) {
                     myPageInfo={myPageInfo}
                   />
                 </div>
-              </LeftBoxWrapper>
-            </div>
-          ) : <EmptyPage 
+              </LeftBoxWrapper> ) : <EmptyPage 
                 isApproved={isApproved} 
                 history={props.history} 
                 isGuest={isGuest} 
                 username={myPageInfo.username} 
               />
+          }
+            </div>
           }
         </>
       )}
@@ -318,7 +324,7 @@ const mapStateToProps = state => {
     address: state.account.address,
     isApproved: state.account.isApproved,
     memoryList: state.loveinfo.memories,
-    point: state.account.point,
+    balances: state.loveinfo.balances,
   };
 };
 const mapDispatchToProps = dispatch => {
@@ -326,8 +332,11 @@ const mapDispatchToProps = dispatch => {
     setLocks: value => {
       dispatch(actions.setLocks(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
+    },
+    setRecentData: value => {
+      dispatch(actions.setRecentData(value));
     },
   };
 };

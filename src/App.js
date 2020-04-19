@@ -4,7 +4,7 @@ import lazy from "react-lazy-with-preload";
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-import { SimpleLoading, GlobaLoading } from './components/elements/GlobaLoading';
+import { SimpleLoading } from './components/elements/GlobaLoading';
 import * as globalData from './store/actions/globalData';
 
 // check display language
@@ -130,7 +130,7 @@ function App(props) {
           </Switch>
         </Suspense>
       </Router>
-      {isLoading && <GlobaLoading />}
+      {isLoading && <SimpleLoading />}
     </div>
   );
 }

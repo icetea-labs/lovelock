@@ -341,7 +341,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function TopContrainer(props) {
-  const { proIndex, address, topInfo, setTopInfo, setGLoading } = props;
+  const { proIndex, address, topInfo, setTopInfo, setGLoading, history, language } = props;
   const tx = useTx();
   const isSender = topInfo.sender === address;
   const isReceiver = topInfo.receiver === address;
@@ -508,6 +508,11 @@ function TopContrainer(props) {
     }, 1);
   }
 
+  function navigateLink(e) {
+    e.preventDefault()
+    history.push(e.target.getAttribute('href'))
+  }
+
   const buttonChange = () => (
     <label htmlFor="outlined-button-file">
       <Button component="span" className={classes.btChange}>
@@ -590,7 +595,7 @@ function TopContrainer(props) {
         ) : (
           <CardMedia
             className={classes.media}
-            image={topInfo.coverImg && process.env.REACT_APP_IPFS + topInfo.coverImg}
+            image={topInfo.coverImg ? process.env.REACT_APP_IPFS + topInfo.coverImg : '/static/img/landing.svg'}
           >
             {canChangeCover() && (
               <div className="showChangeImg">
@@ -684,12 +689,13 @@ function TopContrainer(props) {
                   href={`/u/${topInfo.sender}`}
                   className="user_name color-violet"
                   title={topInfo.s_info.lockName || ''}
+                  onClick={navigateLink}
                 >
                   {`${topInfo.s_info.lockName || topInfo.s_name}`}
                 </Link>
                 <span className="sinceDate">・</span>
                 <span className="time color-gray">
-                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" />
+                  <TimeWithFormat value={topInfo.s_date} format="DD MMM YYYY" language={language} />
                 </span>
                 {isSender && renderEditLockIcon()}
               </div>
@@ -712,7 +718,7 @@ function TopContrainer(props) {
           </div>
         </div>
 
-        {topInfo.r_content && (
+        {!topInfo.isJournal && (
           <div className="proposeMes">
             <div className="content_detail clearfix">
               {loading ? (
@@ -720,7 +726,7 @@ function TopContrainer(props) {
               ) : (
                 <div className="name_time" style={{ width: '100%', textAlign: 'right' }}>
                   {isReceiver && renderEditLockIcon(true)}
-                  <Link href={`/u/${topInfo.receiver}`} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
+                  <Link href={`/u/${topInfo.receiver}`}  onClick={navigateLink} className="user_name color-violet">{`${topInfo.r_name}`}</Link>
                 </div>
               )}
               {loading ? (
@@ -736,7 +742,7 @@ function TopContrainer(props) {
                   />
                 </div>
               ) : (
-                <div className="rightContent">{topInfo.r_content}</div>
+                <div className="rightContent">{topInfo.r_content || '🌼'}</div>
               )}
             </div>
             <div className="user_photo ">
@@ -765,6 +771,7 @@ const mapStateToProps = state => {
   return {
     topInfo: state.loveinfo.topInfo,
     address: state.account.address,
+    language: state.globalData.language
   };
 };
 
@@ -773,8 +780,8 @@ const mapDispatchToProps = dispatch => {
     setTopInfo: value => {
       dispatch(actions.setTopInfo(value));
     },
-    setMemory: value => {
-      dispatch(actions.setMemory(value));
+    setMemories: value => {
+      dispatch(actions.setMemories(value));
     },
     setGLoading(value) {
       dispatch(actions.setLoading(value));
