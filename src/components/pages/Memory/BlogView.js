@@ -89,7 +89,7 @@ export function BlogView(props) {
         if (!mem.blogContent) {
           const blogData = JSON.parse(mem.content);
           mem.meta = blogData.meta;
-          const { json, gateway } = await smartFetchIpfsJson(blogData.blogHash, {
+          const { json } = await smartFetchIpfsJson(blogData.blogHash, {
             signal,
             timestamp: mem.info.date,
           }).catch(err => {
@@ -98,13 +98,13 @@ export function BlogView(props) {
           });
           json._overwrite = true;
           mem.blogContent = json;
-
-          // set blog coverPhoto to full path
-          if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
-            mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url, gateway);
-          }
         } else {
           mem.blogContent = { ...mem.blogContent, _overwrite: true}
+        }
+
+        // set blog coverPhoto to full path
+        if (mem.meta && mem.meta.coverPhoto && mem.meta.coverPhoto.url) {
+          mem.meta.coverPhoto.url = ensureHashUrl(mem.meta.coverPhoto.url);
         }
 
         // save to redux
