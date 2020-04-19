@@ -10,6 +10,7 @@ import { rem } from '../../elements/StyledUtils';
 import { callView, showSubscriptionError, TimeWithFormat } from '../../../helper';
 import Icon from '../../elements/Icon';
 
+import Button from '@material-ui/core/Button';
 import { LinkPro } from '../../elements/Button';
 import { Lock } from '../../elements';
 import * as actions from '../../../store/actions';
@@ -158,7 +159,8 @@ function LeftContainer(props) {
     closeMobileMenu,
     language,
     featured,
-    context
+    context,
+    myPageInfo
   } = props;
 
   const isLockPage = proIndex != null;
@@ -168,7 +170,7 @@ function LeftContainer(props) {
   const hasRecentImages = !!Object.keys(recentImages).length;
   const recentBlogPosts = shouldRenderRecent ? recentData.blogPosts || [] : [];
 
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const ja = 'ja';
 
   useEffect(() => {
@@ -240,31 +242,50 @@ function LeftContainer(props) {
   }
 
   function newLock() {
-    setShowNewLockDialog(true);
+    setShowNewLockDialog(myPageInfo || true);
     if (closeMobileMenu) closeMobileMenu();
   }
 
   function eventConfirmLock(data) {
     confirmLock(data.log);
     if (address === data.log.sender && data.log.status === 1) {
-      const message = 'Your lock request has been accepted.';
-      enqueueSnackbar(message, { variant: 'info' });
+      const message = 'Your lock request has been accepted';
+      const action = (
+        <Button variant="contained" color="secondary"
+          onClick={() => history.push(`/lock/${data.log.id}`)}>
+          VIEW
+        </Button>
+      )
+      enqueueSnackbar(message, { variant: 'success', action });
     }
   }
 
   async function eventCreatePropose(data) {
-    const lockForFeed = await callView('getLocksForFeed', [address, true, false]);
-    setLocks(lockForFeed.locks);
-
-    // console.log(data);
     if (address !== data.log.sender) {
-      const message = 'You have a new lock request.';
-      enqueueSnackbar(message, { variant: 'info' });
+      const message = 'You have a new lock request';
+      const action = key => (
+        <Button variant="contained" color="secondary"
+         onClick={() => {
+          closeSnackbar(key)
+          setTimeout(() =>showNotifyLock(+data.log.id), 0)
+         }}>
+          VIEW
+        </Button>
+      )
+      enqueueSnackbar(message, { variant: 'success', action });
     }
+
+    if (['home', 'mypage'].includes(context)) {
+      // reload left sidebar locks
+      const params = myPageInfo ? [myPageInfo.address, false] : [address, true]
+      const lockForFeed = await callView('getLocksForFeed', params);
+      setLocks(lockForFeed.locks);
+    }
+
     // goto propose detail when sent to bot.
-    if (data.log.receiver === process.env.REACT_APP_BOT_LOVER) {
-      history.push(`/lock/${data.log.id}`);
-    }
+    // if (data.log.receiver === process.env.REACT_APP_BOT_LOVER) {
+    //   history.push(`/lock/${data.log.id}`);
+    // }
   }
 
   function renderCollections(_collections) {
@@ -403,10 +424,10 @@ function LeftContainer(props) {
       <StickyBox className="sticky-leftside" offsetTop={20} offsetBottom={20}>
         <LeftBox>
           <ShadowBox>
-            {address && !isGuest && showNewLock && (
+            {address && showNewLock && (
               <LinkPro className="btn_add_promise" onClick={newLock}>
                 <Icon type="add" />
-                <FormattedMessage id="leftmenu.newLock" />
+                <FormattedMessage id={!isGuest ? "leftmenu.newLock" : "leftmenu.requestLock"} />
               </LinkPro>
             )}
             {!featured && renderOwnerLocks(locks, address)}
