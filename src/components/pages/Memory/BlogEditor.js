@@ -83,6 +83,11 @@ export default function BlogEditor(props) {
   }
 
   useEffect(() => {
+    if (lockIndex != null) return
+    setLockIndex(lockIndexInit)
+  })
+
+  useEffect(() => {
     loadAllDrafts().then(setDrafts);
   }, []);
 
