@@ -24,7 +24,6 @@ function RightContainer(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (validCollectionId == null && proIndex === topInfo.index) return;
     fetchMemories();
   }, [])
 
