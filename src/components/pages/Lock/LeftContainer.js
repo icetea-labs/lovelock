@@ -105,6 +105,7 @@ const RecentBlogPostBox = styled.ul`
   width: 100%;
   line-height: 1.5;
   li {
+    display: flex;
     padding: 0.2rem 0;
     a:hover {
       text-decoration: underline;
@@ -299,23 +300,25 @@ function LeftContainer(props) {
     return posts.map(({ date, content, index }, i) => {
       return (
         <li key={i}>
-          ・
-          <a href={`/blog/${index}`}
-            onClick={e => {
-              e.preventDefault()
-              const memo = props.memories.find(m => m.id === index)
-              if (memo) {
-                memo.showDetail = true;
-                props.updateMemory(memo)
-              } else {
-                history.push(`/blog/${index}`)
-              }
-            }}
-          >
-            {content.meta.title}
-          </a>
-          <span className="date">
-            ・<TimeWithFormat value={date} format="DD MMM YYYY" />
+          <span>・</span>
+          <span>
+            <a href={`/blog/${index}`}
+              onClick={e => {
+                e.preventDefault()
+                const memo = props.memories.find(m => m.id === index)
+                if (memo) {
+                  memo.showDetail = true;
+                  props.updateMemory(memo)
+                } else {
+                  history.push(`/blog/${index}`)
+                }
+              }}
+            >
+              {content.meta.title}
+            </a>
+            <span className="date">
+              ・<TimeWithFormat value={date} format="DD MMM YYYY" />
+            </span>
           </span>
         </li>
       );
