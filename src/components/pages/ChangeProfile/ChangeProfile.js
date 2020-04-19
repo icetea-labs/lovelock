@@ -285,7 +285,7 @@ function ChangeProfile(props) {
             // Set to redux
             setAccount(accountInfo);
             // Show message infor
-            const message = 'Change profile success!';
+            const message = 'Profile updated.';
             enqueueSnackbar(message, { variant: 'success' });
             history.push('/');
           }

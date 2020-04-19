@@ -125,9 +125,15 @@ const useStyles = makeStyles(theme => ({
   },
   lockReqSettingBg: {
     margin: theme.spacing(2),
+    textAlign: 'center',
+    '& img': {
+      width: 40,
+    }
   },
   lockReqSetting: {
     color: theme.palette.primary.main,
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(3),
   },
   listNoti: {
     maxWidth: 330,
@@ -701,16 +707,20 @@ function Header(props) {
 
   const renderNoTiFooter = (notiList, noItemLangId, moreItemLangId) => {
     if (notiList.length > 0 && notiList.length <= maxNotiShown) return
-
+    const empty = !notiList.length
+    const remainning = notiList.length - maxNotiShown
     return (
       <div className={classes.lockReqSettingBg}>
-        {notiList.length === 0 && (
+        {empty && (
+          <img src="/static/img/plant.svg" alt="plant" />
+        )}
+        {empty && (
           <ListItemText align="center" primary={<FormattedMessage id={noItemLangId} />} className={classes.lockReqSetting} />
         )}
-        {notiList.length > maxNotiShown && (
+        {remainning > 0 && (
           <ListItemText
             align="center"
-            primary={<FormattedMessage id={moreItemLangId} values={{ remainning: notiList.length - maxNotiShown }} />}
+            primary={<FormattedMessage id={moreItemLangId} values={{ remainning }} />}
             className={classes.lockReqSetting}
           />
         )}
