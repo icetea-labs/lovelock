@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '@material-ui/core/Button';
 import Hash from 'ipfs-only-hash';
 import {
   toPublicKey,
@@ -803,4 +804,25 @@ export function fetchNoti(params, signal) {
 
 export function markNoti(params, signal) {
   return _fetchNotiCore('mark', params, signal);
+}
+
+export function showActions ({ enqueueSnackbar, closeSnackbar }, message, viewCallback, variant = 'info') {
+      const action = viewCallback ? (key => (
+        <>
+          <Button color="inherit" size="small"
+            onClick={() => {
+              closeSnackbar(key)
+              setTimeout(viewCallback, 0)
+            }}>
+            VIEW
+          </Button>
+          <Button color="inherit" size="small"
+            onClick={() => {
+              closeSnackbar(key)
+            }}>
+            DISMISS
+          </Button>
+        </>
+      )) : undefined
+      enqueueSnackbar(message, { variant, action });
 }

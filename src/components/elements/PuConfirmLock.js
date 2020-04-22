@@ -8,7 +8,7 @@ import { withSnackbar } from 'notistack';
 import CommonDialog from './CommonDialog';
 import { TagTitle } from './PuNewLock';
 import { sendTxWithAuthen } from '../../helper/hooks';
-import { handleError, markNoti } from '../../helper';
+import { handleError, markNoti, showActions } from '../../helper';
 import appConstants from "../../helper/constants";
 
 const useStyles = makeStyles(theme => ({
@@ -52,7 +52,7 @@ class PuConfirmLock extends React.Component {
   };
 
   async messageAccept(message) {
-    const { index, enqueueSnackbar, close, updateNoti, address, history } = this.props;
+    const { index, enqueueSnackbar, closeSnackbar, close, updateNoti, address, history } = this.props;
 
     if (!message) {
       const message = <div><span>Please input </span><span>{getMessage('messageLabel')}</span></div>
@@ -63,15 +63,9 @@ class PuConfirmLock extends React.Component {
     try {
       const result = await sendTxWithAuthen(this.props, 'acceptLock', index, message);
       if (result) {
-        const errMessage = 'Lock request accepted, go post a memory.';
-        const action = (
-          <Button variant="contained" color="secondary"
-            onClick={() => history.push(`/lock/${index}`)}>
-            VIEW
-          </Button>
-        )
-        enqueueSnackbar(errMessage, { variant: 'success', action });
+        const message = 'Lock request accepted, go post a memory.';
         close();
+        showActions({ enqueueSnackbar, closeSnackbar }, message, () => history.push(`/lock/${index}`))
         if (updateNoti) {
           markNoti({ lock_id: index, address }).then(updateNoti)
         } else {
