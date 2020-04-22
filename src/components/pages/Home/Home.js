@@ -172,6 +172,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actions.setLocks(value));
     },
     setMemories: value => {
+      value.src = 'home'
       dispatch(actions.setMemories(value));
     },
   };

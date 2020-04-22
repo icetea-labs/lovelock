@@ -528,14 +528,6 @@ function Header(props) {
     otherReqs && otherReqs.forEach(dataItem => {
       const item = camelObject(dataItem)
       item.text = processTags(item.text)
-      item.adjustedEvent = item.eventName
-      if (item.eventName === 'addMemory') {
-        if (item.itemType) {
-          item.adjustedEvent = 'acceptLock'
-        } else if (item.itemFlag) {
-          item.adjustedEvent = 'addBlogPost'
-        }
-      }
       if (item.eventName === 'addLike') {
         // no add duplicate
         if (!likeList.includes(item.itemId)) {
@@ -665,8 +657,7 @@ function Header(props) {
     </StyledMenu>
   );
 
-  const renderNotiItem = ({id, adjustedEvent, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
-    adjustedEvent = adjustedEvent || eventName
+  const renderNotiItem = ({id, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
     return  <ListItem
       alignItems="flex-start"
       button
@@ -681,7 +672,7 @@ function Header(props) {
         primary={
           <Typography component="span" variant="body1" >
             <FormattedMessage
-              id={"noti." + adjustedEvent}
+              id={"noti." + eventName}
               values={{ actorName: <b>{actorName}</b> }} />
           </Typography>
         }
@@ -748,11 +739,11 @@ function Header(props) {
   }
 
   const handleNotiClick = notiItem => {
-    const { id, adjustedEvent, itemId, itemFlag: isBlog, itemData: lockId } = notiItem
+    const { id, eventName, itemId, itemFlag: isBlog } = notiItem
     let path = `/memory/${itemId}`
-    if (adjustedEvent === 'acceptLock') {
+    if (eventName === 'confirmLock') {
       // it is better to go to the lock because it has more info
-      path = `/lock/${lockId}`
+      path = `/lock/${itemId}`
     } else if (isBlog) {
       path = `/blog/${itemId}`
     }

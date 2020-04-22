@@ -28,16 +28,18 @@ const loveinfo = (state = initialState, action) => {
     case actionTypes.SET_MEMORIES:
       return { ...state, memories: action.data };
     case actionTypes.UPDATE_MEMORY: {
-      if (state.memories && state.memories.length) {
-        const existing = state.memories.findIndex(m => m.id === action.data.id)
-        if (existing >= 0) {
-          state.memories[existing] = action.data;
-        } else {
-          state.memories.push(action.data);
-        }
-        return { ...state, memories: [...state.memories] }
+      state.memories = state.memories || []
+      const existing = state.memories.findIndex(m => m.id === action.data.id)
+      if (existing >= 0) {
+        state.memories[existing] = action.data;
+      } else {
+        state.memories.push(action.data);
       }
-      return { ...state, memories: [action.data] };
+
+      const newMemoies = [...state.memories]
+      newMemoies.src = state.memories.src
+      newMemoies.srcId = state.memories.srcId
+      return { ...state, memories: newMemoies }
     }
     case actionTypes.SET_BLOG_VIEW:
       return { ...state, blogView: action.data };

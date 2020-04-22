@@ -83,7 +83,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Mypage(props) {
-  const { match, setLocks, setMemories, setRecentData, memoryList, balances, isApproved } = props;
+  const { match, setLocks, setRecentData, memoryList, balances, isApproved } = props;
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
@@ -158,7 +158,7 @@ function Mypage(props) {
 
               let memories = result;
               if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemories(memories);
+              setMemories(memories, resp.address);
               setLoading(false);
             })
             .catch(err => {
@@ -223,6 +223,13 @@ function Mypage(props) {
     }
   }
 
+  function setMemories(value, address) {
+    value.src = 'mypage'
+    value.srcId = address || ((myPageInfo && myPageInfo.address) ? myPageInfo.address : paramAliasOrAddr)
+    props.dispatch(actions.setMemories(value));
+  }
+
+  // Replace the URL path to use username
   if (myPageInfo && myPageInfo.username) {
     const pathname = `/u/${myPageInfo.username}`;
     window.history.replaceState(null, '', pathname);
@@ -330,11 +337,9 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = dispatch => {
   return {
+    dispatch,
     setLocks: value => {
       dispatch(actions.setLocks(value));
-    },
-    setMemories: value => {
-      dispatch(actions.setMemories(value));
     },
     setRecentData: value => {
       dispatch(actions.setRecentData(value));

@@ -86,6 +86,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     setMemories: value => {
+      value.src = 'explore'
       dispatch(actions.setMemories(value));
     },
     setLocks: value => {
