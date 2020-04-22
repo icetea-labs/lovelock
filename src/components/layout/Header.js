@@ -537,25 +537,13 @@ function Header(props) {
 
     const otherNotiList = [];
     const likeList = []; // to prevent dupplicate like noti
-    otherReqs &&
-      otherReqs.forEach(dataItem => {
-        const item = camelObject(dataItem);
-        item.text = processTags(item.text);
-        item.adjustedEvent = item.eventName;
-        if (item.eventName === 'addMemory') {
-          if (item.itemType) {
-            item.adjustedEvent = 'acceptLock';
-          } else if (item.itemFlag) {
-            item.adjustedEvent = 'addBlogPost';
-          }
-        }
-        if (item.eventName === 'addLike') {
-          // no add duplicate
-          if (!likeList.includes(item.itemId)) {
-            likeList.push(item.itemId);
-            otherNotiList.push(item);
-          }
-        } else {
+    otherReqs && otherReqs.forEach(dataItem => {
+      const item = camelObject(dataItem)
+      item.text = processTags(item.text)
+      if (item.eventName === 'addLike') {
+        // no add duplicate
+        if (!likeList.includes(item.itemId)) {
+          likeList.push(item.itemId)
           otherNotiList.push(item);
         }
       });
@@ -675,41 +663,35 @@ function Header(props) {
     </StyledMenu>
   );
 
-  const renderNotiItem = (
-    { id, adjustedEvent, eventName, actorName, actorAvatar, text, image, timestamp },
-    onClick
-  ) => {
-    adjustedEvent = adjustedEvent || eventName;
-    return (
-      <ListItem
-        alignItems="flex-start"
-        button
-        className={classes.listItemNotiStyle}
-        style={{ paddingRight: image ? 60 : 16 }}
-        key={id}
-        onClick={onClick}
-      >
-        <ListItemAvatar>
-          <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
-        </ListItemAvatar>
-        <ListItemText
-          primary={
-            <Typography component="span" variant="body1">
-              <FormattedMessage id={'noti.' + adjustedEvent} values={{ actorName: <b>{actorName}</b> }} />
+  const renderNotiItem = ({id, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
+    return  <ListItem
+      alignItems="flex-start"
+      button
+      className={classes.listItemNotiStyle}
+      style={{ paddingRight: image ? 60 : 16 }}
+      key={id}
+      onClick={onClick}>
+      <ListItemAvatar>
+        <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
+      </ListItemAvatar>
+      <ListItemText
+        primary={
+          <Typography component="span" variant="body1" >
+            <FormattedMessage
+              id={"noti." + eventName}
+              values={{ actorName: <b>{actorName}</b> }} />
+          </Typography>
+        }
+        secondary={
+          <>
+            <Typography component="span" variant="body1"
+              className={classes.notiPromise}
+              style={{ width: image ? 'calc(100% - 24px)' : '100%' }}
+            >
+              {text}
             </Typography>
-          }
-          secondary={
-            <>
-              <Typography
-                component="span"
-                variant="body1"
-                className={classes.notiPromise}
-                style={{ width: image ? 'calc(100% - 24px)' : '100%' }}
-              >
-                {text}
-              </Typography>
-              <Typography component="span" variant="body2">
-                {diffTime(timestamp)}
+            <Typography component="span" variant="body2">
+              {diffTime(timestamp)}
               </Typography>
             </>
           }
@@ -770,11 +752,11 @@ function Header(props) {
   };
 
   const handleNotiClick = notiItem => {
-    const { id, adjustedEvent, itemId, itemFlag: isBlog, itemData: lockId } = notiItem;
-    let path = `/memory/${itemId}`;
-    if (adjustedEvent === 'acceptLock') {
+    const { id, eventName, itemId, itemFlag: isBlog } = notiItem
+    let path = `/memory/${itemId}`
+    if (eventName === 'confirmLock') {
       // it is better to go to the lock because it has more info
-      path = `/lock/${lockId}`;
+      path = `/lock/${itemId}`
     } else if (isBlog) {
       path = `/blog/${itemId}`;
     }

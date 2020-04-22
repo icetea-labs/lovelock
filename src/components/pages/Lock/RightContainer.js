@@ -25,21 +25,10 @@ function RightContainer(props) {
 
   useEffect(() => {
     fetchMemories();
-  }, [])
-
-  useDidUpdate(() => {
-    if (noMoreMemories) return;
-    if (page * appConstants.memoryPageSize <= memoryList.length) return;
-    fetchMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, proIndex, validCollectionId])
 
-  useDidUpdate(() => {
-    if (validCollectionId == null && proIndex === topInfo.index) return;
-    fetchMemories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proIndex, validCollectionId]);
-
+  // if changed is forced, reload memories no matter what
   useDidUpdate(() => {
     fetchMemories(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,12 +47,18 @@ function RightContainer(props) {
 
       let memories = result;
       if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-      dispatch(actions.setMemories(memories));
+      setMemories(memories)
       setLoading(false);
     }).catch(err => {
       console.error(err)
       setLoading(false)
     })
+  }
+
+  function setMemories(value) {
+    value.src = 'lock'
+    value.srcId = proIndex
+    dispatch(actions.setMemories(value));
   }
 
   function nextPage() {

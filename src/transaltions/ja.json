@@ -159,7 +159,7 @@
     "noti.notiMore": "and {remainning} more…",
 
     "noti.createLock": "{actorName}",
-    "noti.acceptLock": "{actorName} accepted your lock request.",
+    "noti.confirmLock": "{actorName} accepted your lock request.",
     "noti.addMemory": "{actorName} shared a new memory with you.",
     "noti.addBlogPost": "{actorName} shared a blog article with you.",
     "noti.addLike": "{actorName} liked your memory.",
