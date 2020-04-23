@@ -7,10 +7,9 @@ import { FormattedMessage } from 'react-intl';
 import StickyBox from 'react-sticky-box';
 import { ensureContract } from '../../../service/tweb3';
 import { rem } from '../../elements/StyledUtils';
-import { callView, showSubscriptionError, TimeWithFormat } from '../../../helper';
+import { callView, showSubscriptionError, TimeWithFormat, showActions } from '../../../helper';
 import Icon from '../../elements/Icon';
 
-import Button from '@material-ui/core/Button';
 import { LinkPro } from '../../elements/Button';
 import { Lock } from '../../elements';
 import * as actions from '../../../store/actions';
@@ -170,7 +169,8 @@ function LeftContainer(props) {
   const hasRecentImages = !!Object.keys(recentImages).length;
   const recentBlogPosts = shouldRenderRecent ? recentData.blogPosts || [] : [];
 
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const snackbar = useSnackbar()
+  const { enqueueSnackbar } = snackbar;
   const ja = 'ja';
 
   useEffect(() => {
@@ -250,29 +250,14 @@ function LeftContainer(props) {
     confirmLock(data.log);
     if (address === data.log.sender && data.log.status === 1) {
       const message = 'Your lock request has been accepted';
-      const action = (
-        <Button variant="contained" color="secondary"
-          onClick={() => history.push(`/lock/${data.log.id}`)}>
-          VIEW
-        </Button>
-      )
-      enqueueSnackbar(message, { variant: 'success', action });
+      showActions(snackbar, message, () => history.push(`/lock/${data.log.id}`))
     }
   }
 
   async function eventCreatePropose(data) {
     if (address !== data.log.sender) {
       const message = 'You have a new lock request';
-      const action = key => (
-        <Button variant="contained" color="secondary"
-         onClick={() => {
-          closeSnackbar(key)
-          setTimeout(() =>showNotifyLock(+data.log.id), 0)
-         }}>
-          VIEW
-        </Button>
-      )
-      enqueueSnackbar(message, { variant: 'success', action });
+      showActions(snackbar, message, () => showNotifyLock(+data.log.id))
     }
 
     if (['home', 'mypage'].includes(context)) {

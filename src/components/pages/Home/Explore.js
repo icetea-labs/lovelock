@@ -12,7 +12,9 @@ import { useDidUpdate } from '../../../helper/hooks'
 
 function Explore(props) {
   const { setMemories, memoryList, setLocks } = props;
-  const [loading, setLoading] = useState(true);
+  const notOwnMemorySrc = memoryList.src !== 'explore';
+
+  const [loading, setLoading] = useState(notOwnMemorySrc);
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
@@ -26,18 +28,36 @@ function Explore(props) {
   }, [setLocks])
 
   useEffect(() => {
+    if (page !== 1) {
+      setPage(1)
+      setNoMoreMemories(false)
+    }
     fetchMemories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pinIndex]);
 
   useDidUpdate(() => {
+    if (page === 1 || noMoreMemories) return
+
     fetchMemories(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  useDidUpdate(() => {
+    fetchMemories(false, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed]);
 
-  function fetchMemories(loadToCurrentPage = false) {
+  function fetchMemories(pageChanged = false, loadToCurrentPage = false) {
+    if (notOwnMemorySrc) {
+      setLoading(notOwnMemorySrc);
+      setMemories([]);
+    } else if (!pageChanged && !loadToCurrentPage) {
+      return
+    }
+
     APIService.getChoiceMemories(pinIndex, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
-      if (!result.length) {
+      if (result.length < appConstants.memoryPageSize) {
         setNoMoreMemories(true);
       }
 
@@ -86,6 +106,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     setMemories: value => {
+      value.src = 'explore'
       dispatch(actions.setMemories(value));
     },
     setLocks: value => {

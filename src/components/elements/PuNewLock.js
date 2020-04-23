@@ -16,7 +16,6 @@ import { FormattedMessage } from 'react-intl';
 import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import ContactSupportOutlinedIcon from '@material-ui/icons/ContactSupportOutlined';
-import Button from '@material-ui/core/Button';
 
 import * as actions from '../../store/actions';
 import {
@@ -26,6 +25,7 @@ import {
   imageResize,
   handleError,
   getUserSuggestions,
+  showActions
 } from '../../helper';
 import { ensureToken, sendTransaction } from '../../helper/hooks';
 import AddInfoMessage from './AddInfoMessage';
@@ -383,7 +383,7 @@ class PuNewLock extends React.Component {
   };
 
   async createLock() {
-    const { setLoading, enqueueSnackbar, close, address, newLockOptions } = this.props;
+    const { setLoading, enqueueSnackbar, closeSnackbar, close, address, newLockOptions } = this.props;
     const { promiseStm, date, file, firstname, lastname, cropFile, lockType: lockTypeState, lockName, botReply } = this.state;
 
     let { partner } = this.state;
@@ -465,18 +465,8 @@ class PuNewLock extends React.Component {
       const result = await ensureToken(this.props, uploadThenSendTx);
 
       if (result) {
-        let action
-        if (lockType !== 'lock') {
-          // button to view lock if it is auto-accepted
-          action = (
-            <Button 
-              variant="contained" color="secondary"
-              onClick={() => this.props.history.push(`/lock/${result.returnValue}`)}>
-              VIEW
-            </Button>
-          )
-        }
-        enqueueSnackbar(this.getMessage('sent'), { variant: 'success', action });
+        const callback = lockType !== 'lock' ?  () => this.props.history.push(`/lock/${result.returnValue}`) : undefined
+        showActions({enqueueSnackbar, closeSnackbar}, this.getMessage('sent'), callback, 'success')
         setLoading(false);
         close();
       }

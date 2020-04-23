@@ -181,12 +181,6 @@ ReactDOM.render(
             </IconButton>
           )}
           preventDuplicate
-          autoHideDuration={7000}
-          maxSnack={2}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
         >
           <Suspense fallback={<SimpleLoading />}>
               <App />  
