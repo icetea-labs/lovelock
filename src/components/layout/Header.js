@@ -348,13 +348,13 @@ function Header(props) {
   const [step, setStep] = useState('');
 
   function handeOpenMypage(addr) {
+    handleMobileMenuClose();
     addr = typeof addr === 'string' ? addr : address;
     // if (props.match.path === '/u/:address') {
     //   window.location.href = `/u/${addr}`;
     // } else {
     props.history.push(`/u/${addr}`);
     //}
-    handleMobileMenuClose();
   }
   function handeExpandMore(event) {
     setAnchorElMenu(event.currentTarget);
@@ -389,12 +389,14 @@ function Header(props) {
   }
 
   function handeExplore() {
-    props.history.push('/explore');
     handleMobileMenuClose();
+    props.history.push('/explore');
   }
   function handeNewLock() {
-    dispatch(actions.setShowNewLockDialog(true));
     handleMobileMenuClose();
+    setTimeout(() => {
+      dispatch(actions.setShowNewLockDialog(true));
+    }, 0)
   }
   function closeNewLockDialog() {
     dispatch(actions.setShowNewLockDialog(false));
@@ -546,6 +548,8 @@ function Header(props) {
           likeList.push(item.itemId)
           otherNotiList.push(item);
         }
+      } else {
+        otherNotiList.push(item);
       }
     });
     dispatch(actions.setNoti(otherNotiList));
@@ -747,7 +751,10 @@ function Header(props) {
 
   const handleLockNotiClick = lockReq => {
     handleLockReqClose();
-    handleSelLock(lockReq.itemId);
+    handleMobileMenuClose();
+    setTimeout(() => {
+      handleSelLock(lockReq.itemId);
+    }, 0)
     // markNoti({ id: lockReq.id })
   };
 
@@ -812,12 +819,12 @@ function Header(props) {
       onClose={handleMobileMenuClose}
     >
       <MenuItem onClick={handleLockReqOpen}>
-        <IconButton aria-label={`show ${lockReqList.length} new requests`} color="inherit">
+        <IconButton aria-label={`show ${lockReqList.length} new lock requests`} color="inherit">
           <Badge badgeContent={lockReqList.length} color="primary">
             <GroupIcon />
           </Badge>
         </IconButton>
-        <p>Messages</p>
+        <p>Requests</p>
       </MenuItem>
       <MenuItem onClick={handleNotiOpen}>
         <IconButton aria-label={`show ${notiList.length} new notifications`} color="inherit">
