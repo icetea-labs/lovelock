@@ -88,7 +88,6 @@ function Mypage(props) {
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
   const address = useSelector(state => state.account.address);
-  const [loading, setLoading] = useState(true);
   const [myPageInfo, setMyPageInfo] = useState({
     avatar: '',
     username: '',
@@ -99,10 +98,13 @@ function Mypage(props) {
   });
 
   const paramAliasOrAddr = match.params.address || address;
+  const notOwnMemorySrc = memoryList.src !== 'mypage' || memoryList.srcId !== paramAliasOrAddr;
+  const [loading, setLoading] = useState(notOwnMemorySrc);
 
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
+  const [memoryIndexes, setMemoryIndexes] = useState([]);
 
   useEffect(() => {
     async function getDataMypage() {
@@ -129,47 +131,59 @@ function Mypage(props) {
   }, [paramAliasOrAddr]);
 
   useEffect(() => {
-    //setLoading(true)
-    setMemories([]);
-    fetchDataLocksMemories();
+    if (page !== 1) {
+      setPage(1)
+      setNoMoreMemories(false)
+    }
+    getData()
+  }, [paramAliasOrAddr])
+
+  useDidUpdate(() => {
+    if (page === 1 || noMoreMemories) return
+    getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, paramAliasOrAddr]);
+  }, [page]);
 
   // this only runs on DidUpdate, not DidMount
   useDidUpdate(() => {
-    fetchDataLocksMemories(true);
+    getData(true);
   }, [changed]);
 
-  function fetchDataLocksMemories(loadToCurrentPage = false) {
-    APIService.getLocksForFeed(paramAliasOrAddr, false, true, true)
-      .then(resp => {
-        // set to redux
-        setLocks(resp.locks);
-        setRecentData(resp.recentData)
+  async function getLocksForFeed(forced) {
+    if (forced || notOwnMemorySrc || page === 1) {
+      setLoading(true);
+      setMemories([]);
+      return APIService.getLocksForFeed(paramAliasOrAddr, false, true, true).then(r => {
+        setLocks(r.locks)
+        setRecentData(r.recentData)
+        setMemoryIndexes(r.memoryIndexes)
+        return r
+      })
+    } else {
+      return { locks: props.locks, memoryIndexes }
+    }
+  }
 
-        const memoIndex = resp.memoryIndexes;
+  function getData(forced) {
+    return getLocksForFeed(forced).then(r => {
+      r.memoryIndexes.length && fetchMemories(r.memoryIndexes, r.address, forced)
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+  }
 
-        if (memoIndex.length > 0) {
-          APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
-            .then(result => {
-              if (!result.length) {
-                setNoMoreMemories(true);
-              }
-
-              let memories = result;
-              if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemories(memories, resp.address);
-              setLoading(false);
-            })
-            .catch(err => {
-              console.error(err);
-              setLoading(false);
-            });
-        } else {
-          setMemories([]);
+  function fetchMemories(memoriesIndexes, myAddress, loadToCurrentPage = false) {
+    return APIService.getMemoriesByListMemIndex(memoriesIndexes, page, appConstants.memoryPageSize, loadToCurrentPage)
+      .then(result => {
+        if (result.length < appConstants.memoryPageSize) {
           setNoMoreMemories(true);
-          setLoading(false);
         }
+
+        let memories = result;
+        if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
+        setMemories(memories, myAddress);
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
@@ -240,92 +254,91 @@ function Mypage(props) {
   return (
     <>
       {!loading && (
-        <>
-            <div>
-              <BannerContainer>
-                <ShadowBox>
-                  <ProfileCover>
-                    <CoverBox>
-                      <AvatarPro hash={myPageInfo.avatar} className={classes.avatar} />
-                      <div>
-                        <Typography variant="h5" className={classes.displayName}>
-                          {myPageInfo.displayname}
-                        </Typography>
-                        <PointShow>
-                        <PersonIcon className={classes.titleIcon} />
-                          <Typography variant="subtitle1" color="primary">
-                            &nbsp;{`@${myPageInfo.username}`}
+        <div>
+          <BannerContainer>
+            <ShadowBox>
+              <ProfileCover>
+                <CoverBox>
+                  <AvatarPro hash={myPageInfo.avatar} className={classes.avatar} />
+                  <div>
+                    <Typography variant="h5" className={classes.displayName}>
+                      {myPageInfo.displayname}
+                    </Typography>
+                    <PointShow>
+                    <PersonIcon className={classes.titleIcon} />
+                      <Typography variant="subtitle1" color="primary">
+                        &nbsp;{`@${myPageInfo.username}`}
+                      </Typography>
+                      <LoyaltyIcon className={classes.titlePoint} />
+                      <Typography variant="subtitle1" color="primary">
+                        &nbsp;{balances[myPageInfo.address || paramAliasOrAddr]}
+                      </Typography>
+                    </PointShow>
+                  </div>
+                </CoverBox>
+                <NavbarBox>
+                  <div className="proLike">
+                    {/* <Button>Timeline</Button> */}
+                    {/* <Button>Photos</Button> */}
+                    <Button onClick={handleFollow} className={classes.btLikeFollow}>
+                      {myPageInfo.isMyFollow ? (
+                        <>
+                          <BookmarkIcon color="primary" className={classes.rightIcon} />
+                          <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
+                            <FormattedMessage id="topContainer.following" />
+                            {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
                           </Typography>
-                          <LoyaltyIcon className={classes.titlePoint} />
-                          <Typography variant="subtitle1" color="primary">
-                            &nbsp;{balances[myPageInfo.address || paramAliasOrAddr]}
+                        </>
+                      ) : (
+                        <>
+                          <BookmarkBorderIcon className={classes.rightIcon} />
+                          <Typography component="span" variant="body2" className={classes.textFollow}>
+                            <FormattedMessage id="topContainer.follow" />
+                            {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
                           </Typography>
-                        </PointShow>
-                      </div>
-                    </CoverBox>
-                    <NavbarBox>
-                      <div className="proLike">
-                        {/* <Button>Timeline</Button> */}
-                        {/* <Button>Photos</Button> */}
-                        <Button onClick={handleFollow} className={classes.btLikeFollow}>
-                          {myPageInfo.isMyFollow ? (
-                            <>
-                              <BookmarkIcon color="primary" className={classes.rightIcon} />
-                              <Typography component="span" variant="body2" color="primary" className={classes.textFollow}>
-                                <FormattedMessage id="topContainer.following" />
-                                {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
-                              </Typography>
-                            </>
-                          ) : (
-                            <>
-                              <BookmarkBorderIcon className={classes.rightIcon} />
-                              <Typography component="span" variant="body2" className={classes.textFollow}>
-                                <FormattedMessage id="topContainer.follow" />
-                                {myPageInfo.numFollow > 0 && `(${myPageInfo.numFollow})`}
-                              </Typography>
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </NavbarBox>
-                  </ProfileCover>
-                </ShadowBox>
-              </BannerContainer>
-              {isHaveLocks ? (<LeftBoxWrapper>
-                <div className="proposeColumn proposeColumn--left">
-                  <LeftContainer
-                    loading={loading}
-                    context="mypage"
-                    showNewLock
-                    myPageInfo={isGuest ? myPageInfo : undefined}
-                    isGuest={isGuest}
-                  />
-                </div>
-                <div className="proposeColumn proposeColumn--right">
-                  <MemoryList
-                    {...props}
-                    onMemoryChanged={refresh}
-                    loading={loading}
-                    nextPage={nextPage}
-                    needSelectLock={true}
-                    locks={props.locks}
-                    myPageInfo={myPageInfo}
-                  />
-                </div>
-              </LeftBoxWrapper> ) : <EmptyPage 
-                isApproved={isApproved} 
-                history={props.history} 
-                isGuest={isGuest} 
-                username={myPageInfo.username} 
-              />
-          }
-            </div>
-          }
-        </>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </NavbarBox>
+              </ProfileCover>
+            </ShadowBox>
+          </BannerContainer>
+          {isHaveLocks ? (
+            <LeftBoxWrapper>
+              <div className="proposeColumn proposeColumn--left">
+                <LeftContainer
+                  loading={loading}
+                  context="mypage"
+                  showNewLock
+                  myPageInfo={isGuest ? myPageInfo : undefined}
+                  isGuest={isGuest}
+                />
+              </div>
+              <div className="proposeColumn proposeColumn--right">
+                <MemoryList
+                  {...props}
+                  onMemoryChanged={refresh}
+                  loading={loading}
+                  nextPage={nextPage}
+                  needSelectLock={true}
+                  locks={props.locks}
+                  myPageInfo={myPageInfo}
+                />
+              </div>
+            </LeftBoxWrapper> 
+          ) : (<EmptyPage 
+            isApproved={isApproved} 
+            history={props.history} 
+            isGuest={isGuest} 
+            username={myPageInfo.username} 
+          />)}
+        </div>
       )}
     </>
   );
 }
+
 const mapStateToProps = state => {
   return {
     locks: state.loveinfo.locks,

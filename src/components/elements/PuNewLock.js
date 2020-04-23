@@ -16,7 +16,6 @@ import { FormattedMessage } from 'react-intl';
 import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import ContactSupportOutlinedIcon from '@material-ui/icons/ContactSupportOutlined';
-import Button from '@material-ui/core/Button';
 
 import * as actions from '../../store/actions';
 import {

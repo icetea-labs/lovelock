@@ -546,7 +546,8 @@ function Header(props) {
           likeList.push(item.itemId)
           otherNotiList.push(item);
         }
-      });
+      }
+    });
     dispatch(actions.setNoti(otherNotiList));
   };
 
@@ -702,7 +703,6 @@ function Header(props) {
           </ListItemSecondaryAction>
         )}
       </ListItem>
-    );
   };
 
   const renderNoTiFooter = (notiList, noItemLangId, moreItemLangId) => {

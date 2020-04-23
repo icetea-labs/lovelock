@@ -9,40 +9,53 @@ import { useDidUpdate } from '../../../helper/hooks';
 
 function RightContainer(props) {
   const { proIndex, collectionId, memoryList } = props;
-
   const topInfo = useSelector(state => state.loveinfo.topInfo);
   const collections = topInfo.collections;
   const currentCol = collections == null ? '' : collections.find(c => c.id === collectionId);
   const collectionName = currentCol == null ? '' : currentCol.name;
   const validCollectionId = collectionName ? collectionId : null;
 
+  const srcId = String(proIndex) + '/' + (validCollectionId || '')
+  const notOwnMemorySrc = memoryList.src !== 'lock' || memoryList.srcId !== srcId;
+
   const [changed, setChanged] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(notOwnMemorySrc);
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    fetchMemories();
+    if (page !== 1) {
+      setPage(1)
+      setNoMoreMemories(false)
+    }
+    fetchMemories()
+  }, [proIndex, validCollectionId])
+
+  useDidUpdate(() => {
+    if (page === 1 || noMoreMemories) return
+    fetchMemories(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, proIndex, validCollectionId])
+  }, [page])
 
   // if changed is forced, reload memories no matter what
   useDidUpdate(() => {
-    fetchMemories(true);
+    fetchMemories(false, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed]);
 
-  function fetchMemories(loadToCurrentPage = false) {
-    (page === 1) && setLoading(true);
+  function fetchMemories(pageChanged = false, loadToCurrentPage = false) {
+    if (notOwnMemorySrc) {
+      setLoading(true);
+      setMemories([]);
+    } else if (!pageChanged && !loadToCurrentPage) {
+      return
+    }
 
     APIService.getMemoriesByLockIndex(proIndex, validCollectionId, page, appConstants.memoryPageSize, loadToCurrentPage).then(result => {
-      if (!result.length) {
+      if (result.length < appConstants.memoryPageSize) {
         setNoMoreMemories(true);
-        if (!loadToCurrentPage) {
-          setPage(page - 1)
-        }
       }
 
       let memories = result;
@@ -57,7 +70,7 @@ function RightContainer(props) {
 
   function setMemories(value) {
     value.src = 'lock'
-    value.srcId = proIndex
+    value.srcId = srcId
     dispatch(actions.setMemories(value));
   }
 
