@@ -60,6 +60,8 @@ export function BlogView(props) {
   const [showComment, setShowComment] = useState(true);
   const [numComment, setNumComment] = useState(0);
 
+  const existingMemo = (memories && memories.length) ? memories.find(m => m.id === paramMemIndex) : undefined
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -75,11 +77,7 @@ export function BlogView(props) {
   }, [paramMemIndex]);
 
   async function fetchMemory() {
-    if (memories && memories.length) {
-      const existingMemo = memories.find(m => m.id === paramMemIndex)
-      if (existingMemo) return existingMemo
-    }
-
+    if (existingMemo) return existingMemo
     return APIService.getMemoriesByListMemIndex([paramMemIndex]).then(mems => mems[0])
   }
 
@@ -121,8 +119,11 @@ export function BlogView(props) {
   }
 
   function closeMemory() {
-    //props.history.push(`/lock/${blogView.lockIndex}`);
-    window.history.back();
+    if (existingMemo) {
+      window.history.back();
+    } else {
+      props.history.push(`/lock/${blogView.lockIndex}`);
+    }
   }
 
   const textInput = React.createRef();

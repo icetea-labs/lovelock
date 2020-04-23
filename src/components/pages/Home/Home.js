@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { useSnackbar } from 'notistack';
 import { FlexBox, LeftBoxWrapper } from '../../elements/StyledUtils';
 import LeftContainer from '../Lock/LeftContainer';
 import MemoryList from '../Memory/MemoryList';
@@ -15,12 +14,15 @@ import { useDidUpdate } from '../../../helper/hooks';
 import EmptyPage from '../../layout/EmptyPage';
 
 function Home(props) {
-  const [loading, setLoading] = useState(true);
+  const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
+  const notOwnMemorySrc = memoryList.src !== 'home';
+
+  const [loading, setLoading] = useState(notOwnMemorySrc);
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
+  const [memoryIndexes, setMemoryIndexes] = useState([]);
 
-  const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
   // const { enqueueSnackbar } = useSnackbar();
 
   function refresh() {
@@ -28,15 +30,29 @@ function Home(props) {
   }
 
   useEffect(() => {
+    if (page !== 1) {
+      setPage(1)
+      setNoMoreMemories(false)
+    }
+
     const signal = {};
-    fetchMemories(signal);
+    getData(signal);
+    return handleSignal(signal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useDidUpdate(() => {
+    if (page === 1 || noMoreMemories) return
+
+    const signal = {};
+    getData(signal);
     return handleSignal(signal);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useDidUpdate(() => {
     const signal = {};
-    fetchMemories(signal, true);
+    getData(signal, true);
     return handleSignal(signal);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changed]);
@@ -51,45 +67,51 @@ function Home(props) {
     };
   }
 
-  function fetchMemories(signal, loadToCurrentPage = false) {
-    if (!address) return false;
-
-    return APIService.getLocksForFeed(address, true, true)
-      .then(resp => {
-
-        // set to redux
-        setLocks(resp.locks);
+  async function getLocksForFeed(signal, forced) {
+    if (forced || notOwnMemorySrc || page === 1) {
+      setLoading(true);
+      setMemories([]);
+      return APIService.getLocksForFeed(address, true, true).then(r => {
         if (signal.cancel) return;
-
+        
         // Don't need to subscribe when no lock, because LeftContainer already do that
-        // !resp.locks.length &&
+        // !r.locks.length &&
         //   ensureContract().then(c => {
         //     signal.sub = watchCreatePropose(c, signal);
         //   });
 
-        const memoIndex = resp.memoryIndexes
+        setLocks(r.locks)
+        setMemoryIndexes(r.memoryIndexes)
+        return r
+      })
+    } else {
+      return { locks, memoryIndexes }
+    }
+  }
 
-        if (memoIndex.length > 0) {
-          APIService.getMemoriesByListMemIndex(memoIndex, page, appConstants.memoryPageSize, loadToCurrentPage)
-            .then(result => {
-              if (!result.length) {
-                setNoMoreMemories(true);
-              }
+  function getData(signal, forced) {
+    if (!address) return;
+    return getLocksForFeed(signal, forced).then(r => {
+      if (signal.cancel) return;
+      r.memoryIndexes.length && fetchMemories(signal, r.memoryIndexes, forced)
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+  }
 
-              let memories = result;
-              if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
-              setMemories(memories);
-              setLoading(false);
-            })
-            .catch(err => {
-              console.error(err);
-              setLoading(false);
-            });
-        } else {
-          setMemories([]);
+  function fetchMemories(signal, memoryIndexes, loadToCurrentPage = false) {
+    return APIService.getMemoriesByListMemIndex(memoryIndexes, page, appConstants.memoryPageSize, loadToCurrentPage)
+      .then(result => {
+        if (signal.cancel) return;
+        if (result.length < appConstants.memoryPageSize) {
           setNoMoreMemories(true);
-          setLoading(false);
         }
+
+        let memories = result;
+        if (page > 1 && !loadToCurrentPage) memories = memoryList.concat(result);
+        setMemories(memories);
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
@@ -172,6 +194,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(actions.setLocks(value));
     },
     setMemories: value => {
+      value.src = 'home'
       dispatch(actions.setMemories(value));
     },
   };

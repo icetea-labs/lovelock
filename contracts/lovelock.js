@@ -158,7 +158,9 @@ class LoveLock {
     if (!isValidAddress(addOrAlias)) {
       address = convertAliasToAddress(addOrAlias);
     }
-    return apiGetLocksForFeed(self, address, !!includeFollowing, !!includeMemoryIndexes, !!includeRecentData);
+    const r = apiGetLocksForFeed(self, address, !!includeFollowing, !!includeMemoryIndexes, !!includeRecentData);
+    r.address = address;
+    return r
   };
   @view getMaxLocksIndex = () => {
     const locks = this.getLocks();
