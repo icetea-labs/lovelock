@@ -7,12 +7,12 @@ const LOCK_TYPE_CRUSH = 1;
 const LOCK_TYPE_JOURNAL = 2;
 
 exports.apiCreateFirstLock = (self, lockSender) => {
-  return _createLock(self, undefined, undefined, undefined, undefined, lockSender)
-}
+  return _createLock(self, undefined, undefined, undefined, undefined, lockSender);
+};
 
-exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info,) => {
-  return _createLock(self, s_content, receiver, s_info, bot_info)
-}
+exports.apiCreateLock = (self, s_content, receiver, s_info = {}, bot_info) => {
+  return _createLock(self, s_content, receiver, s_info, bot_info);
+};
 
 const _createLock = (self, s_content, receiver, s_info = {}, bot_info, lockSender) => {
   // cache some variables
@@ -22,7 +22,7 @@ const _createLock = (self, s_content, receiver, s_info = {}, bot_info, lockSende
   // this should not needed because it waste state space
   // but we put it here because the client is expected it!
   if (receiver == null) {
-    receiver = sender
+    receiver = sender;
   }
 
   const isJournal = sender === receiver;
@@ -57,7 +57,7 @@ const _createLock = (self, s_content, receiver, s_info = {}, bot_info, lockSende
       date: Joi.date()
         .timestamp()
         .raw(),
-      lockName: Joi.string()
+      lockName: Joi.string(),
     })
   );
   s_info.date = s_info.date ?? block.timestamp;
@@ -115,50 +115,50 @@ const _createLock = (self, s_content, receiver, s_info = {}, bot_info, lockSende
 };
 
 exports.apiEditLock = (self, lockIndex, data, contributors) => {
-  expect(data || contributors, 'You must provide updated data and/or contributors.')
+  expect(data || contributors, 'You must provide updated data and/or contributors.');
 
   const [lock, locks] = self.getLock(lockIndex);
   expectLockOwners(lock);
 
   if (data) {
     if (data.lockName != null) {
-      lock.s_info.lockName = data.lockName
+      lock.s_info.lockName = data.lockName;
     }
-  
+
     expect(data.message !== '', 'Message is required.');
-    
+
     if (data.message != null) {
       if (msg.sender === lock.sender) {
-        lock.s_content = data.message
+        lock.s_content = data.message;
       } else if (msg.sender === lock.receiver) {
-        lock.r_content = data.message
+        lock.r_content = data.message;
       }
     }
     if (data.date != null) {
-      lock.s_info.date = data.date
+      lock.s_info.date = data.date;
     }
     if (data.coverImg != null) {
-      lock.coverImg = data.coverImg
+      lock.coverImg = data.coverImg;
     }
   }
 
   if (contributors != null) {
     contributors.forEach(c => {
       if (typeof c !== 'string' || c.length !== 43) {
-        throw new Error('Contributors contain invalid address.')
+        throw new Error('Contributors contain invalid address.');
       }
-    })
-    lock.contributors = contributors
+    });
+    lock.contributors = contributors;
   }
 
   self.setLocks(locks);
   return lock;
-}
+};
 
 exports.apiChangeLockName = (self, lockIndex, lockName) => {
   const [lock, locks] = self.getLock(lockIndex);
   expectLockOwners(lock);
-  lock.s_info.lockName = lockName
+  lock.s_info.lockName = lockName;
   self.setLocks(locks);
   return { lockIndex, lockName };
 };
@@ -201,6 +201,8 @@ exports.apiFollowLock = (self, lockIndex) => {
   const sender = msg.sender;
   const [lock, locks] = self.getLock(lockIndex);
   const afl = self.getAFL();
+  const timestamp = Date.now();
+  let isFollow = false;
   if (!afl[sender]) afl[sender] = [];
   const index = lock.follows.indexOf(sender);
   if (index !== -1) {
@@ -211,12 +213,29 @@ exports.apiFollowLock = (self, lockIndex) => {
     //  followLock
     lock.follows.push(sender);
     afl[sender].push(lockIndex);
+    isFollow = true;
   }
   // set map address follow lock
   self.setAFL(afl);
 
   // save locks
   self.setLocks(locks);
+
+  self.emitEvent(
+    'addFollowLock',
+    {
+      by: msg.sender,
+      log: {
+        id: lockIndex,
+        lockName: lock.s_info.lockName,
+        isFollow,
+        timestamp,
+        sender: lock.sender,
+        receiver: lock.receiver,
+      },
+    },
+    ['by']
+  );
   return sender;
 };
 
@@ -268,12 +287,12 @@ function _confirmLock(self, index, r_content, status, saveFlag) {
   // status: pending: 0, accept_lock: 1, cancel_lock: 2
   switch (status) {
     case LOCK_STATUS_ACCEPTED:
-      expect(sender === lock.receiver, "Cannot accept lock. You must be receiver.");
-      expect(lock.status === LOCK_STATUS_PENDING, "This lock is no longer pending and cannot be accepted.");
+      expect(sender === lock.receiver, 'Cannot accept lock. You must be receiver.');
+      expect(lock.status === LOCK_STATUS_PENDING, 'This lock is no longer pending and cannot be accepted.');
       break;
     case LOCK_STATUS_DENIED:
-      expectLockOwners(lock, "You cannot cancel lock.");
-      expect(lock.status === LOCK_STATUS_PENDING, "This lock is no longer pending and cannot be denied.")
+      expectLockOwners(lock, 'You cannot cancel lock.');
+      expect(lock.status === LOCK_STATUS_PENDING, 'This lock is no longer pending and cannot be denied.');
       break;
   }
   Object.assign(lock, { r_content, status });
@@ -310,7 +329,7 @@ exports.apiGetDataForMypage = (self, address, excludeFollowing, ctDid, ctAlias) 
   let myData = {};
   myData.avatar = tags.avatar;
   myData.address = address;
-  myData.firstname = tags.firstname || ''
+  myData.firstname = tags.firstname || '';
   myData['display-name'] = tags['display-name'] || '';
   myData.username = alias.replace('account.', '');
   if (!excludeFollowing) {
@@ -322,10 +341,10 @@ exports.apiGetDataForMypage = (self, address, excludeFollowing, ctDid, ctAlias) 
 function _prepareData(locks, lockIndexes) {
   return locks.filter((l, i) => {
     if (lockIndexes.includes(i)) {
-      l.id = i
-      return true
+      l.id = i;
+      return true;
     }
-  })
+  });
 }
 
 exports.apiGetDetailLock = (self, index, includeRecentData) => {
@@ -338,44 +357,44 @@ exports.apiGetDetailLock = (self, index, includeRecentData) => {
 
 exports.apiGetLocksForFeed = (self, addr, includeFollowing, includeMemoryIndexes, includeRecentData) => {
   const locks = self.getLocks();
-  const a2l = self.getA2l()
+  const a2l = self.getA2l();
   const myLockIndexes = a2l[addr] || [];
-  const myFollowingIndexes = includeFollowing ? (self.getAFL()[addr] || []) : []
-  const combinedLocks = _prepareData(locks, myLockIndexes.concat(myFollowingIndexes))
+  const myFollowingIndexes = includeFollowing ? self.getAFL()[addr] || [] : [];
+  const combinedLocks = _prepareData(locks, myLockIndexes.concat(myFollowingIndexes));
 
-  const myFollowingAddresses = includeFollowing ? (self.getFollowing()[addr] || []).filter(a => a !== addr) : []
+  const myFollowingAddresses = includeFollowing ? (self.getFollowing()[addr] || []).filter(a => a !== addr) : [];
   const ctDid = loadContract('system.did');
   const ctAlias = loadContract('system.alias');
   const myFollowingUsers = myFollowingAddresses.reduce((users, faddr) => {
-    const u = exports.apiGetDataForMypage(self, faddr, true, ctDid, ctAlias)
-    u.type = -1
-    users.push(u)
-    return users
-  }, [])
+    const u = exports.apiGetDataForMypage(self, faddr, true, ctDid, ctAlias);
+    u.type = -1;
+    users.push(u);
+    return users;
+  }, []);
 
   _addLeftInfoToLocks(combinedLocks, myLockIndexes, ctDid, ctAlias);
 
   // get memory indexes
-  let memoryIndexes = []
+  let memoryIndexes = [];
   if (includeMemoryIndexes) {
     const flIndexes = myFollowingAddresses.reduce((list, faddr) => {
-      list.push(...(a2l[faddr] || []))
-      return list
-    }, [])
+      list.push(...(a2l[faddr] || []));
+      return list;
+    }, []);
 
-    const flocks = _prepareData(locks, flIndexes)
-    const allLocks = combinedLocks.concat(flocks)
+    const flocks = _prepareData(locks, flIndexes);
+    const allLocks = combinedLocks.concat(flocks);
 
     allLocks.forEach(l => {
-      memoryIndexes.push(...l.memoIndex)
-    })
+      memoryIndexes.push(...l.memoIndex);
+    });
   }
   // remove dupplicate and sort ASC
-  memoryIndexes = Array.from(new Set(memoryIndexes)).sort((a, b) => a - b)
+  memoryIndexes = Array.from(new Set(memoryIndexes)).sort((a, b) => a - b);
 
-  let recentData = {}
+  let recentData = {};
   if (includeRecentData) {
-    recentData = _getRecentData(self, memoryIndexes)
+    recentData = _getRecentData(self, memoryIndexes);
   }
 
   return { locks: combinedLocks.concat(myFollowingUsers), memoryIndexes, recentData };
@@ -386,59 +405,61 @@ exports.apiGetFeaturedChoices = (self, lockIndexes, userAddrs) => {
   const ctDid = loadContract('system.did');
   const ctAlias = loadContract('system.alias');
 
-  const featuredLocks = _prepareData(locks, lockIndexes)
-  _addLeftInfoToLocks(featuredLocks, [], ctDid, ctAlias)
+  const featuredLocks = _prepareData(locks, lockIndexes);
+  _addLeftInfoToLocks(featuredLocks, [], ctDid, ctAlias);
 
   const featuredUsers = userAddrs.reduce((users, faddr) => {
-    const u = exports.apiGetDataForMypage(self, faddr, true, ctDid, ctAlias)
-    u.type = -1
-    users.push(u)
-    return users
-  }, [])
+    const u = exports.apiGetDataForMypage(self, faddr, true, ctDid, ctAlias);
+    u.type = -1;
+    users.push(u);
+    return users;
+  }, []);
 
-  return featuredLocks.concat(featuredUsers)
-}
+  return featuredLocks.concat(featuredUsers);
+};
 
 // assume memoryIndexes are sorted ASC
 const _getRecentData = (self, memoIndexes) => {
-  
-  if (!memoIndexes || !memoIndexes.length) return []
+  if (!memoIndexes || !memoIndexes.length) return [];
 
-  const MAX_PHOTO = 8
-  const MAX_BLOG = 5
+  const MAX_PHOTO = 8;
+  const MAX_BLOG = 5;
 
-  const memories = self.getMemories()
-  return [...memoIndexes].reverse().reduce((r, i) => {
-    if (r.photos.length >= MAX_PHOTO && r.blogPosts.length >= MAX_BLOG) return r
+  const memories = self.getMemories();
+  return [...memoIndexes].reverse().reduce(
+    (r, i) => {
+      if (r.photos.length >= MAX_PHOTO && r.blogPosts.length >= MAX_BLOG) return r;
 
-    const m = getDataByIndex(memories, i)
-    if (m.isPrivate) return r
+      const m = getDataByIndex(memories, i);
+      if (m.isPrivate) return r;
 
-    // get list of image
-    if (m.info && (m.info.blog || (m.info.hash && m.info.hash.length))) {
-      const data = {
-        index: i,
-        author: m.sender,
-        date: m.info.date,
-        content: m.info.blog ? JSON.parse(m.content) : m.content,
-        collectionId: m.info.collectionId,
-        likes: m.likes ? Object.keys(m.likes).length : 0,
-        comments: m.comments ? m.comments.length : 0
+      // get list of image
+      if (m.info && (m.info.blog || (m.info.hash && m.info.hash.length))) {
+        const data = {
+          index: i,
+          author: m.sender,
+          date: m.info.date,
+          content: m.info.blog ? JSON.parse(m.content) : m.content,
+          collectionId: m.info.collectionId,
+          likes: m.likes ? Object.keys(m.likes).length : 0,
+          comments: m.comments ? m.comments.length : 0,
+        };
+
+        if (m.info.blog) {
+          r.blogPosts.push(data);
+        } else {
+          m.info.hash.reduce((p, h) => {
+            p[h] = data;
+            return p;
+          }, r.photos);
+        }
       }
 
-      if (m.info.blog) {
-        r.blogPosts.push(data)
-      } else {
-        m.info.hash.reduce((p, h) => {
-          p[h] = data
-          return p
-        }, r.photos)
-      }
-    }
-
-    return r
-  }, { photos:{}, blogPosts: [] })
-}
+      return r;
+    },
+    { photos: {}, blogPosts: [] }
+  );
+};
 
 function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
   locks.forEach(lock => {
@@ -462,11 +483,10 @@ function _addLeftInfoToLocks(locks, ownerLocksId = [], ctDid, ctAlias) {
     const r_alias = ctAlias.byAddress.invokeView(lock.receiver);
     tmp.r_alias = (r_alias || '').replace('account.', '');
 
-    tmp.isMyLock = ownerLocksId.includes(lock.id)
+    tmp.isMyLock = ownerLocksId.includes(lock.id);
 
-    Object.assign(lock, tmp)
-
-  })
+    Object.assign(lock, tmp);
+  });
 
   return locks;
 }
@@ -491,7 +511,7 @@ function _addTopInfoToLocks(self, locks, includeRecentData) {
       tmp.r_publicKey = r_tags['pub-key'] || '';
     }
     if (includeRecentData) {
-      tmp.recentData = _getRecentData(self, lock.memoIndex)
+      tmp.recentData = _getRecentData(self, lock.memoIndex);
     }
     resp.push({ ...lock, ...tmp });
   });
