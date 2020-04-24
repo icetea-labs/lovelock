@@ -782,7 +782,7 @@ function Header(props) {
     // most of the time, history.push navigates to other page
     // and the noti is reloaded as the result of Header's useEffect
     // so no need to reload noti here
-    // markNoti({ id });
+    markNoti({ id });
   };
 
   const renderLockRequests = () => (
