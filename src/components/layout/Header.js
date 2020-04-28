@@ -767,10 +767,10 @@ function Header(props) {
     } else if (isBlog) {
       path = `/blog/${itemId}`;
     }
-    if (eventName === 'addFollowLock') {
+    if (eventName === 'followLock') {
       path = `/lock/${itemId}`
     }
-    if (eventName === 'addFollowPerson') {
+    if (eventName === 'followPerson') {
       path = `/u/${actorAddr}`
     }
     if (path === window.location.pathname) {

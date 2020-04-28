@@ -222,7 +222,7 @@ exports.apiFollowLock = (self, lockIndex) => {
   self.setLocks(locks);
 
   self.emitEvent(
-    'addFollowLock',
+    'followLock',
     {
       by: msg.sender,
       log: {
