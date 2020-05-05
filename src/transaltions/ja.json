@@ -9,6 +9,7 @@
     "home.activationForm": "このフォームに記入してください。",
     "home.activationGoal": "コンテンツを投稿する前に、アカウントのアクティベーションをリクエストします。",
     "home.supportTitle": "サポートの必要がありませんか。このリンクでお問い合わせください。",
+    "home.supportHelp": "Help",
     "home.supportEmail": "電子メール",
     "home.supportOr": " または ",
     "home.supportTelegram": "Telegram",
@@ -166,6 +167,8 @@
     "noti.addComment": "{actorName} commented on your memory.",
     "noti.tag_addMemory": "{actorName} tagged you in a memory.",
     "noti.tag_addComment": "{actorName} tagged you in a comment.",
+    "noti.followLock": "{actorName} is following your lock.",
+    "noti.followPerson": "{actorName} is following you.",
     
     "notFound.oop": "ほら、ページが見つかりません！",
     "notFound.guide": "そのリンクは存在しませんでした。下のボタンをクリックしてホームに戻ります。",

@@ -759,13 +759,19 @@ function Header(props) {
   };
 
   const handleNotiClick = notiItem => {
-    const { id, eventName, itemId, itemFlag: isBlog } = notiItem
+    const { id, eventName, itemId, itemFlag: isBlog, actorAddr } = notiItem
     let path = `/memory/${itemId}`
     if (eventName === 'confirmLock') {
       // it is better to go to the lock because it has more info
       path = `/lock/${itemId}`
     } else if (isBlog) {
       path = `/blog/${itemId}`;
+    }
+    if (eventName === 'followLock') {
+      path = `/lock/${itemId}`
+    }
+    if (eventName === 'followPerson') {
+      path = `/u/${actorAddr}`
     }
     if (path === window.location.pathname) {
       window.location.href = path;

@@ -215,6 +215,10 @@ export default function EmptyPage(props){
         <SupportSite>
           <p>
             <FormattedMessage id="home.supportTitle" />
+            <a href="https://help.lovelock.one" target="_blank" rel="noopener noreferrer">
+              <FormattedMessage id="home.supportHelp" />
+            </a>
+            &nbsp;ー&nbsp;
             <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
               <FormattedMessage id="home.supportEmail" />
             </a>

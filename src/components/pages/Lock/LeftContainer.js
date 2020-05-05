@@ -433,6 +433,10 @@ function LeftContainer(props) {
           </ShadowBox>
           <SupportSite>
             <p>
+              <a href="https://help.lovelock.one" target="_blank" rel="noopener noreferrer">
+                Help
+              </a>
+              &nbsp;ー&nbsp;
               <a href="mailto:info@icetea.io" target="_blank" rel="noopener noreferrer">
                 Email
               </a>

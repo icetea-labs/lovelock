@@ -320,13 +320,18 @@ class LoveLock {
   // =========== OTHER ================
   @transaction followPerson(addOrAlias: string) {
     let address = addOrAlias;
+    const self = this;
     if (!isValidAddress(addOrAlias)) {
       address = convertAliasToAddress(addOrAlias);
     }
+    const timestamp = Date.now();
+    let isFollow = false;
     // expectUserApproved(this);
     const sender = msg.sender;
-    const following = this.getFollowing();
-    const followed = this.getFollowed();
+    // List follower of sender
+    const following = self.getFollowing();
+    // List follower of address
+    const followed = self.getFollowed();
     if (!following[sender]) following[sender] = [];
     const index = following[sender].indexOf(address);
     if (index !== -1) {
@@ -344,10 +349,24 @@ class LoveLock {
     } else {
       //  followLock
       followed[address].push(sender);
+      isFollow = true;
     }
 
     this.setFollowing(following);
     this.setFollowed(followed);
+    self.emitEvent(
+      'followPerson',
+      {
+        by: msg.sender,
+        log: {
+          receiver: address,
+          isFollow,
+          timestamp,
+        },
+      },
+      ['by']
+    );
+    return sender;
   }
 
   @view getFollowedPerson = (addOrAlias: string) => {
