@@ -1,5 +1,5 @@
 import React from 'react';
-import Avatar from '@material-ui/core/Avatar';
+import { AvatarPro } from './AvatarPro';
 import Badge from "@material-ui/core/Badge";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -9,7 +9,7 @@ const MainAvatar = withStyles(theme => ({
       height: theme.spacing(3.5),
       border: `2px solid ${theme.palette.background.paper}`
     }
-  }))(Avatar);
+  }))(AvatarPro);
   
   const OtherAvatar = withStyles(theme => ({
     root: {
@@ -18,7 +18,7 @@ const MainAvatar = withStyles(theme => ({
       marginLeft: theme.spacing(.5),
       marginBottom: theme.spacing(.5),
     }
-  }))(Avatar);
+  }))(AvatarPro);
 
   const StyledBadge = withStyles(theme => ({
     root: {
@@ -28,7 +28,7 @@ const MainAvatar = withStyles(theme => ({
   }))(Badge);
 
 const SingleAvatar = ({avatar, ...rest}) => {
-    return <Avatar src={process.env.REACT_APP_IPFS + avatar} {...rest} />
+    return <AvatarPro hash={avatar} {...rest} />
 }
 
 const DualAvatar = ({avatar, avatar2, ...rest}) => {
@@ -41,13 +41,13 @@ const DualAvatar = ({avatar, avatar2, ...rest}) => {
         }}
         badgeContent={
           <MainAvatar
-            src={process.env.REACT_APP_IPFS + avatar}
+            hash={avatar}
             {...rest}
           />
         }
       >
         <OtherAvatar
-          src={process.env.REACT_APP_IPFS + avatar2}
+          hash={avatar2}
           {...rest}
         />
       </StyledBadge>

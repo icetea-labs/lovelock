@@ -22,7 +22,13 @@ export function ensureHashUrl(url, gateway = ipfsGateway) {
   }
 
 export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
-    return fetch(gateway + hash, signal ? { signal } : undefined).then(r => resolveBlogHashUrls(r.json(), gateway));
+    return fetch(gateway + hash, signal ? { signal } : undefined)
+      .then(r => r.json())
+      .then(json => {
+        const result = { json: resolveBlogHashUrls(json, gateway), gateway }
+        if (!cache[hash]) cache[hash] = result
+        return result
+    });
   }
   
   export function fetchJsonWithFallback(
@@ -37,12 +43,17 @@ export function fetchIpfsJson(hash, { gateway = ipfsGateway, signal } = {}) {
       abortFallback, // whether to abort fallback gateway when resolve
     } = {}
   ) {
+    
     if (signal && signal.aborted) {
       return Promise.reject(new DOMException('Aborted', 'AbortError'));
     }
 
     if (cache[hash]) {
-        return Promise.resolve(cache[hash])
+      return Promise.resolve(cache[hash])
+    }
+
+    if (mainGateway === fallbackGateway) {
+      return fetchIpfsJson(hash, { gateway: mainGateway, signal })
     }
   
     return new Promise((resolve, reject) => {

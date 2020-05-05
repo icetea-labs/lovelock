@@ -51,12 +51,13 @@ export default function BlogShowcase(props) {
               alt='blog cover'
               className={classes.blogImgTimeline}
               style={photo ? {} : { maxHeight: height, objectFit: 'cover' }}
+              crossOrigin="anonymous"
               onLoad={event => {
                 if (!photo) {
                   setColors(defaultColors)
                 } else {
-                  getPalette(photo.url, { defaultColors })
-                    .then(colors => colors && setColors(colors)).catch(console.warn)
+                  getPalette(event.target, { defaultColors })
+                     .then(colors => colors && setColors(colors)).catch(console.warn)
                 }
               }}
             />

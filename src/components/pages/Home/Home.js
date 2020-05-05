@@ -15,9 +15,10 @@ import EmptyPage from '../../layout/EmptyPage';
 
 function Home(props) {
   const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
+  const needToLoadData = Boolean(address && isApproved)
   const notOwnMemorySrc = memoryList.src !== 'home';
 
-  const [loading, setLoading] = useState(notOwnMemorySrc);
+  const [loading, setLoading] = useState(needToLoadData && notOwnMemorySrc);
   const [changed, setChanged] = useState(false);
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
@@ -30,6 +31,8 @@ function Home(props) {
   }
 
   useEffect(() => {
+    if (!needToLoadData) return
+    
     if (page !== 1) {
       setPage(1)
       setNoMoreMemories(false)
@@ -90,13 +93,17 @@ function Home(props) {
   }
 
   function getData(signal, forced) {
-    if (!address) return;
+    if (!needToLoadData) return;
     return getLocksForFeed(signal, forced).then(r => {
       if (signal.cancel) return;
-      r.memoryIndexes.length && fetchMemories(signal, r.memoryIndexes, forced)
+      if (r.memoryIndexes.length) {
+        fetchMemories(signal, r.memoryIndexes, forced) 
+      } else {
+        setLoading(false)
+      }
     }).catch(err => {
-      console.error(err);
       setLoading(false);
+      console.error(err);
     });
   }
 
@@ -118,29 +125,6 @@ function Home(props) {
         setLoading(false);
       });
   }
-
-  // function watchCreatePropose(contract, signal) {
-  //   const filter = {};
-  //   return contract.events.allEvents(filter, async (error, result) => {
-  //     if (signal.cancel) return;
-
-  //     if (error) {
-  //       showSubscriptionError(error, enqueueSnackbar);
-  //     } else {
-  //       const repsNew = result.filter(({ eventName }) => {
-  //         return eventName === 'createLock';
-  //       });
-
-  //       if (
-  //         repsNew.length > 0 &&
-  //         (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
-  //       ) {
-  //         // navigate to the created lock (this should unsub the watch via useEffect)
-  //         props.history.push(`/lock/${repsNew[0].eventData.log.id}`);
-  //       }
-  //     }
-  //   });
-  // }
 
   function nextPage() {
     if (noMoreMemories) return;
