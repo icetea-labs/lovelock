@@ -13,8 +13,7 @@ import { AvatarPro } from '../../elements/index';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import { TimeWithFormat } from '../../../helper/utils';
 
-const font =
-  '"jaf-bernino-sans", "Open Sans", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif';
+// const font = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;";
 const styles = {
   wrapper: {
     margin: '0 auto',
@@ -25,15 +24,15 @@ const styles = {
     },
   },
   titleText: {
-    fontFamily: font,
-    fontSize: 64.8,
+    // fontFamily: font,
+    fontSize: 48,
     fontWeight: 700,
     lineHeight: 1,
     marginBottom: 20,
   },
   subtitleText: {
-    fontFamily: font,
-    fontSize: 27,
+    // fontFamily: font,
+    fontSize: 24,
     fontWeight: 300,
     lineHeight: 1.2,
     marginBottom: 20,
@@ -126,21 +125,32 @@ class Editor extends React.Component {
     }));
   }
 
+  getAuthorInfo() {
+    const m = this.props.authorInfo
+    if (m && m.sender) {
+      return {
+        address: m.sender,
+        avatar:  m.s_avatar || m.s_tags.avatar,
+        displayName: m.s_name || m.s_tags['display-name']
+      }
+    } else {
+      // create/edit mode => get author info from redux
+      return this.props
+    }
+  }
+
   renderAuthorInfo() {
     const { classes } = this.props;
-    
-    let memoryInfo = this.props.memoryInfo;
-    let avatar = memoryInfo.s_avatar || memoryInfo.s_tags.avatar;
-    let displayName = memoryInfo.s_name || memoryInfo.s_tags['display-name'];
-    let date = memoryInfo.s_date || memoryInfo.info.date
+    const { address, avatar, displayName } = this.getAuthorInfo()
+    const date = Date.now()
     return ReactDOMServer.renderToString(
       <div className={classes.authorInfo}>
         <div className={classes.authorInfoLeft}>
-          <a href={`/u/${memoryInfo.sender}`}>
+          <a href={`/u/${address}`}>
             <AvatarPro className={classes.avatar} hash={avatar} />
           </a>
           <div className={classes.author}>
-            <a className={classes.authorName} href={`/u/${memoryInfo.sender}`}>
+            <a className={classes.authorName} href={`/u/${address}`}>
               {displayName}
             </a>
             <div className={classes.date}>
@@ -247,6 +257,8 @@ class Editor extends React.Component {
               placeholder={language === ja ? '題名' : 'Title'}
               value={this.props.title}
               onChange={e => this.props.onTitleChange(e.target.value)}
+              multiline
+              autoFocus
               fullWidth
             />
             <Input
@@ -255,6 +267,7 @@ class Editor extends React.Component {
               placeholder={language === ja ? 'サブタイトル（オプション）' : 'Subtitle (optional)'}
               value={this.props.subtitle}
               onChange={e => this.props.onSubtitleChange(e.target.value)}
+              multiline
               fullWidth
             />
           </>
@@ -280,6 +293,9 @@ class Editor extends React.Component {
 const mapStateToProps = state => {
   return {
     language: state.globalData.language,
+    address: state.account.address,
+    displayName: state.account.displayName,
+    avatar: state.account.avatar
   };
 };
 

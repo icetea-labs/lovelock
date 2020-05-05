@@ -166,7 +166,11 @@ function Mypage(props) {
 
   function getData(forced) {
     return getLocksForFeed(forced).then(r => {
-      r.memoryIndexes.length && fetchMemories(r.memoryIndexes, r.address, forced)
+      if (r.memoryIndexes.length) {
+        fetchMemories(r.memoryIndexes, r.address, forced)
+      } else {
+        setLoading(false)
+      }
     }).catch(err => {
       console.error(err);
       setLoading(false);
