@@ -13,7 +13,7 @@ import { AvatarPro } from '../../elements/index';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import { TimeWithFormat } from '../../../helper/utils';
 
-const font = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;";
+// const font = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;";
 const styles = {
   wrapper: {
     margin: '0 auto',
@@ -24,15 +24,15 @@ const styles = {
     },
   },
   titleText: {
-    fontFamily: font,
-    fontSize: 64.8,
+    // fontFamily: font,
+    fontSize: 48,
     fontWeight: 700,
     lineHeight: 1,
     marginBottom: 20,
   },
   subtitleText: {
-    fontFamily: font,
-    fontSize: 27,
+    // fontFamily: font,
+    fontSize: 24,
     fontWeight: 300,
     lineHeight: 1.2,
     marginBottom: 20,
@@ -257,6 +257,8 @@ class Editor extends React.Component {
               placeholder={language === ja ? '題名' : 'Title'}
               value={this.props.title}
               onChange={e => this.props.onTitleChange(e.target.value)}
+              multiline
+              autoFocus
               fullWidth
             />
             <Input
@@ -265,6 +267,7 @@ class Editor extends React.Component {
               placeholder={language === ja ? 'サブタイトル（オプション）' : 'Subtitle (optional)'}
               value={this.props.subtitle}
               onChange={e => this.props.onSubtitleChange(e.target.value)}
+              multiline
               fullWidth
             />
           </>
