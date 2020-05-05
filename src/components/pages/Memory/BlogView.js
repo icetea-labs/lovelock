@@ -188,7 +188,7 @@ export function BlogView(props) {
             />
           }
         >
-          <Editor initContent={blogView.blogContent} memoryInfo={blogView} read_only />
+          <Editor initContent={blogView.blogContent} authorInfo={blogView} read_only />
           <div className={classes.editorComment}>
             <MemoryActionButton
               handleShowComment={handleShowComment}

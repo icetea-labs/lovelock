@@ -583,7 +583,7 @@ function MemoryContent(props) {
               />
             }
           >
-            <Editor initContent={memoryDecrypted.blogContent} memoryInfo={memoryDecrypted} read_only />
+            <Editor initContent={memoryDecrypted.blogContent} authorInfo={memoryDecrypted} read_only />
             <div className={classes.editorComment}>
               {memoryDecrypted.isUnlock && (
                 <MemoryActionButton

@@ -4,8 +4,7 @@ $base-size: 16;
 }
 
 body {
-  font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'PingFang  SC', 'Microsoft YaHei', 'WenQuanYi Micro Hei',
-    'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, 'Segoe UI', sans-serif;
+  font-family: Montserrat, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
   color: #212833;
@@ -94,18 +93,6 @@ input.dante-menu-input {
   height: 100%;
 }
 
-.sectionLayout--fullWidth .aspectRatioPlaceholder {
-  max-width: none!important;
-  max-height: none!important;
-}
-
-@media (max-width: 1012px) {
-  .graf--layoutFillWidth {
-    margin-left: -9.5%!important;
-    margin-right: -9.5%!important;
-  }
-}
-
 .main-appbar::after{
   content: "BETA";
   position: fixed;
@@ -120,46 +107,6 @@ input.dante-menu-input {
   color: #8250c8;
   line-height: 27px;
   transform:rotate(-45deg);
-}
-
-@media (max-width: 1200px) {
-  .graf--layoutOutsetLeft {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .postContent {
-    font-size: 18px !important;
-    line-height: 1.6 !important;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
-  }
-
-  .graf--h2  {
-    font-size: 40px !important;
-    line-height: 45px !important;
-  }
-
-  .graf--h3  {
-    font-size: 35px !important;
-    line-height: 38px !important;
-  }
-
-  .graf--h4 {
-    font-size: 24px !important;
-    line-height: 35px !important;
-  }
-
-  .imageCaption {
-    font-size: 14px !important;
-  }
-
-  .graf--blockquote {
-    margin-left: -10px !important;
-    padding-left: 10px !important;
-    line-height: 1.6;
-  }
 }
 
 * {
