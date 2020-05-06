@@ -25,17 +25,19 @@ const styles = {
   },
   titleText: {
     // fontFamily: font,
-    fontSize: 48,
+    fontSize: 50,
     fontWeight: 700,
-    lineHeight: 1,
+    lineHeight: 1.1,
     marginBottom: 20,
+    color: '#4a4a4a',
   },
   subtitleText: {
     // fontFamily: font,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 300,
-    lineHeight: 1.2,
+    lineHeight: 1.25,
     marginBottom: 20,
+    color: '#979797',
   },
   authorInfo: {
     display: 'flex',
