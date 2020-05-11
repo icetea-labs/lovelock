@@ -167,8 +167,8 @@
     "noti.addComment": "{actorName} commented on your memory.",
     "noti.tag_addMemory": "{actorName} tagged you in a memory.",
     "noti.tag_addComment": "{actorName} tagged you in a comment.",
-    "noti.followLock": "{actorName} is following your lock.",
-    "noti.followPerson": "{actorName} is following you.",
+    "noti.followLock": "{actorName} followed your lock.",
+    "noti.followPerson": "{actorName} followed you.",
 
     "notFound.oop": "OOPS, PAGE NOT FOUND!",
     "notFound.guide": "Perhaps you are wandering too far. Click the button below to come back home.",

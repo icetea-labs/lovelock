@@ -76,12 +76,6 @@ function Home(props) {
       setMemories([]);
       return APIService.getLocksForFeed(address, true, true).then(r => {
         if (signal.cancel) return;
-        
-        // Don't need to subscribe when no lock, because LeftContainer already do that
-        // !r.locks.length &&
-        //   ensureContract().then(c => {
-        //     signal.sub = watchCreatePropose(c, signal);
-        //   });
 
         setLocks(r.locks)
         setMemoryIndexes(r.memoryIndexes)

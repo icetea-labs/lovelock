@@ -57,7 +57,8 @@ const src = fs.readFileSync('./contracts/lovelock.js');
   tweb3.onError(console.error);
 
   // deploy the contract
-  const r = await tweb3.deployJs(compiledSrc, [], { from: account.address });
+  //const r = await tweb3.deployJs(compiledSrc, [], { from: account.address });
+  const r = await tweb3.deploy(compiledSrc, { from: account.address });
   console.log(`Contract created: ${r.address}`);
 
   // migrate data

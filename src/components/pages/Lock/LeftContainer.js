@@ -190,32 +190,20 @@ function LeftContainer(props) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function watchCreatePropose(contract, signal) {
-    const filter = {};
-    return contract.events.allEvents(filter, async (error, result) => {
+    return contract.events.allEvents(async (error, result) => {
       if (signal && signal.cancel) return;
 
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
-        const repsNew = result.filter(({ eventName }) => {
-          return eventName === 'createLock';
-        });
-
-        if (
-          repsNew.length > 0 &&
-          (repsNew[0].eventData.log.sender === address || repsNew[0].eventData.log.receiver === address)
-        ) {
-          eventCreatePropose(repsNew[0].eventData, signal);
+        if (result.eventName === 'createLock' &&
+          (result.eventData.log.sender === address || result.eventData.log.receiver === address)) {
+          eventCreatePropose(result.eventData, signal);
         }
 
-        const respConfirm = result.filter(({ eventName }) => {
-          return eventName === 'confirmLock';
-        });
-        if (
-          respConfirm.length > 0 &&
-          (respConfirm[0].eventData.log.sender === address || respConfirm[0].eventData.log.receiver === address)
-        ) {
-          eventConfirmLock(respConfirm[0].eventData);
+        if (result.eventName ===  'confirmLock' && 
+          (result.eventData.log.sender === address || result.eventData.log.receiver === address)) {
+          eventConfirmLock(result.eventData);
         }
       }
     });
