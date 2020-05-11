@@ -92,7 +92,7 @@ const RecentImageBox = styled.div`
     height: 112px;
     padding-left: 2px;
     padding-bottom: 2px;
-    object-fit: cover;
+    object-fit: scale-down;
     cursor: pointer;
     :hover {
       opacity: 0.9;
