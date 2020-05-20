@@ -133,7 +133,8 @@ class Editor extends React.Component {
       return {
         address: m.sender,
         avatar:  m.s_avatar || m.s_tags.avatar,
-        displayName: m.s_name || m.s_tags['display-name']
+        displayName: m.s_name || m.s_tags['display-name'],
+        date: m.info.date
       }
     } else {
       // create/edit mode => get author info from redux
@@ -143,8 +144,9 @@ class Editor extends React.Component {
 
   renderAuthorInfo() {
     const { classes } = this.props;
-    const { address, avatar, displayName } = this.getAuthorInfo()
-    const date = Date.now()
+    const author = this.getAuthorInfo()
+    const { address, avatar, displayName } = author
+    const date = author.date || Date.now()
     return ReactDOMServer.renderToString(
       <div className={classes.authorInfo}>
         <div className={classes.authorInfoLeft}>
