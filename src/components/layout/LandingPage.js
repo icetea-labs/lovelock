@@ -184,10 +184,10 @@ class LandingPage extends PureComponent {
                 <h2 className="signUpSubTitle">
                   <FormattedMessage id="landing.cta" />
                 </h2>
-                <Button href="/register" className="signUpBtn" variant="contained" color="primary">
+                <Button href="/registerIceteaId" className="signUpBtn" variant="contained" color="primary">
                   <FormattedMessage id="landing.btnRegist" />
                 </Button>
-                <Button href="/login" className="signUpBtn" variant="outlined" color="primary">
+                <Button href="/loginIceteaId" className="signUpBtn" variant="outlined" color="primary">
                   <FormattedMessage id="landing.btnLogin" />
                 </Button>
               </SignupForm>

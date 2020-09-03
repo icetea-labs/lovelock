@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { encode as codecEncode } from '@iceteachain/common/src/codec';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -11,7 +11,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { FormattedMessage } from 'react-intl';
 
-import { wallet, savetoLocalStorage } from '../../../../helper';
+import { wallet, savetoLocalStorage} from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -52,6 +52,19 @@ function ByMnemonic(props) {
   const inputPassword = 'パスワードを入力してください';
 
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    // const getKey = async() => {
+    //   const key = await axios.get('http://localhost:3001/key/getKey', { withCredentials: true })
+    //   console.log('key', key);
+    //   const encryptionKey = key.data.encryptionKey;
+    //   const privateKey = decrypt(key.data.privateKey, key.data.encryptionKey)
+    //   console.log('encryptionKey', encryptionKey);
+    //   console.log('privateKey', privateKey);
+    //   props.setRecoveryPhase(privateKey);
+    // }
+    // getKey();
+  }, [])
 
   async function gotoLogin(e) {
     e.preventDefault();
@@ -191,6 +204,11 @@ function ByMnemonic(props) {
       <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
         <FormattedMessage id="login.qrCode" />
       </LinkPro>
+      <div>
+        <LinkPro onClick={() => props.setIsSendOtpActive(true)}>
+          Send OTP
+        </LinkPro>
+      </div>
       <TextField
         id="rePassword"
         label={<FormattedMessage id="login.newPassLabel" />}

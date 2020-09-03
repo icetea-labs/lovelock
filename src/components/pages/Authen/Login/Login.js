@@ -11,6 +11,7 @@ import ByPassWord from './ByPassWord';
 import { LinkPro } from '../../../elements/Button';
 import * as actionCreate from '../../../../store/actions/create';
 import ScanQRCodeModal from '../../../elements/ScanQRCodeModal';
+import SendOtpModal from '../../../elements/SendOtpModal';
 
 const styles = () => ({
   //   button: {
@@ -23,6 +24,7 @@ function Login(props) {
   const { history, setStep, step } = props;
   const [isQRCodeActive, setIsQRCodeActive] = useState(false);
   const [recoveryPhase, setRecoveryPhase] = useState('');
+  const [isSendOtpActive, setIsSendOtpActive] = useState(false);
 
   function gotoRegister() {
     setStep('one');
@@ -43,6 +45,7 @@ function Login(props) {
                   setIsQRCodeActive={setIsQRCodeActive}
                   recoveryPhase={recoveryPhase}
                   setRecoveryPhase={setRecoveryPhase}
+                  setIsSendOtpActive={setIsSendOtpActive}
                 />
               )}
               <div className="btRegister">
@@ -58,6 +61,7 @@ function Login(props) {
         </LayoutAuthen>
       </QueueAnim>
       {isQRCodeActive && <ScanQRCodeModal setIsQRCodeActive={setIsQRCodeActive} setRecoveryPhase={setRecoveryPhase} />}
+      {isSendOtpActive && <SendOtpModal setIsSendOtpActive={setIsSendOtpActive} setRecoveryPhase={setRecoveryPhase} />}
     </div>
   );
 }

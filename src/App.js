@@ -77,6 +77,12 @@ const Mypage = lazy(() => import(
   './components/pages/MyPage'
 ));
 
+const RegisterIceteaId = lazy(() => import(
+  /* webpackChunkName: "register_iceteaId" */
+  './components/pages/Authen/Register/RegisterIceteaId'
+));
+
+
 function RouteWithLayout({ layout, component, ...rest }) {
   window.trackPageView && window.trackPageView(rest.location.pathname);
   return (
@@ -103,18 +109,27 @@ function RouteHome(props) {
   );
 }
 
+function RouteIceteaId({ component, ...rest }) {
+  window.trackPageView && window.trackPageView(rest.location.pathname);
+  return <Route {...rest} render={props => React.createElement(component, {...props, ...rest})} />;
+
+}
+
 function App(props) {
   const { isLoading, setLanguage } = props;
 
   setLanguage(languageWithoutRegionCode);
-  
+
   return (
     <div className="App">
       <Router>
         <Suspense fallback={<SimpleLoading />}>
           <Switch>
+            <RouteIceteaId exact path="/loginIceteaId" redirectUrl="http://localhost:3000/login" component={RegisterIceteaId} />
             <RouteWithoutLayout exact path="/login" component={Login} />
+
             <RouteWithoutLayout exact path="/register" component={Register} />
+            <RouteIceteaId exact path="/registerIceteaId" redirectUrl="http://localhost:3000/register" component={RegisterIceteaId} />
             <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
 
             <RouteHome hasAddress={!!props.address} exact path="/" />

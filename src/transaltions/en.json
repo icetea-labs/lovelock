@@ -52,6 +52,9 @@
     "regist.successConfirm": "I have saved my recovery phrase",
     "regist.btnContinue": "Continue",
     "regist.regist": "Create New Account",
+    "regist.registIceteaId": "Create New IceteaId Account",
+    "regist.requireDisplayname": "Display name is required",
+    "regist.displayName": "Display Name",
 
     "header.btnCreate": "Create",
     "header.btnExplore": "Explore",

@@ -26,6 +26,10 @@ import {
   saveFileToIpfs,
   applyRotation,
   imageResize,
+  generateEncryptionKey,
+  encrypt,
+  axios,
+  awsEncrypt,
 } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 // import { AvatarPro } from '../../../elements';
@@ -136,10 +140,10 @@ function RegisterUsername(props) {
     /* setIsOpenCrop, setOriginFile, avatar, */ avatarData,
   } = props;
   const [username, setUsername] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [password, setPassword] = useState('');
-  const [rePassword, setRePassword] = useState('');
+  const [displayName, setDisplayname] = useState('');
+  const [kmsCredentials, setKmsCredentials] = useState(null);
+  // const [password, setPassword] = useState('');
+  // const [rePassword, setRePassword] = useState('');
   // const [avatar, setAvatar] = useState('/static/img/no-avatar.jpg');
   // const [avatarData, setAvatarData] = useState('');
   // const [isOpenCrop, setIsOpenCrop] = useState(false);
@@ -148,12 +152,12 @@ function RegisterUsername(props) {
   const [isRememberState, setIsRememberState] = useRemember();
 
   useEffect(() => {
-    ValidatorForm.addValidationRule('isPasswordMatch', value => {
-      if (value !== password) {
-        return false;
-      }
-      return true;
-    });
+    // ValidatorForm.addValidationRule('isPasswordMatch', value => {
+    //   if (value !== password) {
+    //     return false;
+    //   }
+    //   return true;
+    // });
 
     // Fix issue #148
     ValidatorForm.addValidationRule('specialCharacter', async name => {
@@ -166,12 +170,27 @@ function RegisterUsername(props) {
       const resp = await isAliasRegistered(name);
       return !resp;
     });
-
+    const getInfo = async () => {
+      try {
+        const info = await axios.get('/key/getCredentials')
+        console.log(info)
+        if (info.data) {
+          setUsername(info.data.user.username.split('@')[0]);
+          setDisplayname(info.data.user.display_name);
+          setKmsCredentials(info.data.credentials);
+        }
+      } catch (err) {
+        if (err && err.response.status === 401) {
+          window.location = '/registerIceteaId'
+        }
+      }
+    }
+    getInfo();
     return () => {
-      ValidatorForm.removeValidationRule('isPasswordMatch');
+      // ValidatorForm.removeValidationRule('isPasswordMatch');
       ValidatorForm.removeValidationRule('isAliasRegistered');
     };
-  }, [password]);
+  }, []);
 
   async function gotoNext() {
     const isUsernameRegisted = await isAliasRegistered(username);
@@ -184,9 +203,14 @@ function RegisterUsername(props) {
         try {
           const account = await createAccountWithMneomnic();
           const { privateKey, address, publicKey, mnemonic } = account;
-          const displayname = `${firstname} ${lastname}`;
-
-          // setAccount({ username, address, privateKey, publicKey, cipher: password, mnemonic });
+          const encryptionKey = generateEncryptionKey();
+          const encryptedPrivateKey = encrypt(privateKey, encryptionKey);
+          const encryptedEncryptionKey = await awsEncrypt({...kmsCredentials, plainText: encryptionKey})
+          const saveKey = await axios.post('/key/save', {
+            encryptionKey: encryptedEncryptionKey,
+            privateKey: encryptedPrivateKey
+          })
+          setAccount({ username, address, privateKey, publicKey, mnemonic });
           const tweb3 = getWeb3();
           tweb3.wallet.importAccount(privateKey);
           tweb3.wallet.defaultAccount = address;
@@ -206,9 +230,9 @@ function RegisterUsername(props) {
           registerInfo.push(
             setTagsInfo(
               {
-                'display-name': displayname,
-                firstname,
-                lastname,
+                'display-name': displayName,
+                // firstname,
+                // lastname,
                 'pub-key': publicKey,
               },
               opts
@@ -220,7 +244,7 @@ function RegisterUsername(props) {
           const newAccount = {
             address,
             privateKey,
-            cipher: password,
+            // cipher: password,
             publicKey,
             mnemonic,
           };
@@ -239,7 +263,7 @@ function RegisterUsername(props) {
 
           // save to browser password manager
           if (window.PasswordCredential) {
-            const credData = { id: username, password, name: displayname };
+            const credData = { id: username, name: displayName };
             if (avatarUrl) {
               credData.iconURL = avatarUrl;
             }
@@ -312,34 +336,19 @@ function RegisterUsername(props) {
           value={username}
           inputProps={{ autoComplete: 'username' }}
         />
-        <FlexBox>
-          <TextValidator
-            label={<FormattedMessage id="regist.firstName" />}
-            fullWidth
-            onChange={event => {
-              setFirstname(event.currentTarget.value);
-            }}
-            name="firstname"
-            validators={['required']}
-            errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
-            className={classes.marginRight}
-            margin="dense"
-            value={firstname}
-          />
-          <TextValidator
-            label={<FormattedMessage id="regist.lastName" />}
-            fullWidth
-            onChange={event => {
-              setLastname(event.currentTarget.value);
-            }}
-            name="lastname"
-            validators={['required']}
-            errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
-            margin="dense"
-            value={lastname}
-          />
-        </FlexBox>
         <TextValidator
+          label={<FormattedMessage id="regist.displayName" />}
+          fullWidth
+          onChange={event => {
+            setDisplayname(event.currentTarget.value);
+          }}
+          name="displayname"
+          validators={['required']}
+          errorMessages={[<FormattedMessage id="regist.requireDisplayname" />]}
+          margin="dense"
+          value={displayName}
+        />
+        {/* <TextValidator
           label={<FormattedMessage id="regist.password" />}
           fullWidth
           onChange={event => {
@@ -366,7 +375,7 @@ function RegisterUsername(props) {
           margin="dense"
           value={rePassword}
           inputProps={{ autoComplete: 'new-password' }}
-        />
+        /> */}
         {/* <Box display="flex" className={classes.avatarBox}>
           <span>Avatar</span>
           <PreviewContainter>

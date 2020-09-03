@@ -73,7 +73,7 @@ const ContWrap = styled.div`
   padding: 30px;
 `;
 
-const Action = styled.div`
+export const Action = styled.div`
   .actionConfirm {
     width: 100%;
     margin: 48px 0 16px;
@@ -183,7 +183,7 @@ class CommonDialog extends React.Component {
     const { cancel, confirm, close, okText, cancelText, children, title, hasParentDialog, ensureTopLevel } = this.props;
     const haveCancelButton = cancelText && cancel;
     const haveConfirmButton = okText && confirm;
-    
+
     return (
       <>
         <Backdrop className="cdialog-backdrop" key={1} onClick={this.handleBackdropClick} ref={this.backdropRef} />
