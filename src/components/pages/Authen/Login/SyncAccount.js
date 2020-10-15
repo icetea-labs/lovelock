@@ -37,10 +37,12 @@ export default function SyncAccount() {
 
   useEffect(() => {
     const checkHaveAcc = async () => {
+      const isLogin = await i.auth.isLogin();
+      if (!isLogin.payload) return history.push('/loginIceteaid')
       const key = await i.user.getKey();
       if (key.payload) {
         dispatch(setStep('two'));
-        return history.push('/login')
+        return history.push('/loginIceteaid')
       }
     }
     checkHaveAcc()

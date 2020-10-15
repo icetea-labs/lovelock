@@ -23,9 +23,8 @@ import {
 } from '../../../../helper';
 import getWeb3 from '../../../../service/tweb3';
 import { setAccount, setStep, setLoading } from '../../../../store/actions';
-import { getContract } from '../../../../service/tweb3';
 import { useHistory } from 'react-router-dom';
-const ct = getContract().methods;
+
 const i = new IceteaId('xxx')
 
 const useStyles = makeStyles(theme => ({
@@ -59,6 +58,11 @@ export default function UpdateInfo({avatarData}) {
   const history = useHistory();
 
   useEffect(() => {
+    const checkLogin = async () => {
+      const isLogin = await i.auth.isLogin();
+      if (!isLogin.payload) return history.push('/loginIceteaid')
+    }
+    checkLogin();
     dispatch(setStep('one'));
   }, []);
 
