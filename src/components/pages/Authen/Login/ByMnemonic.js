@@ -46,7 +46,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ByMnemonic(props) {
-  console.log("props", props.isSyncAccount)
   const { setLoading, setAccount, setStep, history, language } = props;
   const [password, setPassword] = useState('');
   const [rePassErr] = useState('');

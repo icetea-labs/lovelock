@@ -12,8 +12,9 @@ import ByMnemonic from './ByMnemonic';
 import Otp from '../Otp';
 import OldUserModal from '../../../elements/OldUserModal';
 import ScanQRCodeModal from '../../../elements/ScanQRCodeModal';
-import { setIsSync } from '../../../../store/actions';
 import * as actions from '../../../../store/actions';
+import { SimpleLoading } from '../../../elements/GlobaLoading';
+import globalData from '../../../../store/reducers/globalData';
 
 const i = new IceteaId('xxx')
 
@@ -34,7 +35,7 @@ const OrParagraph = styled.div`
 export default function LoginIceteaId() {
   const dispatch = useDispatch();
   const step = useSelector(state => state.create.step);
-  const isSync = useSelector(state => state.account.isSyncAccount);
+  const isLoading = useSelector(state => state.globalData.isLoading);
   const [isQRCodeActive, setIsQRCodeActive] = useState(false);
   const [recoveryPhase, setRecoveryPhase] = useState('');
   const [isOldUserActive, setIsOldUserActive] = useState(true);
@@ -66,7 +67,6 @@ export default function LoginIceteaId() {
   }
 
   const loginNewAccount = async () => {
-    dispatch(setIsSync(false));
     setIsOldUserActive(false);
     localStorage.setItem('isShowModal', 'true')
   }
@@ -81,7 +81,6 @@ export default function LoginIceteaId() {
   }
 
   const syncAccount = async () => {
-    dispatch(setIsSync(true));
     setIsOldUserActive(false);
     localStorage.setItem('isShowModal', 'true')
     localStorage.setItem('needSync', 'true')
@@ -89,6 +88,7 @@ export default function LoginIceteaId() {
 
   return (
     <>
+      {isLoading && <SimpleLoading />}
       <QueueAnim delay={200} type={['top', 'bottom']}>
         <LayoutAuthen key={1}>
           <BoxAuthen>
