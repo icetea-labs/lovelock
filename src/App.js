@@ -138,11 +138,13 @@ function App(props) {
       <Router>
         <Suspense fallback={<SimpleLoading />}>
           <Switch>
-            <RouteWithoutLayout exact path="/login" component={LoginIceteaId} />
+            <RouteWithoutLayout exact path="/login" component={Login} />
+            <RouteWithoutLayout exact path="/register" component={Register} />
+
+            <RouteWithoutLayout exact path="/loginIceteaid" component={LoginIceteaId} />
             <RouteWithoutLayout exact path="/syncAccount" component={SyncAccount} />
             <RouteWithoutLayout exact path="/checkAccount" component={CheckAccount} />
-            <RouteWithoutLayout exact path="/register" component={RegisterIceteaId} />
-            <RouteWithoutLayout exact path="/registerold" component={Register} />
+            <RouteWithoutLayout exact path="/registerIceteaid" component={RegisterIceteaId} />
             <RouteWithoutLayout exact path="/updateInfo" component={UpdateInfo} />
             <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
 

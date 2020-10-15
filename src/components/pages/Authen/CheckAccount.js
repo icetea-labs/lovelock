@@ -15,7 +15,7 @@ export default function IconLabelTabs() {
       const key = await i.user.getKey();
       if (key.payload) {
         dispatch(setStep('two'));
-        return history.push('/login')
+        return history.push('/loginIceteaid')
       }
       const needSync = localStorage.getItem('needSync');
       if (needSync) return history.push('/syncAccount');

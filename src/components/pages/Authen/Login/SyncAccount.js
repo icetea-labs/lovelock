@@ -9,6 +9,8 @@ import ByMnemonic from './ByMnemonic';
 import ScanQRCodeModal from '../../../elements/ScanQRCodeModal';
 import { setStep } from '../../../../store/actions/create';
 import { useHistory } from 'react-router-dom';
+import { HeaderAuthen } from '../../../elements/Common';
+import { FormattedMessage } from 'react-intl';
 
 const i = new IceteaId('xxx')
 
@@ -50,6 +52,7 @@ export default function SyncAccount() {
         <LayoutAuthen key={1}>
           <BoxAuthen>
             <ShadowBoxAuthen>
+              <HeaderAuthen title={<FormattedMessage id="login.syncAccount" />} />
               <>
                 <ByMnemonic
                   setIsQRCodeActive={setIsQRCodeActive}

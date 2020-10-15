@@ -30,6 +30,7 @@
     "login.login": "Sign in",
     "login.withPhoneOrEmail": "Using Phone Or Email",
     "login.sendOtp": "Send Otp",
+    "login.syncAccount": "Sync account",
 
     "regist.userName": "Username",
     "regist.firstName": "First Name",

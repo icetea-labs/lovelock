@@ -176,7 +176,13 @@ function ByMnemonic(props) {
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
     user = (user && JSON.parse(user)) || {};
     const addr = user.address;
-    setStep('one');
+    if (props.isSyncAccount) {
+      setStep('one')
+      return history.push('/loginIceteaid')
+    }
+    if (addr) {
+      setStep('one');
+    } else history.goBack();
   }
 
   const classes = useStyles();

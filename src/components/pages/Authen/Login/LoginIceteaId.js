@@ -94,7 +94,7 @@ export default function LoginIceteaId() {
           <BoxAuthen>
             <ShadowBoxAuthen>
               <>
-                {step === 'one' && <HeaderAuthen title={<FormattedMessage id="login.login" />} />}
+                <HeaderAuthen title={<FormattedMessage id="login.login" />} />
                 {step === 'one' && <>
                   <DivActionButton>
                     <ButtonPro onClick={() => dispatch(actionCreate.setStep('three'))} fullWidth className="alreadyAcc">
@@ -119,6 +119,7 @@ export default function LoginIceteaId() {
                     setIsQRCodeActive={setIsQRCodeActive}
                     recoveryPhase={recoveryPhase}
                     setRecoveryPhase={setRecoveryPhase}
+                    isSyncAccount={true}
                   />
                 )}
                 {step === 'three' && <Otp />}
