@@ -20,6 +20,9 @@ import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
+import { IceteaId } from 'iceteaid-web';
+
+const i = new IceteaId('xxx')
 
 const styles = theme => ({
   // button: {
@@ -43,6 +46,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ByMnemonic(props) {
+  console.log("props", props.isSyncAccount)
   const { setLoading, setAccount, setStep, history, language } = props;
   const [password, setPassword] = useState('');
   const [rePassErr] = useState('');
@@ -84,11 +88,13 @@ function ByMnemonic(props) {
     try {
       let privateKey = phrase;
       let address;
+      let mnemonic;
       let mode = 0;
       if (wallet.isMnemonic(phrase)) {
         const recoveryAccount = wallet.getAccountFromMneomnic(phrase);
         ({ privateKey, address } = recoveryAccount);
         mode = 1;
+        mnemonic = phrase;
       } else {
         try {
           address = wallet.getAddressFromPrivateKey(privateKey);
@@ -98,7 +104,15 @@ function ByMnemonic(props) {
         }
       }
       // console.log('getAddressFromPrivateKey', privateKey);
-
+      if (props.isSyncAccount) {
+        const encrytionKey = await i.user.generateEncryptionKey();
+        const result = await i.user.encryptKey(
+          privateKey,
+          encrytionKey.payload.encryptionKey,
+          mnemonic,
+        );
+        localStorage.removeItem('needSync')
+      }
       const tweb3 = getWeb3();
       const acc = tweb3.wallet.importAccount(privateKey);
       // tweb3.wallet.defaultAccount = address;
@@ -163,9 +177,7 @@ function ByMnemonic(props) {
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
     user = (user && JSON.parse(user)) || {};
     const addr = user.address;
-    if (addr) {
-      setStep('one');
-    } else history.goBack();
+    setStep('one');
   }
 
   const classes = useStyles();

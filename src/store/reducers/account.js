@@ -16,6 +16,7 @@ const initialState = {
   displayName: '',
   mode: '',
   point: '',
+  isSyncAccount: false,
   ...(function getSessionStorage() {
     const resp = {};
     const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
@@ -56,7 +57,10 @@ const account = (state = initialState, action) => {
 
     case actionTypes.SET_NEEDAUTH:
       return { ...state, needAuth: action.data };
-      
+
+    case actionTypes.SET_ISSYNC:
+      return { ...state, isSyncAccount: action.data };
+
     default:
       return state;
   }

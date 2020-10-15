@@ -52,9 +52,12 @@ import { getInfoAndTags, getUserSuggestions, diffTime, camelObject, fetchNoti, m
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
-
+import { IceteaId } from 'iceteaid-web';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import appConstants from '../../helper/constants';
 const maxNotiShown = appConstants.maxNotiShown;
+
+const i = new IceteaId('xxx');
 
 const StyledLogo = styled(Link)`
   @media (max-width: 600px) {
@@ -665,6 +668,20 @@ function Header(props) {
         </ListItemIcon>
         <ListItemText primary="Change Account" />
       </StyledMenuItem> */}
+      <StyledMenuItem
+        onClick={async () => {
+          await i.auth.logout();
+          localStorage.removeItem('user');
+          localStorage.removeItem('sessionData');
+          props.history.push('/login');
+          handleMenuClose();
+        }}
+      >
+        <ListItemIcon>
+          <ExitToAppIcon />
+        </ListItemIcon>
+        <ListItemText primary="Logout" />
+      </StyledMenuItem>
     </StyledMenu>
   );
 

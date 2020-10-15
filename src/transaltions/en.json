@@ -28,6 +28,8 @@
     "login.btnBack": "Back",
     "login.btnRecover": "Recover",
     "login.login": "Sign in",
+    "login.withPhoneOrEmail": "Using Phone Or Email",
+    "login.sendOtp": "Send Otp",
 
     "regist.userName": "Username",
     "regist.firstName": "First Name",
@@ -52,6 +54,13 @@
     "regist.successConfirm": "I have saved my recovery phrase",
     "regist.btnContinue": "Continue",
     "regist.regist": "Create New Account",
+    "regist.withPhoneOrEmail": "Using Phone Or Email",
+    "regist.updateInfo": "Update your information",
+    "regist.displayName": "Display name",
+    "regist.fullName": "Full name",
+    "regist.phoneNumber": "Phone number",
+    "regist.email": "Email",
+    "regist.otpCode": "Verification code",
 
     "header.btnCreate": "Create",
     "header.btnExplore": "Explore",

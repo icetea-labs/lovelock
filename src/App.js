@@ -77,6 +77,31 @@ const Mypage = lazy(() => import(
   './components/pages/MyPage'
 ));
 
+const RegisterIceteaId = lazy(() => import(
+  /* webpackChunkName: "register_iceteaid" */
+  './components/pages/Authen/Register/RegisterIceteaId'
+));
+
+const UpdateInfo = lazy(() => import(
+  /* webpackChunkName: "update_info" */
+  './components/pages/Authen/Register/UpdateInfo'
+));
+
+const LoginIceteaId = lazy(() => import(
+  /* webpackChunkName: "login_iceteaid" */
+  './components/pages/Authen/Login/LoginIceteaId'
+));
+
+const SyncAccount = lazy(() => import(
+  /* webpackChunkName: "sync_account" */
+  './components/pages/Authen/Login/SyncAccount'
+));
+
+const CheckAccount = lazy(() => import(
+  /* webpackChunkName: "sync_account" */
+  './components/pages/Authen/CheckAccount'
+));
+
 function RouteWithLayout({ layout, component, ...rest }) {
   window.trackPageView && window.trackPageView(rest.location.pathname);
   return (
@@ -107,14 +132,18 @@ function App(props) {
   const { isLoading, setLanguage } = props;
 
   setLanguage(languageWithoutRegionCode);
-  
+
   return (
     <div className="App">
       <Router>
         <Suspense fallback={<SimpleLoading />}>
           <Switch>
-            <RouteWithoutLayout exact path="/login" component={Login} />
-            <RouteWithoutLayout exact path="/register" component={Register} />
+            <RouteWithoutLayout exact path="/login" component={LoginIceteaId} />
+            <RouteWithoutLayout exact path="/syncAccount" component={SyncAccount} />
+            <RouteWithoutLayout exact path="/checkAccount" component={CheckAccount} />
+            <RouteWithoutLayout exact path="/register" component={RegisterIceteaId} />
+            <RouteWithoutLayout exact path="/registerold" component={Register} />
+            <RouteWithoutLayout exact path="/updateInfo" component={UpdateInfo} />
             <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
 
             <RouteHome hasAddress={!!props.address} exact path="/" />
