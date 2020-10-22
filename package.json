@@ -9,7 +9,7 @@
     "@iceteachain/web3": "^0.2.1",
     "@material-ui/core": "^4.9.13",
     "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.52",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/pickers": "^3.2.10",
     "Dante2": "github:TradaTech/dante2",
     "autosuggest-highlight": "^3.1.1",
