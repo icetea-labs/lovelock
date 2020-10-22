@@ -22,9 +22,9 @@ import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
 import { IceteaId } from 'iceteaid-web';
 
-const i = new IceteaId('xxx')
+const i = new IceteaId('xxx');
 
-const styles = theme => ({
+const styles = (theme) => ({
   // button: {
   //   margin: theme.spacing(1),
   //   background: 'linear-gradient(332deg, #b276ff, #fe8dc3)',
@@ -36,7 +36,7 @@ const styles = theme => ({
   },
 });
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   formCtLb: {
     '@media (max-width: 768px)': {
       marginTop: theme.spacing(3),
@@ -101,16 +101,6 @@ function ByMnemonic(props) {
           err.showMessage = 'Invalid recovery phrase.';
           throw err;
         }
-      }
-      // console.log('getAddressFromPrivateKey', privateKey);
-      if (props.isSyncAccount) {
-        const encrytionKey = await i.user.generateEncryptionKey();
-        const result = await i.user.encryptKey(
-          privateKey,
-          encrytionKey.payload.encryptionKey,
-          mnemonic,
-        );
-        localStorage.removeItem('needSync')
       }
       const tweb3 = getWeb3();
       const acc = tweb3.wallet.importAccount(privateKey);
@@ -177,8 +167,8 @@ function ByMnemonic(props) {
     user = (user && JSON.parse(user)) || {};
     const addr = user.address;
     if (props.isSyncAccount) {
-      setStep('one')
-      return history.push('/loginIceteaid')
+      setStep('one');
+      return history.push('/loginIceteaid');
     }
     if (addr) {
       setStep('one');
@@ -195,7 +185,7 @@ function ByMnemonic(props) {
         placeholder={language === ja ? inputRecovery : 'Enter your Recovery phrase or key'}
         multiline
         rows="4"
-        onKeyDown={e => e.keyCode === 13 && gotoLogin(e)}
+        onKeyDown={(e) => e.keyCode === 13 && gotoLogin(e)}
         onChange={handleMnemonic}
         margin="normal"
         variant="outlined"
@@ -246,21 +236,21 @@ function ByMnemonic(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     language: state.globalData.language,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setAccount: value => {
+    setAccount: (value) => {
       dispatch(actionAccount.setAccount(value));
     },
-    setStep: value => {
+    setStep: (value) => {
       dispatch(actionCreate.setStep(value));
     },
-    setLoading: value => {
+    setLoading: (value) => {
       dispatch(actionGlobal.setLoading(value));
     },
   };

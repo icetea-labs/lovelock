@@ -53,7 +53,7 @@ import LeftContainer from '../pages/Lock/LeftContainer';
 // import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
 import { IceteaId } from 'iceteaid-web';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import appConstants from '../../helper/constants';
 const maxNotiShown = appConstants.maxNotiShown;
 
@@ -111,7 +111,7 @@ const StyledToolbar = withStyles({
   },
 })(Toolbar);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
   },
@@ -274,7 +274,7 @@ const StyledMenu = withStyles({
     border: '1px solid #d3d4d5',
     borderRadius: 10,
   },
-})(props => (
+})((props) => (
   <Menu
     elevation={0}
     getContentAnchorEl={null}
@@ -290,7 +290,7 @@ const StyledMenu = withStyles({
   />
 ));
 
-const StyledMenuItem = withStyles(theme => ({
+const StyledMenuItem = withStyles((theme) => ({
   root: {
     borderRadius: 10,
     margin: theme.spacing(1),
@@ -306,16 +306,16 @@ const StyledMenuItem = withStyles(theme => ({
 function Header(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
-  const needAuth = useSelector(state => state.account.needAuth);
-  const newLockDialog = useSelector(state => state.globalData.newLockDialog);
-  const photoViewer = useSelector(state => state.globalData.photoViewer);
-  const mnemonic = useSelector(state => state.account.mnemonic);
-  const privateKey = useSelector(state => state.account.privateKey);
-  const mode = useSelector(state => state.account.mode);
-  const address = useSelector(state => state.account.address);
-  const language = useSelector(state => state.globalData.language);
-  const isApproved = useSelector(state => state.account.isApproved);
-  const sideBarLocks = useSelector(state => state.loveinfo.locks);
+  const needAuth = useSelector((state) => state.account.needAuth);
+  const newLockDialog = useSelector((state) => state.globalData.newLockDialog);
+  const photoViewer = useSelector((state) => state.globalData.photoViewer);
+  const mnemonic = useSelector((state) => state.account.mnemonic);
+  const privateKey = useSelector((state) => state.account.privateKey);
+  const mode = useSelector((state) => state.account.mode);
+  const address = useSelector((state) => state.account.address);
+  const language = useSelector((state) => state.globalData.language);
+  const isApproved = useSelector((state) => state.account.isApproved);
+  const sideBarLocks = useSelector((state) => state.loveinfo.locks);
 
   const [showPhrase, setShowPhrase] = useState(false);
   const [anchorElLockReq, setAnchorElLockReq] = useState(null);
@@ -324,8 +324,8 @@ function Header(props) {
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [isLeftMenuOpened, setIsLeftMenuOpened] = useState(false);
 
-  const lockReqList = useSelector(state => state.notify.lockRequests);
-  const notiList = useSelector(state => state.notify.notifications);
+  const lockReqList = useSelector((state) => state.notify.lockRequests);
+  const notiList = useSelector((state) => state.notify.notifications);
 
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -340,11 +340,11 @@ function Header(props) {
 
   // const tokenAddress = useSelector(state => state.account.tokenAddress);
   // const privateKey = useSelector(state => state.account.privateKey);
-  const displayName = useSelector(state => state.account.displayName);
+  const displayName = useSelector((state) => state.account.displayName);
   // const point = useSelector(state => state.account.point);
-  const avatarRedux = useSelector(state => state.account.avatar);
+  const avatarRedux = useSelector((state) => state.account.avatar);
 
-  const notifyLockData = useSelector(state => state.globalData.notifyLockData) || {};
+  const notifyLockData = useSelector((state) => state.globalData.notifyLockData) || {};
 
   const ja = 'ja';
   const [apiLocks, setApiLocks] = useState([]);
@@ -399,7 +399,7 @@ function Header(props) {
     handleMobileMenuClose();
     setTimeout(() => {
       dispatch(actions.setShowNewLockDialog(true));
-    }, 0)
+    }, 0);
   }
   function closeNewLockDialog() {
     dispatch(actions.setShowNewLockDialog(false));
@@ -448,16 +448,16 @@ function Header(props) {
     closeNotiLock();
   }
 
-  const getSuggestions = async value => {
+  const getSuggestions = async (value) => {
     const users = await getUserSuggestions(value);
     setSuggestions(users);
   };
 
-  const getSuggestionValue = suggestion => {
+  const getSuggestionValue = (suggestion) => {
     return `@${suggestion.nick}`;
   };
 
-  const processTags = text => {
+  const processTags = (text) => {
     if (!text) return '';
     return text.replace(/@\[.+?-(.+?)\]/gs, '$1');
   };
@@ -502,7 +502,7 @@ function Header(props) {
     // get the item
     const name = newValue.substring(1);
     if (suggestions) {
-      const seletedItem = suggestions.find(item => item.nick === name);
+      const seletedItem = suggestions.find((item) => item.nick === name);
       if (seletedItem) {
         handeOpenMypage(seletedItem.nick || seletedItem.address);
       }
@@ -517,13 +517,13 @@ function Header(props) {
     setSuggestions([]);
   };
 
-  const processNotiResult = result => {
+  const processNotiResult = (result) => {
     const [lockReqs, otherReqs] = result || [];
 
     const lockRequests = [];
     const allLocksList = [];
     lockReqs &&
-      lockReqs.forEach(dataItem => {
+      lockReqs.forEach((dataItem) => {
         const item = camelObject(dataItem);
         const fullLock = {
           id: Number(item.itemId),
@@ -542,23 +542,24 @@ function Header(props) {
 
     const otherNotiList = [];
     const likeList = []; // to prevent dupplicate like noti
-    otherReqs && otherReqs.forEach(dataItem => {
-      const item = camelObject(dataItem)
-      item.text = processTags(item.text)
-      if (item.eventName === 'addLike') {
-        // no add duplicate
-        if (!likeList.includes(item.itemId)) {
-          likeList.push(item.itemId)
+    otherReqs &&
+      otherReqs.forEach((dataItem) => {
+        const item = camelObject(dataItem);
+        item.text = processTags(item.text);
+        if (item.eventName === 'addLike') {
+          // no add duplicate
+          if (!likeList.includes(item.itemId)) {
+            likeList.push(item.itemId);
+            otherNotiList.push(item);
+          }
+        } else {
           otherNotiList.push(item);
         }
-      } else {
-        otherNotiList.push(item);
-      }
-    });
+      });
     dispatch(actions.setNoti(otherNotiList));
   };
 
-  const getLockReqAndNoti = signal => {
+  const getLockReqAndNoti = (signal) => {
     return fetchNoti({ address }, signal).then(processNotiResult);
   };
 
@@ -668,52 +669,40 @@ function Header(props) {
         </ListItemIcon>
         <ListItemText primary="Change Account" />
       </StyledMenuItem> */}
-      <StyledMenuItem
-        onClick={async () => {
-          await i.auth.logout();
-          localStorage.removeItem('user');
-          localStorage.removeItem('sessionData');
-          props.history.push('/login');
-          handleMenuClose();
-        }}
-      >
-        <ListItemIcon>
-          <ExitToAppIcon />
-        </ListItemIcon>
-        <ListItemText primary="Logout" />
-      </StyledMenuItem>
     </StyledMenu>
   );
 
-  const renderNotiItem = ({id, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
-    return  <ListItem
-      alignItems="flex-start"
-      button
-      className={classes.listItemNotiStyle}
-      style={{ paddingRight: image ? 60 : 16 }}
-      key={id}
-      onClick={onClick}>
-      <ListItemAvatar>
-        <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
-      </ListItemAvatar>
-      <ListItemText
-        primary={
-          <Typography component="span" variant="body1" >
-            <FormattedMessage
-              id={"noti." + eventName}
-              values={{ actorName: <b>{actorName}</b> }} />
-          </Typography>
-        }
-        secondary={
-          <>
-            <Typography component="span" variant="body1"
-              className={classes.notiPromise}
-              style={{ width: image ? 'calc(100% - 24px)' : '100%' }}
-            >
-              {text}
+  const renderNotiItem = ({ id, eventName, actorName, actorAvatar, text, image, timestamp }, onClick) => {
+    return (
+      <ListItem
+        alignItems="flex-start"
+        button
+        className={classes.listItemNotiStyle}
+        style={{ paddingRight: image ? 60 : 16 }}
+        key={id}
+        onClick={onClick}
+      >
+        <ListItemAvatar>
+          <AvatarPro alt={actorName} hash={actorAvatar} className={classes.jsxAvatar} />
+        </ListItemAvatar>
+        <ListItemText
+          primary={
+            <Typography component="span" variant="body1">
+              <FormattedMessage id={'noti.' + eventName} values={{ actorName: <b>{actorName}</b> }} />
             </Typography>
-            <Typography component="span" variant="body2">
-              {diffTime(timestamp)}
+          }
+          secondary={
+            <>
+              <Typography
+                component="span"
+                variant="body1"
+                className={classes.notiPromise}
+                style={{ width: image ? 'calc(100% - 24px)' : '100%' }}
+              >
+                {text}
+              </Typography>
+              <Typography component="span" variant="body2">
+                {diffTime(timestamp)}
               </Typography>
             </>
           }
@@ -724,6 +713,7 @@ function Header(props) {
           </ListItemSecondaryAction>
         )}
       </ListItem>
+    );
   };
 
   const renderNoTiFooter = (notiList, noItemLangId, moreItemLangId) => {
@@ -761,34 +751,34 @@ function Header(props) {
           </ListSubheader>
         }
       >
-        {notiList.slice(0, maxNotiShown).map(item => renderNotiItem(item, () => onItemClick(item)))}
+        {notiList.slice(0, maxNotiShown).map((item) => renderNotiItem(item, () => onItemClick(item)))}
       </List>
     );
   };
 
-  const handleLockNotiClick = lockReq => {
+  const handleLockNotiClick = (lockReq) => {
     handleLockReqClose();
     handleMobileMenuClose();
     setTimeout(() => {
       handleSelLock(lockReq.itemId);
-    }, 0)
+    }, 0);
     // markNoti({ id: lockReq.id })
   };
 
-  const handleNotiClick = notiItem => {
-    const { id, eventName, itemId, itemFlag: isBlog, actorAddr } = notiItem
-    let path = `/memory/${itemId}`
+  const handleNotiClick = (notiItem) => {
+    const { id, eventName, itemId, itemFlag: isBlog, actorAddr } = notiItem;
+    let path = `/memory/${itemId}`;
     if (eventName === 'confirmLock') {
       // it is better to go to the lock because it has more info
-      path = `/lock/${itemId}`
+      path = `/lock/${itemId}`;
     } else if (isBlog) {
       path = `/blog/${itemId}`;
     }
     if (eventName === 'followLock') {
-      path = `/lock/${itemId}`
+      path = `/lock/${itemId}`;
     }
     if (eventName === 'followPerson') {
-      path = `/u/${actorAddr}`
+      path = `/u/${actorAddr}`;
     }
     if (path === window.location.pathname) {
       window.location.href = path;
@@ -953,7 +943,7 @@ function Header(props) {
                       sectionContainerFirst: 'react-autosuggest__section-container--first',
                       sectionTitle: 'react-autosuggest__section-title',
                     }}
-                    renderInputComponent={inputProps => (
+                    renderInputComponent={(inputProps) => (
                       <InputBase
                         placeholder={language === ja ? '検索…' : 'Search…'}
                         classes={{

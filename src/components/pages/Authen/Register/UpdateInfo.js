@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import QueueAnim from 'rc-queue-anim';
 import { FormattedMessage } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
-import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen, DivControlBtnKeystore } from '../../../elements/StyledUtils';
-import { HeaderAuthen } from '../../../elements/Common';
 import * as actionCreate from '../../../../store/actions/create';
 import { ButtonPro } from '../../../elements/Button';
 import { IceteaId } from 'iceteaid-web';
-import RegisterSuccess from './RegisterSuccess';
-import Icon from '@material-ui/core/Icon';
 import { makeStyles } from '@material-ui/core/styles';
 
 import {
@@ -22,12 +17,13 @@ import {
   wallet,
 } from '../../../../helper';
 import getWeb3 from '../../../../service/tweb3';
-import { setAccount, setStep, setLoading } from '../../../../store/actions';
+import { setAccount, setLoading } from '../../../../store/actions';
 import { useHistory } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 
-const i = new IceteaId('xxx')
+const i = new IceteaId('xxx');
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
   },
@@ -45,74 +41,63 @@ const useStyles = makeStyles(theme => ({
     width: 100,
     height: 100,
   },
+  textField: {
+    backgroundColor: '#26163E',
+    opacity: 0.67,
+  },
+  input: {
+    color: '#FFFFFF',
+    borderRadius: 10,
+    '&::placeholder': {
+      color: '#FFFFFF',
+      opacity: 0.67,
+    },
+  },
+  label: {
+    color: '#FFFFFF',
+    opacity: 0.67,
+    '&$focused': {
+      opacity: 1,
+    },
+  },
+  button: {
+    marginTop: 10,
+  },
 }));
 
-export default function UpdateInfo({avatarData}) {
-  const [displayName, setDisplayName] = useState('')
-  const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [username, setUsername] = useState('')
+export default function UpdateInfo({ avatarData }) {
+  const [displayName, setDisplayName] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const dispatch = useDispatch();
-  const step = useSelector(state => state.create.step);
   const classes = useStyles();
   const history = useHistory();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    const checkLogin = async () => {
-      const isLogin = await i.auth.isLogin();
-      if (!isLogin.payload) return history.push('/loginIceteaid')
-    }
-    checkLogin();
-    dispatch(setStep('one'));
-  }, []);
+    // Fix issue #148
+    ValidatorForm.addValidationRule('specialCharacter', async (name) => {
+      // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+      const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+[a-z0-9]$');
+      return regex.test(name);
+    });
 
-  useEffect(() => {
-    const getMetaData = async () => {
-      try {
-        const key = await i.user.getKey();
-        if (key.payload) {
-          dispatch(setStep('two'));
-          return history.push('/login')
-        }
-        const user = await i.user.getMetaData();
-        if (user.payload && user.payload.loginProvider !== 'mobile') {
-          setDisplayName(user.payload.displayName)
-          setFullName(user.payload.fullName)
-          setPassword(btoa(JSON.stringify(user.payload)))
-          const splitUsername = user.payload.username.split('@');
-          const username = splitUsername[0];
-          const domainName = splitUsername[1].replace('.', '-');
-          setUsername(`${username}-${domainName}`)
-        }
-        if (user.payload && user.payload.loginProvider === 'mobile') {
-          const username = user.payload.username.substring(user.payload.username.lastIndexOf('+') +1)
-          setUsername(username)
-        }
-      } catch (err) {
-        return history.push('/register')
-      }
-    }
-    getMetaData();
-  }, [])
-
-
-  useEffect(() => {
-
-    ValidatorForm.addValidationRule('isAliasRegistered', async name => {
+    ValidatorForm.addValidationRule('isAliasRegistered', async (name) => {
       const resp = await isAliasRegistered(name);
       return !resp;
     });
+    return () => {
+      ValidatorForm.removeValidationRule('specialCharacter');
+      ValidatorForm.removeValidationRule('isAliasRegistered');
+    };
   }, []);
 
   const gotoNext = async () => {
     try {
       const { privateKey, address, publicKey, mnemonic } = wallet.getAccountFromMneomnic();
       const encrytionKey = await i.user.generateEncryptionKey();
-      const result = await i.user.encryptKey(
-        privateKey,
-        encrytionKey.payload.encryptionKey,
-        mnemonic,
-      );
+      await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mnemonic);
+      await i.user.updateInfo(username, displayName);
       const tweb3 = getWeb3();
       tweb3.wallet.importAccount(privateKey);
       tweb3.wallet.defaultAccount = address;
@@ -122,7 +107,7 @@ export default function UpdateInfo({avatarData}) {
       if (avatarData) {
         const newFile = await applyRotation(avatarData[0], 1, 500);
         const saveFile = imageResize(avatarData[0], newFile);
-        const setAva = saveFileToIpfs(saveFile).then(hash => {
+        const setAva = saveFileToIpfs(saveFile).then((hash) => {
           avatarUrl = process.env.REACT_APP_IPFS + hash;
           setTagsInfo({ avatar: hash }, opts);
         });
@@ -149,66 +134,73 @@ export default function UpdateInfo({avatarData}) {
       dispatch(setAccount(newAccount));
       dispatch(setLoading(false));
 
-      dispatch(actionCreate.setStep('two'));
+      dispatch(actionCreate.setStep('five'));
+      return history.push('/registerSuccess');
     } catch (err) {
+      if (err.payload && err.payload.message.code === 'ER_DUP_ENTRY') {
+        enqueueSnackbar('Username already taken', { variant: 'error' });
+      }
       throw err;
     }
-  }
+  };
 
   return (
     <>
-      <QueueAnim delay={200} type={['top', 'bottom']}>
-        <LayoutAuthen key={1}>
-          <BoxAuthen>
-            <ShadowBoxAuthen>
-              <>
-                {step === 'one' && <HeaderAuthen title={<FormattedMessage id="regist.updateInfo" />} />}
-                {step === 'one' && <ValidatorForm onSubmit={gotoNext}>
-                  <TextValidator
-                    label={<FormattedMessage id="regist.displayName" />}
-                    fullWidth
-                    onChange={event => {
-                      // Fix issue #148
-                      setDisplayName(event.currentTarget.value.toLowerCase());
-                    }}
-                    name="displayName"
-                    validators={['required']}
-                    errorMessages={[
-                      <FormattedMessage id="regist.requiredMes" />,
-                    ]}
-                    margin="dense"
-                    value={displayName}
-                    inputProps={{ autoComplete: 'displayName' }}
-                  />
-                  <TextValidator
-                    label={<FormattedMessage id="regist.fullName" />}
-                    fullWidth
-                    onChange={event => {
-                      // Fix issue #148
-                      setFullName(event.currentTarget.value.toLowerCase());
-                    }}
-                    name="fullName"
-                    validators={['required']}
-                    errorMessages={[
-                      <FormattedMessage id="regist.requiredMes" />,
-                    ]}
-                    margin="dense"
-                    value={fullName}
-                    inputProps={{ autoComplete: 'fullName' }}
-                  />
-                  <DivControlBtnKeystore justify={'flex-end'}>
-                    <ButtonPro type="submit" className="nextBtn">
-                      <FormattedMessage id="regist.next" />
-                      <Icon className={classes.rightIcon}>arrow_right_alt</Icon>
-                    </ButtonPro>
-                  </DivControlBtnKeystore>
-                </ValidatorForm>}
-                {step === 'two' && <RegisterSuccess />}
-              </>
-            </ShadowBoxAuthen>
-          </BoxAuthen>
-        </LayoutAuthen>
-      </QueueAnim>
+      <ValidatorForm onSubmit={gotoNext}>
+        <TextValidator
+          label={<FormattedMessage id="regist.userName" />}
+          fullWidth
+          onChange={(event) => {
+            // Fix issue #148
+            setUsername(event.currentTarget.value.toLowerCase());
+          }}
+          name="Username"
+          validators={['required', 'specialCharacter', 'isAliasRegistered']}
+          errorMessages={[
+            <FormattedMessage id="regist.requiredMes" />,
+            <FormattedMessage id="regist.characterCheck" />,
+            <FormattedMessage id="regist.userTaken" />,
+          ]}
+          margin="dense"
+          value={username}
+          inputProps={{ autoComplete: 'username' }}
+          variant="filled"
+          color="secondary"
+          className={classes.textField}
+          InputProps={{
+            className: classes.input,
+          }}
+          InputLabelProps={{
+            className: classes.label,
+          }}
+        />
+        <TextValidator
+          label={<FormattedMessage id="regist.displayName" />}
+          fullWidth
+          onChange={(event) => {
+            // Fix issue #148
+            setDisplayName(event.currentTarget.value.toLowerCase());
+          }}
+          name="fullName"
+          validators={['required']}
+          errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
+          margin="dense"
+          value={displayName}
+          inputProps={{ autoComplete: 'displayName' }}
+          variant="filled"
+          color="secondary"
+          className={classes.textField}
+          InputProps={{
+            className: classes.input,
+          }}
+          InputLabelProps={{
+            className: classes.label,
+          }}
+        />
+        <ButtonPro fullWidth type="submit" className={classes.button}>
+          <FormattedMessage id="regist.next" />
+        </ButtonPro>
+      </ValidatorForm>
     </>
   );
 }

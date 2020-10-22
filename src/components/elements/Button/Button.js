@@ -65,15 +65,15 @@ const StyledLinkPro = withStyles({
 
 const StyledGoogleBtn = withStyles({
   root: {
-    background: 'rgb(230, 0, 35)',
+    background: '#EC7171',
     color: 'rgb(255, 255, 255)',
     '&:hover': {
-      background: '#d50c22',
+      background: 'rgb(230, 0, 35)',
     },
-  }
-})(BaseButton)
+  },
+})(BaseButton);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   styledButton: {
     margin: theme.spacing(1),
   },
@@ -132,5 +132,5 @@ export const ButtonGoogle = ({ children, ...props }) => {
     <StyledGoogleBtn color="primary" className={classes.styledButton} {...props}>
       {children}
     </StyledGoogleBtn>
-  )
-}
+  );
+};

@@ -30,7 +30,9 @@
     "login.login": "Sign in",
     "login.withPhoneOrEmail": "Using Phone Or Email",
     "login.sendOtp": "Send Otp",
-    "login.syncAccount": "Sync account",
+    "login.trynow": "Try now",
+    "login.later": "Try later",
+    "login.wannaGo": "Wanna go",
 
     "regist.userName": "Username",
     "regist.firstName": "First Name",
@@ -155,9 +157,10 @@
     "memory.import": "Import",
     "memory.postTo": "Post to:",
 
-    "landing.introTitle": "An intimate place to store and cherish your meaningful memories. Safe, clutterless, and lasting.",
-    "landing.introSubTit": " Keep to yourself or share with close friends.",
+    "landing.introTitle": "An intimate place to store and cherish your meaningful memories",
+    "landing.introSubTit": "Safe, clutterless, and lasting. Keep to yourself or share with close friends.",
     "landing.tagline": "Love written in the blocks.",
+    "landing.lovelock": "Love Lock",
     "landing.cta": "Join LoveLock now.",
     "landing.btnRegist": "Register",
     "landing.btnLogin": "Log In",

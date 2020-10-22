@@ -9,11 +9,12 @@ import * as actionCreate from '../../../../store/actions/create';
 import { ButtonPro, ButtonGoogle } from '../../../elements/Button';
 import { IceteaId } from 'iceteaid-web';
 import Otp from '../Otp';
+import RegisterSuccess from './RegisterSuccess';
 
-const i = new IceteaId('xxx')
+const i = new IceteaId('xxx');
 
 const DivActionButton = styled.div`
-  margin: 15px 0 15px 0
+  margin: 15px 0 15px 0;
 `;
 
 const OrParagraph = styled.div`
@@ -28,45 +29,23 @@ const OrParagraph = styled.div`
 
 export default function RegisterIceteaId() {
   const dispatch = useDispatch();
-  const step = useSelector(state => state.create.step);
-
-  useEffect(() => {
-    dispatch(actionCreate.setStep('one'));
-  }, []);
+  const step = useSelector((state) => state.create.step);
 
   return (
     <>
-      <QueueAnim delay={200} type={['top', 'bottom']}>
-        <LayoutAuthen key={1}>
-          <BoxAuthen>
-            <ShadowBoxAuthen>
-              <>
-                {step === 'one' && <HeaderAuthen title={<FormattedMessage id="regist.regist" />} />}
-                {step === 'one' && <>
-                  <DivActionButton>
-                    <ButtonPro onClick={() => dispatch(actionCreate.setStep('two'))} fullWidth className="alreadyAcc">
-                      <FormattedMessage id="regist.withPhoneOrEmail" />
-                    </ButtonPro>
-                  </DivActionButton>
-                  <OrParagraph>
-                    Or
-                  </OrParagraph>
-                  <DivActionButton>
-                    <ButtonGoogle
-                      className="alreadyAcc"
-                      fullWidth
-                      onClick={() => i.auth.loginWithGoogle(`${process.env.REACT_APP_LOVELOCK_URL}/checkAccount`)}
-                    >
-                      Continue with Google
-                    </ButtonGoogle>
-                  </DivActionButton>
-                </>}
-                {step === 'two' && <Otp />}
-              </>
-            </ShadowBoxAuthen>
-          </BoxAuthen>
-        </LayoutAuthen>
-      </QueueAnim>
+      {step === 'five' && (
+        <QueueAnim delay={200} type={['top', 'bottom']}>
+          <LayoutAuthen key={1}>
+            <BoxAuthen>
+              <ShadowBoxAuthen>
+                <>
+                  <RegisterSuccess />
+                </>
+              </ShadowBoxAuthen>
+            </BoxAuthen>
+          </LayoutAuthen>
+        </QueueAnim>
+      )}
     </>
   );
 }
