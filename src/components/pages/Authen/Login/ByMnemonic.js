@@ -20,9 +20,6 @@ import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
-import { IceteaId } from 'iceteaid-web';
-
-const i = new IceteaId('xxx');
 
 const styles = (theme) => ({
   // button: {
@@ -87,6 +84,7 @@ function ByMnemonic(props) {
     try {
       let privateKey = phrase;
       let address;
+      // eslint-disable-next-line no-unused-vars
       let mnemonic;
       let mode = 0;
       if (wallet.isMnemonic(phrase)) {
@@ -166,10 +164,6 @@ function ByMnemonic(props) {
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
     user = (user && JSON.parse(user)) || {};
     const addr = user.address;
-    if (props.isSyncAccount) {
-      setStep('one');
-      return history.push('/loginIceteaid');
-    }
     if (addr) {
       setStep('one');
     } else history.goBack();

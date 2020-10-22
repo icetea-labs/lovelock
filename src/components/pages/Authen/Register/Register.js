@@ -7,7 +7,6 @@ import { FormattedMessage } from 'react-intl';
 import { LayoutAuthen, BoxAuthen, ShadowBoxAuthen } from '../../../elements/StyledUtils';
 import { HeaderAuthen } from '../../../elements/Common';
 import RegisterUsername from './RegisterUsername';
-import RegisterIceteaId from './RegisterIceteaId';
 import RegisterSuccess from './RegisterSuccess';
 import * as actionCreate from '../../../../store/actions/create';
 import ImageCrop from '../../../elements/ImageCrop';
@@ -58,15 +57,15 @@ function Register(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     step: state.create.step,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setStep: step => {
+    setStep: (step) => {
       dispatch(actionCreate.setStep(step));
     },
   };

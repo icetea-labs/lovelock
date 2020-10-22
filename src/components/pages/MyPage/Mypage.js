@@ -32,7 +32,7 @@ const ShadowBox = styled.div`
   padding: 30px 30px 10px 30px;
   border-radius: 10px;
   background: linear-gradient(320deg, #eee, #ddd);
-  background-image: url("/static/img/small_tiles.png");
+  background-image: url('/static/img/small_tiles.png');
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
   @media (max-width: 768px) {
     padding: 16px;
@@ -59,7 +59,7 @@ const PointShow = styled.div`
   justify-content: center;
 `;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   avatar: {
     width: 126,
     height: 126,
@@ -87,7 +87,7 @@ function Mypage(props) {
   const classes = useStyles();
   const tx = useTx();
   const { enqueueSnackbar } = useSnackbar();
-  const address = useSelector(state => state.account.address);
+  const address = useSelector((state) => state.account.address);
   const [myPageInfo, setMyPageInfo] = useState({
     avatar: '',
     username: '',
@@ -108,22 +108,24 @@ function Mypage(props) {
 
   useEffect(() => {
     async function getDataMypage() {
-      callView('getDataForMypage', [paramAliasOrAddr]).then(data => {
-        const info = {};
-        info.avatar = data[0].avatar;
-        info.username = data[0].username;
-        info.displayname = data[0]['display-name'];
-        info.followed = data[0].followed;
-        info.address = data[0].address;
-        balances[info.address] = data[0].token;
-        const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
-        info.numFollow = numFollow;
-        info.isMyFollow = isMyFollow;
-        setMyPageInfo(info);
-      }).catch(err => {
-        console.error(err)
-        props.history.push('/notfound')
-      })
+      callView('getDataForMypage', [paramAliasOrAddr])
+        .then((data) => {
+          const info = {};
+          info.avatar = data[0].avatar;
+          info.username = data[0].username;
+          info.displayname = data[0]['display-name'];
+          info.followed = data[0].followed;
+          info.address = data[0].address;
+          balances[info.address] = data[0].token;
+          const { numFollow, isMyFollow } = serialFollowData(data[0].followed);
+          info.numFollow = numFollow;
+          info.isMyFollow = isMyFollow;
+          setMyPageInfo(info);
+        })
+        .catch((err) => {
+          console.error(err);
+          props.history.push('/notfound');
+        });
     }
 
     getDataMypage();
@@ -132,14 +134,15 @@ function Mypage(props) {
 
   useEffect(() => {
     if (page !== 1) {
-      setPage(1)
-      setNoMoreMemories(false)
+      setPage(1);
+      setNoMoreMemories(false);
     }
-    getData()
-  }, [paramAliasOrAddr])
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramAliasOrAddr]);
 
   useDidUpdate(() => {
-    if (page === 1 || noMoreMemories) return
+    if (page === 1 || noMoreMemories) return;
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
@@ -153,33 +156,35 @@ function Mypage(props) {
     if (forced || notOwnMemorySrc || page === 1) {
       setLoading(true);
       setMemories([]);
-      return APIService.getLocksForFeed(paramAliasOrAddr, false, true, true).then(r => {
-        setLocks(r.locks)
-        setRecentData(r.recentData)
-        setMemoryIndexes(r.memoryIndexes)
-        return r
-      })
+      return APIService.getLocksForFeed(paramAliasOrAddr, false, true, true).then((r) => {
+        setLocks(r.locks);
+        setRecentData(r.recentData);
+        setMemoryIndexes(r.memoryIndexes);
+        return r;
+      });
     } else {
-      return { locks: props.locks, memoryIndexes }
+      return { locks: props.locks, memoryIndexes };
     }
   }
 
   function getData(forced) {
-    return getLocksForFeed(forced).then(r => {
-      if (r.memoryIndexes.length) {
-        fetchMemories(r.memoryIndexes, r.address, forced)
-      } else {
-        setLoading(false)
-      }
-    }).catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
+    return getLocksForFeed(forced)
+      .then((r) => {
+        if (r.memoryIndexes.length) {
+          fetchMemories(r.memoryIndexes, r.address, forced);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }
 
   function fetchMemories(memoriesIndexes, myAddress, loadToCurrentPage = false) {
     return APIService.getMemoriesByListMemIndex(memoriesIndexes, page, appConstants.memoryPageSize, loadToCurrentPage)
-      .then(result => {
+      .then((result) => {
         if (result.length < appConstants.memoryPageSize) {
           setNoMoreMemories(true);
         }
@@ -189,14 +194,14 @@ function Mypage(props) {
         setMemories(memories, myAddress);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setLoading(false);
       });
   }
 
   function refresh() {
-    setChanged(c => !c);
+    setChanged((c) => !c);
   }
 
   function nextPage() {
@@ -212,7 +217,7 @@ function Mypage(props) {
   }
 
   function getNumTopFollow(_numFollow, _isMyFollow) {
-    callView('getFollowedPerson', [paramAliasOrAddr]).then(data => {
+    callView('getFollowedPerson', [paramAliasOrAddr]).then((data) => {
       const { numFollow, isMyFollow } = serialFollowData(data);
       if (_numFollow !== numFollow || _isMyFollow !== isMyFollow) {
         setMyPageInfo({ ...myPageInfo, numFollow, isMyFollow });
@@ -242,8 +247,8 @@ function Mypage(props) {
   }
 
   function setMemories(value, address) {
-    value.src = 'mypage'
-    value.srcId = address || ((myPageInfo && myPageInfo.address) ? myPageInfo.address : paramAliasOrAddr)
+    value.src = 'mypage';
+    value.srcId = address || (myPageInfo && myPageInfo.address ? myPageInfo.address : paramAliasOrAddr);
     props.dispatch(actions.setMemories(value));
   }
 
@@ -254,7 +259,7 @@ function Mypage(props) {
   }
 
   const isHaveLocks = props.locks.length > 0;
-  const isGuest = myPageInfo.address !== address
+  const isGuest = myPageInfo.address !== address;
   return (
     <>
       {!loading && (
@@ -269,7 +274,7 @@ function Mypage(props) {
                       {myPageInfo.displayname}
                     </Typography>
                     <PointShow>
-                    <PersonIcon className={classes.titleIcon} />
+                      <PersonIcon className={classes.titleIcon} />
                       <Typography variant="subtitle1" color="primary">
                         &nbsp;{`@${myPageInfo.username}`}
                       </Typography>
@@ -330,20 +335,22 @@ function Mypage(props) {
                   myPageInfo={myPageInfo}
                 />
               </div>
-            </LeftBoxWrapper> 
-          ) : (<EmptyPage 
-            isApproved={isApproved} 
-            history={props.history} 
-            isGuest={isGuest} 
-            username={myPageInfo.username} 
-          />)}
+            </LeftBoxWrapper>
+          ) : (
+            <EmptyPage
+              isApproved={isApproved}
+              history={props.history}
+              isGuest={isGuest}
+              username={myPageInfo.username}
+            />
+          )}
         </div>
       )}
     </>
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     locks: state.loveinfo.locks,
     address: state.account.address,
@@ -352,13 +359,13 @@ const mapStateToProps = state => {
     balances: state.loveinfo.balances,
   };
 };
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     dispatch,
-    setLocks: value => {
+    setLocks: (value) => {
       dispatch(actions.setLocks(value));
     },
-    setRecentData: value => {
+    setRecentData: (value) => {
       dispatch(actions.setRecentData(value));
     },
   };

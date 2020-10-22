@@ -11,7 +11,6 @@ import UpdateInfo from '../pages/Authen/Register/UpdateInfo';
 import { useDispatch, useSelector } from 'react-redux';
 import { IceteaId } from 'iceteaid-web';
 import IceteaIdModal from '../elements/IceteaIdModal';
-import { DivControlBtnKeystore } from '../elements/StyledUtils';
 
 const OutBox = styled.div`
   display: flex;

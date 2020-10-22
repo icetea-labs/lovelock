@@ -20,7 +20,7 @@ import { loadAllDrafts, saveDraft, delDraft } from '../../../helper/draft';
 import { ensureToken } from '../../../helper/hooks';
 import { saveToIpfs, saveFileToIpfs, sendTxUtil, handleError, makeLockName } from '../../../helper';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   menuItem: {
     width: '100%',
     maxWidth: 480,
@@ -54,11 +54,11 @@ export default function BlogEditor(props) {
   const [previewOn, setPreviewOn] = useState(false);
   const [drafts, setDrafts] = useState();
 
-  const tokenAddress = useSelector(state => state.account.tokenAddress);
-  const tokenKey = useSelector(state => state.account.tokenKey);
-  const address = useSelector(state => state.account.address);
+  const tokenAddress = useSelector((state) => state.account.tokenAddress);
+  const tokenKey = useSelector((state) => state.account.tokenKey);
+  const address = useSelector((state) => state.account.address);
 
-  const topInfo = useSelector(state => state.loveinfo.topInfo);
+  const topInfo = useSelector((state) => state.loveinfo.topInfo);
   const editMode = memory != null && memory.lockIndex != null;
   const senderName = editMode ? memory.s_tags['display-name'] : topInfo ? topInfo.s_name : '';
   const receiverName = editMode ? memory.r_tags['display-name'] : topInfo ? topInfo.r_name : '';
@@ -66,12 +66,12 @@ export default function BlogEditor(props) {
   const [actionMenu, setActionMenu] = useState(null);
   const [selectionLocks, setSelectionLocks] = useState(null);
 
-  const lockIndexInit = editMode ? memory.lockIndex : (props.needSelectLock ? null : topInfo.index)
+  const lockIndexInit = editMode ? memory.lockIndex : props.needSelectLock ? null : topInfo.index;
   const [lockIndex, setLockIndex] = useState(lockIndexInit);
-  const language = useSelector(state => state.globalData.language);
+  const language = useSelector((state) => state.globalData.language);
   const ja = 'ja';
 
-  const myLocks = (props.locks || []).filter(l => l.isMyLock && l.status === 1)
+  const myLocks = (props.locks || []).filter((l) => l.isMyLock && l.status === 1);
 
   if (memory && memory.blogContent && memory !== blogMemory) {
     blogMemory = memory;
@@ -81,11 +81,11 @@ export default function BlogEditor(props) {
     setBlogTitle(r.title);
     setBlogSubtitle(r.subtitle);
   }
-
+  // eslint-disable-next-line
   useEffect(() => {
-    if (lockIndex != null) return
-    setLockIndex(lockIndexInit)
-  })
+    if (lockIndex != null) return;
+    setLockIndex(lockIndexInit);
+  });
 
   useEffect(() => {
     loadAllDrafts().then(setDrafts);
@@ -93,9 +93,9 @@ export default function BlogEditor(props) {
 
   useEffect(() => {
     if (!editMode && !props.needSelectLock) {
-      setLockIndex(topInfo.index)
+      setLockIndex(topInfo.index);
     }
-  }, [editMode, props.needSelectLock, topInfo.index])
+  }, [editMode, props.needSelectLock, topInfo.index]);
 
   function showDrafts(event) {
     setActionMenu(event.currentTarget);
@@ -108,7 +108,7 @@ export default function BlogEditor(props) {
   const dispatch = useDispatch();
 
   const { enqueueSnackbar } = useSnackbar();
-  const showError = e => enqueueSnackbar(e, { variant: 'error' });
+  const showError = (e) => enqueueSnackbar(e, { variant: 'error' });
 
   function setBlogTitle(title) {
     blogTitle = title || '';
@@ -127,7 +127,7 @@ export default function BlogEditor(props) {
   function removeDraft(keyToDel, hide) {
     if (keyToDel) {
       if (drafts && drafts.length) {
-        const dr = drafts.filter(d => d.key !== keyToDel);
+        const dr = drafts.filter((d) => d.key !== keyToDel);
         setDrafts(dr);
       }
       delDraft(keyToDel);
@@ -142,13 +142,13 @@ export default function BlogEditor(props) {
     const method = editMode ? 'editMemory' : 'addMemory';
     const params = editMode ? [memory.id, content, null] : [lockIndex, false, content, info];
     return sendTxUtil(method, params, opts)
-      .then(r => {
+      .then((r) => {
         removeDraft(draftKey);
         handleClose();
         onMemoryChanged && onMemoryChanged({ editMode, index: r.returnValue, params });
         return r;
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         const message = handleError(err, 'sending blog post');
         showError(message);
@@ -176,10 +176,10 @@ export default function BlogEditor(props) {
       setGLoading(true);
       submitBlog()
         .then(() => {
-            setGLoading(false);
-            enqueueSnackbar('Published', { variant: 'success' });
+          setGLoading(false);
+          enqueueSnackbar('Published', { variant: 'success' });
         })
-        .catch(err => {
+        .catch((err) => {
           setGLoading(false);
           console.error(err);
           showError(`An error has occured, you can try again later: ${err.message}`);
@@ -194,7 +194,7 @@ export default function BlogEditor(props) {
   async function submitBlog() {
     const combined = combineContent();
     if (blog.validate(combined)) {
-      const uploadThenSendTx = async opts => {
+      const uploadThenSendTx = async (opts) => {
         const { blocks } = combined;
         const images = blocks.reduce((collector, b, i) => {
           if (
@@ -203,7 +203,7 @@ export default function BlogEditor(props) {
             (b.data.url.indexOf('blob:') === 0 || b.data.url.indexOf('data:') === 0)
           ) {
             collector[i] = fetch(b.data.url)
-              .then(r => r.arrayBuffer())
+              .then((r) => r.arrayBuffer())
               .then(Buffer.from);
           }
           return collector;
@@ -306,7 +306,7 @@ export default function BlogEditor(props) {
   }
 
   function selectedLockName() {
-    const lock = lockIndex == null ? null : myLocks.find(lock => lock.id === lockIndex);
+    const lock = lockIndex == null ? null : myLocks.find((lock) => lock.id === lockIndex);
     if (!lock) {
       if (language === ja) {
         return '--ロックを洗濯してください--';
@@ -334,7 +334,7 @@ export default function BlogEditor(props) {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
             transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           >
-            {myLocks.map(lock => (
+            {myLocks.map((lock) => (
               <ListItem key={lock.id} onClick={() => updateLockIndex(lock.id)} button className={classes.menuItem}>
                 <ListItemText primary={lock.s_info.lockName || makeLockName(lock)} />
               </ListItem>
