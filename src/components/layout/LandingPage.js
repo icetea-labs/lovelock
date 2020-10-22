@@ -1,13 +1,28 @@
-import React, { PureComponent } from 'react';
+import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
+import QueueAnim from 'rc-queue-anim';
+import { ButtonGoogle, ButtonPro, LinkPro } from '../elements/Button';
+import * as actionCreate from '../../store/actions/create';
+import { device } from '../../helper';
+import Otp from '../pages/Authen/Otp';
+import UpdateInfo from '../pages/Authen/Register/UpdateInfo';
+import { useDispatch, useSelector } from 'react-redux';
+import { IceteaId } from 'iceteaid-web';
+import IceteaIdModal from '../elements/IceteaIdModal';
+import { DivControlBtnKeystore } from '../elements/StyledUtils';
 
 const OutBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: #ebdef6;
 `;
 
 const SplitLeft = styled.div`
@@ -19,10 +34,6 @@ const SplitLeft = styled.div`
   overflow-x: hidden;
   padding-top: 20px;
   left: 0;
-  background-color: #8250c8;
-  color: #fff;
-  background-size: cover;
-  background-image: url('/static/img/landing.svg');
   @media (max-width: 768px) {
     height: 40%;
     width: 100%;
@@ -38,7 +49,6 @@ const SplitRight = styled.div`
   overflow-x: hidden;
   padding-top: 20px;
   right: 0;
-  background-color: #fff;
   @media (max-width: 768px) {
     height: 65%;
     width: 100%;
@@ -48,83 +58,145 @@ const SplitRight = styled.div`
 
 const SplitContentLeft = styled.div`
   position: absolute;
-  top: 47%;
+  top: 45%;
   left: 50%;
   max-width: 100%;
+  width: 60%;
+
   transform: translate(-50%, -50%);
   .imgView {
     margin-left: 243px;
+  }
+  img {
+    margin-top: 70px;
+    display: none;
+  }
+  @media ${device.tablet} {
+    img {
+      display: block;
+      transform: scale(1.6);
+    }
   }
 `;
 
 const LoveLockQuote = styled.div`
   width: 100%;
   height: 100%;
-  font-size: 18px;
+  font-size: calc(20px + 1vw);
+  font-family: Montserrat;
+  font-weight: 700;
   font-stretch: normal;
-  line-height: 1.45;
-  color: #ffffff;
+  line-height: 1.3;
+  color: #2d1949;
   position: relative;
-  @media (max-width: 414px) {
-    font-size: 16px;
-    .more {
-      display: none;
-    }
-  }
   ::before {
-    content: open-quote;
-    font-size: 80px;
-    top: -40px;
-    left: -40px;
+    content: url('/static/img/leafQuote.svg');
+    bottom: -10px;
+    right: 66px;
     position: absolute;
-    color: rgba(255, 255, 255, 0.5);
+    z-index: -10;
+    transform: scale(0.7);
   }
+`;
+
+const SmallQuote = styled.div`
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  font-family: Montserrat;
+  font-weight: 400;
+  padding: 20px 0 20px 0;
 `;
 
 const SplitContentRight = styled.div`
   position: absolute;
-  top: 44%;
-  left: 44%;
+  color: #ffffff;
+  top: 45%;
+  left: 50%;
   transform: translate(-50%, -50%);
-  text-align: left;
+  text-align: center;
+  width: 65%;
+
   img {
-    width: 64px;
-    height: 64px;
+    width: 25px;
+    height: 25px;
   }
   .imgView {
     margin: 16px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    span {
+      font-size: 18px;
+    }
   }
+  @media ${device.laptop} {
+    .imgView {
+      margin-bottom: 50px;
+    }
+    .signUpSubTitle {
+      margin-bottom: 20px;
+    }
+  }
+
   .signUpTitle {
     font-size: 25px;
     line-height: 32px;
+    font-weight: 600;
   }
   .signUpSubTitle {
-    color: #14171a;
-    font-size: 18px;
+    font-size: 13px;
     line-height: 24px;
-    margin: 16px auto;
+    mix-blend-mode: normal;
+    opacity: 0.8;
+    font-family: Montserrat;
   }
   .signUpBtn {
     margin-right: 16px;
     width: 130px;
     height: 40px;
+    font-weight: bold;
+  }
+  .loginBtn {
+    margin-top: 10px;
+    color: #c892ff;
+    width: 100%;
   }
 `;
 
 const SignupForm = styled.div`
-  margin: 30px auto;
-  line-height: 3.5;
+  background-color: #43256d;
+  border-radius: 10px;
+  color: #ffffff;
+  line-height: 1.5;
+  padding: 40px 20px 40px;
+  button {
+    height: 50px;
+  }
+
+  @media ${device.laptop} {
+    line-height: 3.5;
+    padding: 20px 100px 20px 100px;
+  }
+
+  .goBack {
+    margin-bottom: 0;
+    margin-top: 200px;
+    button {
+      color: #c892ff;
+    }
+  }
 `;
 
 const FooterWapper = styled.div`
   height: 20px;
   line-height: 20px;
-  background: #fff;
+  background: #ebdef6;
   width: 100%;
   color: #aab8c2;
   display: flex;
   font-size: 12px;
-  font-weight: 300px;
+  font-weight: 300;
   border-top: 1px solid #e6ecf0;
   justify-content: center;
   padding: 8px 0;
@@ -155,70 +227,142 @@ const Copyright = styled.div`
     margin-left: 10px;
   }
 `;
+const OrParagraph = styled.div`
+  overflow: hidden;
+  text-align: center;
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: bold;
+  mix-blend-mode: normal;
+  opacity: 0.2;
+  line-height: 2.5;
+  margin-bottom: 5px;
+`;
+const i = new IceteaId('xxx');
 
-class LandingPage extends PureComponent {
-  render() {
-    const isLock = window.location.pathname.indexOf('/lock/') === 0;
-    return !isLock ? (
-      <>
-        <OutBox>
-          <SplitLeft>
-            <SplitContentLeft>
-              <LoveLockQuote>
-                <FormattedMessage id="landing.introTitle" />
-                <span className="more">
-                  <FormattedMessage id="landing.introSubTit" />
-                </span>
-              </LoveLockQuote>
-            </SplitContentLeft>
-          </SplitLeft>
-          <SplitRight>
-            <SplitContentRight>
+const LandingPage = memo(() => {
+  const dispatch = useDispatch();
+  const isLock = window.location.pathname.indexOf('/lock/') === 0;
+  const step = useSelector((state) => state.create.step);
+  const [openModal, setOpenModal] = useState(false);
+
+  return !isLock ? (
+    <>
+      <OutBox>
+        <SplitLeft>
+          <SplitContentLeft>
+            <LoveLockQuote>
+              <FormattedMessage id="landing.introTitle" />
+            </LoveLockQuote>
+            <SmallQuote>
+              <span className="more">
+                <FormattedMessage id="landing.introSubTit" />
+              </span>
+            </SmallQuote>
+            <img src="/static/img/newLanding.svg" alt="" />
+          </SplitContentLeft>
+        </SplitLeft>
+        <SplitRight>
+          <SplitContentRight>
+            <SignupForm>
               <div className="imgView">
                 <img src="/static/img/logo.svg" alt="loveLock" />
+                <span>
+                  <FormattedMessage id="landing.lovelock" />
+                </span>
               </div>
-              <h1 className="signUpTitle">
-                <FormattedMessage id="landing.tagline" />
-              </h1>
-              <SignupForm>
+              {step !== 'four' && (
+                <h1 className="signUpTitle">
+                  <FormattedMessage id="landing.tagline" />
+                </h1>
+              )}
+              {step === 'four' && (
+                <h1 className="signUpTitle">
+                  <FormattedMessage id="regist.updateInfo" />
+                </h1>
+              )}
+
+              <QueueAnim delay={200} type={['top', 'bottom']}>
                 <h2 className="signUpSubTitle">
                   <FormattedMessage id="landing.cta" />
                 </h2>
-                <Button href="/register" className="signUpBtn" variant="contained" color="primary">
-                  <FormattedMessage id="landing.btnRegist" />
-                </Button>
-                <Button href="/login" className="signUpBtn" variant="outlined" color="primary">
-                  <FormattedMessage id="landing.btnLogin" />
-                </Button>
-              </SignupForm>
-            </SplitContentRight>
-          </SplitRight>
-        </OutBox>
-        <FooterWapper>
-          <Copyright>
+                {step === 'one' && (
+                  <>
+                    <ButtonPro onClick={() => dispatch(actionCreate.setStep('two'))} fullWidth className="alreadyAcc">
+                      <FormattedMessage id="landing.btnRegist" />
+                    </ButtonPro>
+                    <Button
+                      onClick={() => {
+                        dispatch(actionCreate.setStep('two'));
+                        setOpenModal(true);
+                      }}
+                      className="loginBtn"
+                      variant="outlined"
+                      color="primary"
+                    >
+                      <FormattedMessage id="landing.btnLogin" />
+                    </Button>
+                  </>
+                )}
+                {step === 'two' && (
+                  <>
+                    <ButtonPro onClick={() => dispatch(actionCreate.setStep('three'))} fullWidth className="alreadyAcc">
+                      <FormattedMessage id="regist.withPhoneOrEmail" />
+                    </ButtonPro>
+                    <OrParagraph>Or</OrParagraph>
+                    <ButtonGoogle
+                      onClick={() => i.auth.loginWithGoogle(`${process.env.REACT_APP_LOVELOCK_URL}/checkAccount`)}
+                      className="alreadyAcc"
+                      fullWidth
+                    >
+                      Continue with Google
+                    </ButtonGoogle>
+                  </>
+                )}
+                {step === 'three' && <Otp />}
+                {step === 'four' && <UpdateInfo />}
+              </QueueAnim>
+              <div className="goBack">
+                {step !== 'one' && (
+                  <>
+                    <span>
+                      <FormattedMessage id="login.wannaGo" />
+                      <LinkPro onClick={() => dispatch(actionCreate.setStep('one'))} className="alreadyAcc">
+                        <span>back?</span>
+                      </LinkPro>
+                    </span>
+                  </>
+                )}
+              </div>
+            </SignupForm>
+          </SplitContentRight>
+        </SplitRight>
+      </OutBox>
+      <FooterWapper>
+        <Copyright>
+          <p>
+            Powered by&nbsp;
+            <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
+              Icetea Platform
+            </a>
+          </p>
+        </Copyright>
+        <Copyright>
+          <div className="footRight">
             <p>
-              Powered by&nbsp;
-              <a href="https://icetea.io/" target="_blank" rel="noopener noreferrer">
-                Icetea Platform
+              &copy; 2019&nbsp;
+              <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
+                Trada Technology
               </a>
             </p>
-          </Copyright>
-          <Copyright>
-            <div className="footRight">
-              <p>
-                &copy; 2019&nbsp;
-                <a href="https://trada.tech" target="_blank" rel="noopener noreferrer">
-                  Trada Technology
-                </a>
-              </p>
-            </div>
-          </Copyright>
-        </FooterWapper>
-      </>
-    ) : (
-      <div />
-    );
-  }
-}
+          </div>
+        </Copyright>
+      </FooterWapper>
+      {openModal && <IceteaIdModal open={openModal} setOpen={setOpenModal} />}
+    </>
+  ) : (
+    <div />
+  );
+});
 
-export default withRouter(LandingPage);
+export default LandingPage;

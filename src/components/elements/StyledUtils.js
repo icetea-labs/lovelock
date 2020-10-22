@@ -28,9 +28,9 @@ export const zIndex = {
 };
 
 export const BtnActive = styled.button`
-  width: ${props => (props.width ? props.width : '100px')};
-  height: ${props => (props.height ? props.height : '40px')};
-  line-height: ${props => (props.height ? props.height : '40px')};
+  width: ${(props) => (props.width ? props.width : '100px')};
+  height: ${(props) => (props.height ? props.height : '40px')};
+  line-height: ${(props) => (props.height ? props.height : '40px')};
   text-align: center;
   font-size: 14px;
   font-weight: bold;
@@ -100,7 +100,7 @@ export const BtnActive = styled.button`
 export const BtnInactive = styled(BtnActive)`
   background: #848e9c;
   box-shadow: none;
-  width: ${props => (props.width ? props.width : '100px')};
+  width: ${(props) => (props.width ? props.width : '100px')};
   &:hover {
     transform: scale(1);
   }
@@ -125,8 +125,8 @@ export const Loading = styled.div`
     }
   }
 `;
-export const px2rem = px => `${px / 16}rem`;
-export const rem = px => `${px / 16}rem`;
+export const px2rem = (px) => `${px / 16}rem`;
+export const rem = (px) => `${px / 16}rem`;
 export const media = {
   pc: (...args) =>
     css`
@@ -158,43 +158,43 @@ export const mobile = {
 
 export const FlexBox = styled.div`
   display: flex;
-  flex-direction: ${props => props.direction};
-  justify-content: ${props => props.justify};
-  align-items: ${props => props.align};
-  flex: ${props => props.flex};
-  padding: ${props => props.padding};
-  height: ${props => props.height};
-  width: ${props => props.width};
-  min-height: ${props => props.minHeight};
-  flex-wrap: ${props => props.wrap};
-  margin: ${props => props.margin};
-  margin-top: ${props => props.marginTop};
-  margin-bottom: ${props => props.marginBottom};
-  margin-left: ${props => props.marginLeft};
-  margin-right: ${props => props.marginRight};
-  text-align: ${props => props.textAlign};
+  flex-direction: ${(props) => props.direction};
+  justify-content: ${(props) => props.justify};
+  align-items: ${(props) => props.align};
+  flex: ${(props) => props.flex};
+  padding: ${(props) => props.padding};
+  height: ${(props) => props.height};
+  width: ${(props) => props.width};
+  min-height: ${(props) => props.minHeight};
+  flex-wrap: ${(props) => props.wrap};
+  margin: ${(props) => props.margin};
+  margin-top: ${(props) => props.marginTop};
+  margin-bottom: ${(props) => props.marginBottom};
+  margin-left: ${(props) => props.marginLeft};
+  margin-right: ${(props) => props.marginRight};
+  text-align: ${(props) => props.textAlign};
 `;
 export const FlexWidthBox = styled.div`
-  width: ${props => props.width};
+  width: ${(props) => props.width};
   ${media.mobile`
     width: 100%;
   `}
 `;
 export const FlexItem = styled.div`
-  flex: ${props => props.flex || 1};
-  padding: ${props => props.padding};
-  margin: ${props => props.margin};
-  width: ${props => props.width};
+  flex: ${(props) => props.flex || 1};
+  padding: ${(props) => props.padding};
+  margin: ${(props) => props.margin};
+  width: ${(props) => props.width};
 `;
 export const ShadowBoxBK = styled.div.attrs({
   className: 'shadow_box',
 })`
-  width: ${props => props.width};
+  width: ${(props) => props.width};
   background-color: #fff;
   box-shadow: 0px 2px 10px 0px rgba(90, 102, 124, 0.1);
-  padding: ${props => props.padding};
+  padding: ${(props) => props.padding};
   box-sizing: border-box;
-  margin: ${props => props.margin};
+  margin: ${(props) => props.margin};
   ::-webkit-scrollbar {
     width: 4px;
     border-radius: 4px;
@@ -211,14 +211,14 @@ export const ShadowBoxBK = styled.div.attrs({
     background-color: #fff;
   }
   ${media.mobile`
-    padding: ${props => props.padding && '16px 12px'};
+    padding: ${(props) => props.padding && '16px 12px'};
     margin: 0px 0px 16px 0px;
   `}
 `;
 export const TextOvewflow = styled.div.attrs({
   className: 'text-overflow',
 })`
-  width: ${props => props.width};
+  width: ${(props) => props.width};
 `;
 export const LayoutDisplay = styled.div`
   position: fixed;
@@ -232,7 +232,7 @@ export const LayoutDisplay = styled.div`
 export const DivControlBtnKeystore = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: ${props => props.justify || 'space-between'};
+  justify-content: ${(props) => props.justify || 'space-between'};
   padding: 10px 0 0 0;
   font-size: 14px;
   @media (min-width: 320px) and (max-width: 623px) {
@@ -330,4 +330,12 @@ export const LeftBoxWrapper = styled.div`
       }
     }
   }
+`;
+
+export const OneLineButton = styled.div`
+  display: flex;
+  button:first-child {
+    margin-right: 10px;
+  }
+  margin-top: 20px;
 `;
