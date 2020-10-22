@@ -105,7 +105,6 @@ function RegisterSuccess(props) {
   } = props;
 
   const [savedPhrase, setSavedPhrase] = useState(false);
-
   function gotoHome() {
     setLoading(true);
     setTimeout(async () => {
@@ -202,7 +201,7 @@ function RegisterSuccess(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     mnemonic: state.account.mnemonic,
     address: state.account.address,
@@ -213,18 +212,18 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setStep: step => {
+    setStep: (step) => {
       dispatch(actionCreate.setStep(step));
     },
-    setAccount: value => {
+    setAccount: (value) => {
       dispatch(actionAccount.setAccount(value));
     },
-    setLoading: value => {
+    setLoading: (value) => {
       dispatch(actionGlobal.setLoading(value));
     },
-    setPathName: value => {
+    setPathName: (value) => {
       dispatch(actionCreate.setPathName(value));
     },
   };
