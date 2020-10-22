@@ -14,13 +14,12 @@ const i = new IceteaId('xxx');
 export default function CheckAccount() {
   const history = useHistory();
   const dispatch = useDispatch();
-  const [isRemember, setIsRemember] = useRemember();
+  const [isRemember] = useRemember();
 
   useEffect(() => {
     dispatch(setLoading(true));
     const checkHaveAcc = async () => {
       const key = await i.user.getKey();
-      console.log('key', key);
       if (key.payload) {
         const { private_key, encryption_key, mnemonic } = key.payload;
         const decrypted = await i.user.decryptKey(private_key, encryption_key, mnemonic);
@@ -87,6 +86,7 @@ export default function CheckAccount() {
       }
     };
     checkHaveAcc();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <></>;

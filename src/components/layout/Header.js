@@ -52,12 +52,8 @@ import { getInfoAndTags, getUserSuggestions, diffTime, camelObject, fetchNoti, m
 import LeftContainer from '../pages/Lock/LeftContainer';
 // import APIService from '../../service/apiService';
 // import LandingPage from './LandingPage';
-import { IceteaId } from 'iceteaid-web';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import appConstants from '../../helper/constants';
 const maxNotiShown = appConstants.maxNotiShown;
-
-const i = new IceteaId('xxx');
 
 const StyledLogo = styled(Link)`
   @media (max-width: 600px) {
