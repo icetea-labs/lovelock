@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TabPanel from '@material-ui/lab/TabPanel';
 import TabContext from '@material-ui/lab/TabContext';
-import { IceteaId } from 'iceteaid-web';
-import { useHistory } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
-import { useDispatch, useSelector } from 'react-redux';
 import OtpEmail from './OtpEmail';
 import OtpPhone from './OtpPhone';
 import { StyledTab, StyledTabs } from '../../elements/Tabs';
@@ -20,20 +16,10 @@ const useStyles = makeStyles({
   },
 });
 
-const i = new IceteaId('xxx');
-
 export default function IconLabelTabs() {
-  const history = useHistory();
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
   const [isSentOtp, setIsSent] = useState(false);
   const classes = useStyles();
   const [value, setValue] = useState(0);
-  const { enqueueSnackbar } = useSnackbar();
-  const dispatch = useDispatch();
-  const step = useSelector((state) => state.create.step);
-  const isSync = useSelector((state) => state.account.isSyncAccount);
 
   const handleChange = (event, newValue) => {
     setIsSent(false);
