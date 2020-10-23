@@ -12,10 +12,14 @@ import appConstants from '../../../helper/constants';
 
 import { useDidUpdate } from '../../../helper/hooks';
 import EmptyPage from '../../layout/EmptyPage';
+import { getAlias } from '../../../helper';
+import { IceteaId } from 'iceteaid-web';
+import TryIceteaIdModal from '../../elements/TryIceteaIdModal';
+const i = new IceteaId('xxx');
 
 function Home(props) {
   const { setLocks, setMemories, address, locks, history, isApproved, memoryList } = props;
-  const needToLoadData = Boolean(address && isApproved)
+  const needToLoadData = Boolean(address && isApproved);
   const notOwnMemorySrc = memoryList.src !== 'home';
 
   const [loading, setLoading] = useState(needToLoadData && notOwnMemorySrc);
@@ -23,19 +27,32 @@ function Home(props) {
   const [page, setPage] = useState(1);
   const [noMoreMemories, setNoMoreMemories] = useState(false);
   const [memoryIndexes, setMemoryIndexes] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
 
   // const { enqueueSnackbar } = useSnackbar();
 
   function refresh() {
-    setChanged(c => !c);
+    setChanged((c) => !c);
   }
 
   useEffect(() => {
-    if (!needToLoadData) return
-    
+    const shouldOpenModal = async () => {
+      const username = await getAlias(address);
+      const isRegister = await i.auth.isRegister(username);
+      if (!isRegister.payload) {
+        setOpenModal(true);
+      }
+    };
+    shouldOpenModal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!needToLoadData) return;
+
     if (page !== 1) {
-      setPage(1)
-      setNoMoreMemories(false)
+      setPage(1);
+      setNoMoreMemories(false);
     }
 
     const signal = {};
@@ -45,7 +62,7 @@ function Home(props) {
   }, []);
 
   useDidUpdate(() => {
-    if (page === 1 || noMoreMemories) return
+    if (page === 1 || noMoreMemories) return;
 
     const signal = {};
     getData(signal);
@@ -74,36 +91,38 @@ function Home(props) {
     if (forced || notOwnMemorySrc || page === 1) {
       setLoading(true);
       setMemories([]);
-      return APIService.getLocksForFeed(address, true, true).then(r => {
+      return APIService.getLocksForFeed(address, true, true).then((r) => {
         if (signal.cancel) return;
 
-        setLocks(r.locks)
-        setMemoryIndexes(r.memoryIndexes)
-        return r
-      })
+        setLocks(r.locks);
+        setMemoryIndexes(r.memoryIndexes);
+        return r;
+      });
     } else {
-      return { locks, memoryIndexes }
+      return { locks, memoryIndexes };
     }
   }
 
   function getData(signal, forced) {
     if (!needToLoadData) return;
-    return getLocksForFeed(signal, forced).then(r => {
-      if (signal.cancel) return;
-      if (r.memoryIndexes.length) {
-        fetchMemories(signal, r.memoryIndexes, forced) 
-      } else {
-        setLoading(false)
-      }
-    }).catch(err => {
-      setLoading(false);
-      console.error(err);
-    });
+    return getLocksForFeed(signal, forced)
+      .then((r) => {
+        if (signal.cancel) return;
+        if (r.memoryIndexes.length) {
+          fetchMemories(signal, r.memoryIndexes, forced);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        console.error(err);
+      });
   }
 
   function fetchMemories(signal, memoryIndexes, loadToCurrentPage = false) {
     return APIService.getMemoriesByListMemIndex(memoryIndexes, page, appConstants.memoryPageSize, loadToCurrentPage)
-      .then(result => {
+      .then((result) => {
         if (signal.cancel) return;
         if (result.length < appConstants.memoryPageSize) {
           setNoMoreMemories(true);
@@ -114,7 +133,7 @@ function Home(props) {
         setMemories(memories);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setLoading(false);
       });
@@ -126,7 +145,7 @@ function Home(props) {
   }
 
   const renderHomeEmptyPropose = () => {
-    return <EmptyPage isApproved={isApproved} history={history} />
+    return <EmptyPage isApproved={isApproved} history={history} />;
   };
   const isRegistered = !!address;
   const isHaveLocks = locks.length > 0;
@@ -135,6 +154,7 @@ function Home(props) {
     <>
       {!loading && (
         <>
+          <TryIceteaIdModal open={openModal} setOpen={setOpenModal} />
           {isHaveLocks ? (
             <LeftBoxWrapper>
               <div className="proposeColumn proposeColumn--left">
@@ -157,7 +177,7 @@ function Home(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     address: state.account.address,
     locks: state.loveinfo.locks,
@@ -166,13 +186,13 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setLocks: value => {
+    setLocks: (value) => {
       dispatch(actions.setLocks(value));
     },
-    setMemories: value => {
-      value.src = 'home'
+    setMemories: (value) => {
+      value.src = 'home';
       dispatch(actions.setMemories(value));
     },
   };

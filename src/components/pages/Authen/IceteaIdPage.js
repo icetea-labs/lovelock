@@ -1,15 +1,18 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import QueueAnim from 'rc-queue-anim';
-import { ButtonGoogle, ButtonPro, LinkPro } from '../elements/Button';
-import * as actionCreate from '../../store/actions/create';
-import { device } from '../../helper';
-import Otp from '../pages/Authen/Otp';
-import UpdateInfo from '../pages/Authen/Register/UpdateInfo';
+import { ButtonGoogle, ButtonPro, LinkPro } from '../../elements/Button';
+import * as actionCreate from '../../../store/actions/create';
+import { device } from '../../../helper';
+import Otp from '../../pages/Authen/Otp';
+import UpdateInfo from '../../pages/Authen/Register/UpdateInfo';
 import { useDispatch, useSelector } from 'react-redux';
 import { IceteaId } from 'iceteaid-web';
+import { getAlias } from '../../../helper';
+import { useHistory } from 'react-router-dom';
+import { setLoading } from '../../../store/actions';
 
 const OutBox = styled.div`
   display: flex;
@@ -239,12 +242,36 @@ const OrParagraph = styled.div`
 `;
 const i = new IceteaId('xxx');
 
-const LandingPage = memo(() => {
+const IceteaIdPage = memo(() => {
   const dispatch = useDispatch();
-  const isLock = window.location.pathname.indexOf('/lock/') === 0;
+  const [showPage, setShowPage] = useState(false);
   const step = useSelector((state) => state.create.step);
+  const address = useSelector((state) => state.account.address);
+  const history = useHistory();
+  setLoading(true);
 
-  return !isLock ? (
+  if (!address) {
+    return history.push('/');
+  }
+
+  useEffect(() => {
+    const shouldShowPage = async () => {
+      try {
+        const username = await getAlias(address);
+        const isRegister = await i.auth.isRegister(username);
+        if (!isRegister.payload) {
+          return setShowPage(true);
+        }
+        return history.push('/');
+      } catch (err) {
+        console.log('err', err);
+      }
+    };
+    shouldShowPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return showPage ? (
     <>
       <OutBox>
         <SplitLeft>
@@ -360,4 +387,4 @@ const LandingPage = memo(() => {
   );
 });
 
-export default LandingPage;
+export default IceteaIdPage;

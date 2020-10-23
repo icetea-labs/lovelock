@@ -1,20 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IceteaId } from 'iceteaid-web';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setAccount, setLoading, setStep } from '../../../store/actions';
 import { savetoLocalStorage, wallet } from '../../../helper';
 import { getWeb3, grantAccessToken } from '../../../service/tweb3';
 import { encode } from '../../../helper/encode';
 import { useRemember } from '../../../helper/hooks';
 import { encode as codecEncode } from '@iceteachain/common/src/codec';
+import SyncAccountModal from '../../elements/SyncAccountModal';
 
 const i = new IceteaId('xxx');
 
-export default function CheckAccount() {
+export default function LoggingAccount() {
+  const [openModal, setOpenModal] = useState(false);
   const history = useHistory();
   const dispatch = useDispatch();
   const [isRemember] = useRemember();
+  const address = useSelector((state) => state.account.address);
+  const mnemonic = useSelector((state) => state.account.mnemonic);
+  const privateKey = useSelector((state) => state.account.privateKey);
+  const encryptedData = useSelector((state) => state.account.encryptedData);
+  const cipher = useSelector((state) => state.account.cipher);
 
   useEffect(() => {
     dispatch(setLoading(true));
@@ -80,14 +87,21 @@ export default function CheckAccount() {
           history.push('/');
         });
       } else {
+        console.log('address', address);
+        console.log('private', privateKey);
+        console.log('mene', mnemonic);
+        console.log('en', encryptedData);
+        console.log('cipher', cipher);
         dispatch(setLoading(false));
-        dispatch(setStep('four'));
-        history.push('/');
+        if (address) {
+          return history.push('/syncAccount');
+        }
+        setOpenModal(true);
       }
     };
     checkHaveAcc();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <></>;
+  return <>{openModal && <SyncAccountModal open={openModal} setOpen={setOpenModal} />}</>;
 }
