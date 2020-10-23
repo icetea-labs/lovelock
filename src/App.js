@@ -106,10 +106,24 @@ const RegisterIceteaId = lazy(() =>
   )
 );
 
-const CheckAccount = lazy(() =>
+const LoggingAccount = lazy(() =>
   import(
-    /* webpackChunkName: "check_account" */
-    './components/pages/Authen/CheckAccount'
+    /* webpackChunkName: "logging_account" */
+    './components/pages/Authen/LoggingAccount'
+  )
+);
+
+const SyncAccount = lazy(() =>
+  import(
+    /* webpackChunkName: "sync_account" */
+    './components/pages/Authen/SyncAccount'
+  )
+);
+
+const IceteaIdPage = lazy(() =>
+  import(
+    /* webpackChunkName: "iceteaid_page" */
+    './components/pages/Authen/IceteaIdPage'
   )
 );
 
@@ -151,9 +165,11 @@ function App(props) {
           <Switch>
             <RouteWithoutLayout exact path="/login" component={Login} />
             <RouteWithoutLayout exact path="/register" component={Register} />
-            <RouteWithoutLayout exact path="/checkAccount" component={CheckAccount} />
+            <RouteWithoutLayout exact path="/logging" component={LoggingAccount} />
             <RouteWithoutLayout exact path="/registerSuccess" component={RegisterIceteaId} />
+            <RouteWithoutLayout exact path="/syncAccount" component={SyncAccount} />
             <RouteWithoutLayout exact path="/blog/:index" component={BLogView} />
+            <RouteWithoutLayout exact path="/iceteaId" component={IceteaIdPage} />
 
             <RouteHome hasAddress={!!props.address} exact path="/" />
             <RouteWithLayout layout={HomeLayout} exact path="/profile" component={ChangeProfile} />

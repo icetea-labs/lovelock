@@ -62,7 +62,7 @@ export default function OtpPhone({ isSentOtp, setIsSent }) {
   const verifyOtp = async () => {
     try {
       await i.auth.verifyOtp('+84' + phone, 'sms', otp);
-      return history.push('/checkAccount');
+      return history.push('/logging');
     } catch (err) {
       const msg = err.payload.message || err.message;
       enqueueSnackbar(msg, { variant: 'error' });

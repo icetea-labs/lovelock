@@ -11,7 +11,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { FormattedMessage } from 'react-intl';
 
-import { wallet, savetoLocalStorage } from '../../../../helper';
+import { wallet, savetoLocalStorage, getAlias, getTagsInfo } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -20,7 +20,9 @@ import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
+import { IceteaId } from 'iceteaid-web';
 
+const i = new IceteaId('xxx');
 const styles = (theme) => ({
   // button: {
   //   margin: theme.spacing(1),
@@ -100,6 +102,15 @@ function ByMnemonic(props) {
           throw err;
         }
       }
+      if (props.isSyncAccount) {
+        const encrytionKey = await i.user.generateEncryptionKey();
+
+        await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mode === 1 ? privateKey : '');
+        const username = await getAlias(address);
+        const info = await getTagsInfo(address);
+
+        await i.user.updateInfo(username, info['display-name']);
+      }
       const tweb3 = getWeb3();
       const acc = tweb3.wallet.importAccount(privateKey);
       // tweb3.wallet.defaultAccount = address;
@@ -139,6 +150,9 @@ function ByMnemonic(props) {
         setAccount(account);
         setLoading(false);
         history.push('/');
+        if (props.isSyncAccount) {
+          enqueueSnackbar('Sync account successfully. Now you can using IceteaID to login.', { variant: 'success' });
+        }
       });
     } catch (error) {
       console.warn(error);
@@ -189,9 +203,11 @@ function ByMnemonic(props) {
         autoFocus
         value={props.recoveryPhase}
       />
-      <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
-        <FormattedMessage id="login.qrCode" />
-      </LinkPro>
+      {!props.isSyncAccount && (
+        <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
+          <FormattedMessage id="login.qrCode" />
+        </LinkPro>
+      )}
       <TextField
         id="rePassword"
         label={<FormattedMessage id="login.newPassLabel" />}

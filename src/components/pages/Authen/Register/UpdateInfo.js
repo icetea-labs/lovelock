@@ -138,10 +138,8 @@ export default function UpdateInfo({ avatarData }) {
       dispatch(actionCreate.setStep('five'));
       return history.push('/registerSuccess');
     } catch (err) {
-      if (err.payload && err.payload.message.code === 'ER_DUP_ENTRY') {
-        enqueueSnackbar('Username already taken', { variant: 'error' });
-      }
-      throw err;
+      const msg = err.payload.message || err.message;
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   };
 

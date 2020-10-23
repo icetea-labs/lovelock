@@ -33,6 +33,9 @@
     "login.trynow": "Try now",
     "login.later": "Try later",
     "login.wannaGo": "Wanna go",
+    "login.newAccount": "Login new account",
+    "login.syncNow": "Sync now",
+    "login.syncAccount": "Sync account with IceteaID",
 
     "regist.userName": "Username",
     "regist.firstName": "First Name",

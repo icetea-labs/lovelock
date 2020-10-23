@@ -11,6 +11,8 @@ import { OneLineButton } from './StyledUtils';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { ButtonPro } from './Button';
+import { setStep } from '../../store/actions';
+import { useDispatch } from 'react-redux';
 
 const styles = (theme) => ({
   root: {
@@ -50,7 +52,7 @@ const ContWrap = styled.div`
 `;
 
 const Title = styled.div`
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   font-style: normal;
   font-stretch: normal;
@@ -69,11 +71,16 @@ const SubTitle = styled.div`
   margin-top: 5px;
 `;
 
-export default function IceteaIdModal({ open, setOpen }) {
+export default function SyncAccountModal({ open, setOpen }) {
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const handleClose = () => {
     setOpen(false);
+  };
+  const loginNewAccount = () => {
+    dispatch(setStep('four'));
+    history.push('/');
   };
 
   return (
@@ -86,24 +93,24 @@ export default function IceteaIdModal({ open, setOpen }) {
         aria-labelledby="customized-dialog-title"
         open={open}
       >
-        <DialogTitle id="customized-dialog-title" onClose={handleClose} />
+        <DialogTitle id="customized-dialog-title" />
         <DialogContent>
           <ContWrap>
-            <Title>Try using IceteaID?</Title>
-            <SubTitle>Login faster and simpler.</SubTitle>
+            <Title>Already have account?</Title>
+            <SubTitle>Sync your account with IceteaID.</SubTitle>
             <OneLineButton>
-              <Button onClick={() => history.push('/login')} fullWidth color="primary" variant="outlined">
-                <FormattedMessage id="login.later" />
+              <Button onClick={loginNewAccount} fullWidth color="primary" variant="outlined">
+                <FormattedMessage id="login.newAccount" />
               </Button>
               <ButtonPro
-                onClick={() => setOpen(false)}
+                onClick={() => history.push('/syncAccount')}
                 fullWidth
                 variant="contained"
                 color="primary"
                 className="nextBtn"
                 type="submit"
               >
-                <FormattedMessage id="login.trynow" />
+                <FormattedMessage id="login.syncNow" />
               </ButtonPro>
             </OneLineButton>
           </ContWrap>
