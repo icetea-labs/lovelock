@@ -61,7 +61,7 @@ export default function OtpEmail({ isSentOtp, setIsSent }) {
   const verifyOtp = async () => {
     try {
       await i.auth.verifyOtp(email, 'email', otp);
-      return history.push('/checkAccount');
+      return history.push('/logging');
     } catch (err) {
       const msg = err.payload.message || err.message;
       enqueueSnackbar(msg, { variant: 'error' });
