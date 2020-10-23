@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 import * as actionCreate from '../../../../store/actions/create';
 import { ButtonPro } from '../../../elements/Button';
@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function UpdateInfo({ avatarData }) {
   const [displayName, setDisplayName] = useState('');
-  const [password, setPassword] = useState('');
+  const [password] = useState('');
   const [username, setUsername] = useState('');
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -103,6 +103,7 @@ export default function UpdateInfo({ avatarData }) {
       tweb3.wallet.defaultAccount = address;
       const registerInfo = [];
       const opts = { address };
+      // eslint-disable-next-line no-unused-vars
       let avatarUrl;
       if (avatarData) {
         const newFile = await applyRotation(avatarData[0], 1, 500);
