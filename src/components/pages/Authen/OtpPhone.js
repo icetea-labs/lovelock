@@ -1,6 +1,6 @@
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 import { FormattedMessage } from 'react-intl';
-import { DivControlBtnKeystore, OneLineButton } from '../../elements/StyledUtils';
+import { OneLineButton } from '../../elements/StyledUtils';
 import { ButtonPro } from '../../elements/Button';
 import * as actionCreate from '../../../store/actions/create';
 import React, { useState } from 'react';
@@ -61,8 +61,8 @@ export default function OtpPhone({ isSentOtp, setIsSent }) {
 
   const verifyOtp = async () => {
     try {
-      const verify = await i.auth.verifyOtp('+84' + phone, 'sms', otp);
-      return history.push('/checkAccount');
+      await i.auth.verifyOtp('+84' + phone, 'sms', otp);
+      return history.push('/logging');
     } catch (err) {
       const msg = err.payload.message || err.message;
       enqueueSnackbar(msg, { variant: 'error' });

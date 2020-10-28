@@ -16,13 +16,15 @@ const initialState = {
   displayName: '',
   mode: '',
   point: '',
+  tryIceteaId: false,
   ...(function getSessionStorage() {
     const resp = {};
     const sessionData = sessionStorage.getItem('sessionData') || localStorage.getItem('sessionData');
 
     if (sessionData) {
       const token = codecDecode(Buffer.from(sessionData, 'base64'));
-      const expiredSoon = process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
+      const expiredSoon =
+        process.env.REACT_APP_CONTRACT !== token.contract || token.expireAfter - Date.now() < 60 * 1000;
       if (!expiredSoon) {
         resp.tokenKey = codecToString(token.tokenKey);
         import(
@@ -30,7 +32,7 @@ const initialState = {
           '../../service/tweb3'
         ).then(({ getWeb3 }) => {
           getWeb3().wallet.importAccount(token.tokenKey);
-        })
+        });
 
         resp.tokenAddress = token.tokenAddress;
       }
@@ -56,6 +58,9 @@ const account = (state = initialState, action) => {
 
     case actionTypes.SET_NEEDAUTH:
       return { ...state, needAuth: action.data };
+
+    case actionTypes.SET_TRYICETEAID:
+      return { ...state, tryIceteaId: action.data };
 
     default:
       return state;

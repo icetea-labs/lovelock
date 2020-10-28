@@ -11,7 +11,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { FormattedMessage } from 'react-intl';
 
-import { wallet, savetoLocalStorage } from '../../../../helper';
+import { wallet, savetoLocalStorage, getAlias, getTagsInfo } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -23,7 +23,6 @@ import { encode } from '../../../../helper/encode';
 import { IceteaId } from 'iceteaid-web';
 
 const i = new IceteaId('xxx');
-
 const styles = (theme) => ({
   // button: {
   //   margin: theme.spacing(1),
@@ -87,6 +86,7 @@ function ByMnemonic(props) {
     try {
       let privateKey = phrase;
       let address;
+      // eslint-disable-next-line no-unused-vars
       let mnemonic;
       let mode = 0;
       if (wallet.isMnemonic(phrase)) {
@@ -101,6 +101,15 @@ function ByMnemonic(props) {
           err.showMessage = 'Invalid recovery phrase.';
           throw err;
         }
+      }
+      if (props.isSyncAccount) {
+        const encrytionKey = await i.user.generateEncryptionKey();
+
+        await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mode === 1 ? privateKey : '');
+        const username = await getAlias(address);
+        const info = await getTagsInfo(address);
+
+        await i.user.updateInfo(username, info['display-name']);
       }
       const tweb3 = getWeb3();
       const acc = tweb3.wallet.importAccount(privateKey);
@@ -141,6 +150,9 @@ function ByMnemonic(props) {
         setAccount(account);
         setLoading(false);
         history.push('/');
+        if (props.isSyncAccount) {
+          enqueueSnackbar('Sync account successfully. Now you can using IceteaID to login.', { variant: 'success' });
+        }
       });
     } catch (error) {
       console.warn(error);
@@ -166,10 +178,6 @@ function ByMnemonic(props) {
     let user = localStorage.getItem('user') || sessionStorage.getItem('user');
     user = (user && JSON.parse(user)) || {};
     const addr = user.address;
-    if (props.isSyncAccount) {
-      setStep('one');
-      return history.push('/loginIceteaid');
-    }
     if (addr) {
       setStep('one');
     } else history.goBack();
@@ -195,9 +203,11 @@ function ByMnemonic(props) {
         autoFocus
         value={props.recoveryPhase}
       />
-      <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
-        <FormattedMessage id="login.qrCode" />
-      </LinkPro>
+      {!props.isSyncAccount && (
+        <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
+          <FormattedMessage id="login.qrCode" />
+        </LinkPro>
+      )}
       <TextField
         id="rePassword"
         label={<FormattedMessage id="login.newPassLabel" />}
