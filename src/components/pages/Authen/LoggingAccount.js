@@ -18,10 +18,6 @@ export default function LoggingAccount() {
   const dispatch = useDispatch();
   const [isRemember] = useRemember();
   const address = useSelector((state) => state.account.address);
-  const mnemonic = useSelector((state) => state.account.mnemonic);
-  const privateKey = useSelector((state) => state.account.privateKey);
-  const encryptedData = useSelector((state) => state.account.encryptedData);
-  const cipher = useSelector((state) => state.account.cipher);
 
   useEffect(() => {
     dispatch(setLoading(true));
@@ -87,11 +83,6 @@ export default function LoggingAccount() {
           history.push('/');
         });
       } else {
-        console.log('address', address);
-        console.log('private', privateKey);
-        console.log('mene', mnemonic);
-        console.log('en', encryptedData);
-        console.log('cipher', cipher);
         dispatch(setLoading(false));
         if (address) {
           return history.push('/syncAccount');

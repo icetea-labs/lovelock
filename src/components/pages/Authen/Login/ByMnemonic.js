@@ -105,7 +105,7 @@ function ByMnemonic(props) {
       if (props.isSyncAccount) {
         const encrytionKey = await i.user.generateEncryptionKey();
 
-        await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mode === 1 ? privateKey : '');
+        await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mode === 1 ? mnemonic : '');
         const username = await getAlias(address);
         const info = await getTagsInfo(address);
 
