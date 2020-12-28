@@ -136,7 +136,6 @@ export default function UpdateInfo({ avatarData }) {
       dispatch(actionCreate.setStep('five'));
       return history.push('/registerSuccess');
     } catch (err) {
-      console.log('err', err);
       enqueueSnackbar(err.message, { variant: 'error' });
     }
   };
