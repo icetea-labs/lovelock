@@ -51,10 +51,9 @@ export default function OtpEmail({ isSentOtp, setIsSent }) {
     try {
       const sendOtp = await i.auth.sendOtp(email, 'email');
       setIsSent(true);
-      enqueueSnackbar(sendOtp.payload.message, { variant: 'success' });
+      enqueueSnackbar(sendOtp.message, { variant: 'success' });
     } catch (err) {
-      const msg = err.payload.message || err.message;
-      enqueueSnackbar(msg, { variant: 'error' });
+      enqueueSnackbar(err.message, { variant: 'error' });
     }
   };
 
@@ -63,8 +62,7 @@ export default function OtpEmail({ isSentOtp, setIsSent }) {
       await i.auth.verifyOtp(email, 'email', otp);
       return history.push('/logging');
     } catch (err) {
-      const msg = err.payload.message || err.message;
-      enqueueSnackbar(msg, { variant: 'error' });
+      enqueueSnackbar(err.message, { variant: 'error' });
     }
   };
 

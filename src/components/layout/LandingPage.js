@@ -18,11 +18,14 @@ const OutBox = styled.div`
   top: 0;
   background-color: #ebdef6;
   bottom: 0;
+
+  @media ${device.tablet} {
+    position: fixed;
+  }
   @media ${device.laptop} {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: fixed;
   }
 `;
 
@@ -30,7 +33,7 @@ const SplitLeft = styled.div`
   display: inline-block;
   position: relative;
   width: 100%;
-  min-height: 300px;
+  min-height: 250px;
 
   @media ${device.laptopL} {
     height: 100%;
@@ -65,7 +68,7 @@ const SplitContentLeft = styled.div`
   top: 45%;
   left: 50%;
   max-width: 100%;
-  width: 60%;
+  width: 80%;
 
   transform: translate(-50%, -50%);
   .imgView {
@@ -76,10 +79,12 @@ const SplitContentLeft = styled.div`
     display: none;
   }
   @media ${device.laptop} {
+    width: 60%;
     img {
       display: block;
       transform: scale(1.6);
     }
+    max-width: 1000px;
   }
 `;
 
@@ -169,6 +174,7 @@ const SplitContentRight = styled.div`
   }
   @media ${device.laptopL} {
     width: 65%;
+    max-width: 600px;
   }
 
   .signUpTitle {
