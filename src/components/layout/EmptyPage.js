@@ -117,7 +117,7 @@ const DownInfo = styled.div`
   }
 `;
 
-export default function EmptyPage(props){
+export default function EmptyPage(props) {
   const dispatch = useDispatch();
   const { history, isApproved, isGuest, username } = props;
 
@@ -134,64 +134,72 @@ export default function EmptyPage(props){
     <FlexWidthBox>
       <ShadowBox>
         <RightBox>
-            {(!isApproved && !isGuest) ? (
-              <Alert severity="info" variant="outlined" className="note">
-                <AlertTitle>
-                  <h5><FormattedMessage id="home.activationTitle" /></h5>
-                </AlertTitle>
-                <span>
-                  <FormattedMessage id="home.activationSubTitle" />
-                  <a
-                    className="underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="http://bit.ly/LoveLock-AAR"
-                  >
-                    <strong><FormattedMessage id="home.activationForm" /></strong>
-                  </a>
-                  <FormattedMessage id="home.activationGoal" />
-                </span>
-              </Alert>
-            ) : (
-              <div>
-                <img src="/static/img/plant.svg" alt="plant" />
-                <div className="emptyTitle">
-                    {
-                      isGuest ? <h1>{username || 'This user'} has no lock.</h1> : <h1><FormattedMessage id="home.emptyTitle" /></h1>
-                    }
-                </div>
-                <div className="emptySubTitle">
-                  {isGuest ? (
-                    <h2>{username || 'This user'} has not created any content.</h2>
-                  ) : (
-                    <h2>
-                      <span>
-                        <FormattedMessage id="home.emptySubTitle" />
-                      </span>
-                      <a href="https://help.lovelock.one/" className="underline" target="_blank" rel="noopener noreferrer">
-                        <FormattedMessage id="home.emptySubTitleLink" />
-                      </a>
-                    </h2>
-                  )}
-                </div>
+          {!isApproved && !isGuest ? (
+            <Alert severity="info" variant="outlined" className="note">
+              <AlertTitle>
+                <h5>
+                  <FormattedMessage id="home.activationTitle" />
+                </h5>
+              </AlertTitle>
+              <span>
+                <FormattedMessage id="home.activationSubTitle" />
+                <a className="underline" target="_blank" rel="noopener noreferrer" href="http://bit.ly/LoveLock-AAR">
+                  <strong>
+                    <FormattedMessage id="home.activationForm" />
+                  </strong>
+                </a>
+                <FormattedMessage id="home.activationGoal" />
+              </span>
+            </Alert>
+          ) : (
+            <div>
+              <img src="/static/img/plant.svg" alt="plant" />
+              <div className="emptyTitle">
                 {isGuest ? (
-                  <LinkPro variant="contained" color="primary" route="/explore" onClick={openLink}>
-                    <FormattedMessage id="home.exploreLink" />
-                  </LinkPro>
+                  <h1>{username || 'This user'} has no lock.</h1>
                 ) : (
-                  <>
-                    <ActionForm>
-                      <ButtonPro variant="contained" color="primary" onClick={openPopup}>
-                        <FormattedMessage id="home.buttonCreate" />
-                      </ButtonPro>
-                    </ActionForm>
-                    <LinkPro className="btn_add_promise" route="/explore" onClick={openLink}>
-                      <FormattedMessage id="home.exploreLink" />
-                    </LinkPro>
-                  </>
+                  <h1>
+                    <FormattedMessage id="home.emptyTitle" />
+                  </h1>
                 )}
               </div>
-            )}
+              <div className="emptySubTitle">
+                {isGuest ? (
+                  <h2>{username || 'This user'} has not created any content.</h2>
+                ) : (
+                  <h2>
+                    <span>
+                      <FormattedMessage id="home.emptySubTitle" />
+                    </span>
+                    <a
+                      href="https://help.lovelock.one/"
+                      className="underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FormattedMessage id="home.emptySubTitleLink" />
+                    </a>
+                  </h2>
+                )}
+              </div>
+              {isGuest ? (
+                <LinkPro variant="contained" color="primary" route="/explore" onClick={openLink}>
+                  <FormattedMessage id="home.exploreLink" />
+                </LinkPro>
+              ) : (
+                <>
+                  <ActionForm>
+                    <ButtonPro variant="contained" color="primary" onClick={openPopup}>
+                      <FormattedMessage id="home.buttonCreate" />
+                    </ButtonPro>
+                  </ActionForm>
+                  <LinkPro className="btn_add_promise" route="/explore" onClick={openLink}>
+                    <FormattedMessage id="home.exploreLink" />
+                  </LinkPro>
+                </>
+              )}
+            </div>
+          )}
         </RightBox>
       </ShadowBox>
       <FooterWapper>
@@ -223,7 +231,7 @@ export default function EmptyPage(props){
               <FormattedMessage id="home.supportEmail" />
             </a>
             <FormattedMessage id="home.supportOr" />
-            <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
+            <a href="https://t.me/iceteachain_vi" target="_blank" rel="noopener noreferrer">
               <FormattedMessage id="home.supportTelegram" />
             </a>
           </p>

@@ -3,7 +3,7 @@ import { IceteaId } from 'iceteaid-web';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAccount, setLoading, setStep } from '../../../store/actions';
-import { savetoLocalStorage, wallet } from '../../../helper';
+import { getAlias, registerAlias, savetoLocalStorage, setTagsInfo, wallet } from '../../../helper';
 import { getWeb3, grantAccessToken } from '../../../service/tweb3';
 import { encode } from '../../../helper/encode';
 import { useRemember } from '../../../helper/hooks';
@@ -23,28 +23,52 @@ export default function LoggingAccount() {
     dispatch(setLoading(true));
     const checkHaveAcc = async () => {
       const key = await i.user.getKey();
-      if (key.payload) {
-        const { private_key, encryption_key, mnemonic } = key.payload;
-        const decrypted = await i.user.decryptKey(private_key, encryption_key, mnemonic);
-        let privateKey = decrypted.payload.privateKey;
+      if (key) {
+        let { privateKey, encryptionKey, mnemonic } = key;
+        const decrypted = await i.user.decryptKey(privateKey, encryptionKey, mnemonic);
         let address;
+        let publicKey;
         let mode = 0;
 
-        if (wallet.isMnemonic(decrypted.payload.mnemonic)) {
-          const recoveryAccount = wallet.getAccountFromMneomnic(decrypted.payload.mnemonic);
-          ({ privateKey, address } = recoveryAccount);
+        if (wallet.isMnemonic(decrypted.mnemonic)) {
+          const recoveryAccount = wallet.getAccountFromMneomnic(decrypted.mnemonic);
+          ({ privateKey, address, publicKey } = recoveryAccount);
           mode = 1;
         } else {
           try {
-            address = wallet.getAddressFromPrivateKey(decrypted.payload.privateKey);
+            address = wallet.getAddressFromPrivateKey(decrypted.privateKey);
+            publicKey = wallet.getPubKeyFromPrivateKey(decrypted.privateKey);
           } catch (err) {
             err.showMessage = 'Invalid recovery phrase.';
             throw err;
           }
         }
+
+        // to make sure everyone update pubkey and address
+        await i.user.exUpdatePbKeyAndAddress(publicKey, address);
         const tweb3 = getWeb3();
         const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
+
+        // if login from teawork. because teawork not register alias
+        const username = await getAlias(address);
+        if (!username) {
+          const user = await i.user.getMetaData();
+
+          const registerInfo = [];
+          const opts = { address };
+          registerInfo.push(
+            setTagsInfo(
+              {
+                'display-name': user.displayName,
+                'pub-key': publicKey,
+              },
+              opts
+            )
+          );
+          registerInfo.push(registerAlias(address, address));
+          await Promise.all(registerInfo);
+        }
 
         // check if account is a regular address
         if (!tweb3.utils.isRegularAccount(acc.address)) {

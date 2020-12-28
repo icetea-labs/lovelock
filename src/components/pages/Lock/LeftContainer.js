@@ -159,24 +159,24 @@ function LeftContainer(props) {
     language,
     featured,
     context,
-    myPageInfo
+    myPageInfo,
   } = props;
 
   const isLockPage = proIndex != null;
-  const shouldRenderRecent = ['mypage', 'lock'].includes(context)
+  const shouldRenderRecent = ['mypage', 'lock'].includes(context);
   const collections = isLockPage && topInfo && topInfo.index === proIndex ? topInfo.collections || [] : [];
   const recentImages = shouldRenderRecent ? recentData.photos || {} : {};
   const hasRecentImages = !!Object.keys(recentImages).length;
   const recentBlogPosts = shouldRenderRecent ? recentData.blogPosts || [] : [];
 
-  const snackbar = useSnackbar()
+  const snackbar = useSnackbar();
   const { enqueueSnackbar } = snackbar;
   const ja = 'ja';
 
   useEffect(() => {
     const signal = {};
     let sub;
-    ensureContract().then(c => {
+    ensureContract().then((c) => {
       sub = watchCreatePropose(c, signal);
     });
 
@@ -196,22 +196,26 @@ function LeftContainer(props) {
       if (error) {
         showSubscriptionError(error, enqueueSnackbar);
       } else {
-        if (result.eventName === 'createLock' &&
-          (result.eventData.log.sender === address || result.eventData.log.receiver === address)) {
+        if (
+          result.eventName === 'createLock' &&
+          (result.eventData.log.sender === address || result.eventData.log.receiver === address)
+        ) {
           eventCreatePropose(result.eventData, signal);
         }
 
-        if (result.eventName ===  'confirmLock' && 
-          (result.eventData.log.sender === address || result.eventData.log.receiver === address)) {
+        if (
+          result.eventName === 'confirmLock' &&
+          (result.eventData.log.sender === address || result.eventData.log.receiver === address)
+        ) {
           eventConfirmLock(result.eventData);
         }
       }
     });
   }
 
-  const openPhotoViewer = event => {
+  const openPhotoViewer = (event) => {
     const currentIndex = Number(event.target.getAttribute('data-index')) || 0;
-    const views = Object.keys(recentImages).map(hash => ({ source: process.env.REACT_APP_IPFS + hash }));
+    const views = Object.keys(recentImages).map((hash) => ({ source: process.env.REACT_APP_IPFS + hash }));
     const options = {
       currentIndex,
       views,
@@ -238,19 +242,19 @@ function LeftContainer(props) {
     confirmLock(data.log);
     if (address === data.log.sender && data.log.status === 1) {
       const message = 'Your lock request has been accepted';
-      showActions(snackbar, message, () => history.push(`/lock/${data.log.id}`))
+      showActions(snackbar, message, () => history.push(`/lock/${data.log.id}`));
     }
   }
 
   async function eventCreatePropose(data) {
     if (address !== data.log.sender) {
       const message = 'You have a new lock request';
-      showActions(snackbar, message, () => showNotifyLock(+data.log.id))
+      showActions(snackbar, message, () => showNotifyLock(+data.log.id));
     }
 
     if (['home', 'mypage'].includes(context)) {
       // reload left sidebar locks
-      const params = myPageInfo ? [myPageInfo.address, false] : [address, true]
+      const params = myPageInfo ? [myPageInfo.address, false] : [address, true];
       const lockForFeed = await callView('getLocksForFeed', params);
       setLocks(lockForFeed.locks);
     }
@@ -296,15 +300,16 @@ function LeftContainer(props) {
         <li key={i}>
           <span>・</span>
           <span>
-            <a href={`/blog/${index}`}
-              onClick={e => {
-                e.preventDefault()
-                const memo = props.memories.find(m => m.id === index)
+            <a
+              href={`/blog/${index}`}
+              onClick={(e) => {
+                e.preventDefault();
+                const memo = props.memories.find((m) => m.id === index);
                 if (memo) {
                   memo.showDetail = true;
-                  props.updateMemory(memo)
+                  props.updateMemory(memo);
                 } else {
-                  history.push(`/blog/${index}`)
+                  history.push(`/blog/${index}`);
                 }
               }}
             >
@@ -320,11 +325,11 @@ function LeftContainer(props) {
   }
 
   function renderOwnerLocks(locks, myAddress) {
-    const newLocks = locks.filter(lock => {
+    const newLocks = locks.filter((lock) => {
       return lock.isMyLock;
     });
-    const acceptedLocks = newLocks.filter(l => l.status === 1);
-    const pendingLocks = newLocks.filter(l => l.status === 0);
+    const acceptedLocks = newLocks.filter((l) => l.status === 1);
+    const pendingLocks = newLocks.filter((l) => l.status === 0);
     return (
       <>
         {!!acceptedLocks.length && (
@@ -371,7 +376,7 @@ function LeftContainer(props) {
   }
 
   function renderFollowingLocks(locks, myAddress) {
-    const followingLocks = locks.filter(lock => {
+    const followingLocks = locks.filter((lock) => {
       return lock.address || (!lock.isMyLock && lock.status === 1); // accepted
     });
     if (!followingLocks.length) return;
@@ -400,7 +405,7 @@ function LeftContainer(props) {
             {address && showNewLock && (
               <LinkPro className="btn_add_promise" onClick={newLock}>
                 <Icon type="add" />
-                <FormattedMessage id={!isGuest ? "leftmenu.newLock" : "leftmenu.requestLock"} />
+                <FormattedMessage id={!isGuest ? 'leftmenu.newLock' : 'leftmenu.requestLock'} />
               </LinkPro>
             )}
             {!featured && renderOwnerLocks(locks, address)}
@@ -417,7 +422,9 @@ function LeftContainer(props) {
               <RecentBlogPostBox>{renderRecentBlogPosts(recentBlogPosts)}</RecentBlogPostBox>
             )}
             {shouldRenderRecent && hasRecentImages && <div className="title">Photo</div>}
-            {shouldRenderRecent && hasRecentImages && <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>}
+            {shouldRenderRecent && hasRecentImages && (
+              <RecentImageBox>{renderRecentImages(recentImages)}</RecentImageBox>
+            )}
           </ShadowBox>
           <SupportSite>
             <p>
@@ -429,7 +436,7 @@ function LeftContainer(props) {
                 Email
               </a>
               &nbsp;ー&nbsp;
-              <a href="https://t.me/iceteachainvn" target="_blank" rel="noopener noreferrer">
+              <a href="https://t.me/iceteachain_vi" target="_blank" rel="noopener noreferrer">
                 Telegram
               </a>
             </p>
@@ -446,7 +453,7 @@ function LeftContainer(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     locks: state.loveinfo.locks,
     address: state.account.address,
@@ -457,28 +464,30 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setLocks: value => {
+    setLocks: (value) => {
       dispatch(actions.setLocks(value));
     },
-    updateMemory: memory => {
+    updateMemory: (memory) => {
       dispatch(actions.updateMemory(memory));
     },
-    setShowNewLockDialog: value => {
+    setShowNewLockDialog: (value) => {
       dispatch(actions.setShowNewLockDialog(value));
     },
-    confirmLock: value => {
+    confirmLock: (value) => {
       dispatch(actions.confirmLock(value));
     },
     showPhotoViewer(options) {
       dispatch(actions.setShowPhotoViewer(options));
     },
     showNotifyLock(lockIndex) {
-      dispatch(actions.setNotifyLock({
-        index: lockIndex,
-        show: true
-      }));
+      dispatch(
+        actions.setNotifyLock({
+          index: lockIndex,
+          show: true,
+        })
+      );
     },
   };
 };

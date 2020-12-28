@@ -51,11 +51,10 @@ export default function OtpPhone({ isSentOtp, setIsSent }) {
   const sendOtp = async () => {
     try {
       const sendOtp = await i.auth.sendOtp('+84' + phone, 'sms');
-      enqueueSnackbar(sendOtp.payload.message, { variant: 'success' });
+      enqueueSnackbar(sendOtp.message, { variant: 'success' });
       setIsSent(true);
     } catch (err) {
-      const msg = err.payload.message || err.message;
-      enqueueSnackbar(msg, { variant: 'error' });
+      enqueueSnackbar(err.message, { variant: 'error' });
     }
   };
 
@@ -64,8 +63,7 @@ export default function OtpPhone({ isSentOtp, setIsSent }) {
       await i.auth.verifyOtp('+84' + phone, 'sms', otp);
       return history.push('/logging');
     } catch (err) {
-      const msg = err.payload.message || err.message;
-      enqueueSnackbar(msg, { variant: 'error' });
+      enqueueSnackbar(err.message, { variant: 'error' });
     }
   };
 

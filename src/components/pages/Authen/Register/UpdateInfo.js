@@ -14,7 +14,6 @@ import {
   registerAlias,
   saveFileToIpfs,
   setTagsInfo,
-  wallet,
 } from '../../../../helper';
 import getWeb3 from '../../../../service/tweb3';
 import { setAccount, setLoading } from '../../../../store/actions';
@@ -94,9 +93,8 @@ export default function UpdateInfo({ avatarData }) {
 
   const gotoNext = async () => {
     try {
-      const { privateKey, address, publicKey, mnemonic } = wallet.getAccountFromMneomnic();
-      const encrytionKey = await i.user.generateEncryptionKey();
-      await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mnemonic);
+      const account = await i.user.exGenerateAccount();
+      const { privateKey, address, publicKey, mnemonic } = account;
       await i.user.updateInfo(username, displayName);
       const tweb3 = getWeb3();
       tweb3.wallet.importAccount(privateKey);
@@ -138,8 +136,8 @@ export default function UpdateInfo({ avatarData }) {
       dispatch(actionCreate.setStep('five'));
       return history.push('/registerSuccess');
     } catch (err) {
-      const msg = err.payload.message || err.message;
-      enqueueSnackbar(msg, { variant: 'error' });
+      console.log('err', err);
+      enqueueSnackbar(err.message, { variant: 'error' });
     }
   };
 

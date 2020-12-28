@@ -11,7 +11,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { FormattedMessage } from 'react-intl';
 
-import { wallet, savetoLocalStorage, getAlias, getTagsInfo } from '../../../../helper';
+import { wallet, savetoLocalStorage, getAlias, getTagsInfo, setTagsInfo, registerAlias } from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -86,30 +86,50 @@ function ByMnemonic(props) {
     try {
       let privateKey = phrase;
       let address;
+      let publicKey;
       // eslint-disable-next-line no-unused-vars
       let mnemonic;
       let mode = 0;
       if (wallet.isMnemonic(phrase)) {
         const recoveryAccount = wallet.getAccountFromMneomnic(phrase);
-        ({ privateKey, address } = recoveryAccount);
+        ({ privateKey, address, publicKey } = recoveryAccount);
         mode = 1;
         mnemonic = phrase;
       } else {
         try {
           address = wallet.getAddressFromPrivateKey(privateKey);
+          publicKey = wallet.getPubKeyFromPrivateKey(privateKey);
         } catch (err) {
           err.showMessage = 'Invalid recovery phrase.';
           throw err;
         }
       }
       if (props.isSyncAccount) {
-        const encrytionKey = await i.user.generateEncryptionKey();
+        const encryptionKey = await i.user.generateEncryptionKey();
 
-        await i.user.encryptKey(privateKey, encrytionKey.payload.encryptionKey, mode === 1 ? mnemonic : '');
+        await i.user.encryptKey({ privateKey, encryptionKey, mnemonic, publicKey, address });
         const username = await getAlias(address);
         const info = await getTagsInfo(address);
+        // old account lovelock will have tag, else account come from teawork need set tags
+        if (username && Object.keys(info).length) {
+          await i.user.updateInfo(username, info['display-name']);
+        } else {
+          const user = await i.user.getMetaData();
 
-        await i.user.updateInfo(username, info['display-name']);
+          const registerInfo = [];
+          const opts = { address };
+          registerInfo.push(
+            setTagsInfo(
+              {
+                'display-name': user.displayName,
+                'pub-key': publicKey,
+              },
+              opts
+            )
+          );
+          registerInfo.push(registerAlias(address, address));
+          await Promise.all(registerInfo);
+        }
       }
       const tweb3 = getWeb3();
       const acc = tweb3.wallet.importAccount(privateKey);
