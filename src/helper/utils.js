@@ -32,7 +32,7 @@ import { decodeTx, decode } from './decode';
 // let's use a fake eccrypto
 // we will review things later when we enable private locks/memories
 const eccrypto = {
-  derive: function() {
+  derive: function () {
     return 0;
   },
 };
@@ -67,7 +67,6 @@ export function waitForHtmlTags(
     }, step);
   }
 }
-
 
 export function signalPrerenderDone(wait) {
   if (wait == null) {
@@ -156,7 +155,7 @@ export async function saveToIpfs(files) {
   // simple upload
   const isBuffer = Buffer.isBuffer(files[0]);
   if (files.length !== 1) {
-    files = files.map(f => ({ content: f }));
+    files = files.map((f) => ({ content: f }));
   }
 
   let contentBuffer = files;
@@ -208,7 +207,7 @@ export async function saveToIpfs(files) {
 
 // upload one file
 export function saveFileToIpfs(files) {
-  return saveToIpfs(files).then(ids => ids[0]);
+  return saveToIpfs(files).then((ids) => ids[0]);
 }
 
 /**
@@ -219,7 +218,7 @@ export async function saveBufferToIpfs(files, opts = {}) {
   let ipfsId = [];
   try {
     if (files && files.length > 0) {
-      const content = files.map(el => {
+      const content = files.map((el) => {
         return Buffer.from(el);
       });
       if (opts.privateKey && opts.publicKey) {
@@ -228,7 +227,7 @@ export async function saveBufferToIpfs(files, opts = {}) {
           encodeJsonData.push(encodeWithPublicKey(content[i], opts.privateKey, opts.publicKey));
         }
         encodeJsonData = await Promise.all(encodeJsonData);
-        const encodeBufferData = encodeJsonData.map(el => {
+        const encodeBufferData = encodeJsonData.map((el) => {
           return Buffer.from(JSON.stringify(el));
         });
         ipfsId = await saveToIpfs(encodeBufferData);
@@ -278,7 +277,7 @@ export async function getJsonFromIpfs(cid, key) {
 }
 
 function getImageDimensions(file) {
-  return new Promise(resolved => {
+  return new Promise((resolved) => {
     const i = new Image();
     i.onload = () => {
       resolved({ w: i.width, h: i.height });
@@ -302,7 +301,7 @@ export function saveMemCacheAPI(memoryContent, id) {
     alert('Cache API is not supported.');
   } else {
     const cacheName = 'lovelock-private';
-    caches.open(cacheName).then(cache => {
+    caches.open(cacheName).then((cache) => {
       if (!memoryContent) {
         // eslint-disable-next-line no-alert
         alert('Please select a file first!');
@@ -596,10 +595,14 @@ export const wallet = {
   isMnemonic(mnemonic) {
     return !!validateMnemonic(mnemonic);
   },
+  getPubKeyFromPrivateKey(privateKey) {
+    const { publicKey } = toPubKeyAndAddress(privateKey);
+    return publicKey;
+  },
 };
 
 export const applyRotation = (file, orientation, maxWidth) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = () => {
       const url = reader.result;
@@ -686,8 +689,8 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
   let people = await getAliasContract()
     .methods.query(regex, { includeTags: true })
     .call()
-    .then(result => {
-      return Object.keys(result).map(key => {
+    .then((result) => {
+      return Object.keys(result).map((key) => {
         const nick = key.substring(key.indexOf('.') + 1);
         const tags = result[key].tags || {};
         return {
@@ -698,7 +701,7 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
         };
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.warn(err);
       return [];
     });
@@ -709,7 +712,7 @@ export async function getUserSuggestionsByNick(value, usernameKey = 'nick') {
 }
 
 export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
-  if (value.length < 2) return []
+  if (value.length < 2) return [];
   let people = await getDidContract()
     .methods.queryByTags(
       {
@@ -718,8 +721,8 @@ export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
       { includeAlias: true }
     )
     .call()
-    .then(result => {
-      return result.map(item => {
+    .then((result) => {
+      return result.map((item) => {
         const nick = item.alias ? item.alias.substring(item.alias.indexOf('.') + 1) : '';
         const tags = item.tags || {};
         return {
@@ -730,7 +733,7 @@ export async function getUserSuggestionsByName(value, usernameKey = 'nick') {
         };
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.warn(err);
       return [];
     });
@@ -769,60 +772,67 @@ export function getShortName(tags) {
 
 // snake to camel
 export function toCamel(s) {
-  return s.replace(/(_[a-z])/ig, ($1) => {
-    return $1.toUpperCase()
-      .replace('_', '');
+  return s.replace(/(_[a-z])/gi, ($1) => {
+    return $1.toUpperCase().replace('_', '');
   });
-};
+}
 
 export function camelObject(obj) {
-  const r = []
+  const r = [];
   for (const prop in obj) {
-    r[toCamel(prop)] = obj[prop]
+    r[toCamel(prop)] = obj[prop];
   }
-  return r
+  return r;
 }
 
 function _fetchNotiCore(subPath, params, signal) {
-  if (!process.env.REACT_APP_API) return Promise.resolve([])
+  if (!process.env.REACT_APP_API) return Promise.resolve([]);
 
-  const query = new URLSearchParams(params).toString()
+  const query = new URLSearchParams(params).toString();
   return fetch(`${process.env.REACT_APP_API}/noti/${subPath}?${query}`, { signal })
-    .then(r => r.json())
-    .then(r => {
-      return r.result
+    .then((r) => r.json())
+    .then((r) => {
+      return r.result;
     })
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'AbortError') return;
       throw err;
-    })
+    });
 }
 
 export function fetchNoti(params, signal) {
-  return _fetchNotiCore('list', params, signal)
+  return _fetchNotiCore('list', params, signal);
 }
 
 export function markNoti(params, signal) {
   return _fetchNotiCore('mark', params, signal);
 }
 
-export function showActions ({ enqueueSnackbar, closeSnackbar }, message, viewCallback, variant = 'info') {
-      const action = viewCallback ? (key => (
+export function showActions({ enqueueSnackbar, closeSnackbar }, message, viewCallback, variant = 'info') {
+  const action = viewCallback
+    ? (key) => (
         <>
-          <Button color="inherit" size="small"
+          <Button
+            color="inherit"
+            size="small"
             onClick={() => {
-              closeSnackbar(key)
-              setTimeout(viewCallback, 0)
-            }}>
+              closeSnackbar(key);
+              setTimeout(viewCallback, 0);
+            }}
+          >
             VIEW
           </Button>
-          <Button color="inherit" size="small"
+          <Button
+            color="inherit"
+            size="small"
             onClick={() => {
-              closeSnackbar(key)
-            }}>
+              closeSnackbar(key);
+            }}
+          >
             DISMISS
           </Button>
         </>
-      )) : undefined
-      enqueueSnackbar(message, { variant, action });
+      )
+    : undefined;
+  enqueueSnackbar(message, { variant, action });
 }

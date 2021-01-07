@@ -38,8 +38,13 @@ function Home(props) {
   useEffect(() => {
     const shouldOpenModal = async () => {
       const username = await getAlias(address);
-      const isRegister = await i.auth.isRegister(username);
-      if (!isRegister.payload) {
+      let usernameExist;
+      if (username) {
+        usernameExist = await i.auth.isRegister(username);
+      }
+      const addressExist = await i.auth.exIsRegister(address);
+
+      if (!usernameExist && !addressExist) {
         setOpenModal(true);
       }
     };

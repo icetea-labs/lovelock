@@ -12,45 +12,54 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IceteaId } from 'iceteaid-web';
 
 const OutBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: fixed;
   width: 100%;
   height: 100%;
   left: 0;
   top: 0;
   background-color: #ebdef6;
+  bottom: 0;
+
+  @media ${device.tablet} {
+    position: fixed;
+  }
+  @media ${device.laptop} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 `;
 
 const SplitLeft = styled.div`
-  height: 100%;
-  width: 50%;
-  position: fixed;
-  z-index: 1500;
-  top: 0;
-  overflow-x: hidden;
-  padding-top: 20px;
-  left: 0;
-  @media (max-width: 768px) {
-    height: 40%;
-    width: 100%;
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  min-height: 250px;
+
+  @media ${device.laptopL} {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1500;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+    left: 0;
   }
 `;
 
 const SplitRight = styled.div`
-  height: 100%;
-  width: 50%;
-  position: fixed;
-  z-index: 1500;
-  top: 0;
-  overflow-x: hidden;
-  padding-top: 20px;
-  right: 0;
-  @media (max-width: 768px) {
-    height: 65%;
-    width: 100%;
-    top: 40%;
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  @media ${device.laptopL} {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1500;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 50px;
+    right: 0;
   }
 `;
 
@@ -59,7 +68,7 @@ const SplitContentLeft = styled.div`
   top: 45%;
   left: 50%;
   max-width: 100%;
-  width: 60%;
+  width: 80%;
 
   transform: translate(-50%, -50%);
   .imgView {
@@ -69,11 +78,13 @@ const SplitContentLeft = styled.div`
     margin-top: 70px;
     display: none;
   }
-  @media ${device.tablet} {
+  @media ${device.laptop} {
+    width: 60%;
     img {
       display: block;
       transform: scale(1.6);
     }
+    max-width: 1000px;
   }
 `;
 
@@ -107,13 +118,7 @@ const SmallQuote = styled.div`
 `;
 
 const SplitContentRight = styled.div`
-  position: absolute;
-  color: #ffffff;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   text-align: center;
-  width: 65%;
 
   img {
     width: 25px;
@@ -128,13 +133,48 @@ const SplitContentRight = styled.div`
       font-size: 18px;
     }
   }
-  @media ${device.laptop} {
+  @media ${device.mobileS} {
+    padding: 20px;
+    .signUpTitle {
+      font-size: 15px;
+      line-height: 15px;
+      font-weight: 600;
+    }
+    .signUpSubTitle {
+      font-size: 10px;
+      line-height: 15px;
+      mix-blend-mode: normal;
+      opacity: 0.8;
+      font-family: Montserrat;
+    }
+    button {
+      padding: 0.1em;
+      font-size: 0.8em;
+      height: 30px;
+    }
+  }
+
+  @media ${device.tablet} {
+    padding: 10px 100px;
+  }
+
+  @media ${device.laptopL} {
+    position: absolute;
+    color: #ffffff;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
     .imgView {
       margin-bottom: 50px;
     }
     .signUpSubTitle {
       margin-bottom: 20px;
     }
+  }
+  @media ${device.laptopL} {
+    width: 65%;
+    max-width: 600px;
   }
 
   .signUpTitle {
@@ -173,6 +213,11 @@ const SignupForm = styled.div`
   }
 
   @media ${device.laptop} {
+    line-height: 3.5;
+    padding: 20px;
+  }
+
+  @media ${device.laptopL} {
     line-height: 3.5;
     padding: 20px 100px 20px 100px;
   }

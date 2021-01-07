@@ -3,7 +3,7 @@ import { IceteaId } from 'iceteaid-web';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAccount, setLoading, setStep } from '../../../store/actions';
-import { savetoLocalStorage, wallet } from '../../../helper';
+import { getAlias, registerAlias, savetoLocalStorage, setTagsInfo, wallet } from '../../../helper';
 import { getWeb3, grantAccessToken } from '../../../service/tweb3';
 import { encode } from '../../../helper/encode';
 import { useRemember } from '../../../helper/hooks';
@@ -18,34 +18,41 @@ export default function LoggingAccount() {
   const dispatch = useDispatch();
   const [isRemember] = useRemember();
   const address = useSelector((state) => state.account.address);
-  const mnemonic = useSelector((state) => state.account.mnemonic);
-  const privateKey = useSelector((state) => state.account.privateKey);
-  const encryptedData = useSelector((state) => state.account.encryptedData);
-  const cipher = useSelector((state) => state.account.cipher);
 
   useEffect(() => {
     dispatch(setLoading(true));
     const checkHaveAcc = async () => {
       const key = await i.user.getKey();
-      if (key.payload) {
-        const { private_key, encryption_key, mnemonic } = key.payload;
-        const decrypted = await i.user.decryptKey(private_key, encryption_key, mnemonic);
-        let privateKey = decrypted.payload.privateKey;
+      if (key) {
+        let { privateKey, encryptionKey, mnemonic } = key;
+        const decrypted = await i.user.decryptKey(privateKey, encryptionKey, mnemonic);
         let address;
+        let publicKey;
         let mode = 0;
 
-        if (wallet.isMnemonic(decrypted.payload.mnemonic)) {
-          const recoveryAccount = wallet.getAccountFromMneomnic(decrypted.payload.mnemonic);
-          ({ privateKey, address } = recoveryAccount);
+        if (wallet.isMnemonic(decrypted.mnemonic)) {
+          const recoveryAccount = wallet.getAccountFromMneomnic(decrypted.mnemonic);
+          ({ privateKey, address, publicKey } = recoveryAccount);
           mode = 1;
         } else {
           try {
-            address = wallet.getAddressFromPrivateKey(decrypted.payload.privateKey);
+            address = wallet.getAddressFromPrivateKey(decrypted.privateKey);
+            publicKey = wallet.getPubKeyFromPrivateKey(decrypted.privateKey);
+            privateKey = decrypted.privateKey;
           } catch (err) {
             err.showMessage = 'Invalid recovery phrase.';
             throw err;
           }
         }
+        const username = await getAlias(address);
+        if (!username) {
+          dispatch(setLoading(false));
+          dispatch(setStep('four'));
+          return history.push('/');
+        }
+
+        // to make sure everyone update pubkey and address
+        await i.user.exUpdatePbKeyAndAddress(publicKey, address);
         const tweb3 = getWeb3();
         const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
@@ -61,7 +68,7 @@ export default function LoggingAccount() {
         const token = tweb3.wallet.createRegularAccount();
         grantAccessToken(address, token.address, isRemember).then(({ returnValue }) => {
           tweb3.wallet.importAccount(token.privateKey);
-          const keyObject = encode(privateKey, '');
+          const keyObject = encode(mnemonic ? mnemonic : privateKey, privateKey);
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
           storage.sessionData = codecEncode({
@@ -87,11 +94,6 @@ export default function LoggingAccount() {
           history.push('/');
         });
       } else {
-        console.log('address', address);
-        console.log('private', privateKey);
-        console.log('mene', mnemonic);
-        console.log('en', encryptedData);
-        console.log('cipher', cipher);
         dispatch(setLoading(false));
         if (address) {
           return history.push('/syncAccount');
