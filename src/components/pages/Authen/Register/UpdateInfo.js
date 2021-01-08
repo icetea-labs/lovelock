@@ -14,11 +14,13 @@ import {
   registerAlias,
   saveFileToIpfs,
   setTagsInfo,
+  wallet,
 } from '../../../../helper';
 import getWeb3 from '../../../../service/tweb3';
-import { setAccount, setLoading } from '../../../../store/actions';
+import { setAccount, setLoading, setStep } from '../../../../store/actions';
 import { useHistory } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
+import TextField from '@material-ui/core/TextField';
 
 const i = new IceteaId('xxx');
 
@@ -66,12 +68,26 @@ const useStyles = makeStyles((theme) => ({
 
 export default function UpdateInfo({ avatarData }) {
   const [displayName, setDisplayName] = useState('');
-  const [password] = useState('');
+  const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const dispatch = useDispatch();
   const classes = useStyles();
   const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const getAccount = async () => {
+      try {
+        const { displayName } = await i.user.getMetaData();
+        console.log('await i.user.getMetaData()', await i.user.getMetaData());
+        setDisplayName(displayName);
+      } catch (err) {
+        dispatch(setStep('one'));
+        history.push('/');
+      }
+    };
+    getAccount();
+  }, []);
 
   useEffect(() => {
     // Fix issue #148
@@ -93,7 +109,32 @@ export default function UpdateInfo({ avatarData }) {
 
   const gotoNext = async () => {
     try {
-      const account = await i.user.exGenerateAccount();
+      const key = await i.user.getKey();
+      let account;
+
+      if (key) {
+        let address;
+        let publicKey;
+        let { privateKey, encryptionKey, mnemonic } = key;
+        const decrypted = await i.user.decryptKey(privateKey, encryptionKey, mnemonic);
+        if (wallet.isMnemonic(decrypted.mnemonic)) {
+          const recoveryAccount = wallet.getAccountFromMneomnic(decrypted.mnemonic);
+          ({ privateKey, address, publicKey } = recoveryAccount);
+          account = { privateKey, address, publicKey, mnemonic: decrypted.mnemonic };
+        } else {
+          try {
+            address = wallet.getAddressFromPrivateKey(decrypted.privateKey);
+            publicKey = wallet.getPubKeyFromPrivateKey(decrypted.privateKey);
+            privateKey = decrypted.privateKey;
+            account = { privateKey, address, publicKey, mnemonic: privateKey };
+          } catch (err) {
+            err.showMessage = 'Invalid recovery phrase.';
+            throw err;
+          }
+        }
+      } else {
+        account = await i.user.exGenerateAccount();
+      }
       const { privateKey, address, publicKey, mnemonic } = account;
       await i.user.updateInfo(username, displayName);
       const tweb3 = getWeb3();
@@ -132,7 +173,6 @@ export default function UpdateInfo({ avatarData }) {
       };
       dispatch(setAccount(newAccount));
       dispatch(setLoading(false));
-
       dispatch(actionCreate.setStep('five'));
       return history.push('/registerSuccess');
     } catch (err) {
@@ -183,6 +223,29 @@ export default function UpdateInfo({ avatarData }) {
           margin="dense"
           value={displayName}
           inputProps={{ autoComplete: 'displayName' }}
+          variant="filled"
+          color="secondary"
+          className={classes.textField}
+          InputProps={{
+            className: classes.input,
+          }}
+          InputLabelProps={{
+            className: classes.label,
+          }}
+        />
+        <TextField
+          label={<FormattedMessage id="regist.password" />}
+          fullWidth
+          onChange={(event) => {
+            setPassword(event.currentTarget.value);
+          }}
+          name="password"
+          type="password"
+          validators={['required']}
+          errorMessages={[<FormattedMessage id="regist.requiredMes" />]}
+          margin="dense"
+          value={password}
+          inputProps={{ autoComplete: 'new-password' }}
           variant="filled"
           color="secondary"
           className={classes.textField}

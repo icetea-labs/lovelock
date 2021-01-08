@@ -38,10 +38,17 @@ export default function LoggingAccount() {
           try {
             address = wallet.getAddressFromPrivateKey(decrypted.privateKey);
             publicKey = wallet.getPubKeyFromPrivateKey(decrypted.privateKey);
+            privateKey = decrypted.privateKey;
           } catch (err) {
             err.showMessage = 'Invalid recovery phrase.';
             throw err;
           }
+        }
+        const username = await getAlias(address);
+        if (!username) {
+          dispatch(setLoading(false));
+          dispatch(setStep('four'));
+          return history.push('/');
         }
 
         // to make sure everyone update pubkey and address
@@ -49,26 +56,6 @@ export default function LoggingAccount() {
         const tweb3 = getWeb3();
         const acc = tweb3.wallet.importAccount(privateKey);
         // tweb3.wallet.defaultAccount = address;
-
-        // if login from teawork. because teawork not register alias
-        const username = await getAlias(address);
-        if (!username) {
-          const user = await i.user.getMetaData();
-
-          const registerInfo = [];
-          const opts = { address };
-          registerInfo.push(
-            setTagsInfo(
-              {
-                'display-name': user.displayName,
-                'pub-key': publicKey,
-              },
-              opts
-            )
-          );
-          registerInfo.push(registerAlias(address, address));
-          await Promise.all(registerInfo);
-        }
 
         // check if account is a regular address
         if (!tweb3.utils.isRegularAccount(acc.address)) {
@@ -81,7 +68,7 @@ export default function LoggingAccount() {
         const token = tweb3.wallet.createRegularAccount();
         grantAccessToken(address, token.address, isRemember).then(({ returnValue }) => {
           tweb3.wallet.importAccount(token.privateKey);
-          const keyObject = encode(privateKey, '');
+          const keyObject = encode(mnemonic ? mnemonic : privateKey, privateKey);
           const storage = isRemember ? localStorage : sessionStorage;
           // save token account
           storage.sessionData = codecEncode({

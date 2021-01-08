@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { encode as codecEncode } from '@iceteachain/common/src/codec';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -10,8 +10,17 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { FormattedMessage } from 'react-intl';
+import { useDispatch } from 'react-redux';
 
-import { wallet, savetoLocalStorage, getAlias, getTagsInfo, setTagsInfo, registerAlias } from '../../../../helper';
+import {
+  wallet,
+  savetoLocalStorage,
+  getAlias,
+  getTagsInfo,
+  setTagsInfo,
+  registerAlias,
+  isAliasRegistered,
+} from '../../../../helper';
 import { ButtonPro, LinkPro } from '../../../elements/Button';
 import * as actionGlobal from '../../../../store/actions/globalData';
 import * as actionAccount from '../../../../store/actions/account';
@@ -21,6 +30,7 @@ import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
 import { IceteaId } from 'iceteaid-web';
+import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 
 const i = new IceteaId('xxx');
 const styles = (theme) => ({
@@ -49,11 +59,34 @@ function ByMnemonic(props) {
   const [password, setPassword] = useState('');
   const [rePassErr] = useState('');
   const [isRemember, setIsRemember] = useRemember();
+  const [showUsernameInput, setShowUsernameInput] = useState(false);
+  const [username, setUsername] = useState('');
+  const dispatch = useDispatch();
   const ja = 'ja';
   const inputRecovery = '回復フレーズまたはキーを入力してください';
   const inputPassword = 'パスワードを入力してください';
 
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (props.isSyncAccount) {
+      // Fix issue #148
+      ValidatorForm.addValidationRule('specialCharacter', async (name) => {
+        // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
+        const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+[a-z0-9]$');
+        return regex.test(name);
+      });
+
+      ValidatorForm.addValidationRule('isAliasRegistered', async (name) => {
+        const resp = await isAliasRegistered(name);
+        return !resp;
+      });
+
+      return () => {
+        ValidatorForm.removeValidationRule('isAliasRegistered');
+      };
+    }
+  }, []);
 
   async function gotoLogin(e) {
     e.preventDefault();
@@ -105,10 +138,14 @@ function ByMnemonic(props) {
         }
       }
       if (props.isSyncAccount) {
+        const username = await getAlias(address);
+        if (!username) {
+          dispatch(setStep('four'));
+          return history.push('/iceteaId');
+        }
         const encryptionKey = await i.user.generateEncryptionKey();
 
         await i.user.encryptKey({ privateKey, encryptionKey, mnemonic, publicKey, address });
-        const username = await getAlias(address);
         const info = await getTagsInfo(address);
         // old account lovelock will have tag, else account come from teawork need set tags
         if (username && Object.keys(info).length) {
@@ -127,7 +164,7 @@ function ByMnemonic(props) {
               opts
             )
           );
-          registerInfo.push(registerAlias(address, address));
+          registerInfo.push(registerAlias(username, address));
           await Promise.all(registerInfo);
         }
       }
@@ -206,7 +243,7 @@ function ByMnemonic(props) {
   const classes = useStyles();
 
   return (
-    <form onSubmit={gotoLogin}>
+    <ValidatorForm onSubmit={gotoLogin}>
       <TextField
         id="outlined-multiline-static"
         label={<FormattedMessage id="login.recoveryLabel" />}
@@ -227,6 +264,26 @@ function ByMnemonic(props) {
         <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
           <FormattedMessage id="login.qrCode" />
         </LinkPro>
+      )}
+      {props.isSyncAccount && showUsernameInput && (
+        <TextValidator
+          label={<FormattedMessage id="regist.userName" />}
+          fullWidth
+          onChange={(event) => {
+            // Fix issue #148
+            setUsername(event.currentTarget.value.toLowerCase());
+          }}
+          name="username"
+          validators={['required', 'specialCharacter', 'isAliasRegistered']}
+          errorMessages={[
+            <FormattedMessage id="regist.requiredMes" />,
+            <FormattedMessage id="regist.characterCheck" />,
+            <FormattedMessage id="regist.userTaken" />,
+          ]}
+          margin="dense"
+          value={username}
+          inputProps={{ autoComplete: 'username' }}
+        />
       )}
       <TextField
         id="rePassword"
@@ -262,7 +319,7 @@ function ByMnemonic(props) {
           <FormattedMessage id="login.btnRecover" />
         </ButtonPro>
       </DivControlBtnKeystore>
-    </form>
+    </ValidatorForm>
   );
 }
 
