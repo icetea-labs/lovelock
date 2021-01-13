@@ -3,7 +3,7 @@ import { IceteaId } from 'iceteaid-web';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAccount, setLoading, setStep } from '../../../store/actions';
-import { getAlias, registerAlias, savetoLocalStorage, setTagsInfo, wallet } from '../../../helper';
+import { getAlias, savetoLocalStorage, wallet } from '../../../helper';
 import { getWeb3, grantAccessToken } from '../../../service/tweb3';
 import { encode } from '../../../helper/encode';
 import { useRemember } from '../../../helper/hooks';

@@ -79,7 +79,6 @@ export default function UpdateInfo({ avatarData }) {
     const getAccount = async () => {
       try {
         const { displayName } = await i.user.getMetaData();
-        console.log('await i.user.getMetaData()', await i.user.getMetaData());
         setDisplayName(displayName);
       } catch (err) {
         dispatch(setStep('one'));
@@ -87,6 +86,7 @@ export default function UpdateInfo({ avatarData }) {
       }
     };
     getAccount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
