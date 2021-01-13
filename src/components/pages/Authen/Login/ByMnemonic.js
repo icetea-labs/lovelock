@@ -30,7 +30,7 @@ import { DivControlBtnKeystore } from '../../../elements/StyledUtils';
 import { useRemember } from '../../../../helper/hooks';
 import { encode } from '../../../../helper/encode';
 import { IceteaId } from 'iceteaid-web';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import { ValidatorForm } from 'react-material-ui-form-validator';
 
 const i = new IceteaId('xxx');
 const styles = (theme) => ({
@@ -59,8 +59,6 @@ function ByMnemonic(props) {
   const [password, setPassword] = useState('');
   const [rePassErr] = useState('');
   const [isRemember, setIsRemember] = useRemember();
-  const [showUsernameInput, setShowUsernameInput] = useState(false);
-  const [username, setUsername] = useState('');
   const dispatch = useDispatch();
   const ja = 'ja';
   const inputRecovery = '回復フレーズまたはキーを入力してください';
@@ -86,7 +84,7 @@ function ByMnemonic(props) {
         ValidatorForm.removeValidationRule('isAliasRegistered');
       };
     }
-  }, []);
+  }, [props.isSyncAccount]);
 
   async function gotoLogin(e) {
     e.preventDefault();
@@ -264,26 +262,6 @@ function ByMnemonic(props) {
         <LinkPro onClick={() => props.setIsQRCodeActive(true)}>
           <FormattedMessage id="login.qrCode" />
         </LinkPro>
-      )}
-      {props.isSyncAccount && showUsernameInput && (
-        <TextValidator
-          label={<FormattedMessage id="regist.userName" />}
-          fullWidth
-          onChange={(event) => {
-            // Fix issue #148
-            setUsername(event.currentTarget.value.toLowerCase());
-          }}
-          name="username"
-          validators={['required', 'specialCharacter', 'isAliasRegistered']}
-          errorMessages={[
-            <FormattedMessage id="regist.requiredMes" />,
-            <FormattedMessage id="regist.characterCheck" />,
-            <FormattedMessage id="regist.userTaken" />,
-          ]}
-          margin="dense"
-          value={username}
-          inputProps={{ autoComplete: 'username' }}
-        />
       )}
       <TextField
         id="rePassword"
