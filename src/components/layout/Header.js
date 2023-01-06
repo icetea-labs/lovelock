@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { alpha, makeStyles, withStyles } from '@material-ui/core/styles';
+import { fade, makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -186,9 +186,9 @@ const useStyles = makeStyles((theme) => ({
   search: {
     position: 'relative',
     borderRadius: 36,
-    backgroundColor: alpha(theme.palette.common.white, 1),
+    backgroundColor: fade(theme.palette.common.white, 1),
     '&:hover': {
-      backgroundColor: alpha(theme.palette.common.white, 0.95),
+      backgroundColor: fade(theme.palette.common.white, 0.95),
     },
     marginRight: theme.spacing(2),
     marginLeft: theme.spacing(1),
