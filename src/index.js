@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { createTheme, MuiThemeProvider } from '@material-ui/core/styles';
 // import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
 import CloseIcon from '@material-ui/icons/Close';
@@ -19,7 +19,7 @@ import messageJa from './transaltions/ja.json';
 
 // we have to do it here because App component is lasily loaded
 // so cannot this kind of stuff there
-(function(p) {
+(function (p) {
   if (/^\/blog\/\d+\/?$/.test(p) || /^\/lock\/\d+(\/|$)/.test(p)) {
     window.prerenderReady = false;
   }
@@ -35,7 +35,7 @@ const App = lazy(() =>
 );
 
 // const defaultTheme = createMuiTheme();
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: '#8250c8',
@@ -145,7 +145,7 @@ const theme = createMuiTheme({
 
 // add action to all snackbars
 const notistackRef = React.createRef();
-const onClickDismiss = key => () => {
+const onClickDismiss = (key) => () => {
   notistackRef.current.closeSnackbar(key);
 };
 
@@ -169,13 +169,10 @@ ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Provider store={store}>
       {/* <PersistGate loading={<GlobaLoading />} persistor={persistor}> */}
-      <IntlProvider
-            locale={languageWithoutRegionCode}
-            messages={messages[languageWithoutRegionCode] || messages.en}
-          >
+      <IntlProvider locale={languageWithoutRegionCode} messages={messages[languageWithoutRegionCode] || messages.en}>
         <SnackbarProvider
           ref={notistackRef}
-          action={key => (
+          action={(key) => (
             <IconButton onClick={onClickDismiss(key)}>
               <CloseIcon />
             </IconButton>
@@ -183,7 +180,7 @@ ReactDOM.render(
           preventDuplicate
         >
           <Suspense fallback={<SimpleLoading />}>
-              <App />  
+            <App />
           </Suspense>
         </SnackbarProvider>
       </IntlProvider>
@@ -208,14 +205,16 @@ ReactDOM.render(
 );
 
 serviceWorker.register({
-  onUpdate: registration => {
+  onUpdate: (registration) => {
     const waitingServiceWorker = registration.waiting;
 
     if (waitingServiceWorker) {
-      waitingServiceWorker.addEventListener("statechange", event => {
-        if (event.target.state === "activated") {
-          if (window.confirm("The LoveLock website you are seeing is cached and outdated, click OK to refresh the page.")) {
-            window.location.reload()
+      waitingServiceWorker.addEventListener('statechange', (event) => {
+        if (event.target.state === 'activated') {
+          if (
+            window.confirm('The LoveLock website you are seeing is cached and outdated, click OK to refresh the page.')
+          ) {
+            window.location.reload();
           }
         }
       });
