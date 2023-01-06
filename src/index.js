@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { createTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 // import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import { SnackbarProvider } from 'notistack';
 import CloseIcon from '@material-ui/icons/Close';
@@ -35,7 +35,7 @@ const App = lazy(() =>
 );
 
 // const defaultTheme = createMuiTheme();
-const theme = createTheme({
+const theme = createMuiTheme({
   palette: {
     primary: {
       main: '#8250c8',
