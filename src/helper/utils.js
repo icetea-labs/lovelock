@@ -195,11 +195,10 @@ export async function saveToIpfs(files) {
     const hash32bytes = stableHashObject({ app, fileHashes, from, time });
     const { signature } = sign(hash32bytes, tokenKey);
     const authData = JSON.stringify({ app, from, pubkey, sign: codecToDataString(signature), time });
-    console.log(authData);
+
     const auth = `Basic ${Buffer.from(
       `${process.env.REACT_APP_INFURA_PROJECT_ID}:${process.env.REACT_APP_INFURA_SECRET_KEY}`
     ).toString('base64')}`;
-    console.log('xx', auth);
 
     const newIpfs = createIpfsClient(auth);
 
