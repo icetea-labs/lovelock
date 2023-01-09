@@ -209,7 +209,7 @@ export async function saveToIpfs(files) {
 
     return results;
   } catch (error) {
-    console.log('e', error);
+    console.log(error);
     return null;
   }
 }

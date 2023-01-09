@@ -186,10 +186,11 @@ ReactDOM.render(
       </IntlProvider>
       {/* </PersistGate> */}
     </Provider>
-    <Helmet>
+    {/* <Helmet>
       <title>Lovelock - Cherish Your Intimate Memories</title>
       <meta property="og:title" content="Lovelock - Cherish Your Intimate Memories" />
       <meta property="og:type" content="website" />
+      
       <meta
         name="description"
         content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
@@ -199,7 +200,7 @@ ReactDOM.render(
         property="og:description"
         content="A safe and peaceful place to store and celebrate your meaningful moments, keep them to yourself or share to close friends."
       />
-    </Helmet>
+    </Helmet> */}
   </MuiThemeProvider>,
   document.getElementById('root')
 );
