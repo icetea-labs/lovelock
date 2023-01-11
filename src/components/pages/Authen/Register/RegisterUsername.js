@@ -36,7 +36,7 @@ import * as actionCreate from '../../../../store/actions/create';
 import { DivControlBtnKeystore, FlexBox } from '../../../elements/StyledUtils';
 import { useRemember } from '../../../../helper/hooks';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
   },
@@ -148,7 +148,7 @@ function RegisterUsername(props) {
   const [isRememberState, setIsRememberState] = useRemember();
 
   useEffect(() => {
-    ValidatorForm.addValidationRule('isPasswordMatch', value => {
+    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
       if (value !== password) {
         return false;
       }
@@ -156,13 +156,13 @@ function RegisterUsername(props) {
     });
 
     // Fix issue #148
-    ValidatorForm.addValidationRule('specialCharacter', async name => {
+    ValidatorForm.addValidationRule('specialCharacter', async (name) => {
       // const regex = new RegExp('^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-z0-9._]+(?<![_.])$');
       const regex = new RegExp('^(?![_.])(?!.*[_.]{2})[a-z0-9._]+[a-z0-9]$');
       return regex.test(name);
     });
 
-    ValidatorForm.addValidationRule('isAliasRegistered', async name => {
+    ValidatorForm.addValidationRule('isAliasRegistered', async (name) => {
       const resp = await isAliasRegistered(name);
       return !resp;
     });
@@ -197,7 +197,7 @@ function RegisterUsername(props) {
           if (avatarData) {
             const newFile = await applyRotation(avatarData[0], 1, 500);
             const saveFile = imageResize(avatarData[0], newFile);
-            const setAva = saveFileToIpfs(saveFile).then(hash => {
+            const setAva = saveFileToIpfs(saveFile).then((hash) => {
               avatarUrl = process.env.REACT_APP_IPFS + hash;
               setTagsInfo({ avatar: hash }, opts);
             });
@@ -218,6 +218,7 @@ function RegisterUsername(props) {
           await Promise.all(registerInfo);
 
           const newAccount = {
+            username,
             address,
             privateKey,
             cipher: password,
@@ -297,7 +298,7 @@ function RegisterUsername(props) {
         <TextValidator
           label={<FormattedMessage id="regist.userName" />}
           fullWidth
-          onChange={event => {
+          onChange={(event) => {
             // Fix issue #148
             setUsername(event.currentTarget.value.toLowerCase());
           }}
@@ -316,7 +317,7 @@ function RegisterUsername(props) {
           <TextValidator
             label={<FormattedMessage id="regist.firstName" />}
             fullWidth
-            onChange={event => {
+            onChange={(event) => {
               setFirstname(event.currentTarget.value);
             }}
             name="firstname"
@@ -329,7 +330,7 @@ function RegisterUsername(props) {
           <TextValidator
             label={<FormattedMessage id="regist.lastName" />}
             fullWidth
-            onChange={event => {
+            onChange={(event) => {
               setLastname(event.currentTarget.value);
             }}
             name="lastname"
@@ -342,7 +343,7 @@ function RegisterUsername(props) {
         <TextValidator
           label={<FormattedMessage id="regist.password" />}
           fullWidth
-          onChange={event => {
+          onChange={(event) => {
             setPassword(event.currentTarget.value);
           }}
           name="password"
@@ -356,7 +357,7 @@ function RegisterUsername(props) {
         <TextValidator
           label={<FormattedMessage id="regist.rePassword" />}
           fullWidth
-          onChange={event => {
+          onChange={(event) => {
             setRePassword(event.currentTarget.value);
           }}
           name="rePassword"
@@ -434,24 +435,24 @@ function RegisterUsername(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isRemember: state.create.isRemember,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setAccount: value => {
+    setAccount: (value) => {
       dispatch(actionAccount.setAccount(value));
     },
-    setStep: value => {
+    setStep: (value) => {
       dispatch(actionCreate.setStep(value));
     },
-    setLoading: value => {
+    setLoading: (value) => {
       dispatch(actionGlobal.setLoading(value));
     },
-    setIsRemember: value => {
+    setIsRemember: (value) => {
       window.localStorage['remember'] = value ? '1' : '0';
       dispatch(actionCreate.setIsRemember(value));
     },

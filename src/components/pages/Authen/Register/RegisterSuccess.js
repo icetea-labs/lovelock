@@ -17,6 +17,8 @@ import { encode } from '../../../../helper/encode';
 import { savetoLocalStorage } from '../../../../helper';
 import { getWeb3, grantAccessToken } from '../../../../service/tweb3';
 
+const { IceteaWeb3 } = require('@iceteachain/web3');
+
 const WrapperImg = styled.div`
   margin-top: 20px;
   img {
@@ -102,8 +104,24 @@ function RegisterSuccess(props) {
     isRemember,
     pathName,
     setPathName,
+    username,
   } = props;
 
+  const tweb3 = new IceteaWeb3(process.env.REACT_APP_RPC);
+  const pkey = process.env.REACT_APP_PKEY;
+
+  const account = tweb3.wallet.importAccount(pkey);
+
+  const lovelock = tweb3.contract(process.env.REACT_APP_CONTRACT || 'contract.lovelockdev').methods;
+  lovelock
+    .addUsers(username)
+    .sendCommit({ from: account.address })
+    .then(({ returnValue }) => {
+      console.log(`DONE. User ${returnValue} unlocked.`);
+    })
+    .catch((e) => {
+      console.error(e);
+    });
   const [savedPhrase, setSavedPhrase] = useState(false);
 
   function gotoHome() {
@@ -202,7 +220,7 @@ function RegisterSuccess(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     mnemonic: state.account.mnemonic,
     address: state.account.address,
@@ -210,21 +228,22 @@ const mapStateToProps = state => {
     password: state.account.cipher,
     isRemember: state.create.isRemember,
     pathName: state.create.pathName,
+    username: state.account.username,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    setStep: step => {
+    setStep: (step) => {
       dispatch(actionCreate.setStep(step));
     },
-    setAccount: value => {
+    setAccount: (value) => {
       dispatch(actionAccount.setAccount(value));
     },
-    setLoading: value => {
+    setLoading: (value) => {
       dispatch(actionGlobal.setLoading(value));
     },
-    setPathName: value => {
+    setPathName: (value) => {
       dispatch(actionCreate.setPathName(value));
     },
   };
